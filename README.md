@@ -68,7 +68,7 @@ RL-менеджер для делегирования задач между лю
 
 ## Архив статей
 
-| Дата | Статья | Темы | Кратко |
-|---|---|---|---|
-| 16.05.2026 | Optimizing Risk-averse Human-AI Hybrid Teams | RL, Human-AI | RL-менеджер для делегирования задач между человеком и AI |
-| 16.05.2026 | From Autonomous Agents to Integrated Systems | Agents, Orchestration | Концепция orchestrated distributed intelligence |
+|id статьи| Дата перевода| Тема статьи |
+|---|---|---|
+|2403.08386| 16.05.2026 | Optimizing Risk-averse Human-AI Hybrid Teams |
+|2503.13754| 16.05.2026 | From Autonomous Agents to Integrated Systems |
