@@ -1,0 +1,1034 @@
+{
+  "title": "[2403.08386] Optimizing Risk-averse Human-AI Hybrid Teams This work was partially supported by the CHIST-ERA-19-XAI010 SAI project. M. Conti’s and A. Passarella’s work was partly funded by the PNRR - M4C2 - Investimento 1.3, Partenariato Esteso PE00000013 - ”FAIR” funded by the European Commission under the NextGeneration EU programme.",
+  "sections": [
+    {
+      "heading": "Optimizing Risk-averse Human-AI Hybrid Teams ††thanks: This work was partially supported by the CHIST-ERA-19-XAI010 SAI project. M. Conti’s and A. Passarella’s work was partly funded by the PNRR - M4C2 - Investimento 1.3, Partenariato Esteso PE00000013 - ”FAIR” funded by the European Commission under the NextGeneration EU programme.",
+      "level": 1,
+      "content": [],
+      "children": [
+        {
+          "heading": "Abstract",
+          "level": 6,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "We anticipate increased instances of humans and AI systems working together in what we refer to as a hybrid team. The increase in collaboration is expected as AI systems gain proficiency and their adoption becomes more widespread. However, their behavior is not error-free, making hybrid teams a very suitable solution. As such, we consider methods for improving performance for these teams of humans and AI systems. For hybrid teams, we will refer to both the humans and AI systems as agents. To improve team performance over that seen for agents operating individually, we propose a manager which learns, through a standard Reinforcement Learning scheme, how to best delegate, over time, the responsibility of taking a decision to any of the agents. We further guide the manager’s learning so they also minimize how many changes in delegation are made resulting from undesirable team behavior. We demonstrate the optimality of our manager’s performance in several grid environments which include failure states which terminate an episode and should be avoided. We perform our experiments with teams of agents with varying degrees of acceptable risk, in the form of proximity to a failure state, and measure the manager’s ability to make effective delegation decisions with respect to its own risk-based constraints, then compare these to the optimal decisions. Our results show our manager can successfully learn desirable delegations which result in team paths near/exactly optimal with respect to path length and number of delegations."
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "Index Terms:",
+          "level": 6,
+          "content": [],
+          "children": []
+        },
+        {
+          "heading": "I Introduction",
+          "level": 2,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "The performance attainable by AI systems continues to improve and so we anticipate increased adoption to create scenarios where humans and AI systems, which we refer to both as agents, operate as a “hybrid team.” In a hybrid team, tasks can be offloaded to a single agent or there can be concurrent actions of multiple human and AI agents [[1](#bib.bib1), [2](#bib.bib2), [3](#bib.bib3), [4](#bib.bib4), [5](#bib.bib5)]. As is evident from past examples [[6](#bib.bib6), [7](#bib.bib7), [8](#bib.bib8), [9](#bib.bib9), [10](#bib.bib10), [11](#bib.bib11)], humans and artificial agents are certainly not error-free, so both humans and artificial agents are capable of erroneous decisions resulting from mistakes, risky behavior, etc. To ensure successful operation, considerations are needed to mitigate these issues. In some cases, this leads to the design of systems which abstain from decision-making when they have low confidence/experience [[12](#bib.bib12), [13](#bib.bib13)]. Therefore, we utilize a manager, which oversees the operations of the hybrid team, and, over time, delegates the responsibility of taking a decision to either agent, based on the context of the specific problem, and the expected performance of agents at each specific point in time. The manager learns through observations of context and behavior how best to make delegation decisions."
+            },
+            {
+              "type": "paragraph",
+              "text": "We highlight four primary features of our manager. First, clearly, the manager prioritizes selecting agents which provide higher chances of success, based on its own estimate of the performance of the individual agents at any point in time. Second, the measure of agent performance used by the manager is independent of those used to train the individual agents on the same task. This ensures the manager does not make unfair assumptions regarding access to private agent information or the manager being bound by the same measure of ideal behavior. Third, interventions of the manager (i.e., decisions on delegation choices) are also based on constraints regarding the behavior and outcomes of the team decisions. Typically, such constraints indicate how far (or close) the hybrid team is to severe conditions that may have catastrophic effects (e.g., an incident in case of driving scenarios). These constraints, together with estimates of the agents’ actions, determine intervention points. Therefore, the manager can remain in the background until intervention is needed. Fourth, the manager learns how to optimize the performance of the team by choosing appropriate delegations and learns how to minimize the *number* of such interventions. In realistic scenarios, managers that switch too frequently between team agents might not be practical, indeed."
+            },
+            {
+              "type": "paragraph",
+              "text": "We code these features into a standard Reinforcement Learning scheme, which we completely describe in [[14](#bib.bib14)]. Specifically, the manager reward model will receive reward-based feedback which includes penalties for delegations resulting in violation of constraints. The scale of the penalties will indicate how strongly averse the manager should be to making an intervention, which implicitly indicates aversion to those conditions which would lead to an intervention. This will serve to motivate the manager to recognize those agents which align best with the manager’s constraints regarding behavior. Additionally, the manager reward will distinguish between task success and failure to ensure the manager also recognizes successful behavior regarding the underlying task. Combined, these aspects will incentivize a manager behavior policy which prioritizes successful team behavior and reduced frequencies of manager intervention."
+            },
+            {
+              "type": "paragraph",
+              "text": "While we have considered similar concepts in prior work [[15](#bib.bib15), [16](#bib.bib16), [17](#bib.bib17)], there are distinguishing factors for our model. First, in [[15](#bib.bib15)], we propose a Reinforcement Learning (RL) model which mixes cognitively inspired Instance-Based Learning (IBL) [[18](#bib.bib18)] and RL [[19](#bib.bib19)] to learn a delegation model based on human-inspired behavior understanding. At each time step, the manager selected the next delegated agent. We extended the delegation scenario in [[16](#bib.bib16)] to cases of hybrid teams in driving contexts with impacted agent sensing. This method similarly relied on manager delegations at each step of an episode. Additionally, the manager observation was provided by combining the observations of the team agents. For our work in [[17](#bib.bib17)], we focus instead on cases where agents may differ in the actions they can take in an environment. We required consistency for the states the agents can visit, but the diverse actions meant agents may move through the environment in diverse ways. For our new model [[14](#bib.bib14)], as opposed to our prior works, our approach lets us isolate the manager model from the agent models. Unlike our previous cases, the manager has an entirely independent view of states and can only observe changes in state at intervention points. The manager will therefore ignore intermediary states, eliminating reliance on consistency between the manager and agent models. Further, we remove the previous expectation of a manager delegation at each time step to enable agent operation for windows of time steps. Additionally, we isolate the manager’s notion of desirable behavior by eliminating assumptions of similarity between the manager and agent feedback regarding actions/behavior."
+            },
+            {
+              "type": "paragraph",
+              "text": "The main contribution presented in the paper is the analysis of the optimality for our delegation manager described in [[14](#bib.bib14)], which supports the management of hybrid teams of diverse agents. Shifting from [[14](#bib.bib14)], we introduce teams of agents which exhibit diverse behavior models according to their own notion of risk aversion. These agents are used to create teams for training and testing our manager model. We train our manager to identify agents which can successfully navigate the environment while avoiding violations of manager constraints. Unlike our scenario in [[14](#bib.bib14)], we do not include cases of multiple agents moving concurrently in the environment; instead, we focus on demonstrating optimality for single teams with no additional agents, which prevents our environments from becoming non-stationary. The scenario, and limitation to a single team, enables comparison of our team to that of an optimal solution. From our tests, we see most cases resulting in a score at or near perfect for the manager."
+            },
+            {
+              "type": "paragraph",
+              "text": "The remainder of this paper is as follows: Section [I-A](#S1.SS1 \"I-A Related Work ‣ I Introduction ‣ Optimizing Risk-averse Human-AI Hybrid Teams This work was partially supported by the CHIST-ERA-19-XAI010 SAI project. M. Conti’s and A. Passarella’s work was partly funded by the PNRR - M4C2 - Investimento 1.3, Partenariato Esteso PE00000013 - ”FAIR” funded by the European Commission under the NextGeneration EU programme.\") outlines additional works of note which relate to and inform methods used in our framework; Section [II](#S2 \"II Intervening Manager ‣ Optimizing Risk-averse Human-AI Hybrid Teams This work was partially supported by the CHIST-ERA-19-XAI010 SAI project. M. Conti’s and A. Passarella’s work was partly funded by the PNRR - M4C2 - Investimento 1.3, Partenariato Esteso PE00000013 - ”FAIR” funded by the European Commission under the NextGeneration EU programme.\") introduces our manager model; Section [III](#S3 \"III Specific scenario for optimality analysis ‣ Optimizing Risk-averse Human-AI Hybrid Teams This work was partially supported by the CHIST-ERA-19-XAI010 SAI project. M. Conti’s and A. Passarella’s work was partly funded by the PNRR - M4C2 - Investimento 1.3, Partenariato Esteso PE00000013 - ”FAIR” funded by the European Commission under the NextGeneration EU programme.\") outlines the demonstration scenario and related details; Section [IV](#S4 \"IV Results ‣ Optimizing Risk-averse Human-AI Hybrid Teams This work was partially supported by the CHIST-ERA-19-XAI010 SAI project. M. Conti’s and A. Passarella’s work was partly funded by the PNRR - M4C2 - Investimento 1.3, Partenariato Esteso PE00000013 - ”FAIR” funded by the European Commission under the NextGeneration EU programme.\") defines our test scenarios and provides results; and Section [V](#S5 \"V Conclusion ‣ Optimizing Risk-averse Human-AI Hybrid Teams This work was partially supported by the CHIST-ERA-19-XAI010 SAI project. M. Conti’s and A. Passarella’s work was partly funded by the PNRR - M4C2 - Investimento 1.3, Partenariato Esteso PE00000013 - ”FAIR” funded by the European Commission under the NextGeneration EU programme.\") concludes the work."
+            }
+          ],
+          "children": [
+            {
+              "heading": "I-A Related Work",
+              "level": 3,
+              "content": [],
+              "children": [
+                {
+                  "heading": "I-A1 Hybrid Reinforcement Learning",
+                  "level": 4,
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "text": "Hierarchical Reinforcement Learning (HRL) represents a selection of methods and features which inspired our approach. HRL approaches will typically elicit models represented in a hierarchical manner. The lower-level policies operate at more granular levels of actions and state transitions. At these lower levels, models of behavior dictate outcomes for sequences of decisions and higher-level policies can learn when to select these policies. The behaviors at the lower level are referred to as “options,” which execute until a termination is triggered. In [[20](#bib.bib20)], the proposed approach demonstrates a method to learn “reusable” options, where new options are added if it is apparent, they may provide improved performance. Regarding the shift from one option to the next, [[21](#bib.bib21)] demonstrates an approach for considering the compatibility of successively selected options, which can help to reduce the complexity of making the transition from an option to its successor. While relevant, our model assumes previously learned behavior policies for the team agents and no hierarchical layers of abstraction, so we are not following the common HRL approach of learning policies at various levels."
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "As an extension, HRL concepts can also be applied in scenarios of multiple concurrently operating agents [[22](#bib.bib22), [23](#bib.bib23), [24](#bib.bib24), [25](#bib.bib25), [26](#bib.bib26), [27](#bib.bib27), [28](#bib.bib28), [29](#bib.bib29)]. In the multi-agent scenario, agents can operate simultaneously while attempting to accomplish potentially distinct tasks. As seen in [[29](#bib.bib29)], cooperative or compatible tasks can allow knowledge sharing to help solve compatible tasks. The use of multiple agents also affords a measure of compatibility, so both agent and task can be considered to ensure the best alignment of agents to tasks. With our assumption of multiple agents but a single acting agent, we will therefore not be making direct comparison to the multi-agent approaches. For further distinction between our model and HRL approaches, we refer to Section [II](#S2 \"II Intervening Manager ‣ Optimizing Risk-averse Human-AI Hybrid Teams This work was partially supported by the CHIST-ERA-19-XAI010 SAI project. M. Conti’s and A. Passarella’s work was partly funded by the PNRR - M4C2 - Investimento 1.3, Partenariato Esteso PE00000013 - ”FAIR” funded by the European Commission under the NextGeneration EU programme.\")."
+                    }
+                  ],
+                  "children": []
+                },
+                {
+                  "heading": "I-A2 Delegation",
+                  "level": 4,
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "text": "In addition to HRL methods, we also note the relation of our approach to delegation [[15](#bib.bib15), [16](#bib.bib16), [17](#bib.bib17), [30](#bib.bib30), [31](#bib.bib31), [32](#bib.bib32), [30](#bib.bib30), [33](#bib.bib33), [34](#bib.bib34), [35](#bib.bib35)], where a manager is similarly tasked with identifying adequate agents for a task given the current state and some measure of agent desirability (e.g., performance, cost, etc.). Commonly, the manager is tasked with making decisions based on a measure of agent performance and their corresponding cost of executing actions. In this model, the manager will require a more detailed and deeper understanding of desirable agent behavior and measure of agent cost. As an example, [[32](#bib.bib32)] demonstrates a delegation model using performance or priority values to train a Reinforcement Learning model to operate under algorithmic triage. Similarly, [[31](#bib.bib31)] demonstrates the use of costs associated with scenario features such as agent operation or switching costs in the manager reward. This idea can also be linked to [[30](#bib.bib30)] as it demonstrates a case where the delegation policy maintains a bias toward a lower-cost policy when possible and switches to a higher-cost and more performant policy when necessary. As we focus on a manager model with fewer assumptions regarding access to these features, our approach includes distinct aspects from the highlighted delegation models. Again, our manager will instead be attempting to reduce the need to make such delegation decisions while also not requiring access to an explicit measure of action values for the team agents."
+                    }
+                  ],
+                  "children": []
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "heading": "II Intervening Manager",
+          "level": 2,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "We model our manager through a modified Markov Decision Process (MDP) and a series of Absorbing Markov Chains (AMC) (see [[14](#bib.bib14)] for more details on their general features). Specifically, let s𝑠s be a state in the state space S𝑆S of the MPD describing the manager’s behavior. We define a function β​(s):S→{0,1}:𝛽𝑠→𝑆01\\beta(s):S\\rightarrow\\{0,1\\} to identify intervention states (i.e., states where the manager must evaluate a possible change of delegation) as those states where β​(s)=1𝛽𝑠1\\beta(s)=1 holds true. We model the operations of the agent delegated between two consecutive intervention points as a Markov Chain, where we identify a subset of states S𝐐subscript𝑆𝐐S\\_{\\mathbf{Q}} that do not generate a manager intervention (i.e., for which β=0𝛽0\\beta=0), and a set of states S𝐑subscript𝑆𝐑S\\_{\\mathbf{R}} where interventions are made."
+            },
+            {
+              "type": "formula",
+              "text": "s𝑠s"
+            },
+            {
+              "type": "formula",
+              "text": "S𝑆S"
+            },
+            {
+              "type": "formula",
+              "text": "β​(s):S→{0,1}:𝛽𝑠→𝑆01\\beta(s):S\\rightarrow\\{0,1\\}"
+            },
+            {
+              "type": "formula",
+              "text": "β​(s)=1𝛽𝑠1\\beta(s)=1"
+            },
+            {
+              "type": "formula",
+              "text": "S𝐐subscript𝑆𝐐S_{\\mathbf{Q}}"
+            },
+            {
+              "type": "formula",
+              "text": "β=0𝛽0\\beta=0"
+            },
+            {
+              "type": "formula",
+              "text": "S𝐑subscript𝑆𝐑S_{\\mathbf{R}}"
+            },
+            {
+              "type": "paragraph",
+              "text": "Between two consecutive delegations, we model this as an Absorbing Markov Chain (see [[14](#bib.bib14)]) where S𝐐subscript𝑆𝐐S\\_{\\mathbf{Q}} and S𝐑subscript𝑆𝐑S\\_{\\mathbf{R}} are transient and absorbing states, respectively. When the manager decides on the next delegation, a “new” Markov Process starts, whose absorbing states are those that will trigger the next delegation action by the manager. As such, the manager MDP observes only the absorbing states of the underlying AMCs, as those are the ones where the manager takes decisions, and thus, as explained in the following, rewards are provided based on a standard Reinforcement Learning approach. Finally, in the following, we define an episode as the sequence of actions from the beginning of the task to its completion, which may even result in success of the hybrid team (“goal found”) or not (“goal not found”)."
+            },
+            {
+              "type": "formula",
+              "text": "S𝐐subscript𝑆𝐐S_{\\mathbf{Q}}"
+            },
+            {
+              "type": "formula",
+              "text": "S𝐑subscript𝑆𝐑S_{\\mathbf{R}}"
+            },
+            {
+              "type": "paragraph",
+              "text": "More formally, to model the dynamics for our manager, we use a modified MDP which refer to as an Intervening MDP (IMDP) MI=⟨S=S𝐑​⋃S𝐐,AM,RM,TM,D,β,γ⟩subscript𝑀𝐼delimited-⟨⟩𝑆 subscript𝑆𝐑subscript𝑆𝐐subscript𝐴𝑀subscript𝑅𝑀subscript𝑇𝑀𝐷𝛽𝛾M\\_{I}=\\langle S=S\\_{\\mathbf{R}}\\bigcup S\\_{\\mathbf{Q}},A\\_{M},R\\_{M},T\\_{M},D,\\beta,\\gamma\\rangle with"
+            },
+            {
+              "type": "formula",
+              "text": "MI=⟨S=S𝐑​⋃S𝐐,AM,RM,TM,D,β,γ⟩subscript𝑀𝐼delimited-⟨⟩𝑆subscript𝑆𝐑subscript𝑆𝐐subscript𝐴𝑀subscript𝑅𝑀subscript𝑇𝑀𝐷𝛽𝛾M_{I}=\\langle S=S_{\\mathbf{R}}\\bigcup S_{\\mathbf{Q}},A_{M},R_{M},T_{M},D,\\beta,\\gamma\\rangle"
+            },
+            {
+              "type": "list",
+              "text": "* • S𝑆S, the MDP state space * • S𝐑⊆Ssubscript𝑆𝐑𝑆S\\_{\\mathbf{R}}\\subseteq S, the set of intervention states * • S𝐐⊆Ssubscript𝑆𝐐𝑆S\\_{\\mathbf{Q}}\\subseteq S, the set of unobserved delegated operation states * • AM={i∈D}subscript𝐴𝑀𝑖𝐷A\\_{M}=\\{i\\in D\\}, the manager agent selection action space * • RMsubscript𝑅𝑀R\\_{M}, the manager’s reward function * • TMsubscript𝑇𝑀T\\_{M}, the manager’s transition function * • D𝐷D, the set of agents available for delegation * • β𝛽\\beta, the intervention cue function"
+            },
+            {
+              "type": "paragraph",
+              "text": "S𝑆S, the MDP state space"
+            },
+            {
+              "type": "formula",
+              "text": "S𝑆S"
+            },
+            {
+              "type": "paragraph",
+              "text": "S𝐑⊆Ssubscript𝑆𝐑𝑆S\\_{\\mathbf{R}}\\subseteq S, the set of intervention states"
+            },
+            {
+              "type": "formula",
+              "text": "S𝐑⊆Ssubscript𝑆𝐑𝑆S_{\\mathbf{R}}\\subseteq S"
+            },
+            {
+              "type": "paragraph",
+              "text": "S𝐐⊆Ssubscript𝑆𝐐𝑆S\\_{\\mathbf{Q}}\\subseteq S, the set of unobserved delegated operation states"
+            },
+            {
+              "type": "formula",
+              "text": "S𝐐⊆Ssubscript𝑆𝐐𝑆S_{\\mathbf{Q}}\\subseteq S"
+            },
+            {
+              "type": "paragraph",
+              "text": "AM={i∈D}subscript𝐴𝑀𝑖𝐷A\\_{M}=\\{i\\in D\\}, the manager agent selection action space"
+            },
+            {
+              "type": "formula",
+              "text": "AM={i∈D}subscript𝐴𝑀𝑖𝐷A_{M}=\\{i\\in D\\}"
+            },
+            {
+              "type": "paragraph",
+              "text": "RMsubscript𝑅𝑀R\\_{M}, the manager’s reward function"
+            },
+            {
+              "type": "formula",
+              "text": "RMsubscript𝑅𝑀R_{M}"
+            },
+            {
+              "type": "paragraph",
+              "text": "TMsubscript𝑇𝑀T\\_{M}, the manager’s transition function"
+            },
+            {
+              "type": "formula",
+              "text": "TMsubscript𝑇𝑀T_{M}"
+            },
+            {
+              "type": "paragraph",
+              "text": "D𝐷D, the set of agents available for delegation"
+            },
+            {
+              "type": "formula",
+              "text": "D𝐷D"
+            },
+            {
+              "type": "paragraph",
+              "text": "β𝛽\\beta, the intervention cue function"
+            },
+            {
+              "type": "formula",
+              "text": "β𝛽\\beta"
+            },
+            {
+              "type": "paragraph",
+              "text": "Moreover, the reward function of the manager is defined as follows (assuming it is computed at the end of an episode):"
+            },
+            {
+              "type": "table",
+              "text": "| | | | | | --- | --- | --- | --- | | | RM={1−tanh⁡(ν⋅ρ),goal found−tanh⁡(ν⋅ρ),otherwisesubscript𝑅𝑀cases1⋅𝜈𝜌goal found⋅𝜈𝜌otherwiseR\\_{M}=\\begin{cases}1-\\tanh\\left(\\nu\\cdot\\rho\\right),&\\quad\\textrm{goal found}\\\\ -\\tanh\\left(\\nu\\cdot\\rho\\right),&\\quad\\textrm{otherwise}\\end{cases} | | (1) |"
+            },
+            {
+              "type": "formula",
+              "text": "RM={1−tanh⁡(ν⋅ρ),goal found−tanh⁡(ν⋅ρ),otherwisesubscript𝑅𝑀cases1⋅𝜈𝜌goal found⋅𝜈𝜌otherwiseR_{M}=\\begin{cases}1-\\tanh\\left(\\nu\\cdot\\rho\\right),&\\quad\\textrm{goal found}\\\\ -\\tanh\\left(\\nu\\cdot\\rho\\right),&\\quad\\textrm{otherwise}\\end{cases}"
+            },
+            {
+              "type": "paragraph",
+              "text": "where ρ𝜌\\rho is the “cue frequency,” i.e., the number of times interventions have been triggered during the observed episode, and ν𝜈\\nu is a scaling coefficient, which we use to scale how strongly the penalties degrade the episode’s value. Note that, using tanh​() \\tanh() allows us to maintain a bound on the scale of the penalty for RL training."
+            },
+            {
+              "type": "formula",
+              "text": "ρ𝜌\\rho"
+            },
+            {
+              "type": "formula",
+              "text": "ν𝜈\\nu"
+            },
+            {
+              "type": "formula",
+              "text": "tanh​()\\tanh()"
+            },
+            {
+              "type": "paragraph",
+              "text": "The manager IMDP will make transitions from si∈S𝐐subscript𝑠𝑖subscript𝑆𝐐s\\_{i}\\in S\\_{\\mathbf{Q}} to sj∈S𝐑subscript𝑠𝑗subscript𝑆𝐑s\\_{j}\\in S\\_{\\mathbf{R}} based on the policy of the delegated agent πdsubscript𝜋𝑑\\pi\\_{d} for d∈D𝑑𝐷d\\in D and β𝛽\\beta. Therefore, with an infinite horizon, the manager transitions can be modeled as"
+            },
+            {
+              "type": "formula",
+              "text": "si∈S𝐐subscript𝑠𝑖subscript𝑆𝐐s_{i}\\in S_{\\mathbf{Q}}"
+            },
+            {
+              "type": "formula",
+              "text": "sj∈S𝐑subscript𝑠𝑗subscript𝑆𝐑s_{j}\\in S_{\\mathbf{R}}"
+            },
+            {
+              "type": "formula",
+              "text": "πdsubscript𝜋𝑑\\pi_{d}"
+            },
+            {
+              "type": "formula",
+              "text": "d∈D𝑑𝐷d\\in D"
+            },
+            {
+              "type": "formula",
+              "text": "β𝛽\\beta"
+            },
+            {
+              "type": "table",
+              "text": "| | | | | | --- | --- | --- | --- | | | P​(sj|si,d)=bi​jπd𝑃conditionalsubscript𝑠𝑗 subscript𝑠𝑖𝑑subscriptsuperscript𝑏subscript𝜋𝑑𝑖𝑗P(s\\_{j}|s\\_{i},d)=b^{\\pi\\_{d}}\\_{ij} | | (2) |"
+            },
+            {
+              "type": "formula",
+              "text": "P​(sj|si,d)=bi​jπd𝑃conditionalsubscript𝑠𝑗subscript𝑠𝑖𝑑subscriptsuperscript𝑏subscript𝜋𝑑𝑖𝑗P(s_{j}|s_{i},d)=b^{\\pi_{d}}_{ij}"
+            },
+            {
+              "type": "paragraph",
+              "text": "with bi​jπdsubscriptsuperscript𝑏subscript𝜋𝑑𝑖𝑗b^{\\pi\\_{d}}\\_{ij} referring to the transition probabilities of the underlying AMC between two interventions, under the specific policy πdsubscript𝜋𝑑\\pi\\_{d} of the agent delegated during that time window. The use of a series of AMCs implies that we must allow an intermediary transition from an intervention state to the start of a new delegation window. This will implicitly occur in the same state, so we extend the definition of β𝛽\\beta to accommodate this aspect. The extension allows the representation to shift from an absorbing state that does not terminate an episode to a recurrent state which starts a new AMC chain. In this case, the model becomes"
+            },
+            {
+              "type": "formula",
+              "text": "bi​jπdsubscriptsuperscript𝑏subscript𝜋𝑑𝑖𝑗b^{\\pi_{d}}_{ij}"
+            },
+            {
+              "type": "formula",
+              "text": "πdsubscript𝜋𝑑\\pi_{d}"
+            },
+            {
+              "type": "formula",
+              "text": "β𝛽\\beta"
+            },
+            {
+              "type": "table",
+              "text": "| | | | | | --- | --- | --- | --- | | | β​(s,ηs)={1,(s​ violates constraints∧ηs=0)∨s=sg0,s​ satisfies constraints∨ηs=1𝛽𝑠subscript𝜂𝑠cases 1𝑠 violates constraintssubscript𝜂𝑠0𝑠 subscript𝑠𝑔otherwise 0𝑠 satisfies constraintssubscript𝜂𝑠 1otherwise\\beta(s,\\eta\\_{s})=\\begin{cases}1,\\quad(s\\textrm{ violates constraints}\\wedge\\eta\\_{s}=0)\\vee s=s\\_{g}\\\\ 0,\\quad s\\textrm{ satisfies constraints}\\vee\\eta\\_{s}=1\\end{cases} | | (3) |"
+            },
+            {
+              "type": "formula",
+              "text": "β​(s,ηs)={1,(s​ violates constraints∧ηs=0)∨s=sg0,s​ satisfies constraints∨ηs=1𝛽𝑠subscript𝜂𝑠cases1𝑠 violates constraintssubscript𝜂𝑠0𝑠subscript𝑠𝑔otherwise0𝑠 satisfies constraintssubscript𝜂𝑠1otherwise\\beta(s,\\eta_{s})=\\begin{cases}1,\\quad(s\\textrm{ violates constraints}\\wedge\\eta_{s}=0)\\vee s=s_{g}\\\\ 0,\\quad s\\textrm{ satisfies constraints}\\vee\\eta_{s}=1\\end{cases}"
+            },
+            {
+              "type": "paragraph",
+              "text": "where ηssubscript𝜂𝑠\\eta\\_{s} is an indicator denoting whether a new delegation was made in state s𝑠s. With this β𝛽\\beta, a delegation converts the current state into the starting state of a new AMC which continues until they either reach a goal/terminal state or a new absorbing state."
+            },
+            {
+              "type": "formula",
+              "text": "ηssubscript𝜂𝑠\\eta_{s}"
+            },
+            {
+              "type": "formula",
+              "text": "s𝑠s"
+            },
+            {
+              "type": "formula",
+              "text": "β𝛽\\beta"
+            },
+            {
+              "type": "paragraph",
+              "text": "The final aspect of the manager model, according to a standard RL scheme, is the definition of its value function. Specifically, the manager delegation policy πmsubscript𝜋𝑚\\pi\\_{m} gives a value function for state sj∈SQsubscript𝑠𝑗subscript𝑆𝑄s\\_{j}\\in S\\_{Q}"
+            },
+            {
+              "type": "formula",
+              "text": "πmsubscript𝜋𝑚\\pi_{m}"
+            },
+            {
+              "type": "formula",
+              "text": "sj∈SQsubscript𝑠𝑗subscript𝑆𝑄s_{j}\\in S_{Q}"
+            },
+            {
+              "type": "table",
+              "text": "| | | | | | --- | --- | --- | --- | | | Vπm​(sj)=∑d∈Dπm​(d|sj)​∑sk∈S𝐑bj​kπd​[RM+γ​Vπm​(sk)]superscript𝑉subscript𝜋𝑚subscript𝑠𝑗subscript𝑑𝐷subscript𝜋𝑚conditional𝑑subscript𝑠𝑗subscriptsubscript𝑠𝑘subscript𝑆𝐑subscriptsuperscript𝑏subscript𝜋𝑑𝑗𝑘delimited-[]subscript𝑅𝑀𝛾superscript𝑉subscript𝜋𝑚subscript𝑠𝑘V^{\\pi\\_{m}} (s\\_{j})=\\sum\\_{d\\in D}\\pi\\_{m}(d|s\\_{j})\\sum\\_{s\\_{k}\\in S\\_{\\mathbf{R}}}b^{\\pi\\_{d}}\\_{jk}\\left[R\\_{M}+\\gamma V^{\\pi\\_{m}}(s\\_{k})\\right] | | (4) |"
+            },
+            {
+              "type": "formula",
+              "text": "Vπm​(sj)=∑d∈Dπm​(d|sj)​∑sk∈S𝐑bj​kπd​[RM+γ​Vπm​(sk)]superscript𝑉subscript𝜋𝑚subscript𝑠𝑗subscript𝑑𝐷subscript𝜋𝑚conditional𝑑subscript𝑠𝑗subscriptsubscript𝑠𝑘subscript𝑆𝐑subscriptsuperscript𝑏subscript𝜋𝑑𝑗𝑘delimited-[]subscript𝑅𝑀𝛾superscript𝑉subscript𝜋𝑚subscript𝑠𝑘V^{\\pi_{m}} (s_{j})=\\sum_{d\\in D}\\pi_{m}(d|s_{j})\\sum_{s_{k}\\in S_{\\mathbf{R}}}b^{\\pi_{d}}_{jk}\\left[R_{M}+\\gamma V^{\\pi_{m}}(s_{k})\\right]"
+            },
+            {
+              "type": "paragraph",
+              "text": "where bj​kπdsubscriptsuperscript𝑏subscript𝜋𝑑𝑗𝑘b^{\\pi\\_{d}}\\_{jk} allows the manager’s value function to depend on the AMC transitions according to the delegation to agent d𝑑d. The value estimate is based on manager delegation policy πmsubscript𝜋𝑚\\pi\\_{m} and states observed according to delegated agent behavior policies πdsubscript𝜋𝑑\\pi\\_{d}. The model can be defined recursively to estimate expected state value with respect to the probability of delegation decision πm​(d|s)subscript𝜋𝑚conditional𝑑𝑠\\pi\\_{m}(d|s), probability of next observed state bj​kπdsubscriptsuperscript𝑏subscript𝜋𝑑𝑗𝑘b^{\\pi\\_{d}}\\_{jk} following delegated agent policy πdsubscript𝜋𝑑\\pi\\_{d}, and the discounted next state value γ​Vπm​(sk)𝛾superscript𝑉subscript𝜋𝑚subscript𝑠𝑘\\gamma V^{\\pi\\_{m}}(s\\_{k}). The discount γ𝛾\\gamma indicates the weight for the estimated value of future states. The manager estimates the value of states according to its behavior policy via ([4](#S2.E4 \"In II Intervening Manager ‣ Optimizing Risk-averse Human-AI Hybrid Teams This work was partially supported by the CHIST-ERA-19-XAI010 SAI project. M. Conti’s and A. Passarella’s work was partly funded by the PNRR - M4C2 - Investimento 1.3, Partenariato Esteso PE00000013 - ”FAIR” funded by the European Commission under the NextGeneration EU programme.\")), which estimates the expected rewards for trajectories leading from the current state sjsubscript𝑠𝑗s\\_{j}. These rewards, immediate or episodic, are dictated by the manager reward function RMsubscript𝑅𝑀R\\_{M} and indicate the value/reward for each decision made by the manager. For immediate rewards attributed at each intervention, the manager will observe in ([4](#S2.E4 \"In II Intervening Manager ‣ Optimizing Risk-averse Human-AI Hybrid Teams This work was partially supported by the CHIST-ERA-19-XAI010 SAI project. M. Conti’s and A. Passarella’s work was partly funded by the PNRR - M4C2 - Investimento 1.3, Partenariato Esteso PE00000013 - ”FAIR” funded by the European Commission under the NextGeneration EU programme.\")) the immediate feedback resulting from the transition to state sksubscript𝑠𝑘s\\_{k}. For the episodic case (i.e., when rewards are attributed only at the end of an episode), the manager observes a delayed reward based on all delegations occurred during the episode. This is done by backtracking the observed rewards and assigning these values to the explored states. Both cases of feedback are consistent with standard RL methods."
+            },
+            {
+              "type": "formula",
+              "text": "bj​kπdsubscriptsuperscript𝑏subscript𝜋𝑑𝑗𝑘b^{\\pi_{d}}_{jk}"
+            },
+            {
+              "type": "formula",
+              "text": "d𝑑d"
+            },
+            {
+              "type": "formula",
+              "text": "πmsubscript𝜋𝑚\\pi_{m}"
+            },
+            {
+              "type": "formula",
+              "text": "πdsubscript𝜋𝑑\\pi_{d}"
+            },
+            {
+              "type": "formula",
+              "text": "πm​(d|s)subscript𝜋𝑚conditional𝑑𝑠\\pi_{m}(d|s)"
+            },
+            {
+              "type": "formula",
+              "text": "bj​kπdsubscriptsuperscript𝑏subscript𝜋𝑑𝑗𝑘b^{\\pi_{d}}_{jk}"
+            },
+            {
+              "type": "formula",
+              "text": "πdsubscript𝜋𝑑\\pi_{d}"
+            },
+            {
+              "type": "formula",
+              "text": "γ​Vπm​(sk)𝛾superscript𝑉subscript𝜋𝑚subscript𝑠𝑘\\gamma V^{\\pi_{m}}(s_{k})"
+            },
+            {
+              "type": "formula",
+              "text": "γ𝛾\\gamma"
+            },
+            {
+              "type": "formula",
+              "text": "sjsubscript𝑠𝑗s_{j}"
+            },
+            {
+              "type": "formula",
+              "text": "RMsubscript𝑅𝑀R_{M}"
+            },
+            {
+              "type": "formula",
+              "text": "sksubscript𝑠𝑘s_{k}"
+            },
+            {
+              "type": "paragraph",
+              "text": "We can therefore derive the optimal value function V∗superscript𝑉V^{\\*} as"
+            },
+            {
+              "type": "formula",
+              "text": "V∗superscript𝑉V^{*}"
+            },
+            {
+              "type": "table",
+              "text": "| | | | | | --- | --- | --- | --- | | | V∗​(sj)=maxd​∑sk∈S𝐑bj​kπd​[RM+γ​V∗​(sk)]superscript𝑉subscript𝑠𝑗subscript𝑑subscriptsubscript𝑠𝑘subscript𝑆𝐑subscriptsuperscript𝑏subscript𝜋𝑑𝑗𝑘delimited-[]subscript𝑅𝑀𝛾superscript𝑉subscript𝑠𝑘V^{\\*}(s\\_{j})=\\max\\_{d}\\sum\\_{s\\_{k}\\in S\\_{\\mathbf{R}}}b^{\\pi\\_{d}}\\_{jk}\\left[R\\_{M}+\\gamma V^{\\*}(s\\_{k})\\right] | | (5) |"
+            },
+            {
+              "type": "formula",
+              "text": "V∗​(sj)=maxd​∑sk∈S𝐑bj​kπd​[RM+γ​V∗​(sk)]superscript𝑉subscript𝑠𝑗subscript𝑑subscriptsubscript𝑠𝑘subscript𝑆𝐑subscriptsuperscript𝑏subscript𝜋𝑑𝑗𝑘delimited-[]subscript𝑅𝑀𝛾superscript𝑉subscript𝑠𝑘V^{*}(s_{j})=\\max_{d}\\sum_{s_{k}\\in S_{\\mathbf{R}}}b^{\\pi_{d}}_{jk}\\left[R_{M}+\\gamma V^{*}(s_{k})\\right]"
+            },
+            {
+              "type": "paragraph",
+              "text": "and state-action value function Q∗superscript𝑄Q^{\\*}"
+            },
+            {
+              "type": "formula",
+              "text": "Q∗superscript𝑄Q^{*}"
+            },
+            {
+              "type": "table",
+              "text": "| | | | | | --- | --- | --- | --- | | | Q∗​(sj,d)=∑sk∈S𝐑bj​kπd​[RM+γ​V∗​(sk)]superscript𝑄subscript𝑠𝑗𝑑subscriptsubscript𝑠𝑘subscript𝑆𝐑subscriptsuperscript𝑏subscript𝜋𝑑𝑗𝑘delimited-[]subscript𝑅𝑀𝛾superscript𝑉subscript𝑠𝑘Q^{\\*}(s\\_{j},d)=\\sum\\_{s\\_{k}\\in S\\_{\\mathbf{R}}}b^{\\pi\\_{d}}\\_{jk}\\left[R\\_{M}+\\gamma V^{\\*}(s\\_{k})\\right] | | (6) |"
+            },
+            {
+              "type": "formula",
+              "text": "Q∗​(sj,d)=∑sk∈S𝐑bj​kπd​[RM+γ​V∗​(sk)]superscript𝑄subscript𝑠𝑗𝑑subscriptsubscript𝑠𝑘subscript𝑆𝐑subscriptsuperscript𝑏subscript𝜋𝑑𝑗𝑘delimited-[]subscript𝑅𝑀𝛾superscript𝑉subscript𝑠𝑘Q^{*}(s_{j},d)=\\sum_{s_{k}\\in S_{\\mathbf{R}}}b^{\\pi_{d}}_{jk}\\left[R_{M}+\\gamma V^{*}(s_{k})\\right]"
+            },
+            {
+              "type": "paragraph",
+              "text": "As shown in [[14](#bib.bib14)], our model can be shown to conform to standard RL requirement for convergence. Further, we can utilize RL techniques to learn an optimal manager policy πmsubscript𝜋𝑚\\pi\\_{m}."
+            },
+            {
+              "type": "formula",
+              "text": "πmsubscript𝜋𝑚\\pi_{m}"
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "III Specific scenario for optimality analysis",
+          "level": 2,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "We consider a specific scenario, described hereafter, which is particularly suited to analyze the performance of a manager defined as explained in Section [II](#S2 \"II Intervening Manager ‣ Optimizing Risk-averse Human-AI Hybrid Teams This work was partially supported by the CHIST-ERA-19-XAI010 SAI project. M. Conti’s and A. Passarella’s work was partly funded by the PNRR - M4C2 - Investimento 1.3, Partenariato Esteso PE00000013 - ”FAIR” funded by the European Commission under the NextGeneration EU programme.\") with respect to the ideal optimal behavior. Specifically, we utilize teams of agents which are tasked with navigating a grid environment (see Fig. [1](#S3.F1 \"Figure 1 ‣ III-A Navigating Agent Training ‣ III Specific scenario for optimality analysis ‣ Optimizing Risk-averse Human-AI Hybrid Teams This work was partially supported by the CHIST-ERA-19-XAI010 SAI project. M. Conti’s and A. Passarella’s work was partly funded by the PNRR - M4C2 - Investimento 1.3, Partenariato Esteso PE00000013 - ”FAIR” funded by the European Commission under the NextGeneration EU programme.\")) by moving from a start state to a goal state. Grid environments are defined by a collection of grid cells which the agents navigate by selecting actions denoting the direction they wish to travel (i.e., left/right/up/down). The actions will move the agents to an adjacent cell in the direction of the action selected. If the agent chooses to move in the direction of a wall or boundary, by the nature of the grid environment, the boundary prevents movement in that direction and the agent will remain in the same state. We augment the grid environment by adding a state type which we denote as a “failure” type state. If an agent enters either a goal or failure state, then the episode will terminate."
+            },
+            {
+              "type": "paragraph",
+              "text": "The failure states provide a means to guide manager behavior and define manager constraints. For the management of agents navigating a grid environment, our manager will have constraints defining the lowest accepted proximity to a failure state. If the team violates the proximity constraint, then the manager’s β𝛽\\beta function will indicate that an intervention is required, and a delegation decision will be made. With the characteristics of the grid environment, we will determine distance according to the Manhattan Distance"
+            },
+            {
+              "type": "formula",
+              "text": "β𝛽\\beta"
+            },
+            {
+              "type": "table",
+              "text": "| | | | | | --- | --- | --- | --- | | | δ​(s1,s2)=|x1−x2|+|y1−y2|𝛿subscript𝑠1subscript𝑠2subscript𝑥1subscript𝑥2subscript𝑦1subscript𝑦2\\delta(s\\_{1},s\\_{2})=|x\\_{1}-x\\_{2}|+|y\\_{1}-y\\_{2}| | | (7) |"
+            },
+            {
+              "type": "formula",
+              "text": "δ​(s1,s2)=|x1−x2|+|y1−y2|𝛿subscript𝑠1subscript𝑠2subscript𝑥1subscript𝑥2subscript𝑦1subscript𝑦2\\delta(s_{1},s_{2})=|x_{1}-x_{2}|+|y_{1}-y_{2}|"
+            },
+            {
+              "type": "paragraph",
+              "text": "for cells si=(xi,yi)subscript𝑠𝑖subscript𝑥𝑖subscript𝑦𝑖s\\_{i}=(x\\_{i},y\\_{i}) and (xi,yi)subscript𝑥𝑖subscript𝑦𝑖(x\\_{i},y\\_{i}) indicating the column and row of the cell, respectively. We use the Manhattan distance as this corresponds directly to the number of steps needed to reach a failure state given there are no boundaries. As such, we get an estimate of the importance of a nearby failure state."
+            },
+            {
+              "type": "formula",
+              "text": "si=(xi,yi)subscript𝑠𝑖subscript𝑥𝑖subscript𝑦𝑖s_{i}=(x_{i},y_{i})"
+            },
+            {
+              "type": "formula",
+              "text": "(xi,yi)subscript𝑥𝑖subscript𝑦𝑖(x_{i},y_{i})"
+            },
+            {
+              "type": "paragraph",
+              "text": "The use of distance-based notions of optimality and safety will allow us to directly observe the impact manager oversight has on the team’s behavior. We would expect to see cases where the manager learns delegation selections which balance the team’s risk, with respect to manager constraints, and the performance measure the agents used to learn. The manager will of course not observe these performance measures, but will observe how the learned behaviors of the agents have been impacted while learning according to these performance measures. Combined, this allows us to measure these factors to indicate how well the team and manager can work together to accomplish their task. We will discuss these aspects, and how we measure them, in Section [III-B](#S3.SS2 \"III-B Manager Task ‣ III Specific scenario for optimality analysis ‣ Optimizing Risk-averse Human-AI Hybrid Teams This work was partially supported by the CHIST-ERA-19-XAI010 SAI project. M. Conti’s and A. Passarella’s work was partly funded by the PNRR - M4C2 - Investimento 1.3, Partenariato Esteso PE00000013 - ”FAIR” funded by the European Commission under the NextGeneration EU programme.\")."
+            }
+          ],
+          "children": [
+            {
+              "heading": "III-A Navigating Agent Training",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "To build teams of agents, we train the navigation agents independently to generate behavior policies for each agent. Once trained, each behavior policy defines a candidate agent for a team. For the training, we represent the grid environment as an MDP. The transitions operate as described above to support movement between adjacent states and agents receive rewards to indicate the value of their action choices. In our independently trained agent models, we provide rewards to motivate desirable behavior. For the navigation task, we split the reward into to two components to give observed reward"
+                },
+                {
+                  "type": "table",
+                  "text": "| | | | | | --- | --- | --- | --- | | | r=R​(s,a,s′)+R​(minsf⁡δ​(s,sf))𝑟𝑅𝑠𝑎superscript𝑠′𝑅subscriptsubscript𝑠𝑓𝛿𝑠subscript𝑠𝑓r=R(s,a,s^{\\prime})+R\\left(\\min\\_{s\\_{f}}\\delta(s,s\\_{f})\\right) | | (8) |"
+                },
+                {
+                  "type": "formula",
+                  "text": "r=R​(s,a,s′)+R​(minsf⁡δ​(s,sf))𝑟𝑅𝑠𝑎superscript𝑠′𝑅subscriptsubscript𝑠𝑓𝛿𝑠subscript𝑠𝑓r=R(s,a,s^{\\prime})+R\\left(\\min_{s_{f}}\\delta(s,s_{f})\\right)"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "where s𝑠s is the current state and s′superscript𝑠′s^{\\prime} is the next state reached resulting from the action a𝑎a in state s𝑠s. First, the agents receive a penalty each time they are within an agent-specific distance of a failure state sfsubscript𝑠𝑓s\\_{f}. The scale of the penalty depends on agent distance and is set for each agent, given by R​(δ)∈ℝ𝑅𝛿ℝR(\\delta)\\in\\mathbb{R} according to"
+                },
+                {
+                  "type": "formula",
+                  "text": "s𝑠s"
+                },
+                {
+                  "type": "formula",
+                  "text": "s′superscript𝑠′s^{\\prime}"
+                },
+                {
+                  "type": "formula",
+                  "text": "a𝑎a"
+                },
+                {
+                  "type": "formula",
+                  "text": "s𝑠s"
+                },
+                {
+                  "type": "formula",
+                  "text": "sfsubscript𝑠𝑓s_{f}"
+                },
+                {
+                  "type": "formula",
+                  "text": "R​(δ)∈ℝ𝑅𝛿ℝR(\\delta)\\in\\mathbb{R}"
+                },
+                {
+                  "type": "table",
+                  "text": "| | | | | | --- | --- | --- | --- | | | R​(minsf⁡δ​(s,sf))=rd𝑅subscriptsubscript𝑠𝑓𝛿𝑠subscript𝑠𝑓subscript𝑟𝑑R\\left(\\min\\_{s\\_{f}}\\delta(s,s\\_{f})\\right)=r\\_{d} | | (9) |"
+                },
+                {
+                  "type": "formula",
+                  "text": "R​(minsf⁡δ​(s,sf))=rd𝑅subscriptsubscript𝑠𝑓𝛿𝑠subscript𝑠𝑓subscript𝑟𝑑R\\left(\\min_{s_{f}}\\delta(s,s_{f})\\right)=r_{d}"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "for δ𝛿\\delta from Equation [7](#S3.E7 \"In III Specific scenario for optimality analysis ‣ Optimizing Risk-averse Human-AI Hybrid Teams This work was partially supported by the CHIST-ERA-19-XAI010 SAI project. M. Conti’s and A. Passarella’s work was partly funded by the PNRR - M4C2 - Investimento 1.3, Partenariato Esteso PE00000013 - ”FAIR” funded by the European Commission under the NextGeneration EU programme.\"). As we are generating unique agents, each agent d𝑑d will have its own set of values for rdsubscript𝑟𝑑r\\_{d} given as a parameter for agent training. For example, with closest failure state sfsubscript𝑠𝑓s\\_{f}, an agent could observe"
+                },
+                {
+                  "type": "formula",
+                  "text": "δ𝛿\\delta"
+                },
+                {
+                  "type": "formula",
+                  "text": "d𝑑d"
+                },
+                {
+                  "type": "formula",
+                  "text": "rdsubscript𝑟𝑑r_{d}"
+                },
+                {
+                  "type": "formula",
+                  "text": "sfsubscript𝑠𝑓s_{f}"
+                },
+                {
+                  "type": "table",
+                  "text": "| | | | | | --- | --- | --- | --- | | | R​(δ​(s,sf))={−20,minsf⁡δ​(s,sf)=1−10,minsf⁡δ​(s,sf)=20,otherwise𝑅𝛿𝑠subscript𝑠𝑓cases20subscriptsubscript𝑠𝑓𝛿𝑠subscript𝑠𝑓110subscriptsubscript𝑠𝑓𝛿𝑠subscript𝑠𝑓20otherwiseR(\\delta(s,s\\_{f}))=\\begin{cases}-20,&\\min\\_{s\\_{f}}\\delta(s,s\\_{f})=1\\\\ -10,&\\min\\_{s\\_{f}}\\delta(s,s\\_{f})=2\\\\ \\quad~{}0,&\\textrm{otherwise}\\end{cases} | | (10) |"
+                },
+                {
+                  "type": "formula",
+                  "text": "R​(δ​(s,sf))={−20,minsf⁡δ​(s,sf)=1−10,minsf⁡δ​(s,sf)=20,otherwise𝑅𝛿𝑠subscript𝑠𝑓cases20subscriptsubscript𝑠𝑓𝛿𝑠subscript𝑠𝑓110subscriptsubscript𝑠𝑓𝛿𝑠subscript𝑠𝑓20otherwiseR(\\delta(s,s_{f}))=\\begin{cases}-20,&\\min_{s_{f}}\\delta(s,s_{f})=1\\\\ -10,&\\min_{s_{f}}\\delta(s,s_{f})=2\\\\ \\quad~{}0,&\\textrm{otherwise}\\end{cases}"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "to give unique penalties for δ​(s,sf)<3𝛿𝑠subscript𝑠𝑓3\\delta(s,s\\_{f})<3 and no penalty for δ​(s,sf)≥3𝛿𝑠subscript𝑠𝑓3\\delta(s,s\\_{f})\\geq 3. Also, once the agent has moved to a cell such that minsf⁡δ​(s,sf)≥3subscriptsubscript𝑠𝑓𝛿𝑠subscript𝑠𝑓3\\min\\_{s\\_{f}}\\delta(s,s\\_{f})\\geq 3, there will be no observed proximity penalty."
+                },
+                {
+                  "type": "formula",
+                  "text": "δ​(s,sf)<3𝛿𝑠subscript𝑠𝑓3\\delta(s,s_{f})<3"
+                },
+                {
+                  "type": "formula",
+                  "text": "δ​(s,sf)≥3𝛿𝑠subscript𝑠𝑓3\\delta(s,s_{f})\\geq 3"
+                },
+                {
+                  "type": "formula",
+                  "text": "minsf⁡δ​(s,sf)≥3subscriptsubscript𝑠𝑓𝛿𝑠subscript𝑠𝑓3\\min_{s_{f}}\\delta(s,s_{f})\\geq 3"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "In addition to the distance-based penalty, we provide rewards aligning to the general navigation task. These rewards motivate shortest paths and eliminate erroneous behavior(s) (e.g., collision with a wall/boundary). These rewards are given according to"
+                },
+                {
+                  "type": "table",
+                  "text": "| | | | | | --- | --- | --- | --- | | | R​(s,a,s′)={−10,wall/boundary collision−20,s′ is a failure state100,s′ is a goal state−1,otherwise𝑅𝑠𝑎superscript𝑠′cases10wall/boundary collision20s′ is a failure state100s′ is a goal state1otherwiseR(s,a,s^{\\prime})=\\begin{cases}-10,&\\textrm{wall/boundary collision}\\\\ -20,&\\textrm{$s^{\\prime}$ is a failure state}\\\\ 100,&\\textrm{$s^{\\prime}$ is a goal state}\\\\ -1,&\\textrm{otherwise}\\end{cases} | | (11) |"
+                },
+                {
+                  "type": "formula",
+                  "text": "R​(s,a,s′)={−10,wall/boundary collision−20,s′ is a failure state100,s′ is a goal state−1,otherwise𝑅𝑠𝑎superscript𝑠′cases10wall/boundary collision20s′ is a failure state100s′ is a goal state1otherwiseR(s,a,s^{\\prime})=\\begin{cases}-10,&\\textrm{wall/boundary collision}\\\\ -20,&\\textrm{$s^{\\prime}$ is a failure state}\\\\ 100,&\\textrm{$s^{\\prime}$ is a goal state}\\\\ -1,&\\textrm{otherwise}\\end{cases}"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "to motivate agents to learn efficient paths to the goal."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "The distance-based penalty will therefore determine how close an agent is likely to reach a failure state while learning an efficient path. As an example, we refer to Fig. [2](#S3.F2 \"Figure 2 ‣ III-A Navigating Agent Training ‣ III Specific scenario for optimality analysis ‣ Optimizing Risk-averse Human-AI Hybrid Teams This work was partially supported by the CHIST-ERA-19-XAI010 SAI project. M. Conti’s and A. Passarella’s work was partly funded by the PNRR - M4C2 - Investimento 1.3, Partenariato Esteso PE00000013 - ”FAIR” funded by the European Commission under the NextGeneration EU programme.\"), where we demonstrate the significance placed on cells near failure states when the safe distance is three. In the figure, there is a clear pattern of degrading importance placed on cells as the distance to a failure state increases. Therefore, based on the severity of these penalties, an agent’s path will prioritize the cells which are of least concern with respect to the safety distance (e.g., the cells furthest left in Fig. [2(b)](#S3.F2.sf2 \"In Figure 2 ‣ III-A Navigating Agent Training ‣ III Specific scenario for optimality analysis ‣ Optimizing Risk-averse Human-AI Hybrid Teams This work was partially supported by the CHIST-ERA-19-XAI010 SAI project. M. Conti’s and A. Passarella’s work was partly funded by the PNRR - M4C2 - Investimento 1.3, Partenariato Esteso PE00000013 - ”FAIR” funded by the European Commission under the NextGeneration EU programme.\")). It is important to note that this does not assume any compatibility or similarity to the manager’s constraints. This allows us to create ensembles of agents where each act according to their previously learned model and corresponding level of accepted risk."
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "III-B Manager Task",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "As defined for our framework, the agents under manager oversight will operate by choosing actions until there is need for an intervention. In the grid navigation case, from the manager’s perspective, this will amount to teams making errors by moving to a state which is too close to a failure state (or entering a failure state), according to the manager’s constraints defining β𝛽\\beta regarding the safe distance."
+                },
+                {
+                  "type": "formula",
+                  "text": "β𝛽\\beta"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Similar to Equation [10](#S3.E10 \"In III-A Navigating Agent Training ‣ III Specific scenario for optimality analysis ‣ Optimizing Risk-averse Human-AI Hybrid Teams This work was partially supported by the CHIST-ERA-19-XAI010 SAI project. M. Conti’s and A. Passarella’s work was partly funded by the PNRR - M4C2 - Investimento 1.3, Partenariato Esteso PE00000013 - ”FAIR” funded by the European Commission under the NextGeneration EU programme.\"), the manager will use a β𝛽\\beta function based on minsf⁡δ​(s,sf)subscriptsubscript𝑠𝑓𝛿𝑠subscript𝑠𝑓\\min\\_{s\\_{f}}\\delta(s,s\\_{f}) for current state s𝑠s. In our scenario, the distance is used to define β𝛽\\beta such that"
+                },
+                {
+                  "type": "formula",
+                  "text": "β𝛽\\beta"
+                },
+                {
+                  "type": "formula",
+                  "text": "minsf⁡δ​(s,sf)subscriptsubscript𝑠𝑓𝛿𝑠subscript𝑠𝑓\\min_{s_{f}}\\delta(s,s_{f})"
+                },
+                {
+                  "type": "formula",
+                  "text": "s𝑠s"
+                },
+                {
+                  "type": "formula",
+                  "text": "β𝛽\\beta"
+                },
+                {
+                  "type": "table",
+                  "text": "| | | | | | --- | --- | --- | --- | | | β​(s,ηs)=1⇔minsf⁡δ​(s,sf)≤δI∧ηs=0⇔𝛽𝑠subscript𝜂𝑠1subscriptsubscript𝑠𝑓𝛿𝑠subscript𝑠𝑓subscript𝛿𝐼subscript𝜂𝑠0\\beta(s,\\eta\\_{s})=1\\Leftrightarrow\\min\\_{s\\_{f}}\\delta(s,s\\_{f})\\leq\\delta\\_{I}\\wedge\\eta\\_{s}=0 | | (12) |"
+                },
+                {
+                  "type": "formula",
+                  "text": "β​(s,ηs)=1⇔minsf⁡δ​(s,sf)≤δI∧ηs=0⇔𝛽𝑠subscript𝜂𝑠1subscriptsubscript𝑠𝑓𝛿𝑠subscript𝑠𝑓subscript𝛿𝐼subscript𝜂𝑠0\\beta(s,\\eta_{s})=1\\Leftrightarrow\\min_{s_{f}}\\delta(s,s_{f})\\leq\\delta_{I}\\wedge\\eta_{s}=0"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "where δIsubscript𝛿𝐼\\delta\\_{I} sets the manager’s limit on proximity. Thus, we see the manager will not intervene until the minimum Manhattan distance meets the manager’s threshold. This ensures the manager bases its intervention decision on a separate and compatible measure of safety."
+                },
+                {
+                  "type": "formula",
+                  "text": "δIsubscript𝛿𝐼\\delta_{I}"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Following Equation [1](#S2.E1 \"In II Intervening Manager ‣ Optimizing Risk-averse Human-AI Hybrid Teams This work was partially supported by the CHIST-ERA-19-XAI010 SAI project. M. Conti’s and A. Passarella’s work was partly funded by the PNRR - M4C2 - Investimento 1.3, Partenariato Esteso PE00000013 - ”FAIR” funded by the European Commission under the NextGeneration EU programme.\"), the manager will observe a reward which indicates task success or failure, with the scale of the reward being dictated by the number ρ𝜌\\rho of interventions triggered. As defined, the reward values are not directly dependent on the safety distance δIsubscript𝛿𝐼\\delta\\_{I}; instead, the manager reward will be based on intervention frequency. Therefore, there is an implicit dependence on δIsubscript𝛿𝐼\\delta\\_{I}, but the key factor is the behavior of the delegated agents and the team’s success regarding the task."
+                },
+                {
+                  "type": "formula",
+                  "text": "ρ𝜌\\rho"
+                },
+                {
+                  "type": "formula",
+                  "text": "δIsubscript𝛿𝐼\\delta_{I}"
+                },
+                {
+                  "type": "formula",
+                  "text": "δIsubscript𝛿𝐼\\delta_{I}"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "As we isolate the manager and agent views on safety, the team dynamics will vary accordingly. Agents selected by the manager will operate according to their own acceptable safety distance, which will guide their actions and resulting paths. Similarly, the manager’s constraints on safe behavior will determine how suitable an agent is for delegation. Teams composed entirely of agents which accept more risk than the manager will typically result in frequent manager intervention while agents with more restrictive risk aversion will lead to few/no needed interventions by the manager. Consequently, the manager’s performance will depend on agents available, how the agents choose to operate, and how well the manager can associate these factors to learn desirable behavior."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Given our view of the manager’s impact on team performance, the notion of optimal manager behavior in our scenario will be that of the sum of path length and number of manager interventions. The focus on path length will indicate the kind of path the team finds according to their risk aversion levels, while the focus on interventions clearly indicates how well the team aligns with the manager’s constraints. With that in mind, the performance for our manager will be measured as"
+                },
+                {
+                  "type": "table",
+                  "text": "| | | | | | --- | --- | --- | --- | | | c=m+nβ𝑐𝑚subscript𝑛𝛽c=m+n\\_{\\beta} | | (13) |"
+                },
+                {
+                  "type": "formula",
+                  "text": "c=m+nβ𝑐𝑚subscript𝑛𝛽c=m+n_{\\beta}"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "for path length m𝑚m and"
+                },
+                {
+                  "type": "formula",
+                  "text": "m𝑚m"
+                },
+                {
+                  "type": "table",
+                  "text": "| | | | | | --- | --- | --- | --- | | | nβ=∑st∈{s1,…,sm}𝟙​{β​(st,ηst)=1}subscript𝑛𝛽subscriptsubscript𝑠𝑡subscript𝑠1…subscript𝑠𝑚1𝛽subscript𝑠𝑡subscript𝜂subscript𝑠𝑡1n\\_{\\beta}=\\sum\\_{s\\_{t}\\in\\{s\\_{1},\\dots,s\\_{m}\\}}\\mathds{1}\\left\\{\\beta(s\\_{t},\\eta\\_{s\\_{t}})=1\\right\\} | | (14) |"
+                },
+                {
+                  "type": "formula",
+                  "text": "nβ=∑st∈{s1,…,sm}𝟙​{β​(st,ηst)=1}subscript𝑛𝛽subscriptsubscript𝑠𝑡subscript𝑠1…subscript𝑠𝑚1𝛽subscript𝑠𝑡subscript𝜂subscript𝑠𝑡1n_{\\beta}=\\sum_{s_{t}\\in\\{s_{1},\\dots,s_{m}\\}}\\mathds{1}\\left\\{\\beta(s_{t},\\eta_{s_{t}})=1\\right\\}"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "denoting the number of interventions for an episode trajectory {s1,…,sm}subscript𝑠1…subscript𝑠𝑚\\{s\\_{1},\\dots,s\\_{m}\\}. The c𝑐c values for each test episode are then averaged to calculate the mean performance c¯¯𝑐\\bar{c} for a managed team. We perform the tests by running 50 episodes per two agent team in each environment and intervention distance case."
+                },
+                {
+                  "type": "formula",
+                  "text": "{s1,…,sm}subscript𝑠1…subscript𝑠𝑚\\{s_{1},\\dots,s_{m}\\}"
+                },
+                {
+                  "type": "formula",
+                  "text": "c𝑐c"
+                },
+                {
+                  "type": "formula",
+                  "text": "c¯¯𝑐\\bar{c}"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "To generate bounds on performance, we measure the optimal cost in an environment with consideration for how the values of m𝑚m and nβsubscript𝑛𝛽n\\_{\\beta} are related. These values will be determined by the specific grid environment and manager constraints. We use a shortest path algorithm to calculate the minimal value possible for c𝑐c for a given manager. The measure of a shortest path is augmented to accommodate the manager’s constraints. Any path which would induce an intervention will have its weight increased by one each time β=1𝛽1\\beta=1 to indicate an intervention penalty. Hence, the shortest path algorithm will return a path which has a minimal sum of grid cells traversed and manager interventions incurred."
+                },
+                {
+                  "type": "formula",
+                  "text": "m𝑚m"
+                },
+                {
+                  "type": "formula",
+                  "text": "nβsubscript𝑛𝛽n_{\\beta}"
+                },
+                {
+                  "type": "formula",
+                  "text": "c𝑐c"
+                },
+                {
+                  "type": "formula",
+                  "text": "β=1𝛽1\\beta=1"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "In cases where the manager’s performance score deviates from optimal, this can result from three outcomes. First, the team may have only agents with aversion higher than the manager, so their paths are longer than the shortest possible. For example, consider an agent avoiding the central failure state in Figure [2(b)](#S3.F2.sf2 \"In Figure 2 ‣ III-A Navigating Agent Training ‣ III Specific scenario for optimality analysis ‣ Optimizing Risk-averse Human-AI Hybrid Teams This work was partially supported by the CHIST-ERA-19-XAI010 SAI project. M. Conti’s and A. Passarella’s work was partly funded by the PNRR - M4C2 - Investimento 1.3, Partenariato Esteso PE00000013 - ”FAIR” funded by the European Commission under the NextGeneration EU programme.\"). A path avoiding this state will incur additional steps which move away from the goal and toward the left boundary before turning back toward the goal. A shorter path is possible adjacent to the failure state, so a team that avoids this path could have a sub-optimal score. Second, the manager could choose an agent which has not gained much experience in a part of the grid due to its training not performing much exploration in that region. If the manager has a team of agents which enters such a region, then there could be slight confusion and resulting longer paths until the team returns to the desirable path. Last, the manager could simply choose the sub-optimal agent in a state and result in less desirable paths than if the manager chose the other agent."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "For concrete examples, given our measure of manager performance, we will compare the c𝑐c values to a measure of optimal paths. As indicated in Figure [3](#S3.F3 \"Figure 3 ‣ III-B Manager Task ‣ III Specific scenario for optimality analysis ‣ Optimizing Risk-averse Human-AI Hybrid Teams This work was partially supported by the CHIST-ERA-19-XAI010 SAI project. M. Conti’s and A. Passarella’s work was partly funded by the PNRR - M4C2 - Investimento 1.3, Partenariato Esteso PE00000013 - ”FAIR” funded by the European Commission under the NextGeneration EU programme.\"), agent risk aversion levels will determine the path an agent uses to traverse a grid environment. On the left side, we see an agent with high penalties for R​(δ​(s,sf))𝑅𝛿𝑠subscript𝑠𝑓R(\\delta(s,s\\_{f})) (e.g., R​(1)=−35𝑅135R(1)=-35 and R​(2)=−15𝑅215R(2)=-15), while the right side shows behavior for lower values (e.g., R​(1)=−15𝑅115R(1)=-15 and R​(2)=−5𝑅25R(2)=-5). As indicated, the strength of the aversion penalties can have a significant impact on the path length for an agent/team. When paired with a manager, the agent and manager aversion levels will impact the overall resulting paths. Agents with high penalties, such as the left side of Figure [3](#S3.F3 \"Figure 3 ‣ III-B Manager Task ‣ III Specific scenario for optimality analysis ‣ Optimizing Risk-averse Human-AI Hybrid Teams This work was partially supported by the CHIST-ERA-19-XAI010 SAI project. M. Conti’s and A. Passarella’s work was partly funded by the PNRR - M4C2 - Investimento 1.3, Partenariato Esteso PE00000013 - ”FAIR” funded by the European Commission under the NextGeneration EU programme.\"), will have fewer cases where their path is close enough to a failure state to trigger a manager intervention. Therefore, the best c𝑐c a manager with δI≤2subscript𝛿𝐼2\\delta\\_{I}\\leq 2 can achieve given a team of these agents will be bounded by their path length (i.e., c=18𝑐18c=18). On the other hand, a manager with a team of agents selecting paths such as the right side of Figure [3](#S3.F3 \"Figure 3 ‣ III-B Manager Task ‣ III Specific scenario for optimality analysis ‣ Optimizing Risk-averse Human-AI Hybrid Teams This work was partially supported by the CHIST-ERA-19-XAI010 SAI project. M. Conti’s and A. Passarella’s work was partly funded by the PNRR - M4C2 - Investimento 1.3, Partenariato Esteso PE00000013 - ”FAIR” funded by the European Commission under the NextGeneration EU programme.\"), will have higher dependence on δIsubscript𝛿𝐼\\delta\\_{I}. With δI=1subscript𝛿𝐼1\\delta\\_{I}=1, the team will trigger an intervention and so nβ=1subscript𝑛𝛽1n\\_{\\beta}=1 and m=14𝑚14m=14, giving a best possible score c=15𝑐15c=15. Hence, manager score depends on both their ability to select suitable agents and the best possible behavior any agent could achieve. Therefore, our score of optimality indicates how well the manager can achieve these values and how the team impacts the manager’s score."
+                },
+                {
+                  "type": "formula",
+                  "text": "c𝑐c"
+                },
+                {
+                  "type": "formula",
+                  "text": "R​(δ​(s,sf))𝑅𝛿𝑠subscript𝑠𝑓R(\\delta(s,s_{f}))"
+                },
+                {
+                  "type": "formula",
+                  "text": "R​(1)=−35𝑅135R(1)=-35"
+                },
+                {
+                  "type": "formula",
+                  "text": "R​(2)=−15𝑅215R(2)=-15"
+                },
+                {
+                  "type": "formula",
+                  "text": "R​(1)=−15𝑅115R(1)=-15"
+                },
+                {
+                  "type": "formula",
+                  "text": "R​(2)=−5𝑅25R(2)=-5"
+                },
+                {
+                  "type": "formula",
+                  "text": "c𝑐c"
+                },
+                {
+                  "type": "formula",
+                  "text": "δI≤2subscript𝛿𝐼2\\delta_{I}\\leq 2"
+                },
+                {
+                  "type": "formula",
+                  "text": "c=18𝑐18c=18"
+                },
+                {
+                  "type": "formula",
+                  "text": "δIsubscript𝛿𝐼\\delta_{I}"
+                },
+                {
+                  "type": "formula",
+                  "text": "δI=1subscript𝛿𝐼1\\delta_{I}=1"
+                },
+                {
+                  "type": "formula",
+                  "text": "nβ=1subscript𝑛𝛽1n_{\\beta}=1"
+                },
+                {
+                  "type": "formula",
+                  "text": "m=14𝑚14m=14"
+                },
+                {
+                  "type": "formula",
+                  "text": "c=15𝑐15c=15"
+                }
+              ],
+              "children": []
+            }
+          ]
+        },
+        {
+          "heading": "IV Results",
+          "level": 2,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "We train and test our managers across several grid environments and risk aversion levels. The grid environments (see Fig. [1](#S3.F1 \"Figure 1 ‣ III-A Navigating Agent Training ‣ III Specific scenario for optimality analysis ‣ Optimizing Risk-averse Human-AI Hybrid Teams This work was partially supported by the CHIST-ERA-19-XAI010 SAI project. M. Conti’s and A. Passarella’s work was partly funded by the PNRR - M4C2 - Investimento 1.3, Partenariato Esteso PE00000013 - ”FAIR” funded by the European Commission under the NextGeneration EU programme.\")) are designed to include varying levels of navigation difficulty and ease of failure state avoidance. Further, we generate several navigation agents with varying levels of risk aversion (see Section [III-A](#S3.SS1 \"III-A Navigating Agent Training ‣ III Specific scenario for optimality analysis ‣ Optimizing Risk-averse Human-AI Hybrid Teams This work was partially supported by the CHIST-ERA-19-XAI010 SAI project. M. Conti’s and A. Passarella’s work was partly funded by the PNRR - M4C2 - Investimento 1.3, Partenariato Esteso PE00000013 - ”FAIR” funded by the European Commission under the NextGeneration EU programme.\")) to create diverse teams for the manager. Given the agent parameters and training, all team agents are trained to avoid entering the failure state, but they are distinct in their risk feedback (i.e., R​(δ)𝑅𝛿R(\\delta))."
+            },
+            {
+              "type": "formula",
+              "text": "R​(δ)𝑅𝛿R(\\delta)"
+            },
+            {
+              "type": "paragraph",
+              "text": "As noted, the performance of the manager is compared to an estimate of the optimal path possible, according to the grid and corresponding manager distance-based error threshold. The navigating agents, by definition, are motivated to find paths which minimize path length and failure state proximity penalties, so the team’s path will serve as an indicator of manager performance. Given that each agent is trying to reach the goal in the shortest path that does not violate their own view of risk, the agent a manager chooses will determine the length of path the team finds. Consequently, the manager’s delegation decisions will directly impact how short a path is taken by the team. If the manager selects an agent with a higher aversion level than itself, the team may take more steps to reach the goal than if an agent with lower aversion were selected. Hence, manager performance can be viewed according to the manager’s impact on team paths and intervention frequency."
+            },
+            {
+              "type": "paragraph",
+              "text": "In Tables [III](#S4.T3 \"TABLE III ‣ IV Results ‣ Optimizing Risk-averse Human-AI Hybrid Teams This work was partially supported by the CHIST-ERA-19-XAI010 SAI project. M. Conti’s and A. Passarella’s work was partly funded by the PNRR - M4C2 - Investimento 1.3, Partenariato Esteso PE00000013 - ”FAIR” funded by the European Commission under the NextGeneration EU programme.\")-[III](#S4.T3 \"TABLE III ‣ IV Results ‣ Optimizing Risk-averse Human-AI Hybrid Teams This work was partially supported by the CHIST-ERA-19-XAI010 SAI project. M. Conti’s and A. Passarella’s work was partly funded by the PNRR - M4C2 - Investimento 1.3, Partenariato Esteso PE00000013 - ”FAIR” funded by the European Commission under the NextGeneration EU programme.\"), we demonstrate the manager performance in our various grid environments. The manager training was performed across teams with a mixture of risk-aversion levels and manager intervention distances δI∈[0,1,2,3]subscript𝛿𝐼 0123\\delta\\_{I}\\in[0,1,2,3]. The inclusion of a zero-distance intervention serves as a base level to indicate how a team can perform when there is no intervention without reaching a terminal error state. Note, the navigating agents we trained have a success rate of 100% with respect to their reaching the goal state at test time. This means the manager only needs to consider agent performance and β𝛽\\beta with respect to the cost function defined in Equation [13](#S3.E13 \"In III-B Manager Task ‣ III Specific scenario for optimality analysis ‣ Optimizing Risk-averse Human-AI Hybrid Teams This work was partially supported by the CHIST-ERA-19-XAI010 SAI project. M. Conti’s and A. Passarella’s work was partly funded by the PNRR - M4C2 - Investimento 1.3, Partenariato Esteso PE00000013 - ”FAIR” funded by the European Commission under the NextGeneration EU programme.\"). Agents avoiding failure states ensures our comparison of results is consistent across the various teams and there is no ambiguity caused by the appearance of shorter paths due to failure paths."
+            },
+            {
+              "type": "formula",
+              "text": "δI∈[0,1,2,3]subscript𝛿𝐼0123\\delta_{I}\\in[0,1,2,3]"
+            },
+            {
+              "type": "formula",
+              "text": "β𝛽\\beta"
+            },
+            {
+              "type": "table",
+              "text": "| Team Types | Intervention Distance | | | | | --- | --- | --- | --- | --- | | 0 | 1 | 2 | 3 | | None, Low | 8.0 (8.0) | 9.55 (8.0) | 13.14 (12.0) | 15.0 (15.0) | | None, Medium | 8.0 (8.0) | 9.50 (8.0) | 13.31 (12.0) | 15.0 (15.0) | | None, High | 8.0 (8.0) | 9.54 (8.0) | 13.39 (12.0) | 15.0 (15.0) | | Low, Medium | 8.0 (8.0) | 8.0 (8.0) | 12.0 (12.0) | 15.0 (15.0) | | Low, High | 8.0 (8.0) | 8.0 (8.0) | 12.0 (12.0) | 15.0 (15.0) | | Medium, High | 8.0 (8.0) | 8.0 (8.0) | 12.0 (12.0) | 15.0 (15.0) |"
+            },
+            {
+              "type": "table",
+              "text": "| Team Types | Intervention Distance | | | | | --- | --- | --- | --- | --- | | 0 | 1 | 2 | 3 | | None, Low | 14.9 (14.0) | 15.5 (15.0) | 18.5 (18.0) | 21.0 (21.0) | | None, Medium | 15.2 (14.0) | 15.5 (15.0) | 18.5 (18.0) | 21.0 (21.0) | | None, High | 15.0 (14.0) | 15.4 (15.0) | 18.9 (18.0) | 21.8 (21.0) | | Low, Medium | 17.0 (14.0) | 17.0 (15.0) | 19.0 (18.0) | 23.0 (21.0) | | Low, High | 17.0 (14.0) | 17.0 (15.0) | 19.0 (18.0) | 23.0 (21.0) | | Medium, High | 17.0 (14.0) | 17.0 (15.0) | 19.0 (18.0) | 23.0 (21.0) |"
+            },
+            {
+              "type": "table",
+              "text": "| Team Types | Intervention Distance | | | | | --- | --- | --- | --- | --- | | 0 | 1 | 2 | 3 | | None, Low | 15.0 (15.0) | 15.0 (15.0) | 18.0 (18.0) | 24.5 (24.0) | | None, Medium | 15.0 (15.0) | 15.0 (15.0) | 18.0 (18.0) | 24.5 (24.0) | | None, High | 15.0 (15.0) | 15.0 (15.0) | 18.0 (18.0) | 24.5 (24.0) | | Low, Medium | 15.0 (15.0) | 15.0 (15.0) | 18.0 (18.0) | 24.5 (24.0) | | Low, High | 15.0 (15.0) | 15.0 (15.0) | 18.0 (18.0) | 24.5 (24.0) | | Medium, High | 15.0 (15.0) | 15.0 (15.0) | 18.0 (18.0) | 24.5 (24.0) |"
+            },
+            {
+              "type": "paragraph",
+              "text": "We present the results in the tables in the following format. First, the “Team Types” indicates the level of aversion for a team agent with respect to proximity to a failure state: None, Low, Medium, and High. These aversion levels correspond to the maximum δ​(s,sf)𝛿𝑠subscript𝑠𝑓\\delta(s,s\\_{f}) such that R​(δ​(s,sf))<0𝑅𝛿𝑠subscript𝑠𝑓0R(\\delta(s,s\\_{f}))<0, with None→0→None0\\textrm{None}\\rightarrow 0, Low→1→Low1\\textrm{Low}\\rightarrow 1, Medium→2→Medium2\\textrm{Medium}\\rightarrow 2, High→3→High3\\textrm{High}\\rightarrow 3. Remember that agent paths will vary according to these aversion levels (see Fig. [2](#S3.F2 \"Figure 2 ‣ III-A Navigating Agent Training ‣ III Specific scenario for optimality analysis ‣ Optimizing Risk-averse Human-AI Hybrid Teams This work was partially supported by the CHIST-ERA-19-XAI010 SAI project. M. Conti’s and A. Passarella’s work was partly funded by the PNRR - M4C2 - Investimento 1.3, Partenariato Esteso PE00000013 - ”FAIR” funded by the European Commission under the NextGeneration EU programme.\")). In the remaining columns, we demonstrate the team’s performance under managers with varying intervention distances. The team/manager scores are given as the team score followed by the estimated optimal score in parenthesis. The score is calculated according to combined shortest path and intervention cost c𝑐c defined in Section [III-B](#S3.SS2 \"III-B Manager Task ‣ III Specific scenario for optimality analysis ‣ Optimizing Risk-averse Human-AI Hybrid Teams This work was partially supported by the CHIST-ERA-19-XAI010 SAI project. M. Conti’s and A. Passarella’s work was partly funded by the PNRR - M4C2 - Investimento 1.3, Partenariato Esteso PE00000013 - ”FAIR” funded by the European Commission under the NextGeneration EU programme.\")."
+            },
+            {
+              "type": "formula",
+              "text": "δ​(s,sf)𝛿𝑠subscript𝑠𝑓\\delta(s,s_{f})"
+            },
+            {
+              "type": "formula",
+              "text": "R​(δ​(s,sf))<0𝑅𝛿𝑠subscript𝑠𝑓0R(\\delta(s,s_{f}))<0"
+            },
+            {
+              "type": "formula",
+              "text": "None→0→None0\\textrm{None}\\rightarrow 0"
+            },
+            {
+              "type": "formula",
+              "text": "Low→1→Low1\\textrm{Low}\\rightarrow 1"
+            },
+            {
+              "type": "formula",
+              "text": "Medium→2→Medium2\\textrm{Medium}\\rightarrow 2"
+            },
+            {
+              "type": "formula",
+              "text": "High→3→High3\\textrm{High}\\rightarrow 3"
+            },
+            {
+              "type": "formula",
+              "text": "c𝑐c"
+            },
+            {
+              "type": "paragraph",
+              "text": "In Table [III](#S4.T3 \"TABLE III ‣ IV Results ‣ Optimizing Risk-averse Human-AI Hybrid Teams This work was partially supported by the CHIST-ERA-19-XAI010 SAI project. M. Conti’s and A. Passarella’s work was partly funded by the PNRR - M4C2 - Investimento 1.3, Partenariato Esteso PE00000013 - ”FAIR” funded by the European Commission under the NextGeneration EU programme.\"), we see the results for the Angle Cliff environment. In this grid, the team will have few chances to avoid intervention cases when δIsubscript𝛿𝐼\\delta\\_{I} increases. Still, there is a path along the diagonal that agents can traverse to minimize these interventions (see Fig. [2(a)](#S3.F2.sf1 \"In Figure 2 ‣ III-A Navigating Agent Training ‣ III Specific scenario for optimality analysis ‣ Optimizing Risk-averse Human-AI Hybrid Teams This work was partially supported by the CHIST-ERA-19-XAI010 SAI project. M. Conti’s and A. Passarella’s work was partly funded by the PNRR - M4C2 - Investimento 1.3, Partenariato Esteso PE00000013 - ”FAIR” funded by the European Commission under the NextGeneration EU programme.\")). As indicated by the results, the manager can identify the sequence of agents which generates results nearing these optimal paths. As the agents were trained to find a path that fits their view of acceptable risk, without a prescribed training from any starting state, we can attribute some of the sub-optimal paths (e.g., “None, High” team with Intervention Distance: 2) to either risk aversion or minor agent confusion when the team enters less-frequently experienced states. In other words, some delegation changes and sub-optimal team agent behavior could result in a path which diverges slightly from a policy-agnostic shortest path. This could lead to backtracking (e.g., “right” action followed by a “left” action) to return to the optimal path, which increases c𝑐c by one or more. Further, any single deviation from the diagonal will result in the next states incurring additional penalties, so small deviations from the center path will result in these minor deviations in team score. On the other hand, for teams where the agents are of similar risk-aversion level to the manager (e.g., “Low, Medium” and δI=1subscript𝛿𝐼1\\delta\\_{I}=1), we see indications of good alignment between the manager and team. In these cases, the scores align well with our measure of optimal as the team paths follow trajectories which align with the manager’s constraints and lead to optimal results."
+            },
+            {
+              "type": "formula",
+              "text": "δIsubscript𝛿𝐼\\delta_{I}"
+            },
+            {
+              "type": "formula",
+              "text": "c𝑐c"
+            },
+            {
+              "type": "formula",
+              "text": "δI=1subscript𝛿𝐼1\\delta_{I}=1"
+            },
+            {
+              "type": "paragraph",
+              "text": "For the next results, Table [III](#S4.T3 \"TABLE III ‣ IV Results ‣ Optimizing Risk-averse Human-AI Hybrid Teams This work was partially supported by the CHIST-ERA-19-XAI010 SAI project. M. Conti’s and A. Passarella’s work was partly funded by the PNRR - M4C2 - Investimento 1.3, Partenariato Esteso PE00000013 - ”FAIR” funded by the European Commission under the NextGeneration EU programme.\") indicates the team performance in the Maze grid. As noted in Section [III-B](#S3.SS2 \"III-B Manager Task ‣ III Specific scenario for optimality analysis ‣ Optimizing Risk-averse Human-AI Hybrid Teams This work was partially supported by the CHIST-ERA-19-XAI010 SAI project. M. Conti’s and A. Passarella’s work was partly funded by the PNRR - M4C2 - Investimento 1.3, Partenariato Esteso PE00000013 - ”FAIR” funded by the European Commission under the NextGeneration EU programme.\"), this environment offers an example of cases where the agent aversion to risk could have significant impact on the paths taken. Despite the added complexity of the available paths, the teams show strong performance and are frequently near the optimal level of performance. Like the previous case, we should note that deviations of around two are less severe than they appear. In these cases, this is equivalent to a single step off an optimal path and then returning. Further, deviations from an “optimal” path account for cases where the agents demonstrate their aversion to the failure states, resulting paths which diverge from the shortest possible. This is most apparent in the cases of agents with a high aversion to risk. While the manager risk aversion is lower, the agent will still choose paths which maintain greater distance from failure states, resulting in paths which require diverging from the shortest possible when risk is not considered. As such, these teams will result in higher c𝑐c for the manager performance measure. Similar to the previous environment, we see cases with strong alignment of manager and agent risk aversion (e.g., “None, Low” and δI=1subscript𝛿𝐼1\\delta\\_{I}=1), with corresponding strong team performance at/near optimal. On the other hand, the strong aversion of some agents (e.g., “Medium, High” and δI=1subscript𝛿𝐼1\\delta\\_{I}=1) results in the longer paths and scores higher than would be possible with agents more willing to take the shorter path near the central failure state. In such a case, there is no manner in which the manager could force the team to take the shorter path, so the resulting score is higher than the minimum/optimal. Again, the manager would only reach this optimal value if the team were able to take a “riskier” route to the goal."
+            },
+            {
+              "type": "formula",
+              "text": "c𝑐c"
+            },
+            {
+              "type": "formula",
+              "text": "δI=1subscript𝛿𝐼1\\delta_{I}=1"
+            },
+            {
+              "type": "formula",
+              "text": "δI=1subscript𝛿𝐼1\\delta_{I}=1"
+            },
+            {
+              "type": "paragraph",
+              "text": "As our final case, we utilize a map with several false paths and an overall long trajectory to the goal, which could confuse early exploration. Despite these factors, the results in Table [III](#S4.T3 \"TABLE III ‣ IV Results ‣ Optimizing Risk-averse Human-AI Hybrid Teams This work was partially supported by the CHIST-ERA-19-XAI010 SAI project. M. Conti’s and A. Passarella’s work was partly funded by the PNRR - M4C2 - Investimento 1.3, Partenariato Esteso PE00000013 - ”FAIR” funded by the European Commission under the NextGeneration EU programme.\") show some of the best scores out of the three scenarios. In most cases, the managed teams achieve the best score, and the only deviations amount on average to less than a single additional intervention or path step."
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "V Conclusion",
+          "level": 2,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "We presented a manager which provided oversight for teams of RL agents attempting a navigation task in grid environments. These grid environments included states which indicate risky regions of the environment which the agents should avoid. Our manager model was trained and tested with diverse teams of agents. The teams included agents which were trained to navigate the environment with shortest paths which also avoided the risky states. By avoiding risky states, the navigating agents generate paths to the goal state which might deviate from the shortest possible. Managers were given their own notion/measure of risk with which to determine desirable agent delegations. By isolating the notion/model of risk for the agents and managers, we demonstrated how our model could support teams of diverse agents, and we further indicated how our manager could provide oversight while assuming no reliance on knowledge of the agents’ measures of desirable behavior. We performed tests with our manager model to compare its performance to that of an optimal model of behavior. Optimality was determined by a minimization of path lengths and occurrences of manager intervention. Our testing demonstrated strong manager performance, with most of our results indicating a manager at or near the optimal result."
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "References",
+          "level": 2,
+          "content": [
+            {
+              "type": "list",
+              "text": "* [1] M. Carroll, R. Shah, M. K. Ho, T. Griffiths, S. Seshia, P. Abbeel, and A. Dragan, “On the utility of learning about humans for human-ai coordination,” *Advances in neural information processing systems*, vol. 32, 2019. * [2] M. Chen, S. Nikolaidis, H. Soh, D. Hsu, and S. Srinivasa, “Planning with trust for human-robot collaboration,” in *Proceedings of the 2018 ACM/IEEE international conference on human-robot interaction*, 2018, pp. 307–315. * [3] Z. R. Khavas, S. R. Ahmadzadeh, and P. Robinette, “Modeling trust in human-robot interaction: A survey,” in *Social Robotics*, A. R. Wagner, D. Feil-Seifer, K. S. Haring, S. Rossi, T. Williams, H. He, and S. Sam Ge, Eds. Cham: Springer International Publishing, 2020, pp. 529–541. * [4] S. Westby and C. Riedl, “Collective intelligence in human-ai teams: A bayesian theory of mind approach,” in *Proceedings of the AAAI Conference on Artificial Intelligence*, vol. 37, no. 5, 2023, pp. 6119–6127. * [5] S. A. Wu, R. E. Wang, J. A. Evans, J. B. Tenenbaum, D. C. Parkes, and M. Kleiman-Weiner, “Too many cooks: Bayesian inference for coordinating multi-agent collaboration,” *Topics in Cognitive Science*, vol. 13, no. 2, pp. 414–432, 2021. * [6] U. Agudo, K. G. Liberal, M. Arrese, and H. Matute, “The impact of ai errors in a human-in-the-loop process,” *Cognitive Research: Principles and Implications*, vol. 9, no. 1, p. 1, 2024. * [7] Á. A. Cabrera, A. J. Druck, J. I. Hong, and A. Perer, “Discovering and validating ai errors with crowdsourced failure reports,” *Proceedings of the ACM on Human-Computer Interaction*, vol. 5, no. CSCW2, pp. 1–22, 2021. * [8] K. Haegler, R. Zernecke, A. M. Kleemann, J. Albrecht, O. Pollatos, H. Brückmann, and M. Wiesmann, “No fear no risk! human risk behavior is affected by chemosensory anxiety signals,” *Neuropsychologia*, vol. 48, no. 13, pp. 3901–3908, 2010. * [9] A. Mahmood, J. W. Fung, I. Won, and C.-M. Huang, “Owning mistakes sincerely: Strategies for mitigating ai errors,” in *Proceedings of the 2022 CHI Conference on Human Factors in Computing Systems*, 2022, pp. 1–11. * [10] J. Reason, *Human error*. Cambridge university press, 1990. * [11] S. Russell, I. S. Moskowitz, and A. Raglin, “Human information interaction, artificial intelligence, and errors,” *Autonomy and Artificial Intelligence: A Threat or Savior?*, pp. 71–101, 2017. * [12] J. Afanador, M. Baptista, and N. Oren, “An adversarial algorithm for delegation,” in *Agreement Technologies: 6th International Conference, AT 2018, Bergen, Norway, December 6-7, 2018, Revised Selected Papers 6*. Springer, 2019, pp. 130–145. * [13] G. Chen, X. Li, C. Sun, and H. Wang, “Learning to make adherence-aware advice,” *arXiv preprint arXiv:2310.00817*, 2023. * [14] A. Fuchs, A. Passarella, and M. Conti, “Optimizing delegation in collaborative human-ai hybrid teams,” 2024. * [15] ——, “A cognitive framework for delegation between error-prone ai and human agents,” in *2022 IEEE International Conference on Smart Computing (SMARTCOMP)*. IEEE, 2022, pp. 317–322. * [16] ——, “Compensating for sensing failures via delegation in human–ai hybrid systems,” *Sensors*, vol. 23, no. 7, p. 3409, 2023. * [17] ——, “Optimizing delegation between human and ai collaborative agents,” in *Workshop on Hybrid Human-Machine Learning and Decision Making*, 2023. * [18] C. C. Aggarwal, “Instance-based learning: A survey.” *Data classification: algorithms and applications*, vol. 157, 2014. * [19] R. S. Sutton and A. G. Barto, *Reinforcement learning: An introduction*. MIT press, 2018. * [20] F. M. Garcia, C. Nota, and P. S. Thomas, “Learning reusable options for multi-task reinforcement learning,” *arXiv preprint arXiv:2001.01577*, 2020. * [21] J. Erskine and C. Lehnert, “Developing cooperative policies for multi-stage reinforcement learning tasks,” *IEEE Robotics and Automation Letters*, vol. 7, no. 3, pp. 6590–6597, 2022. * [22] J. Chakravorty, N. Ward, J. Roy, M. Chevalier-Boisvert, S. Basu, A. Lupu, and D. Precup, “Option-critic in cooperative multi-agent systems,” *arXiv preprint arXiv:1911.12825*, 2019. * [23] J. Chen, M. Haliem, T. Lan, and V. Aggarwal, “Multi-agent deep covering option discovery,” *arXiv preprint arXiv:2210.03269*, 2022. * [24] K. Kurzer, C. Zhou, and J. M. Zöllner, “Decentralized cooperative planning for automated vehicles with hierarchical monte carlo tree search,” in *2018 IEEE intelligent vehicles symposium (IV)*. IEEE, 2018, pp. 529–536. * [25] Q. P. Lau, M.-L. Lee, and W. Hsu, “Coordination guided reinforcement learning.” in *AAMAS*, 2012, pp. 215–222. * [26] K. Menda, Y.-C. Chen, J. Grana, J. W. Bono, B. D. Tracey, M. J. Kochenderfer, and D. Wolpert, “Deep reinforcement learning for event-driven multi-agent decision processes,” *IEEE Transactions on Intelligent Transportation Systems*, vol. 20, no. 4, pp. 1259–1268, 2018. * [27] K. Rohanimanesh and S. Mahadevan, “Learning to take concurrent actions,” *Advances in neural information processing systems*, vol. 15, 2002. * [28] A. J. Singh, A. Kumar, and H. C. Lau, “Hierarchical multiagent reinforcement learning for maritime traffic management,” 2020. * [29] M. Yang, J. Zhao, X. Hu, W. Zhou, and H. Li, “Ldsa: Learning dynamic subtask assignment in cooperative multi-agent reinforcement learning,” *arXiv preprint arXiv:2205.02561*, 2022. * [30] A. Jacq, J. Ferret, O. Pietquin, and M. Geist, “Lazy-mdps: Towards interpretable rl by learning when to act,” in *Proceedings of the 21st International Conference on Autonomous Agents and Multiagent Systems*, 2022, pp. 669–677. * [31] V. B. Meresht, A. De, A. Singla, and M. Gomez-Rodriguez, “Learning to switch between machines and humans,” *CoRR*, vol. abs/2002.04258, 2020. [Online]. Available: https://arxiv.org/abs/2002.04258 * [32] E. Straitouri, A. Singla, V. B. Meresht, and M. Gomez-Rodriguez, “Reinforcement learning under algorithmic triage,” *CoRR*, vol. abs/2109.11328, 2021. [Online]. Available: https://arxiv.org/abs/2109.11328 * [33] D. Richards and A. Stedmon, “To delegate or not to delegate: A review of control frameworks for autonomous cars,” *Applied ergonomics*, vol. 53, pp. 383–388, 2016. * [34] S. Palmer, D. Richards, G. Shelton-Rayner, K. Izzetoglu, and D. Inch, “Assessing variable levels of delegated control–a novel measure of trust,” in *HCI International 2020–Late Breaking Papers: Cognition, Learning and Games: 22nd HCI International Conference, HCII 2020, Copenhagen, Denmark, July 19–24, 2020, Proceedings 22*. Springer, 2020, pp. 202–215. * [35] C. Candrian and A. Scherer, “Rise of the machines: Delegating decisions to autonomous ai,” *Computers in Human Behavior*, vol. 134, p. 107308, 2022."
+            }
+          ],
+          "children": []
+        }
+      ]
+    }
+  ],
+  "chunks": [
+    {
+      "heading_path": [
+        "Optimizing Risk-averse Human-AI Hybrid Teams ††thanks: This work was partially supported by the CHIST-ERA-19-XAI010 SAI project. M. Conti’s and A. Passarella’s work was partly funded by the PNRR - M4C2 - Investimento 1.3, Partenariato Esteso PE00000013 - ”FAIR” funded by the European Commission under the NextGeneration EU programme."
+      ],
+      "text": "# Optimizing Risk-averse Human-AI Hybrid Teams ††thanks: This work was partially supported by the CHIST-ERA-19-XAI010 SAI project. M. Conti’s and A. Passarella’s work was partly funded by the PNRR - M4C2 - Investimento 1.3, Partenariato Esteso PE00000013 - ”FAIR” funded by the European Commission under the NextGeneration EU programme."
+    },
+    {
+      "heading_path": [
+        "Optimizing Risk-averse Human-AI Hybrid Teams ††thanks: This work was partially supported by the CHIST-ERA-19-XAI010 SAI project. M. Conti’s and A. Passarella’s work was partly funded by the PNRR - M4C2 - Investimento 1.3, Partenariato Esteso PE00000013 - ”FAIR” funded by the European Commission under the NextGeneration EU programme.",
+        "Abstract"
+      ],
+      "text": "###### Abstract\n\nWe anticipate increased instances of humans and AI systems working together in what we refer to as a hybrid team. The increase in collaboration is expected as AI systems gain proficiency and their adoption becomes more widespread. However, their behavior is not error-free, making hybrid teams a very suitable solution. As such, we consider methods for improving performance for these teams of humans and AI systems. For hybrid teams, we will refer to both the humans and AI systems as agents. To improve team performance over that seen for agents operating individually, we propose a manager which learns, through a standard Reinforcement Learning scheme, how to best delegate, over time, the responsibility of taking a decision to any of the agents. We further guide the manager’s learning so they also minimize how many changes in delegation are made resulting from undesirable team behavior. We demonstrate the optimality of our manager’s performance in several grid environments which include failure states which terminate an episode and should be avoided. We perform our experiments with teams of agents with varying degrees of acceptable risk, in the form of proximity to a failure state, and measure the manager’s ability to make effective delegation decisions with respect to its own risk-based constraints, then compare these to the optimal decisions. Our results show our manager can successfully learn desirable delegations which result in team paths near/exactly optimal with respect to path length and number of delegations."
+    },
+    {
+      "heading_path": [
+        "Optimizing Risk-averse Human-AI Hybrid Teams ††thanks: This work was partially supported by the CHIST-ERA-19-XAI010 SAI project. M. Conti’s and A. Passarella’s work was partly funded by the PNRR - M4C2 - Investimento 1.3, Partenariato Esteso PE00000013 - ”FAIR” funded by the European Commission under the NextGeneration EU programme.",
+        "Index Terms:"
+      ],
+      "text": "###### Index Terms:"
+    },
+    {
+      "heading_path": [
+        "Optimizing Risk-averse Human-AI Hybrid Teams ††thanks: This work was partially supported by the CHIST-ERA-19-XAI010 SAI project. M. Conti’s and A. Passarella’s work was partly funded by the PNRR - M4C2 - Investimento 1.3, Partenariato Esteso PE00000013 - ”FAIR” funded by the European Commission under the NextGeneration EU programme.",
+        "I Introduction"
+      ],
+      "text": "## I Introduction\n\nThe performance attainable by AI systems continues to improve and so we anticipate increased adoption to create scenarios where humans and AI systems, which we refer to both as agents, operate as a “hybrid team.” In a hybrid team, tasks can be offloaded to a single agent or there can be concurrent actions of multiple human and AI agents [[1](#bib.bib1), [2](#bib.bib2), [3](#bib.bib3), [4](#bib.bib4), [5](#bib.bib5)]. As is evident from past examples [[6](#bib.bib6), [7](#bib.bib7), [8](#bib.bib8), [9](#bib.bib9), [10](#bib.bib10), [11](#bib.bib11)], humans and artificial agents are certainly not error-free, so both humans and artificial agents are capable of erroneous decisions resulting from mistakes, risky behavior, etc. To ensure successful operation, considerations are needed to mitigate these issues. In some cases, this leads to the design of systems which abstain from decision-making when they have low confidence/experience [[12](#bib.bib12), [13](#bib.bib13)]. Therefore, we utilize a manager, which oversees the operations of the hybrid team, and, over time, delegates the responsibility of taking a decision to either agent, based on the context of the specific problem, and the expected performance of agents at each specific point in time. The manager learns through observations of context and behavior how best to make delegation decisions.\n\nWe highlight four primary features of our manager. First, clearly, the manager prioritizes selecting agents which provide higher chances of success, based on its own estimate of the performance of the individual agents at any point in time. Second, the measure of agent performance used by the manager is independent of those used to train the individual agents on the same task. This ensures the manager does not make unfair assumptions regarding access to private agent information or the manager being bound by the same measure of ideal behavior. Third, interventions of the manager (i.e., decisions on delegation choices) are also based on constraints regarding the behavior and outcomes of the team decisions. Typically, such constraints indicate how far (or close) the hybrid team is to severe conditions that may have catastrophic effects (e.g., an incident in case of driving scenarios). These constraints, together with estimates of the agents’ actions, determine intervention points. Therefore, the manager can remain in the background until intervention is needed. Fourth, the manager learns how to optimize the performance of the team by choosing appropriate delegations and learns how to minimize the *number* of such interventions. In realistic scenarios, managers that switch too frequently between team agents might not be practical, indeed.\n\nWe code these features into a standard Reinforcement Learning scheme, which we completely describe in [[14](#bib.bib14)]. Specifically, the manager reward model will receive reward-based feedback which includes penalties for delegations resulting in violation of constraints. The scale of the penalties will indicate how strongly averse the manager should be to making an intervention, which implicitly indicates aversion to those conditions which would lead to an intervention. This will serve to motivate the manager to recognize those agents which align best with the manager’s constraints regarding behavior. Additionally, the manager reward will distinguish between task success and failure to ensure the manager also recognizes successful behavior regarding the underlying task. Combined, these aspects will incentivize a manager behavior policy which prioritizes successful team behavior and reduced frequencies of manager intervention.\n\nWhile we have considered similar concepts in prior work [[15](#bib.bib15), [16](#bib.bib16), [17](#bib.bib17)], there are distinguishing factors for our model. First, in [[15](#bib.bib15)], we propose a Reinforcement Learning (RL) model which mixes cognitively inspired Instance-Based Learning (IBL) [[18](#bib.bib18)] and RL [[19](#bib.bib19)] to learn a delegation model based on human-inspired behavior understanding. At each time step, the manager selected the next delegated agent. We extended the delegation scenario in [[16](#bib.bib16)] to cases of hybrid teams in driving contexts with impacted agent sensing. This method similarly relied on manager delegations at each step of an episode. Additionally, the manager observation was provided by combining the observations of the team agents. For our work in [[17](#bib.bib17)], we focus instead on cases where agents may differ in the actions they can take in an environment. We required consistency for the states the agents can visit, but the diverse actions meant agents may move through the environment in diverse ways. For our new model [[14](#bib.bib14)], as opposed to our prior works, our approach lets us isolate the manager model from the agent models. Unlike our previous cases, the manager has an entirely independent view of states and can only observe changes in state at intervention points. The manager will therefore ignore intermediary states, eliminating reliance on consistency between the manager and agent models. Further, we remove the previous expectation of a manager delegation at each time step to enable agent operation for windows of time steps. Additionally, we isolate the manager’s notion of desirable behavior by eliminating assumptions of similarity between the manager and agent feedback regarding actions/behavior.\n\nThe main contribution presented in the paper is the analysis of the optimality for our delegation manager described in [[14](#bib.bib14)], which supports the management of hybrid teams of diverse agents. Shifting from [[14](#bib.bib14)], we introduce teams of agents which exhibit diverse behavior models according to their own notion of risk aversion. These agents are used to create teams for training and testing our manager model. We train our manager to identify agents which can successfully navigate the environment while avoiding violations of manager constraints. Unlike our scenario in [[14](#bib.bib14)], we do not include cases of multiple agents moving concurrently in the environment; instead, we focus on demonstrating optimality for single teams with no additional agents, which prevents our environments from becoming non-stationary. The scenario, and limitation to a single team, enables comparison of our team to that of an optimal solution. From our tests, we see most cases resulting in a score at or near perfect for the manager.\n\nThe remainder of this paper is as follows: Section [I-A](#S1.SS1 \"I-A Related Work ‣ I Introduction ‣ Optimizing Risk-averse Human-AI Hybrid Teams This work was partially supported by the CHIST-ERA-19-XAI010 SAI project. M. Conti’s and A. Passarella’s work was partly funded by the PNRR - M4C2 - Investimento 1.3, Partenariato Esteso PE00000013 - ”FAIR” funded by the European Commission under the NextGeneration EU programme.\") outlines additional works of note which relate to and inform methods used in our framework; Section [II](#S2 \"II Intervening Manager ‣ Optimizing Risk-averse Human-AI Hybrid Teams This work was partially supported by the CHIST-ERA-19-XAI010 SAI project. M. Conti’s and A. Passarella’s work was partly funded by the PNRR - M4C2 - Investimento 1.3, Partenariato Esteso PE00000013 - ”FAIR” funded by the European Commission under the NextGeneration EU programme.\") introduces our manager model; Section [III](#S3 \"III Specific scenario for optimality analysis ‣ Optimizing Risk-averse Human-AI Hybrid Teams This work was partially supported by the CHIST-ERA-19-XAI010 SAI project. M. Conti’s and A. Passarella’s work was partly funded by the PNRR - M4C2 - Investimento 1.3, Partenariato Esteso PE00000013 - ”FAIR” funded by the European Commission under the NextGeneration EU programme.\") outlines the demonstration scenario and related details; Section [IV](#S4 \"IV Results ‣ Optimizing Risk-averse Human-AI Hybrid Teams This work was partially supported by the CHIST-ERA-19-XAI010 SAI project. M. Conti’s and A. Passarella’s work was partly funded by the PNRR - M4C2 - Investimento 1.3, Partenariato Esteso PE00000013 - ”FAIR” funded by the European Commission under the NextGeneration EU programme.\") defines our test scenarios and provides results; and Section [V](#S5 \"V Conclusion ‣ Optimizing Risk-averse Human-AI Hybrid Teams This work was partially supported by the CHIST-ERA-19-XAI010 SAI project. M. Conti’s and A. Passarella’s work was partly funded by the PNRR - M4C2 - Investimento 1.3, Partenariato Esteso PE00000013 - ”FAIR” funded by the European Commission under the NextGeneration EU programme.\") concludes the work."
+    },
+    {
+      "heading_path": [
+        "Optimizing Risk-averse Human-AI Hybrid Teams ††thanks: This work was partially supported by the CHIST-ERA-19-XAI010 SAI project. M. Conti’s and A. Passarella’s work was partly funded by the PNRR - M4C2 - Investimento 1.3, Partenariato Esteso PE00000013 - ”FAIR” funded by the European Commission under the NextGeneration EU programme.",
+        "I Introduction",
+        "I-A Related Work"
+      ],
+      "text": "### I-A Related Work"
+    },
+    {
+      "heading_path": [
+        "Optimizing Risk-averse Human-AI Hybrid Teams ††thanks: This work was partially supported by the CHIST-ERA-19-XAI010 SAI project. M. Conti’s and A. Passarella’s work was partly funded by the PNRR - M4C2 - Investimento 1.3, Partenariato Esteso PE00000013 - ”FAIR” funded by the European Commission under the NextGeneration EU programme.",
+        "I Introduction",
+        "I-A Related Work",
+        "I-A1 Hybrid Reinforcement Learning"
+      ],
+      "text": "#### I-A1 Hybrid Reinforcement Learning\n\nHierarchical Reinforcement Learning (HRL) represents a selection of methods and features which inspired our approach. HRL approaches will typically elicit models represented in a hierarchical manner. The lower-level policies operate at more granular levels of actions and state transitions. At these lower levels, models of behavior dictate outcomes for sequences of decisions and higher-level policies can learn when to select these policies. The behaviors at the lower level are referred to as “options,” which execute until a termination is triggered. In [[20](#bib.bib20)], the proposed approach demonstrates a method to learn “reusable” options, where new options are added if it is apparent, they may provide improved performance. Regarding the shift from one option to the next, [[21](#bib.bib21)] demonstrates an approach for considering the compatibility of successively selected options, which can help to reduce the complexity of making the transition from an option to its successor. While relevant, our model assumes previously learned behavior policies for the team agents and no hierarchical layers of abstraction, so we are not following the common HRL approach of learning policies at various levels.\n\nAs an extension, HRL concepts can also be applied in scenarios of multiple concurrently operating agents [[22](#bib.bib22), [23](#bib.bib23), [24](#bib.bib24), [25](#bib.bib25), [26](#bib.bib26), [27](#bib.bib27), [28](#bib.bib28), [29](#bib.bib29)]. In the multi-agent scenario, agents can operate simultaneously while attempting to accomplish potentially distinct tasks. As seen in [[29](#bib.bib29)], cooperative or compatible tasks can allow knowledge sharing to help solve compatible tasks. The use of multiple agents also affords a measure of compatibility, so both agent and task can be considered to ensure the best alignment of agents to tasks. With our assumption of multiple agents but a single acting agent, we will therefore not be making direct comparison to the multi-agent approaches. For further distinction between our model and HRL approaches, we refer to Section [II](#S2 \"II Intervening Manager ‣ Optimizing Risk-averse Human-AI Hybrid Teams This work was partially supported by the CHIST-ERA-19-XAI010 SAI project. M. Conti’s and A. Passarella’s work was partly funded by the PNRR - M4C2 - Investimento 1.3, Partenariato Esteso PE00000013 - ”FAIR” funded by the European Commission under the NextGeneration EU programme.\")."
+    },
+    {
+      "heading_path": [
+        "Optimizing Risk-averse Human-AI Hybrid Teams ††thanks: This work was partially supported by the CHIST-ERA-19-XAI010 SAI project. M. Conti’s and A. Passarella’s work was partly funded by the PNRR - M4C2 - Investimento 1.3, Partenariato Esteso PE00000013 - ”FAIR” funded by the European Commission under the NextGeneration EU programme.",
+        "I Introduction",
+        "I-A Related Work",
+        "I-A2 Delegation"
+      ],
+      "text": "#### I-A2 Delegation\n\nIn addition to HRL methods, we also note the relation of our approach to delegation [[15](#bib.bib15), [16](#bib.bib16), [17](#bib.bib17), [30](#bib.bib30), [31](#bib.bib31), [32](#bib.bib32), [30](#bib.bib30), [33](#bib.bib33), [34](#bib.bib34), [35](#bib.bib35)], where a manager is similarly tasked with identifying adequate agents for a task given the current state and some measure of agent desirability (e.g., performance, cost, etc.). Commonly, the manager is tasked with making decisions based on a measure of agent performance and their corresponding cost of executing actions. In this model, the manager will require a more detailed and deeper understanding of desirable agent behavior and measure of agent cost. As an example, [[32](#bib.bib32)] demonstrates a delegation model using performance or priority values to train a Reinforcement Learning model to operate under algorithmic triage. Similarly, [[31](#bib.bib31)] demonstrates the use of costs associated with scenario features such as agent operation or switching costs in the manager reward. This idea can also be linked to [[30](#bib.bib30)] as it demonstrates a case where the delegation policy maintains a bias toward a lower-cost policy when possible and switches to a higher-cost and more performant policy when necessary. As we focus on a manager model with fewer assumptions regarding access to these features, our approach includes distinct aspects from the highlighted delegation models. Again, our manager will instead be attempting to reduce the need to make such delegation decisions while also not requiring access to an explicit measure of action values for the team agents."
+    },
+    {
+      "heading_path": [
+        "Optimizing Risk-averse Human-AI Hybrid Teams ††thanks: This work was partially supported by the CHIST-ERA-19-XAI010 SAI project. M. Conti’s and A. Passarella’s work was partly funded by the PNRR - M4C2 - Investimento 1.3, Partenariato Esteso PE00000013 - ”FAIR” funded by the European Commission under the NextGeneration EU programme.",
+        "II Intervening Manager"
+      ],
+      "text": "## II Intervening Manager\n\nWe model our manager through a modified Markov Decision Process (MDP) and a series of Absorbing Markov Chains (AMC) (see [[14](#bib.bib14)] for more details on their general features). Specifically, let s𝑠s be a state in the state space S𝑆S of the MPD describing the manager’s behavior. We define a function β​(s):S→{0,1}:𝛽𝑠→𝑆01\\beta(s):S\\rightarrow\\{0,1\\} to identify intervention states (i.e., states where the manager must evaluate a possible change of delegation) as those states where β​(s)=1𝛽𝑠1\\beta(s)=1 holds true. We model the operations of the agent delegated between two consecutive intervention points as a Markov Chain, where we identify a subset of states S𝐐subscript𝑆𝐐S\\_{\\mathbf{Q}} that do not generate a manager intervention (i.e., for which β=0𝛽0\\beta=0), and a set of states S𝐑subscript𝑆𝐑S\\_{\\mathbf{R}} where interventions are made.\n\ns𝑠s\n\nS𝑆S\n\nβ​(s):S→{0,1}:𝛽𝑠→𝑆01\\beta(s):S\\rightarrow\\{0,1\\}\n\nβ​(s)=1𝛽𝑠1\\beta(s)=1\n\nS𝐐subscript𝑆𝐐S_{\\mathbf{Q}}\n\nβ=0𝛽0\\beta=0\n\nS𝐑subscript𝑆𝐑S_{\\mathbf{R}}\n\nBetween two consecutive delegations, we model this as an Absorbing Markov Chain (see [[14](#bib.bib14)]) where S𝐐subscript𝑆𝐐S\\_{\\mathbf{Q}} and S𝐑subscript𝑆𝐑S\\_{\\mathbf{R}} are transient and absorbing states, respectively. When the manager decides on the next delegation, a “new” Markov Process starts, whose absorbing states are those that will trigger the next delegation action by the manager. As such, the manager MDP observes only the absorbing states of the underlying AMCs, as those are the ones where the manager takes decisions, and thus, as explained in the following, rewards are provided based on a standard Reinforcement Learning approach. Finally, in the following, we define an episode as the sequence of actions from the beginning of the task to its completion, which may even result in success of the hybrid team (“goal found”) or not (“goal not found”).\n\nS𝐐subscript𝑆𝐐S_{\\mathbf{Q}}\n\nS𝐑subscript𝑆𝐑S_{\\mathbf{R}}\n\nMore formally, to model the dynamics for our manager, we use a modified MDP which refer to as an Intervening MDP (IMDP) MI=⟨S=S𝐑​⋃S𝐐,AM,RM,TM,D,β,γ⟩subscript𝑀𝐼delimited-⟨⟩𝑆 subscript𝑆𝐑subscript𝑆𝐐subscript𝐴𝑀subscript𝑅𝑀subscript𝑇𝑀𝐷𝛽𝛾M\\_{I}=\\langle S=S\\_{\\mathbf{R}}\\bigcup S\\_{\\mathbf{Q}},A\\_{M},R\\_{M},T\\_{M},D,\\beta,\\gamma\\rangle with\n\nMI=⟨S=S𝐑​⋃S𝐐,AM,RM,TM,D,β,γ⟩subscript𝑀𝐼delimited-⟨⟩𝑆subscript𝑆𝐑subscript𝑆𝐐subscript𝐴𝑀subscript𝑅𝑀subscript𝑇𝑀𝐷𝛽𝛾M_{I}=\\langle S=S_{\\mathbf{R}}\\bigcup S_{\\mathbf{Q}},A_{M},R_{M},T_{M},D,\\beta,\\gamma\\rangle\n\n* • S𝑆S, the MDP state space * • S𝐑⊆Ssubscript𝑆𝐑𝑆S\\_{\\mathbf{R}}\\subseteq S, the set of intervention states * • S𝐐⊆Ssubscript𝑆𝐐𝑆S\\_{\\mathbf{Q}}\\subseteq S, the set of unobserved delegated operation states * • AM={i∈D}subscript𝐴𝑀𝑖𝐷A\\_{M}=\\{i\\in D\\}, the manager agent selection action space * • RMsubscript𝑅𝑀R\\_{M}, the manager’s reward function * • TMsubscript𝑇𝑀T\\_{M}, the manager’s transition function * • D𝐷D, the set of agents available for delegation * • β𝛽\\beta, the intervention cue function\n\nS𝑆S, the MDP state space\n\nS𝑆S\n\nS𝐑⊆Ssubscript𝑆𝐑𝑆S\\_{\\mathbf{R}}\\subseteq S, the set of intervention states\n\nS𝐑⊆Ssubscript𝑆𝐑𝑆S_{\\mathbf{R}}\\subseteq S\n\nS𝐐⊆Ssubscript𝑆𝐐𝑆S\\_{\\mathbf{Q}}\\subseteq S, the set of unobserved delegated operation states\n\nS𝐐⊆Ssubscript𝑆𝐐𝑆S_{\\mathbf{Q}}\\subseteq S\n\nAM={i∈D}subscript𝐴𝑀𝑖𝐷A\\_{M}=\\{i\\in D\\}, the manager agent selection action space\n\nAM={i∈D}subscript𝐴𝑀𝑖𝐷A_{M}=\\{i\\in D\\}\n\nRMsubscript𝑅𝑀R\\_{M}, the manager’s reward function\n\nRMsubscript𝑅𝑀R_{M}\n\nTMsubscript𝑇𝑀T\\_{M}, the manager’s transition function\n\nTMsubscript𝑇𝑀T_{M}\n\nD𝐷D, the set of agents available for delegation\n\nD𝐷D\n\nβ𝛽\\beta, the intervention cue function\n\nβ𝛽\\beta\n\nMoreover, the reward function of the manager is defined as follows (assuming it is computed at the end of an episode):\n\n| | | | | | --- | --- | --- | --- | | | RM={1−tanh⁡(ν⋅ρ),goal found−tanh⁡(ν⋅ρ),otherwisesubscript𝑅𝑀cases1⋅𝜈𝜌goal found⋅𝜈𝜌otherwiseR\\_{M}=\\begin{cases}1-\\tanh\\left(\\nu\\cdot\\rho\\right),&\\quad\\textrm{goal found}\\\\ -\\tanh\\left(\\nu\\cdot\\rho\\right),&\\quad\\textrm{otherwise}\\end{cases} | | (1) |\n\nRM={1−tanh⁡(ν⋅ρ),goal found−tanh⁡(ν⋅ρ),otherwisesubscript𝑅𝑀cases1⋅𝜈𝜌goal found⋅𝜈𝜌otherwiseR_{M}=\\begin{cases}1-\\tanh\\left(\\nu\\cdot\\rho\\right),&\\quad\\textrm{goal found}\\\\ -\\tanh\\left(\\nu\\cdot\\rho\\right),&\\quad\\textrm{otherwise}\\end{cases}\n\nwhere ρ𝜌\\rho is the “cue frequency,” i.e., the number of times interventions have been triggered during the observed episode, and ν𝜈\\nu is a scaling coefficient, which we use to scale how strongly the penalties degrade the episode’s value. Note that, using tanh​() \\tanh() allows us to maintain a bound on the scale of the penalty for RL training.\n\nρ𝜌\\rho\n\nν𝜈\\nu\n\ntanh​()\\tanh()\n\nThe manager IMDP will make transitions from si∈S𝐐subscript𝑠𝑖subscript𝑆𝐐s\\_{i}\\in S\\_{\\mathbf{Q}} to sj∈S𝐑subscript𝑠𝑗subscript𝑆𝐑s\\_{j}\\in S\\_{\\mathbf{R}} based on the policy of the delegated agent πdsubscript𝜋𝑑\\pi\\_{d} for d∈D𝑑𝐷d\\in D and β𝛽\\beta. Therefore, with an infinite horizon, the manager transitions can be modeled as\n\nsi∈S𝐐subscript𝑠𝑖subscript𝑆𝐐s_{i}\\in S_{\\mathbf{Q}}\n\nsj∈S𝐑subscript𝑠𝑗subscript𝑆𝐑s_{j}\\in S_{\\mathbf{R}}\n\nπdsubscript𝜋𝑑\\pi_{d}\n\nd∈D𝑑𝐷d\\in D\n\nβ𝛽\\beta\n\n| | | | | | --- | --- | --- | --- | | | P​(sj|si,d)=bi​jπd𝑃conditionalsubscript𝑠𝑗 subscript𝑠𝑖𝑑subscriptsuperscript𝑏subscript𝜋𝑑𝑖𝑗P(s\\_{j}|s\\_{i},d)=b^{\\pi\\_{d}}\\_{ij} | | (2) |\n\nP​(sj|si,d)=bi​jπd𝑃conditionalsubscript𝑠𝑗subscript𝑠𝑖𝑑subscriptsuperscript𝑏subscript𝜋𝑑𝑖𝑗P(s_{j}|s_{i},d)=b^{\\pi_{d}}_{ij}\n\nwith bi​jπdsubscriptsuperscript𝑏subscript𝜋𝑑𝑖𝑗b^{\\pi\\_{d}}\\_{ij} referring to the transition probabilities of the underlying AMC between two interventions, under the specific policy πdsubscript𝜋𝑑\\pi\\_{d} of the agent delegated during that time window. The use of a series of AMCs implies that we must allow an intermediary transition from an intervention state to the start of a new delegation window. This will implicitly occur in the same state, so we extend the definition of β𝛽\\beta to accommodate this aspect. The extension allows the representation to shift from an absorbing state that does not terminate an episode to a recurrent state which starts a new AMC chain. In this case, the model becomes\n\nbi​jπdsubscriptsuperscript𝑏subscript𝜋𝑑𝑖𝑗b^{\\pi_{d}}_{ij}\n\nπdsubscript𝜋𝑑\\pi_{d}\n\nβ𝛽\\beta\n\n| | | | | | --- | --- | --- | --- | | | β​(s,ηs)={1,(s​ violates constraints∧ηs=0)∨s=sg0,s​ satisfies constraints∨ηs=1𝛽𝑠subscript𝜂𝑠cases 1𝑠 violates constraintssubscript𝜂𝑠0𝑠 subscript𝑠𝑔otherwise 0𝑠 satisfies constraintssubscript𝜂𝑠 1otherwise\\beta(s,\\eta\\_{s})=\\begin{cases}1,\\quad(s\\textrm{ violates constraints}\\wedge\\eta\\_{s}=0)\\vee s=s\\_{g}\\\\ 0,\\quad s\\textrm{ satisfies constraints}\\vee\\eta\\_{s}=1\\end{cases} | | (3) |\n\nβ​(s,ηs)={1,(s​ violates constraints∧ηs=0)∨s=sg0,s​ satisfies constraints∨ηs=1𝛽𝑠subscript𝜂𝑠cases1𝑠 violates constraintssubscript𝜂𝑠0𝑠subscript𝑠𝑔otherwise0𝑠 satisfies constraintssubscript𝜂𝑠1otherwise\\beta(s,\\eta_{s})=\\begin{cases}1,\\quad(s\\textrm{ violates constraints}\\wedge\\eta_{s}=0)\\vee s=s_{g}\\\\ 0,\\quad s\\textrm{ satisfies constraints}\\vee\\eta_{s}=1\\end{cases}\n\nwhere ηssubscript𝜂𝑠\\eta\\_{s} is an indicator denoting whether a new delegation was made in state s𝑠s. With this β𝛽\\beta, a delegation converts the current state into the starting state of a new AMC which continues until they either reach a goal/terminal state or a new absorbing state.\n\nηssubscript𝜂𝑠\\eta_{s}\n\ns𝑠s\n\nβ𝛽\\beta\n\nThe final aspect of the manager model, according to a standard RL scheme, is the definition of its value function. Specifically, the manager delegation policy πmsubscript𝜋𝑚\\pi\\_{m} gives a value function for state sj∈SQsubscript𝑠𝑗subscript𝑆𝑄s\\_{j}\\in S\\_{Q}\n\nπmsubscript𝜋𝑚\\pi_{m}\n\nsj∈SQsubscript𝑠𝑗subscript𝑆𝑄s_{j}\\in S_{Q}\n\n| | | | | | --- | --- | --- | --- | | | Vπm​(sj)=∑d∈Dπm​(d|sj)​∑sk∈S𝐑bj​kπd​[RM+γ​Vπm​(sk)]superscript𝑉subscript𝜋𝑚subscript𝑠𝑗subscript𝑑𝐷subscript𝜋𝑚conditional𝑑subscript𝑠𝑗subscriptsubscript𝑠𝑘subscript𝑆𝐑subscriptsuperscript𝑏subscript𝜋𝑑𝑗𝑘delimited-[]subscript𝑅𝑀𝛾superscript𝑉subscript𝜋𝑚subscript𝑠𝑘V^{\\pi\\_{m}} (s\\_{j})=\\sum\\_{d\\in D}\\pi\\_{m}(d|s\\_{j})\\sum\\_{s\\_{k}\\in S\\_{\\mathbf{R}}}b^{\\pi\\_{d}}\\_{jk}\\left[R\\_{M}+\\gamma V^{\\pi\\_{m}}(s\\_{k})\\right] | | (4) |\n\nVπm​(sj)=∑d∈Dπm​(d|sj)​∑sk∈S𝐑bj​kπd​[RM+γ​Vπm​(sk)]superscript𝑉subscript𝜋𝑚subscript𝑠𝑗subscript𝑑𝐷subscript𝜋𝑚conditional𝑑subscript𝑠𝑗subscriptsubscript𝑠𝑘subscript𝑆𝐑subscriptsuperscript𝑏subscript𝜋𝑑𝑗𝑘delimited-[]subscript𝑅𝑀𝛾superscript𝑉subscript𝜋𝑚subscript𝑠𝑘V^{\\pi_{m}} (s_{j})=\\sum_{d\\in D}\\pi_{m}(d|s_{j})\\sum_{s_{k}\\in S_{\\mathbf{R}}}b^{\\pi_{d}}_{jk}\\left[R_{M}+\\gamma V^{\\pi_{m}}(s_{k})\\right]\n\nwhere bj​kπdsubscriptsuperscript𝑏subscript𝜋𝑑𝑗𝑘b^{\\pi\\_{d}}\\_{jk} allows the manager’s value function to depend on the AMC transitions according to the delegation to agent d𝑑d. The value estimate is based on manager delegation policy πmsubscript𝜋𝑚\\pi\\_{m} and states observed according to delegated agent behavior policies πdsubscript𝜋𝑑\\pi\\_{d}. The model can be defined recursively to estimate expected state value with respect to the probability of delegation decision πm​(d|s)subscript𝜋𝑚conditional𝑑𝑠\\pi\\_{m}(d|s), probability of next observed state bj​kπdsubscriptsuperscript𝑏subscript𝜋𝑑𝑗𝑘b^{\\pi\\_{d}}\\_{jk} following delegated agent policy πdsubscript𝜋𝑑\\pi\\_{d}, and the discounted next state value γ​Vπm​(sk)𝛾superscript𝑉subscript𝜋𝑚subscript𝑠𝑘\\gamma V^{\\pi\\_{m}}(s\\_{k}). The discount γ𝛾\\gamma indicates the weight for the estimated value of future states. The manager estimates the value of states according to its behavior policy via ([4](#S2.E4 \"In II Intervening Manager ‣ Optimizing Risk-averse Human-AI Hybrid Teams This work was partially supported by the CHIST-ERA-19-XAI010 SAI project. M. Conti’s and A. Passarella’s work was partly funded by the PNRR - M4C2 - Investimento 1.3, Partenariato Esteso PE00000013 - ”FAIR” funded by the European Commission under the NextGeneration EU programme.\")), which estimates the expected rewards for trajectories leading from the current state sjsubscript𝑠𝑗s\\_{j}. These rewards, immediate or episodic, are dictated by the manager reward function RMsubscript𝑅𝑀R\\_{M} and indicate the value/reward for each decision made by the manager. For immediate rewards attributed at each intervention, the manager will observe in ([4](#S2.E4 \"In II Intervening Manager ‣ Optimizing Risk-averse Human-AI Hybrid Teams This work was partially supported by the CHIST-ERA-19-XAI010 SAI project. M. Conti’s and A. Passarella’s work was partly funded by the PNRR - M4C2 - Investimento 1.3, Partenariato Esteso PE00000013 - ”FAIR” funded by the European Commission under the NextGeneration EU programme.\")) the immediate feedback resulting from the transition to state sksubscript𝑠𝑘s\\_{k}. For the episodic case (i.e., when rewards are attributed only at the end of an episode), the manager observes a delayed reward based on all delegations occurred during the episode. This is done by backtracking the observed rewards and assigning these values to the explored states. Both cases of feedback are consistent with standard RL methods.\n\nbj​kπdsubscriptsuperscript𝑏subscript𝜋𝑑𝑗𝑘b^{\\pi_{d}}_{jk}\n\nd𝑑d\n\nπmsubscript𝜋𝑚\\pi_{m}\n\nπdsubscript𝜋𝑑\\pi_{d}\n\nπm​(d|s)subscript𝜋𝑚conditional𝑑𝑠\\pi_{m}(d|s)\n\nbj​kπdsubscriptsuperscript𝑏subscript𝜋𝑑𝑗𝑘b^{\\pi_{d}}_{jk}\n\nπdsubscript𝜋𝑑\\pi_{d}\n\nγ​Vπm​(sk)𝛾superscript𝑉subscript𝜋𝑚subscript𝑠𝑘\\gamma V^{\\pi_{m}}(s_{k})\n\nγ𝛾\\gamma\n\nsjsubscript𝑠𝑗s_{j}\n\nRMsubscript𝑅𝑀R_{M}\n\nsksubscript𝑠𝑘s_{k}\n\nWe can therefore derive the optimal value function V∗superscript𝑉V^{\\*} as\n\nV∗superscript𝑉V^{*}\n\n| | | | | | --- | --- | --- | --- | | | V∗​(sj)=maxd​∑sk∈S𝐑bj​kπd​[RM+γ​V∗​(sk)]superscript𝑉subscript𝑠𝑗subscript𝑑subscriptsubscript𝑠𝑘subscript𝑆𝐑subscriptsuperscript𝑏subscript𝜋𝑑𝑗𝑘delimited-[]subscript𝑅𝑀𝛾superscript𝑉subscript𝑠𝑘V^{\\*}(s\\_{j})=\\max\\_{d}\\sum\\_{s\\_{k}\\in S\\_{\\mathbf{R}}}b^{\\pi\\_{d}}\\_{jk}\\left[R\\_{M}+\\gamma V^{\\*}(s\\_{k})\\right] | | (5) |\n\nV∗​(sj)=maxd​∑sk∈S𝐑bj​kπd​[RM+γ​V∗​(sk)]superscript𝑉subscript𝑠𝑗subscript𝑑subscriptsubscript𝑠𝑘subscript𝑆𝐑subscriptsuperscript𝑏subscript𝜋𝑑𝑗𝑘delimited-[]subscript𝑅𝑀𝛾superscript𝑉subscript𝑠𝑘V^{*}(s_{j})=\\max_{d}\\sum_{s_{k}\\in S_{\\mathbf{R}}}b^{\\pi_{d}}_{jk}\\left[R_{M}+\\gamma V^{*}(s_{k})\\right]\n\nand state-action value function Q∗superscript𝑄Q^{\\*}\n\nQ∗superscript𝑄Q^{*}\n\n| | | | | | --- | --- | --- | --- | | | Q∗​(sj,d)=∑sk∈S𝐑bj​kπd​[RM+γ​V∗​(sk)]superscript𝑄subscript𝑠𝑗𝑑subscriptsubscript𝑠𝑘subscript𝑆𝐑subscriptsuperscript𝑏subscript𝜋𝑑𝑗𝑘delimited-[]subscript𝑅𝑀𝛾superscript𝑉subscript𝑠𝑘Q^{\\*}(s\\_{j},d)=\\sum\\_{s\\_{k}\\in S\\_{\\mathbf{R}}}b^{\\pi\\_{d}}\\_{jk}\\left[R\\_{M}+\\gamma V^{\\*}(s\\_{k})\\right] | | (6) |\n\nQ∗​(sj,d)=∑sk∈S𝐑bj​kπd​[RM+γ​V∗​(sk)]superscript𝑄subscript𝑠𝑗𝑑subscriptsubscript𝑠𝑘subscript𝑆𝐑subscriptsuperscript𝑏subscript𝜋𝑑𝑗𝑘delimited-[]subscript𝑅𝑀𝛾superscript𝑉subscript𝑠𝑘Q^{*}(s_{j},d)=\\sum_{s_{k}\\in S_{\\mathbf{R}}}b^{\\pi_{d}}_{jk}\\left[R_{M}+\\gamma V^{*}(s_{k})\\right]\n\nAs shown in [[14](#bib.bib14)], our model can be shown to conform to standard RL requirement for convergence. Further, we can utilize RL techniques to learn an optimal manager policy πmsubscript𝜋𝑚\\pi\\_{m}.\n\nπmsubscript𝜋𝑚\\pi_{m}"
+    },
+    {
+      "heading_path": [
+        "Optimizing Risk-averse Human-AI Hybrid Teams ††thanks: This work was partially supported by the CHIST-ERA-19-XAI010 SAI project. M. Conti’s and A. Passarella’s work was partly funded by the PNRR - M4C2 - Investimento 1.3, Partenariato Esteso PE00000013 - ”FAIR” funded by the European Commission under the NextGeneration EU programme.",
+        "III Specific scenario for optimality analysis"
+      ],
+      "text": "## III Specific scenario for optimality analysis\n\nWe consider a specific scenario, described hereafter, which is particularly suited to analyze the performance of a manager defined as explained in Section [II](#S2 \"II Intervening Manager ‣ Optimizing Risk-averse Human-AI Hybrid Teams This work was partially supported by the CHIST-ERA-19-XAI010 SAI project. M. Conti’s and A. Passarella’s work was partly funded by the PNRR - M4C2 - Investimento 1.3, Partenariato Esteso PE00000013 - ”FAIR” funded by the European Commission under the NextGeneration EU programme.\") with respect to the ideal optimal behavior. Specifically, we utilize teams of agents which are tasked with navigating a grid environment (see Fig. [1](#S3.F1 \"Figure 1 ‣ III-A Navigating Agent Training ‣ III Specific scenario for optimality analysis ‣ Optimizing Risk-averse Human-AI Hybrid Teams This work was partially supported by the CHIST-ERA-19-XAI010 SAI project. M. Conti’s and A. Passarella’s work was partly funded by the PNRR - M4C2 - Investimento 1.3, Partenariato Esteso PE00000013 - ”FAIR” funded by the European Commission under the NextGeneration EU programme.\")) by moving from a start state to a goal state. Grid environments are defined by a collection of grid cells which the agents navigate by selecting actions denoting the direction they wish to travel (i.e., left/right/up/down). The actions will move the agents to an adjacent cell in the direction of the action selected. If the agent chooses to move in the direction of a wall or boundary, by the nature of the grid environment, the boundary prevents movement in that direction and the agent will remain in the same state. We augment the grid environment by adding a state type which we denote as a “failure” type state. If an agent enters either a goal or failure state, then the episode will terminate.\n\nThe failure states provide a means to guide manager behavior and define manager constraints. For the management of agents navigating a grid environment, our manager will have constraints defining the lowest accepted proximity to a failure state. If the team violates the proximity constraint, then the manager’s β𝛽\\beta function will indicate that an intervention is required, and a delegation decision will be made. With the characteristics of the grid environment, we will determine distance according to the Manhattan Distance\n\nβ𝛽\\beta\n\n| | | | | | --- | --- | --- | --- | | | δ​(s1,s2)=|x1−x2|+|y1−y2|𝛿subscript𝑠1subscript𝑠2subscript𝑥1subscript𝑥2subscript𝑦1subscript𝑦2\\delta(s\\_{1},s\\_{2})=|x\\_{1}-x\\_{2}|+|y\\_{1}-y\\_{2}| | | (7) |\n\nδ​(s1,s2)=|x1−x2|+|y1−y2|𝛿subscript𝑠1subscript𝑠2subscript𝑥1subscript𝑥2subscript𝑦1subscript𝑦2\\delta(s_{1},s_{2})=|x_{1}-x_{2}|+|y_{1}-y_{2}|\n\nfor cells si=(xi,yi)subscript𝑠𝑖subscript𝑥𝑖subscript𝑦𝑖s\\_{i}=(x\\_{i},y\\_{i}) and (xi,yi)subscript𝑥𝑖subscript𝑦𝑖(x\\_{i},y\\_{i}) indicating the column and row of the cell, respectively. We use the Manhattan distance as this corresponds directly to the number of steps needed to reach a failure state given there are no boundaries. As such, we get an estimate of the importance of a nearby failure state.\n\nsi=(xi,yi)subscript𝑠𝑖subscript𝑥𝑖subscript𝑦𝑖s_{i}=(x_{i},y_{i})\n\n(xi,yi)subscript𝑥𝑖subscript𝑦𝑖(x_{i},y_{i})\n\nThe use of distance-based notions of optimality and safety will allow us to directly observe the impact manager oversight has on the team’s behavior. We would expect to see cases where the manager learns delegation selections which balance the team’s risk, with respect to manager constraints, and the performance measure the agents used to learn. The manager will of course not observe these performance measures, but will observe how the learned behaviors of the agents have been impacted while learning according to these performance measures. Combined, this allows us to measure these factors to indicate how well the team and manager can work together to accomplish their task. We will discuss these aspects, and how we measure them, in Section [III-B](#S3.SS2 \"III-B Manager Task ‣ III Specific scenario for optimality analysis ‣ Optimizing Risk-averse Human-AI Hybrid Teams This work was partially supported by the CHIST-ERA-19-XAI010 SAI project. M. Conti’s and A. Passarella’s work was partly funded by the PNRR - M4C2 - Investimento 1.3, Partenariato Esteso PE00000013 - ”FAIR” funded by the European Commission under the NextGeneration EU programme.\")."
+    },
+    {
+      "heading_path": [
+        "Optimizing Risk-averse Human-AI Hybrid Teams ††thanks: This work was partially supported by the CHIST-ERA-19-XAI010 SAI project. M. Conti’s and A. Passarella’s work was partly funded by the PNRR - M4C2 - Investimento 1.3, Partenariato Esteso PE00000013 - ”FAIR” funded by the European Commission under the NextGeneration EU programme.",
+        "III Specific scenario for optimality analysis",
+        "III-A Navigating Agent Training"
+      ],
+      "text": "### III-A Navigating Agent Training\n\nTo build teams of agents, we train the navigation agents independently to generate behavior policies for each agent. Once trained, each behavior policy defines a candidate agent for a team. For the training, we represent the grid environment as an MDP. The transitions operate as described above to support movement between adjacent states and agents receive rewards to indicate the value of their action choices. In our independently trained agent models, we provide rewards to motivate desirable behavior. For the navigation task, we split the reward into to two components to give observed reward\n\n| | | | | | --- | --- | --- | --- | | | r=R​(s,a,s′)+R​(minsf⁡δ​(s,sf))𝑟𝑅𝑠𝑎superscript𝑠′𝑅subscriptsubscript𝑠𝑓𝛿𝑠subscript𝑠𝑓r=R(s,a,s^{\\prime})+R\\left(\\min\\_{s\\_{f}}\\delta(s,s\\_{f})\\right) | | (8) |\n\nr=R​(s,a,s′)+R​(minsf⁡δ​(s,sf))𝑟𝑅𝑠𝑎superscript𝑠′𝑅subscriptsubscript𝑠𝑓𝛿𝑠subscript𝑠𝑓r=R(s,a,s^{\\prime})+R\\left(\\min_{s_{f}}\\delta(s,s_{f})\\right)\n\nwhere s𝑠s is the current state and s′superscript𝑠′s^{\\prime} is the next state reached resulting from the action a𝑎a in state s𝑠s. First, the agents receive a penalty each time they are within an agent-specific distance of a failure state sfsubscript𝑠𝑓s\\_{f}. The scale of the penalty depends on agent distance and is set for each agent, given by R​(δ)∈ℝ𝑅𝛿ℝR(\\delta)\\in\\mathbb{R} according to\n\ns𝑠s\n\ns′superscript𝑠′s^{\\prime}\n\na𝑎a\n\ns𝑠s\n\nsfsubscript𝑠𝑓s_{f}\n\nR​(δ)∈ℝ𝑅𝛿ℝR(\\delta)\\in\\mathbb{R}\n\n| | | | | | --- | --- | --- | --- | | | R​(minsf⁡δ​(s,sf))=rd𝑅subscriptsubscript𝑠𝑓𝛿𝑠subscript𝑠𝑓subscript𝑟𝑑R\\left(\\min\\_{s\\_{f}}\\delta(s,s\\_{f})\\right)=r\\_{d} | | (9) |\n\nR​(minsf⁡δ​(s,sf))=rd𝑅subscriptsubscript𝑠𝑓𝛿𝑠subscript𝑠𝑓subscript𝑟𝑑R\\left(\\min_{s_{f}}\\delta(s,s_{f})\\right)=r_{d}\n\nfor δ𝛿\\delta from Equation [7](#S3.E7 \"In III Specific scenario for optimality analysis ‣ Optimizing Risk-averse Human-AI Hybrid Teams This work was partially supported by the CHIST-ERA-19-XAI010 SAI project. M. Conti’s and A. Passarella’s work was partly funded by the PNRR - M4C2 - Investimento 1.3, Partenariato Esteso PE00000013 - ”FAIR” funded by the European Commission under the NextGeneration EU programme.\"). As we are generating unique agents, each agent d𝑑d will have its own set of values for rdsubscript𝑟𝑑r\\_{d} given as a parameter for agent training. For example, with closest failure state sfsubscript𝑠𝑓s\\_{f}, an agent could observe\n\nδ𝛿\\delta\n\nd𝑑d\n\nrdsubscript𝑟𝑑r_{d}\n\nsfsubscript𝑠𝑓s_{f}\n\n| | | | | | --- | --- | --- | --- | | | R​(δ​(s,sf))={−20,minsf⁡δ​(s,sf)=1−10,minsf⁡δ​(s,sf)=20,otherwise𝑅𝛿𝑠subscript𝑠𝑓cases20subscriptsubscript𝑠𝑓𝛿𝑠subscript𝑠𝑓110subscriptsubscript𝑠𝑓𝛿𝑠subscript𝑠𝑓20otherwiseR(\\delta(s,s\\_{f}))=\\begin{cases}-20,&\\min\\_{s\\_{f}}\\delta(s,s\\_{f})=1\\\\ -10,&\\min\\_{s\\_{f}}\\delta(s,s\\_{f})=2\\\\ \\quad~{}0,&\\textrm{otherwise}\\end{cases} | | (10) |\n\nR​(δ​(s,sf))={−20,minsf⁡δ​(s,sf)=1−10,minsf⁡δ​(s,sf)=20,otherwise𝑅𝛿𝑠subscript𝑠𝑓cases20subscriptsubscript𝑠𝑓𝛿𝑠subscript𝑠𝑓110subscriptsubscript𝑠𝑓𝛿𝑠subscript𝑠𝑓20otherwiseR(\\delta(s,s_{f}))=\\begin{cases}-20,&\\min_{s_{f}}\\delta(s,s_{f})=1\\\\ -10,&\\min_{s_{f}}\\delta(s,s_{f})=2\\\\ \\quad~{}0,&\\textrm{otherwise}\\end{cases}\n\nto give unique penalties for δ​(s,sf)<3𝛿𝑠subscript𝑠𝑓3\\delta(s,s\\_{f})<3 and no penalty for δ​(s,sf)≥3𝛿𝑠subscript𝑠𝑓3\\delta(s,s\\_{f})\\geq 3. Also, once the agent has moved to a cell such that minsf⁡δ​(s,sf)≥3subscriptsubscript𝑠𝑓𝛿𝑠subscript𝑠𝑓3\\min\\_{s\\_{f}}\\delta(s,s\\_{f})\\geq 3, there will be no observed proximity penalty.\n\nδ​(s,sf)<3𝛿𝑠subscript𝑠𝑓3\\delta(s,s_{f})<3\n\nδ​(s,sf)≥3𝛿𝑠subscript𝑠𝑓3\\delta(s,s_{f})\\geq 3\n\nminsf⁡δ​(s,sf)≥3subscriptsubscript𝑠𝑓𝛿𝑠subscript𝑠𝑓3\\min_{s_{f}}\\delta(s,s_{f})\\geq 3\n\nIn addition to the distance-based penalty, we provide rewards aligning to the general navigation task. These rewards motivate shortest paths and eliminate erroneous behavior(s) (e.g., collision with a wall/boundary). These rewards are given according to\n\n| | | | | | --- | --- | --- | --- | | | R​(s,a,s′)={−10,wall/boundary collision−20,s′ is a failure state100,s′ is a goal state−1,otherwise𝑅𝑠𝑎superscript𝑠′cases10wall/boundary collision20s′ is a failure state100s′ is a goal state1otherwiseR(s,a,s^{\\prime})=\\begin{cases}-10,&\\textrm{wall/boundary collision}\\\\ -20,&\\textrm{$s^{\\prime}$ is a failure state}\\\\ 100,&\\textrm{$s^{\\prime}$ is a goal state}\\\\ -1,&\\textrm{otherwise}\\end{cases} | | (11) |\n\nR​(s,a,s′)={−10,wall/boundary collision−20,s′ is a failure state100,s′ is a goal state−1,otherwise𝑅𝑠𝑎superscript𝑠′cases10wall/boundary collision20s′ is a failure state100s′ is a goal state1otherwiseR(s,a,s^{\\prime})=\\begin{cases}-10,&\\textrm{wall/boundary collision}\\\\ -20,&\\textrm{$s^{\\prime}$ is a failure state}\\\\ 100,&\\textrm{$s^{\\prime}$ is a goal state}\\\\ -1,&\\textrm{otherwise}\\end{cases}\n\nto motivate agents to learn efficient paths to the goal.\n\nThe distance-based penalty will therefore determine how close an agent is likely to reach a failure state while learning an efficient path. As an example, we refer to Fig. [2](#S3.F2 \"Figure 2 ‣ III-A Navigating Agent Training ‣ III Specific scenario for optimality analysis ‣ Optimizing Risk-averse Human-AI Hybrid Teams This work was partially supported by the CHIST-ERA-19-XAI010 SAI project. M. Conti’s and A. Passarella’s work was partly funded by the PNRR - M4C2 - Investimento 1.3, Partenariato Esteso PE00000013 - ”FAIR” funded by the European Commission under the NextGeneration EU programme.\"), where we demonstrate the significance placed on cells near failure states when the safe distance is three. In the figure, there is a clear pattern of degrading importance placed on cells as the distance to a failure state increases. Therefore, based on the severity of these penalties, an agent’s path will prioritize the cells which are of least concern with respect to the safety distance (e.g., the cells furthest left in Fig. [2(b)](#S3.F2.sf2 \"In Figure 2 ‣ III-A Navigating Agent Training ‣ III Specific scenario for optimality analysis ‣ Optimizing Risk-averse Human-AI Hybrid Teams This work was partially supported by the CHIST-ERA-19-XAI010 SAI project. M. Conti’s and A. Passarella’s work was partly funded by the PNRR - M4C2 - Investimento 1.3, Partenariato Esteso PE00000013 - ”FAIR” funded by the European Commission under the NextGeneration EU programme.\")). It is important to note that this does not assume any compatibility or similarity to the manager’s constraints. This allows us to create ensembles of agents where each act according to their previously learned model and corresponding level of accepted risk."
+    },
+    {
+      "heading_path": [
+        "Optimizing Risk-averse Human-AI Hybrid Teams ††thanks: This work was partially supported by the CHIST-ERA-19-XAI010 SAI project. M. Conti’s and A. Passarella’s work was partly funded by the PNRR - M4C2 - Investimento 1.3, Partenariato Esteso PE00000013 - ”FAIR” funded by the European Commission under the NextGeneration EU programme.",
+        "III Specific scenario for optimality analysis",
+        "III-B Manager Task"
+      ],
+      "text": "### III-B Manager Task\n\nAs defined for our framework, the agents under manager oversight will operate by choosing actions until there is need for an intervention. In the grid navigation case, from the manager’s perspective, this will amount to teams making errors by moving to a state which is too close to a failure state (or entering a failure state), according to the manager’s constraints defining β𝛽\\beta regarding the safe distance.\n\nβ𝛽\\beta\n\nSimilar to Equation [10](#S3.E10 \"In III-A Navigating Agent Training ‣ III Specific scenario for optimality analysis ‣ Optimizing Risk-averse Human-AI Hybrid Teams This work was partially supported by the CHIST-ERA-19-XAI010 SAI project. M. Conti’s and A. Passarella’s work was partly funded by the PNRR - M4C2 - Investimento 1.3, Partenariato Esteso PE00000013 - ”FAIR” funded by the European Commission under the NextGeneration EU programme.\"), the manager will use a β𝛽\\beta function based on minsf⁡δ​(s,sf)subscriptsubscript𝑠𝑓𝛿𝑠subscript𝑠𝑓\\min\\_{s\\_{f}}\\delta(s,s\\_{f}) for current state s𝑠s. In our scenario, the distance is used to define β𝛽\\beta such that\n\nβ𝛽\\beta\n\nminsf⁡δ​(s,sf)subscriptsubscript𝑠𝑓𝛿𝑠subscript𝑠𝑓\\min_{s_{f}}\\delta(s,s_{f})\n\ns𝑠s\n\nβ𝛽\\beta\n\n| | | | | | --- | --- | --- | --- | | | β​(s,ηs)=1⇔minsf⁡δ​(s,sf)≤δI∧ηs=0⇔𝛽𝑠subscript𝜂𝑠1subscriptsubscript𝑠𝑓𝛿𝑠subscript𝑠𝑓subscript𝛿𝐼subscript𝜂𝑠0\\beta(s,\\eta\\_{s})=1\\Leftrightarrow\\min\\_{s\\_{f}}\\delta(s,s\\_{f})\\leq\\delta\\_{I}\\wedge\\eta\\_{s}=0 | | (12) |\n\nβ​(s,ηs)=1⇔minsf⁡δ​(s,sf)≤δI∧ηs=0⇔𝛽𝑠subscript𝜂𝑠1subscriptsubscript𝑠𝑓𝛿𝑠subscript𝑠𝑓subscript𝛿𝐼subscript𝜂𝑠0\\beta(s,\\eta_{s})=1\\Leftrightarrow\\min_{s_{f}}\\delta(s,s_{f})\\leq\\delta_{I}\\wedge\\eta_{s}=0\n\nwhere δIsubscript𝛿𝐼\\delta\\_{I} sets the manager’s limit on proximity. Thus, we see the manager will not intervene until the minimum Manhattan distance meets the manager’s threshold. This ensures the manager bases its intervention decision on a separate and compatible measure of safety.\n\nδIsubscript𝛿𝐼\\delta_{I}\n\nFollowing Equation [1](#S2.E1 \"In II Intervening Manager ‣ Optimizing Risk-averse Human-AI Hybrid Teams This work was partially supported by the CHIST-ERA-19-XAI010 SAI project. M. Conti’s and A. Passarella’s work was partly funded by the PNRR - M4C2 - Investimento 1.3, Partenariato Esteso PE00000013 - ”FAIR” funded by the European Commission under the NextGeneration EU programme.\"), the manager will observe a reward which indicates task success or failure, with the scale of the reward being dictated by the number ρ𝜌\\rho of interventions triggered. As defined, the reward values are not directly dependent on the safety distance δIsubscript𝛿𝐼\\delta\\_{I}; instead, the manager reward will be based on intervention frequency. Therefore, there is an implicit dependence on δIsubscript𝛿𝐼\\delta\\_{I}, but the key factor is the behavior of the delegated agents and the team’s success regarding the task.\n\nρ𝜌\\rho\n\nδIsubscript𝛿𝐼\\delta_{I}\n\nδIsubscript𝛿𝐼\\delta_{I}\n\nAs we isolate the manager and agent views on safety, the team dynamics will vary accordingly. Agents selected by the manager will operate according to their own acceptable safety distance, which will guide their actions and resulting paths. Similarly, the manager’s constraints on safe behavior will determine how suitable an agent is for delegation. Teams composed entirely of agents which accept more risk than the manager will typically result in frequent manager intervention while agents with more restrictive risk aversion will lead to few/no needed interventions by the manager. Consequently, the manager’s performance will depend on agents available, how the agents choose to operate, and how well the manager can associate these factors to learn desirable behavior.\n\nGiven our view of the manager’s impact on team performance, the notion of optimal manager behavior in our scenario will be that of the sum of path length and number of manager interventions. The focus on path length will indicate the kind of path the team finds according to their risk aversion levels, while the focus on interventions clearly indicates how well the team aligns with the manager’s constraints. With that in mind, the performance for our manager will be measured as\n\n| | | | | | --- | --- | --- | --- | | | c=m+nβ𝑐𝑚subscript𝑛𝛽c=m+n\\_{\\beta} | | (13) |\n\nc=m+nβ𝑐𝑚subscript𝑛𝛽c=m+n_{\\beta}\n\nfor path length m𝑚m and\n\nm𝑚m\n\n| | | | | | --- | --- | --- | --- | | | nβ=∑st∈{s1,…,sm}𝟙​{β​(st,ηst)=1}subscript𝑛𝛽subscriptsubscript𝑠𝑡subscript𝑠1…subscript𝑠𝑚1𝛽subscript𝑠𝑡subscript𝜂subscript𝑠𝑡1n\\_{\\beta}=\\sum\\_{s\\_{t}\\in\\{s\\_{1},\\dots,s\\_{m}\\}}\\mathds{1}\\left\\{\\beta(s\\_{t},\\eta\\_{s\\_{t}})=1\\right\\} | | (14) |\n\nnβ=∑st∈{s1,…,sm}𝟙​{β​(st,ηst)=1}subscript𝑛𝛽subscriptsubscript𝑠𝑡subscript𝑠1…subscript𝑠𝑚1𝛽subscript𝑠𝑡subscript𝜂subscript𝑠𝑡1n_{\\beta}=\\sum_{s_{t}\\in\\{s_{1},\\dots,s_{m}\\}}\\mathds{1}\\left\\{\\beta(s_{t},\\eta_{s_{t}})=1\\right\\}\n\ndenoting the number of interventions for an episode trajectory {s1,…,sm}subscript𝑠1…subscript𝑠𝑚\\{s\\_{1},\\dots,s\\_{m}\\}. The c𝑐c values for each test episode are then averaged to calculate the mean performance c¯¯𝑐\\bar{c} for a managed team. We perform the tests by running 50 episodes per two agent team in each environment and intervention distance case.\n\n{s1,…,sm}subscript𝑠1…subscript𝑠𝑚\\{s_{1},\\dots,s_{m}\\}\n\nc𝑐c\n\nc¯¯𝑐\\bar{c}\n\nTo generate bounds on performance, we measure the optimal cost in an environment with consideration for how the values of m𝑚m and nβsubscript𝑛𝛽n\\_{\\beta} are related. These values will be determined by the specific grid environment and manager constraints. We use a shortest path algorithm to calculate the minimal value possible for c𝑐c for a given manager. The measure of a shortest path is augmented to accommodate the manager’s constraints. Any path which would induce an intervention will have its weight increased by one each time β=1𝛽1\\beta=1 to indicate an intervention penalty. Hence, the shortest path algorithm will return a path which has a minimal sum of grid cells traversed and manager interventions incurred.\n\nm𝑚m\n\nnβsubscript𝑛𝛽n_{\\beta}\n\nc𝑐c\n\nβ=1𝛽1\\beta=1\n\nIn cases where the manager’s performance score deviates from optimal, this can result from three outcomes. First, the team may have only agents with aversion higher than the manager, so their paths are longer than the shortest possible. For example, consider an agent avoiding the central failure state in Figure [2(b)](#S3.F2.sf2 \"In Figure 2 ‣ III-A Navigating Agent Training ‣ III Specific scenario for optimality analysis ‣ Optimizing Risk-averse Human-AI Hybrid Teams This work was partially supported by the CHIST-ERA-19-XAI010 SAI project. M. Conti’s and A. Passarella’s work was partly funded by the PNRR - M4C2 - Investimento 1.3, Partenariato Esteso PE00000013 - ”FAIR” funded by the European Commission under the NextGeneration EU programme.\"). A path avoiding this state will incur additional steps which move away from the goal and toward the left boundary before turning back toward the goal. A shorter path is possible adjacent to the failure state, so a team that avoids this path could have a sub-optimal score. Second, the manager could choose an agent which has not gained much experience in a part of the grid due to its training not performing much exploration in that region. If the manager has a team of agents which enters such a region, then there could be slight confusion and resulting longer paths until the team returns to the desirable path. Last, the manager could simply choose the sub-optimal agent in a state and result in less desirable paths than if the manager chose the other agent.\n\nFor concrete examples, given our measure of manager performance, we will compare the c𝑐c values to a measure of optimal paths. As indicated in Figure [3](#S3.F3 \"Figure 3 ‣ III-B Manager Task ‣ III Specific scenario for optimality analysis ‣ Optimizing Risk-averse Human-AI Hybrid Teams This work was partially supported by the CHIST-ERA-19-XAI010 SAI project. M. Conti’s and A. Passarella’s work was partly funded by the PNRR - M4C2 - Investimento 1.3, Partenariato Esteso PE00000013 - ”FAIR” funded by the European Commission under the NextGeneration EU programme.\"), agent risk aversion levels will determine the path an agent uses to traverse a grid environment. On the left side, we see an agent with high penalties for R​(δ​(s,sf))𝑅𝛿𝑠subscript𝑠𝑓R(\\delta(s,s\\_{f})) (e.g., R​(1)=−35𝑅135R(1)=-35 and R​(2)=−15𝑅215R(2)=-15), while the right side shows behavior for lower values (e.g., R​(1)=−15𝑅115R(1)=-15 and R​(2)=−5𝑅25R(2)=-5). As indicated, the strength of the aversion penalties can have a significant impact on the path length for an agent/team. When paired with a manager, the agent and manager aversion levels will impact the overall resulting paths. Agents with high penalties, such as the left side of Figure [3](#S3.F3 \"Figure 3 ‣ III-B Manager Task ‣ III Specific scenario for optimality analysis ‣ Optimizing Risk-averse Human-AI Hybrid Teams This work was partially supported by the CHIST-ERA-19-XAI010 SAI project. M. Conti’s and A. Passarella’s work was partly funded by the PNRR - M4C2 - Investimento 1.3, Partenariato Esteso PE00000013 - ”FAIR” funded by the European Commission under the NextGeneration EU programme.\"), will have fewer cases where their path is close enough to a failure state to trigger a manager intervention. Therefore, the best c𝑐c a manager with δI≤2subscript𝛿𝐼2\\delta\\_{I}\\leq 2 can achieve given a team of these agents will be bounded by their path length (i.e., c=18𝑐18c=18). On the other hand, a manager with a team of agents selecting paths such as the right side of Figure [3](#S3.F3 \"Figure 3 ‣ III-B Manager Task ‣ III Specific scenario for optimality analysis ‣ Optimizing Risk-averse Human-AI Hybrid Teams This work was partially supported by the CHIST-ERA-19-XAI010 SAI project. M. Conti’s and A. Passarella’s work was partly funded by the PNRR - M4C2 - Investimento 1.3, Partenariato Esteso PE00000013 - ”FAIR” funded by the European Commission under the NextGeneration EU programme.\"), will have higher dependence on δIsubscript𝛿𝐼\\delta\\_{I}. With δI=1subscript𝛿𝐼1\\delta\\_{I}=1, the team will trigger an intervention and so nβ=1subscript𝑛𝛽1n\\_{\\beta}=1 and m=14𝑚14m=14, giving a best possible score c=15𝑐15c=15. Hence, manager score depends on both their ability to select suitable agents and the best possible behavior any agent could achieve. Therefore, our score of optimality indicates how well the manager can achieve these values and how the team impacts the manager’s score.\n\nc𝑐c\n\nR​(δ​(s,sf))𝑅𝛿𝑠subscript𝑠𝑓R(\\delta(s,s_{f}))\n\nR​(1)=−35𝑅135R(1)=-35\n\nR​(2)=−15𝑅215R(2)=-15\n\nR​(1)=−15𝑅115R(1)=-15\n\nR​(2)=−5𝑅25R(2)=-5\n\nc𝑐c\n\nδI≤2subscript𝛿𝐼2\\delta_{I}\\leq 2\n\nc=18𝑐18c=18\n\nδIsubscript𝛿𝐼\\delta_{I}\n\nδI=1subscript𝛿𝐼1\\delta_{I}=1\n\nnβ=1subscript𝑛𝛽1n_{\\beta}=1\n\nm=14𝑚14m=14\n\nc=15𝑐15c=15"
+    },
+    {
+      "heading_path": [
+        "Optimizing Risk-averse Human-AI Hybrid Teams ††thanks: This work was partially supported by the CHIST-ERA-19-XAI010 SAI project. M. Conti’s and A. Passarella’s work was partly funded by the PNRR - M4C2 - Investimento 1.3, Partenariato Esteso PE00000013 - ”FAIR” funded by the European Commission under the NextGeneration EU programme.",
+        "IV Results"
+      ],
+      "text": "## IV Results\n\nWe train and test our managers across several grid environments and risk aversion levels. The grid environments (see Fig. [1](#S3.F1 \"Figure 1 ‣ III-A Navigating Agent Training ‣ III Specific scenario for optimality analysis ‣ Optimizing Risk-averse Human-AI Hybrid Teams This work was partially supported by the CHIST-ERA-19-XAI010 SAI project. M. Conti’s and A. Passarella’s work was partly funded by the PNRR - M4C2 - Investimento 1.3, Partenariato Esteso PE00000013 - ”FAIR” funded by the European Commission under the NextGeneration EU programme.\")) are designed to include varying levels of navigation difficulty and ease of failure state avoidance. Further, we generate several navigation agents with varying levels of risk aversion (see Section [III-A](#S3.SS1 \"III-A Navigating Agent Training ‣ III Specific scenario for optimality analysis ‣ Optimizing Risk-averse Human-AI Hybrid Teams This work was partially supported by the CHIST-ERA-19-XAI010 SAI project. M. Conti’s and A. Passarella’s work was partly funded by the PNRR - M4C2 - Investimento 1.3, Partenariato Esteso PE00000013 - ”FAIR” funded by the European Commission under the NextGeneration EU programme.\")) to create diverse teams for the manager. Given the agent parameters and training, all team agents are trained to avoid entering the failure state, but they are distinct in their risk feedback (i.e., R​(δ)𝑅𝛿R(\\delta)).\n\nR​(δ)𝑅𝛿R(\\delta)\n\nAs noted, the performance of the manager is compared to an estimate of the optimal path possible, according to the grid and corresponding manager distance-based error threshold. The navigating agents, by definition, are motivated to find paths which minimize path length and failure state proximity penalties, so the team’s path will serve as an indicator of manager performance. Given that each agent is trying to reach the goal in the shortest path that does not violate their own view of risk, the agent a manager chooses will determine the length of path the team finds. Consequently, the manager’s delegation decisions will directly impact how short a path is taken by the team. If the manager selects an agent with a higher aversion level than itself, the team may take more steps to reach the goal than if an agent with lower aversion were selected. Hence, manager performance can be viewed according to the manager’s impact on team paths and intervention frequency.\n\nIn Tables [III](#S4.T3 \"TABLE III ‣ IV Results ‣ Optimizing Risk-averse Human-AI Hybrid Teams This work was partially supported by the CHIST-ERA-19-XAI010 SAI project. M. Conti’s and A. Passarella’s work was partly funded by the PNRR - M4C2 - Investimento 1.3, Partenariato Esteso PE00000013 - ”FAIR” funded by the European Commission under the NextGeneration EU programme.\")-[III](#S4.T3 \"TABLE III ‣ IV Results ‣ Optimizing Risk-averse Human-AI Hybrid Teams This work was partially supported by the CHIST-ERA-19-XAI010 SAI project. M. Conti’s and A. Passarella’s work was partly funded by the PNRR - M4C2 - Investimento 1.3, Partenariato Esteso PE00000013 - ”FAIR” funded by the European Commission under the NextGeneration EU programme.\"), we demonstrate the manager performance in our various grid environments. The manager training was performed across teams with a mixture of risk-aversion levels and manager intervention distances δI∈[0,1,2,3]subscript𝛿𝐼 0123\\delta\\_{I}\\in[0,1,2,3]. The inclusion of a zero-distance intervention serves as a base level to indicate how a team can perform when there is no intervention without reaching a terminal error state. Note, the navigating agents we trained have a success rate of 100% with respect to their reaching the goal state at test time. This means the manager only needs to consider agent performance and β𝛽\\beta with respect to the cost function defined in Equation [13](#S3.E13 \"In III-B Manager Task ‣ III Specific scenario for optimality analysis ‣ Optimizing Risk-averse Human-AI Hybrid Teams This work was partially supported by the CHIST-ERA-19-XAI010 SAI project. M. Conti’s and A. Passarella’s work was partly funded by the PNRR - M4C2 - Investimento 1.3, Partenariato Esteso PE00000013 - ”FAIR” funded by the European Commission under the NextGeneration EU programme.\"). Agents avoiding failure states ensures our comparison of results is consistent across the various teams and there is no ambiguity caused by the appearance of shorter paths due to failure paths.\n\nδI∈[0,1,2,3]subscript𝛿𝐼0123\\delta_{I}\\in[0,1,2,3]\n\nβ𝛽\\beta\n\n| Team Types | Intervention Distance | | | | | --- | --- | --- | --- | --- | | 0 | 1 | 2 | 3 | | None, Low | 8.0 (8.0) | 9.55 (8.0) | 13.14 (12.0) | 15.0 (15.0) | | None, Medium | 8.0 (8.0) | 9.50 (8.0) | 13.31 (12.0) | 15.0 (15.0) | | None, High | 8.0 (8.0) | 9.54 (8.0) | 13.39 (12.0) | 15.0 (15.0) | | Low, Medium | 8.0 (8.0) | 8.0 (8.0) | 12.0 (12.0) | 15.0 (15.0) | | Low, High | 8.0 (8.0) | 8.0 (8.0) | 12.0 (12.0) | 15.0 (15.0) | | Medium, High | 8.0 (8.0) | 8.0 (8.0) | 12.0 (12.0) | 15.0 (15.0) |\n\n| Team Types | Intervention Distance | | | | | --- | --- | --- | --- | --- | | 0 | 1 | 2 | 3 | | None, Low | 14.9 (14.0) | 15.5 (15.0) | 18.5 (18.0) | 21.0 (21.0) | | None, Medium | 15.2 (14.0) | 15.5 (15.0) | 18.5 (18.0) | 21.0 (21.0) | | None, High | 15.0 (14.0) | 15.4 (15.0) | 18.9 (18.0) | 21.8 (21.0) | | Low, Medium | 17.0 (14.0) | 17.0 (15.0) | 19.0 (18.0) | 23.0 (21.0) | | Low, High | 17.0 (14.0) | 17.0 (15.0) | 19.0 (18.0) | 23.0 (21.0) | | Medium, High | 17.0 (14.0) | 17.0 (15.0) | 19.0 (18.0) | 23.0 (21.0) |\n\n| Team Types | Intervention Distance | | | | | --- | --- | --- | --- | --- | | 0 | 1 | 2 | 3 | | None, Low | 15.0 (15.0) | 15.0 (15.0) | 18.0 (18.0) | 24.5 (24.0) | | None, Medium | 15.0 (15.0) | 15.0 (15.0) | 18.0 (18.0) | 24.5 (24.0) | | None, High | 15.0 (15.0) | 15.0 (15.0) | 18.0 (18.0) | 24.5 (24.0) | | Low, Medium | 15.0 (15.0) | 15.0 (15.0) | 18.0 (18.0) | 24.5 (24.0) | | Low, High | 15.0 (15.0) | 15.0 (15.0) | 18.0 (18.0) | 24.5 (24.0) | | Medium, High | 15.0 (15.0) | 15.0 (15.0) | 18.0 (18.0) | 24.5 (24.0) |\n\nWe present the results in the tables in the following format. First, the “Team Types” indicates the level of aversion for a team agent with respect to proximity to a failure state: None, Low, Medium, and High. These aversion levels correspond to the maximum δ​(s,sf)𝛿𝑠subscript𝑠𝑓\\delta(s,s\\_{f}) such that R​(δ​(s,sf))<0𝑅𝛿𝑠subscript𝑠𝑓0R(\\delta(s,s\\_{f}))<0, with None→0→None0\\textrm{None}\\rightarrow 0, Low→1→Low1\\textrm{Low}\\rightarrow 1, Medium→2→Medium2\\textrm{Medium}\\rightarrow 2, High→3→High3\\textrm{High}\\rightarrow 3. Remember that agent paths will vary according to these aversion levels (see Fig. [2](#S3.F2 \"Figure 2 ‣ III-A Navigating Agent Training ‣ III Specific scenario for optimality analysis ‣ Optimizing Risk-averse Human-AI Hybrid Teams This work was partially supported by the CHIST-ERA-19-XAI010 SAI project. M. Conti’s and A. Passarella’s work was partly funded by the PNRR - M4C2 - Investimento 1.3, Partenariato Esteso PE00000013 - ”FAIR” funded by the European Commission under the NextGeneration EU programme.\")). In the remaining columns, we demonstrate the team’s performance under managers with varying intervention distances. The team/manager scores are given as the team score followed by the estimated optimal score in parenthesis. The score is calculated according to combined shortest path and intervention cost c𝑐c defined in Section [III-B](#S3.SS2 \"III-B Manager Task ‣ III Specific scenario for optimality analysis ‣ Optimizing Risk-averse Human-AI Hybrid Teams This work was partially supported by the CHIST-ERA-19-XAI010 SAI project. M. Conti’s and A. Passarella’s work was partly funded by the PNRR - M4C2 - Investimento 1.3, Partenariato Esteso PE00000013 - ”FAIR” funded by the European Commission under the NextGeneration EU programme.\").\n\nδ​(s,sf)𝛿𝑠subscript𝑠𝑓\\delta(s,s_{f})\n\nR​(δ​(s,sf))<0𝑅𝛿𝑠subscript𝑠𝑓0R(\\delta(s,s_{f}))<0\n\nNone→0→None0\\textrm{None}\\rightarrow 0\n\nLow→1→Low1\\textrm{Low}\\rightarrow 1\n\nMedium→2→Medium2\\textrm{Medium}\\rightarrow 2\n\nHigh→3→High3\\textrm{High}\\rightarrow 3\n\nc𝑐c\n\nIn Table [III](#S4.T3 \"TABLE III ‣ IV Results ‣ Optimizing Risk-averse Human-AI Hybrid Teams This work was partially supported by the CHIST-ERA-19-XAI010 SAI project. M. Conti’s and A. Passarella’s work was partly funded by the PNRR - M4C2 - Investimento 1.3, Partenariato Esteso PE00000013 - ”FAIR” funded by the European Commission under the NextGeneration EU programme.\"), we see the results for the Angle Cliff environment. In this grid, the team will have few chances to avoid intervention cases when δIsubscript𝛿𝐼\\delta\\_{I} increases. Still, there is a path along the diagonal that agents can traverse to minimize these interventions (see Fig. [2(a)](#S3.F2.sf1 \"In Figure 2 ‣ III-A Navigating Agent Training ‣ III Specific scenario for optimality analysis ‣ Optimizing Risk-averse Human-AI Hybrid Teams This work was partially supported by the CHIST-ERA-19-XAI010 SAI project. M. Conti’s and A. Passarella’s work was partly funded by the PNRR - M4C2 - Investimento 1.3, Partenariato Esteso PE00000013 - ”FAIR” funded by the European Commission under the NextGeneration EU programme.\")). As indicated by the results, the manager can identify the sequence of agents which generates results nearing these optimal paths. As the agents were trained to find a path that fits their view of acceptable risk, without a prescribed training from any starting state, we can attribute some of the sub-optimal paths (e.g., “None, High” team with Intervention Distance: 2) to either risk aversion or minor agent confusion when the team enters less-frequently experienced states. In other words, some delegation changes and sub-optimal team agent behavior could result in a path which diverges slightly from a policy-agnostic shortest path. This could lead to backtracking (e.g., “right” action followed by a “left” action) to return to the optimal path, which increases c𝑐c by one or more. Further, any single deviation from the diagonal will result in the next states incurring additional penalties, so small deviations from the center path will result in these minor deviations in team score. On the other hand, for teams where the agents are of similar risk-aversion level to the manager (e.g., “Low, Medium” and δI=1subscript𝛿𝐼1\\delta\\_{I}=1), we see indications of good alignment between the manager and team. In these cases, the scores align well with our measure of optimal as the team paths follow trajectories which align with the manager’s constraints and lead to optimal results.\n\nδIsubscript𝛿𝐼\\delta_{I}\n\nc𝑐c\n\nδI=1subscript𝛿𝐼1\\delta_{I}=1\n\nFor the next results, Table [III](#S4.T3 \"TABLE III ‣ IV Results ‣ Optimizing Risk-averse Human-AI Hybrid Teams This work was partially supported by the CHIST-ERA-19-XAI010 SAI project. M. Conti’s and A. Passarella’s work was partly funded by the PNRR - M4C2 - Investimento 1.3, Partenariato Esteso PE00000013 - ”FAIR” funded by the European Commission under the NextGeneration EU programme.\") indicates the team performance in the Maze grid. As noted in Section [III-B](#S3.SS2 \"III-B Manager Task ‣ III Specific scenario for optimality analysis ‣ Optimizing Risk-averse Human-AI Hybrid Teams This work was partially supported by the CHIST-ERA-19-XAI010 SAI project. M. Conti’s and A. Passarella’s work was partly funded by the PNRR - M4C2 - Investimento 1.3, Partenariato Esteso PE00000013 - ”FAIR” funded by the European Commission under the NextGeneration EU programme.\"), this environment offers an example of cases where the agent aversion to risk could have significant impact on the paths taken. Despite the added complexity of the available paths, the teams show strong performance and are frequently near the optimal level of performance. Like the previous case, we should note that deviations of around two are less severe than they appear. In these cases, this is equivalent to a single step off an optimal path and then returning. Further, deviations from an “optimal” path account for cases where the agents demonstrate their aversion to the failure states, resulting paths which diverge from the shortest possible. This is most apparent in the cases of agents with a high aversion to risk. While the manager risk aversion is lower, the agent will still choose paths which maintain greater distance from failure states, resulting in paths which require diverging from the shortest possible when risk is not considered. As such, these teams will result in higher c𝑐c for the manager performance measure. Similar to the previous environment, we see cases with strong alignment of manager and agent risk aversion (e.g., “None, Low” and δI=1subscript𝛿𝐼1\\delta\\_{I}=1), with corresponding strong team performance at/near optimal. On the other hand, the strong aversion of some agents (e.g., “Medium, High” and δI=1subscript𝛿𝐼1\\delta\\_{I}=1) results in the longer paths and scores higher than would be possible with agents more willing to take the shorter path near the central failure state. In such a case, there is no manner in which the manager could force the team to take the shorter path, so the resulting score is higher than the minimum/optimal. Again, the manager would only reach this optimal value if the team were able to take a “riskier” route to the goal.\n\nc𝑐c\n\nδI=1subscript𝛿𝐼1\\delta_{I}=1\n\nδI=1subscript𝛿𝐼1\\delta_{I}=1\n\nAs our final case, we utilize a map with several false paths and an overall long trajectory to the goal, which could confuse early exploration. Despite these factors, the results in Table [III](#S4.T3 \"TABLE III ‣ IV Results ‣ Optimizing Risk-averse Human-AI Hybrid Teams This work was partially supported by the CHIST-ERA-19-XAI010 SAI project. M. Conti’s and A. Passarella’s work was partly funded by the PNRR - M4C2 - Investimento 1.3, Partenariato Esteso PE00000013 - ”FAIR” funded by the European Commission under the NextGeneration EU programme.\") show some of the best scores out of the three scenarios. In most cases, the managed teams achieve the best score, and the only deviations amount on average to less than a single additional intervention or path step."
+    },
+    {
+      "heading_path": [
+        "Optimizing Risk-averse Human-AI Hybrid Teams ††thanks: This work was partially supported by the CHIST-ERA-19-XAI010 SAI project. M. Conti’s and A. Passarella’s work was partly funded by the PNRR - M4C2 - Investimento 1.3, Partenariato Esteso PE00000013 - ”FAIR” funded by the European Commission under the NextGeneration EU programme.",
+        "V Conclusion"
+      ],
+      "text": "## V Conclusion\n\nWe presented a manager which provided oversight for teams of RL agents attempting a navigation task in grid environments. These grid environments included states which indicate risky regions of the environment which the agents should avoid. Our manager model was trained and tested with diverse teams of agents. The teams included agents which were trained to navigate the environment with shortest paths which also avoided the risky states. By avoiding risky states, the navigating agents generate paths to the goal state which might deviate from the shortest possible. Managers were given their own notion/measure of risk with which to determine desirable agent delegations. By isolating the notion/model of risk for the agents and managers, we demonstrated how our model could support teams of diverse agents, and we further indicated how our manager could provide oversight while assuming no reliance on knowledge of the agents’ measures of desirable behavior. We performed tests with our manager model to compare its performance to that of an optimal model of behavior. Optimality was determined by a minimization of path lengths and occurrences of manager intervention. Our testing demonstrated strong manager performance, with most of our results indicating a manager at or near the optimal result."
+    },
+    {
+      "heading_path": [
+        "Optimizing Risk-averse Human-AI Hybrid Teams ††thanks: This work was partially supported by the CHIST-ERA-19-XAI010 SAI project. M. Conti’s and A. Passarella’s work was partly funded by the PNRR - M4C2 - Investimento 1.3, Partenariato Esteso PE00000013 - ”FAIR” funded by the European Commission under the NextGeneration EU programme.",
+        "References"
+      ],
+      "text": "## References\n\n* [1] M. Carroll, R. Shah, M. K. Ho, T. Griffiths, S. Seshia, P. Abbeel, and A. Dragan, “On the utility of learning about humans for human-ai coordination,” *Advances in neural information processing systems*, vol. 32, 2019. * [2] M. Chen, S. Nikolaidis, H. Soh, D. Hsu, and S. Srinivasa, “Planning with trust for human-robot collaboration,” in *Proceedings of the 2018 ACM/IEEE international conference on human-robot interaction*, 2018, pp. 307–315. * [3] Z. R. Khavas, S. R. Ahmadzadeh, and P. Robinette, “Modeling trust in human-robot interaction: A survey,” in *Social Robotics*, A. R. Wagner, D. Feil-Seifer, K. S. Haring, S. Rossi, T. Williams, H. He, and S. Sam Ge, Eds. Cham: Springer International Publishing, 2020, pp. 529–541. * [4] S. Westby and C. Riedl, “Collective intelligence in human-ai teams: A bayesian theory of mind approach,” in *Proceedings of the AAAI Conference on Artificial Intelligence*, vol. 37, no. 5, 2023, pp. 6119–6127. * [5] S. A. Wu, R. E. Wang, J. A. Evans, J. B. Tenenbaum, D. C. Parkes, and M. Kleiman-Weiner, “Too many cooks: Bayesian inference for coordinating multi-agent collaboration,” *Topics in Cognitive Science*, vol. 13, no. 2, pp. 414–432, 2021. * [6] U. Agudo, K. G. Liberal, M. Arrese, and H. Matute, “The impact of ai errors in a human-in-the-loop process,” *Cognitive Research: Principles and Implications*, vol. 9, no. 1, p. 1, 2024. * [7] Á. A. Cabrera, A. J. Druck, J. I. Hong, and A. Perer, “Discovering and validating ai errors with crowdsourced failure reports,” *Proceedings of the ACM on Human-Computer Interaction*, vol. 5, no. CSCW2, pp. 1–22, 2021. * [8] K. Haegler, R. Zernecke, A. M. Kleemann, J. Albrecht, O. Pollatos, H. Brückmann, and M. Wiesmann, “No fear no risk! human risk behavior is affected by chemosensory anxiety signals,” *Neuropsychologia*, vol. 48, no. 13, pp. 3901–3908, 2010. * [9] A. Mahmood, J. W. Fung, I. Won, and C.-M. Huang, “Owning mistakes sincerely: Strategies for mitigating ai errors,” in *Proceedings of the 2022 CHI Conference on Human Factors in Computing Systems*, 2022, pp. 1–11. * [10] J. Reason, *Human error*. Cambridge university press, 1990. * [11] S. Russell, I. S. Moskowitz, and A. Raglin, “Human information interaction, artificial intelligence, and errors,” *Autonomy and Artificial Intelligence: A Threat or Savior?*, pp. 71–101, 2017. * [12] J. Afanador, M. Baptista, and N. Oren, “An adversarial algorithm for delegation,” in *Agreement Technologies: 6th International Conference, AT 2018, Bergen, Norway, December 6-7, 2018, Revised Selected Papers 6*. Springer, 2019, pp. 130–145. * [13] G. Chen, X. Li, C. Sun, and H. Wang, “Learning to make adherence-aware advice,” *arXiv preprint arXiv:2310.00817*, 2023. * [14] A. Fuchs, A. Passarella, and M. Conti, “Optimizing delegation in collaborative human-ai hybrid teams,” 2024. * [15] ——, “A cognitive framework for delegation between error-prone ai and human agents,” in *2022 IEEE International Conference on Smart Computing (SMARTCOMP)*. IEEE, 2022, pp. 317–322. * [16] ——, “Compensating for sensing failures via delegation in human–ai hybrid systems,” *Sensors*, vol. 23, no. 7, p. 3409, 2023. * [17] ——, “Optimizing delegation between human and ai collaborative agents,” in *Workshop on Hybrid Human-Machine Learning and Decision Making*, 2023. * [18] C. C. Aggarwal, “Instance-based learning: A survey.” *Data classification: algorithms and applications*, vol. 157, 2014. * [19] R. S. Sutton and A. G. Barto, *Reinforcement learning: An introduction*. MIT press, 2018. * [20] F. M. Garcia, C. Nota, and P. S. Thomas, “Learning reusable options for multi-task reinforcement learning,” *arXiv preprint arXiv:2001.01577*, 2020. * [21] J. Erskine and C. Lehnert, “Developing cooperative policies for multi-stage reinforcement learning tasks,” *IEEE Robotics and Automation Letters*, vol. 7, no. 3, pp. 6590–6597, 2022. * [22] J. Chakravorty, N. Ward, J. Roy, M. Chevalier-Boisvert, S. Basu, A. Lupu, and D. Precup, “Option-critic in cooperative multi-agent systems,” *arXiv preprint arXiv:1911.12825*, 2019. * [23] J. Chen, M. Haliem, T. Lan, and V. Aggarwal, “Multi-agent deep covering option discovery,” *arXiv preprint arXiv:2210.03269*, 2022. * [24] K. Kurzer, C. Zhou, and J. M. Zöllner, “Decentralized cooperative planning for automated vehicles with hierarchical monte carlo tree search,” in *2018 IEEE intelligent vehicles symposium (IV)*. IEEE, 2018, pp. 529–536. * [25] Q. P. Lau, M.-L. Lee, and W. Hsu, “Coordination guided reinforcement learning.” in *AAMAS*, 2012, pp. 215–222. * [26] K. Menda, Y.-C. Chen, J. Grana, J. W. Bono, B. D. Tracey, M. J. Kochenderfer, and D. Wolpert, “Deep reinforcement learning for event-driven multi-agent decision processes,” *IEEE Transactions on Intelligent Transportation Systems*, vol. 20, no. 4, pp. 1259–1268, 2018. * [27] K. Rohanimanesh and S. Mahadevan, “Learning to take concurrent actions,” *Advances in neural information processing systems*, vol. 15, 2002. * [28] A. J. Singh, A. Kumar, and H. C. Lau, “Hierarchical multiagent reinforcement learning for maritime traffic management,” 2020. * [29] M. Yang, J. Zhao, X. Hu, W. Zhou, and H. Li, “Ldsa: Learning dynamic subtask assignment in cooperative multi-agent reinforcement learning,” *arXiv preprint arXiv:2205.02561*, 2022. * [30] A. Jacq, J. Ferret, O. Pietquin, and M. Geist, “Lazy-mdps: Towards interpretable rl by learning when to act,” in *Proceedings of the 21st International Conference on Autonomous Agents and Multiagent Systems*, 2022, pp. 669–677. * [31] V. B. Meresht, A. De, A. Singla, and M. Gomez-Rodriguez, “Learning to switch between machines and humans,” *CoRR*, vol. abs/2002.04258, 2020. [Online]. Available: https://arxiv.org/abs/2002.04258 * [32] E. Straitouri, A. Singla, V. B. Meresht, and M. Gomez-Rodriguez, “Reinforcement learning under algorithmic triage,” *CoRR*, vol. abs/2109.11328, 2021. [Online]. Available: https://arxiv.org/abs/2109.11328 * [33] D. Richards and A. Stedmon, “To delegate or not to delegate: A review of control frameworks for autonomous cars,” *Applied ergonomics*, vol. 53, pp. 383–388, 2016. * [34] S. Palmer, D. Richards, G. Shelton-Rayner, K. Izzetoglu, and D. Inch, “Assessing variable levels of delegated control–a novel measure of trust,” in *HCI International 2020–Late Breaking Papers: Cognition, Learning and Games: 22nd HCI International Conference, HCII 2020, Copenhagen, Denmark, July 19–24, 2020, Proceedings 22*. Springer, 2020, pp. 202–215. * [35] C. Candrian and A. Scherer, “Rise of the machines: Delegating decisions to autonomous ai,” *Computers in Human Behavior*, vol. 134, p. 107308, 2022."
+    }
+  ]
+}
