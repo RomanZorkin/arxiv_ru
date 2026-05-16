@@ -1,5 +1,5 @@
--[Статья на русском языке](https://romanzorkin.github.io/slaides/articles/2501.02368/2501.02368_ru.html)  
--[Статья на английском языке](https://romanzorkin.github.io/slaides/articles/2501.02368/2501.02368.html)  
+-[Статья на русском языке](https://romanzorkin.github.io/arxiv_ru/articles/2501.02368/2501.02368_ru.html)  
+-[Статья на английском языке](https://romanzorkin.github.io/arxiv_ru/articles/2501.02368/2501.02368.html)  
 
 # Enhancing Workplace Productivity and Well-Being using AI Agents
 

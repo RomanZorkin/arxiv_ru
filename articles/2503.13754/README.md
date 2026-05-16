@@ -1,5 +1,5 @@
--[Статья на русском языке](https://romanzorkin.github.io/slaides/articles/2503.13754/2503.13754_ru.html)  
--[Статья на английском языке](https://romanzorkin.github.io/slaides/articles/2503.13754/2503.13754.html)  
+-[Статья на русском языке](https://romanzorkin.github.io/arxiv_ru/articles/2503.13754/2503.13754_ru.html)  
+-[Статья на английском языке](https://romanzorkin.github.io/arxiv_ru/articles/2503.13754/2503.13754.html)  
 
 # From Autonomous Agents to Integrated Systems, A New Paradigm: Orchestrated Distributed Intelligence
 
