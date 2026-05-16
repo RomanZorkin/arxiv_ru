@@ -28,35 +28,18 @@
 
 ## Последние статьи
 
-### Optimizing Risk-averse Human-AI Hybrid Teams
+### Impact of LLMs on Team Collaboration in Software Development
 📅 16.05.2026  
-🏷 `Reinforcement Learning` `Human-AI Collaboration` `Multi-Agent Systems`
+🏷 `LLM` `командная работа` `SDLC` `продуктивность` `документация` `кейс-стади` `опрос`
 
-RL-менеджер для делегирования задач между людьми и AI-агентами
-в гибридных командах с учетом риска и минимизацией вмешательств.
+Статья исследует, как большие языковые модели (LLM) влияют на командное сотрудничество на всех этапах жизненного цикла разработки ПО (SDLC). На основе литературного обзора, опроса практиков и двух кейс-стади авторы показывают, что LLM повышают продуктивность, улучшают коммуникацию и помогают в документации, но также создают новые вызовы, связанные с настройкой, приватностью и доверием.
 
-- [📖 Русская HTML версия](articles/2403.08386/2403.08386_ru.html)
-- [📄 Оригинальная статья](articles/2403.08386/2403.08386.html)
-- [🧠 Summary / README](articles/2403.08386/README.md)
-- [⚙ Metadata](articles/2403.08386/metadata.json)
+- [📖 Русская HTML версия](/articles/2510.08612/2510.08612_ru.html)
+- [📄 Оригинальная статья](/articles/2510.08612/2510.08612.html)
+- [🧠 Summary / README](articles/2510.08612/README.md)
+- [⚙ Metadata](articles/2510.08612/metadata.json)
 
 ---
-
-### From Autonomous Agents to Integrated Systems
-📅 16.05.2026  
-🏷 `Multi-Agent Systems` `AI Orchestration`
-
-Парадигма Orchestrated Distributed Intelligence —
-подход к построению координируемых распределённых AI-систем.
-
-- [📖 Русская HTML версия](articles/2503.13754/2503.13754_ru.html)
-- [📄 Оригинальная статья](articles/2503.13754/2503.13754.html)
-- [🧠 Summary / README](articles/2503.13754/README.md)
-- [⚙ Metadata](articles/2503.13754/metadata.json)
-
----
-
-
 
 ## О проекте
 
@@ -70,5 +53,4 @@ RL-менеджер для делегирования задач между лю
 
 |id статьи| Дата перевода| Тема статьи |
 |---|---|---|
-|2403.08386| 16.05.2026 | Optimizing Risk-averse Human-AI Hybrid Teams |
-|2503.13754| 16.05.2026 | From Autonomous Agents to Integrated Systems |
+|2510.08612| 16.05.2026 | Impact of LLMs on Team Collaboration in Software Development (articles/2510.08612/README.md)|
