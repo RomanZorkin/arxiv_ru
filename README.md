@@ -53,4 +53,4 @@
 
 |id статьи| Дата перевода| Тема статьи |
 |---|---|---|
-|2510.08612| 16.05.2026 | Impact of LLMs on Team Collaboration in Software Development (articles/2510.08612/README.md)|
+|2510.08612| 16.05.2026 | [Impact of LLMs on Team Collaboration in Software Development] (articles/2510.08612/README.md)|
