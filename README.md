@@ -28,7 +28,7 @@
 
 ## Последние статьи
 
-### Impact of LLMs on Team Collaboration in Software Development
+### Влияние LLM на командное взаимодействие в разработке программного обеспечения
 📅 16.05.2026  
 🏷 `LLM` `командная работа` `SDLC` `продуктивность` `документация` `кейс-стади` `опрос`
 
@@ -40,7 +40,7 @@
 - [⚙ Metadata](articles/2510.08612/metadata.json)
 
 ---
-### From Autonomous Agents to Integrated Systems, A New Paradigm: Orchestrated Distributed Intelligence
+### От автономных агентов к интегрированным системам: новая парадигма — скоординированный распределённый интеллект
 📅 16.05.2026  
 🏷 `multi-agent systems` `orchestration` `systems thinking` `human-AI collaboration` `enterprise AI` `agentic AI` `organizational transformation`
 
@@ -113,8 +113,8 @@
 
 |id статьи| Дата перевода| Тема статьи |
 |---|---|---|
-| [2510.08612](articles/2510.08612/README.md) | 16.05.2026 | Impact of LLMs on Team Collaboration in Software Development |
-| [2503.13754](articles/2503.13754/README.md) | 16.05.2026 | From Autonomous Agents to Integrated Systems, A New Paradigm: Orchestrated Distributed Intelligence |
+| [2510.08612](articles/2510.08612/README.md) | 16.05.2026 | Влияние LLM на командное взаимодействие в разработке программного обеспечения |
+| [2503.13754](articles/2503.13754/README.md) | 16.05.2026 |От автономных агентов к интегрированным системам: новая парадигма — скоординированный распределённый интеллект |
 | [2403.08386](articles/2403.08386/README.md) | 16.05.2026 | Оптимизация риск-аверсивных гибридных команд человек-ИИ |
 | [2503.09794](articles/2503.09794/README.md) | 16.05.2026 | Усиление командной работы с помощью ИИ-агентов как пространственных коллабораторов |
 | [2501.02368](articles/2501.02368/README.md) | 16.05.2026 | Повышение продуктивности и благополучия на рабочем месте с использованием AI Agents |
