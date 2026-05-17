@@ -1,5 +1,5 @@
--[Статья на русском языке](https://romanzorkin.github.io/slaides/articles/2403.08386/2403.08386_ru.html)  
--[Статья на английском языке](https://romanzorkin.github.io/slaides/articles/2403.08386/2403.08386.html)  
+-[Статья на русском языке](https://romanzorkin.github.io/arxiv_ru/articles/2403.08386/2403.08386_ru.html)  
+-[Статья на английском языке](https://romanzorkin.github.io/arxiv_ru/articles/2403.08386/2403.08386.html)  
 
 # Optimizing Risk-averse Human-AI Hybrid Teams
 
