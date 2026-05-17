@@ -1,0 +1,1444 @@
+{
+  "title": "[1910.01736] Context-Aware Graph Attention Networks",
+  "sections": [
+    {
+      "heading": "Context-Aware Graph Attention Networks",
+      "level": 1,
+      "content": [],
+      "children": [
+        {
+          "heading": "Abstract",
+          "level": 6,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "Graph Neural Networks (GNNs) have been widely studied for graph data representation and learning. However, existing GNNs generally conduct context-aware learning on node feature representation only which usually ignores the learning of edge (weight) representation. In this paper, we propose a novel unified GNN model, named Context-aware Adaptive Graph Attention Network (CaGAT). CaGAT aims to learn a context-aware attention representation for each graph edge by further exploiting the context relationships among different edges. In particular, CaGAT conducts *context-aware learning* on both *node feature representation* and *edge (weight) representation* simultaneously and cooperatively in a *unified* manner which can boost their respective performance in network training. We apply CaGAT on semi-supervised learning tasks. Promising experimental results on several benchmark datasets demonstrate the effectiveness and benefits of CaGAT."
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "1 Introduction",
+          "level": 2,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "Graph data representation and learning is a fundamental problem in machine learning area. Recently, Graph Neural Networks (GNNs) have been widely studied for this problem [[5](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib5), [10](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib10), [15](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib15), [7](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib7), [17](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib17), [24](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib24)]. Overall, existing GNNs can generally be categorized into spatial methods and spectral methods [[24](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib24)]."
+            },
+            {
+              "type": "paragraph",
+              "text": "Spectral methods usually define the graph convolution based on spectral representation of graphs. For example, Bruna et al. [[3](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib3)] propose a spectral based graph convolution network (GCN) by using the eigen-decomposition of graph Laplacian matrix. Henaff et al. [[8](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib8)] further introduce a spatially constrained spectral filters in GCN layer-wise propagation. By using Chebyshev expansion, Defferrard et al. [[5](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib5)] propose a method to approximate the spectral filters and thus derive a more efficient GCN model. By using the first-order approximation of spectral filters, Kipf et al. [[10](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib10)] also present a more efficient GCN for graph based semi-supervised learning."
+            },
+            {
+              "type": "paragraph",
+              "text": "In this paper, we focus on spatial methods. For spatial GNN methods, they generally define the graph convolution by employing a specific node feature diffusion (or aggregation) operation on neighbors to obtain the context-aware representations of graph nodes in GNN layer-wise propagation [[15](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib15), [13](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib13), [20](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib20), [22](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib22), [18](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib18)]. For example, Atwood and Towsley [[1](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib1)] propose Diffusion-Convolutional Neural Networks (DCNNs) by incorporating graph diffusion process into GNN network. Li et al. [[13](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib13)] propose Diffusion Convolutional Recurrent Neural Network (DCRNN) which employs a finite K-step truncated random walk diffusion model for feature aggregation. Klicpera et al. [[11](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib11)] propose to integrate PageRank propagation into GCN in layer-wise propagation. Hamilton et al. [[7](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib7)] present a general inductive representation and learning framework (GraphSAGE) by sampling and aggregating features from a node’s local neighborhood. The above methods generally conduct graph node feature diffusion/aggreagtion on a fixed structure graph. Recently, Velickovic et al. [[17](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib17)] propose Graph Attention Networks (GATs) which first assign different weights for graph edges and then develop an adaptive weighted feature aggregation mechanism in its layer-wise feature propagation."
+            },
+            {
+              "type": "paragraph",
+              "text": "Motivation. One main limitation of the above existing spatial GNNs is that they generally conduct context-aware learning on node feature representation only which obviously ignores the learning of edge (weight) representation. Although, the attention learning and representation of edges have been proposed in GATs [[17](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib17)], they are learned independently which lacks of considering the context relationships among different edges. This motivates us to develop a unified model, named Context-aware adaptive Graph Attention Network (CaGAT), which conducts *context-aware learning* on both *node feature representation* and *edge (weight) representation* simultaneously in layer-wise propagation."
+            },
+            {
+              "type": "paragraph",
+              "text": "It is known that, in GNNs, the context-aware learning of node feature representation is usually conducted via a feature diffusion model. This inspires us to achieve context-aware learning of edge representation similarly by employing a graph diffusion model. In this paper, we adopt a Tensor Product Graph (TPG) diffusion model [[2](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib2), [21](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib21)], which provides an explicit diffusion for pairwise relationship data. Specifically, in our CaGAT architecture, we employ TPG and Neighborhood Propagation (NP) [[19](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib19)] for the context-aware learning of graph edge and node, respectively. Moreover, both TPG and NP can well be re-formulated as regularization forms, which further helps us to derive a unified regularization model to integrate them together for boosting their respective performance."
+            },
+            {
+              "type": "paragraph",
+              "text": "Contributions. Overall, the main contributions of this paper are summarized as follows:"
+            },
+            {
+              "type": "list",
+              "text": "* • We propose a novel spatial GNN, named CaGAT for graph data representation and learning. * • We propose to introduce context-aware edge learning/representation in GNN architecture by employing a tensor product graph diffusion model. * • We provide a unified learning framework to conduct both edge attention (weight) representation and node feature representation cooperatively in GNN architecture."
+            },
+            {
+              "type": "paragraph",
+              "text": "We propose a novel spatial GNN, named CaGAT for graph data representation and learning."
+            },
+            {
+              "type": "paragraph",
+              "text": "We propose to introduce context-aware edge learning/representation in GNN architecture by employing a tensor product graph diffusion model."
+            },
+            {
+              "type": "paragraph",
+              "text": "We provide a unified learning framework to conduct both edge attention (weight) representation and node feature representation cooperatively in GNN architecture."
+            },
+            {
+              "type": "paragraph",
+              "text": "Promising experimental results on several benchmark datasets demonstrate the effectiveness of the proposed CaGAT model on semi-supervised learning tasks."
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "2 Related Works",
+          "level": 2,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "Graph Attention Networks (GATs) [[17](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib17)] have been widely used for graph data analysis and learning. GATs conduct two steps in each hidden layer, i.e., 1) graph edge attention estimation and 2) node feature aggregation and representation."
+            },
+            {
+              "type": "paragraph",
+              "text": "Step 1: Edge attention estimation. Given a set of node features H=(h1,h2​⋯​hn)∈ℝd×nHsubscripth1subscripth2⋯subscripth𝑛superscriptℝ𝑑𝑛\\textbf{H}=(\\textbf{h}\\_{1},\\textbf{h}\\_{2}\\cdots\\textbf{h}\\_{n})\\in\\mathbb{R}^{d\\times n} and graph adjacency matrix A∈ℝn×nAsuperscriptℝ𝑛𝑛\\textbf{A}\\in\\mathbb{R}^{n\\times n}, GATs define the graph attention 𝒢​(hi,hj;W,Θ)𝒢subscripth𝑖subscripth𝑗WΘ\\mathcal{G}(\\textbf{h}\\_{i},\\textbf{h}\\_{j};\\textbf{W},\\Theta) for each graph edge ei​jsubscript𝑒𝑖𝑗e\\_{ij} as,"
+            },
+            {
+              "type": "formula",
+              "text": "H=(h1,h2​⋯​hn)∈ℝd×nHsubscripth1subscripth2⋯subscripth𝑛superscriptℝ𝑑𝑛\\textbf{H}=(\\textbf{h}_{1},\\textbf{h}_{2}\\cdots\\textbf{h}_{n})\\in\\mathbb{R}^{d\\times n}"
+            },
+            {
+              "type": "formula",
+              "text": "A∈ℝn×nAsuperscriptℝ𝑛𝑛\\textbf{A}\\in\\mathbb{R}^{n\\times n}"
+            },
+            {
+              "type": "formula",
+              "text": "𝒢​(hi,hj;W,Θ)𝒢subscripth𝑖subscripth𝑗WΘ\\mathcal{G}(\\textbf{h}_{i},\\textbf{h}_{j};\\textbf{W},\\Theta)"
+            },
+            {
+              "type": "formula",
+              "text": "ei​jsubscript𝑒𝑖𝑗e_{ij}"
+            },
+            {
+              "type": "table",
+              "text": "| | | | | | --- | --- | --- | --- | | | 𝒢​(hi,hj;W,Θ)=softmaxG​(f​(Whi,Whj;Θ))𝒢subscripth𝑖subscripth𝑗WΘsubscriptsoftmax𝐺𝑓subscriptWh𝑖subscriptWh𝑗Θ\\displaystyle\\mathcal{G}(\\textbf{h}\\_{i},\\textbf{h}\\_{j};\\textbf{W},\\Theta)=\\mathrm{softmax}\\_{G}\\big{(}f(\\textbf{W}\\textbf{h}\\_{i},\\textbf{W}\\textbf{h}\\_{j};\\Theta)\\big{)} | | (1) |"
+            },
+            {
+              "type": "formula",
+              "text": "𝒢​(hi,hj;W,Θ)=softmaxG​(f​(Whi,Whj;Θ))𝒢subscripth𝑖subscripth𝑗WΘsubscriptsoftmax𝐺𝑓subscriptWh𝑖subscriptWh𝑗Θ\\displaystyle\\mathcal{G}(\\textbf{h}_{i},\\textbf{h}_{j};\\textbf{W},\\Theta)=\\mathrm{softmax}_{G}\\big{(}f(\\textbf{W}\\textbf{h}_{i},\\textbf{W}\\textbf{h}_{j};\\Theta)\\big{)}"
+            },
+            {
+              "type": "paragraph",
+              "text": "where W∈ℝd~×dWsuperscriptℝ~𝑑𝑑\\textbf{W}\\in\\mathbb{R}^{\\tilde{d}\\times d} and ΘΘ\\Theta denote the layer-specific trainable parameter of linear transformation and attention estimation, respectively. softmaxGsubscriptsoftmax𝐺\\mathrm{softmax}\\_{G} denotes the softmax function defined on graph111It is defined as softmaxG​(fi​j)=exp⁡(fi​j)∑k∈𝒩iexp⁡(fi​k)subscriptsoftmax𝐺subscript𝑓𝑖𝑗subscript𝑓𝑖𝑗subscript𝑘subscript𝒩𝑖subscript𝑓𝑖𝑘\\mathrm{softmax}\\_{G}(f\\_{ij})=\\frac{\\exp(f\\_{ij})}{\\sum\\_{k\\in\\mathcal{N}\\_{i}}\\exp(f\\_{ik})} where 𝒩isubscript𝒩𝑖\\mathcal{N}\\_{i} denotes the neighborhood set of node visubscript𝑣𝑖v\\_{i} which is specified by adjacency matrix A of graph.. In work [[17](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib17)], the attention mechanism function f​(Whi,Whj;Θ)𝑓subscriptWh𝑖subscriptWh𝑗Θf(\\textbf{W}\\textbf{h}\\_{i},\\textbf{W}\\textbf{h}\\_{j};\\Theta) is defined by a single-layer feedforward neural network, parameterized by a weight vector Θ∈ℝ2​d×1Θsuperscriptℝ2𝑑1\\Theta\\in\\mathbb{R}^{2d\\times 1}. That is,"
+            },
+            {
+              "type": "formula",
+              "text": "W∈ℝd~×dWsuperscriptℝ~𝑑𝑑\\textbf{W}\\in\\mathbb{R}^{\\tilde{d}\\times d}"
+            },
+            {
+              "type": "formula",
+              "text": "ΘΘ\\Theta"
+            },
+            {
+              "type": "formula",
+              "text": "softmaxGsubscriptsoftmax𝐺\\mathrm{softmax}_{G}"
+            },
+            {
+              "type": "formula",
+              "text": "softmaxG​(fi​j)=exp⁡(fi​j)∑k∈𝒩iexp⁡(fi​k)subscriptsoftmax𝐺subscript𝑓𝑖𝑗subscript𝑓𝑖𝑗subscript𝑘subscript𝒩𝑖subscript𝑓𝑖𝑘\\mathrm{softmax}_{G}(f_{ij})=\\frac{\\exp(f_{ij})}{\\sum_{k\\in\\mathcal{N}_{i}}\\exp(f_{ik})}"
+            },
+            {
+              "type": "formula",
+              "text": "𝒩isubscript𝒩𝑖\\mathcal{N}_{i}"
+            },
+            {
+              "type": "formula",
+              "text": "visubscript𝑣𝑖v_{i}"
+            },
+            {
+              "type": "formula",
+              "text": "f​(Whi,Whj;Θ)𝑓subscriptWh𝑖subscriptWh𝑗Θf(\\textbf{W}\\textbf{h}_{i},\\textbf{W}\\textbf{h}_{j};\\Theta)"
+            },
+            {
+              "type": "formula",
+              "text": "Θ∈ℝ2​d×1Θsuperscriptℝ2𝑑1\\Theta\\in\\mathbb{R}^{2d\\times 1}"
+            },
+            {
+              "type": "table",
+              "text": "| | | | | | --- | --- | --- | --- | | | f​(Whi,Whj;Θ)=σa​(ΘT​[Whi∥Whj])𝑓subscriptWh𝑖subscriptWh𝑗Θsubscript𝜎𝑎superscriptΘTdelimited-[]conditionalsubscriptWh𝑖subscriptWh𝑗\\displaystyle f(\\textbf{W}\\textbf{h}\\_{i},\\textbf{W}\\textbf{h}\\_{j};\\Theta)=\\sigma\\_{a}\\big{(}\\Theta^{\\mathrm{T}}[\\textbf{W}\\textbf{h}\\_{i}\\|\\textbf{W}\\textbf{h}\\_{j}]\\big{)} | | (2) |"
+            },
+            {
+              "type": "formula",
+              "text": "f​(Whi,Whj;Θ)=σa​(ΘT​[Whi∥Whj])𝑓subscriptWh𝑖subscriptWh𝑗Θsubscript𝜎𝑎superscriptΘTdelimited-[]conditionalsubscriptWh𝑖subscriptWh𝑗\\displaystyle f(\\textbf{W}\\textbf{h}_{i},\\textbf{W}\\textbf{h}_{j};\\Theta)=\\sigma_{a}\\big{(}\\Theta^{\\mathrm{T}}[\\textbf{W}\\textbf{h}_{i}\\|\\textbf{W}\\textbf{h}_{j}]\\big{)}"
+            },
+            {
+              "type": "paragraph",
+              "text": "where σa​(⋅)subscript𝜎𝑎⋅\\sigma\\_{a}(\\cdot) denotes some nonlinear function, such as LeakyReLU, and ∥∥\\| denotes the concatenation operation."
+            },
+            {
+              "type": "formula",
+              "text": "σa​(⋅)subscript𝜎𝑎⋅\\sigma_{a}(\\cdot)"
+            },
+            {
+              "type": "formula",
+              "text": "∥∥\\|"
+            },
+            {
+              "type": "paragraph",
+              "text": "Step 2: Note feature aggregation and representation. Based on the above graph edge attention, GATs define the node feature aggregation to obtain the context-aware feature representation hi′subscriptsuperscripth′𝑖\\textbf{h}^{\\prime}\\_{i} for each node visubscript𝑣𝑖v\\_{i} as,"
+            },
+            {
+              "type": "formula",
+              "text": "hi′subscriptsuperscripth′𝑖\\textbf{h}^{\\prime}_{i}"
+            },
+            {
+              "type": "formula",
+              "text": "visubscript𝑣𝑖v_{i}"
+            },
+            {
+              "type": "table",
+              "text": "| | | | | | --- | --- | --- | --- | | | hi′=∑j∈𝒩i𝒢​(hi,hj;W,Θ)​Whjsubscriptsuperscripth′𝑖subscript𝑗subscript𝒩𝑖𝒢subscripth𝑖subscripth𝑗WΘsubscriptWh𝑗\\displaystyle\\textbf{h}^{\\prime}\\_{i}=\\sum\\nolimits\\_{j\\in\\mathcal{N}\\_{i}}\\mathcal{G}(\\textbf{h}\\_{i},\\textbf{h}\\_{j};\\textbf{W},\\Theta)\\textbf{W}\\textbf{h}\\_{j} | | (3) |"
+            },
+            {
+              "type": "formula",
+              "text": "hi′=∑j∈𝒩i𝒢​(hi,hj;W,Θ)​Whjsubscriptsuperscripth′𝑖subscript𝑗subscript𝒩𝑖𝒢subscripth𝑖subscripth𝑗WΘsubscriptWh𝑗\\displaystyle\\textbf{h}^{\\prime}_{i}=\\sum\\nolimits_{j\\in\\mathcal{N}_{i}}\\mathcal{G}(\\textbf{h}_{i},\\textbf{h}_{j};\\textbf{W},\\Theta)\\textbf{W}\\textbf{h}_{j}"
+            },
+            {
+              "type": "paragraph",
+              "text": "In addition, in each hidden layer of GATs, an activation function σ​(⋅)𝜎⋅\\sigma(\\cdot) is further conducted on hi′superscriptsubscripth𝑖′\\textbf{h}\\_{i}^{\\prime} to obtain nonlinear representation. The last layer of GATs outputs the final representation of graph nodes, which can be used for many learning tasks, such as clustering, visualization and (semi-supervised) classification etc. In this paper, we focus on semi-supervised classification. For this task, the layer-specific weight parameters {W,Θ}WΘ\\{\\textbf{W},\\Theta\\} of each layer are optimized by minimizing the cross-entropy loss defined on labelled data, as discussed in works [[10](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib10), [17](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib17)]."
+            },
+            {
+              "type": "formula",
+              "text": "σ​(⋅)𝜎⋅\\sigma(\\cdot)"
+            },
+            {
+              "type": "formula",
+              "text": "hi′superscriptsubscripth𝑖′\\textbf{h}_{i}^{\\prime}"
+            },
+            {
+              "type": "formula",
+              "text": "{W,Θ}WΘ\\{\\textbf{W},\\Theta\\}"
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "3 Context-aware Adaptive Graph Attention Network",
+          "level": 2,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "There are two main limitations for the above GATs. First, GATs estimate the attention of of each graph edge independently which ignores the context relationships among different edges. Second, GATs conduct Step 1 edge attention estimation and Step 2 node feature aggregation/representation independently which also neglects the correlation between these two steps and thus may lead to weak suboptimal learning results."
+            },
+            {
+              "type": "paragraph",
+              "text": "To overcome these issues, we propose a novel GNN model, named Context-aware adaptive Graph Attention (CaGAT). CaGAT has two main aspects. First, CaGAT aims to learn a context-aware graph edge attention by exploiting the context relationship information of edges encoded in graph A. Second, CaGAT conducts 1) graph edge attention learning and 2) node feature representation simultaneously and cooperatively in a *unified* model to boost their respective performance."
+            }
+          ],
+          "children": [
+            {
+              "heading": "3.1 Context-aware edge attention learning",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "Setting D as a diagonal matrix with elements Di​i=∑jAi​jsubscriptD𝑖𝑖subscript𝑗subscriptA𝑖𝑗\\textbf{D}\\_{ii}=\\sum\\_{j}\\textbf{A}\\_{ij}, the diffusion matrix can be defined as A¯=D−1​A¯AsuperscriptD1A\\bar{\\textbf{A}}=\\textbf{D}^{-1}\\textbf{A}. Motivated by recent works on Tensor Product Graph (TPG) diffusion [[2](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib2), [21](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib21)], we propose to learn a context-aware graph attention for each edge ei​jsubscript𝑒𝑖𝑗e\\_{ij} as follows,"
+                },
+                {
+                  "type": "formula",
+                  "text": "Di​i=∑jAi​jsubscriptD𝑖𝑖subscript𝑗subscriptA𝑖𝑗\\textbf{D}_{ii}=\\sum_{j}\\textbf{A}_{ij}"
+                },
+                {
+                  "type": "formula",
+                  "text": "A¯=D−1​A¯AsuperscriptD1A\\bar{\\textbf{A}}=\\textbf{D}^{-1}\\textbf{A}"
+                },
+                {
+                  "type": "formula",
+                  "text": "ei​jsubscript𝑒𝑖𝑗e_{ij}"
+                },
+                {
+                  "type": "table",
+                  "text": "| | | | | | --- | --- | --- | --- | | | 𝒮(t+1)​(hi,hj;W,Θ)=α​∑h∈𝒩i,k∈𝒩jA¯i​h​𝒮(t)​(hh,hk;W,Θ)​A¯k​j⏞Context​information+(1−α)​𝒢​(hi,hj;W,Θ)⏞GATsuperscript𝒮𝑡1subscripth𝑖subscripth𝑗WΘ𝛼superscript⏞subscriptformulae-sequenceℎsubscript𝒩𝑖𝑘subscript𝒩𝑗subscript¯A𝑖ℎsuperscript𝒮𝑡subscripthℎsubscripth𝑘WΘsubscript¯A𝑘𝑗Contextinformation1𝛼superscript⏞𝒢subscripth𝑖subscripth𝑗WΘGAT\\displaystyle\\mathcal{S}^{(t+1)}(\\textbf{h}\\_{i},\\textbf{h}\\_{j};\\textbf{W},\\Theta)=\\alpha\\overbrace{\\sum\\_{h\\in\\mathcal{N}\\_{i},k\\in\\mathcal{N}\\_{j}}\\bar{\\textbf{A}}\\_{ih}\\mathcal{S}^{(t)}(\\textbf{h}\\_{h},\\textbf{h}\\_{k};\\textbf{W},\\Theta)\\bar{\\textbf{A}}\\_{kj}}^{\\mathrm{Context\\,information}}+(1-\\alpha)\\overbrace{\\mathcal{G}(\\textbf{h}\\_{i},\\textbf{h}\\_{j};\\textbf{W},\\Theta)}^{\\mathrm{GAT}} | | (4) |"
+                },
+                {
+                  "type": "formula",
+                  "text": "𝒮(t+1)​(hi,hj;W,Θ)=α​∑h∈𝒩i,k∈𝒩jA¯i​h​𝒮(t)​(hh,hk;W,Θ)​A¯k​j⏞Context​information+(1−α)​𝒢​(hi,hj;W,Θ)⏞GATsuperscript𝒮𝑡1subscripth𝑖subscripth𝑗WΘ𝛼superscript⏞subscriptformulae-sequenceℎsubscript𝒩𝑖𝑘subscript𝒩𝑗subscript¯A𝑖ℎsuperscript𝒮𝑡subscripthℎsubscripth𝑘WΘsubscript¯A𝑘𝑗Contextinformation1𝛼superscript⏞𝒢subscripth𝑖subscripth𝑗WΘGAT\\displaystyle\\mathcal{S}^{(t+1)}(\\textbf{h}_{i},\\textbf{h}_{j};\\textbf{W},\\Theta)=\\alpha\\overbrace{\\sum_{h\\in\\mathcal{N}_{i},k\\in\\mathcal{N}_{j}}\\bar{\\textbf{A}}_{ih}\\mathcal{S}^{(t)}(\\textbf{h}_{h},\\textbf{h}_{k};\\textbf{W},\\Theta)\\bar{\\textbf{A}}_{kj}}^{\\mathrm{Context\\,information}}+(1-\\alpha)\\overbrace{\\mathcal{G}(\\textbf{h}_{i},\\textbf{h}_{j};\\textbf{W},\\Theta)}^{\\mathrm{GAT}}"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "where t=0,1​⋯​T𝑡 01⋯𝑇t=0,1\\cdots T and 𝒮(0)​(hh,hk;W,Θ)=𝒢​(hh,hk;W,Θ)superscript𝒮0subscripthℎsubscripth𝑘WΘ𝒢subscripthℎsubscripth𝑘WΘ\\mathcal{S}^{(0)}(\\textbf{h}\\_{h},\\textbf{h}\\_{k};\\textbf{W},\\Theta)=\\mathcal{G}(\\textbf{h}\\_{h},\\textbf{h}\\_{k};\\textbf{W},\\Theta), as defined in Eq.(1). The parameter α∈(0,1)𝛼01\\alpha\\in(0,1) denotes the fraction of attention information that edge ei​jsubscript𝑒𝑖𝑗e\\_{ij} receives from its neighbors on graph A. The parameter W∈ℝd~×dWsuperscriptℝ~𝑑𝑑\\textbf{W}\\in\\mathbb{R}^{\\tilde{d}\\times d} and ΘΘ\\Theta denote the layer-specific trainable parameter of linear transformation and edge attention estimation, respectively."
+                },
+                {
+                  "type": "formula",
+                  "text": "t=0,1​⋯​T𝑡01⋯𝑇t=0,1\\cdots T"
+                },
+                {
+                  "type": "formula",
+                  "text": "𝒮(0)​(hh,hk;W,Θ)=𝒢​(hh,hk;W,Θ)superscript𝒮0subscripthℎsubscripth𝑘WΘ𝒢subscripthℎsubscripth𝑘WΘ\\mathcal{S}^{(0)}(\\textbf{h}_{h},\\textbf{h}_{k};\\textbf{W},\\Theta)=\\mathcal{G}(\\textbf{h}_{h},\\textbf{h}_{k};\\textbf{W},\\Theta)"
+                },
+                {
+                  "type": "formula",
+                  "text": "α∈(0,1)𝛼01\\alpha\\in(0,1)"
+                },
+                {
+                  "type": "formula",
+                  "text": "ei​jsubscript𝑒𝑖𝑗e_{ij}"
+                },
+                {
+                  "type": "formula",
+                  "text": "W∈ℝd~×dWsuperscriptℝ~𝑑𝑑\\textbf{W}\\in\\mathbb{R}^{\\tilde{d}\\times d}"
+                },
+                {
+                  "type": "formula",
+                  "text": "ΘΘ\\Theta"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Remark. Comparing with GATs, the attention 𝒮(t+1)​(hi,hj;W,Θ)superscript𝒮𝑡1subscripth𝑖subscripth𝑗WΘ\\mathcal{S}^{(t+1)}(\\textbf{h}\\_{i},\\textbf{h}\\_{j};\\textbf{W},\\Theta) of edge ei​jsubscript𝑒𝑖𝑗e\\_{ij} is determined based on both its own feature presentation (Whi,Whj)subscriptWh𝑖subscriptWh𝑗(\\textbf{W}\\textbf{h}\\_{i},\\textbf{W}\\textbf{h}\\_{j}) and attentions 𝒢​(hh,hk;W,Θ)𝒢subscripthℎsubscripth𝑘WΘ\\mathcal{G}(\\textbf{h}\\_{h},\\textbf{h}\\_{k};\\textbf{W},\\Theta) of its neighboring edges eh​ksubscript𝑒ℎ𝑘e\\_{hk}. Therefore, CaGAT can capture more context information in graph attention estimation. When α=0𝛼0\\alpha=0, CaGAT degenerates to GATs. Let Si​j(t)=𝒮(t)​(hi,hj;W,Θ)superscriptsubscriptS𝑖𝑗𝑡superscript𝒮𝑡subscripth𝑖subscripth𝑗WΘ\\textbf{S}\\_{ij}^{(t)}=\\mathcal{S}^{(t)}(\\textbf{h}\\_{i},\\textbf{h}\\_{j};\\textbf{W},\\Theta) and Gi​j=𝒢​(hi,hj;W,Θ)subscriptG𝑖𝑗𝒢subscripth𝑖subscripth𝑗WΘ\\textbf{G}\\_{ij}=\\mathcal{G}(\\textbf{h}\\_{i},\\textbf{h}\\_{j};\\textbf{W},\\Theta), then Eq.([4](https://ar5iv.labs.arxiv.org/html/1910.01736#S3.E4 \"In 3.1 Context-aware edge attention learning ‣ 3 Context-aware Adaptive Graph Attention Network ‣ Context-Aware Graph Attention Networks\")) is compactly formulated as,"
+                },
+                {
+                  "type": "formula",
+                  "text": "𝒮(t+1)​(hi,hj;W,Θ)superscript𝒮𝑡1subscripth𝑖subscripth𝑗WΘ\\mathcal{S}^{(t+1)}(\\textbf{h}_{i},\\textbf{h}_{j};\\textbf{W},\\Theta)"
+                },
+                {
+                  "type": "formula",
+                  "text": "ei​jsubscript𝑒𝑖𝑗e_{ij}"
+                },
+                {
+                  "type": "formula",
+                  "text": "(Whi,Whj)subscriptWh𝑖subscriptWh𝑗(\\textbf{W}\\textbf{h}_{i},\\textbf{W}\\textbf{h}_{j})"
+                },
+                {
+                  "type": "formula",
+                  "text": "𝒢​(hh,hk;W,Θ)𝒢subscripthℎsubscripth𝑘WΘ\\mathcal{G}(\\textbf{h}_{h},\\textbf{h}_{k};\\textbf{W},\\Theta)"
+                },
+                {
+                  "type": "formula",
+                  "text": "eh​ksubscript𝑒ℎ𝑘e_{hk}"
+                },
+                {
+                  "type": "formula",
+                  "text": "α=0𝛼0\\alpha=0"
+                },
+                {
+                  "type": "formula",
+                  "text": "Si​j(t)=𝒮(t)​(hi,hj;W,Θ)superscriptsubscriptS𝑖𝑗𝑡superscript𝒮𝑡subscripth𝑖subscripth𝑗WΘ\\textbf{S}_{ij}^{(t)}=\\mathcal{S}^{(t)}(\\textbf{h}_{i},\\textbf{h}_{j};\\textbf{W},\\Theta)"
+                },
+                {
+                  "type": "formula",
+                  "text": "Gi​j=𝒢​(hi,hj;W,Θ)subscriptG𝑖𝑗𝒢subscripth𝑖subscripth𝑗WΘ\\textbf{G}_{ij}=\\mathcal{G}(\\textbf{h}_{i},\\textbf{h}_{j};\\textbf{W},\\Theta)"
+                },
+                {
+                  "type": "table",
+                  "text": "| | | | | | --- | --- | --- | --- | | | S(t+1)=α​A¯​S(t)​A¯T+(1−α)​GsuperscriptS𝑡1𝛼¯AsuperscriptS𝑡superscript¯AT1𝛼G\\displaystyle\\textbf{S}^{(t+1)}=\\alpha\\bar{\\textbf{A}}\\textbf{S}^{(t)}\\bar{\\textbf{A}}^{\\mathrm{T}}+(1-\\alpha)\\textbf{G} | | (5) |"
+                },
+                {
+                  "type": "formula",
+                  "text": "S(t+1)=α​A¯​S(t)​A¯T+(1−α)​GsuperscriptS𝑡1𝛼¯AsuperscriptS𝑡superscript¯AT1𝛼G\\displaystyle\\textbf{S}^{(t+1)}=\\alpha\\bar{\\textbf{A}}\\textbf{S}^{(t)}\\bar{\\textbf{A}}^{\\mathrm{T}}+(1-\\alpha)\\textbf{G}"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "where t=0,1​⋯​T𝑡 01⋯𝑇t=0,1\\cdots T and S(0)=GsuperscriptS0G\\textbf{S}^{(0)}=\\textbf{G}."
+                },
+                {
+                  "type": "formula",
+                  "text": "t=0,1​⋯​T𝑡01⋯𝑇t=0,1\\cdots T"
+                },
+                {
+                  "type": "formula",
+                  "text": "S(0)=GsuperscriptS0G\\textbf{S}^{(0)}=\\textbf{G}"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Regularization framework. Here, we show that update Eq.([5](https://ar5iv.labs.arxiv.org/html/1910.01736#S3.E5 \"In 3.1 Context-aware edge attention learning ‣ 3 Context-aware Adaptive Graph Attention Network ‣ Context-Aware Graph Attention Networks\")) can be theoretically explained from an regularization framework. First, it can be rewritten as222For any matrices X,Y XY\\textbf{X},\\textbf{Y} and Z with appropriate sizes, equation vec​(XYZT)=(Z⊗X)​vec​(Y)vecsuperscriptXYZTtensor-productZXvecY\\mathrm{vec}(\\textbf{X}\\textbf{Y}\\textbf{Z}^{\\mathrm{T}})=(\\textbf{Z}\\otimes\\textbf{X})\\mathrm{vec}(\\textbf{Y}) is satisfied."
+                },
+                {
+                  "type": "formula",
+                  "text": "X,YXY\\textbf{X},\\textbf{Y}"
+                },
+                {
+                  "type": "formula",
+                  "text": "vec​(XYZT)=(Z⊗X)​vec​(Y)vecsuperscriptXYZTtensor-productZXvecY\\mathrm{vec}(\\textbf{X}\\textbf{Y}\\textbf{Z}^{\\mathrm{T}})=(\\textbf{Z}\\otimes\\textbf{X})\\mathrm{vec}(\\textbf{Y})"
+                },
+                {
+                  "type": "table",
+                  "text": "| | | | | | --- | --- | --- | --- | | | vec​(S(t+1))=α​𝔸​vec​(S(t))+(1−α)​vec​(G)vecsuperscriptS𝑡1𝛼𝔸vecsuperscriptS𝑡1𝛼vecG\\displaystyle\\textrm{vec}(\\textbf{S}^{(t+1)})=\\alpha\\mathbb{A}\\textrm{vec}(\\textbf{S}^{(t)})+(1-\\alpha)\\textrm{vec}(\\textbf{G}) | | (6) |"
+                },
+                {
+                  "type": "formula",
+                  "text": "vec​(S(t+1))=α​𝔸​vec​(S(t))+(1−α)​vec​(G)vecsuperscriptS𝑡1𝛼𝔸vecsuperscriptS𝑡1𝛼vecG\\displaystyle\\textrm{vec}(\\textbf{S}^{(t+1)})=\\alpha\\mathbb{A}\\textrm{vec}(\\textbf{S}^{(t)})+(1-\\alpha)\\textrm{vec}(\\textbf{G})"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "where 𝔸=A¯⊗A¯,A¯=D−1​Aformulae-sequence𝔸tensor-product¯A¯A¯AsuperscriptD1A\\mathbb{A}=\\bar{\\textbf{A}}\\otimes\\bar{\\textbf{A}},\\bar{\\textbf{A}}=\\textbf{D}^{-1}\\textbf{A}, and ⊗tensor-product\\otimes denotes the Kronecker product operation. The operation vec​(⋅)vec⋅\\textrm{vec}(\\cdot) denotes the column vectorization of an input matrix by stacking its columns one after the next. Then, one can prove that the converged solution of Eq.([6](https://ar5iv.labs.arxiv.org/html/1910.01736#S3.E6 \"In 3.1 Context-aware edge attention learning ‣ 3 Context-aware Adaptive Graph Attention Network ‣ Context-Aware Graph Attention Networks\")) is the optimal solution that minimizes the following optimization problem [[19](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib19), [2](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib2)],"
+                },
+                {
+                  "type": "formula",
+                  "text": "𝔸=A¯⊗A¯,A¯=D−1​Aformulae-sequence𝔸tensor-product¯A¯A¯AsuperscriptD1A\\mathbb{A}=\\bar{\\textbf{A}}\\otimes\\bar{\\textbf{A}},\\bar{\\textbf{A}}=\\textbf{D}^{-1}\\textbf{A}"
+                },
+                {
+                  "type": "formula",
+                  "text": "⊗tensor-product\\otimes"
+                },
+                {
+                  "type": "formula",
+                  "text": "vec​(⋅)vec⋅\\textrm{vec}(\\cdot)"
+                },
+                {
+                  "type": "table",
+                  "text": "| | | | | | --- | --- | --- | --- | | | minS⁡ℛCaGAT​(S;A,G)=vec​(S)T​(I−𝔸)​vec​(S)+μ​‖S−G‖F2subscriptSsubscriptℛCaGAT SAGvecsuperscriptSTI𝔸vecS𝜇superscriptsubscriptnormSG𝐹2\\displaystyle\\min\\_{\\textbf{S}}\\,\\mathcal{R}\\_{\\mathrm{CaGAT}}(\\textbf{S};\\textbf{A},\\textbf{G})=\\textrm{vec}(\\textbf{S})^{\\mathrm{T}}(\\textbf{I}-\\mathbb{A})\\textrm{vec}(\\textbf{S})+\\mu\\|{\\textbf{S}}-{\\textbf{G}}\\|\\_{F}^{2} | | (7) |"
+                },
+                {
+                  "type": "formula",
+                  "text": "minS⁡ℛCaGAT​(S;A,G)=vec​(S)T​(I−𝔸)​vec​(S)+μ​‖S−G‖F2subscriptSsubscriptℛCaGATSAGvecsuperscriptSTI𝔸vecS𝜇superscriptsubscriptnormSG𝐹2\\displaystyle\\min_{\\textbf{S}}\\,\\mathcal{R}_{\\mathrm{CaGAT}}(\\textbf{S};\\textbf{A},\\textbf{G})=\\textrm{vec}(\\textbf{S})^{\\mathrm{T}}(\\textbf{I}-\\mathbb{A})\\textrm{vec}(\\textbf{S})+\\mu\\|{\\textbf{S}}-{\\textbf{G}}\\|_{F}^{2}"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "where μ=1α−1𝜇1𝛼1\\mu=\\frac{1}{\\alpha}-1 is a replacement parameter of α𝛼\\alpha to balance two terms. From this regularization framework, one can note that, CaGAT aims to learn a context-aware graph attention S by considering the local consistency as well as preserving the information of original graph attention G."
+                },
+                {
+                  "type": "formula",
+                  "text": "μ=1α−1𝜇1𝛼1\\mu=\\frac{1}{\\alpha}-1"
+                },
+                {
+                  "type": "formula",
+                  "text": "α𝛼\\alpha"
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "3.2 Node feature representation",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "Based on the proposed context-aware graph attention, we can obtain the feature representation of each node visubscript𝑣𝑖v\\_{i} by using the feature aggregation similar to Eq.(3) as"
+                },
+                {
+                  "type": "formula",
+                  "text": "visubscript𝑣𝑖v_{i}"
+                },
+                {
+                  "type": "table",
+                  "text": "| | | | | | --- | --- | --- | --- | | | hi′=λ​∑j∈𝒩i𝒮​(hi,hj;W,Θ)​Whj+(1−λ)​Whisubscriptsuperscripth′𝑖𝜆subscript𝑗subscript𝒩𝑖𝒮subscripth𝑖subscripth𝑗WΘsubscriptWh𝑗1𝜆subscriptWh𝑖\\displaystyle\\textbf{h}^{\\prime}\\_{i}=\\lambda\\sum\\nolimits\\_{j\\in\\mathcal{N}\\_{i}}\\mathcal{S}(\\textbf{h}\\_{i},\\textbf{h}\\_{j};\\textbf{W},\\Theta)\\textbf{W}\\textbf{h}\\_{j}+(1-\\lambda)\\textbf{W}\\textbf{h}\\_{i} | | (8) |"
+                },
+                {
+                  "type": "formula",
+                  "text": "hi′=λ​∑j∈𝒩i𝒮​(hi,hj;W,Θ)​Whj+(1−λ)​Whisubscriptsuperscripth′𝑖𝜆subscript𝑗subscript𝒩𝑖𝒮subscripth𝑖subscripth𝑗WΘsubscriptWh𝑗1𝜆subscriptWh𝑖\\displaystyle\\textbf{h}^{\\prime}_{i}=\\lambda\\sum\\nolimits_{j\\in\\mathcal{N}_{i}}\\mathcal{S}(\\textbf{h}_{i},\\textbf{h}_{j};\\textbf{W},\\Theta)\\textbf{W}\\textbf{h}_{j}+(1-\\lambda)\\textbf{W}\\textbf{h}_{i}"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "where λ∈(0,1)𝜆01\\lambda\\in(0,1) is a weight parameter. Using matrix notation, Eq.(8) is formulated as"
+                },
+                {
+                  "type": "formula",
+                  "text": "λ∈(0,1)𝜆01\\lambda\\in(0,1)"
+                },
+                {
+                  "type": "table",
+                  "text": "| | | | | | --- | --- | --- | --- | | | H′=λ​SWH+(1−λ)​WHsuperscriptH′𝜆SWH1𝜆WH\\displaystyle\\textbf{H}^{\\prime}=\\lambda\\textbf{S}\\textbf{W}\\textbf{H}+(1-\\lambda)\\textbf{W}\\textbf{H} | | (9) |"
+                },
+                {
+                  "type": "formula",
+                  "text": "H′=λ​SWH+(1−λ)​WHsuperscriptH′𝜆SWH1𝜆WH\\displaystyle\\textbf{H}^{\\prime}=\\lambda\\textbf{S}\\textbf{W}\\textbf{H}+(1-\\lambda)\\textbf{W}\\textbf{H}"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "where Si​j=𝒮​(hi,hj;W,Θ)subscriptS𝑖𝑗𝒮subscripth𝑖subscripth𝑗WΘ\\textbf{S}\\_{ij}=\\mathcal{S}(\\textbf{h}\\_{i},\\textbf{h}\\_{j};\\textbf{W},\\Theta) and thus ∑j∈𝒩iSi​j=1,Si​j≥0formulae-sequencesubscript𝑗subscript𝒩𝑖subscriptS𝑖𝑗1subscriptS𝑖𝑗0\\sum\\_{j\\in\\mathcal{N}\\_{i}}\\textbf{S}\\_{ij}=1,\\textbf{S}\\_{ij}\\geq 0."
+                },
+                {
+                  "type": "formula",
+                  "text": "Si​j=𝒮​(hi,hj;W,Θ)subscriptS𝑖𝑗𝒮subscripth𝑖subscripth𝑗WΘ\\textbf{S}_{ij}=\\mathcal{S}(\\textbf{h}_{i},\\textbf{h}_{j};\\textbf{W},\\Theta)"
+                },
+                {
+                  "type": "formula",
+                  "text": "∑j∈𝒩iSi​j=1,Si​j≥0formulae-sequencesubscript𝑗subscript𝒩𝑖subscriptS𝑖𝑗1subscriptS𝑖𝑗0\\sum_{j\\in\\mathcal{N}_{i}}\\textbf{S}_{ij}=1,\\textbf{S}_{ij}\\geq 0"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Regularization framework. The feature aggregation Eq.(8) can be regarded as a one-step neighborhood propagation (NP) which can also be derived from the following regularization framework [[19](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib19)],"
+                },
+                {
+                  "type": "table",
+                  "text": "| | | | | | --- | --- | --- | --- | | | minH′⁡ℛNP​(H′;S,WH)=Tr​(H′​(I−S)​H′T)+γ​‖H′−WH‖F2subscriptsuperscriptH′subscriptℛNP superscriptH′SWHTrsuperscriptH′ISsuperscriptsuperscriptH′T𝛾subscriptsuperscriptnormsuperscriptH′WH2𝐹\\displaystyle\\min\\_{\\textbf{H}^{\\prime}}\\mathcal{R}\\_{\\mathrm{NP}}(\\textbf{H}^{\\prime};\\textbf{S},\\textbf{W}\\textbf{H})=\\mathrm{Tr}({\\textbf{H}^{\\prime}}(\\textbf{I}-\\textbf{S}){\\textbf{H}^{\\prime}}^{\\mathrm{T}})+\\gamma\\|\\textbf{H}^{\\prime}-\\textbf{W}\\textbf{H}\\|^{2}\\_{F} | | (10) |"
+                },
+                {
+                  "type": "formula",
+                  "text": "minH′⁡ℛNP​(H′;S,WH)=Tr​(H′​(I−S)​H′T)+γ​‖H′−WH‖F2subscriptsuperscriptH′subscriptℛNPsuperscriptH′SWHTrsuperscriptH′ISsuperscriptsuperscriptH′T𝛾subscriptsuperscriptnormsuperscriptH′WH2𝐹\\displaystyle\\min_{\\textbf{H}^{\\prime}}\\mathcal{R}_{\\mathrm{NP}}(\\textbf{H}^{\\prime};\\textbf{S},\\textbf{W}\\textbf{H})=\\mathrm{Tr}({\\textbf{H}^{\\prime}}(\\textbf{I}-\\textbf{S}){\\textbf{H}^{\\prime}}^{\\mathrm{T}})+\\gamma\\|\\textbf{H}^{\\prime}-\\textbf{W}\\textbf{H}\\|^{2}_{F}"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "where γ=1λ−1𝛾1𝜆1\\gamma=\\frac{1}{\\lambda}-1 is a replacement parameter of λ𝜆\\lambda."
+                },
+                {
+                  "type": "formula",
+                  "text": "γ=1λ−1𝛾1𝜆1\\gamma=\\frac{1}{\\lambda}-1"
+                },
+                {
+                  "type": "formula",
+                  "text": "λ𝜆\\lambda"
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "3.3 Unified model",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "Based on regularization frameworks (Eq.(6) and Eq.(9)), we can propose a unified regularization framework by conducting context-aware learning of both graph edge attention and node feature representation together as"
+                },
+                {
+                  "type": "table",
+                  "text": "| | | | | | --- | --- | --- | --- | | | minS,H′𝒰=ℛCaGAT​(S;A,G)+β​ℛNP​(H′;S,WH) subscript SsuperscriptH′𝒰 subscriptℛCaGAT SAG𝛽subscriptℛNP superscriptH′SWH\\displaystyle\\min\\_{\\textbf{S},\\textbf{H}^{\\prime}}\\ \\ \\mathcal{U}=\\mathcal{R}\\_{\\mathrm{CaGAT}}(\\textbf{S};\\textbf{A},\\textbf{G})+\\beta\\mathcal{R}\\_{\\mathrm{NP}}(\\textbf{H}^{\\prime};\\textbf{S},\\textbf{W}\\textbf{H}) | | (11) |"
+                },
+                {
+                  "type": "formula",
+                  "text": "minS,H′𝒰=ℛCaGAT​(S;A,G)+β​ℛNP​(H′;S,WH)subscriptSsuperscriptH′𝒰subscriptℛCaGATSAG𝛽subscriptℛNPsuperscriptH′SWH\\displaystyle\\min_{\\textbf{S},\\textbf{H}^{\\prime}}\\ \\ \\mathcal{U}=\\mathcal{R}_{\\mathrm{CaGAT}}(\\textbf{S};\\textbf{A},\\textbf{G})+\\beta\\mathcal{R}_{\\mathrm{NP}}(\\textbf{H}^{\\prime};\\textbf{S},\\textbf{W}\\textbf{H})"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "where β>0𝛽0\\beta>0 balances two terms. In practical, the optimal S and H′superscriptH′\\textbf{H}^{\\prime} can be obtained via a simple approximate algorithm which alternatively conducts the following Step 1 and Step 2."
+                },
+                {
+                  "type": "formula",
+                  "text": "β>0𝛽0\\beta>0"
+                },
+                {
+                  "type": "formula",
+                  "text": "H′superscriptH′\\textbf{H}^{\\prime}"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Step 1. Solving S while fixing H′superscriptH′\\textbf{H}^{\\prime}, the problem becomes"
+                },
+                {
+                  "type": "formula",
+                  "text": "H′superscriptH′\\textbf{H}^{\\prime}"
+                },
+                {
+                  "type": "table",
+                  "text": "| | | | | | --- | --- | --- | --- | | | minSℛCaGAT​(S;A,G)+β​Tr​(H′​(I−S)​H′T) subscriptSsubscriptℛCaGAT SAG𝛽TrsuperscriptH′ISsuperscriptsuperscriptH′T\\displaystyle\\min\\_{\\textbf{S}}\\ \\ \\mathcal{R}\\_{\\mathrm{CaGAT}}(\\textbf{S};\\textbf{A},\\textbf{G})+\\beta\\mathrm{Tr}({\\textbf{H}^{\\prime}}(\\textbf{I}-\\textbf{S}){\\textbf{H}^{\\prime}}^{\\mathrm{T}}) | | (12) |"
+                },
+                {
+                  "type": "formula",
+                  "text": "minSℛCaGAT​(S;A,G)+β​Tr​(H′​(I−S)​H′T)subscriptSsubscriptℛCaGATSAG𝛽TrsuperscriptH′ISsuperscriptsuperscriptH′T\\displaystyle\\min_{\\textbf{S}}\\ \\ \\mathcal{R}_{\\mathrm{CaGAT}}(\\textbf{S};\\textbf{A},\\textbf{G})+\\beta\\mathrm{Tr}({\\textbf{H}^{\\prime}}(\\textbf{I}-\\textbf{S}){\\textbf{H}^{\\prime}}^{\\mathrm{T}})"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Then, Eq.(12) can be rewritten more compactly as"
+                },
+                {
+                  "type": "table",
+                  "text": "| | | | | | --- | --- | --- | --- | | | minS⁡vec​(S)T​(I−𝔸)​vec​(S)+μ​‖S−G‖F2−β​Tr​(SH′T​H′)subscriptSvecsuperscriptSTI𝔸vecS𝜇superscriptsubscriptnormSG𝐹2𝛽TrsuperscriptsuperscriptSH′TsuperscriptH′\\displaystyle\\min\\_{\\textbf{S}}\\,\\,\\,\\textrm{vec}(\\textbf{S})^{\\mathrm{T}}(\\textbf{I}-\\mathbb{A})\\textrm{vec}(\\textbf{S})+\\mu\\|{\\textbf{S}}-{\\textbf{G}}\\|\\_{F}^{2}-\\beta\\mathrm{Tr}({\\textbf{S}}{{\\textbf{H}^{\\prime}}^{\\mathrm{T}}\\textbf{H}^{\\prime}}) | | (13) |"
+                },
+                {
+                  "type": "formula",
+                  "text": "minS⁡vec​(S)T​(I−𝔸)​vec​(S)+μ​‖S−G‖F2−β​Tr​(SH′T​H′)subscriptSvecsuperscriptSTI𝔸vecS𝜇superscriptsubscriptnormSG𝐹2𝛽TrsuperscriptsuperscriptSH′TsuperscriptH′\\displaystyle\\min_{\\textbf{S}}\\,\\,\\,\\textrm{vec}(\\textbf{S})^{\\mathrm{T}}(\\textbf{I}-\\mathbb{A})\\textrm{vec}(\\textbf{S})+\\mu\\|{\\textbf{S}}-{\\textbf{G}}\\|_{F}^{2}-\\beta\\mathrm{Tr}({\\textbf{S}}{{\\textbf{H}^{\\prime}}^{\\mathrm{T}}\\textbf{H}^{\\prime}})"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "It is equivalent to"
+                },
+                {
+                  "type": "table",
+                  "text": "| | | | | | --- | --- | --- | --- | | | minS⁡vec​(S)T​(I−𝔸)​vec​(S)+μ​‖S−(G+β2​μ​H′T​H′)‖F2subscriptSvecsuperscriptSTI𝔸vecS𝜇superscriptsubscriptnormSG𝛽2𝜇superscriptsuperscriptH′TsuperscriptH′𝐹2\\displaystyle\\min\\_{\\textbf{S}}\\,\\,\\,\\textrm{vec}(\\textbf{S})^{\\mathrm{T}}(\\textbf{I}-\\mathbb{A})\\textrm{vec}(\\textbf{S})+\\mu\\|{\\textbf{S}}-({\\textbf{G}}+\\textstyle\\frac{\\beta}{2\\mu}{{\\textbf{H}^{\\prime}}^{\\mathrm{T}}\\textbf{H}^{\\prime}})\\|\\_{F}^{2} | | (14) |"
+                },
+                {
+                  "type": "formula",
+                  "text": "minS⁡vec​(S)T​(I−𝔸)​vec​(S)+μ​‖S−(G+β2​μ​H′T​H′)‖F2subscriptSvecsuperscriptSTI𝔸vecS𝜇superscriptsubscriptnormSG𝛽2𝜇superscriptsuperscriptH′TsuperscriptH′𝐹2\\displaystyle\\min_{\\textbf{S}}\\,\\,\\,\\textrm{vec}(\\textbf{S})^{\\mathrm{T}}(\\textbf{I}-\\mathbb{A})\\textrm{vec}(\\textbf{S})+\\mu\\|{\\textbf{S}}-({\\textbf{G}}+\\textstyle\\frac{\\beta}{2\\mu}{{\\textbf{H}^{\\prime}}^{\\mathrm{T}}\\textbf{H}^{\\prime}})\\|_{F}^{2}"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "The optimal S can be computed approximately via a power iteration update algorithm as"
+                },
+                {
+                  "type": "table",
+                  "text": "| | | | | | --- | --- | --- | --- | | | S(t+1)=α​A¯​S(t)​A¯T+(1−α)​G+ξ​H′T​H′superscriptS𝑡1𝛼¯AsuperscriptS𝑡superscript¯AT1𝛼G𝜉superscriptsuperscriptH′TsuperscriptH′\\displaystyle\\textbf{S}^{(t+1)}=\\alpha\\bar{\\textbf{A}}\\textbf{S}^{(t)}\\bar{\\textbf{A}}^{\\mathrm{T}}+(1-\\alpha)\\textbf{G}+\\xi{\\textbf{H}^{\\prime}}^{\\mathrm{T}}\\textbf{H}^{\\prime} | | (15) |"
+                },
+                {
+                  "type": "formula",
+                  "text": "S(t+1)=α​A¯​S(t)​A¯T+(1−α)​G+ξ​H′T​H′superscriptS𝑡1𝛼¯AsuperscriptS𝑡superscript¯AT1𝛼G𝜉superscriptsuperscriptH′TsuperscriptH′\\displaystyle\\textbf{S}^{(t+1)}=\\alpha\\bar{\\textbf{A}}\\textbf{S}^{(t)}\\bar{\\textbf{A}}^{\\mathrm{T}}+(1-\\alpha)\\textbf{G}+\\xi{\\textbf{H}^{\\prime}}^{\\mathrm{T}}\\textbf{H}^{\\prime}"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "where t=0,1​⋯​T𝑡 01⋯𝑇t=0,1\\cdots T and S(0)=GsuperscriptS0G\\textbf{S}^{(0)}=\\textbf{G}. Parameter α=11+μ𝛼11𝜇\\alpha=\\frac{1}{1+\\mu} and ξ=(1−α)​β2​μ𝜉1𝛼𝛽2𝜇\\xi=\\frac{(1-\\alpha)\\beta}{2\\mu}."
+                },
+                {
+                  "type": "formula",
+                  "text": "t=0,1​⋯​T𝑡01⋯𝑇t=0,1\\cdots T"
+                },
+                {
+                  "type": "formula",
+                  "text": "S(0)=GsuperscriptS0G\\textbf{S}^{(0)}=\\textbf{G}"
+                },
+                {
+                  "type": "formula",
+                  "text": "α=11+μ𝛼11𝜇\\alpha=\\frac{1}{1+\\mu}"
+                },
+                {
+                  "type": "formula",
+                  "text": "ξ=(1−α)​β2​μ𝜉1𝛼𝛽2𝜇\\xi=\\frac{(1-\\alpha)\\beta}{2\\mu}"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Step 2. Solving H′superscriptH′\\textbf{H}^{\\prime} while fixing S, the problem becomes Eq.(10). The optimal solution is"
+                },
+                {
+                  "type": "formula",
+                  "text": "H′superscriptH′\\textbf{H}^{\\prime}"
+                },
+                {
+                  "type": "table",
+                  "text": "| | | | | | --- | --- | --- | --- | | | H′=(1−λ)​(I−λ​S)−1​WHsuperscriptH′1𝜆superscriptI𝜆S1WH\\displaystyle\\textbf{H}^{\\prime}=(1-\\lambda)(\\textbf{I}-\\lambda\\textbf{S})^{-1}\\textbf{WH} | | (16) |"
+                },
+                {
+                  "type": "formula",
+                  "text": "H′=(1−λ)​(I−λ​S)−1​WHsuperscriptH′1𝜆superscriptI𝜆S1WH\\displaystyle\\textbf{H}^{\\prime}=(1-\\lambda)(\\textbf{I}-\\lambda\\textbf{S})^{-1}\\textbf{WH}"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "and an approximate solution can be obtained by [[19](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib19), [23](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib23)]"
+                },
+                {
+                  "type": "table",
+                  "text": "| | | | | | --- | --- | --- | --- | | | H′=[(λ​S)T+(1−λ)​∑t=0T−1(λ​S)i]​WHsuperscriptH′delimited-[]superscript𝜆S𝑇1𝜆subscriptsuperscript𝑇1𝑡0superscript𝜆S𝑖WH\\displaystyle\\textbf{H}^{\\prime}=\\big{[}(\\lambda\\textbf{S})^{T}+(1-\\lambda)\\textstyle\\sum^{T-1}\\_{t=0}(\\lambda\\textbf{S})^{i}\\big{]}\\textbf{WH} | | (17) |"
+                },
+                {
+                  "type": "formula",
+                  "text": "H′=[(λ​S)T+(1−λ)​∑t=0T−1(λ​S)i]​WHsuperscriptH′delimited-[]superscript𝜆S𝑇1𝜆subscriptsuperscript𝑇1𝑡0superscript𝜆S𝑖WH\\displaystyle\\textbf{H}^{\\prime}=\\big{[}(\\lambda\\textbf{S})^{T}+(1-\\lambda)\\textstyle\\sum^{T-1}_{t=0}(\\lambda\\textbf{S})^{i}\\big{]}\\textbf{WH}"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "When T=1𝑇1T=1, we obtain the one-step iteration solution as"
+                },
+                {
+                  "type": "formula",
+                  "text": "T=1𝑇1T=1"
+                },
+                {
+                  "type": "table",
+                  "text": "| | | | | | --- | --- | --- | --- | | | H′=λ​SWH+(1−λ)​WHsuperscriptH′𝜆SWH1𝜆WH\\displaystyle\\textbf{H}^{\\prime}=\\lambda\\textbf{S}\\textbf{W}\\textbf{H}+(1-\\lambda)\\textbf{W}\\textbf{H} | | (18) |"
+                },
+                {
+                  "type": "formula",
+                  "text": "H′=λ​SWH+(1−λ)​WHsuperscriptH′𝜆SWH1𝜆WH\\displaystyle\\textbf{H}^{\\prime}=\\lambda\\textbf{S}\\textbf{W}\\textbf{H}+(1-\\lambda)\\textbf{W}\\textbf{H}"
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "3.4 CaGAT architecture",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "The overall layer-wise propagation of the proposed CaGAT is summarized in Algorithm 1, where σ​(⋅)𝜎⋅\\sigma(\\cdot) used in the last step denotes an activation function, such as ReLU​(⋅)=max⁡(0,⋅)ReLU⋅0⋅\\mathrm{ReLU}(\\cdot)=\\max(0,\\cdot). Considering the efficiency of CaGAT training, we employ a truncated iteration algorithm to optimize the context-aware problem approximately in CaGAT architecture. In this paper, we apply CaGAT on semi-supervised classification. Similar to many other works [[10](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib10), [17](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib17)], the optimal weight matrix W and weight vector ΘΘ\\Theta of each hidden layer in CaGAT are trained by minimizing the cross-entropy loss via an Adam algorithm [[9](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib9)] which is initialized by using Glorot initialization [[6](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib6)]. Figure 1 shows the training loss values across different epochs. One can note that, CaGAT obtains obviously lower cross-entropy loss values than GAT at convergence, which clearly demonstrates the higher predictive accuracy of CaGAT model."
+                },
+                {
+                  "type": "formula",
+                  "text": "σ​(⋅)𝜎⋅\\sigma(\\cdot)"
+                },
+                {
+                  "type": "formula",
+                  "text": "ReLU​(⋅)=max⁡(0,⋅)ReLU⋅0⋅\\mathrm{ReLU}(\\cdot)=\\max(0,\\cdot)"
+                },
+                {
+                  "type": "formula",
+                  "text": "ΘΘ\\Theta"
+                },
+                {
+                  "type": "formula",
+                  "text": "H∈ℝd×nHsuperscriptℝ𝑑𝑛\\textbf{H}\\in\\mathbb{R}^{d\\times n}"
+                },
+                {
+                  "type": "formula",
+                  "text": "A∈ℝn×nAsuperscriptℝ𝑛𝑛{\\textbf{A}}\\in\\mathbb{R}^{n\\times n}"
+                },
+                {
+                  "type": "formula",
+                  "text": "ΘΘ\\Theta"
+                },
+                {
+                  "type": "formula",
+                  "text": "ξ,α𝜉𝛼\\xi,\\alpha"
+                },
+                {
+                  "type": "formula",
+                  "text": "λ𝜆\\lambda"
+                },
+                {
+                  "type": "formula",
+                  "text": "K𝐾K"
+                },
+                {
+                  "type": "formula",
+                  "text": "T𝑇T"
+                },
+                {
+                  "type": "formula",
+                  "text": "H′superscriptH′\\textbf{H}^{\\prime}"
+                },
+                {
+                  "type": "formula",
+                  "text": "A¯=D−1​A¯AsuperscriptD1A\\bar{\\textbf{A}}=\\textbf{D}^{-1}\\textbf{A}"
+                },
+                {
+                  "type": "formula",
+                  "text": "Gi​jsubscriptG𝑖𝑗\\textbf{G}_{ij}"
+                },
+                {
+                  "type": "formula",
+                  "text": "Gi​j=𝒢​(hi,hj;W,Θ)subscriptG𝑖𝑗𝒢subscripth𝑖subscripth𝑗WΘ\\textbf{G}_{ij}=\\mathcal{G}(\\textbf{h}_{i},\\textbf{h}_{j};\\textbf{W},\\Theta)"
+                },
+                {
+                  "type": "formula",
+                  "text": "H′superscriptH′{\\textbf{H}^{\\prime}}"
+                },
+                {
+                  "type": "formula",
+                  "text": "H′←λ​GWH+(1−λ)​WH←superscriptH′𝜆GWH1𝜆WH\\textbf{H}^{\\prime}\\leftarrow\\lambda\\textbf{G}\\textbf{W}\\textbf{H}+(1-\\lambda)\\textbf{W}\\textbf{H}"
+                },
+                {
+                  "type": "formula",
+                  "text": "k=1,2​⋯​K𝑘12⋯𝐾k=1,2\\cdots K"
+                },
+                {
+                  "type": "formula",
+                  "text": "t=1,2​⋯​T𝑡12⋯𝑇t=1,2\\cdots T"
+                },
+                {
+                  "type": "formula",
+                  "text": "S←α​A¯​S​A¯T+(1−α)​G+ξ​H′T​H′←S𝛼¯ASsuperscript¯AT1𝛼G𝜉superscriptsuperscriptH′TsuperscriptH′\\textbf{S}\\leftarrow\\alpha\\bar{\\textbf{A}}\\textbf{S}\\bar{\\textbf{A}}^{\\mathrm{T}}+(1-\\alpha)\\textbf{G}+\\xi{\\textbf{H}^{\\prime}}^{\\mathrm{T}}\\textbf{H}^{\\prime}"
+                },
+                {
+                  "type": "formula",
+                  "text": "H′←λ​SWH′+(1−λ)​WH←superscriptH′𝜆superscriptSWH′1𝜆WH\\textbf{H}^{\\prime}\\leftarrow\\lambda\\textbf{S}\\textbf{W}\\textbf{H}^{\\prime}+(1-\\lambda)\\textbf{W}\\textbf{H}"
+                },
+                {
+                  "type": "formula",
+                  "text": "H′←σ​(H′)←superscriptH′𝜎superscriptH′\\textbf{H}^{\\prime}\\leftarrow\\sigma(\\textbf{H}^{\\prime})"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Complexity analysis. The main computation complexity of CaGAT network training involves context-aware attention computation and feature aggregation. For context-aware attention computation step, we adopt a simple update algorithm and the whole computational complexity is 𝒪​(T​n3)𝒪𝑇superscript𝑛3\\mathcal{O}(Tn^{3}) in the worst case (for the full dense graph). For feature aggregation step, we adopt a similar feature aggregation used in GATs [[17](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib17)], which has the computational complexity as 𝒪​(n2​d)𝒪superscript𝑛2𝑑\\mathcal{O}(n^{2}d) in the worst case, where d𝑑d denotes the feature dimension of H. Therefore, the whole complexity is 𝒪​(K​(T​n3+n2​d))𝒪𝐾𝑇superscript𝑛3superscript𝑛2𝑑\\mathcal{O}(K(Tn^{3}+n^{2}d)). In our experiments, the maximum iterations {K,T}𝐾𝑇\\{K,T\\} are set to {3,2}32\\{3,2\\} respectively. Thus, the overall layer-wise propagation in CaGAT is not computationally expensive."
+                },
+                {
+                  "type": "formula",
+                  "text": "𝒪​(T​n3)𝒪𝑇superscript𝑛3\\mathcal{O}(Tn^{3})"
+                },
+                {
+                  "type": "formula",
+                  "text": "𝒪​(n2​d)𝒪superscript𝑛2𝑑\\mathcal{O}(n^{2}d)"
+                },
+                {
+                  "type": "formula",
+                  "text": "d𝑑d"
+                },
+                {
+                  "type": "formula",
+                  "text": "𝒪​(K​(T​n3+n2​d))𝒪𝐾𝑇superscript𝑛3superscript𝑛2𝑑\\mathcal{O}(K(Tn^{3}+n^{2}d))"
+                },
+                {
+                  "type": "formula",
+                  "text": "{K,T}𝐾𝑇\\{K,T\\}"
+                },
+                {
+                  "type": "formula",
+                  "text": "{3,2}32\\{3,2\\}"
+                }
+              ],
+              "children": []
+            }
+          ]
+        },
+        {
+          "heading": "4 Experiments",
+          "level": 2,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "To verify the effectiveness of the proposed method, we implement our CaGAT and test it on four benchmark datasets and compare it with some other related methods."
+            }
+          ],
+          "children": [
+            {
+              "heading": "4.1 Datasets",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "We test our method on four benchmark datasets, including Cora, Citeseer, Pubmed from a graph neural network dataset [[16](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib16)] and Cora-ML [[14](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib14), [12](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib12)]. The details of these datasets and their usages in our experiments are introduced below."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Cora. This data contains 2485 nodes and 7554 edges. Nodes correspond to documents and edges to citations between documents. Each node has a 1433 dimension feature descriptor and all the nodes are classified into 7 classes."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Citeseer. This data contains 2110 nodes and 5778 edges. Each node corresponds to a document and edge to citation relationship between documents. The nodes of this network are classified into 6 classes and each node has been represented by a 3703 dimension feature descriptor."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Pubmed. This dataset contains 19717 nodes and 64041 edges which are classified into 3 classes. Each node is represented by a 500 dimension feature descriptor."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Cora-ML. It contains 2810 nodes and 7981 edges. Each node is represented by a 2879 dimension feature descriptor and all the nodes are falling into 7 classes."
+                },
+                {
+                  "type": "table",
+                  "text": "| | | | | | | --- | --- | --- | --- | --- | | Dataset | Cora | | Citeseer | | | No. of label (each class) | 10 | 20 | 10 | 20 | | MLP | 50.30 ±plus-or-minus\\pm 2.98 | 58.34 ±plus-or-minus\\pm 1.84 | 52.31±plus-or-minus\\pm 2.52 | 58.98 ±plus-or-minus\\pm 1.89 | | LogReg [[16](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib16)] | 50.78 ±plus-or-minus\\pm 4.66 | 58.38 ±plus-or-minus\\pm 2.36 | 53.23 ±plus-or-minus\\pm 3.28 | 60.86 ±plus-or-minus\\pm 2.77 | | LabelProp [[25](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib25)] | 67.78 ±plus-or-minus\\pm 4.62 | 75.41 ±plus-or-minus\\pm 2.75 | 65.42 ±plus-or-minus\\pm 2.65 | 68.24 ±plus-or-minus\\pm 2.07 | | LabelProp NL [[25](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib25)] | 70.59 ±plus-or-minus\\pm 1.56 | 74.36 ±plus-or-minus\\pm 1.69 | 63.81±plus-or-minus\\pm 2.48 | 66.61 ±plus-or-minus\\pm 1.82 | | DGI [[18](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib18)] | 70.78 ±plus-or-minus\\pm 4.46 | 71.19 ±plus-or-minus\\pm 4.55 | 68.69 ±plus-or-minus\\pm 2.35 | 67.97 ±plus-or-minus\\pm 2.66 | | GraphSAGE [[7](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib7)] | 70.89 ±plus-or-minus\\pm 3.99 | 77.54 ±plus-or-minus\\pm 1.91 | 68.48 ±plus-or-minus\\pm 1.92 | 71.84 ±plus-or-minus\\pm 1.36 | | CVD+PP [[4](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib4)] | 75.97 ±plus-or-minus\\pm 2.65 | 79.57 ±plus-or-minus\\pm 1.18 | 70.74 ±plus-or-minus\\pm 1.74 | 70.95 ±plus-or-minus\\pm 1.21 | | GCN [[10](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib10)] | 76.35 ±plus-or-minus\\pm 2.79 | 79.03 ±plus-or-minus\\pm 1.52 | 71.04 ±plus-or-minus\\pm 1.79 | 71.49 ±plus-or-minus\\pm 1.24 | | GATs [[17](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib17)] | 76.54 ±plus-or-minus\\pm 2.50 | 79.07 ±plus-or-minus\\pm 1.36 | 71.07 ±plus-or-minus\\pm 1.23 | 71.91 ±plus-or-minus\\pm 1.27 | | CaGAT | 77.98 ±plus-or-minus\\pm 2.38 | 80.51 ±plus-or-minus\\pm 0.80 | 72.12 ±plus-or-minus\\pm 1.35 | 73.21 ±plus-or-minus\\pm 1.36 | | Dataset | Pubmed | | Cora-ML | | | No. of label (each class) | 10 | 20 | 10 | 20 | | MLP | 64.39 ±plus-or-minus\\pm 2.77 | 69.76 ±plus-or-minus\\pm 1.81 | 53.87 ±plus-or-minus\\pm 2.54 | 63.76 ±plus-or-minus\\pm 1.75 | | LogReg [[16](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib16)] | 60.75 ±plus-or-minus\\pm 3.59 | 64.03 ±plus-or-minus\\pm 2.89 | 48.07 ±plus-or-minus\\pm 6.34 | 62.17 ±plus-or-minus\\pm 2.64 | | LabelProp [[25](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib25)] | 64.03 ±plus-or-minus\\pm 8.72 | 70.64 ±plus-or-minus\\pm 5.20 | 65.03 ±plus-or-minus\\pm 4.41 | 71.81 ±plus-or-minus\\pm 3.78 | | LabelProp NL [[25](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib25)] | 68.01 ±plus-or-minus\\pm 5.03 | 73.31 ±plus-or-minus\\pm 1.47 | 72.23 ±plus-or-minus\\pm 2.18 | 75.26 ±plus-or-minus\\pm 1.48 | | DGI [[18](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib18)] | 70.08 ±plus-or-minus\\pm 2.71 | 71.62 ±plus-or-minus\\pm 1.59 | 69.38 ±plus-or-minus\\pm 4.99 | 72.26 ±plus-or-minus\\pm 2.89 | | GraphSAGE [[7](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib7)] | 69.92 ±plus-or-minus\\pm 3.85 | 73.16 ±plus-or-minus\\pm 2.08 | 75.24 ±plus-or-minus\\pm 3.65 | 80.82 ±plus-or-minus\\pm 1.75 | | CVD+PP [[4](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib4)] | 75.00 ±plus-or-minus\\pm 3.17 | 76.89 ±plus-or-minus\\pm 1.70 | 78.51 ±plus-or-minus\\pm 2.64 | 80.83 ±plus-or-minus\\pm 1.54 | | GCN [[10](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib10)] | 74.88 ±plus-or-minus\\pm 2.85 | 77.41 ±plus-or-minus\\pm 2.06 | 78.41 ±plus-or-minus\\pm 2.37 | 80.04 ±plus-or-minus\\pm 1.63 | | GATs [[17](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib17)] | 74.64 ±plus-or-minus\\pm 2.23 | 76.74 ±plus-or-minus\\pm 1.73 | 78.98 ±plus-or-minus\\pm 2.09 | 80.33 ±plus-or-minus\\pm 1.98 | | CaGAT | 75.63 ±plus-or-minus\\pm 3.09 | 77.68 ±plus-or-minus\\pm 2.15 | 80.38 ±plus-or-minus\\pm 2.09 | 81.86 ±plus-or-minus\\pm 1.85 |"
+                },
+                {
+                  "type": "formula",
+                  "text": "±plus-or-minus\\pm"
+                },
+                {
+                  "type": "formula",
+                  "text": "±plus-or-minus\\pm"
+                },
+                {
+                  "type": "formula",
+                  "text": "±plus-or-minus\\pm"
+                },
+                {
+                  "type": "formula",
+                  "text": "±plus-or-minus\\pm"
+                },
+                {
+                  "type": "formula",
+                  "text": "±plus-or-minus\\pm"
+                },
+                {
+                  "type": "formula",
+                  "text": "±plus-or-minus\\pm"
+                },
+                {
+                  "type": "formula",
+                  "text": "±plus-or-minus\\pm"
+                },
+                {
+                  "type": "formula",
+                  "text": "±plus-or-minus\\pm"
+                },
+                {
+                  "type": "formula",
+                  "text": "±plus-or-minus\\pm"
+                },
+                {
+                  "type": "formula",
+                  "text": "±plus-or-minus\\pm"
+                },
+                {
+                  "type": "formula",
+                  "text": "±plus-or-minus\\pm"
+                },
+                {
+                  "type": "formula",
+                  "text": "±plus-or-minus\\pm"
+                },
+                {
+                  "type": "formula",
+                  "text": "±plus-or-minus\\pm"
+                },
+                {
+                  "type": "formula",
+                  "text": "±plus-or-minus\\pm"
+                },
+                {
+                  "type": "formula",
+                  "text": "±plus-or-minus\\pm"
+                },
+                {
+                  "type": "formula",
+                  "text": "±plus-or-minus\\pm"
+                },
+                {
+                  "type": "formula",
+                  "text": "±plus-or-minus\\pm"
+                },
+                {
+                  "type": "formula",
+                  "text": "±plus-or-minus\\pm"
+                },
+                {
+                  "type": "formula",
+                  "text": "±plus-or-minus\\pm"
+                },
+                {
+                  "type": "formula",
+                  "text": "±plus-or-minus\\pm"
+                },
+                {
+                  "type": "formula",
+                  "text": "±plus-or-minus\\pm"
+                },
+                {
+                  "type": "formula",
+                  "text": "±plus-or-minus\\pm"
+                },
+                {
+                  "type": "formula",
+                  "text": "±plus-or-minus\\pm"
+                },
+                {
+                  "type": "formula",
+                  "text": "±plus-or-minus\\pm"
+                },
+                {
+                  "type": "formula",
+                  "text": "±plus-or-minus\\pm"
+                },
+                {
+                  "type": "formula",
+                  "text": "±plus-or-minus\\pm"
+                },
+                {
+                  "type": "formula",
+                  "text": "±plus-or-minus\\pm"
+                },
+                {
+                  "type": "formula",
+                  "text": "±plus-or-minus\\pm"
+                },
+                {
+                  "type": "formula",
+                  "text": "±plus-or-minus\\pm"
+                },
+                {
+                  "type": "formula",
+                  "text": "±plus-or-minus\\pm"
+                },
+                {
+                  "type": "formula",
+                  "text": "±plus-or-minus\\pm"
+                },
+                {
+                  "type": "formula",
+                  "text": "±plus-or-minus\\pm"
+                },
+                {
+                  "type": "formula",
+                  "text": "±plus-or-minus\\pm"
+                },
+                {
+                  "type": "formula",
+                  "text": "±plus-or-minus\\pm"
+                },
+                {
+                  "type": "formula",
+                  "text": "±plus-or-minus\\pm"
+                },
+                {
+                  "type": "formula",
+                  "text": "±plus-or-minus\\pm"
+                },
+                {
+                  "type": "formula",
+                  "text": "±plus-or-minus\\pm"
+                },
+                {
+                  "type": "formula",
+                  "text": "±plus-or-minus\\pm"
+                },
+                {
+                  "type": "formula",
+                  "text": "±plus-or-minus\\pm"
+                },
+                {
+                  "type": "formula",
+                  "text": "±plus-or-minus\\pm"
+                },
+                {
+                  "type": "formula",
+                  "text": "±plus-or-minus\\pm"
+                },
+                {
+                  "type": "formula",
+                  "text": "±plus-or-minus\\pm"
+                },
+                {
+                  "type": "formula",
+                  "text": "±plus-or-minus\\pm"
+                },
+                {
+                  "type": "formula",
+                  "text": "±plus-or-minus\\pm"
+                },
+                {
+                  "type": "formula",
+                  "text": "±plus-or-minus\\pm"
+                },
+                {
+                  "type": "formula",
+                  "text": "±plus-or-minus\\pm"
+                },
+                {
+                  "type": "formula",
+                  "text": "±plus-or-minus\\pm"
+                },
+                {
+                  "type": "formula",
+                  "text": "±plus-or-minus\\pm"
+                },
+                {
+                  "type": "formula",
+                  "text": "±plus-or-minus\\pm"
+                },
+                {
+                  "type": "formula",
+                  "text": "±plus-or-minus\\pm"
+                },
+                {
+                  "type": "formula",
+                  "text": "±plus-or-minus\\pm"
+                },
+                {
+                  "type": "formula",
+                  "text": "±plus-or-minus\\pm"
+                },
+                {
+                  "type": "formula",
+                  "text": "±plus-or-minus\\pm"
+                },
+                {
+                  "type": "formula",
+                  "text": "±plus-or-minus\\pm"
+                },
+                {
+                  "type": "formula",
+                  "text": "±plus-or-minus\\pm"
+                },
+                {
+                  "type": "formula",
+                  "text": "±plus-or-minus\\pm"
+                },
+                {
+                  "type": "formula",
+                  "text": "±plus-or-minus\\pm"
+                },
+                {
+                  "type": "formula",
+                  "text": "±plus-or-minus\\pm"
+                },
+                {
+                  "type": "formula",
+                  "text": "±plus-or-minus\\pm"
+                },
+                {
+                  "type": "formula",
+                  "text": "±plus-or-minus\\pm"
+                },
+                {
+                  "type": "formula",
+                  "text": "±plus-or-minus\\pm"
+                },
+                {
+                  "type": "formula",
+                  "text": "±plus-or-minus\\pm"
+                },
+                {
+                  "type": "formula",
+                  "text": "±plus-or-minus\\pm"
+                },
+                {
+                  "type": "formula",
+                  "text": "±plus-or-minus\\pm"
+                },
+                {
+                  "type": "formula",
+                  "text": "±plus-or-minus\\pm"
+                },
+                {
+                  "type": "formula",
+                  "text": "±plus-or-minus\\pm"
+                },
+                {
+                  "type": "formula",
+                  "text": "±plus-or-minus\\pm"
+                },
+                {
+                  "type": "formula",
+                  "text": "±plus-or-minus\\pm"
+                },
+                {
+                  "type": "formula",
+                  "text": "±plus-or-minus\\pm"
+                },
+                {
+                  "type": "formula",
+                  "text": "±plus-or-minus\\pm"
+                },
+                {
+                  "type": "formula",
+                  "text": "±plus-or-minus\\pm"
+                },
+                {
+                  "type": "formula",
+                  "text": "±plus-or-minus\\pm"
+                },
+                {
+                  "type": "formula",
+                  "text": "±plus-or-minus\\pm"
+                },
+                {
+                  "type": "formula",
+                  "text": "±plus-or-minus\\pm"
+                },
+                {
+                  "type": "formula",
+                  "text": "±plus-or-minus\\pm"
+                },
+                {
+                  "type": "formula",
+                  "text": "±plus-or-minus\\pm"
+                },
+                {
+                  "type": "formula",
+                  "text": "±plus-or-minus\\pm"
+                },
+                {
+                  "type": "formula",
+                  "text": "±plus-or-minus\\pm"
+                },
+                {
+                  "type": "formula",
+                  "text": "±plus-or-minus\\pm"
+                },
+                {
+                  "type": "formula",
+                  "text": "±plus-or-minus\\pm"
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "4.2 Experimental setting",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "For all datasets, we randomly select 10 and 20 samples in each class as labeled data for training the network and use the other 20 labeled data in each class for validation purpose. The remaining unlabeled samples are used as testing samples. All the reported results are averaged over ten runs with different groups of training, validation and testing data splits."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Similar to traditional GATs [[17](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib17)], the number of hidden convolution layers in CaGAT is set as 2. The number of units in each hidden layer is set as 8 and it also has eight head-attentions, as suggested in GATs [[17](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib17)]. We train our CaGAT for a maximum of 10000 epochs (training iterations) by using an ADAM algorithm [[9](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib9)] with a learning rate of 0.005. We stop training if the validation loss does not decrease for 100 consecutive epochs, as suggested in work [[17](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib17)]. All the network weights {W,Θ}WΘ\\{\\textbf{W},\\Theta\\} of each hidden layer are initialized by using Glorot initialization [[6](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib6)]. The balanced parameter α𝛼\\alpha and ξ𝜉\\xi (Eq.(15)) in CaGAT are set to 0.4 and 0.001, respectively. The parameter λ𝜆\\lambda (Eq.(18)) is set to 0.3. We will shown in §4.4 that CaGAT is generally insensitive w.r.t. these parameters."
+                },
+                {
+                  "type": "formula",
+                  "text": "{W,Θ}WΘ\\{\\textbf{W},\\Theta\\}"
+                },
+                {
+                  "type": "formula",
+                  "text": "α𝛼\\alpha"
+                },
+                {
+                  "type": "formula",
+                  "text": "ξ𝜉\\xi"
+                },
+                {
+                  "type": "formula",
+                  "text": "λ𝜆\\lambda"
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "4.3 Comparison results",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "Baselines. We first compare our CaGAT model with the baseline model GATs [[17](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib17)] which is the most related model with our CaGAT. We also compare our method against some other related graph approaches which contain i) Graph based semi-supervised learning method Label Propagation(LabelProp) [[25](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib25)] and Normalized Laplacian Label Propagation (LabelProp NL) [[25](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib25)], ii) Attribute-based models like Logistic Regression (LogReg) and Multilayer Perceptron (MLP) [[16](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib16)] that do not consider the graph structure and iii) Graph neural network methods including Graph Convolutional Network (GCN) [[10](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib10)], Graph Attention Networks (GATs) [[17](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib17)], Deep Graph Informax(DGI) [[18](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib18)], GraphSAGE [[7](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib7)] and CVD+PP [[4](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib4)] The codes of these comparison methods are available and we use them in our experiments."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Comparison results. Table 1 summarizes the comparison results on four benchmark datasets. The best results are marked as bold. Here, we can note that, (1) CaGAT consistently outperforms the baseline method GATs [[17](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib17)] on all datasets. It clearly demonstrates the effectiveness and benefits of the proposed context-aware graph attention estimation on conducting graph data learning. (2) CaGAT outperforms recent graph neural network method GraphSAGE [[7](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib7)], APPNP [[11](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib11)] and DGI [[18](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib18)], which demonstrates the advantages of CaGAT on graph data representation and semi-supervised learning. (3) CaGAT can obtain better performance than other semi-supervised learning methods, such as LabelProp [[25](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib25)], Normalized Laplacian Label Propagation (LabelProp NL) [[25](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib25)], LogReg and Multilayer Perceptron (MLP) [[16](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib16)]. It further demonstrates the effectiveness of CaGAT on conducting semi-supervised learning tasks."
+                },
+                {
+                  "type": "formula",
+                  "text": "α𝛼\\alpha"
+                },
+                {
+                  "type": "formula",
+                  "text": "λ𝜆\\lambda"
+                },
+                {
+                  "type": "formula",
+                  "text": "α𝛼\\alpha"
+                },
+                {
+                  "type": "formula",
+                  "text": "λ𝜆\\lambda"
+                },
+                {
+                  "type": "formula",
+                  "text": "ξ𝜉\\xi"
+                },
+                {
+                  "type": "table",
+                  "text": "| ξ𝜉\\xi | 1e-2 | 1e-3 | 1e-4 | 1e-5 | 0 | | --- | --- | --- | --- | --- | --- | | Cora | 77.49 ±plus-or-minus\\pm 2.35 | 77.98 ±plus-or-minus\\pm 2.38 | 77.14 ±plus-or-minus\\pm 2.44 | 77.02 ±plus-or-minus\\pm 2.48 | 77.02 ±plus-or-minus\\pm 2.48 | | Cora-ML | 79.43 ±plus-or-minus\\pm 2.02 | 80.38 ±plus-or-minus\\pm 2.09 | 77.21 ±plus-or-minus\\pm 2.36 | 77.03 ±plus-or-minus\\pm 2.38 | 77.05 ±plus-or-minus\\pm 2.37 |"
+                },
+                {
+                  "type": "formula",
+                  "text": "ξ𝜉\\xi"
+                },
+                {
+                  "type": "formula",
+                  "text": "±plus-or-minus\\pm"
+                },
+                {
+                  "type": "formula",
+                  "text": "±plus-or-minus\\pm"
+                },
+                {
+                  "type": "formula",
+                  "text": "±plus-or-minus\\pm"
+                },
+                {
+                  "type": "formula",
+                  "text": "±plus-or-minus\\pm"
+                },
+                {
+                  "type": "formula",
+                  "text": "±plus-or-minus\\pm"
+                },
+                {
+                  "type": "formula",
+                  "text": "±plus-or-minus\\pm"
+                },
+                {
+                  "type": "formula",
+                  "text": "±plus-or-minus\\pm"
+                },
+                {
+                  "type": "formula",
+                  "text": "±plus-or-minus\\pm"
+                },
+                {
+                  "type": "formula",
+                  "text": "±plus-or-minus\\pm"
+                },
+                {
+                  "type": "formula",
+                  "text": "±plus-or-minus\\pm"
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "4.4 Parameter analysis",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "There are three main parameters {λ,α,ξ}𝜆𝛼𝜉\\{\\lambda,\\alpha,\\xi\\} of the proposed CaGAT in which α𝛼\\alpha is used to weight the importance of graph attention in context-aware attention estimation while ξ𝜉\\xi is used to balance the graph attention and feature aggregation terms in the proposed unified model. Table 2 shows the performance of CaGAT model under different parameter ξ𝜉\\xi values (a replacement of parameter β𝛽\\beta in Eq.(11)). Note that, when ξ=0𝜉0\\xi=0, the proposed model degenerates to conduct graph attention and feature aggregation independently in network training. From Table 2, we can note that (1) CaGAT with ξ>0𝜉0\\xi>0 outperforms that with ξ=0𝜉0\\xi=0, which clearly demonstrates the desired benefits of the proposed unified cooperative learning manner to boost the performance of both edge and node learning. (2) CaGAT is generally insensitive w.r.t. parameter ξ𝜉\\xi. It can obtain better results as ξ𝜉\\xi varying in parameter range 1e-3∼similar-to\\sim1e-2. Figure 2 shows the performance of CaGAT model under different parameter α𝛼\\alpha and λ𝜆\\lambda values, respectively. Here, we can note that, CaGAT is generally insensitive w.r.t. parameter α𝛼\\alpha and λ𝜆\\lambda, and obtains better results as α𝛼\\alpha varying in range 0.2∼0.6similar-to0.20.60.2\\sim 0.6 and λ𝜆\\lambda varying in range 0.1∼0.7similar-to0.10.70.1\\sim 0.7."
+                },
+                {
+                  "type": "formula",
+                  "text": "{λ,α,ξ}𝜆𝛼𝜉\\{\\lambda,\\alpha,\\xi\\}"
+                },
+                {
+                  "type": "formula",
+                  "text": "α𝛼\\alpha"
+                },
+                {
+                  "type": "formula",
+                  "text": "ξ𝜉\\xi"
+                },
+                {
+                  "type": "formula",
+                  "text": "ξ𝜉\\xi"
+                },
+                {
+                  "type": "formula",
+                  "text": "β𝛽\\beta"
+                },
+                {
+                  "type": "formula",
+                  "text": "ξ=0𝜉0\\xi=0"
+                },
+                {
+                  "type": "formula",
+                  "text": "ξ>0𝜉0\\xi>0"
+                },
+                {
+                  "type": "formula",
+                  "text": "ξ=0𝜉0\\xi=0"
+                },
+                {
+                  "type": "formula",
+                  "text": "ξ𝜉\\xi"
+                },
+                {
+                  "type": "formula",
+                  "text": "ξ𝜉\\xi"
+                },
+                {
+                  "type": "formula",
+                  "text": "∼similar-to\\sim"
+                },
+                {
+                  "type": "formula",
+                  "text": "α𝛼\\alpha"
+                },
+                {
+                  "type": "formula",
+                  "text": "λ𝜆\\lambda"
+                },
+                {
+                  "type": "formula",
+                  "text": "α𝛼\\alpha"
+                },
+                {
+                  "type": "formula",
+                  "text": "λ𝜆\\lambda"
+                },
+                {
+                  "type": "formula",
+                  "text": "α𝛼\\alpha"
+                },
+                {
+                  "type": "formula",
+                  "text": "0.2∼0.6similar-to0.20.60.2\\sim 0.6"
+                },
+                {
+                  "type": "formula",
+                  "text": "λ𝜆\\lambda"
+                },
+                {
+                  "type": "formula",
+                  "text": "0.1∼0.7similar-to0.10.70.1\\sim 0.7"
+                }
+              ],
+              "children": []
+            }
+          ]
+        },
+        {
+          "heading": "5 Conclusion",
+          "level": 2,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "In this paper, we propose a novel spatial graph neural network, named Context-aware Adaptive Graph Attention Network (CaGAT). The key idea behind CaGAT is to compute a context-aware graph attention by employing a Tensor Product Graph (TPG) diffusion technique. Moreover, CaGAT conducts graph edge attention learning and node feature representation cooperatively in a *unified* scheme which can further exploit the correlation between them in network training and thus can boost their respective performance. Experimental results on four widely used benchmarks validates the benefits of CaGAT on semi-supervised learning tasks."
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "References",
+          "level": 2,
+          "content": [
+            {
+              "type": "list",
+              "text": "* [1] J. Atwood and D. Towsley. Diffusion-convolutional neural networks. In Advances in Neural Information Processing Systems, pages 1993–2001, 2016. * [2] S. Bai, X. Bai, Q. Tian, and L. J. Latecki. Regularized diffusion process for visual retrieval. In Thirty-First AAAI Conference on Artificial Intelligence, 2017. * [3] J. Bruna, W. Zaremba, A. Szlam, and Y. LeCun. Spectral networks and locally connected networks on graphs. In International Conference on Learning Representations, 2014. * [4] J. Chen, J. Zhu, and L. Song. Stochastic training of graph convolutional networks with variance reduction. In International Conference on Machine Learning, pages 942–950, 2018. * [5] M. Defferrard, X. Bresson, and P. Vandergheynst. Convolutional neural networks on graphs with fast localized spectral filtering. In Advances in Neural Information Processing Systems, pages 3844–3852, 2016. * [6] X. Glorot and Y. Bengio. Understanding the difficulty of training deep feedforward neural networks. In International conference on artificial intelligence and statistics, pages 249–256, 2010. * [7] W. Hamilton, Z. Ying, and J. Leskovec. Inductive representation learning on large graphs. In Advances in Neural Information Processing Systems, pages 1024–1034, 2017. * [8] M. Henaff, J. Bruna, and Y. LeCun. Deep convolutional networks on graph-structured data. arXiv preprint arXiv:1506.05163, 2015. * [9] D. P. Kingma and J. Ba. Adam: A method for stochastic optimization. In International Conference on Learning Representations, 2015. * [10] T. N. Kipf and M. Welling. Semi-supervised classification with graph convolutional networks. arXiv preprint arXiv:1609.02907, 2016. * [11] J. Klicpera, A. Bojchevski, and S. Günnemann. Predict then propagate: Graph neural networks meet personalized pagerank. In ICLR, 2019. * [12] J. Klicpera, A. Bojchevski, and S. Günnemann. Predict then propagate: Graph neural networks meet personalized pagerank. In International Conference on Learning Representations (ICLR), 2019. * [13] Y. Li, R. Yu, C. Shahabi, and Y. Liu. Diffusion convolutional recurrent neural network: Data-driven traffic forecasting. In International Conference on Learning Representations (ICLR ’18), 2018. * [14] A. K. McCallum, K. Nigam, J. Rennie, and K. Seymore. Automating the construction of internet portals with machine learning. Information Retrieval, 3(2):127–163, 2000. * [15] F. Monti, D. Boscaini, J. Masci, E. Rodola, J. Svoboda, and M. M. Bronstein. Geometric deep learning on graphs and manifolds using mixture model cnns. In IEEE Conference on Computer Vision and Pattern Recognition, pages 5423–5434, 2017. * [16] O. Shchur, M. Mumme, A. Bojchevski, and S. Günnemann. Pitfalls of graph neural network evaluation. Relational Representation Learning Workshop, NeurIPS 2018, 2018. * [17] P. Velickovic, G. Cucurull, A. Casanova, A. Romero, P. Lio, and Y. Bengio. Graph attention networks. arXiv preprint arXiv:1710.10903, 2017. * [18] P. Veličković, W. Fedus, W. L. Hamilton, P. Liò, Y. Bengio, and R. D. Hjelm. Deep Graph Infomax. In International Conference on Learning Representations, 2019. * [19] F. Wang and C. Zhang. Label propagation through linear neighborhoods. IEEE Transactions on Knowledge and Data Engineering, 20(1):55–67, 2008. * [20] Z. Xinyi and L. Chen. Capsule graph neural network. In ICLR, 2019. * [21] X. Yang, L. Prasad, and L. J. Latecki. Affinity learning with diffusion on tensor product graph. IEEE transactions on pattern analysis and machine intelligence, 35(1):28–38, 2012. * [22] S. Zhang, H. Tong, J. Xu, and R. Maciejewski. Graph convolutional networks: Algorithms, applications and open challenges. In International Conference on Computational Social Networks, pages 79–91, 2018. * [23] D. Zhou, O. Bousquet, T. N. Lal, J. Weston, and B. Schölkopf. Learning with local and global consistency. In Advances in neural information processing systems, pages 321–328, 2004. * [24] J. Zhou, G. Cui, Z. Zhang, C. Yang, Z. Liu, and M. Sun. Graph neural networks: A review of methods and applications. arXiv preprint arXiv:1812.08434, 2018. * [25] X. Zhu, Z. Ghahramani, and J. D. Lafferty. Semi-supervised learning using gaussian fields and harmonic functions. In International conference on Machine learning, pages 912–919, 2003."
+            }
+          ],
+          "children": []
+        }
+      ]
+    }
+  ],
+  "chunks": [
+    {
+      "heading_path": [
+        "Context-Aware Graph Attention Networks"
+      ],
+      "text": "# Context-Aware Graph Attention Networks"
+    },
+    {
+      "heading_path": [
+        "Context-Aware Graph Attention Networks",
+        "Abstract"
+      ],
+      "text": "###### Abstract\n\nGraph Neural Networks (GNNs) have been widely studied for graph data representation and learning. However, existing GNNs generally conduct context-aware learning on node feature representation only which usually ignores the learning of edge (weight) representation. In this paper, we propose a novel unified GNN model, named Context-aware Adaptive Graph Attention Network (CaGAT). CaGAT aims to learn a context-aware attention representation for each graph edge by further exploiting the context relationships among different edges. In particular, CaGAT conducts *context-aware learning* on both *node feature representation* and *edge (weight) representation* simultaneously and cooperatively in a *unified* manner which can boost their respective performance in network training. We apply CaGAT on semi-supervised learning tasks. Promising experimental results on several benchmark datasets demonstrate the effectiveness and benefits of CaGAT."
+    },
+    {
+      "heading_path": [
+        "Context-Aware Graph Attention Networks",
+        "1 Introduction"
+      ],
+      "text": "## 1 Introduction\n\nGraph data representation and learning is a fundamental problem in machine learning area. Recently, Graph Neural Networks (GNNs) have been widely studied for this problem [[5](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib5), [10](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib10), [15](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib15), [7](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib7), [17](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib17), [24](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib24)]. Overall, existing GNNs can generally be categorized into spatial methods and spectral methods [[24](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib24)].\n\nSpectral methods usually define the graph convolution based on spectral representation of graphs. For example, Bruna et al. [[3](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib3)] propose a spectral based graph convolution network (GCN) by using the eigen-decomposition of graph Laplacian matrix. Henaff et al. [[8](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib8)] further introduce a spatially constrained spectral filters in GCN layer-wise propagation. By using Chebyshev expansion, Defferrard et al. [[5](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib5)] propose a method to approximate the spectral filters and thus derive a more efficient GCN model. By using the first-order approximation of spectral filters, Kipf et al. [[10](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib10)] also present a more efficient GCN for graph based semi-supervised learning.\n\nIn this paper, we focus on spatial methods. For spatial GNN methods, they generally define the graph convolution by employing a specific node feature diffusion (or aggregation) operation on neighbors to obtain the context-aware representations of graph nodes in GNN layer-wise propagation [[15](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib15), [13](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib13), [20](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib20), [22](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib22), [18](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib18)]. For example, Atwood and Towsley [[1](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib1)] propose Diffusion-Convolutional Neural Networks (DCNNs) by incorporating graph diffusion process into GNN network. Li et al. [[13](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib13)] propose Diffusion Convolutional Recurrent Neural Network (DCRNN) which employs a finite K-step truncated random walk diffusion model for feature aggregation. Klicpera et al. [[11](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib11)] propose to integrate PageRank propagation into GCN in layer-wise propagation. Hamilton et al. [[7](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib7)] present a general inductive representation and learning framework (GraphSAGE) by sampling and aggregating features from a node’s local neighborhood. The above methods generally conduct graph node feature diffusion/aggreagtion on a fixed structure graph. Recently, Velickovic et al. [[17](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib17)] propose Graph Attention Networks (GATs) which first assign different weights for graph edges and then develop an adaptive weighted feature aggregation mechanism in its layer-wise feature propagation.\n\nMotivation. One main limitation of the above existing spatial GNNs is that they generally conduct context-aware learning on node feature representation only which obviously ignores the learning of edge (weight) representation. Although, the attention learning and representation of edges have been proposed in GATs [[17](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib17)], they are learned independently which lacks of considering the context relationships among different edges. This motivates us to develop a unified model, named Context-aware adaptive Graph Attention Network (CaGAT), which conducts *context-aware learning* on both *node feature representation* and *edge (weight) representation* simultaneously in layer-wise propagation.\n\nIt is known that, in GNNs, the context-aware learning of node feature representation is usually conducted via a feature diffusion model. This inspires us to achieve context-aware learning of edge representation similarly by employing a graph diffusion model. In this paper, we adopt a Tensor Product Graph (TPG) diffusion model [[2](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib2), [21](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib21)], which provides an explicit diffusion for pairwise relationship data. Specifically, in our CaGAT architecture, we employ TPG and Neighborhood Propagation (NP) [[19](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib19)] for the context-aware learning of graph edge and node, respectively. Moreover, both TPG and NP can well be re-formulated as regularization forms, which further helps us to derive a unified regularization model to integrate them together for boosting their respective performance.\n\nContributions. Overall, the main contributions of this paper are summarized as follows:\n\n* • We propose a novel spatial GNN, named CaGAT for graph data representation and learning. * • We propose to introduce context-aware edge learning/representation in GNN architecture by employing a tensor product graph diffusion model. * • We provide a unified learning framework to conduct both edge attention (weight) representation and node feature representation cooperatively in GNN architecture.\n\nWe propose a novel spatial GNN, named CaGAT for graph data representation and learning.\n\nWe propose to introduce context-aware edge learning/representation in GNN architecture by employing a tensor product graph diffusion model.\n\nWe provide a unified learning framework to conduct both edge attention (weight) representation and node feature representation cooperatively in GNN architecture.\n\nPromising experimental results on several benchmark datasets demonstrate the effectiveness of the proposed CaGAT model on semi-supervised learning tasks."
+    },
+    {
+      "heading_path": [
+        "Context-Aware Graph Attention Networks",
+        "2 Related Works"
+      ],
+      "text": "## 2 Related Works\n\nGraph Attention Networks (GATs) [[17](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib17)] have been widely used for graph data analysis and learning. GATs conduct two steps in each hidden layer, i.e., 1) graph edge attention estimation and 2) node feature aggregation and representation.\n\nStep 1: Edge attention estimation. Given a set of node features H=(h1,h2​⋯​hn)∈ℝd×nHsubscripth1subscripth2⋯subscripth𝑛superscriptℝ𝑑𝑛\\textbf{H}=(\\textbf{h}\\_{1},\\textbf{h}\\_{2}\\cdots\\textbf{h}\\_{n})\\in\\mathbb{R}^{d\\times n} and graph adjacency matrix A∈ℝn×nAsuperscriptℝ𝑛𝑛\\textbf{A}\\in\\mathbb{R}^{n\\times n}, GATs define the graph attention 𝒢​(hi,hj;W,Θ)𝒢subscripth𝑖subscripth𝑗WΘ\\mathcal{G}(\\textbf{h}\\_{i},\\textbf{h}\\_{j};\\textbf{W},\\Theta) for each graph edge ei​jsubscript𝑒𝑖𝑗e\\_{ij} as,\n\nH=(h1,h2​⋯​hn)∈ℝd×nHsubscripth1subscripth2⋯subscripth𝑛superscriptℝ𝑑𝑛\\textbf{H}=(\\textbf{h}_{1},\\textbf{h}_{2}\\cdots\\textbf{h}_{n})\\in\\mathbb{R}^{d\\times n}\n\nA∈ℝn×nAsuperscriptℝ𝑛𝑛\\textbf{A}\\in\\mathbb{R}^{n\\times n}\n\n𝒢​(hi,hj;W,Θ)𝒢subscripth𝑖subscripth𝑗WΘ\\mathcal{G}(\\textbf{h}_{i},\\textbf{h}_{j};\\textbf{W},\\Theta)\n\nei​jsubscript𝑒𝑖𝑗e_{ij}\n\n| | | | | | --- | --- | --- | --- | | | 𝒢​(hi,hj;W,Θ)=softmaxG​(f​(Whi,Whj;Θ))𝒢subscripth𝑖subscripth𝑗WΘsubscriptsoftmax𝐺𝑓subscriptWh𝑖subscriptWh𝑗Θ\\displaystyle\\mathcal{G}(\\textbf{h}\\_{i},\\textbf{h}\\_{j};\\textbf{W},\\Theta)=\\mathrm{softmax}\\_{G}\\big{(}f(\\textbf{W}\\textbf{h}\\_{i},\\textbf{W}\\textbf{h}\\_{j};\\Theta)\\big{)} | | (1) |\n\n𝒢​(hi,hj;W,Θ)=softmaxG​(f​(Whi,Whj;Θ))𝒢subscripth𝑖subscripth𝑗WΘsubscriptsoftmax𝐺𝑓subscriptWh𝑖subscriptWh𝑗Θ\\displaystyle\\mathcal{G}(\\textbf{h}_{i},\\textbf{h}_{j};\\textbf{W},\\Theta)=\\mathrm{softmax}_{G}\\big{(}f(\\textbf{W}\\textbf{h}_{i},\\textbf{W}\\textbf{h}_{j};\\Theta)\\big{)}\n\nwhere W∈ℝd~×dWsuperscriptℝ~𝑑𝑑\\textbf{W}\\in\\mathbb{R}^{\\tilde{d}\\times d} and ΘΘ\\Theta denote the layer-specific trainable parameter of linear transformation and attention estimation, respectively. softmaxGsubscriptsoftmax𝐺\\mathrm{softmax}\\_{G} denotes the softmax function defined on graph111It is defined as softmaxG​(fi​j)=exp⁡(fi​j)∑k∈𝒩iexp⁡(fi​k)subscriptsoftmax𝐺subscript𝑓𝑖𝑗subscript𝑓𝑖𝑗subscript𝑘subscript𝒩𝑖subscript𝑓𝑖𝑘\\mathrm{softmax}\\_{G}(f\\_{ij})=\\frac{\\exp(f\\_{ij})}{\\sum\\_{k\\in\\mathcal{N}\\_{i}}\\exp(f\\_{ik})} where 𝒩isubscript𝒩𝑖\\mathcal{N}\\_{i} denotes the neighborhood set of node visubscript𝑣𝑖v\\_{i} which is specified by adjacency matrix A of graph.. In work [[17](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib17)], the attention mechanism function f​(Whi,Whj;Θ)𝑓subscriptWh𝑖subscriptWh𝑗Θf(\\textbf{W}\\textbf{h}\\_{i},\\textbf{W}\\textbf{h}\\_{j};\\Theta) is defined by a single-layer feedforward neural network, parameterized by a weight vector Θ∈ℝ2​d×1Θsuperscriptℝ2𝑑1\\Theta\\in\\mathbb{R}^{2d\\times 1}. That is,\n\nW∈ℝd~×dWsuperscriptℝ~𝑑𝑑\\textbf{W}\\in\\mathbb{R}^{\\tilde{d}\\times d}\n\nΘΘ\\Theta\n\nsoftmaxGsubscriptsoftmax𝐺\\mathrm{softmax}_{G}\n\nsoftmaxG​(fi​j)=exp⁡(fi​j)∑k∈𝒩iexp⁡(fi​k)subscriptsoftmax𝐺subscript𝑓𝑖𝑗subscript𝑓𝑖𝑗subscript𝑘subscript𝒩𝑖subscript𝑓𝑖𝑘\\mathrm{softmax}_{G}(f_{ij})=\\frac{\\exp(f_{ij})}{\\sum_{k\\in\\mathcal{N}_{i}}\\exp(f_{ik})}\n\n𝒩isubscript𝒩𝑖\\mathcal{N}_{i}\n\nvisubscript𝑣𝑖v_{i}\n\nf​(Whi,Whj;Θ)𝑓subscriptWh𝑖subscriptWh𝑗Θf(\\textbf{W}\\textbf{h}_{i},\\textbf{W}\\textbf{h}_{j};\\Theta)\n\nΘ∈ℝ2​d×1Θsuperscriptℝ2𝑑1\\Theta\\in\\mathbb{R}^{2d\\times 1}\n\n| | | | | | --- | --- | --- | --- | | | f​(Whi,Whj;Θ)=σa​(ΘT​[Whi∥Whj])𝑓subscriptWh𝑖subscriptWh𝑗Θsubscript𝜎𝑎superscriptΘTdelimited-[]conditionalsubscriptWh𝑖subscriptWh𝑗\\displaystyle f(\\textbf{W}\\textbf{h}\\_{i},\\textbf{W}\\textbf{h}\\_{j};\\Theta)=\\sigma\\_{a}\\big{(}\\Theta^{\\mathrm{T}}[\\textbf{W}\\textbf{h}\\_{i}\\|\\textbf{W}\\textbf{h}\\_{j}]\\big{)} | | (2) |\n\nf​(Whi,Whj;Θ)=σa​(ΘT​[Whi∥Whj])𝑓subscriptWh𝑖subscriptWh𝑗Θsubscript𝜎𝑎superscriptΘTdelimited-[]conditionalsubscriptWh𝑖subscriptWh𝑗\\displaystyle f(\\textbf{W}\\textbf{h}_{i},\\textbf{W}\\textbf{h}_{j};\\Theta)=\\sigma_{a}\\big{(}\\Theta^{\\mathrm{T}}[\\textbf{W}\\textbf{h}_{i}\\|\\textbf{W}\\textbf{h}_{j}]\\big{)}\n\nwhere σa​(⋅)subscript𝜎𝑎⋅\\sigma\\_{a}(\\cdot) denotes some nonlinear function, such as LeakyReLU, and ∥∥\\| denotes the concatenation operation.\n\nσa​(⋅)subscript𝜎𝑎⋅\\sigma_{a}(\\cdot)\n\n∥∥\\|\n\nStep 2: Note feature aggregation and representation. Based on the above graph edge attention, GATs define the node feature aggregation to obtain the context-aware feature representation hi′subscriptsuperscripth′𝑖\\textbf{h}^{\\prime}\\_{i} for each node visubscript𝑣𝑖v\\_{i} as,\n\nhi′subscriptsuperscripth′𝑖\\textbf{h}^{\\prime}_{i}\n\nvisubscript𝑣𝑖v_{i}\n\n| | | | | | --- | --- | --- | --- | | | hi′=∑j∈𝒩i𝒢​(hi,hj;W,Θ)​Whjsubscriptsuperscripth′𝑖subscript𝑗subscript𝒩𝑖𝒢subscripth𝑖subscripth𝑗WΘsubscriptWh𝑗\\displaystyle\\textbf{h}^{\\prime}\\_{i}=\\sum\\nolimits\\_{j\\in\\mathcal{N}\\_{i}}\\mathcal{G}(\\textbf{h}\\_{i},\\textbf{h}\\_{j};\\textbf{W},\\Theta)\\textbf{W}\\textbf{h}\\_{j} | | (3) |\n\nhi′=∑j∈𝒩i𝒢​(hi,hj;W,Θ)​Whjsubscriptsuperscripth′𝑖subscript𝑗subscript𝒩𝑖𝒢subscripth𝑖subscripth𝑗WΘsubscriptWh𝑗\\displaystyle\\textbf{h}^{\\prime}_{i}=\\sum\\nolimits_{j\\in\\mathcal{N}_{i}}\\mathcal{G}(\\textbf{h}_{i},\\textbf{h}_{j};\\textbf{W},\\Theta)\\textbf{W}\\textbf{h}_{j}\n\nIn addition, in each hidden layer of GATs, an activation function σ​(⋅)𝜎⋅\\sigma(\\cdot) is further conducted on hi′superscriptsubscripth𝑖′\\textbf{h}\\_{i}^{\\prime} to obtain nonlinear representation. The last layer of GATs outputs the final representation of graph nodes, which can be used for many learning tasks, such as clustering, visualization and (semi-supervised) classification etc. In this paper, we focus on semi-supervised classification. For this task, the layer-specific weight parameters {W,Θ}WΘ\\{\\textbf{W},\\Theta\\} of each layer are optimized by minimizing the cross-entropy loss defined on labelled data, as discussed in works [[10](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib10), [17](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib17)].\n\nσ​(⋅)𝜎⋅\\sigma(\\cdot)\n\nhi′superscriptsubscripth𝑖′\\textbf{h}_{i}^{\\prime}\n\n{W,Θ}WΘ\\{\\textbf{W},\\Theta\\}"
+    },
+    {
+      "heading_path": [
+        "Context-Aware Graph Attention Networks",
+        "3 Context-aware Adaptive Graph Attention Network"
+      ],
+      "text": "## 3 Context-aware Adaptive Graph Attention Network\n\nThere are two main limitations for the above GATs. First, GATs estimate the attention of of each graph edge independently which ignores the context relationships among different edges. Second, GATs conduct Step 1 edge attention estimation and Step 2 node feature aggregation/representation independently which also neglects the correlation between these two steps and thus may lead to weak suboptimal learning results.\n\nTo overcome these issues, we propose a novel GNN model, named Context-aware adaptive Graph Attention (CaGAT). CaGAT has two main aspects. First, CaGAT aims to learn a context-aware graph edge attention by exploiting the context relationship information of edges encoded in graph A. Second, CaGAT conducts 1) graph edge attention learning and 2) node feature representation simultaneously and cooperatively in a *unified* model to boost their respective performance."
+    },
+    {
+      "heading_path": [
+        "Context-Aware Graph Attention Networks",
+        "3 Context-aware Adaptive Graph Attention Network",
+        "3.1 Context-aware edge attention learning"
+      ],
+      "text": "### 3.1 Context-aware edge attention learning\n\nSetting D as a diagonal matrix with elements Di​i=∑jAi​jsubscriptD𝑖𝑖subscript𝑗subscriptA𝑖𝑗\\textbf{D}\\_{ii}=\\sum\\_{j}\\textbf{A}\\_{ij}, the diffusion matrix can be defined as A¯=D−1​A¯AsuperscriptD1A\\bar{\\textbf{A}}=\\textbf{D}^{-1}\\textbf{A}. Motivated by recent works on Tensor Product Graph (TPG) diffusion [[2](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib2), [21](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib21)], we propose to learn a context-aware graph attention for each edge ei​jsubscript𝑒𝑖𝑗e\\_{ij} as follows,\n\nDi​i=∑jAi​jsubscriptD𝑖𝑖subscript𝑗subscriptA𝑖𝑗\\textbf{D}_{ii}=\\sum_{j}\\textbf{A}_{ij}\n\nA¯=D−1​A¯AsuperscriptD1A\\bar{\\textbf{A}}=\\textbf{D}^{-1}\\textbf{A}\n\nei​jsubscript𝑒𝑖𝑗e_{ij}\n\n| | | | | | --- | --- | --- | --- | | | 𝒮(t+1)​(hi,hj;W,Θ)=α​∑h∈𝒩i,k∈𝒩jA¯i​h​𝒮(t)​(hh,hk;W,Θ)​A¯k​j⏞Context​information+(1−α)​𝒢​(hi,hj;W,Θ)⏞GATsuperscript𝒮𝑡1subscripth𝑖subscripth𝑗WΘ𝛼superscript⏞subscriptformulae-sequenceℎsubscript𝒩𝑖𝑘subscript𝒩𝑗subscript¯A𝑖ℎsuperscript𝒮𝑡subscripthℎsubscripth𝑘WΘsubscript¯A𝑘𝑗Contextinformation1𝛼superscript⏞𝒢subscripth𝑖subscripth𝑗WΘGAT\\displaystyle\\mathcal{S}^{(t+1)}(\\textbf{h}\\_{i},\\textbf{h}\\_{j};\\textbf{W},\\Theta)=\\alpha\\overbrace{\\sum\\_{h\\in\\mathcal{N}\\_{i},k\\in\\mathcal{N}\\_{j}}\\bar{\\textbf{A}}\\_{ih}\\mathcal{S}^{(t)}(\\textbf{h}\\_{h},\\textbf{h}\\_{k};\\textbf{W},\\Theta)\\bar{\\textbf{A}}\\_{kj}}^{\\mathrm{Context\\,information}}+(1-\\alpha)\\overbrace{\\mathcal{G}(\\textbf{h}\\_{i},\\textbf{h}\\_{j};\\textbf{W},\\Theta)}^{\\mathrm{GAT}} | | (4) |\n\n𝒮(t+1)​(hi,hj;W,Θ)=α​∑h∈𝒩i,k∈𝒩jA¯i​h​𝒮(t)​(hh,hk;W,Θ)​A¯k​j⏞Context​information+(1−α)​𝒢​(hi,hj;W,Θ)⏞GATsuperscript𝒮𝑡1subscripth𝑖subscripth𝑗WΘ𝛼superscript⏞subscriptformulae-sequenceℎsubscript𝒩𝑖𝑘subscript𝒩𝑗subscript¯A𝑖ℎsuperscript𝒮𝑡subscripthℎsubscripth𝑘WΘsubscript¯A𝑘𝑗Contextinformation1𝛼superscript⏞𝒢subscripth𝑖subscripth𝑗WΘGAT\\displaystyle\\mathcal{S}^{(t+1)}(\\textbf{h}_{i},\\textbf{h}_{j};\\textbf{W},\\Theta)=\\alpha\\overbrace{\\sum_{h\\in\\mathcal{N}_{i},k\\in\\mathcal{N}_{j}}\\bar{\\textbf{A}}_{ih}\\mathcal{S}^{(t)}(\\textbf{h}_{h},\\textbf{h}_{k};\\textbf{W},\\Theta)\\bar{\\textbf{A}}_{kj}}^{\\mathrm{Context\\,information}}+(1-\\alpha)\\overbrace{\\mathcal{G}(\\textbf{h}_{i},\\textbf{h}_{j};\\textbf{W},\\Theta)}^{\\mathrm{GAT}}\n\nwhere t=0,1​⋯​T𝑡 01⋯𝑇t=0,1\\cdots T and 𝒮(0)​(hh,hk;W,Θ)=𝒢​(hh,hk;W,Θ)superscript𝒮0subscripthℎsubscripth𝑘WΘ𝒢subscripthℎsubscripth𝑘WΘ\\mathcal{S}^{(0)}(\\textbf{h}\\_{h},\\textbf{h}\\_{k};\\textbf{W},\\Theta)=\\mathcal{G}(\\textbf{h}\\_{h},\\textbf{h}\\_{k};\\textbf{W},\\Theta), as defined in Eq.(1). The parameter α∈(0,1)𝛼01\\alpha\\in(0,1) denotes the fraction of attention information that edge ei​jsubscript𝑒𝑖𝑗e\\_{ij} receives from its neighbors on graph A. The parameter W∈ℝd~×dWsuperscriptℝ~𝑑𝑑\\textbf{W}\\in\\mathbb{R}^{\\tilde{d}\\times d} and ΘΘ\\Theta denote the layer-specific trainable parameter of linear transformation and edge attention estimation, respectively.\n\nt=0,1​⋯​T𝑡01⋯𝑇t=0,1\\cdots T\n\n𝒮(0)​(hh,hk;W,Θ)=𝒢​(hh,hk;W,Θ)superscript𝒮0subscripthℎsubscripth𝑘WΘ𝒢subscripthℎsubscripth𝑘WΘ\\mathcal{S}^{(0)}(\\textbf{h}_{h},\\textbf{h}_{k};\\textbf{W},\\Theta)=\\mathcal{G}(\\textbf{h}_{h},\\textbf{h}_{k};\\textbf{W},\\Theta)\n\nα∈(0,1)𝛼01\\alpha\\in(0,1)\n\nei​jsubscript𝑒𝑖𝑗e_{ij}\n\nW∈ℝd~×dWsuperscriptℝ~𝑑𝑑\\textbf{W}\\in\\mathbb{R}^{\\tilde{d}\\times d}\n\nΘΘ\\Theta\n\nRemark. Comparing with GATs, the attention 𝒮(t+1)​(hi,hj;W,Θ)superscript𝒮𝑡1subscripth𝑖subscripth𝑗WΘ\\mathcal{S}^{(t+1)}(\\textbf{h}\\_{i},\\textbf{h}\\_{j};\\textbf{W},\\Theta) of edge ei​jsubscript𝑒𝑖𝑗e\\_{ij} is determined based on both its own feature presentation (Whi,Whj)subscriptWh𝑖subscriptWh𝑗(\\textbf{W}\\textbf{h}\\_{i},\\textbf{W}\\textbf{h}\\_{j}) and attentions 𝒢​(hh,hk;W,Θ)𝒢subscripthℎsubscripth𝑘WΘ\\mathcal{G}(\\textbf{h}\\_{h},\\textbf{h}\\_{k};\\textbf{W},\\Theta) of its neighboring edges eh​ksubscript𝑒ℎ𝑘e\\_{hk}. Therefore, CaGAT can capture more context information in graph attention estimation. When α=0𝛼0\\alpha=0, CaGAT degenerates to GATs. Let Si​j(t)=𝒮(t)​(hi,hj;W,Θ)superscriptsubscriptS𝑖𝑗𝑡superscript𝒮𝑡subscripth𝑖subscripth𝑗WΘ\\textbf{S}\\_{ij}^{(t)}=\\mathcal{S}^{(t)}(\\textbf{h}\\_{i},\\textbf{h}\\_{j};\\textbf{W},\\Theta) and Gi​j=𝒢​(hi,hj;W,Θ)subscriptG𝑖𝑗𝒢subscripth𝑖subscripth𝑗WΘ\\textbf{G}\\_{ij}=\\mathcal{G}(\\textbf{h}\\_{i},\\textbf{h}\\_{j};\\textbf{W},\\Theta), then Eq.([4](https://ar5iv.labs.arxiv.org/html/1910.01736#S3.E4 \"In 3.1 Context-aware edge attention learning ‣ 3 Context-aware Adaptive Graph Attention Network ‣ Context-Aware Graph Attention Networks\")) is compactly formulated as,\n\n𝒮(t+1)​(hi,hj;W,Θ)superscript𝒮𝑡1subscripth𝑖subscripth𝑗WΘ\\mathcal{S}^{(t+1)}(\\textbf{h}_{i},\\textbf{h}_{j};\\textbf{W},\\Theta)\n\nei​jsubscript𝑒𝑖𝑗e_{ij}\n\n(Whi,Whj)subscriptWh𝑖subscriptWh𝑗(\\textbf{W}\\textbf{h}_{i},\\textbf{W}\\textbf{h}_{j})\n\n𝒢​(hh,hk;W,Θ)𝒢subscripthℎsubscripth𝑘WΘ\\mathcal{G}(\\textbf{h}_{h},\\textbf{h}_{k};\\textbf{W},\\Theta)\n\neh​ksubscript𝑒ℎ𝑘e_{hk}\n\nα=0𝛼0\\alpha=0\n\nSi​j(t)=𝒮(t)​(hi,hj;W,Θ)superscriptsubscriptS𝑖𝑗𝑡superscript𝒮𝑡subscripth𝑖subscripth𝑗WΘ\\textbf{S}_{ij}^{(t)}=\\mathcal{S}^{(t)}(\\textbf{h}_{i},\\textbf{h}_{j};\\textbf{W},\\Theta)\n\nGi​j=𝒢​(hi,hj;W,Θ)subscriptG𝑖𝑗𝒢subscripth𝑖subscripth𝑗WΘ\\textbf{G}_{ij}=\\mathcal{G}(\\textbf{h}_{i},\\textbf{h}_{j};\\textbf{W},\\Theta)\n\n| | | | | | --- | --- | --- | --- | | | S(t+1)=α​A¯​S(t)​A¯T+(1−α)​GsuperscriptS𝑡1𝛼¯AsuperscriptS𝑡superscript¯AT1𝛼G\\displaystyle\\textbf{S}^{(t+1)}=\\alpha\\bar{\\textbf{A}}\\textbf{S}^{(t)}\\bar{\\textbf{A}}^{\\mathrm{T}}+(1-\\alpha)\\textbf{G} | | (5) |\n\nS(t+1)=α​A¯​S(t)​A¯T+(1−α)​GsuperscriptS𝑡1𝛼¯AsuperscriptS𝑡superscript¯AT1𝛼G\\displaystyle\\textbf{S}^{(t+1)}=\\alpha\\bar{\\textbf{A}}\\textbf{S}^{(t)}\\bar{\\textbf{A}}^{\\mathrm{T}}+(1-\\alpha)\\textbf{G}\n\nwhere t=0,1​⋯​T𝑡 01⋯𝑇t=0,1\\cdots T and S(0)=GsuperscriptS0G\\textbf{S}^{(0)}=\\textbf{G}.\n\nt=0,1​⋯​T𝑡01⋯𝑇t=0,1\\cdots T\n\nS(0)=GsuperscriptS0G\\textbf{S}^{(0)}=\\textbf{G}\n\nRegularization framework. Here, we show that update Eq.([5](https://ar5iv.labs.arxiv.org/html/1910.01736#S3.E5 \"In 3.1 Context-aware edge attention learning ‣ 3 Context-aware Adaptive Graph Attention Network ‣ Context-Aware Graph Attention Networks\")) can be theoretically explained from an regularization framework. First, it can be rewritten as222For any matrices X,Y XY\\textbf{X},\\textbf{Y} and Z with appropriate sizes, equation vec​(XYZT)=(Z⊗X)​vec​(Y)vecsuperscriptXYZTtensor-productZXvecY\\mathrm{vec}(\\textbf{X}\\textbf{Y}\\textbf{Z}^{\\mathrm{T}})=(\\textbf{Z}\\otimes\\textbf{X})\\mathrm{vec}(\\textbf{Y}) is satisfied.\n\nX,YXY\\textbf{X},\\textbf{Y}\n\nvec​(XYZT)=(Z⊗X)​vec​(Y)vecsuperscriptXYZTtensor-productZXvecY\\mathrm{vec}(\\textbf{X}\\textbf{Y}\\textbf{Z}^{\\mathrm{T}})=(\\textbf{Z}\\otimes\\textbf{X})\\mathrm{vec}(\\textbf{Y})\n\n| | | | | | --- | --- | --- | --- | | | vec​(S(t+1))=α​𝔸​vec​(S(t))+(1−α)​vec​(G)vecsuperscriptS𝑡1𝛼𝔸vecsuperscriptS𝑡1𝛼vecG\\displaystyle\\textrm{vec}(\\textbf{S}^{(t+1)})=\\alpha\\mathbb{A}\\textrm{vec}(\\textbf{S}^{(t)})+(1-\\alpha)\\textrm{vec}(\\textbf{G}) | | (6) |\n\nvec​(S(t+1))=α​𝔸​vec​(S(t))+(1−α)​vec​(G)vecsuperscriptS𝑡1𝛼𝔸vecsuperscriptS𝑡1𝛼vecG\\displaystyle\\textrm{vec}(\\textbf{S}^{(t+1)})=\\alpha\\mathbb{A}\\textrm{vec}(\\textbf{S}^{(t)})+(1-\\alpha)\\textrm{vec}(\\textbf{G})\n\nwhere 𝔸=A¯⊗A¯,A¯=D−1​Aformulae-sequence𝔸tensor-product¯A¯A¯AsuperscriptD1A\\mathbb{A}=\\bar{\\textbf{A}}\\otimes\\bar{\\textbf{A}},\\bar{\\textbf{A}}=\\textbf{D}^{-1}\\textbf{A}, and ⊗tensor-product\\otimes denotes the Kronecker product operation. The operation vec​(⋅)vec⋅\\textrm{vec}(\\cdot) denotes the column vectorization of an input matrix by stacking its columns one after the next. Then, one can prove that the converged solution of Eq.([6](https://ar5iv.labs.arxiv.org/html/1910.01736#S3.E6 \"In 3.1 Context-aware edge attention learning ‣ 3 Context-aware Adaptive Graph Attention Network ‣ Context-Aware Graph Attention Networks\")) is the optimal solution that minimizes the following optimization problem [[19](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib19), [2](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib2)],\n\n𝔸=A¯⊗A¯,A¯=D−1​Aformulae-sequence𝔸tensor-product¯A¯A¯AsuperscriptD1A\\mathbb{A}=\\bar{\\textbf{A}}\\otimes\\bar{\\textbf{A}},\\bar{\\textbf{A}}=\\textbf{D}^{-1}\\textbf{A}\n\n⊗tensor-product\\otimes\n\nvec​(⋅)vec⋅\\textrm{vec}(\\cdot)\n\n| | | | | | --- | --- | --- | --- | | | minS⁡ℛCaGAT​(S;A,G)=vec​(S)T​(I−𝔸)​vec​(S)+μ​‖S−G‖F2subscriptSsubscriptℛCaGAT SAGvecsuperscriptSTI𝔸vecS𝜇superscriptsubscriptnormSG𝐹2\\displaystyle\\min\\_{\\textbf{S}}\\,\\mathcal{R}\\_{\\mathrm{CaGAT}}(\\textbf{S};\\textbf{A},\\textbf{G})=\\textrm{vec}(\\textbf{S})^{\\mathrm{T}}(\\textbf{I}-\\mathbb{A})\\textrm{vec}(\\textbf{S})+\\mu\\|{\\textbf{S}}-{\\textbf{G}}\\|\\_{F}^{2} | | (7) |\n\nminS⁡ℛCaGAT​(S;A,G)=vec​(S)T​(I−𝔸)​vec​(S)+μ​‖S−G‖F2subscriptSsubscriptℛCaGATSAGvecsuperscriptSTI𝔸vecS𝜇superscriptsubscriptnormSG𝐹2\\displaystyle\\min_{\\textbf{S}}\\,\\mathcal{R}_{\\mathrm{CaGAT}}(\\textbf{S};\\textbf{A},\\textbf{G})=\\textrm{vec}(\\textbf{S})^{\\mathrm{T}}(\\textbf{I}-\\mathbb{A})\\textrm{vec}(\\textbf{S})+\\mu\\|{\\textbf{S}}-{\\textbf{G}}\\|_{F}^{2}\n\nwhere μ=1α−1𝜇1𝛼1\\mu=\\frac{1}{\\alpha}-1 is a replacement parameter of α𝛼\\alpha to balance two terms. From this regularization framework, one can note that, CaGAT aims to learn a context-aware graph attention S by considering the local consistency as well as preserving the information of original graph attention G.\n\nμ=1α−1𝜇1𝛼1\\mu=\\frac{1}{\\alpha}-1\n\nα𝛼\\alpha"
+    },
+    {
+      "heading_path": [
+        "Context-Aware Graph Attention Networks",
+        "3 Context-aware Adaptive Graph Attention Network",
+        "3.2 Node feature representation"
+      ],
+      "text": "### 3.2 Node feature representation\n\nBased on the proposed context-aware graph attention, we can obtain the feature representation of each node visubscript𝑣𝑖v\\_{i} by using the feature aggregation similar to Eq.(3) as\n\nvisubscript𝑣𝑖v_{i}\n\n| | | | | | --- | --- | --- | --- | | | hi′=λ​∑j∈𝒩i𝒮​(hi,hj;W,Θ)​Whj+(1−λ)​Whisubscriptsuperscripth′𝑖𝜆subscript𝑗subscript𝒩𝑖𝒮subscripth𝑖subscripth𝑗WΘsubscriptWh𝑗1𝜆subscriptWh𝑖\\displaystyle\\textbf{h}^{\\prime}\\_{i}=\\lambda\\sum\\nolimits\\_{j\\in\\mathcal{N}\\_{i}}\\mathcal{S}(\\textbf{h}\\_{i},\\textbf{h}\\_{j};\\textbf{W},\\Theta)\\textbf{W}\\textbf{h}\\_{j}+(1-\\lambda)\\textbf{W}\\textbf{h}\\_{i} | | (8) |\n\nhi′=λ​∑j∈𝒩i𝒮​(hi,hj;W,Θ)​Whj+(1−λ)​Whisubscriptsuperscripth′𝑖𝜆subscript𝑗subscript𝒩𝑖𝒮subscripth𝑖subscripth𝑗WΘsubscriptWh𝑗1𝜆subscriptWh𝑖\\displaystyle\\textbf{h}^{\\prime}_{i}=\\lambda\\sum\\nolimits_{j\\in\\mathcal{N}_{i}}\\mathcal{S}(\\textbf{h}_{i},\\textbf{h}_{j};\\textbf{W},\\Theta)\\textbf{W}\\textbf{h}_{j}+(1-\\lambda)\\textbf{W}\\textbf{h}_{i}\n\nwhere λ∈(0,1)𝜆01\\lambda\\in(0,1) is a weight parameter. Using matrix notation, Eq.(8) is formulated as\n\nλ∈(0,1)𝜆01\\lambda\\in(0,1)\n\n| | | | | | --- | --- | --- | --- | | | H′=λ​SWH+(1−λ)​WHsuperscriptH′𝜆SWH1𝜆WH\\displaystyle\\textbf{H}^{\\prime}=\\lambda\\textbf{S}\\textbf{W}\\textbf{H}+(1-\\lambda)\\textbf{W}\\textbf{H} | | (9) |\n\nH′=λ​SWH+(1−λ)​WHsuperscriptH′𝜆SWH1𝜆WH\\displaystyle\\textbf{H}^{\\prime}=\\lambda\\textbf{S}\\textbf{W}\\textbf{H}+(1-\\lambda)\\textbf{W}\\textbf{H}\n\nwhere Si​j=𝒮​(hi,hj;W,Θ)subscriptS𝑖𝑗𝒮subscripth𝑖subscripth𝑗WΘ\\textbf{S}\\_{ij}=\\mathcal{S}(\\textbf{h}\\_{i},\\textbf{h}\\_{j};\\textbf{W},\\Theta) and thus ∑j∈𝒩iSi​j=1,Si​j≥0formulae-sequencesubscript𝑗subscript𝒩𝑖subscriptS𝑖𝑗1subscriptS𝑖𝑗0\\sum\\_{j\\in\\mathcal{N}\\_{i}}\\textbf{S}\\_{ij}=1,\\textbf{S}\\_{ij}\\geq 0.\n\nSi​j=𝒮​(hi,hj;W,Θ)subscriptS𝑖𝑗𝒮subscripth𝑖subscripth𝑗WΘ\\textbf{S}_{ij}=\\mathcal{S}(\\textbf{h}_{i},\\textbf{h}_{j};\\textbf{W},\\Theta)\n\n∑j∈𝒩iSi​j=1,Si​j≥0formulae-sequencesubscript𝑗subscript𝒩𝑖subscriptS𝑖𝑗1subscriptS𝑖𝑗0\\sum_{j\\in\\mathcal{N}_{i}}\\textbf{S}_{ij}=1,\\textbf{S}_{ij}\\geq 0\n\nRegularization framework. The feature aggregation Eq.(8) can be regarded as a one-step neighborhood propagation (NP) which can also be derived from the following regularization framework [[19](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib19)],\n\n| | | | | | --- | --- | --- | --- | | | minH′⁡ℛNP​(H′;S,WH)=Tr​(H′​(I−S)​H′T)+γ​‖H′−WH‖F2subscriptsuperscriptH′subscriptℛNP superscriptH′SWHTrsuperscriptH′ISsuperscriptsuperscriptH′T𝛾subscriptsuperscriptnormsuperscriptH′WH2𝐹\\displaystyle\\min\\_{\\textbf{H}^{\\prime}}\\mathcal{R}\\_{\\mathrm{NP}}(\\textbf{H}^{\\prime};\\textbf{S},\\textbf{W}\\textbf{H})=\\mathrm{Tr}({\\textbf{H}^{\\prime}}(\\textbf{I}-\\textbf{S}){\\textbf{H}^{\\prime}}^{\\mathrm{T}})+\\gamma\\|\\textbf{H}^{\\prime}-\\textbf{W}\\textbf{H}\\|^{2}\\_{F} | | (10) |\n\nminH′⁡ℛNP​(H′;S,WH)=Tr​(H′​(I−S)​H′T)+γ​‖H′−WH‖F2subscriptsuperscriptH′subscriptℛNPsuperscriptH′SWHTrsuperscriptH′ISsuperscriptsuperscriptH′T𝛾subscriptsuperscriptnormsuperscriptH′WH2𝐹\\displaystyle\\min_{\\textbf{H}^{\\prime}}\\mathcal{R}_{\\mathrm{NP}}(\\textbf{H}^{\\prime};\\textbf{S},\\textbf{W}\\textbf{H})=\\mathrm{Tr}({\\textbf{H}^{\\prime}}(\\textbf{I}-\\textbf{S}){\\textbf{H}^{\\prime}}^{\\mathrm{T}})+\\gamma\\|\\textbf{H}^{\\prime}-\\textbf{W}\\textbf{H}\\|^{2}_{F}\n\nwhere γ=1λ−1𝛾1𝜆1\\gamma=\\frac{1}{\\lambda}-1 is a replacement parameter of λ𝜆\\lambda.\n\nγ=1λ−1𝛾1𝜆1\\gamma=\\frac{1}{\\lambda}-1\n\nλ𝜆\\lambda"
+    },
+    {
+      "heading_path": [
+        "Context-Aware Graph Attention Networks",
+        "3 Context-aware Adaptive Graph Attention Network",
+        "3.3 Unified model"
+      ],
+      "text": "### 3.3 Unified model\n\nBased on regularization frameworks (Eq.(6) and Eq.(9)), we can propose a unified regularization framework by conducting context-aware learning of both graph edge attention and node feature representation together as\n\n| | | | | | --- | --- | --- | --- | | | minS,H′𝒰=ℛCaGAT​(S;A,G)+β​ℛNP​(H′;S,WH) subscript SsuperscriptH′𝒰 subscriptℛCaGAT SAG𝛽subscriptℛNP superscriptH′SWH\\displaystyle\\min\\_{\\textbf{S},\\textbf{H}^{\\prime}}\\ \\ \\mathcal{U}=\\mathcal{R}\\_{\\mathrm{CaGAT}}(\\textbf{S};\\textbf{A},\\textbf{G})+\\beta\\mathcal{R}\\_{\\mathrm{NP}}(\\textbf{H}^{\\prime};\\textbf{S},\\textbf{W}\\textbf{H}) | | (11) |\n\nminS,H′𝒰=ℛCaGAT​(S;A,G)+β​ℛNP​(H′;S,WH)subscriptSsuperscriptH′𝒰subscriptℛCaGATSAG𝛽subscriptℛNPsuperscriptH′SWH\\displaystyle\\min_{\\textbf{S},\\textbf{H}^{\\prime}}\\ \\ \\mathcal{U}=\\mathcal{R}_{\\mathrm{CaGAT}}(\\textbf{S};\\textbf{A},\\textbf{G})+\\beta\\mathcal{R}_{\\mathrm{NP}}(\\textbf{H}^{\\prime};\\textbf{S},\\textbf{W}\\textbf{H})\n\nwhere β>0𝛽0\\beta>0 balances two terms. In practical, the optimal S and H′superscriptH′\\textbf{H}^{\\prime} can be obtained via a simple approximate algorithm which alternatively conducts the following Step 1 and Step 2.\n\nβ>0𝛽0\\beta>0\n\nH′superscriptH′\\textbf{H}^{\\prime}\n\nStep 1. Solving S while fixing H′superscriptH′\\textbf{H}^{\\prime}, the problem becomes\n\nH′superscriptH′\\textbf{H}^{\\prime}\n\n| | | | | | --- | --- | --- | --- | | | minSℛCaGAT​(S;A,G)+β​Tr​(H′​(I−S)​H′T) subscriptSsubscriptℛCaGAT SAG𝛽TrsuperscriptH′ISsuperscriptsuperscriptH′T\\displaystyle\\min\\_{\\textbf{S}}\\ \\ \\mathcal{R}\\_{\\mathrm{CaGAT}}(\\textbf{S};\\textbf{A},\\textbf{G})+\\beta\\mathrm{Tr}({\\textbf{H}^{\\prime}}(\\textbf{I}-\\textbf{S}){\\textbf{H}^{\\prime}}^{\\mathrm{T}}) | | (12) |\n\nminSℛCaGAT​(S;A,G)+β​Tr​(H′​(I−S)​H′T)subscriptSsubscriptℛCaGATSAG𝛽TrsuperscriptH′ISsuperscriptsuperscriptH′T\\displaystyle\\min_{\\textbf{S}}\\ \\ \\mathcal{R}_{\\mathrm{CaGAT}}(\\textbf{S};\\textbf{A},\\textbf{G})+\\beta\\mathrm{Tr}({\\textbf{H}^{\\prime}}(\\textbf{I}-\\textbf{S}){\\textbf{H}^{\\prime}}^{\\mathrm{T}})\n\nThen, Eq.(12) can be rewritten more compactly as\n\n| | | | | | --- | --- | --- | --- | | | minS⁡vec​(S)T​(I−𝔸)​vec​(S)+μ​‖S−G‖F2−β​Tr​(SH′T​H′)subscriptSvecsuperscriptSTI𝔸vecS𝜇superscriptsubscriptnormSG𝐹2𝛽TrsuperscriptsuperscriptSH′TsuperscriptH′\\displaystyle\\min\\_{\\textbf{S}}\\,\\,\\,\\textrm{vec}(\\textbf{S})^{\\mathrm{T}}(\\textbf{I}-\\mathbb{A})\\textrm{vec}(\\textbf{S})+\\mu\\|{\\textbf{S}}-{\\textbf{G}}\\|\\_{F}^{2}-\\beta\\mathrm{Tr}({\\textbf{S}}{{\\textbf{H}^{\\prime}}^{\\mathrm{T}}\\textbf{H}^{\\prime}}) | | (13) |\n\nminS⁡vec​(S)T​(I−𝔸)​vec​(S)+μ​‖S−G‖F2−β​Tr​(SH′T​H′)subscriptSvecsuperscriptSTI𝔸vecS𝜇superscriptsubscriptnormSG𝐹2𝛽TrsuperscriptsuperscriptSH′TsuperscriptH′\\displaystyle\\min_{\\textbf{S}}\\,\\,\\,\\textrm{vec}(\\textbf{S})^{\\mathrm{T}}(\\textbf{I}-\\mathbb{A})\\textrm{vec}(\\textbf{S})+\\mu\\|{\\textbf{S}}-{\\textbf{G}}\\|_{F}^{2}-\\beta\\mathrm{Tr}({\\textbf{S}}{{\\textbf{H}^{\\prime}}^{\\mathrm{T}}\\textbf{H}^{\\prime}})\n\nIt is equivalent to\n\n| | | | | | --- | --- | --- | --- | | | minS⁡vec​(S)T​(I−𝔸)​vec​(S)+μ​‖S−(G+β2​μ​H′T​H′)‖F2subscriptSvecsuperscriptSTI𝔸vecS𝜇superscriptsubscriptnormSG𝛽2𝜇superscriptsuperscriptH′TsuperscriptH′𝐹2\\displaystyle\\min\\_{\\textbf{S}}\\,\\,\\,\\textrm{vec}(\\textbf{S})^{\\mathrm{T}}(\\textbf{I}-\\mathbb{A})\\textrm{vec}(\\textbf{S})+\\mu\\|{\\textbf{S}}-({\\textbf{G}}+\\textstyle\\frac{\\beta}{2\\mu}{{\\textbf{H}^{\\prime}}^{\\mathrm{T}}\\textbf{H}^{\\prime}})\\|\\_{F}^{2} | | (14) |\n\nminS⁡vec​(S)T​(I−𝔸)​vec​(S)+μ​‖S−(G+β2​μ​H′T​H′)‖F2subscriptSvecsuperscriptSTI𝔸vecS𝜇superscriptsubscriptnormSG𝛽2𝜇superscriptsuperscriptH′TsuperscriptH′𝐹2\\displaystyle\\min_{\\textbf{S}}\\,\\,\\,\\textrm{vec}(\\textbf{S})^{\\mathrm{T}}(\\textbf{I}-\\mathbb{A})\\textrm{vec}(\\textbf{S})+\\mu\\|{\\textbf{S}}-({\\textbf{G}}+\\textstyle\\frac{\\beta}{2\\mu}{{\\textbf{H}^{\\prime}}^{\\mathrm{T}}\\textbf{H}^{\\prime}})\\|_{F}^{2}\n\nThe optimal S can be computed approximately via a power iteration update algorithm as\n\n| | | | | | --- | --- | --- | --- | | | S(t+1)=α​A¯​S(t)​A¯T+(1−α)​G+ξ​H′T​H′superscriptS𝑡1𝛼¯AsuperscriptS𝑡superscript¯AT1𝛼G𝜉superscriptsuperscriptH′TsuperscriptH′\\displaystyle\\textbf{S}^{(t+1)}=\\alpha\\bar{\\textbf{A}}\\textbf{S}^{(t)}\\bar{\\textbf{A}}^{\\mathrm{T}}+(1-\\alpha)\\textbf{G}+\\xi{\\textbf{H}^{\\prime}}^{\\mathrm{T}}\\textbf{H}^{\\prime} | | (15) |\n\nS(t+1)=α​A¯​S(t)​A¯T+(1−α)​G+ξ​H′T​H′superscriptS𝑡1𝛼¯AsuperscriptS𝑡superscript¯AT1𝛼G𝜉superscriptsuperscriptH′TsuperscriptH′\\displaystyle\\textbf{S}^{(t+1)}=\\alpha\\bar{\\textbf{A}}\\textbf{S}^{(t)}\\bar{\\textbf{A}}^{\\mathrm{T}}+(1-\\alpha)\\textbf{G}+\\xi{\\textbf{H}^{\\prime}}^{\\mathrm{T}}\\textbf{H}^{\\prime}\n\nwhere t=0,1​⋯​T𝑡 01⋯𝑇t=0,1\\cdots T and S(0)=GsuperscriptS0G\\textbf{S}^{(0)}=\\textbf{G}. Parameter α=11+μ𝛼11𝜇\\alpha=\\frac{1}{1+\\mu} and ξ=(1−α)​β2​μ𝜉1𝛼𝛽2𝜇\\xi=\\frac{(1-\\alpha)\\beta}{2\\mu}.\n\nt=0,1​⋯​T𝑡01⋯𝑇t=0,1\\cdots T\n\nS(0)=GsuperscriptS0G\\textbf{S}^{(0)}=\\textbf{G}\n\nα=11+μ𝛼11𝜇\\alpha=\\frac{1}{1+\\mu}\n\nξ=(1−α)​β2​μ𝜉1𝛼𝛽2𝜇\\xi=\\frac{(1-\\alpha)\\beta}{2\\mu}\n\nStep 2. Solving H′superscriptH′\\textbf{H}^{\\prime} while fixing S, the problem becomes Eq.(10). The optimal solution is\n\nH′superscriptH′\\textbf{H}^{\\prime}\n\n| | | | | | --- | --- | --- | --- | | | H′=(1−λ)​(I−λ​S)−1​WHsuperscriptH′1𝜆superscriptI𝜆S1WH\\displaystyle\\textbf{H}^{\\prime}=(1-\\lambda)(\\textbf{I}-\\lambda\\textbf{S})^{-1}\\textbf{WH} | | (16) |\n\nH′=(1−λ)​(I−λ​S)−1​WHsuperscriptH′1𝜆superscriptI𝜆S1WH\\displaystyle\\textbf{H}^{\\prime}=(1-\\lambda)(\\textbf{I}-\\lambda\\textbf{S})^{-1}\\textbf{WH}\n\nand an approximate solution can be obtained by [[19](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib19), [23](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib23)]\n\n| | | | | | --- | --- | --- | --- | | | H′=[(λ​S)T+(1−λ)​∑t=0T−1(λ​S)i]​WHsuperscriptH′delimited-[]superscript𝜆S𝑇1𝜆subscriptsuperscript𝑇1𝑡0superscript𝜆S𝑖WH\\displaystyle\\textbf{H}^{\\prime}=\\big{[}(\\lambda\\textbf{S})^{T}+(1-\\lambda)\\textstyle\\sum^{T-1}\\_{t=0}(\\lambda\\textbf{S})^{i}\\big{]}\\textbf{WH} | | (17) |\n\nH′=[(λ​S)T+(1−λ)​∑t=0T−1(λ​S)i]​WHsuperscriptH′delimited-[]superscript𝜆S𝑇1𝜆subscriptsuperscript𝑇1𝑡0superscript𝜆S𝑖WH\\displaystyle\\textbf{H}^{\\prime}=\\big{[}(\\lambda\\textbf{S})^{T}+(1-\\lambda)\\textstyle\\sum^{T-1}_{t=0}(\\lambda\\textbf{S})^{i}\\big{]}\\textbf{WH}\n\nWhen T=1𝑇1T=1, we obtain the one-step iteration solution as\n\nT=1𝑇1T=1\n\n| | | | | | --- | --- | --- | --- | | | H′=λ​SWH+(1−λ)​WHsuperscriptH′𝜆SWH1𝜆WH\\displaystyle\\textbf{H}^{\\prime}=\\lambda\\textbf{S}\\textbf{W}\\textbf{H}+(1-\\lambda)\\textbf{W}\\textbf{H} | | (18) |\n\nH′=λ​SWH+(1−λ)​WHsuperscriptH′𝜆SWH1𝜆WH\\displaystyle\\textbf{H}^{\\prime}=\\lambda\\textbf{S}\\textbf{W}\\textbf{H}+(1-\\lambda)\\textbf{W}\\textbf{H}"
+    },
+    {
+      "heading_path": [
+        "Context-Aware Graph Attention Networks",
+        "3 Context-aware Adaptive Graph Attention Network",
+        "3.4 CaGAT architecture"
+      ],
+      "text": "### 3.4 CaGAT architecture\n\nThe overall layer-wise propagation of the proposed CaGAT is summarized in Algorithm 1, where σ​(⋅)𝜎⋅\\sigma(\\cdot) used in the last step denotes an activation function, such as ReLU​(⋅)=max⁡(0,⋅)ReLU⋅0⋅\\mathrm{ReLU}(\\cdot)=\\max(0,\\cdot). Considering the efficiency of CaGAT training, we employ a truncated iteration algorithm to optimize the context-aware problem approximately in CaGAT architecture. In this paper, we apply CaGAT on semi-supervised classification. Similar to many other works [[10](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib10), [17](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib17)], the optimal weight matrix W and weight vector ΘΘ\\Theta of each hidden layer in CaGAT are trained by minimizing the cross-entropy loss via an Adam algorithm [[9](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib9)] which is initialized by using Glorot initialization [[6](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib6)]. Figure 1 shows the training loss values across different epochs. One can note that, CaGAT obtains obviously lower cross-entropy loss values than GAT at convergence, which clearly demonstrates the higher predictive accuracy of CaGAT model.\n\nσ​(⋅)𝜎⋅\\sigma(\\cdot)\n\nReLU​(⋅)=max⁡(0,⋅)ReLU⋅0⋅\\mathrm{ReLU}(\\cdot)=\\max(0,\\cdot)\n\nΘΘ\\Theta\n\nH∈ℝd×nHsuperscriptℝ𝑑𝑛\\textbf{H}\\in\\mathbb{R}^{d\\times n}\n\nA∈ℝn×nAsuperscriptℝ𝑛𝑛{\\textbf{A}}\\in\\mathbb{R}^{n\\times n}\n\nΘΘ\\Theta\n\nξ,α𝜉𝛼\\xi,\\alpha\n\nλ𝜆\\lambda\n\nK𝐾K\n\nT𝑇T\n\nH′superscriptH′\\textbf{H}^{\\prime}\n\nA¯=D−1​A¯AsuperscriptD1A\\bar{\\textbf{A}}=\\textbf{D}^{-1}\\textbf{A}\n\nGi​jsubscriptG𝑖𝑗\\textbf{G}_{ij}\n\nGi​j=𝒢​(hi,hj;W,Θ)subscriptG𝑖𝑗𝒢subscripth𝑖subscripth𝑗WΘ\\textbf{G}_{ij}=\\mathcal{G}(\\textbf{h}_{i},\\textbf{h}_{j};\\textbf{W},\\Theta)\n\nH′superscriptH′{\\textbf{H}^{\\prime}}\n\nH′←λ​GWH+(1−λ)​WH←superscriptH′𝜆GWH1𝜆WH\\textbf{H}^{\\prime}\\leftarrow\\lambda\\textbf{G}\\textbf{W}\\textbf{H}+(1-\\lambda)\\textbf{W}\\textbf{H}\n\nk=1,2​⋯​K𝑘12⋯𝐾k=1,2\\cdots K\n\nt=1,2​⋯​T𝑡12⋯𝑇t=1,2\\cdots T\n\nS←α​A¯​S​A¯T+(1−α)​G+ξ​H′T​H′←S𝛼¯ASsuperscript¯AT1𝛼G𝜉superscriptsuperscriptH′TsuperscriptH′\\textbf{S}\\leftarrow\\alpha\\bar{\\textbf{A}}\\textbf{S}\\bar{\\textbf{A}}^{\\mathrm{T}}+(1-\\alpha)\\textbf{G}+\\xi{\\textbf{H}^{\\prime}}^{\\mathrm{T}}\\textbf{H}^{\\prime}\n\nH′←λ​SWH′+(1−λ)​WH←superscriptH′𝜆superscriptSWH′1𝜆WH\\textbf{H}^{\\prime}\\leftarrow\\lambda\\textbf{S}\\textbf{W}\\textbf{H}^{\\prime}+(1-\\lambda)\\textbf{W}\\textbf{H}\n\nH′←σ​(H′)←superscriptH′𝜎superscriptH′\\textbf{H}^{\\prime}\\leftarrow\\sigma(\\textbf{H}^{\\prime})\n\nComplexity analysis. The main computation complexity of CaGAT network training involves context-aware attention computation and feature aggregation. For context-aware attention computation step, we adopt a simple update algorithm and the whole computational complexity is 𝒪​(T​n3)𝒪𝑇superscript𝑛3\\mathcal{O}(Tn^{3}) in the worst case (for the full dense graph). For feature aggregation step, we adopt a similar feature aggregation used in GATs [[17](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib17)], which has the computational complexity as 𝒪​(n2​d)𝒪superscript𝑛2𝑑\\mathcal{O}(n^{2}d) in the worst case, where d𝑑d denotes the feature dimension of H. Therefore, the whole complexity is 𝒪​(K​(T​n3+n2​d))𝒪𝐾𝑇superscript𝑛3superscript𝑛2𝑑\\mathcal{O}(K(Tn^{3}+n^{2}d)). In our experiments, the maximum iterations {K,T}𝐾𝑇\\{K,T\\} are set to {3,2}32\\{3,2\\} respectively. Thus, the overall layer-wise propagation in CaGAT is not computationally expensive.\n\n𝒪​(T​n3)𝒪𝑇superscript𝑛3\\mathcal{O}(Tn^{3})\n\n𝒪​(n2​d)𝒪superscript𝑛2𝑑\\mathcal{O}(n^{2}d)\n\nd𝑑d\n\n𝒪​(K​(T​n3+n2​d))𝒪𝐾𝑇superscript𝑛3superscript𝑛2𝑑\\mathcal{O}(K(Tn^{3}+n^{2}d))\n\n{K,T}𝐾𝑇\\{K,T\\}\n\n{3,2}32\\{3,2\\}"
+    },
+    {
+      "heading_path": [
+        "Context-Aware Graph Attention Networks",
+        "4 Experiments"
+      ],
+      "text": "## 4 Experiments\n\nTo verify the effectiveness of the proposed method, we implement our CaGAT and test it on four benchmark datasets and compare it with some other related methods."
+    },
+    {
+      "heading_path": [
+        "Context-Aware Graph Attention Networks",
+        "4 Experiments",
+        "4.1 Datasets"
+      ],
+      "text": "### 4.1 Datasets\n\nWe test our method on four benchmark datasets, including Cora, Citeseer, Pubmed from a graph neural network dataset [[16](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib16)] and Cora-ML [[14](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib14), [12](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib12)]. The details of these datasets and their usages in our experiments are introduced below.\n\nCora. This data contains 2485 nodes and 7554 edges. Nodes correspond to documents and edges to citations between documents. Each node has a 1433 dimension feature descriptor and all the nodes are classified into 7 classes.\n\nCiteseer. This data contains 2110 nodes and 5778 edges. Each node corresponds to a document and edge to citation relationship between documents. The nodes of this network are classified into 6 classes and each node has been represented by a 3703 dimension feature descriptor.\n\nPubmed. This dataset contains 19717 nodes and 64041 edges which are classified into 3 classes. Each node is represented by a 500 dimension feature descriptor.\n\nCora-ML. It contains 2810 nodes and 7981 edges. Each node is represented by a 2879 dimension feature descriptor and all the nodes are falling into 7 classes.\n\n| | | | | | | --- | --- | --- | --- | --- | | Dataset | Cora | | Citeseer | | | No. of label (each class) | 10 | 20 | 10 | 20 | | MLP | 50.30 ±plus-or-minus\\pm 2.98 | 58.34 ±plus-or-minus\\pm 1.84 | 52.31±plus-or-minus\\pm 2.52 | 58.98 ±plus-or-minus\\pm 1.89 | | LogReg [[16](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib16)] | 50.78 ±plus-or-minus\\pm 4.66 | 58.38 ±plus-or-minus\\pm 2.36 | 53.23 ±plus-or-minus\\pm 3.28 | 60.86 ±plus-or-minus\\pm 2.77 | | LabelProp [[25](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib25)] | 67.78 ±plus-or-minus\\pm 4.62 | 75.41 ±plus-or-minus\\pm 2.75 | 65.42 ±plus-or-minus\\pm 2.65 | 68.24 ±plus-or-minus\\pm 2.07 | | LabelProp NL [[25](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib25)] | 70.59 ±plus-or-minus\\pm 1.56 | 74.36 ±plus-or-minus\\pm 1.69 | 63.81±plus-or-minus\\pm 2.48 | 66.61 ±plus-or-minus\\pm 1.82 | | DGI [[18](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib18)] | 70.78 ±plus-or-minus\\pm 4.46 | 71.19 ±plus-or-minus\\pm 4.55 | 68.69 ±plus-or-minus\\pm 2.35 | 67.97 ±plus-or-minus\\pm 2.66 | | GraphSAGE [[7](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib7)] | 70.89 ±plus-or-minus\\pm 3.99 | 77.54 ±plus-or-minus\\pm 1.91 | 68.48 ±plus-or-minus\\pm 1.92 | 71.84 ±plus-or-minus\\pm 1.36 | | CVD+PP [[4](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib4)] | 75.97 ±plus-or-minus\\pm 2.65 | 79.57 ±plus-or-minus\\pm 1.18 | 70.74 ±plus-or-minus\\pm 1.74 | 70.95 ±plus-or-minus\\pm 1.21 | | GCN [[10](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib10)] | 76.35 ±plus-or-minus\\pm 2.79 | 79.03 ±plus-or-minus\\pm 1.52 | 71.04 ±plus-or-minus\\pm 1.79 | 71.49 ±plus-or-minus\\pm 1.24 | | GATs [[17](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib17)] | 76.54 ±plus-or-minus\\pm 2.50 | 79.07 ±plus-or-minus\\pm 1.36 | 71.07 ±plus-or-minus\\pm 1.23 | 71.91 ±plus-or-minus\\pm 1.27 | | CaGAT | 77.98 ±plus-or-minus\\pm 2.38 | 80.51 ±plus-or-minus\\pm 0.80 | 72.12 ±plus-or-minus\\pm 1.35 | 73.21 ±plus-or-minus\\pm 1.36 | | Dataset | Pubmed | | Cora-ML | | | No. of label (each class) | 10 | 20 | 10 | 20 | | MLP | 64.39 ±plus-or-minus\\pm 2.77 | 69.76 ±plus-or-minus\\pm 1.81 | 53.87 ±plus-or-minus\\pm 2.54 | 63.76 ±plus-or-minus\\pm 1.75 | | LogReg [[16](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib16)] | 60.75 ±plus-or-minus\\pm 3.59 | 64.03 ±plus-or-minus\\pm 2.89 | 48.07 ±plus-or-minus\\pm 6.34 | 62.17 ±plus-or-minus\\pm 2.64 | | LabelProp [[25](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib25)] | 64.03 ±plus-or-minus\\pm 8.72 | 70.64 ±plus-or-minus\\pm 5.20 | 65.03 ±plus-or-minus\\pm 4.41 | 71.81 ±plus-or-minus\\pm 3.78 | | LabelProp NL [[25](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib25)] | 68.01 ±plus-or-minus\\pm 5.03 | 73.31 ±plus-or-minus\\pm 1.47 | 72.23 ±plus-or-minus\\pm 2.18 | 75.26 ±plus-or-minus\\pm 1.48 | | DGI [[18](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib18)] | 70.08 ±plus-or-minus\\pm 2.71 | 71.62 ±plus-or-minus\\pm 1.59 | 69.38 ±plus-or-minus\\pm 4.99 | 72.26 ±plus-or-minus\\pm 2.89 | | GraphSAGE [[7](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib7)] | 69.92 ±plus-or-minus\\pm 3.85 | 73.16 ±plus-or-minus\\pm 2.08 | 75.24 ±plus-or-minus\\pm 3.65 | 80.82 ±plus-or-minus\\pm 1.75 | | CVD+PP [[4](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib4)] | 75.00 ±plus-or-minus\\pm 3.17 | 76.89 ±plus-or-minus\\pm 1.70 | 78.51 ±plus-or-minus\\pm 2.64 | 80.83 ±plus-or-minus\\pm 1.54 | | GCN [[10](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib10)] | 74.88 ±plus-or-minus\\pm 2.85 | 77.41 ±plus-or-minus\\pm 2.06 | 78.41 ±plus-or-minus\\pm 2.37 | 80.04 ±plus-or-minus\\pm 1.63 | | GATs [[17](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib17)] | 74.64 ±plus-or-minus\\pm 2.23 | 76.74 ±plus-or-minus\\pm 1.73 | 78.98 ±plus-or-minus\\pm 2.09 | 80.33 ±plus-or-minus\\pm 1.98 | | CaGAT | 75.63 ±plus-or-minus\\pm 3.09 | 77.68 ±plus-or-minus\\pm 2.15 | 80.38 ±plus-or-minus\\pm 2.09 | 81.86 ±plus-or-minus\\pm 1.85 |\n\n±plus-or-minus\\pm\n\n±plus-or-minus\\pm\n\n±plus-or-minus\\pm\n\n±plus-or-minus\\pm\n\n±plus-or-minus\\pm\n\n±plus-or-minus\\pm\n\n±plus-or-minus\\pm\n\n±plus-or-minus\\pm\n\n±plus-or-minus\\pm\n\n±plus-or-minus\\pm\n\n±plus-or-minus\\pm\n\n±plus-or-minus\\pm\n\n±plus-or-minus\\pm\n\n±plus-or-minus\\pm\n\n±plus-or-minus\\pm\n\n±plus-or-minus\\pm\n\n±plus-or-minus\\pm\n\n±plus-or-minus\\pm\n\n±plus-or-minus\\pm\n\n±plus-or-minus\\pm\n\n±plus-or-minus\\pm\n\n±plus-or-minus\\pm\n\n±plus-or-minus\\pm\n\n±plus-or-minus\\pm\n\n±plus-or-minus\\pm\n\n±plus-or-minus\\pm\n\n±plus-or-minus\\pm\n\n±plus-or-minus\\pm\n\n±plus-or-minus\\pm\n\n±plus-or-minus\\pm\n\n±plus-or-minus\\pm\n\n±plus-or-minus\\pm\n\n±plus-or-minus\\pm\n\n±plus-or-minus\\pm\n\n±plus-or-minus\\pm\n\n±plus-or-minus\\pm\n\n±plus-or-minus\\pm\n\n±plus-or-minus\\pm\n\n±plus-or-minus\\pm\n\n±plus-or-minus\\pm\n\n±plus-or-minus\\pm\n\n±plus-or-minus\\pm\n\n±plus-or-minus\\pm\n\n±plus-or-minus\\pm\n\n±plus-or-minus\\pm\n\n±plus-or-minus\\pm\n\n±plus-or-minus\\pm\n\n±plus-or-minus\\pm\n\n±plus-or-minus\\pm\n\n±plus-or-minus\\pm\n\n±plus-or-minus\\pm\n\n±plus-or-minus\\pm\n\n±plus-or-minus\\pm\n\n±plus-or-minus\\pm\n\n±plus-or-minus\\pm\n\n±plus-or-minus\\pm\n\n±plus-or-minus\\pm\n\n±plus-or-minus\\pm\n\n±plus-or-minus\\pm\n\n±plus-or-minus\\pm\n\n±plus-or-minus\\pm\n\n±plus-or-minus\\pm\n\n±plus-or-minus\\pm\n\n±plus-or-minus\\pm\n\n±plus-or-minus\\pm\n\n±plus-or-minus\\pm\n\n±plus-or-minus\\pm\n\n±plus-or-minus\\pm\n\n±plus-or-minus\\pm\n\n±plus-or-minus\\pm\n\n±plus-or-minus\\pm\n\n±plus-or-minus\\pm\n\n±plus-or-minus\\pm\n\n±plus-or-minus\\pm\n\n±plus-or-minus\\pm\n\n±plus-or-minus\\pm\n\n±plus-or-minus\\pm\n\n±plus-or-minus\\pm\n\n±plus-or-minus\\pm\n\n±plus-or-minus\\pm"
+    },
+    {
+      "heading_path": [
+        "Context-Aware Graph Attention Networks",
+        "4 Experiments",
+        "4.2 Experimental setting"
+      ],
+      "text": "### 4.2 Experimental setting\n\nFor all datasets, we randomly select 10 and 20 samples in each class as labeled data for training the network and use the other 20 labeled data in each class for validation purpose. The remaining unlabeled samples are used as testing samples. All the reported results are averaged over ten runs with different groups of training, validation and testing data splits.\n\nSimilar to traditional GATs [[17](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib17)], the number of hidden convolution layers in CaGAT is set as 2. The number of units in each hidden layer is set as 8 and it also has eight head-attentions, as suggested in GATs [[17](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib17)]. We train our CaGAT for a maximum of 10000 epochs (training iterations) by using an ADAM algorithm [[9](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib9)] with a learning rate of 0.005. We stop training if the validation loss does not decrease for 100 consecutive epochs, as suggested in work [[17](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib17)]. All the network weights {W,Θ}WΘ\\{\\textbf{W},\\Theta\\} of each hidden layer are initialized by using Glorot initialization [[6](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib6)]. The balanced parameter α𝛼\\alpha and ξ𝜉\\xi (Eq.(15)) in CaGAT are set to 0.4 and 0.001, respectively. The parameter λ𝜆\\lambda (Eq.(18)) is set to 0.3. We will shown in §4.4 that CaGAT is generally insensitive w.r.t. these parameters.\n\n{W,Θ}WΘ\\{\\textbf{W},\\Theta\\}\n\nα𝛼\\alpha\n\nξ𝜉\\xi\n\nλ𝜆\\lambda"
+    },
+    {
+      "heading_path": [
+        "Context-Aware Graph Attention Networks",
+        "4 Experiments",
+        "4.3 Comparison results"
+      ],
+      "text": "### 4.3 Comparison results\n\nBaselines. We first compare our CaGAT model with the baseline model GATs [[17](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib17)] which is the most related model with our CaGAT. We also compare our method against some other related graph approaches which contain i) Graph based semi-supervised learning method Label Propagation(LabelProp) [[25](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib25)] and Normalized Laplacian Label Propagation (LabelProp NL) [[25](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib25)], ii) Attribute-based models like Logistic Regression (LogReg) and Multilayer Perceptron (MLP) [[16](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib16)] that do not consider the graph structure and iii) Graph neural network methods including Graph Convolutional Network (GCN) [[10](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib10)], Graph Attention Networks (GATs) [[17](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib17)], Deep Graph Informax(DGI) [[18](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib18)], GraphSAGE [[7](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib7)] and CVD+PP [[4](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib4)] The codes of these comparison methods are available and we use them in our experiments.\n\nComparison results. Table 1 summarizes the comparison results on four benchmark datasets. The best results are marked as bold. Here, we can note that, (1) CaGAT consistently outperforms the baseline method GATs [[17](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib17)] on all datasets. It clearly demonstrates the effectiveness and benefits of the proposed context-aware graph attention estimation on conducting graph data learning. (2) CaGAT outperforms recent graph neural network method GraphSAGE [[7](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib7)], APPNP [[11](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib11)] and DGI [[18](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib18)], which demonstrates the advantages of CaGAT on graph data representation and semi-supervised learning. (3) CaGAT can obtain better performance than other semi-supervised learning methods, such as LabelProp [[25](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib25)], Normalized Laplacian Label Propagation (LabelProp NL) [[25](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib25)], LogReg and Multilayer Perceptron (MLP) [[16](https://ar5iv.labs.arxiv.org/html/1910.01736#bib.bib16)]. It further demonstrates the effectiveness of CaGAT on conducting semi-supervised learning tasks.\n\nα𝛼\\alpha\n\nλ𝜆\\lambda\n\nα𝛼\\alpha\n\nλ𝜆\\lambda\n\nξ𝜉\\xi\n\n| ξ𝜉\\xi | 1e-2 | 1e-3 | 1e-4 | 1e-5 | 0 | | --- | --- | --- | --- | --- | --- | | Cora | 77.49 ±plus-or-minus\\pm 2.35 | 77.98 ±plus-or-minus\\pm 2.38 | 77.14 ±plus-or-minus\\pm 2.44 | 77.02 ±plus-or-minus\\pm 2.48 | 77.02 ±plus-or-minus\\pm 2.48 | | Cora-ML | 79.43 ±plus-or-minus\\pm 2.02 | 80.38 ±plus-or-minus\\pm 2.09 | 77.21 ±plus-or-minus\\pm 2.36 | 77.03 ±plus-or-minus\\pm 2.38 | 77.05 ±plus-or-minus\\pm 2.37 |\n\nξ𝜉\\xi\n\n±plus-or-minus\\pm\n\n±plus-or-minus\\pm\n\n±plus-or-minus\\pm\n\n±plus-or-minus\\pm\n\n±plus-or-minus\\pm\n\n±plus-or-minus\\pm\n\n±plus-or-minus\\pm\n\n±plus-or-minus\\pm\n\n±plus-or-minus\\pm\n\n±plus-or-minus\\pm"
+    },
+    {
+      "heading_path": [
+        "Context-Aware Graph Attention Networks",
+        "4 Experiments",
+        "4.4 Parameter analysis"
+      ],
+      "text": "### 4.4 Parameter analysis\n\nThere are three main parameters {λ,α,ξ}𝜆𝛼𝜉\\{\\lambda,\\alpha,\\xi\\} of the proposed CaGAT in which α𝛼\\alpha is used to weight the importance of graph attention in context-aware attention estimation while ξ𝜉\\xi is used to balance the graph attention and feature aggregation terms in the proposed unified model. Table 2 shows the performance of CaGAT model under different parameter ξ𝜉\\xi values (a replacement of parameter β𝛽\\beta in Eq.(11)). Note that, when ξ=0𝜉0\\xi=0, the proposed model degenerates to conduct graph attention and feature aggregation independently in network training. From Table 2, we can note that (1) CaGAT with ξ>0𝜉0\\xi>0 outperforms that with ξ=0𝜉0\\xi=0, which clearly demonstrates the desired benefits of the proposed unified cooperative learning manner to boost the performance of both edge and node learning. (2) CaGAT is generally insensitive w.r.t. parameter ξ𝜉\\xi. It can obtain better results as ξ𝜉\\xi varying in parameter range 1e-3∼similar-to\\sim1e-2. Figure 2 shows the performance of CaGAT model under different parameter α𝛼\\alpha and λ𝜆\\lambda values, respectively. Here, we can note that, CaGAT is generally insensitive w.r.t. parameter α𝛼\\alpha and λ𝜆\\lambda, and obtains better results as α𝛼\\alpha varying in range 0.2∼0.6similar-to0.20.60.2\\sim 0.6 and λ𝜆\\lambda varying in range 0.1∼0.7similar-to0.10.70.1\\sim 0.7.\n\n{λ,α,ξ}𝜆𝛼𝜉\\{\\lambda,\\alpha,\\xi\\}\n\nα𝛼\\alpha\n\nξ𝜉\\xi\n\nξ𝜉\\xi\n\nβ𝛽\\beta\n\nξ=0𝜉0\\xi=0\n\nξ>0𝜉0\\xi>0\n\nξ=0𝜉0\\xi=0\n\nξ𝜉\\xi\n\nξ𝜉\\xi\n\n∼similar-to\\sim\n\nα𝛼\\alpha\n\nλ𝜆\\lambda\n\nα𝛼\\alpha\n\nλ𝜆\\lambda\n\nα𝛼\\alpha\n\n0.2∼0.6similar-to0.20.60.2\\sim 0.6\n\nλ𝜆\\lambda\n\n0.1∼0.7similar-to0.10.70.1\\sim 0.7"
+    },
+    {
+      "heading_path": [
+        "Context-Aware Graph Attention Networks",
+        "5 Conclusion"
+      ],
+      "text": "## 5 Conclusion\n\nIn this paper, we propose a novel spatial graph neural network, named Context-aware Adaptive Graph Attention Network (CaGAT). The key idea behind CaGAT is to compute a context-aware graph attention by employing a Tensor Product Graph (TPG) diffusion technique. Moreover, CaGAT conducts graph edge attention learning and node feature representation cooperatively in a *unified* scheme which can further exploit the correlation between them in network training and thus can boost their respective performance. Experimental results on four widely used benchmarks validates the benefits of CaGAT on semi-supervised learning tasks."
+    },
+    {
+      "heading_path": [
+        "Context-Aware Graph Attention Networks",
+        "References"
+      ],
+      "text": "## References\n\n* [1] J. Atwood and D. Towsley. Diffusion-convolutional neural networks. In Advances in Neural Information Processing Systems, pages 1993–2001, 2016. * [2] S. Bai, X. Bai, Q. Tian, and L. J. Latecki. Regularized diffusion process for visual retrieval. In Thirty-First AAAI Conference on Artificial Intelligence, 2017. * [3] J. Bruna, W. Zaremba, A. Szlam, and Y. LeCun. Spectral networks and locally connected networks on graphs. In International Conference on Learning Representations, 2014. * [4] J. Chen, J. Zhu, and L. Song. Stochastic training of graph convolutional networks with variance reduction. In International Conference on Machine Learning, pages 942–950, 2018. * [5] M. Defferrard, X. Bresson, and P. Vandergheynst. Convolutional neural networks on graphs with fast localized spectral filtering. In Advances in Neural Information Processing Systems, pages 3844–3852, 2016. * [6] X. Glorot and Y. Bengio. Understanding the difficulty of training deep feedforward neural networks. In International conference on artificial intelligence and statistics, pages 249–256, 2010. * [7] W. Hamilton, Z. Ying, and J. Leskovec. Inductive representation learning on large graphs. In Advances in Neural Information Processing Systems, pages 1024–1034, 2017. * [8] M. Henaff, J. Bruna, and Y. LeCun. Deep convolutional networks on graph-structured data. arXiv preprint arXiv:1506.05163, 2015. * [9] D. P. Kingma and J. Ba. Adam: A method for stochastic optimization. In International Conference on Learning Representations, 2015. * [10] T. N. Kipf and M. Welling. Semi-supervised classification with graph convolutional networks. arXiv preprint arXiv:1609.02907, 2016. * [11] J. Klicpera, A. Bojchevski, and S. Günnemann. Predict then propagate: Graph neural networks meet personalized pagerank. In ICLR, 2019. * [12] J. Klicpera, A. Bojchevski, and S. Günnemann. Predict then propagate: Graph neural networks meet personalized pagerank. In International Conference on Learning Representations (ICLR), 2019. * [13] Y. Li, R. Yu, C. Shahabi, and Y. Liu. Diffusion convolutional recurrent neural network: Data-driven traffic forecasting. In International Conference on Learning Representations (ICLR ’18), 2018. * [14] A. K. McCallum, K. Nigam, J. Rennie, and K. Seymore. Automating the construction of internet portals with machine learning. Information Retrieval, 3(2):127–163, 2000. * [15] F. Monti, D. Boscaini, J. Masci, E. Rodola, J. Svoboda, and M. M. Bronstein. Geometric deep learning on graphs and manifolds using mixture model cnns. In IEEE Conference on Computer Vision and Pattern Recognition, pages 5423–5434, 2017. * [16] O. Shchur, M. Mumme, A. Bojchevski, and S. Günnemann. Pitfalls of graph neural network evaluation. Relational Representation Learning Workshop, NeurIPS 2018, 2018. * [17] P. Velickovic, G. Cucurull, A. Casanova, A. Romero, P. Lio, and Y. Bengio. Graph attention networks. arXiv preprint arXiv:1710.10903, 2017. * [18] P. Veličković, W. Fedus, W. L. Hamilton, P. Liò, Y. Bengio, and R. D. Hjelm. Deep Graph Infomax. In International Conference on Learning Representations, 2019. * [19] F. Wang and C. Zhang. Label propagation through linear neighborhoods. IEEE Transactions on Knowledge and Data Engineering, 20(1):55–67, 2008. * [20] Z. Xinyi and L. Chen. Capsule graph neural network. In ICLR, 2019. * [21] X. Yang, L. Prasad, and L. J. Latecki. Affinity learning with diffusion on tensor product graph. IEEE transactions on pattern analysis and machine intelligence, 35(1):28–38, 2012. * [22] S. Zhang, H. Tong, J. Xu, and R. Maciejewski. Graph convolutional networks: Algorithms, applications and open challenges. In International Conference on Computational Social Networks, pages 79–91, 2018. * [23] D. Zhou, O. Bousquet, T. N. Lal, J. Weston, and B. Schölkopf. Learning with local and global consistency. In Advances in neural information processing systems, pages 321–328, 2004. * [24] J. Zhou, G. Cui, Z. Zhang, C. Yang, Z. Liu, and M. Sun. Graph neural networks: A review of methods and applications. arXiv preprint arXiv:1812.08434, 2018. * [25] X. Zhu, Z. Ghahramani, and J. D. Lafferty. Semi-supervised learning using gaussian fields and harmonic functions. In International conference on Machine learning, pages 912–919, 2003."
+    }
+  ]
+}
