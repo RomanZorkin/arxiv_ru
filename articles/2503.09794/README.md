@@ -1,5 +1,5 @@
--[Статья на русском языке](https://romanzorkin.github.io/arxiv_ru/articles/2503.09794/2503.09794_ru.html)  
--[Статья на английском языке](https://romanzorkin.github.io/arxiv_ru/articles/2503.09794/2503.09794.html)  
+-[Статья на русском языке](https://romanzorkin.github.io/slaides/articles/2503.09794/2503.09794_ru.html)  
+-[Статья на английском языке](https://romanzorkin.github.io/slaides/articles/2503.09794/2503.09794.html)  
 
 # Augmenting Teamwork through AI Agents as Spatial Collaborators
 

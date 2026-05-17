@@ -1,5 +1,5 @@
--[Статья на русском языке](https://romanzorkin.github.io/arxiv_ru/articles/2504.14996/2504.14996_ru.html)  
--[Статья на английском языке](https://romanzorkin.github.io/arxiv_ru/articles/2504.14996/2504.14996.html)  
+-[Статья на русском языке](https://romanzorkin.github.io/slaides/articles/2504.14996/2504.14996_ru.html)  
+-[Статья на английском языке](https://romanzorkin.github.io/slaides/articles/2504.14996/2504.14996.html)  
 
 # Distributed Cognition for AI-supported Remote Operations: Challenges and Research Directions
 

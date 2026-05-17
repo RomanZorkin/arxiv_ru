@@ -1,5 +1,5 @@
--[Статья на русском языке](https://romanzorkin.github.io/arxiv_ru/articles/2510.08612/2510.08612_ru.html)  
--[Статья на английском языке](https://romanzorkin.github.io/arxiv_ru/articles/2510.08612/2510.08612.html)  
+-[Статья на русском языке](https://romanzorkin.github.io/slaides/articles/2510.08612/2510.08612_ru.html)  
+-[Статья на английском языке](https://romanzorkin.github.io/slaides/articles/2510.08612/2510.08612.html)  
 
 # Влияние LLM на командное сотрудничество в разработке ПО
 
