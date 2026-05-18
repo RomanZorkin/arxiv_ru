@@ -37,7 +37,7 @@
 ## Последние статьи
 
 ### Healthcare AI GYM для медицинских агентов
-[2605.02943] опубликована - 05.2026
+[2605.02943] опубликована - 05.2026  
 📅 17.05.2026  
 🏷 `RL` `medical AI agents` `multi-turn` `GRPO` `knowledge distillation` `clinical reasoning` `tool-augmented LLMs`
 
@@ -51,7 +51,7 @@
 ---
 
 ### YOLO26: Анализ сквозной структуры для детектирования объектов в реальном времени без использования NMS
-[2601.12882] опубликована - 01.2026
+[2601.12882] опубликована - 01.2026  
 📅 17.05.2026  
 🏷 `object detection` `YOLO` `real-time computer vision` `NMS-free` `end-to-end learning` `edge AI` `optimization`
 
@@ -65,7 +65,7 @@
 ---
 
 ### К агентному управлению программными проектами: видение и план реализации
-[2601.16392]
+[2601.16392]  
 📅 17.05.2026  
 🏷 `agentic AI` `software project management` `multi-agent systems` `human-AI collaboration` `autonomy levels` `software engineering 3.0` `ethical AI`
 
@@ -79,7 +79,7 @@
 ---
 
 ### Влияние LLM на командное взаимодействие в разработке программного обеспечения
-[2510.08612]
+[2510.08612]  
 📅 16.05.2026  
 🏷 `LLM` `командная работа` `SDLC` `продуктивность` `документация` `кейс-стади` `опрос`
 
@@ -92,7 +92,7 @@
 
 ---
 ### От автономных агентов к интегрированным системам: новая парадигма — скоординированный распределённый интеллект
-[2503.13754]
+[2503.13754]  
 📅 16.05.2026  
 🏷 `multi-agent systems` `orchestration` `systems thinking` `human-AI collaboration` `enterprise AI` `agentic AI` `organizational transformation`
 
@@ -105,7 +105,7 @@
 
 ---
 ### Оптимизация риск-аверсивных гибридных команд человек-ИИ
-[2403.08386]
+[2403.08386]  
 📅 16.05.2026  
 🏷 `Reinforcement Learning` `Human-AI Collaboration` `Multi-Agent Systems` `Risk Aversion` `Markov Decision Processes` `Delegation` `Grid Navigation`
 
@@ -118,7 +118,7 @@
 
 ---
 ### Усиление командной работы с помощью ИИ-агентов как пространственных коллабораторов
-[2503.09794]
+[2503.09794]  
 📅 16.05.2026  
 🏷 `AI agents` `Augmented Reality` `Human-AI Teams` `team dynamics` `spatial computing` `HCI` `collaborative systems`
 
@@ -131,7 +131,7 @@
 
 ---
 ### Повышение продуктивности и благополучия на рабочем месте с использованием AI Agents
-[2501.02368]
+[2501.02368]  
 📅 16.05.2026  
 🏷 `AI agents` `workplace productivity` `employee well-being` `reinforcement learning` `neuroeconomics` `adaptive gamification` `human resources`
 
@@ -144,7 +144,7 @@
 
 ---
 ### Распределённое познание для удалённых операций с поддержкой ИИ: проблемы и направления исследований
-[2504.14996]
+[2504.14996]  
 📅 16.05.2026  
 🏷 `distributed cognition` `human-AI teaming` `remote operations` `team cognition` `intelligent ports` `HCI` `AI memory`
 
