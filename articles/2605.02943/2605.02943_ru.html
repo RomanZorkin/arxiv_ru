@@ -1802,80 +1802,99 @@ Wikipedia: Офлайн-индекс FTS5 по 26M статей (188 ГБ) с и
 <p class="ltx_p" id="A2.SS0.SSS0.Px2.p2.1">Для повышения эффективности обучения TT-OPD применяет стратегию динамической фильтрации, которая сохраняет только те подсказки, которые демонстрируют смешанные результаты по раундам развертывания. Это гарантирует, что сохраненные образцы обеспечивают значимый контраст для обучения и предотвращают вырожденные обновления от однородно правильных или неправильных траекторий..</p>
 </div>
 <figure class="ltx_float ltx_float_algorithm ltx_framed ltx_framed_top" id="alg1">
-<figcaption class="ltx_caption"><span class="ltx_tag ltx_tag_float"><span class="ltx_text ltx_font_bold" id="alg1.2.1.1">Algorithm 1</span> </span> Повиточное усеченное внутриполитическое дистиллирование (TT-OPD)</figcaption>
-<div class="ltx_listing ltx_listing" id="alg1.3">
-<div class="ltx_listingline" id="alg1.l0">
-<span class="ltx_tag ltx_tag_listingline"><span class="ltx_text" id="alg1.l0.1.1.1" style="font-size:80%;">0:</span></span> Базовая модель <math alttext="\theta_{S}" class="ltx_Math" display="inline" id="alg1.l0.m1" intent=":literal"><semantics><msub><mi>θ</mi><mi>S</mi></msub><annotation encoding="application/x-tex">\theta_{S}</annotation></semantics></math>, затухание экспоненциального скользящего среднего <math alttext="\alpha{=}0.995" class="ltx_Math" display="inline" id="alg1.l0.m2" intent=":literal"><semantics><mrow><mi>α</mi><mo>=</mo><mn>0.995</mn></mrow><annotation encoding="application/x-tex">\alpha{=}0.995</annotation></semantics></math>, коэффициент дистилляции <math alttext="\lambda_{\text{distill}}{=}4.0" class="ltx_Math" display="inline" id="alg1.l0.m3" intent=":literal"><semantics><mrow><msub><mi>λ</mi><mtext>distill</mtext></msub><mo>=</mo><mn>4.0</mn></mrow><annotation encoding="application/x-tex">\lambda_{\text{distill}}{=}4.0</annotation></semantics></math>, GRPO KL штраф <math alttext="\beta{=}0.01" class="ltx_Math" display="inline" id="alg1.l0.m4" intent=":literal"><semantics><mrow><mi>β</mi><mo>=</mo><mn>0.01</mn></mrow><annotation encoding="application/x-tex">\beta{=}0.01</annotation></semantics></math>, максимальный контекст <math alttext="L_{\max}{=}12{,}288" class="ltx_Math" display="inline" id="alg1.l0.m5" intent=":literal"><semantics><mrow><msub><mi>L</mi><mi>max</mi></msub><mo>=</mo><mrow><mn>12</mn><mo>,</mo><mn>288</mn></mrow></mrow><annotation encoding="application/x-tex">L_{\max}{=}12{,}288</annotation></semantics></math>, Интервал EMA <math alttext="T_{\text{ema}}{=}5" class="ltx_Math" display="inline" id="alg1.l0.m6" intent=":literal"><semantics><mrow><msub><mi>T</mi><mtext>ema</mtext></msub><mo>=</mo><mn>5</mn></mrow><annotation encoding="application/x-tex">T_{\text{ema}}{=}5</annotation></semantics></math>, распределение задач <math alttext="\mathcal{T}" class="ltx_Math" display="inline" id="alg1.l0.m7" intent=":literal"><semantics><mi class="ltx_font_mathcaligraphic">𝒯</mi><annotation encoding="application/x-tex">\mathcal{T}</annotation></semantics></math>
-</div>
-<div class="ltx_listingline" id="alg1.l0a">
-<span class="ltx_tag ltx_tag_listingline"><span class="ltx_text" id="alg1.l0a.1.1.1" style="font-size:80%;">0:</span></span> Обученный студент <math alttext="\theta_{S}" class="ltx_Math" display="inline" id="alg1.l0a.m1" intent=":literal"><semantics><msub><mi>θ</mi><mi>S</mi></msub><annotation encoding="application/x-tex">\theta_{S}</annotation></semantics></math>
-</div>
-<div class="ltx_listingline" id="alg1.l1">
-<span class="ltx_tag ltx_tag_listingline"><span class="ltx_text" id="alg1.l1.1.1.1" style="font-size:80%;">1:</span></span> Инициализировать учителя <math alttext="\theta_{T}\leftarrow\theta_{S}" class="ltx_Math" display="inline" id="alg1.l1.m1" intent=":literal"><semantics><mrow><msub><mi>θ</mi><mi>T</mi></msub><mo stretchy="false">←</mo><msub><mi>θ</mi><mi>S</mi></msub></mrow><annotation encoding="application/x-tex">\theta_{T}\leftarrow\theta_{S}</annotation></semantics></math>
-</div>
-<div class="ltx_listingline" id="alg1.l2">
-<span class="ltx_tag ltx_tag_listingline"><span class="ltx_text" id="alg1.l2.1.1.1" style="font-size:80%;">2:</span></span> <span class="ltx_text ltx_font_bold" id="alg1.l2.2">для</span> шаг <math alttext="t=1,2,\ldots" class="ltx_Math" display="inline" id="alg1.l2.m1" intent=":literal"><semantics><mrow><mi>t</mi><mo>=</mo><mrow><mn>1</mn><mo>,</mo><mn>2</mn><mo>,</mo><mi mathvariant="normal">…</mi></mrow></mrow><annotation encoding="application/x-tex">t=1,2,\ldots</annotation></semantics></math> <span class="ltx_text ltx_font_bold" id="alg1.l2.3">делать</span>
-</div>
-<div class="ltx_listingline" id="alg1.l3">
-<span class="ltx_tag ltx_tag_listingline"><span class="ltx_text" id="alg1.l3.1.1.1" style="font-size:80%;">3:</span></span>  Пример набора промптов <math alttext="\{x_{i}\}" class="ltx_Math" display="inline" id="alg1.l3.m1" intent=":literal"><semantics><mrow><mo stretchy="false">{</mo><msub><mi>x</mi><mi>i</mi></msub><mo stretchy="false">}</mo></mrow><annotation encoding="application/x-tex">\{x_{i}\}</annotation></semantics></math> из <math alttext="\mathcal{T}" class="ltx_Math" display="inline" id="alg1.l3.m2" intent=":literal"><semantics><mi class="ltx_font_mathcaligraphic">𝒯</mi><annotation encoding="application/x-tex">\mathcal{T}</annotation></semantics></math>
-</div>
-<div class="ltx_listingline" id="alg1.l4">
-<span class="ltx_tag ltx_tag_listingline"><span class="ltx_text" id="alg1.l4.1.1.1" style="font-size:80%;">4:</span></span>  <span class="ltx_text ltx_font_bold" id="alg1.l4.2">для</span> каждый запрос <math alttext="x_{i}" class="ltx_Math" display="inline" id="alg1.l4.m1" intent=":literal"><semantics><msub><mi>x</mi><mi>i</mi></msub><annotation encoding="application/x-tex">x_{i}</annotation></semantics></math> <span class="ltx_text ltx_font_bold" id="alg1.l4.3">выполнить</span>
-</div>
-<div class="ltx_listingline" id="alg1.l5">
-<span class="ltx_tag ltx_tag_listingline"><span class="ltx_text" id="alg1.l5.1.1.1" style="font-size:80%;">5:</span></span>   Генерировать <math alttext="G" class="ltx_Math" display="inline" id="alg1.l5.m1" intent=":literal"><semantics><mi>G</mi><annotation encoding="application/x-tex">G</annotation></semantics></math> прогоны через многошаговое взаимодействие со средой
+<figcaption class="ltx_caption"><span class="ltx_tag ltx_tag_float"><span id="alg1.2.1.1" class="ltx_text ltx_font_bold">Algorithm 1</span> </span> Turn-Level Truncated On-Policy Distillation (TT-OPD)</figcaption>
+<div id="alg1.3" class="ltx_listing ltx_listing">
+<div id="alg1.l0" class="ltx_listingline">
+<span class="ltx_tag ltx_tag_listingline"><span id="alg1.l0.1.1.1" class="ltx_text" style="font-size:80%;">0:</span></span> Base model <math id="alg1.l0.m1" class="ltx_Math" alttext="\theta_{S}" display="inline" intent=":literal"><semantics><msub><mi>θ</mi><mi>S</mi></msub><annotation encoding="application/x-tex">\theta_{S}</annotation></semantics></math>, EMA decay <math id="alg1.l0.m2" class="ltx_Math" alttext="\alpha{=}0.995" display="inline" intent=":literal"><semantics><mrow><mi>α</mi><mo>=</mo><mn>0.995</mn></mrow><annotation encoding="application/x-tex">\alpha{=}0.995</annotation></semantics></math>, distillation coef <math id="alg1.l0.m3" class="ltx_Math" alttext="\lambda_{\text{distill}}{=}4.0" display="inline" intent=":literal"><semantics><mrow><msub><mi>λ</mi><mtext>distill</mtext></msub><mo>=</mo><mn>4.0</mn></mrow><annotation encoding="application/x-tex">\lambda_{\text{distill}}{=}4.0</annotation></semantics></math>, GRPO KL penalty <math id="alg1.l0.m4" class="ltx_Math" alttext="\beta{=}0.01" display="inline" intent=":literal"><semantics><mrow><mi>β</mi><mo>=</mo><mn>0.01</mn></mrow><annotation encoding="application/x-tex">\beta{=}0.01</annotation></semantics></math>, max context <math id="alg1.l0.m5" class="ltx_Math" alttext="L_{\max}{=}12{,}288" display="inline" intent=":literal"><semantics><mrow><msub><mi>L</mi><mi>max</mi></msub><mo>=</mo><mrow><mn>12</mn><mo>,</mo><mn>288</mn></mrow></mrow><annotation encoding="application/x-tex">L_{\max}{=}12{,}288</annotation></semantics></math>, EMA interval <math id="alg1.l0.m6" class="ltx_Math" alttext="T_{\text{ema}}{=}5" display="inline" intent=":literal"><semantics><mrow><msub><mi>T</mi><mtext>ema</mtext></msub><mo>=</mo><mn>5</mn></mrow><annotation encoding="application/x-tex">T_{\text{ema}}{=}5</annotation></semantics></math>, task distribution <math id="alg1.l0.m7" class="ltx_Math" alttext="\mathcal{T}" display="inline" intent=":literal"><semantics><mi class="ltx_font_mathcaligraphic">𝒯</mi><annotation encoding="application/x-tex">\mathcal{T}</annotation></semantics></math>
 
 </div>
-<div class="ltx_listingline" id="alg1.l6">
-<span class="ltx_tag ltx_tag_listingline"><span class="ltx_text" id="alg1.l6.1.1.1" style="font-size:80%;">6:</span></span>   Оцените каждый прогон с помощью косинусного вознаграждения <math alttext="R_{\text{cos}}" class="ltx_Math" display="inline" id="alg1.l6.m1" intent=":literal"><semantics><msub><mi>R</mi><mtext>cos</mtext></msub><annotation encoding="application/x-tex">R_{\text{cos}}</annotation></semantics></math> (Eq. <a class="ltx_ref" href="https://arxiv.org/html/2605.02943v1#S4.E3" title="In Stability Mechanisms ‣ 4.2 TT-OPD Method ‣ 4 Turn-Level Truncated On-Policy Distillation ‣ Healthcare AI GYM for Medical Agents"><span class="ltx_text ltx_ref_tag">3</span></a>)
+<div id="alg1.l0a" class="ltx_listingline">
+<span class="ltx_tag ltx_tag_listingline"><span id="alg1.l0a.1.1.1" class="ltx_text" style="font-size:80%;">0:</span></span> Trained student <math id="alg1.l0a.m1" class="ltx_Math" alttext="\theta_{S}" display="inline" intent=":literal"><semantics><msub><mi>θ</mi><mi>S</mi></msub><annotation encoding="application/x-tex">\theta_{S}</annotation></semantics></math>
 
 </div>
-<div class="ltx_listingline" id="alg1.l7">
-<span class="ltx_tag ltx_tag_listingline"><span class="ltx_text" id="alg1.l7.1.1.1" style="font-size:80%;">7:</span></span>  <span class="ltx_text ltx_font_bold" id="alg1.l7.2">конец</span> <span class="ltx_text ltx_font_bold" id="alg1.l7.3">для</span>
-</div>
-<div class="ltx_listingline" id="alg1.l8">
-<span class="ltx_tag ltx_tag_listingline"><span class="ltx_text" id="alg1.l8.1.1.1" style="font-size:80%;">8:</span></span>  Фильтр: оставить только запросы со смешанными результатами {динамическая выборка}
+<div id="alg1.l1" class="ltx_listingline">
+<span class="ltx_tag ltx_tag_listingline"><span id="alg1.l1.1.1.1" class="ltx_text" style="font-size:80%;">1:</span></span> Initialize teacher <math id="alg1.l1.m1" class="ltx_Math" alttext="\theta_{T}\leftarrow\theta_{S}" display="inline" intent=":literal"><semantics><mrow><msub><mi>θ</mi><mi>T</mi></msub><mo stretchy="false">←</mo><msub><mi>θ</mi><mi>S</mi></msub></mrow><annotation encoding="application/x-tex">\theta_{T}\leftarrow\theta_{S}</annotation></semantics></math>
 
 </div>
-<div class="ltx_listingline" id="alg1.l9">
-<span class="ltx_tag ltx_tag_listingline"><span class="ltx_text" id="alg1.l9.1.1.1" style="font-size:80%;">9:</span></span>  Вычислить групповые относительные преимущества <math alttext="\hat{A}" class="ltx_Math" display="inline" id="alg1.l9.m1" intent=":literal"><semantics><mover accent="true"><mi>A</mi><mo>^</mo></mover><annotation encoding="application/x-tex">\hat{A}</annotation></semantics></math> из <math alttext="R_{\text{cos}}" class="ltx_Math" display="inline" id="alg1.l9.m2" intent=":literal"><semantics><msub><mi>R</mi><mtext>cos</mtext></msub><annotation encoding="application/x-tex">R_{\text{cos}}</annotation></semantics></math>
-</div>
-<div class="ltx_listingline" id="alg1.l10">
-<span class="ltx_tag ltx_tag_listingline"><span class="ltx_text" id="alg1.l10.1.1.1" style="font-size:80%;">10:</span></span>  <span class="ltx_text ltx_font_bold" id="alg1.l10.2">для</span> каждый прогон <math alttext="\tau=(s_{1},a_{1},\ldots,s_{T},a_{T})" class="ltx_Math" display="inline" id="alg1.l10.m1" intent=":literal"><semantics><mrow><mi>τ</mi><mo>=</mo><mrow><mo stretchy="false">(</mo><msub><mi>s</mi><mn>1</mn></msub><mo>,</mo><msub><mi>a</mi><mn>1</mn></msub><mo>,</mo><mi mathvariant="normal">…</mi><mo>,</mo><msub><mi>s</mi><mi>T</mi></msub><mo>,</mo><msub><mi>a</mi><mi>T</mi></msub><mo stretchy="false">)</mo></mrow></mrow><annotation encoding="application/x-tex">\tau=(s_{1},a_{1},\ldots,s_{T},a_{T})</annotation></semantics></math> <span class="ltx_text ltx_font_bold" id="alg1.l10.3">делать</span>
-</div>
-<div class="ltx_listingline" id="alg1.l11">
-<span class="ltx_tag ltx_tag_listingline"><span class="ltx_text" id="alg1.l11.1.1.1" style="font-size:80%;">11:</span></span>   Внедрить контекст с привилегированным результатом в промпт учителя
+<div id="alg1.l2" class="ltx_listingline">
+<span class="ltx_tag ltx_tag_listingline"><span id="alg1.l2.1.1.1" class="ltx_text" style="font-size:80%;">2:</span></span> <span id="alg1.l2.2" class="ltx_text ltx_font_bold">for</span> step <math id="alg1.l2.m1" class="ltx_Math" alttext="t=1,2,\ldots" display="inline" intent=":literal"><semantics><mrow><mi>t</mi><mo>=</mo><mrow><mn>1</mn><mo>,</mo><mn>2</mn><mo>,</mo><mi mathvariant="normal">…</mi></mrow></mrow><annotation encoding="application/x-tex">t=1,2,\ldots</annotation></semantics></math> <span id="alg1.l2.3" class="ltx_text ltx_font_bold">do</span>
+
+
 
 </div>
-<div class="ltx_listingline" id="alg1.l12">
-<span class="ltx_tag ltx_tag_listingline"><span class="ltx_text" id="alg1.l12.1.1.1" style="font-size:80%;">12:</span></span>   Вычислить логарифмические вероятности учителя <math alttext="\pi_{\theta_{T}}(a_{t}\mid s_{t})" class="ltx_Math" display="inline" id="alg1.l12.m1" intent=":literal"><semantics><mrow><msub><mi>π</mi><msub><mi>θ</mi><mi>T</mi></msub></msub><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><mrow><msub><mi>a</mi><mi>t</mi></msub><mo>∣</mo><msub><mi>s</mi><mi>t</mi></msub></mrow><mo stretchy="false">)</mo></mrow></mrow><annotation encoding="application/x-tex">\pi_{\theta_{T}}(a_{t}\mid s_{t})</annotation></semantics></math> для всех ходов <math alttext="t" class="ltx_Math" display="inline" id="alg1.l12.m2" intent=":literal"><semantics><mi>t</mi><annotation encoding="application/x-tex">t</annotation></semantics></math>
-</div>
-<div class="ltx_listingline" id="alg1.l13">
-<span class="ltx_tag ltx_tag_listingline"><span class="ltx_text" id="alg1.l13.1.1.1" style="font-size:80%;">13:</span></span>   Удалить привилегированные токены из выхода учителя
+<div id="alg1.l3" class="ltx_listingline">
+<span class="ltx_tag ltx_tag_listingline"><span id="alg1.l3.1.1.1" class="ltx_text" style="font-size:80%;">3:</span></span>  Sample batch of prompts <math id="alg1.l3.m1" class="ltx_Math" alttext="\{x_{i}\}" display="inline" intent=":literal"><semantics><mrow><mo stretchy="false">{</mo><msub><mi>x</mi><mi>i</mi></msub><mo stretchy="false">}</mo></mrow><annotation encoding="application/x-tex">\{x_{i}\}</annotation></semantics></math> from <math id="alg1.l3.m2" class="ltx_Math" alttext="\mathcal{T}" display="inline" intent=":literal"><semantics><mi class="ltx_font_mathcaligraphic">𝒯</mi><annotation encoding="application/x-tex">\mathcal{T}</annotation></semantics></math>
 
 </div>
-<div class="ltx_listingline" id="alg1.l14">
-<span class="ltx_tag ltx_tag_listingline"><span class="ltx_text" id="alg1.l14.1.1.1" style="font-size:80%;">14:</span></span>  <span class="ltx_text ltx_font_bold" id="alg1.l14.2">Конец</span> <span class="ltx_text ltx_font_bold" id="alg1.l14.3">для</span>
-</div>
-<div class="ltx_listingline" id="alg1.l15">
-<span class="ltx_tag ltx_tag_listingline"><span class="ltx_text" id="alg1.l15.1.1.1" style="font-size:80%;">15:</span></span>  Вычисления <math alttext="\mathcal{L}_{\text{total}}=\mathcal{L}_{\text{GRPO}}(\theta_{S};\,R_{\text{cos}})+\lambda_{\text{distill}}\cdot D_{\text{KL}}(\pi_{\theta_{S}}\|\pi_{\theta_{T}})" class="ltx_Math" display="inline" id="alg1.l15.m1" intent=":literal"><semantics><mrow><msub><mi class="ltx_font_mathcaligraphic">ℒ</mi><mtext>total</mtext></msub><mo>=</mo><mrow><mrow><msub><mi class="ltx_font_mathcaligraphic">ℒ</mi><mtext>GRPO</mtext></msub><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><msub><mi>θ</mi><mi>S</mi></msub><mo rspace="0.337em">;</mo><msub><mi>R</mi><mtext>cos</mtext></msub><mo stretchy="false">)</mo></mrow></mrow><mo>+</mo><mrow><mrow><msub><mi>λ</mi><mtext>distill</mtext></msub><mo lspace="0.222em" rspace="0.222em">⋅</mo><msub><mi>D</mi><mtext>KL</mtext></msub></mrow><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><mrow><msub><mi>π</mi><msub><mi>θ</mi><mi>S</mi></msub></msub><mo>∥</mo><msub><mi>π</mi><msub><mi>θ</mi><mi>T</mi></msub></msub></mrow><mo stretchy="false">)</mo></mrow></mrow></mrow></mrow><annotation encoding="application/x-tex">\mathcal{L}_{\text{total}}=\mathcal{L}_{\text{GRPO}}(\theta_{S};\,R_{\text{cos}})+\lambda_{\text{distill}}\cdot D_{\text{KL}}(\pi_{\theta_{S}}\|\pi_{\theta_{T}})</annotation></semantics></math> {Eq. <a class="ltx_ref" href="https://arxiv.org/html/2605.02943v1#S4.E4" title="In Stability Mechanisms ‣ 4.2 TT-OPD Method ‣ 4 Turn-Level Truncated On-Policy Distillation ‣ Healthcare AI GYM for Medical Agents"><span class="ltx_text ltx_ref_tag">4</span></a>}
+<div id="alg1.l4" class="ltx_listingline">
+<span class="ltx_tag ltx_tag_listingline"><span id="alg1.l4.1.1.1" class="ltx_text" style="font-size:80%;">4:</span></span>  <span id="alg1.l4.2" class="ltx_text ltx_font_bold">for</span> each prompt <math id="alg1.l4.m1" class="ltx_Math" alttext="x_{i}" display="inline" intent=":literal"><semantics><msub><mi>x</mi><mi>i</mi></msub><annotation encoding="application/x-tex">x_{i}</annotation></semantics></math> <span id="alg1.l4.3" class="ltx_text ltx_font_bold">do</span>
+
+
 
 </div>
-<div class="ltx_listingline" id="alg1.l16">
-<span class="ltx_tag ltx_tag_listingline"><span class="ltx_text" id="alg1.l16.1.1.1" style="font-size:80%;">16:</span></span>  Обновление <math alttext="\theta_{S}" class="ltx_Math" display="inline" id="alg1.l16.m1" intent=":literal"><semantics><msub><mi>θ</mi><mi>S</mi></msub><annotation encoding="application/x-tex">\theta_{S}</annotation></semantics></math> через градиентный спуск на <math alttext="\mathcal{L}_{\text{total}}" class="ltx_Math" display="inline" id="alg1.l16.m2" intent=":literal"><semantics><msub><mi class="ltx_font_mathcaligraphic">ℒ</mi><mtext>total</mtext></msub><annotation encoding="application/x-tex">\mathcal{L}_{\text{total}}</annotation></semantics></math>
-</div>
-<div class="ltx_listingline" id="alg1.l17">
-<span class="ltx_tag ltx_tag_listingline"><span class="ltx_text" id="alg1.l17.1.1.1" style="font-size:80%;">17:</span></span>  <span class="ltx_text ltx_font_bold" id="alg1.l17.2">если</span> <math alttext="t\bmod T_{\text{ema}}=0" class="ltx_Math" display="inline" id="alg1.l17.m1" intent=":literal"><semantics><mrow><mrow><mi>t</mi><mo>mod</mo><msub><mi>T</mi><mtext>ema</mtext></msub></mrow><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">t\bmod T_{\text{ema}}=0</annotation></semantics></math> <span class="ltx_text ltx_font_bold" id="alg1.l17.3">затем</span>
-</div>
-<div class="ltx_listingline" id="alg1.l18">
-<span class="ltx_tag ltx_tag_listingline"><span class="ltx_text" id="alg1.l18.1.1.1" style="font-size:80%;">18:</span></span>   <math alttext="\theta_{T}\leftarrow\alpha\cdot\theta_{T}+(1-\alpha)\cdot\theta_{S}" class="ltx_Math" display="inline" id="alg1.l18.m1" intent=":literal"><semantics><mrow><msub><mi>θ</mi><mi>T</mi></msub><mo stretchy="false">←</mo><mrow><mrow><mi>α</mi><mo lspace="0.222em" rspace="0.222em">⋅</mo><msub><mi>θ</mi><mi>T</mi></msub></mrow><mo>+</mo><mrow><mrow><mo stretchy="false">(</mo><mrow><mn>1</mn><mo>−</mo><mi>α</mi></mrow><mo rspace="0.055em" stretchy="false">)</mo></mrow><mo rspace="0.222em">⋅</mo><msub><mi>θ</mi><mi>S</mi></msub></mrow></mrow></mrow><annotation encoding="application/x-tex">\theta_{T}\leftarrow\alpha\cdot\theta_{T}+(1-\alpha)\cdot\theta_{S}</annotation></semantics></math> {Обновление учителя EMA}
+<div id="alg1.l5" class="ltx_listingline">
+<span class="ltx_tag ltx_tag_listingline"><span id="alg1.l5.1.1.1" class="ltx_text" style="font-size:80%;">5:</span></span>   Generate <math id="alg1.l5.m1" class="ltx_Math" alttext="G" display="inline" intent=":literal"><semantics><mi>G</mi><annotation encoding="application/x-tex">G</annotation></semantics></math> rollouts via multi-turn interaction with environment
 
 </div>
-<div class="ltx_listingline" id="alg1.l19">
-<span class="ltx_tag ltx_tag_listingline"><span class="ltx_text" id="alg1.l19.1.1.1" style="font-size:80%;">19:</span></span>  <span class="ltx_text ltx_font_bold" id="alg1.l19.2">end</span> <span class="ltx_text ltx_font_bold" id="alg1.l19.3">если</span>
+<div id="alg1.l6" class="ltx_listingline">
+<span class="ltx_tag ltx_tag_listingline"><span id="alg1.l6.1.1.1" class="ltx_text" style="font-size:80%;">6:</span></span>   Score each rollout with cosine reward <math id="alg1.l6.m1" class="ltx_Math" alttext="R_{\text{cos}}" display="inline" intent=":literal"><semantics><msub><mi>R</mi><mtext>cos</mtext></msub><annotation encoding="application/x-tex">R_{\text{cos}}</annotation></semantics></math> (Eq.&nbsp;<a href="https://arxiv.org/html/2605.02943v1#S4.E3" title="In Stability Mechanisms ‣ 4.2 TT-OPD Method ‣ 4 Turn-Level Truncated On-Policy Distillation ‣ Healthcare AI GYM for Medical Agents" class="ltx_ref"><span class="ltx_text ltx_ref_tag">3</span></a>)
+
 </div>
-<div class="ltx_listingline" id="alg1.l20">
-<span class="ltx_tag ltx_tag_listingline"><span class="ltx_text" id="alg1.l20.1.1.1" style="font-size:80%;">20:</span></span> <span class="ltx_text ltx_font_bold" id="alg1.l20.2">end</span> <span class="ltx_text ltx_font_bold" id="alg1.l20.3">для</span>
+<div id="alg1.l7" class="ltx_listingline">
+<span class="ltx_tag ltx_tag_listingline"><span id="alg1.l7.1.1.1" class="ltx_text" style="font-size:80%;">7:</span></span>  <span id="alg1.l7.2" class="ltx_text ltx_font_bold">end</span> <span id="alg1.l7.3" class="ltx_text ltx_font_bold">for</span>
+</div>
+<div id="alg1.l8" class="ltx_listingline">
+<span class="ltx_tag ltx_tag_listingline"><span id="alg1.l8.1.1.1" class="ltx_text" style="font-size:80%;">8:</span></span>  Filter: keep only prompts with mixed outcomes {dynamic sampling}
+
+</div>
+<div id="alg1.l9" class="ltx_listingline">
+<span class="ltx_tag ltx_tag_listingline"><span id="alg1.l9.1.1.1" class="ltx_text" style="font-size:80%;">9:</span></span>  Compute group-relative advantages <math id="alg1.l9.m1" class="ltx_Math" alttext="\hat{A}" display="inline" intent=":literal"><semantics><mover accent="true"><mi>A</mi><mo>^</mo></mover><annotation encoding="application/x-tex">\hat{A}</annotation></semantics></math> from <math id="alg1.l9.m2" class="ltx_Math" alttext="R_{\text{cos}}" display="inline" intent=":literal"><semantics><msub><mi>R</mi><mtext>cos</mtext></msub><annotation encoding="application/x-tex">R_{\text{cos}}</annotation></semantics></math>
+
+</div>
+<div id="alg1.l10" class="ltx_listingline">
+<span class="ltx_tag ltx_tag_listingline"><span id="alg1.l10.1.1.1" class="ltx_text" style="font-size:80%;">10:</span></span>  <span id="alg1.l10.2" class="ltx_text ltx_font_bold">for</span> each rollout <math id="alg1.l10.m1" class="ltx_Math" alttext="\tau=(s_{1},a_{1},\ldots,s_{T},a_{T})" display="inline" intent=":literal"><semantics><mrow><mi>τ</mi><mo>=</mo><mrow><mo stretchy="false">(</mo><msub><mi>s</mi><mn>1</mn></msub><mo>,</mo><msub><mi>a</mi><mn>1</mn></msub><mo>,</mo><mi mathvariant="normal">…</mi><mo>,</mo><msub><mi>s</mi><mi>T</mi></msub><mo>,</mo><msub><mi>a</mi><mi>T</mi></msub><mo stretchy="false">)</mo></mrow></mrow><annotation encoding="application/x-tex">\tau=(s_{1},a_{1},\ldots,s_{T},a_{T})</annotation></semantics></math> <span id="alg1.l10.3" class="ltx_text ltx_font_bold">do</span>
+
+
+
+</div>
+<div id="alg1.l11" class="ltx_listingline">
+<span class="ltx_tag ltx_tag_listingline"><span id="alg1.l11.1.1.1" class="ltx_text" style="font-size:80%;">11:</span></span>   Inject outcome-privileged context into teacher prompt
+
+</div>
+<div id="alg1.l12" class="ltx_listingline">
+<span class="ltx_tag ltx_tag_listingline"><span id="alg1.l12.1.1.1" class="ltx_text" style="font-size:80%;">12:</span></span>   Compute teacher logprobs <math id="alg1.l12.m1" class="ltx_Math" alttext="\pi_{\theta_{T}}(a_{t}\mid s_{t})" display="inline" intent=":literal"><semantics><mrow><msub><mi>π</mi><msub><mi>θ</mi><mi>T</mi></msub></msub><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><mrow><msub><mi>a</mi><mi>t</mi></msub><mo>∣</mo><msub><mi>s</mi><mi>t</mi></msub></mrow><mo stretchy="false">)</mo></mrow></mrow><annotation encoding="application/x-tex">\pi_{\theta_{T}}(a_{t}\mid s_{t})</annotation></semantics></math> for all turns <math id="alg1.l12.m2" class="ltx_Math" alttext="t" display="inline" intent=":literal"><semantics><mi>t</mi><annotation encoding="application/x-tex">t</annotation></semantics></math>
+
+</div>
+<div id="alg1.l13" class="ltx_listingline">
+<span class="ltx_tag ltx_tag_listingline"><span id="alg1.l13.1.1.1" class="ltx_text" style="font-size:80%;">13:</span></span>   Remove privileged tokens from teacher output
+
+</div>
+<div id="alg1.l14" class="ltx_listingline">
+<span class="ltx_tag ltx_tag_listingline"><span id="alg1.l14.1.1.1" class="ltx_text" style="font-size:80%;">14:</span></span>  <span id="alg1.l14.2" class="ltx_text ltx_font_bold">end</span> <span id="alg1.l14.3" class="ltx_text ltx_font_bold">for</span>
+</div>
+<div id="alg1.l15" class="ltx_listingline">
+<span class="ltx_tag ltx_tag_listingline"><span id="alg1.l15.1.1.1" class="ltx_text" style="font-size:80%;">15:</span></span>  Compute <math id="alg1.l15.m1" class="ltx_Math" alttext="\mathcal{L}_{\text{total}}=\mathcal{L}_{\text{GRPO}}(\theta_{S};\,R_{\text{cos}})+\lambda_{\text{distill}}\cdot D_{\text{KL}}(\pi_{\theta_{S}}\|\pi_{\theta_{T}})" display="inline" intent=":literal"><semantics><mrow><msub><mi class="ltx_font_mathcaligraphic">ℒ</mi><mtext>total</mtext></msub><mo>=</mo><mrow><mrow><msub><mi class="ltx_font_mathcaligraphic">ℒ</mi><mtext>GRPO</mtext></msub><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><msub><mi>θ</mi><mi>S</mi></msub><mo rspace="0.337em">;</mo><msub><mi>R</mi><mtext>cos</mtext></msub><mo stretchy="false">)</mo></mrow></mrow><mo>+</mo><mrow><mrow><msub><mi>λ</mi><mtext>distill</mtext></msub><mo lspace="0.222em" rspace="0.222em">⋅</mo><msub><mi>D</mi><mtext>KL</mtext></msub></mrow><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><mrow><msub><mi>π</mi><msub><mi>θ</mi><mi>S</mi></msub></msub><mo>∥</mo><msub><mi>π</mi><msub><mi>θ</mi><mi>T</mi></msub></msub></mrow><mo stretchy="false">)</mo></mrow></mrow></mrow></mrow><annotation encoding="application/x-tex">\mathcal{L}_{\text{total}}=\mathcal{L}_{\text{GRPO}}(\theta_{S};\,R_{\text{cos}})+\lambda_{\text{distill}}\cdot D_{\text{KL}}(\pi_{\theta_{S}}\|\pi_{\theta_{T}})</annotation></semantics></math> {Eq.&nbsp;<a href="https://arxiv.org/html/2605.02943v1#S4.E4" title="In Stability Mechanisms ‣ 4.2 TT-OPD Method ‣ 4 Turn-Level Truncated On-Policy Distillation ‣ Healthcare AI GYM for Medical Agents" class="ltx_ref"><span class="ltx_text ltx_ref_tag">4</span></a>}
+
+</div>
+<div id="alg1.l16" class="ltx_listingline">
+<span class="ltx_tag ltx_tag_listingline"><span id="alg1.l16.1.1.1" class="ltx_text" style="font-size:80%;">16:</span></span>  Update <math id="alg1.l16.m1" class="ltx_Math" alttext="\theta_{S}" display="inline" intent=":literal"><semantics><msub><mi>θ</mi><mi>S</mi></msub><annotation encoding="application/x-tex">\theta_{S}</annotation></semantics></math> via gradient descent on <math id="alg1.l16.m2" class="ltx_Math" alttext="\mathcal{L}_{\text{total}}" display="inline" intent=":literal"><semantics><msub><mi class="ltx_font_mathcaligraphic">ℒ</mi><mtext>total</mtext></msub><annotation encoding="application/x-tex">\mathcal{L}_{\text{total}}</annotation></semantics></math>
+
+</div>
+<div id="alg1.l17" class="ltx_listingline">
+<span class="ltx_tag ltx_tag_listingline"><span id="alg1.l17.1.1.1" class="ltx_text" style="font-size:80%;">17:</span></span>  <span id="alg1.l17.2" class="ltx_text ltx_font_bold">if</span> <math id="alg1.l17.m1" class="ltx_Math" alttext="t\bmod T_{\text{ema}}=0" display="inline" intent=":literal"><semantics><mrow><mrow><mi>t</mi><mo>mod</mo><msub><mi>T</mi><mtext>ema</mtext></msub></mrow><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">t\bmod T_{\text{ema}}=0</annotation></semantics></math> <span id="alg1.l17.3" class="ltx_text ltx_font_bold">then</span>
+
+
+
+</div>
+<div id="alg1.l18" class="ltx_listingline">
+<span class="ltx_tag ltx_tag_listingline"><span id="alg1.l18.1.1.1" class="ltx_text" style="font-size:80%;">18:</span></span>   <math id="alg1.l18.m1" class="ltx_Math" alttext="\theta_{T}\leftarrow\alpha\cdot\theta_{T}+(1-\alpha)\cdot\theta_{S}" display="inline" intent=":literal"><semantics><mrow><msub><mi>θ</mi><mi>T</mi></msub><mo stretchy="false">←</mo><mrow><mrow><mi>α</mi><mo lspace="0.222em" rspace="0.222em">⋅</mo><msub><mi>θ</mi><mi>T</mi></msub></mrow><mo>+</mo><mrow><mrow><mo stretchy="false">(</mo><mrow><mn>1</mn><mo>−</mo><mi>α</mi></mrow><mo rspace="0.055em" stretchy="false">)</mo></mrow><mo rspace="0.222em">⋅</mo><msub><mi>θ</mi><mi>S</mi></msub></mrow></mrow></mrow><annotation encoding="application/x-tex">\theta_{T}\leftarrow\alpha\cdot\theta_{T}+(1-\alpha)\cdot\theta_{S}</annotation></semantics></math> {EMA teacher update}
+
+</div>
+<div id="alg1.l19" class="ltx_listingline">
+<span class="ltx_tag ltx_tag_listingline"><span id="alg1.l19.1.1.1" class="ltx_text" style="font-size:80%;">19:</span></span>  <span id="alg1.l19.2" class="ltx_text ltx_font_bold">end</span> <span id="alg1.l19.3" class="ltx_text ltx_font_bold">if</span>
+</div>
+<div id="alg1.l20" class="ltx_listingline">
+<span class="ltx_tag ltx_tag_listingline"><span id="alg1.l20.1.1.1" class="ltx_text" style="font-size:80%;">20:</span></span> <span id="alg1.l20.2" class="ltx_text ltx_font_bold">end</span> <span id="alg1.l20.3" class="ltx_text ltx_font_bold">for</span>
 </div>
 </div>
 </figure>
