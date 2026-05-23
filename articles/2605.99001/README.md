@@ -1,7 +1,7 @@
 -[Статья на русском языке](https://romanzorkin.github.io/arxiv_ru/articles/2605.99001/2605.99001_ru.html)  
 -[Статья на английском языке](https://romanzorkin.github.io/arxiv_ru/articles/2605.99001/2605.99001.html)  
 
-# DeepSeek-V4: Towards Highly Efficient Million-Token Context Intelligence
+# DeepSeek-V4: в направлении высокоэффективного интеллекта с контекстом в миллион токенов
 
 [Оригинал статьи](https://hyper.ai/en/papers/DeepSeek-V4) - текущая статья получена из портала https://hyper.ai
 ## Tags
