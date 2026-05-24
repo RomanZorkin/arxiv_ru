@@ -184,7 +184,7 @@ YOLOv26 — сквозной детектор без NMS, использующи
 | [2501.02368](articles/2501.02368/README.md) | 01.2025 | 24.05.2026 | Повышение продуктивности и благополучия на рабочем месте с помощью ИИ-агентов (`Enhancing Workplace Productivity and Well-Being using AI Agents`) ||
 | [2504.14996](articles/2504.14996/README.md) | 04.2025 | 24.05.2026 | Распределенное познание для удаленных операций с поддержкой ИИ: вызовы и направления исследований (`Distributed Cognition for AI-supported Remote Operations: Challenges and Research Directions`) ||
 | [2605.99001](articles/2605.99001/README.md) | 05.2026 | 24.05.2026 | DeepSeek-V4: На пути к высокоэффективному интеллекту контекста из миллиона токенов (`DeepSeek-V4: Towards Highly Efficient Million-Token Context Intelligence`) ||
-| [1810.04805](articles/1810.04805/README.md) | 10.2018 | 10.05.2026 | BERT : Предварительное обучение глубоких двунаправленных Transformers для Понимание языка ||
+| [1810.04805](articles/1810.04805/README.md) | 10.2018 | 24.05.2026 | BERT : Предварительное обучение глубоких двунаправленных трансформеров для Понимание языка (`BERT : Pre-training of Deep Bidirectional Transformers for Language Understanding`) ||
 | [1506.02640](articles/1506.02640/README.md) | 06.2015 | 10.05.2026 | You Only Look Once: Единый детектор объектов в реальном времени ||
 | [1706.03762](articles/1706.03762/README.md) | 06.2017 | 10.05.2026 | Attention Is All You Need ||
 | [1512.03385](articles/1512.03385/README.md) | 12.2015 | 10.05.2026 | Глубокое остаточное обучение для распознавания изображений ||
