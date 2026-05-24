@@ -195,7 +195,7 @@ YOLOv26 — сквозной детектор без NMS, использующи
 | [2605.99001](articles/2605.99001/README.md) | 05.2026 | 24.05.2026 | DeepSeek-V4: На пути к высокоэффективному интеллекту контекста из миллиона токенов (`DeepSeek-V4: Towards Highly Efficient Million-Token Context Intelligence`) ||
 | [1810.04805](articles/1810.04805/README.md) | 10.2018 | 24.05.2026 | BERT : Предварительное обучение глубоких двунаправленных трансформеров для Понимание языка (`BERT : Pre-training of Deep Bidirectional Transformers for Language Understanding`) ||
 | [1506.02640](articles/1506.02640/README.md) | 06.2015 | 24.05.2026 | Вы смотрите только один раз: Унифицированное обнаружение объектов в реальном времени (`You Only Look Once: Unified, Real-Time Object Detection`) ||
-| [1706.03762](articles/1706.03762/README.md) | 06.2017 | 10.05.2026 | Attention Is All You Need ||
+| [1706.03762](articles/1706.03762/README.md) | 06.2017 | 24.05.2026 | Внимание — это всё, что вам нужно (`Attention Is All You Need`) ||
 | [1512.03385](articles/1512.03385/README.md) | 12.2015 | 10.05.2026 | Глубокое остаточное обучение для распознавания изображений ||
 | [1710.10903](articles/1710.10903/README.md) | 10.2017 | 10.05.2026 | Графовые сети внимания (Graph Attention Networks) ||
 | [1910.01736](articles/1910.01736/README.md) | 10.2019 | 10.05.2026 | Контекстно-зависимые графовые сети внимания ||
