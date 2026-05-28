@@ -67,6 +67,20 @@
 ---
 ## Последние статьи
 
+### Универсальный ИИ-агент для диагностики редких заболеваний и приоритизации генов риска
+[2605.06226] дата публикации в arXiv - 05.2026  
+📅 дата перевода 24.05.2026  
+🏷 `rare disease diagnosis` `multi-agent system` `risk gene prioritization` `clinical decision support` `knowledge retrieval` `confidence estimation` `Hygieia agent`
+
+Представлен Hygieia — мультимодальный ИИ-агент для диагностики редких болезней и приоритизации генов риска. Использует роутер для разделения редких и частых случаев, верификатор для повышения надёжности и выдаёт оценку уверенности. Превосходит врачей на 12–60% и экономит время.
+
+- [📖 Русская HTML версия](https://romanzorkin.github.io/arxiv_ru/articles/2605.06226/2605.06226_ru.html)
+- [📄 Оригинальная статья](https://arxiv.org/abs/2605.06226)
+- [🧠 Summary / README](articles/2605.06226/README.md)
+- [⚙ Metadata](articles/2605.06226/metadata.json)
+
+---
+
 ### RoSHAP: распределительный фреймворк и робастная метрика для стабильной атрибуции признаков
 [2605.15154] дата публикации в arXiv - 05.2026  
 📅 дата перевода 24.05.2026  
@@ -175,19 +189,6 @@ YOLOv26 — сквозной детектор без NMS, использующи
 - [⚙ Metadata](articles/2503.09794/metadata.json)
 
 ---
-### Повышение продуктивности и благополучия на рабочем месте с помощью ИИ-агентов
-[2501.02368] дата публикации в arXiv - 01.2025  
-📅 дата перевода 24.05.2026  
-🏷 `AI agents` `workplace productivity` `neuroeconomic models` `reinforcement learning` `adaptive gamification` `employee well-being` `hierarchical RL`
-
-Предлагается AI-фреймворк, интегрирующий машинное обучение с нейробиологическими данными для повышения производительности труда и благополучия сотрудников. Использует HRL, MORL, value alignment и биометрическую обратную связь для адаптивной геймификации и приоритизации задач. Работа основана на симулированных данных.
-
-- [📖 Русская HTML версия](https://romanzorkin.github.io/arxiv_ru/articles/2501.02368/2501.02368_ru.html)
-- [📄 Оригинальная статья](https://arxiv.org/abs/2501.02368)
-- [🧠 Summary / README](articles/2501.02368/README.md)
-- [⚙ Metadata](articles/2501.02368/metadata.json)
-
----
 
 
 ## О проекте
@@ -201,6 +202,7 @@ YOLOv26 — сквозной детектор без NMS, использующи
 
 |id статьи|Месяц публикации|Дата перевода| Тема статьи | Ручной контроль|
 |---|---|---|---|---|
+| [2605.06226](articles/2605.06226/README.md) | 05.2026 | 24.05.2026 | Универсальный ИИ-агент для диагностики редких заболеваний и приоритизации генов риска (`A Versatile AI Agent for Rare Disease Diagnosis and Risk Gene Prioritization`) |✅|
 | [2605.15154](articles/2605.15154/README.md) | 05.2026 | 24.05.2026 | RoSHAP: распределительный фреймворк и робастная метрика для стабильной атрибуции признаков (`RoSHAP: A Distributional Framework and Robust Metric for Stable Feature Attribution`) |✅|
 | [2605.02943](articles/2605.02943/README.md) | 05.2026 | 17.05.2026 | Healthcare AI GYM для медицинских агентов (`Healthcare AI GYM for Medical Agents`) |✅ |
 | [2601.12882](articles/2601.12882/README.md) | 01.2026 | 23.05.2026 | YOLO26: Анализ сквозной структуры без NMS для обнаружения объектов в реальном времени (`YOLO26: An Analysis of NMS-Free End to End Framework for Real-Time Object Detection`) |✅ |

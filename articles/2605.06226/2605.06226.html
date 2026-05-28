@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<!-- saved from url=(0035)https://arxiv.org/html/2605.06226v2 -->
+<html lang="en" data-theme="light" data-reading-mode="disabled"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<title>A Versatile AI Agent for Rare Disease Diagnosis and Risk Gene Prioritization</title>
+<!--Generated on Sat May  9 22:47:26 2026 by LaTeXML (version 0.8.8) http://dlmf.nist.gov/LaTeXML/.-->
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<link rel="stylesheet" href="https://arxiv.org/static/browse/0.3.4/css/arxiv-html-papers-20260131.css" type="text/css">
+<script src="https://arxiv.org/static/browse/0.3.4/js/arxiv-html-papers-20260131.js"></script>
+<script>
+  // Restore the saved color scheme preference, or
+  // enact the browser preference if "automatic", 
+  // without expecting DOM load to have completed.
+  //
+  // Also restore any saved readingmode and ToC display preferences.
+  function initializeReadingPreferences() {
+    let saved_theme = localStorage.getItem("ar5iv_theme") || "automatic";
+    if (saved_theme === "automatic") {
+      if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
+        saved_theme = "dark";
+      }
+    }
+    if (saved_theme == "dark") {
+      document.documentElement.setAttribute("data-theme", "dark");
+    } else {
+      document.documentElement.setAttribute("data-theme", "light");
+    }
+
+    const tocDisplay = localStorage.getItem('arxiv_html_paper_toc_display');
+    if (tocDisplay) {
+      document.documentElement.setAttribute("data-toc-display", tocDisplay);
+    }
+    const readingMode = localStorage.getItem('arxiv_html_paper_reading_mode');
+    if (readingMode) {
+      document.documentElement.setAttribute("data-reading-mode", readingMode);
+    }
+  }
+  // Run as soon as JS starts, to minimize repainting
+  initializeReadingPreferences();
+</script>
+<link rel="apple-touch-icon" sizes="180x180" href="https://arxiv.org/static/browse/0.3.4/images/icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://arxiv.org/static/browse/0.3.4/images/icons/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="https://arxiv.org/static/browse/0.3.4/images/icons/favicon-16x16.png">
+<link rel="manifest" href="https://arxiv.org/static/browse/0.3.4/images/icons/site.webmanifest">
+<link rel="mask-icon" href="https://arxiv.org/static/browse/0.3.4/images/icons/safari-pinned-tab.svg" color="#5bbad5">
+<link rel="stylesheet" type="text/css" media="screen" href="https://use.typekit.net/utz6mli.css">
+<meta content="extension" property="gosuslugi.plugin.extension.content"></head>
+<body>
+<dialog id="modal-form" aria-labelledby="modal-title" closedby="any">
+  <form id="modal-form-content" method="dialog" enctype="multipart/form-data">
+    <header class="modal-header">
+      <h5 id="modal-title" class="modal-title">Report GitHub Issue</h5>
+      <button type="submit" formnovalidate="" class="modal-close" aria-label="Close">×</button>
+    </header>
+
+    <div class="modal-body">
+      <label for="form_title">Title:</label>
+      <input class="form-control" id="form_title" name="form_title" required="" placeholder="Enter title">
+
+      <p id="selectedTextModalDescription" hidden="">Content selection saved. Describe the issue below:</p>
+
+      <label for="description">Description:</label>
+      <textarea class="form-control" id="description" name="description" required="" maxlength="500" placeholder="500 characters maximum"></textarea>
+    </div>
+
+    <footer class="modal-footer">
+      <button type="submit" value="internal-report" class="sr-only modal-submit">Submit without GitHub</button>
+      <button type="submit" value="github-report" class="modal-submit">Submit in GitHub</button>
+    </footer>
+  </form>
+</dialog>
+
+<header class="arxiv-html-header">
+  <div class="html-header-logo">
+    <a href="https://arxiv.org/">
+      <img alt="arXiv logo" class="logo desktop-only" width="100" src="./A Versatile AI Agent for Rare Disease Diagnosis and Risk Gene Prioritization_files/arxiv-logo-one-color-white.svg">
+      <span class="sr-only">Back to arXiv</span>
+    </a>
+  </div>
+  <!--TOC, dark mode, links-->
+  <nav class="html-header-nav">
+    <a class="header-button hover-effect desktop-only" href="https://info.arxiv.org/about/accessible_HTML.html" target="_blank">Why HTML?</a>
+    <a class="header-button" title="Report an Issue" href="https://arxiv.org/html/2605.06226v2#" onclick="event.preventDefault(); showModalForm();">
+      <svg role="presentation" class="mobile-only toggle-icon" aria-hidden="true" height="1.25rem" viewBox="0 0 640 640">
+        <path d="M224 160C224 107 267 64 320 64C373 64 416 107 416 160L416 163.6C416 179.3 403.3 192 387.6 192L252.5 192C236.8 192 224.1 179.3 224.1 163.6L224.1 160zM569.6 172.8C580.2 186.9 577.3 207 563.2 217.6L465.4 290.9C470.7 299.8 474.7 309.6 477.2 320L576 320C593.7 320 608 334.3 608 352C608 369.7 593.7 384 576 384L480 384L480 416C480 418.6 479.9 421.3 479.8 423.9L563.2 486.4C577.3 497 580.2 517.1 569.6 531.2C559 545.3 538.9 548.2 524.8 537.6L461.7 490.3C438.5 534.5 395.2 566.5 344 574.2L344 344C344 330.7 333.3 320 320 320C306.7 320 296 330.7 296 344L296 574.2C244.8 566.5 201.5 534.5 178.3 490.3L115.2 537.6C101.1 548.2 81 545.3 70.4 531.2C59.8 517.1 62.7 497 76.8 486.4L160.2 423.9C160.1 421.3 160 418.7 160 416L160 384L64 384C46.3 384 32 369.7 32 352C32 334.3 46.3 320 64 320L162.8 320C165.3 309.6 169.3 299.8 174.6 290.9L76.8 217.6C62.7 207 59.8 186.9 70.4 172.8C81 158.7 101.1 155.8 115.2 166.4L224 248C236.3 242.9 249.8 240 264 240L376 240C390.2 240 403.7 242.8 416 248L524.8 166.4C538.9 155.8 559 158.7 569.6 172.8z"></path>
+      </svg>
+      <span class="desktop-only">Report Issue</span></a>
+    <!--back to abstract-->
+    <a class="header-button" title="Back to abstract page" aria-label="Back to abstract page" href="https://arxiv.org/abs/2605.06226v2">
+      <svg class="mobile-only toggle-icon" role="presentation" height="1.25rem" viewBox="0 0 512 512" fill="#ffffff" aria-hidden="true">
+        <path d="M502.6 278.6c12.5-12.5 12.5-32.8 0-45.3l-128-128c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L402.7 224 192 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l210.7 0-73.4 73.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0l128-128zM160 96c17.7 0 32-14.3 32-32s-14.3-32-32-32L96 32C43 32 0 75 0 128L0 384c0 53 43 96 96 96l64 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-64 0c-17.7 0-32-14.3-32-32l0-256c0-17.7 14.3-32 32-32l64 0z">
+        </path>
+      </svg>
+      <span class="desktop-only">Back to Abstract</span>
+    </a>
+    <!-- PDF download link -->
+    <a class="header-button" title="Download PDF" href="https://arxiv.org/pdf/2605.06226v2" target="_blank">
+      <svg class="mobile-only toggle-icon" role="presentation" height="1.25rem" viewBox="0 0 576 542">
+        <path d="M208 48L96 48c-8.8 0-16 7.2-16 16l0 384c0 8.8 7.2 16 16 16l80 0 0 48-80 0c-35.3 0-64-28.7-64-64L32 64C32 28.7 60.7 0 96 0L229.5 0c17 0 33.3 6.7 45.3 18.7L397.3 141.3c12 12 18.7 28.3 18.7 45.3l0 149.5-48 0 0-128-88 0c-39.8 0-72-32.2-72-72l0-88zM348.1 160L256 67.9 256 136c0 13.3 10.7 24 24 24l68.1 0zM240 380l32 0c33.1 0 60 26.9 60 60s-26.9 60-60 60l-12 0 0 28c0 11-9 20-20 20s-20-9-20-20l0-128c0-11 9-20 20-20zm32 80c11 0 20-9 20-20s-9-20-20-20l-12 0 0 40 12 0zm96-80l32 0c28.7 0 52 23.3 52 52l0 64c0 28.7-23.3 52-52 52l-32 0c-11 0-20-9-20-20l0-128c0-11 9-20 20-20zm32 128c6.6 0 12-5.4 12-12l0-64c0-6.6-5.4-12-12-12l-12 0 0 88 12 0zm76-108c0-11 9-20 20-20l48 0c11 0 20 9 20 20s-9 20-20 20l-28 0 0 24 28 0c11 0 20 9 20 20s-9 20-20 20l-28 0 0 44c0 11-9 20-20 20s-20-9-20-20l0-128z"></path>
+      </svg>
+      <span class="desktop-only">Download PDF</span></a>
+    <!-- navigational table of contents toggle -->
+    <a class="header-button toggle-icon" href="javascript:toggleNavTOC();" title="Toggle navigation" aria-label="Toggle navigation">
+      <svg height="1.25rem" role="presentation" viewBox="0 0 512 512">
+        <path d="M40 48C26.7 48 16 58.7 16 72v48c0 13.3 10.7 24 24 24H88c13.3 0 24-10.7 24-24V72c0-13.3-10.7-24-24-24H40zM192 64c-17.7 0-32 14.3-32 32s14.3 32 32 32H480c17.7 0 32-14.3 32-32s-14.3-32-32-32H192zm0 160c-17.7 0-32 14.3-32 32s14.3 32 32 32H480c17.7 0 32-14.3 32-32s-14.3-32-32-32H192zm0 160c-17.7 0-32 14.3-32 32s14.3 32 32 32H480c17.7 0 32-14.3 32-32s-14.3-32-32-32H192zM16 232v48c0 13.3 10.7 24 24 24H88c13.3 0 24-10.7 24-24V232c0-13.3-10.7-24-24-24H40c-13.3 0-24 10.7-24 24zM40 368c-13.3 0-24 10.7-24 24v48c0 13.3 10.7 24 24 24H88c13.3 0 24-10.7 24-24V392c0-13.3-10.7-24-24-24H40z">
+        </path>
+      </svg>
+    </a>
+    <!--- collapsable header / reading mode toggle -->
+    <a class="header-button toggle-icon" href="javascript:toggleReadingMode();" title="Disable reading mode, show header and footer">
+      <svg role="presentation" height="1.25rem" viewBox="0 0 448 512"><!--!Font Awesome Free v7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2026 Fonticons, Inc.-->
+        <path d="M32 32C14.3 32 0 46.3 0 64l0 96c0 17.7 14.3 32 32 32s32-14.3 32-32l0-64 64 0c17.7 0 32-14.3 32-32s-14.3-32-32-32L32 32zM64 352c0-17.7-14.3-32-32-32S0 334.3 0 352l0 96c0 17.7 14.3 32 32 32l96 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-64 0 0-64zM320 32c-17.7 0-32 14.3-32 32s14.3 32 32 32l64 0 0 64c0 17.7 14.3 32 32 32s32-14.3 32-32l0-96c0-17.7-14.3-32-32-32l-96 0zM448 352c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 64-64 0c-17.7 0-32 14.3-32 32s14.3 32 32 32l96 0c17.7 0 32-14.3 32-32l0-96z"></path>
+      </svg>
+    </a>
+    <!--- colored theme toggle -->
+    <button type="button" class="header-button color-tog" onclick="toggleColorScheme();" title="Toggle dark/light mode" aria-label="Toggle color scheme">
+      <span class="toggle-icon automatic-tog" aria-hidden="true">
+        <svg role="presentation" height="1.25rem" viewBox="0 0 24 24">
+          <path d="m14.3 16-.7-2h-3.2l-.7 2H7.8L11 7h2l3.2 9h-1.9M20 8.69V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12 20 8.69m-9.15 3.96h2.3L12 9l-1.15 3.65Z">
+          </path>
+        </svg>
+      </span>
+      <span class="toggle-icon light-tog" aria-hidden="true">
+        <svg role="presentation" height="1.25rem" viewBox="0 0 24 24">
+          <path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12 20 8.69Z">
+          </path>
+        </svg>
+      </span>
+      <span class="toggle-icon dark-tog" aria-hidden="true">
+        <svg role="presentation" height="1.25rem" viewBox="0 0 24 24">
+          <path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12c0-2.42-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12 20 8.69Z">
+          </path>
+        </svg>
+      </span>
+    </button>
+  </nav>
+</header><nav class="ltx_page_navbar">
+<nav class="ltx_TOC">
+<ol class="ltx_toclist">
+<li class="ltx_tocentry ltx_tocentry_abstract"><a href="https://arxiv.org/html/2605.06226v2#abstract1" title="In A Versatile AI Agent for Rare Disease Diagnosis and Risk Gene Prioritization" class="ltx_ref"><span class="ltx_text ltx_ref_title">Abstract</span></a></li>
+<li class="ltx_tocentry ltx_tocentry_section"><a href="https://arxiv.org/html/2605.06226v2#S1" title="In A Versatile AI Agent for Rare Disease Diagnosis and Risk Gene Prioritization" class="ltx_ref"><span class="ltx_text ltx_ref_title"><span class="ltx_tag ltx_tag_ref">1 </span>Introduction</span></a></li>
+<li class="ltx_tocentry ltx_tocentry_section"><a href="https://arxiv.org/html/2605.06226v2#S2" title="In A Versatile AI Agent for Rare Disease Diagnosis and Risk Gene Prioritization" class="ltx_ref"><span class="ltx_text ltx_ref_title"><span class="ltx_tag ltx_tag_ref">2 </span>Results</span></a></li>
+<li class="ltx_tocentry ltx_tocentry_section"><a href="https://arxiv.org/html/2605.06226v2#S3" title="In A Versatile AI Agent for Rare Disease Diagnosis and Risk Gene Prioritization" class="ltx_ref"><span class="ltx_text ltx_ref_title"><span class="ltx_tag ltx_tag_ref">3 </span>Discussion</span></a></li>
+<li class="ltx_tocentry ltx_tocentry_section"><a href="https://arxiv.org/html/2605.06226v2#S4" title="In A Versatile AI Agent for Rare Disease Diagnosis and Risk Gene Prioritization" class="ltx_ref"><span class="ltx_text ltx_ref_title"><span class="ltx_tag ltx_tag_ref">4 </span>Methods</span></a></li>
+<li class="ltx_tocentry ltx_tocentry_section"><a href="https://arxiv.org/html/2605.06226v2#S5" title="In A Versatile AI Agent for Rare Disease Diagnosis and Risk Gene Prioritization" class="ltx_ref"><span class="ltx_text ltx_ref_title"><span class="ltx_tag ltx_tag_ref">5 </span>Code Availability and Data Availability</span></a></li>
+<li class="ltx_tocentry ltx_tocentry_section"><a href="https://arxiv.org/html/2605.06226v2#S6" title="In A Versatile AI Agent for Rare Disease Diagnosis and Risk Gene Prioritization" class="ltx_ref"><span class="ltx_text ltx_ref_title"><span class="ltx_tag ltx_tag_ref">6 </span>Institutional Review Board (IRB) Approval</span></a></li>
+<li class="ltx_tocentry ltx_tocentry_section"><a href="https://arxiv.org/html/2605.06226v2#S7" title="In A Versatile AI Agent for Rare Disease Diagnosis and Risk Gene Prioritization" class="ltx_ref"><span class="ltx_text ltx_ref_title"><span class="ltx_tag ltx_tag_ref">7 </span>Acknowledgment</span></a></li>
+<li class="ltx_tocentry ltx_tocentry_section"><a href="https://arxiv.org/html/2605.06226v2#S8" title="In A Versatile AI Agent for Rare Disease Diagnosis and Risk Gene Prioritization" class="ltx_ref"><span class="ltx_text ltx_ref_title"><span class="ltx_tag ltx_tag_ref">8 </span>Author Contribution</span></a></li>
+<li class="ltx_tocentry ltx_tocentry_bibliography"><a href="https://arxiv.org/html/2605.06226v2#bib" title="In A Versatile AI Agent for Rare Disease Diagnosis and Risk Gene Prioritization" class="ltx_ref"><span class="ltx_text ltx_ref_title">References</span></a></li>
+<li class="ltx_tocentry ltx_tocentry_appendix"><a href="https://arxiv.org/html/2605.06226v2#A1" title="In A Versatile AI Agent for Rare Disease Diagnosis and Risk Gene Prioritization" class="ltx_ref"><span class="ltx_text ltx_ref_title"><span class="ltx_tag ltx_tag_ref">A </span>Comparison between Hygieia and other AI agents</span></a></li>
+<li class="ltx_tocentry ltx_tocentry_appendix"><a href="https://arxiv.org/html/2605.06226v2#A2" title="In A Versatile AI Agent for Rare Disease Diagnosis and Risk Gene Prioritization" class="ltx_ref"><span class="ltx_text ltx_ref_title"><span class="ltx_tag ltx_tag_ref">B </span>Prompts</span></a></li>
+<li class="ltx_tocentry ltx_tocentry_appendix"><a href="https://arxiv.org/html/2605.06226v2#A3" title="In A Versatile AI Agent for Rare Disease Diagnosis and Risk Gene Prioritization" class="ltx_ref"><span class="ltx_text ltx_ref_title"><span class="ltx_tag ltx_tag_ref">C </span>Supplementary Figures</span></a></li>
+</ol></nav>
+</nav>
+<div class="ltx_page_main">
+<div id="infobox" class="infobox">
+  <a id="license-tr" href="https://info.arxiv.org/help/license/index.html#licenses-available">
+    License: CC BY-SA 4.0
+  </a>
+  <div id="watermark-tr">
+arXiv:2605.06226v2 [cs.AI] 09 May 2026</div>
+</div><div class="ltx_page_content">
+<article class="ltx_document ltx_authors_1line">
+<div id="p1" class="ltx_para">
+<span id="p1.1" class="ltx_ERROR undefined">\svgsetup</span>
+<p id="p1.2" class="ltx_p">inkscapelatex=false<span id="p1.2.1" class="ltx_ERROR undefined">\pdftrailerid</span>redacted</p>
+</div>
+<h1 class="ltx_title ltx_title_document" lang="en">A Versatile AI Agent for Rare Disease Diagnosis and Risk Gene Prioritization</h1>
+<div class="ltx_authors">
+<span class="ltx_creator ltx_role_author">
+<span class="ltx_personname" lang="en">Tianyu Liu
+</span><span class="ltx_author_notes">
+<span class="ltx_contact ltx_role_affiliation" lang="en">Interdepartmental Program in Computational Biology and Bioinformatics, Yale University
+</span>
+<span class="ltx_contact ltx_role_affiliation" lang="en">Department of Biostatistics, Yale University
+</span>
+<span class="ltx_contact ltx_role_affiliation" lang="en">Broad Institute of MIT and Harvard
+</span></span></span>
+<span class="ltx_creator ltx_role_author">
+<span class="ltx_personname" lang="en">Wangjie Zheng
+</span><span class="ltx_author_notes">
+<span class="ltx_contact ltx_role_affiliation" lang="en">Department of Biostatistics, Yale University
+</span></span></span>
+<span class="ltx_creator ltx_role_author">
+<span class="ltx_personname" lang="en">Rui Yang
+</span><span class="ltx_author_notes">
+<span class="ltx_contact ltx_role_affiliation" lang="en">Center for Biomedical Data Science, Duke-NUS Medical School
+</span></span></span>
+<span class="ltx_creator ltx_role_author">
+<span class="ltx_personname" lang="en">Benny Kai Guo Loo
+</span><span class="ltx_author_notes">
+<span class="ltx_contact ltx_role_affiliation" lang="en">Sport and Exercise Medicine Service, KK Women’s and Children’s Hospital
+</span>
+<span class="ltx_contact ltx_role_affiliation" lang="en">Training Program, Duke-NUS Medical School
+</span>
+<span class="ltx_contact ltx_role_affiliation" lang="en">These authors contributed equally to this work as human experts.
+</span></span></span>
+<span class="ltx_creator ltx_role_author">
+<span class="ltx_personname" lang="en">Hui Zhang
+</span><span class="ltx_author_notes">
+<span class="ltx_contact ltx_role_affiliation" lang="en">Training Program, Duke-NUS Medical School
+</span>
+<span class="ltx_contact ltx_role_affiliation" lang="en">These authors contributed equally to this work as human experts.
+</span></span></span>
+<span class="ltx_creator ltx_role_author">
+<span class="ltx_personname" lang="en">Jeffries Lauran
+</span><span class="ltx_author_notes">
+<span class="ltx_contact ltx_role_affiliation" lang="en">Training Program, Duke-NUS Medical School
+</span>
+<span class="ltx_contact ltx_role_affiliation" lang="en">These authors contributed equally to this work as human experts.
+</span></span></span>
+<span class="ltx_creator ltx_role_author">
+<span class="ltx_personname" lang="en">Jianlei Gu
+</span><span class="ltx_author_notes">
+<span class="ltx_contact ltx_role_affiliation" lang="en">Department of Biostatistics, Yale University
+</span></span></span>
+<span class="ltx_creator ltx_role_author">
+<span class="ltx_personname" lang="en">Botao Yu
+</span><span class="ltx_author_notes">
+<span class="ltx_contact ltx_role_affiliation" lang="en">Department of Computer Science and Engineering, The Ohio State University
+</span></span></span>
+<span class="ltx_creator ltx_role_author">
+<span class="ltx_personname" lang="en">Weihao Xuan
+</span><span class="ltx_author_notes">
+<span class="ltx_contact ltx_role_affiliation" lang="en">Department of Complexity Science and Engineering, The University of Tokyo
+</span>
+<span class="ltx_contact ltx_role_affiliation" lang="en">Center for Advanced Intelligence Project, RIKEN
+</span></span></span>
+<span class="ltx_creator ltx_role_author">
+<span class="ltx_personname" lang="en">Kexin Huang
+</span><span class="ltx_author_notes">
+<span class="ltx_contact ltx_role_affiliation" lang="en">Phylo
+</span></span></span>
+<span class="ltx_creator ltx_role_author">
+<span class="ltx_personname" lang="en">Nan Liu
+</span><span class="ltx_author_notes">
+<span class="ltx_contact ltx_role_affiliation" lang="en">Center for Biomedical Data Science, Duke-NUS Medical School
+</span>
+<span class="ltx_contact ltx_role_affiliation" lang="en">NUS Artificial Intelligence Institute, National University of Singapore
+</span>
+<span class="ltx_contact ltx_role_affiliation" lang="en">Department of Biostatistics and Bioinformatics, Duke University
+</span></span></span>
+<span class="ltx_creator ltx_role_author">
+<span class="ltx_personname" lang="en">James Zou
+</span><span class="ltx_author_notes">
+<span class="ltx_contact ltx_role_affiliation" lang="en">Department of Biomedical Data Science, Stanford University
+</span></span></span>
+<span class="ltx_creator ltx_role_author">
+<span class="ltx_personname" lang="en">Yonghui Jiang
+</span><span class="ltx_author_notes">
+<span class="ltx_contact ltx_role_affiliation" lang="en">Department of Genetics, Yale University
+</span>
+<span class="ltx_contact ltx_role_affiliation" lang="en">Wu Tsai Institute, Yale University
+</span></span></span>
+<span class="ltx_creator ltx_role_author">
+<span class="ltx_personname" lang="en">Hua Xu
+</span><span class="ltx_author_notes">
+<span class="ltx_contact ltx_role_affiliation" lang="en">Interdepartmental Program in Computational Biology and Bioinformatics, Yale University
+</span>
+<span class="ltx_contact ltx_role_affiliation" lang="en">Wu Tsai Institute, Yale University
+</span>
+<span class="ltx_contact ltx_role_affiliation" lang="en">Department of Biomedical Informatics and Data Science, Yale University
+</span>
+<span class="ltx_contact ltx_role_affiliation" lang="en">Corresponding authors.
+</span></span></span>
+<span class="ltx_creator ltx_role_author">
+<span class="ltx_personname" lang="en">Hongyu Zhao
+</span><span class="ltx_author_notes">
+<span class="ltx_contact ltx_role_affiliation" lang="en">Interdepartmental Program in Computational Biology and Bioinformatics, Yale University
+</span>
+<span class="ltx_contact ltx_role_affiliation" lang="en">Department of Biostatistics, Yale University
+</span>
+<span class="ltx_contact ltx_role_affiliation" lang="en">Department of Genetics, Yale University
+</span>
+<span class="ltx_contact ltx_role_affiliation" lang="en">Wu Tsai Institute, Yale University
+</span>
+<span class="ltx_contact ltx_role_affiliation" lang="en">Department of Biomedical Informatics and Data Science, Yale University
+</span>
+<span class="ltx_contact ltx_role_affiliation" lang="en">Corresponding authors.
+</span></span></span>
+</div>
+
+<div id="abstract1" class="ltx_abstract">
+<h6 class="ltx_title ltx_title_abstract">Abstract</h6>
+<p class="ltx_p"><span class="ltx_text" lang="en">Accurate and timely diagnosis is essential for effective treatment, particularly in the context of rare diseases. However, current diagnostic workflows often lead to prolonged assessment times and low accuracy. To address these limitations, we introduce Hygieia, a multi-modal AI agent system designed to support precision disease diagnosis by integrating diverse data sources, including phenotypic features, genetic profiles, and clinical records. Hygieia features a router-based and knowledge-enhanced framework that mitigates hallucination and tailors diagnostic strategies to different disease categories. Notably, it prioritizes risk-related genomic factors for rare diseases and provides confidence scores to assist clinical decision-making. We conducted a comprehensive evaluation demonstrating that Hygieia achieves state-of-the-art performance across multiple diagnostic benchmarks. In collaboration with clinical experts from Yale School of Medicine and Duke-NUS Medical School, we further validated its practical utility by showing (1) Hygieia’s superior diagnostic performance compared to physicians with an improvement from 12%-60% and (2) its effectiveness in assisting clinicians with medical records for handling real-world cases. Our findings indicate that Hygieia not only enhances diagnostic accuracy and interpretability but also significantly reduces clinician workload, highlighting its potential as a valuable tool in clinical decision support systems.</span></p>
+</div>
+<div class="ltx_classification">
+<h6 class="ltx_title ltx_title_classification">keywords: </h6>
+<span id="id1.id1" class="ltx_text" lang="en">AI Agent, Disease Diagnosis, Rare Disease, Risk Gene Prioritization, Clinical System</span>
+</div>
+<section id="S1" class="ltx_section" lang="en">
+<h2 class="ltx_title ltx_title_section">
+<span class="ltx_tag ltx_tag_section">1 </span>Introduction</h2>
+
+<div id="S1.p1" class="ltx_para">
+<p id="S1.p1.1" class="ltx_p">Rare diseases are defined as conditions affecting fewer than 1 in 2,000 individuals, affecting over 300 million patients worldwide <cite class="ltx_cite ltx_citemacro_cite">[<span class="ltx_ref ltx_missing_citation ltx_ref_self">valdez2016public</span>, <span class="ltx_ref ltx_missing_citation ltx_ref_self">nguengang2020estimating</span>, <span class="ltx_ref ltx_missing_citation ltx_ref_self">paul2013hope</span>, <span class="ltx_ref ltx_missing_citation ltx_ref_self">jonker2024access</span>, <span class="ltx_ref ltx_missing_citation ltx_ref_self">zhao2025agentic</span>]</cite>. Moreover, the diagnosis and test recommendations for rare diseases are very challenging. Diagnosing rare diseases based on conventional medical methods typically takes 4 to 5 years <cite class="ltx_cite ltx_citemacro_cite">[<span class="ltx_ref ltx_missing_citation ltx_ref_self">ghosh2025artificial</span>]</cite>, which is known as “diagnostic odyssey”. One reason is that the phenotypes of rare diseases can sometimes be difficult to distinguish directly from common diseases. This also increases the likelihood of misdiagnosis and mistreatment by physicians <cite class="ltx_cite ltx_citemacro_cite">[<span class="ltx_ref ltx_missing_citation ltx_ref_self">dong2020misdiagnosis</span>]</cite>.</p>
+</div>
+<div id="S1.p2" class="ltx_para">
+<p id="S1.p2.1" class="ltx_p">To overcome the challenges mentioned above, researchers have begun collecting genotypes, phenotypes, and diagnosis plans for rare diseases to enrich our understanding of these diseases and to design a better diagnosis and treatment plan. These multi-modal datasets provide valuable research materials for disease diagnosis. Moreover, data-driven solutions, such as disease diagnosis methods based on data mining, deep learning, and advanced artificial intelligence (AI), have also garnered significant attention recently <cite class="ltx_cite ltx_citemacro_cite">[<span class="ltx_ref ltx_missing_citation ltx_ref_self">lee2022deep</span>]</cite>. Experts can train a model using the aforementioned diagnostic data to predict diseases or prioritize disease risk genes, thereby improving diagnostic accuracy. However, such models often face shortcomings in terms of generalization and deployment <cite class="ltx_cite ltx_citemacro_cite">[<span class="ltx_ref ltx_missing_citation ltx_ref_self">rossi2025meta</span>]</cite>. To enhance the model’s versatility and accessibility for physicians, rare disease diagnostic tools based on Foundation Models (such as Large Language Models (LLMs) <cite class="ltx_cite ltx_citemacro_cite">[<span class="ltx_ref ltx_missing_citation ltx_ref_self">thirunavukarasu2023large</span>]</cite> and Visual Language Models (VLMS) <cite class="ltx_cite ltx_citemacro_cite">[<span class="ltx_ref ltx_missing_citation ltx_ref_self">liu2025visual</span>]</cite>) have also been developed. LLMs are pre-trained with a large-scale text corpus and can generalize into different tasks in natural language processing (NLP) with techniques of post-training. LLMs can process electronic health records (EHRs) from patients and make diagnoses accordingly <cite class="ltx_cite ltx_citemacro_cite">[<span class="ltx_ref ltx_missing_citation ltx_ref_self">sarker2024natural</span>, <span class="ltx_ref ltx_missing_citation ltx_ref_self">liu2024geneverse</span>]</cite>, and multiple LLMs with different roles can also work together as an agent system <cite class="ltx_cite ltx_citemacro_cite">[<span class="ltx_ref ltx_missing_citation ltx_ref_self">tran2025multi</span>, <span class="ltx_ref ltx_missing_citation ltx_ref_self">du2025accelerating</span>]</cite>. Such an AI agent can make diagnoses by simulating the real scenarios, leveraging prior knowledge, and providing recommendations and suggestions for physicians as medical AI assistants <cite class="ltx_cite ltx_citemacro_cite">[<span class="ltx_ref ltx_missing_citation ltx_ref_self">liu2025spemo</span>, <span class="ltx_ref ltx_missing_citation ltx_ref_self">liu2025teampath</span>]</cite>.</p>
+</div>
+<div id="S1.p3" class="ltx_para">
+<p id="S1.p3.1" class="ltx_p">Several AI-based tools have been developed for rare disease diagnosis. For example, a general baseline for rare disease diagnosis will be prompting LLMs discussed in RareBench <cite class="ltx_cite ltx_citemacro_cite">[<span class="ltx_ref ltx_missing_citation ltx_ref_self">chen2024rarebench</span>]</cite>, and RareArena <cite class="ltx_cite ltx_citemacro_cite">[<span class="ltx_ref ltx_missing_citation ltx_ref_self">chen2026rarearena</span>]</cite>. Researchers also consider developing AI agents for medical usage based on techniques such as knowledge-enhanced retrieval <cite class="ltx_cite ltx_citemacro_cite">[<span class="ltx_ref ltx_missing_citation ltx_ref_self">wang2025visualrag</span>]</cite> as well as multi-agent communication <cite class="ltx_cite ltx_citemacro_cite">[<span class="ltx_ref ltx_missing_citation ltx_ref_self">dhatterwal2023multi</span>, <span class="ltx_ref ltx_missing_citation ltx_ref_self">chen2025enhancing</span>]</cite>. Although these models are interesting in design and have some clinical significance, their shortcomings are still quite evident. First, even advanced AI-based models used for rare disease diagnosis cannot distinguish between common and rare diseases, which is the basic step to avoid misdiagnosis (Supplementary Figure <a href="https://arxiv.org/html/2605.06226v2#A3.F1" title="Supplementary Fig. 1 ‣ Appendix C Supplementary Figures ‣ A Versatile AI Agent for Rare Disease Diagnosis and Risk Gene Prioritization" class="ltx_ref"><span class="ltx_text ltx_ref_tag">1</span></a> (a)). This finding severely limits the applicability of rare disease diagnostic models. Second, due to the randomness that exists in the model training and inference, these models might not give consistent outputs based on the same input with different random seeds, which is also harmful for the trustworthy output (Supplementary Figure <a href="https://arxiv.org/html/2605.06226v2#A3.F1" title="Supplementary Fig. 1 ‣ Appendix C Supplementary Figures ‣ A Versatile AI Agent for Rare Disease Diagnosis and Risk Gene Prioritization" class="ltx_ref"><span class="ltx_text ltx_ref_tag">1</span></a> (b)). Third, current AI methods only focus on diagnosis, but lack the necessary steps and capacities for result interpretation and discovery of important causal genes of rare diseases. Finally, current studies <cite class="ltx_cite ltx_citemacro_cite">[<span class="ltx_ref ltx_missing_citation ltx_ref_self">lee2022deep</span>, <span class="ltx_ref ltx_missing_citation ltx_ref_self">zhao2025agentic</span>, <span class="ltx_ref ltx_missing_citation ltx_ref_self">liu2026vc</span>]</cite> do not directly address how these AI models can be applied in diagnostic scenarios and collaborate with physicians. Moreover, recent studies have shown that over 80% of rare diseases are influenced by genetic factors and can be passed on to the next generation <cite class="ltx_cite ltx_citemacro_cite">[<span class="ltx_ref ltx_missing_citation ltx_ref_self">zhao2025agentic</span>]</cite>, but how these genetic factors are incorporated into diagnosis and how to infer disease-related genes based on clinical presentation have not been well researched in AI-based methods. Therefore, there is a critical need to design an AI model that can simultaneously diagnose different types of diseases and provide explanations for the decision.</p>
+</div>
+<div id="S1.p4" class="ltx_para">
+<p id="S1.p4.1" class="ltx_p">In this manuscript, we introduce Hygieia, which is an AI agent for disease diagnosis and interpretation. Our model breaks down the diagnostic process into multiple stages, first determining the disease type, then designing distinct diagnostic approaches for common and rare diseases. Diagnosing common diseases is based on prompting LLMs. Meanwhile, due to the complexity of rare disease diagnosis, our agent utilizes multiple tools (such as website searching as well as patient retrieval) to leverage prior knowledge and make a decision. We have two innovations in the design of this agent. First, to resolve the inconsistency, our agent has a verifier to monitor the outputs of the main body of Hygieia and ensure the results converge. Second, to improve the transparency of using AI agents for making clinical decisions, we implement a framework with a reasoning trajectory and confidence estimation to help users understand and trust this workflow. Hygieia can accept multiple modalities or types of data as inputs, such as phenotype information, gene information, medical history, and other information. We also provided a table in Appendix <a href="https://arxiv.org/html/2605.06226v2#A1" title="Appendix A Comparison between Hygieia and other AI agents ‣ A Versatile AI Agent for Rare Disease Diagnosis and Risk Gene Prioritization" class="ltx_ref"><span class="ltx_text ltx_ref_tag">A</span></a> to distinguish Hygieia versus other AI agents focusing on (rare) disease diagnosis, and the unique components (case router, confidence estimation, and multi-task capacity) of Hygieia further enhance its novelty.</p>
+</div>
+<div id="S1.p5" class="ltx_para">
+<p id="S1.p5.1" class="ltx_p">In general, Hygieia can interpret diagnosis results with trackable reasoning paths and prioritize disease-associated risk genes, providing more informative feedback as references to help physicians make decisions and recommendations. Hygieia can also be integrated as a skill to improve the harness of frontier AI Agents in the diagnosis of rare diseases. We invite genetic physicians with verification from Yale School of Medicine and DUKE-NUS Medical School to evaluate the contribution of Hygieia as an effective medical AI assistant, and explore new directions for the diagnosis of rare diseases at the age of AI and digital health.</p>
+</div>
+</section>
+<section id="S2" class="ltx_section" lang="en">
+<h2 class="ltx_title ltx_title_section">
+<span class="ltx_tag ltx_tag_section">2 </span>Results</h2>
+
+<div id="S2.p1" class="ltx_para">
+<p id="S2.p1.1" class="ltx_p"><span id="S2.p1.1.1" class="ltx_text ltx_font_bold">Method overview.</span> For each patient, we collect the annotations from phenotypes, medical records, and genetic test records as the input of Hygieia, and then make a decision based on the prior knowledge in medical research retrieved from the internet and databases. To initiate the workflow, Hygieia will first compute the probability of disease type based on a router, and then determine the most suitable pipeline for diagnosing either common or rare diseases. The pipeline used for rare disease diagnosis is more complex and involves several agents, such as a knowledge-retrieval agent, an information-extraction agent, a summary agent, and a verification agent. Hygieia also infers the risk gene based on patient-level phenotypes or medical records, as an extra function for medical geneticists. Finally, we provide the confidence level of the model output through a majority voting approach. The input data types, workflow, and application scenarios of Hygieia are summarized in Figure <a href="https://arxiv.org/html/2605.06226v2#S2.F1" title="Figure 1 ‣ 2 Results ‣ A Versatile AI Agent for Rare Disease Diagnosis and Risk Gene Prioritization" class="ltx_ref"><span class="ltx_text ltx_ref_tag">1</span></a>. Our benchmarking datasets include MyGene2 <cite class="ltx_cite ltx_citemacro_cite">[<span class="ltx_ref ltx_missing_citation ltx_ref_self">rodrigues2022variant</span>]</cite>, four splits from RareBench <cite class="ltx_cite ltx_citemacro_cite">[<span class="ltx_ref ltx_missing_citation ltx_ref_self">chen2024rarebench</span>]</cite> (RAMEDIS, MME, HMS, and LIRICCAL), RareArena <cite class="ltx_cite ltx_citemacro_cite">[<span class="ltx_ref ltx_missing_citation ltx_ref_self">chen2026rarearena</span>]</cite>, and in-house data from Yale School of Medicine (YSM) and Yale New Haven Hospitals (YNHH) used for the comparison between human experts and Hygieia.</p>
+</div>
+<figure id="S2.F1" class="ltx_figure"><img src="./A Versatile AI Agent for Rare Disease Diagnosis and Risk Gene Prioritization_files/x1.png" id="S2.F1.g1" class="ltx_graphics ltx_centering ltx_img_square" width="830" height="674" alt="Refer to caption">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure">Figure 1: </span>Overall pipeline of Hygieia. (a) Here we showcase how Hygieia can help physicians and clinicians working on two important problems in rare disease analysis, including diagnosis and risk gene prioritization. (b) The workflow of the AI Agent pipeline. We have multiple components, first routing the AI agents with correct models based on inferred disease type, and then providing diagnosis outcomes as well as confidence. (c) We provide the detailed information of each component in our AI agent. (d) Our evaluation criteria, including numerical evaluation and human evaluation, to support mimicking the scenario of clinical application.</figcaption>
+</figure>
+<div id="S2.p2" class="ltx_para">
+<p id="S2.p2.1" class="ltx_p"><span id="S2.p2.1.1" class="ltx_text ltx_font_bold">Hygieia serves as a strong medical agent for disease diagnosis.</span> We first demonstrate the strong capacity of Hygieia serving as a virtual physician, supported by validations conducted from various clinical datasets with different sources. The accuracy of disease classification is much higher than using random guess or prompting LLMs (Supplementary Figure <a href="https://arxiv.org/html/2605.06226v2#A3.F2" title="Supplementary Fig. 2 ‣ Appendix C Supplementary Figures ‣ A Versatile AI Agent for Rare Disease Diagnosis and Risk Gene Prioritization" class="ltx_ref"><span class="ltx_text ltx_ref_tag">2</span></a> (a)), which shows the advantages of having a router to set up a simpler pipeline for common disease diagnosis. Our classifier also predicts accurately for the correct disease types not only in our held-out testing split, but also external validation datasets (MyGene2 and RareBench), shown in Supplementary Figure <a href="https://arxiv.org/html/2605.06226v2#A3.F2" title="Supplementary Fig. 2 ‣ Appendix C Supplementary Figures ‣ A Versatile AI Agent for Rare Disease Diagnosis and Risk Gene Prioritization" class="ltx_ref"><span class="ltx_text ltx_ref_tag">2</span></a> (b). We also visualize the distribution of embeddings with Uniform Manifold Approximation and Projection (UMAP) <cite class="ltx_cite ltx_citemacro_cite">[<span class="ltx_ref ltx_missing_citation ltx_ref_self">mcinnes2018umap</span>]</cite> in Supplementary Figure <a href="https://arxiv.org/html/2605.06226v2#A3.F2" title="Supplementary Fig. 2 ‣ Appendix C Supplementary Figures ‣ A Versatile AI Agent for Rare Disease Diagnosis and Risk Gene Prioritization" class="ltx_ref"><span class="ltx_text ltx_ref_tag">2</span></a> (c), colored by disease types, where we see a clear difference between samples with rare diseases and samples with common diseases, which works as an explanation for our contribution. The diagnosis of rare diseases is more difficult, and we collect seven datasets in our evaluation pipeline. Figure <a href="https://arxiv.org/html/2605.06226v2#S2.F2" title="Figure 2 ‣ 2 Results ‣ A Versatile AI Agent for Rare Disease Diagnosis and Risk Gene Prioritization" class="ltx_ref"><span class="ltx_text ltx_ref_tag">2</span></a> (a) shows the distribution of case numbers across all datasets, while Figure <a href="https://arxiv.org/html/2605.06226v2#S2.F2" title="Figure 2 ‣ 2 Results ‣ A Versatile AI Agent for Rare Disease Diagnosis and Risk Gene Prioritization" class="ltx_ref"><span class="ltx_text ltx_ref_tag">2</span></a> (b) shows the unique number of diseases in different datasets. These figures show that our selected datasets have obvious differences in data distribution, which helps us simulate the clinical usage in the real-world setting. Among these datasets, RAMEDIS, MME, HMS, and LIRICAL are extracted from RareBench, which is a public benchmark framework for evaluating the performance of models for rare disease diagnosis. MyGene2 contains family-level information for patients with rare diseases, which is also publicly available. RareArena is a newly collected dataset for evaluating LLMs’ performances in rare disease diagnosis. The YSM dataset contains five in-house samples as a part of Undiagnosed Diseases Network (UDN) <cite class="ltx_cite ltx_citemacro_cite">[<span class="ltx_ref ltx_missing_citation ltx_ref_self">ramoni2017undiagnosed</span>]</cite>, which covers diseases that are hard to diagnose. This dataset is not directly accessible to public researchers to protect personal information.</p>
+</div>
+<figure id="S2.F2" class="ltx_figure"><img src="./A Versatile AI Agent for Rare Disease Diagnosis and Risk Gene Prioritization_files/x2.png" id="S2.F2.g1" class="ltx_graphics ltx_centering ltx_img_landscape" width="830" height="660" alt="Refer to caption">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure">Figure 2: </span>Benchmarking results for Hygieia in rare disease diagnosis. (a) Number of cases in our testing datasets. (b) Number of diseases in our testing datasets. (c) Top1 recall rate across different datasets. (d) Comparisons of different models with different recall rates in MyGene2.</figcaption>
+</figure>
+<div id="S2.p3" class="ltx_para">
+<p id="S2.p3.1" class="ltx_p">Regarding baseline methods, we also consider a group with strong diversity. Our baselines include LLMs with/without reasoning and searching capacities, agents for biomedical research, and LLMs finetuned with simulated patient-level data from <cite class="ltx_cite ltx_citemacro_cite">[<span class="ltx_ref ltx_missing_citation ltx_ref_self">alsentzer2025few</span>]</cite> with the open-source Qwen3 model <cite class="ltx_cite ltx_citemacro_cite">[<span class="ltx_ref ltx_missing_citation ltx_ref_self">yang2025qwen3</span>]</cite>. Details of our baseline methods can be found in the Methods section.</p>
+</div>
+<div id="S2.p4" class="ltx_para">
+<p id="S2.p4.1" class="ltx_p">During evaluation, we test the Recall rate by comparing the observed diseases with the predicted diseases from different methods. Figure <a href="https://arxiv.org/html/2605.06226v2#S2.F2" title="Figure 2 ‣ 2 Results ‣ A Versatile AI Agent for Rare Disease Diagnosis and Risk Gene Prioritization" class="ltx_ref"><span class="ltx_text ltx_ref_tag">2</span></a> (c) shows that Hygieia outperforms various baseline methods across datasets from different resources. Fine-tuning LLMs for disease diagnosis also does not have strong generalization ability, and thus cannot outperform most of the agent-based solutions. Moreover, since some rare diseases have similar phenotypes or can be treated similarly <cite class="ltx_cite ltx_citemacro_cite">[<span class="ltx_ref ltx_missing_citation ltx_ref_self">griggs2009clinical</span>]</cite>, we also test if increasing the size of predicted targets (e.g., top 5 and top 10 diseases) can improve the Recall rate. Figure <a href="https://arxiv.org/html/2605.06226v2#S2.F2" title="Figure 2 ‣ 2 Results ‣ A Versatile AI Agent for Rare Disease Diagnosis and Risk Gene Prioritization" class="ltx_ref"><span class="ltx_text ltx_ref_tag">2</span></a> (d) shows our results based on the MyGene2 dataset, where Hygieia had a higher recall rate when we increased the testing size. We report the benchmarking results based on a randomly sampled subset from RareArena in Supplementary Figure <a href="https://arxiv.org/html/2605.06226v2#A3.F3" title="Supplementary Fig. 3 ‣ Appendix C Supplementary Figures ‣ A Versatile AI Agent for Rare Disease Diagnosis and Risk Gene Prioritization" class="ltx_ref"><span class="ltx_text ltx_ref_tag">3</span></a>, where Hygieia still presents a leading performance even under the evaluation settings with an advanced dataset. At the same time, not all methods exhibit this phenomenon, which is counterintuitive. This might indicate that the approach of some models taken to clinical decision-making may still be primarily based on guesswork, with reasoning playing a secondary role. However, by integrating the prior knowledge and introducing the self-reflection design, Hygieia achieves a better result in diagnosing rare diseases.</p>
+</div>
+<div id="S2.p5" class="ltx_para">
+<p id="S2.p5.1" class="ltx_p">We also test the reliability of estimated confidence, shown in Supplementary Figure <a href="https://arxiv.org/html/2605.06226v2#A3.F4" title="Supplementary Fig. 4 ‣ Appendix C Supplementary Figures ‣ A Versatile AI Agent for Rare Disease Diagnosis and Risk Gene Prioritization" class="ltx_ref"><span class="ltx_text ltx_ref_tag">4</span></a> (a). Our expectation is that Hygieia has higher confidence for questions with correct answers. Our results demonstrate that 1. the confidence proposed by Hygieia is reliable, as the answer group with higher confidence also has a higher recall rate, and 2. other confidence estimation methods are worse than the current design, shown in Supplementary Figure <a href="https://arxiv.org/html/2605.06226v2#A3.F4" title="Supplementary Fig. 4 ‣ Appendix C Supplementary Figures ‣ A Versatile AI Agent for Rare Disease Diagnosis and Risk Gene Prioritization" class="ltx_ref"><span class="ltx_text ltx_ref_tag">4</span></a> (b) as the rest of three methods cannot produce significant differences between these two groups. We also test the robustness of Hygieia by using three different random seeds for querying, and based on Supplementary Figure <a href="https://arxiv.org/html/2605.06226v2#A3.F5" title="Supplementary Fig. 5 ‣ Appendix C Supplementary Figures ‣ A Versatile AI Agent for Rare Disease Diagnosis and Risk Gene Prioritization" class="ltx_ref"><span class="ltx_text ltx_ref_tag">5</span></a>, we do not observe a large difference across the outcomes with three different runs.</p>
+</div>
+<div id="S2.p6" class="ltx_para">
+<p id="S2.p6.1" class="ltx_p"><span id="S2.p6.1.1" class="ltx_text ltx_font_bold">Case study of Hygieia for disease diagnosis shows its unique and informative decision-making process.</span> To understand the decision-making process of Hygieia and make an in-depth comparison with other baseline methods, we provide a case study with MyGene2. In this sample, we provide phenotypes and detected genes as inputs; the diagnosis is <span id="S2.p6.1.2" class="ltx_text ltx_font_italic">Distal arthrogryposis, type 10</span>. The full reasoning path of Hygieia can be found in Supplementary Figure <a href="https://arxiv.org/html/2605.06226v2#A3.F6" title="Supplementary Fig. 6 ‣ Appendix C Supplementary Figures ‣ A Versatile AI Agent for Rare Disease Diagnosis and Risk Gene Prioritization" class="ltx_ref"><span class="ltx_text ltx_ref_tag">6</span></a> (a).</p>
+</div>
+<figure id="S2.F3" class="ltx_figure"><img src="./A Versatile AI Agent for Rare Disease Diagnosis and Risk Gene Prioritization_files/x3.png" id="S2.F3.g1" class="ltx_graphics ltx_centering ltx_img_square" width="830" height="857" alt="Refer to caption">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure">Figure 3: </span>Case study of Hygieia and other baselines in disease diagnosis. We mask some phenotypes to protect personal information.</figcaption>
+</figure>
+<div id="S2.p7" class="ltx_para">
+<p id="S2.p7.1" class="ltx_p">Based on Figure <a href="https://arxiv.org/html/2605.06226v2#S2.F3" title="Figure 3 ‣ 2 Results ‣ A Versatile AI Agent for Rare Disease Diagnosis and Risk Gene Prioritization" class="ltx_ref"><span class="ltx_text ltx_ref_tag">3</span></a> and among all evaluated methods, Hygieia is the only model that correctly made the definitive diagnosis <span id="S2.p7.1.1" class="ltx_text ltx_font_italic">Distal arthrogryposis, type 10</span>, fully matching both the annotated answer and the genetic etiology (<span id="S2.p7.1.2" class="ltx_text ltx_font_italic">TTN</span> mutation). In contrast, alternative baselines either provide incorrect diagnoses (e.g., <span id="S2.p7.1.3" class="ltx_text ltx_font_italic">Bethlem myopathy, Emery–Dreifuss muscular dystrophy, Flexion contracture, Arthrogryposis multiplex congenita</span>) or produce overly broad, nonspecific conclusions. This demonstrates that Hygieia not only retrieves the correct disease category but is capable of fine‐grained subtype resolution, as an essential requirement in precision medicine.</p>
+</div>
+<div id="S2.p8" class="ltx_para">
+<p id="S2.p8.1" class="ltx_p">Unlike other models, Hygieia has a multi‐step reasoning process that integrates phenotypic patterns, risk gene associations, and syndrome specificity. This demonstrates a higher level of biomedical causal interpretability. While several baselines refuse to show internal reasoning or default to vague clinical summaries, Hygieia transparently links phenotype, genotype, and nosology, exhibiting a cognitively valid chain of inference.</p>
+</div>
+<div id="S2.p9" class="ltx_para">
+<p id="S2.p9.1" class="ltx_p">This specific case intentionally includes multiple phenotypes designed to confound rule‐based or pattern‐matching systems. Models like o4-mini, GPT-4o, and Qwen3-8B fail to integrate the constellation of findings, instead overfitting to a single clinical feature (e.g., <span id="S2.p9.1.1" class="ltx_text ltx_font_italic">toe walking, wrist contracture</span>) and outputting unrelated diagnoses. Hygieia, however, successfully recognizes that the multi‐joint congenital contracture pattern represents a diagnostic signature of distal arthrogryposis, showing resilience to feature redundancy and phenotypic noise.</p>
+</div>
+<div id="S2.p10" class="ltx_para">
+<p id="S2.p10.1" class="ltx_p">We also select a challenging example from the YNHH to demonstrate Hygieia’s potential for solving complex problems. According to Supplementary Figure <a href="https://arxiv.org/html/2605.06226v2#A3.F7" title="Supplementary Fig. 7 ‣ Appendix C Supplementary Figures ‣ A Versatile AI Agent for Rare Disease Diagnosis and Risk Gene Prioritization" class="ltx_ref"><span class="ltx_text ltx_ref_tag">7</span></a>, Hygieia successfully makes the diagnosis of Kabuki Syndrome, including subtypes related to genes based on the iteration steps. Based on the prevalence, only 1 in 32,000 births results in Kabuki syndrome <cite class="ltx_cite ltx_citemacro_cite">[<span class="ltx_ref ltx_missing_citation ltx_ref_self">bogershausen2013unmasking</span>]</cite>, making it a very rare and challenging case, and demonstrating the potential of Hygieia for handling difficult samples and very rare cases.</p>
+</div>
+<div id="S2.p11" class="ltx_para">
+<p id="S2.p11.1" class="ltx_p">Where competing models either offer no next steps or suggest non‐specific investigations, Hygieia explicitly ties the diagnosis to a recognized molecular driver and its associated disease spectrum. This strengthens the translational value of its output, enabling downstream steps such as confirmatory genetic testing, family counseling, and prognosis stratification. The output is not merely a label, but clinically operational knowledge, surpassing the diagnostic passivity of baseline systems. Taken together, the evidence indicates that Hygieia demonstrates a substantially higher standard of diagnostic precision, biomedical reasoning depth, and clinical applicability compared to both traditional LLM baselines and search‐augmented systems. Its ability to unify phenotypic complexity with molecular knowledge exemplifies the next generation of AI‐assisted medical decision systems, thereby positioning Hygieia as the most reliable and clinically aligned model in this evaluation.</p>
+</div>
+<div id="S2.p12" class="ltx_para">
+<p id="S2.p12.1" class="ltx_p"><span id="S2.p12.1.1" class="ltx_text ltx_font_bold">Hygieia successfully prioritizes genes with higher disease risks from individual-level data.</span> To enhance diagnostic interpretability and confidence while providing additional therapeutic insights, modern medicine often aims to identify causative factors <cite class="ltx_cite ltx_citemacro_cite">[<span class="ltx_ref ltx_missing_citation ltx_ref_self">sanchez2022causal</span>]</cite>. In rare disease diagnosis, some physicians may recommend exome- or whole-genome sequencing or targeted gene sequencing to identify disease-causing variants, enabling more reliable conclusions <cite class="ltx_cite ltx_citemacro_cite">[<span class="ltx_ref ltx_missing_citation ltx_ref_self">boycott2013rare</span>]</cite>. Therefore, determining how to provide patients with a list of potential genes for sequencing represents a critical task in rare disease diagnosis. However, few AI agent frameworks have considered this task. Our analysis indicates that disease diagnosis shares similarities with risk factor prioritization, suggesting it can be addressed using a unified framework. Here, our input data are still phenotypes or EHR data, while the output will be a gene or a list of genes. Our selected baselines are similar to the candidates used for evaluating disease diagnosis functions. Details can be found in the Methods section.</p>
+</div>
+<figure id="S2.F4" class="ltx_figure"><img src="./A Versatile AI Agent for Rare Disease Diagnosis and Risk Gene Prioritization_files/x4.png" id="S2.F4.g1" class="ltx_graphics ltx_centering ltx_img_portrait" width="747" height="1038" alt="Refer to caption">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure">Figure 4: </span>Benchmarking results for Hygieia in risk gene prioritization. (a) Statistics in our testing datasets. (b) Top1 recall rate across different datasets. (c) Comparisons of different models with different recall rates in MyGene2. </figcaption>
+</figure>
+<div id="S2.p13" class="ltx_para">
+<p id="S2.p13.1" class="ltx_p">Due to the scarcity of datasets containing both phenotypes and true disease-causing genes, this section employs MyGene2 and simulation data provided by SHEPHERD <cite class="ltx_cite ltx_citemacro_cite">[<span class="ltx_ref ltx_missing_citation ltx_ref_self">alsentzer2025few</span>]</cite> for model evaluation. The statistics of selected datasets are summarized in Figure <a href="https://arxiv.org/html/2605.06226v2#S2.F4" title="Figure 4 ‣ 2 Results ‣ A Versatile AI Agent for Rare Disease Diagnosis and Risk Gene Prioritization" class="ltx_ref"><span class="ltx_text ltx_ref_tag">4</span></a> (a). The scale of simulation data is larger than MyGene2, and thus our assessment also took various scenarios into account. We still computed the Recall rate based on gene lists of different sizes and observed gene labels. Figures <a href="https://arxiv.org/html/2605.06226v2#S2.F4" title="Figure 4 ‣ 2 Results ‣ A Versatile AI Agent for Rare Disease Diagnosis and Risk Gene Prioritization" class="ltx_ref"><span class="ltx_text ltx_ref_tag">4</span></a> (b) and (c) show that Hygieia has a high recall rate, especially under the top 1 setting versus other baselines. However, as we increase the pool of candidates, there is a diminishing advantage of Hygieia. When comparing the recall rate of this task to disease diagnosis, we observe that gene prioritization is a relatively simpler task. Consequently, as the pool of candidates expands, the benefits of employing agents (e.g., additional verifiers) diminish proportionally. Considering that the more genes that need to be tested, the higher the cost for patients, our approach balances accuracy and expense. We also compared the costs of Hygieia and GPT-5-search, revealing that Hygieia holds an advantage in token consumption as well, shown in Supplementary Figure <a href="https://arxiv.org/html/2605.06226v2#A3.F8" title="Supplementary Fig. 8 ‣ Appendix C Supplementary Figures ‣ A Versatile AI Agent for Rare Disease Diagnosis and Risk Gene Prioritization" class="ltx_ref"><span class="ltx_text ltx_ref_tag">8</span></a>. In Figure <a href="https://arxiv.org/html/2605.06226v2#S2.F4" title="Figure 4 ‣ 2 Results ‣ A Versatile AI Agent for Rare Disease Diagnosis and Risk Gene Prioritization" class="ltx_ref"><span class="ltx_text ltx_ref_tag">4</span></a> (c), since we can create a training dataset from the large simulation data, we can also create an oracle model (Qwen3-8B-sft, score is 0.724). However, the performance of this model for recommending based on MyGene2 is poor, suggesting that AI Agents have better generalization ability than traditional SFT approaches.</p>
+</div>
+<div id="S2.p14" class="ltx_para">
+<p id="S2.p14.1" class="ltx_p"><span id="S2.p14.1.1" class="ltx_text ltx_font_bold">Case study of Hygieia for gene ranking shows its unique and informative decision-making process.</span> To understand the decision-making process of Hygieia and make an in-depth comparison versus other baseline methods, we provided a case study with one sample from MyGene2, but for risk gene prioritization. In this sample, we provided phenotypes as inputs; the observed risk gene is <span id="S2.p14.1.2" class="ltx_text ltx_font_italic">NALCN</span>. The full reasoning path of Hygieia can be found in Supplementary Figure <a href="https://arxiv.org/html/2605.06226v2#A3.F6" title="Supplementary Fig. 6 ‣ Appendix C Supplementary Figures ‣ A Versatile AI Agent for Rare Disease Diagnosis and Risk Gene Prioritization" class="ltx_ref"><span class="ltx_text ltx_ref_tag">6</span></a> (b).</p>
+</div>
+<figure id="S2.F5" class="ltx_figure"><img src="./A Versatile AI Agent for Rare Disease Diagnosis and Risk Gene Prioritization_files/x5.png" id="S2.F5.g1" class="ltx_graphics ltx_centering ltx_img_square" width="830" height="887" alt="Refer to caption">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure">Figure 5: </span>Case study for Hygieia and other baselines in risk gene prioritization. We mask some phenotypes to protect personal information.</figcaption>
+</figure>
+<div id="S2.p15" class="ltx_para">
+<p id="S2.p15.1" class="ltx_p">According to Figure <a href="https://arxiv.org/html/2605.06226v2#S2.F5" title="Figure 5 ‣ 2 Results ‣ A Versatile AI Agent for Rare Disease Diagnosis and Risk Gene Prioritization" class="ltx_ref"><span class="ltx_text ltx_ref_tag">5</span></a>, in this evaluation, Hygieia is the only system that successfully identifies NALCN, which is the correct gene associated with the patient’s constellation of phenotypes, fully aligning with the annotated ground truth. All other baseline models, including o4mini, GPT-4o (search), GPT-5 (search), Qwen3-8B, and DeepSeek-v31, either returned incorrect candidates such as <span id="S2.p15.1.1" class="ltx_text ltx_font_italic">MYH3</span> or <span id="S2.p15.1.2" class="ltx_text ltx_font_italic">PIEZO2</span>, or failed to provide a usable response altogether. This example demonstrates that Hygieia consistently outperforms both general-purpose LLMs and search-augmented tools in high-stakes biomedical inference tasks requiring precise gene–phenotype matching.</p>
+</div>
+<div id="S2.p16" class="ltx_para">
+<p id="S2.p16.1" class="ltx_p">Unlike competing models that default to <span id="S2.p16.1.1" class="ltx_text ltx_font_italic">MYH3</span> based on superficial resemblance to Freeman–Sheldon syndrome, Hygieia distinguishes clinically overlapping yet genetically distinct disorders by integrating phenotypic, molecular, and nosological evidence. The model explicitly links the observed features—including congenital contractures, hypotonia, neurodevelopmental delay, and characteristic facies, which are NALCN-associated CLIFAHDD/IHPRF syndromes. This indicates that Hygieia does not rely solely on phenotypic pattern matching, but instead performs multi-layered biomedical reasoning consistent with genetic counseling practice.</p>
+</div>
+<div id="S2.p17" class="ltx_para">
+<p id="S2.p17.1" class="ltx_p">Several baselines fail due to inability to retrieve or interpret data, producing unusable outputs (“NAN", “unable to retrieve data"). Hygieia remains fully functional even under incomplete signal, reflecting robustness to real-world clinical constraints, where patient phenotypes may be sparsely documented, noisy, or partially overlapping. This resilience is essential for deployment in clinical decision support, where diagnostic completeness is rarely guaranteed.</p>
+</div>
+<div id="S2.p18" class="ltx_para">
+<p id="S2.p18.1" class="ltx_p">Hygieia not only outputs the correct target gene but also contextualizes it within a clinically actionable diagnostic category. This stands in sharp contrast to competing models that provide unsubstantiated gene names without justification, which would be unacceptable in a clinical genetics workflow where gene testing decisions have financial, ethical, and prognostic implications. Hygieia’s interpretability and biological validity, therefore, make it a more trustworthy candidate for integration into precision medicine pipelines.</p>
+</div>
+<div id="S2.p19" class="ltx_para">
+<p id="S2.p19.1" class="ltx_p">The comparison clearly illustrates that Hygieia surpasses existing LLM-based and search-augmented baselines in terms of accuracy, reasoning validity, and clinical relevance. Its ability to discriminate among phenotypically similar developmental syndromes and return a gene with direct translational value underscores its potential as a next-generation AI system for genetic factor prioritization.</p>
+</div>
+<div id="S2.p20" class="ltx_para">
+<p id="S2.p20.1" class="ltx_p"><span id="S2.p20.1.1" class="ltx_text ltx_font_bold">Utilizing Hygieia as a medical assistant for physicians in solving complicated cases.</span> One major goal of developing and deploying Hygieia is to make a virtual assistant (Copilot) for physicians and clinicians working on rare disease diagnosis and treatment development, and thus, matching user requirements with the functionality of Hygieia is a crucial step. Previous medical AI agent development has not explored this area extensively, thereby limiting their specific deployment capabilities. In this work, we collaborated with physicians from Duke-NUS, YSM, and YNHH to define key stakeholders in disease diagnosis/gene prioritization, and chart a blueprint for human-AI collaboration, thereby providing a guidance framework for the concrete implementation of Hygieia.</p>
+</div>
+<div id="S2.p21" class="ltx_para">
+<p id="S2.p21.1" class="ltx_p">Figure <a href="https://arxiv.org/html/2605.06226v2#S2.F6" title="Figure 6 ‣ 2 Results ‣ A Versatile AI Agent for Rare Disease Diagnosis and Risk Gene Prioritization" class="ltx_ref"><span class="ltx_text ltx_ref_tag">6</span></a> (a) shows two expected functions of Hygieia from physicians to improve the efficiency and reduce the effort, including direct diagnosis based on physician input, and verification and refinement of physician judgments. The commonality between these two tasks is that both require interaction between the physician and the AI agent, where the physician articulates the character’s needs, and the agent fulfills them. We also provide some examples here to showcase how we can use Hygieia to accomplish these tasks. In Figure <a href="https://arxiv.org/html/2605.06226v2#S2.F6" title="Figure 6 ‣ 2 Results ‣ A Versatile AI Agent for Rare Disease Diagnosis and Risk Gene Prioritization" class="ltx_ref"><span class="ltx_text ltx_ref_tag">6</span></a> (b), we illustrate that Hygieia can take the physicians’ instructions with patient phenotype information (free text format) and other relevant information as inputs, and integrate its different components to create a pipeline, call different tools, and communicate with different AI agents to produce a diagnosis result. In Figure <a href="https://arxiv.org/html/2605.06226v2#S2.F6" title="Figure 6 ‣ 2 Results ‣ A Versatile AI Agent for Rare Disease Diagnosis and Risk Gene Prioritization" class="ltx_ref"><span class="ltx_text ltx_ref_tag">6</span></a> (c), we showcase how Hygieia can take the physicians’ diagnosis results as well as phenotype information as inputs, and by using an alternative best pipeline, first determine the True/False or original diagnosis, and then perform reasoning and correction, to report a new diagnosis answer.</p>
+</div>
+<div id="S2.p22" class="ltx_para">
+<p id="S2.p22.1" class="ltx_p">We also invite three <span id="S2.p22.1.1" class="ltx_text ltx_font_bold">certified genetic physicians</span> as experts in pediatrics and rare disease diagnosis to have a competition with Hygieia based on the two selected tasks discussed in this manuscript. Their training backgrounds are summarized in Supplementary File 1 to justify their strong expertise. We assigned the same question sets for human experts and Hygieia, allowing them to access the same resources (but human experts are not allowed to use LLMs as assistants), and make a direct comparison in their abilities for problem solving. According to Figure <a href="https://arxiv.org/html/2605.06226v2#S2.F6" title="Figure 6 ‣ 2 Results ‣ A Versatile AI Agent for Rare Disease Diagnosis and Risk Gene Prioritization" class="ltx_ref"><span class="ltx_text ltx_ref_tag">6</span></a> (d), Hygieia performs better than all selected human experts in both rare disease diagnosis and gene prioritization, and the improvements versus the second-best expert are 12.49% and 60%, respectively. Human experts also have comments that gene prioritization is more difficult than disease diagnosis, supported by the difference in the improvement. Regarding the efficiency, Hygieia only spends less than two hours in solving all of the selected questions, while human experts take from two hours to 10 hours to answer all questions, shown in Figure <a href="https://arxiv.org/html/2605.06226v2#S2.F6" title="Figure 6 ‣ 2 Results ‣ A Versatile AI Agent for Rare Disease Diagnosis and Risk Gene Prioritization" class="ltx_ref"><span class="ltx_text ltx_ref_tag">6</span></a> (e). Therefore, AI-based medical assistants are able to provide feedback more quickly; this capacity could be very valuable, especially in cases related to timely decisions. Finally, we show a case study for the previously mentioned challenging case, the Kabuki syndrome, and analyze the reasons from human experts and Hygieia to make a diagnosis. According to Figure <a href="https://arxiv.org/html/2605.06226v2#S2.F6" title="Figure 6 ‣ 2 Results ‣ A Versatile AI Agent for Rare Disease Diagnosis and Risk Gene Prioritization" class="ltx_ref"><span class="ltx_text ltx_ref_tag">6</span></a> (f), human experts prefer giving reasons with conciseness, and selecting highly-relevant phenotypes to make a diagnosis. However, Hygieia prefers generating a more structured reasoning path with hierarchy and boldfacing the important information. Therefore, Hygieia can facilitate reasoning for disease diagnosis with an easier approach to understanding and analysis, especially for junior physicians and medical students learning the diagnosis process.</p>
+</div>
+<div id="S2.p23" class="ltx_para">
+<p id="S2.p23.1" class="ltx_p">The robust performance of Hygieia, reflected in both its reasoning process and diagnostic outputs, together with its advantage over human experts in comparative evaluations demonstrates its potential to translate into tangible medical value for healthcare teams, further highlighting its dual contributions at both the algorithmic and application levels. Moving forward, we will involve physicians as human evaluators to directly compare Hygieia with physicians in tasks such as disease diagnosis and key gene identification, thus further extending Hygieia.</p>
+</div>
+<figure id="S2.F6" class="ltx_figure"><img src="./A Versatile AI Agent for Rare Disease Diagnosis and Risk Gene Prioritization_files/x6.png" id="S2.F6.g1" class="ltx_graphics ltx_centering ltx_img_landscape" width="830" height="610" alt="Refer to caption">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure">Figure 6: </span>Illustration of Human-AI collaboration for disease diagnosis and decision correction based on physicians and Hygieia. We mask phenotype information to protect patients’ privacy. (a) Explanations of two selected tasks; (b) Illustration of the diagnosis of diseases based on physician input; (c) Illustration of verification and refinement of physician judgments. (d) Human-AI comparison results for two tasks, H1-H3, represent human experts. (e) Time cost comparison result. (f) Case study for outcomes from our agent and human experts.</figcaption>
+</figure>
+</section>
+<section id="S3" class="ltx_section" lang="en">
+<h2 class="ltx_title ltx_title_section">
+<span class="ltx_tag ltx_tag_section">3 </span>Discussion</h2>
+
+<div id="S3.p1" class="ltx_para">
+<p id="S3.p1.1" class="ltx_p">Accurate and timely diagnosis remains a fundamental challenge in modern medicine, particularly for rare and genetically heterogeneous diseases where phenotypic overlap, incomplete records, and limited clinician exposure often result in prolonged diagnostic odysseys and misdiagnoses. While recent advances in LLMs and biomedical AI have demonstrated promise in clinical reasoning, most existing approaches focus narrowly on either pattern-based disease prediction or retrieval-augmented question answering, without addressing the full diagnostic workflow, interpretability, or clinical deployment constraints. In this work, we present Hygieia, a versatile multi-modal agentic system designed to jointly address disease diagnosis and risk gene prioritization by integrating phenotypic, genomic, and contextual clinical information within a unified framework powered by AI.</p>
+</div>
+<div id="S3.p2" class="ltx_para">
+<p id="S3.p2.1" class="ltx_p">Overall, Hygieia introduces several conceptual and technical advances that collectively address the above challenges. First, it formalizes diagnosis as a multi-stage agentic workflow, beginning with task parsing and disease-type routing, followed by tailored pipelines for common and rare diseases. By explicitly separating these pathways, Hygieia avoids over-generalized reasoning and reduces both computational cost and diagnostic error for common conditions, while allocating more sophisticated reasoning resources to rare disease cases. Second, the system incorporates a self-verification mechanism that iteratively evaluates and corrects intermediate diagnostic outputs until convergence. This verifier–corrector design substantially improves consistency and robustness, mitigating the well-documented randomness of LLM-based inference. Empirically, this design leads to more stable predictions, and we also provide better-calibrated confidence estimates with multiple queries. Third, Hygieia extends beyond diagnosis to risk gene prioritization, framing it as a closely related inference task that benefits from the same phenotypic and contextual reasoning. By unifying these tasks in a single framework, we produce clinically actionable outputs that can directly empower several associated tasks. Fourth, Hygieia also emphasizes interpretability and clinical alignment. Rather than producing opaque predictions or generic summaries, our system explicitly links phenotypes, disease entities, and gene-level evidence through multi-step reasoning trajectories.</p>
+</div>
+<div id="S3.p3" class="ltx_para">
+<p id="S3.p3.1" class="ltx_p">Moreover, Hygieia is evaluated not only through comprehensive benchmarks across diverse datasets with imbalanced and noisy data as inputs, but also through human-in-the-loop studies with practicing physicians, demonstrating its utility as a diagnostic assistant and verifier of clinician judgments. We not only test the performances of Hygieia versus human experts in selected tasks, but also showcase several case studies to demonstrate the contribution of Human-AI collaboration. This dual evaluation strategy strengthens the translational relevance of the proposed system.</p>
+</div>
+<div id="S3.p4" class="ltx_para">
+<p id="S3.p4.1" class="ltx_p">Despite its strong performance, Hygieia has several limitations that warrant discussion. First, it relies heavily on the capabilities of underlying LLMs, many of which are closed-source and subject to evolving behaviors, cost structures, and access constraints. Second, while Hygieia demonstrates strong generalization across datasets, its evaluation is still constrained by the availability and quality of labeled rare disease data, particularly for gene-level ground truth. Simulation datasets are not enough to directly validate their real-world applications in more complicated scenarios. In the future, we will focus on extending Hygieia via more flexible model selection as well as constructing more datasets for the agentic system training and validation.</p>
+</div>
+</section>
+<section id="S4" class="ltx_section" lang="en">
+<h2 class="ltx_title ltx_title_section">
+<span class="ltx_tag ltx_tag_section">4 </span>Methods</h2>
+
+<div id="S4.p1" class="ltx_para">
+<p id="S4.p1.9" class="ltx_p"><span id="S4.p1.9.1" class="ltx_text ltx_font_bold">Problem definition.</span> Here we intend to design a specific agentic system for disease-relevant analysis, including disease diagnosis and risk factor (such as gene) prioritization. Our agent system <math id="S4.p1.1.m1" class="ltx_Math" alttext="\mathcal{A}" display="inline" intent=":literal"><semantics><mi class="ltx_font_mathcaligraphic">𝒜</mi><annotation encoding="application/x-tex">\mathcal{A}</annotation></semantics></math> can take the following information as inputs, including task-specific prompts <math id="S4.p1.2.m2" class="ltx_Math" alttext="R\_x" display="inline" intent=":literal"><semantics><mrow><mi>R</mi><mo lspace="0em" rspace="0em">​</mo><mi mathvariant="normal">_</mi><mo lspace="0em" rspace="0em">​</mo><mi>x</mi></mrow><annotation encoding="application/x-tex">R\_x</annotation></semantics></math>, phenotypes <math id="S4.p1.3.m3" class="ltx_Math" alttext="P\_x" display="inline" intent=":literal"><semantics><mrow><mi>P</mi><mo lspace="0em" rspace="0em">​</mo><mi mathvariant="normal">_</mi><mo lspace="0em" rspace="0em">​</mo><mi>x</mi></mrow><annotation encoding="application/x-tex">P\_x</annotation></semantics></math>, functional and/or genetic information of risked genes <math id="S4.p1.4.m4" class="ltx_Math" alttext="G" display="inline" intent=":literal"><semantics><mi>G</mi><annotation encoding="application/x-tex">G</annotation></semantics></math>, and medical record information <math id="S4.p1.5.m5" class="ltx_Math" alttext="C" display="inline" intent=":literal"><semantics><mi>C</mi><annotation encoding="application/x-tex">C</annotation></semantics></math>. For the problem of disease diagnosis, this system makes inference with <math id="S4.p1.6.m6" class="ltx_Math" alttext="O_{i}=\mathcal{A}(R_{d},P_{i},G_{i},C_{i})" display="inline" intent=":literal"><semantics><mrow><msub><mi>O</mi><mi>i</mi></msub><mo>=</mo><mrow><mi class="ltx_font_mathcaligraphic">𝒜</mi><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><msub><mi>R</mi><mi>d</mi></msub><mo>,</mo><msub><mi>P</mi><mi>i</mi></msub><mo>,</mo><msub><mi>G</mi><mi>i</mi></msub><mo>,</mo><msub><mi>C</mi><mi>i</mi></msub><mo stretchy="false">)</mo></mrow></mrow></mrow><annotation encoding="application/x-tex">O_{i}=\mathcal{A}(R_{d},P_{i},G_{i},C_{i})</annotation></semantics></math> for the patient <math id="S4.p1.7.m7" class="ltx_Math" alttext="i" display="inline" intent=":literal"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math>, and the diagnosis result will be the output. Similarly, for risk gene prioritization, we replace the task-specific prompt <math id="S4.p1.8.m8" class="ltx_Math" alttext="R_{d}" display="inline" intent=":literal"><semantics><msub><mi>R</mi><mi>d</mi></msub><annotation encoding="application/x-tex">R_{d}</annotation></semantics></math> with <math id="S4.p1.9.m9" class="ltx_Math" alttext="R_{g}" display="inline" intent=":literal"><semantics><msub><mi>R</mi><mi>g</mi></msub><annotation encoding="application/x-tex">R_{g}</annotation></semantics></math>, and the output will be the prioritized gene. The model output not only contains the expected diseases or genes (in string), but also the confidence of making such a decision ranging from 0-100.</p>
+</div>
+<div id="S4.p2" class="ltx_para">
+<p id="S4.p2.1" class="ltx_p"><span id="S4.p2.1.1" class="ltx_text ltx_font_bold">Workflow of Hygieia.</span> Our workflow contains four main stages, including <span id="S4.p2.1.2" class="ltx_text ltx_font_italic">task-specific planning</span>, <span id="S4.p2.1.3" class="ltx_text ltx_font_italic">information retrieval and integration</span>, <span id="S4.p2.1.4" class="ltx_text ltx_font_italic">self-reflection-based validation</span>, and <span id="S4.p2.1.5" class="ltx_text ltx_font_italic">confidence estimation</span>. By default, most agents are implemented using GPT-5 <cite class="ltx_cite ltx_citemacro_cite">[<span class="ltx_ref ltx_missing_citation ltx_ref_self">openai2025gpt5</span>]</cite> as their backbone after considering the trade-off among model performance, cost, and protection of patient privacy. We use Claude-Sonnet-4.5 <cite class="ltx_cite ltx_citemacro_cite">[<span class="ltx_ref ltx_missing_citation ltx_ref_self">anthropic2025claudesonnet45</span>]</cite> as the backbone of our verification agent to reduce model bias. We have discussed the ablation studies in the Methods section to justify our settings.</p>
+</div>
+<div id="S4.p3" class="ltx_para">
+<p id="S4.p3.1" class="ltx_p">Regarding <span id="S4.p3.1.1" class="ltx_text ltx_font_italic">task-specific planning</span>, we can integrate information proposed by known biomedical databases and divide the main task into several steps, based on Biomni <cite class="ltx_cite ltx_citemacro_cite">[<span class="ltx_ref ltx_missing_citation ltx_ref_self">huang2025biomni</span>]</cite>. The agent will parse the input information first, and search the current tool base developed based on both tools in Biomni and newly implemented searching functions. It will then determine the correct tool for addressing the given task. We do not map phenotypes with HPO terms <cite class="ltx_cite ltx_citemacro_cite">[<span class="ltx_ref ltx_missing_citation ltx_ref_self">robinson2010human</span>]</cite> as we assume that our agent (based on advanced LLMs) already knows related information. Regarding the difference in diagnosing common and rare diseases, we train a classifier-based router to make more precise diagnoses and reduce cost based on a KNN classifier <cite class="ltx_cite ltx_citemacro_cite">[<span class="ltx_ref ltx_missing_citation ltx_ref_self">pedregosa2011scikit</span>]</cite>. This stage is performed by the parser and the router component.</p>
+</div>
+<div id="S4.p4" class="ltx_para">
+<p id="S4.p4.1" class="ltx_p">Regarding <span id="S4.p4.1.1" class="ltx_text ltx_font_italic">information retrieval and integration</span>, we search the related information of phenotypes and possible gene names as well as gene functions based on web-searching tools, and the data sources including Google, Google Scholar, and PubMed <cite class="ltx_cite ltx_citemacro_cite">[<span class="ltx_ref ltx_missing_citation ltx_ref_self">white2020pubmed</span>]</cite>. Specific human variants and related information are not included in the current version due to the protection of privacy. We also allow the advanced searching tool in LLMs such as the web-searching tools in GPT-4o <cite class="ltx_cite ltx_citemacro_cite">[<span class="ltx_ref ltx_missing_citation ltx_ref_self">hurst2024gpt</span>]</cite> and GPT-5 <cite class="ltx_cite ltx_citemacro_cite">[<span class="ltx_ref ltx_missing_citation ltx_ref_self">openai2025gpt5</span>]</cite>. Here, we consider searching the top <math id="S4.p4.1.m1" class="ltx_Math" alttext="K=5" display="inline" intent=":literal"><semantics><mrow><mi>K</mi><mo>=</mo><mn>5</mn></mrow><annotation encoding="application/x-tex">K=5</annotation></semantics></math> patients from known databases with diagnosis information as references. After collecting the necessary information, we will integrate the prior knowledge as inputs for the next component in this system. This task is finished by the knowledge-manager, web-searcher, and patient-retriever components.</p>
+</div>
+<div id="S4.p5" class="ltx_para">
+<p id="S4.p5.1" class="ltx_p">Regarding <span id="S4.p5.1.1" class="ltx_text ltx_font_italic">self-reflection-based validation</span>, we provide the diagnosis decision as well as methods for validation. The summary agent in our system will utilize the information from the previous two stages and generate a clinical decision. After making the decision based on the summary agent, we introduce our verification agent, which takes the prior knowledge and the output of the summary agent as input and validates whether the result is correct or incorrect <cite class="ltx_cite ltx_citemacro_cite">[<span class="ltx_ref ltx_missing_citation ltx_ref_self">yao2022react</span>]</cite>. If the result is incorrect, the prompt used for the summary agent will update, and the summary agent will make a decision again, until the verification agent agrees with the decision or we reach the limit of tries. The algorithm of this system is shown in Algorithm 1, with the disease diagnosis task as an example. This task is finished by the summary-agent and verification-agent components.</p>
+</div>
+<figure id="alg1" class="ltx_float ltx_float_algorithm ltx_framed ltx_framed_top">
+<figcaption class="ltx_caption"><span class="ltx_tag ltx_tag_float"><span id="alg1.2.1.1" class="ltx_text ltx_font_bold">Algorithm 1</span> </span> Verifier-Corrector Pipeline in Hygieia for disease diagnosis.</figcaption>
+<div id="alg1.3" class="ltx_listing ltx_listing">
+<div id="alg1.l1" class="ltx_listingline">
+<span class="ltx_tag ltx_tag_listingline"><span id="alg1.l1.1.1.1" class="ltx_text" style="font-size:80%;">1:</span></span><span id="alg1.l1.2" class="ltx_text ltx_font_bold">Input:</span> Question <math id="alg1.l1.m1" class="ltx_Math" alttext="Q_{A}" display="inline" intent=":literal"><semantics><msub><mi>Q</mi><mi>A</mi></msub><annotation encoding="application/x-tex">Q_{A}</annotation></semantics></math>, verify prompt <math id="alg1.l1.m2" class="ltx_Math" alttext="T_{V}" display="inline" intent=":literal"><semantics><msub><mi>T</mi><mi>V</mi></msub><annotation encoding="application/x-tex">T_{V}</annotation></semantics></math>, model prompt <math id="alg1.l1.m3" class="ltx_Math" alttext="T_{C}" display="inline" intent=":literal"><semantics><msub><mi>T</mi><mi>C</mi></msub><annotation encoding="application/x-tex">T_{C}</annotation></semantics></math>, number of iteration <math id="alg1.l1.m4" class="ltx_Math" alttext="N" display="inline" intent=":literal"><semantics><mi>N</mi><annotation encoding="application/x-tex">N</annotation></semantics></math>, knowledge query prompt <math id="alg1.l1.m5" class="ltx_Math" alttext="T_{K}" display="inline" intent=":literal"><semantics><msub><mi>T</mi><mi>K</mi></msub><annotation encoding="application/x-tex">T_{K}</annotation></semantics></math>.
+
+</div>
+<div id="alg1.l2" class="ltx_listingline">
+<span class="ltx_tag ltx_tag_listingline"><span id="alg1.l2.1.1.1" class="ltx_text" style="font-size:80%;">2:</span></span><span id="alg1.l2.2" class="ltx_text ltx_font_bold">Helper Models:</span> Verifier <math id="alg1.l2.m1" class="ltx_Math" alttext="\mathcal{M}_{v}" display="inline" intent=":literal"><semantics><msub><mi class="ltx_font_mathcaligraphic">ℳ</mi><mi>v</mi></msub><annotation encoding="application/x-tex">\mathcal{M}_{v}</annotation></semantics></math>, diagnosis agent <math id="alg1.l2.m2" class="ltx_Math" alttext="\mathcal{M}_{s}" display="inline" intent=":literal"><semantics><msub><mi class="ltx_font_mathcaligraphic">ℳ</mi><mi>s</mi></msub><annotation encoding="application/x-tex">\mathcal{M}_{s}</annotation></semantics></math>, router <math id="alg1.l2.m3" class="ltx_Math" alttext="\mathcal{M}_{r}" display="inline" intent=":literal"><semantics><msub><mi class="ltx_font_mathcaligraphic">ℳ</mi><mi>r</mi></msub><annotation encoding="application/x-tex">\mathcal{M}_{r}</annotation></semantics></math>, knowledge extractor <math id="alg1.l2.m4" class="ltx_Math" alttext="\mathcal{M}_{k}" display="inline" intent=":literal"><semantics><msub><mi class="ltx_font_mathcaligraphic">ℳ</mi><mi>k</mi></msub><annotation encoding="application/x-tex">\mathcal{M}_{k}</annotation></semantics></math>, knowledge manager <math id="alg1.l2.m5" class="ltx_Math" alttext="\mathcal{M}_{m}" display="inline" intent=":literal"><semantics><msub><mi class="ltx_font_mathcaligraphic">ℳ</mi><mi>m</mi></msub><annotation encoding="application/x-tex">\mathcal{M}_{m}</annotation></semantics></math>, concatenation function <math id="alg1.l2.m6" class="ltx_math_unparsed" alttext="\cdot||\cdot" display="inline" intent=":literal"><semantics><mrow><mo rspace="0em">⋅</mo><mo fence="false" rspace="0.167em" stretchy="false">|</mo><mo fence="false" stretchy="false">|</mo><mo lspace="0em">⋅</mo></mrow><annotation encoding="application/x-tex">\cdot||\cdot</annotation></semantics></math>.
+
+</div>
+<div id="alg1.l3" class="ltx_listingline">
+<span class="ltx_tag ltx_tag_listingline"><span id="alg1.l3.1.1.1" class="ltx_text" style="font-size:80%;">3:</span></span><span id="alg1.l3.2" class="ltx_text ltx_font_bold">Intermediate variable:</span> Model output <math id="alg1.l3.m1" class="ltx_Math" alttext="O_{A}" display="inline" intent=":literal"><semantics><msub><mi>O</mi><mi>A</mi></msub><annotation encoding="application/x-tex">O_{A}</annotation></semantics></math>, reasoning path <math id="alg1.l3.m2" class="ltx_Math" alttext="O_{R}" display="inline" intent=":literal"><semantics><msub><mi>O</mi><mi>R</mi></msub><annotation encoding="application/x-tex">O_{R}</annotation></semantics></math>, external knowledge <math id="alg1.l3.m3" class="ltx_Math" alttext="K_{A}" display="inline" intent=":literal"><semantics><msub><mi>K</mi><mi>A</mi></msub><annotation encoding="application/x-tex">K_{A}</annotation></semantics></math>.
+
+</div>
+<div id="alg1.l4" class="ltx_listingline">
+<span class="ltx_tag ltx_tag_listingline"><span id="alg1.l4.1.1.1" class="ltx_text" style="font-size:80%;">4:</span></span><span id="alg1.l4.2" class="ltx_text ltx_font_bold">Output:</span> Verified model output <math id="alg1.l4.m1" class="ltx_Math" alttext="O_{C}" display="inline" intent=":literal"><semantics><msub><mi>O</mi><mi>C</mi></msub><annotation encoding="application/x-tex">O_{C}</annotation></semantics></math>, reasoning output <math id="alg1.l4.m2" class="ltx_Math" alttext="R_{A}" display="inline" intent=":literal"><semantics><msub><mi>R</mi><mi>A</mi></msub><annotation encoding="application/x-tex">R_{A}</annotation></semantics></math>.
+
+</div>
+<div id="alg1.l5" class="ltx_listingline">
+<span class="ltx_tag ltx_tag_listingline"><span id="alg1.l5.1.1.1" class="ltx_text" style="font-size:80%;">5:</span></span>INIT: initialize all parameters.
+
+</div>
+<div id="alg1.l6" class="ltx_listingline">
+<span class="ltx_tag ltx_tag_listingline"><span id="alg1.l6.1.1.1" class="ltx_text" style="font-size:80%;">6:</span></span><span id="alg1.l6.2" class="ltx_text ltx_font_bold">if</span> <math id="alg1.l6.m1" class="ltx_Math" alttext="\mathcal{M}_{r}(Q_{A})" display="inline" intent=":literal"><semantics><mrow><msub><mi class="ltx_font_mathcaligraphic">ℳ</mi><mi>r</mi></msub><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><msub><mi>Q</mi><mi>A</mi></msub><mo stretchy="false">)</mo></mrow></mrow><annotation encoding="application/x-tex">\mathcal{M}_{r}(Q_{A})</annotation></semantics></math> is Common <span id="alg1.l6.3" class="ltx_text ltx_font_bold">then</span>
+
+</div>
+<div id="alg1.l7" class="ltx_listingline">
+<span class="ltx_tag ltx_tag_listingline"><span id="alg1.l7.1.1.1" class="ltx_text" style="font-size:80%;">7:</span></span>  <math id="alg1.l7.m1" class="ltx_Math" alttext="O_{C},R_{A}=\mathcal{M}_{s}(T_{C},Q_{A})" display="inline" intent=":literal"><semantics><mrow><mrow><msub><mi>O</mi><mi>C</mi></msub><mo>,</mo><msub><mi>R</mi><mi>A</mi></msub></mrow><mo>=</mo><mrow><msub><mi class="ltx_font_mathcaligraphic">ℳ</mi><mi>s</mi></msub><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><msub><mi>T</mi><mi>C</mi></msub><mo>,</mo><msub><mi>Q</mi><mi>A</mi></msub><mo stretchy="false">)</mo></mrow></mrow></mrow><annotation encoding="application/x-tex">O_{C},R_{A}=\mathcal{M}_{s}(T_{C},Q_{A})</annotation></semantics></math>
+
+</div>
+<div id="alg1.l8" class="ltx_listingline">
+<span class="ltx_tag ltx_tag_listingline"><span id="alg1.l8.1.1.1" class="ltx_text" style="font-size:80%;">8:</span></span>  Return <math id="alg1.l8.m1" class="ltx_Math" alttext="O_{C},R_{A}" display="inline" intent=":literal"><semantics><mrow><msub><mi>O</mi><mi>C</mi></msub><mo>,</mo><msub><mi>R</mi><mi>A</mi></msub></mrow><annotation encoding="application/x-tex">O_{C},R_{A}</annotation></semantics></math>
+
+</div>
+<div id="alg1.l9" class="ltx_listingline">
+<span class="ltx_tag ltx_tag_listingline"><span id="alg1.l9.1.1.1" class="ltx_text" style="font-size:80%;">9:</span></span><span id="alg1.l9.2" class="ltx_text ltx_font_bold">end</span> <span id="alg1.l9.3" class="ltx_text ltx_font_bold">if</span>
+</div>
+<div id="alg1.l10" class="ltx_listingline">
+<span class="ltx_tag ltx_tag_listingline"><span id="alg1.l10.1.1.1" class="ltx_text" style="font-size:80%;">10:</span></span><math id="alg1.l10.m1" class="ltx_Math" alttext="K_{A}=\mathcal{M}_{k}(T_{K},Q_{A})" display="inline" intent=":literal"><semantics><mrow><msub><mi>K</mi><mi>A</mi></msub><mo>=</mo><mrow><msub><mi class="ltx_font_mathcaligraphic">ℳ</mi><mi>k</mi></msub><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><msub><mi>T</mi><mi>K</mi></msub><mo>,</mo><msub><mi>Q</mi><mi>A</mi></msub><mo stretchy="false">)</mo></mrow></mrow></mrow><annotation encoding="application/x-tex">K_{A}=\mathcal{M}_{k}(T_{K},Q_{A})</annotation></semantics></math>
+
+</div>
+<div id="alg1.l11" class="ltx_listingline">
+<span class="ltx_tag ltx_tag_listingline"><span id="alg1.l11.1.1.1" class="ltx_text" style="font-size:80%;">11:</span></span><math id="alg1.l11.m1" class="ltx_Math" alttext="O_{K}=\mathcal{M}_{m}(T_{K},K_{A})" display="inline" intent=":literal"><semantics><mrow><msub><mi>O</mi><mi>K</mi></msub><mo>=</mo><mrow><msub><mi class="ltx_font_mathcaligraphic">ℳ</mi><mi>m</mi></msub><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><msub><mi>T</mi><mi>K</mi></msub><mo>,</mo><msub><mi>K</mi><mi>A</mi></msub><mo stretchy="false">)</mo></mrow></mrow></mrow><annotation encoding="application/x-tex">O_{K}=\mathcal{M}_{m}(T_{K},K_{A})</annotation></semantics></math>
+
+</div>
+<div id="alg1.l12" class="ltx_listingline">
+<span class="ltx_tag ltx_tag_listingline"><span id="alg1.l12.1.1.1" class="ltx_text" style="font-size:80%;">12:</span></span><math id="alg1.l12.m1" class="ltx_math_unparsed" alttext="O_{A},R_{A}=\mathcal{M}_{s}(T_{C},Q_{A}||O_{K})" display="inline" intent=":literal"><semantics><mrow><msub><mi>O</mi><mi>A</mi></msub><mo>,</mo><msub><mi>R</mi><mi>A</mi></msub><mo>=</mo><msub><mi class="ltx_font_mathcaligraphic">ℳ</mi><mi>s</mi></msub><mrow><mo stretchy="false">(</mo><msub><mi>T</mi><mi>C</mi></msub><mo>,</mo><msub><mi>Q</mi><mi>A</mi></msub><mo fence="false" rspace="0.167em" stretchy="false">|</mo><mo fence="false" rspace="0.167em" stretchy="false">|</mo><msub><mi>O</mi><mi>K</mi></msub><mo stretchy="false">)</mo></mrow></mrow><annotation encoding="application/x-tex">O_{A},R_{A}=\mathcal{M}_{s}(T_{C},Q_{A}||O_{K})</annotation></semantics></math>
+
+</div>
+<div id="alg1.l13" class="ltx_listingline">
+<span class="ltx_tag ltx_tag_listingline"><span id="alg1.l13.1.1.1" class="ltx_text" style="font-size:80%;">13:</span></span><span id="alg1.l13.2" class="ltx_text ltx_font_bold">for</span> <math id="alg1.l13.m1" class="ltx_Math" alttext="i" display="inline" intent=":literal"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math> in <math id="alg1.l13.m2" class="ltx_Math" alttext="N" display="inline" intent=":literal"><semantics><mi>N</mi><annotation encoding="application/x-tex">N</annotation></semantics></math> steps <span id="alg1.l13.3" class="ltx_text ltx_font_bold">do</span>
+
+</div>
+<div id="alg1.l14" class="ltx_listingline">
+<span class="ltx_tag ltx_tag_listingline"><span id="alg1.l14.1.1.1" class="ltx_text" style="font-size:80%;">14:</span></span>  <span id="alg1.l14.2" class="ltx_text ltx_font_bold">if</span> <math id="alg1.l14.m1" class="ltx_math_unparsed" alttext="\mathcal{M}_{v}(T_{V},Q_{A}||O_{A})" display="inline" intent=":literal"><semantics><mrow><msub><mi class="ltx_font_mathcaligraphic">ℳ</mi><mi>v</mi></msub><mrow><mo stretchy="false">(</mo><msub><mi>T</mi><mi>V</mi></msub><mo>,</mo><msub><mi>Q</mi><mi>A</mi></msub><mo fence="false" rspace="0.167em" stretchy="false">|</mo><mo fence="false" rspace="0.167em" stretchy="false">|</mo><msub><mi>O</mi><mi>A</mi></msub><mo stretchy="false">)</mo></mrow></mrow><annotation encoding="application/x-tex">\mathcal{M}_{v}(T_{V},Q_{A}||O_{A})</annotation></semantics></math> is True <span id="alg1.l14.3" class="ltx_text ltx_font_bold">then</span>
+
+</div>
+<div id="alg1.l15" class="ltx_listingline">
+<span class="ltx_tag ltx_tag_listingline"><span id="alg1.l15.1.1.1" class="ltx_text" style="font-size:80%;">15:</span></span>   <math id="alg1.l15.m1" class="ltx_Math" alttext="O_{C}=O_{A}" display="inline" intent=":literal"><semantics><mrow><msub><mi>O</mi><mi>C</mi></msub><mo>=</mo><msub><mi>O</mi><mi>A</mi></msub></mrow><annotation encoding="application/x-tex">O_{C}=O_{A}</annotation></semantics></math>
+
+</div>
+<div id="alg1.l16" class="ltx_listingline">
+<span class="ltx_tag ltx_tag_listingline"><span id="alg1.l16.1.1.1" class="ltx_text" style="font-size:80%;">16:</span></span>   Return <math id="alg1.l16.m1" class="ltx_Math" alttext="O_{C},R_{A}" display="inline" intent=":literal"><semantics><mrow><msub><mi>O</mi><mi>C</mi></msub><mo>,</mo><msub><mi>R</mi><mi>A</mi></msub></mrow><annotation encoding="application/x-tex">O_{C},R_{A}</annotation></semantics></math>
+
+</div>
+<div id="alg1.l17" class="ltx_listingline">
+<span class="ltx_tag ltx_tag_listingline"><span id="alg1.l17.1.1.1" class="ltx_text" style="font-size:80%;">17:</span></span>  <span id="alg1.l17.2" class="ltx_text ltx_font_bold">else</span>
+</div>
+<div id="alg1.l18" class="ltx_listingline">
+<span class="ltx_tag ltx_tag_listingline"><span id="alg1.l18.1.1.1" class="ltx_text" style="font-size:80%;">18:</span></span>   <math id="alg1.l18.m1" class="ltx_math_unparsed" alttext="O_{A},R_{A}=\mathcal{M}_{s}(T_{C},Q_{A}||O_{K})" display="inline" intent=":literal"><semantics><mrow><msub><mi>O</mi><mi>A</mi></msub><mo>,</mo><msub><mi>R</mi><mi>A</mi></msub><mo>=</mo><msub><mi class="ltx_font_mathcaligraphic">ℳ</mi><mi>s</mi></msub><mrow><mo stretchy="false">(</mo><msub><mi>T</mi><mi>C</mi></msub><mo>,</mo><msub><mi>Q</mi><mi>A</mi></msub><mo fence="false" rspace="0.167em" stretchy="false">|</mo><mo fence="false" rspace="0.167em" stretchy="false">|</mo><msub><mi>O</mi><mi>K</mi></msub><mo stretchy="false">)</mo></mrow></mrow><annotation encoding="application/x-tex">O_{A},R_{A}=\mathcal{M}_{s}(T_{C},Q_{A}||O_{K})</annotation></semantics></math>
+
+</div>
+<div id="alg1.l19" class="ltx_listingline">
+<span class="ltx_tag ltx_tag_listingline"><span id="alg1.l19.1.1.1" class="ltx_text" style="font-size:80%;">19:</span></span>  <span id="alg1.l19.2" class="ltx_text ltx_font_bold">end</span> <span id="alg1.l19.3" class="ltx_text ltx_font_bold">if</span>
+</div>
+<div id="alg1.l20" class="ltx_listingline">
+<span class="ltx_tag ltx_tag_listingline"><span id="alg1.l20.1.1.1" class="ltx_text" style="font-size:80%;">20:</span></span><span id="alg1.l20.2" class="ltx_text ltx_font_bold">end</span> <span id="alg1.l20.3" class="ltx_text ltx_font_bold">for</span>
+</div>
+<div id="alg1.l21" class="ltx_listingline">
+<span class="ltx_tag ltx_tag_listingline"><span id="alg1.l21.1.1.1" class="ltx_text" style="font-size:80%;">21:</span></span><math id="alg1.l21.m1" class="ltx_math_unparsed" alttext="O_{C},R_{A}=\mathcal{M}_{s}(T_{C},Q_{A}||O_{K})" display="inline" intent=":literal"><semantics><mrow><msub><mi>O</mi><mi>C</mi></msub><mo>,</mo><msub><mi>R</mi><mi>A</mi></msub><mo>=</mo><msub><mi class="ltx_font_mathcaligraphic">ℳ</mi><mi>s</mi></msub><mrow><mo stretchy="false">(</mo><msub><mi>T</mi><mi>C</mi></msub><mo>,</mo><msub><mi>Q</mi><mi>A</mi></msub><mo fence="false" rspace="0.167em" stretchy="false">|</mo><mo fence="false" rspace="0.167em" stretchy="false">|</mo><msub><mi>O</mi><mi>K</mi></msub><mo stretchy="false">)</mo></mrow></mrow><annotation encoding="application/x-tex">O_{C},R_{A}=\mathcal{M}_{s}(T_{C},Q_{A}||O_{K})</annotation></semantics></math>
+
+</div>
+<div id="alg1.l22" class="ltx_listingline">
+<span class="ltx_tag ltx_tag_listingline"><span id="alg1.l22.1.1.1" class="ltx_text" style="font-size:80%;">22:</span></span>Return <math id="alg1.l22.m1" class="ltx_Math" alttext="O_{C},R_{A}" display="inline" intent=":literal"><semantics><mrow><msub><mi>O</mi><mi>C</mi></msub><mo>,</mo><msub><mi>R</mi><mi>A</mi></msub></mrow><annotation encoding="application/x-tex">O_{C},R_{A}</annotation></semantics></math>
+
+</div>
+</div>
+</figure>
+<div id="S4.p6" class="ltx_para">
+<p id="S4.p6.6" class="ltx_p">Regarding <span id="S4.p6.6.1" class="ltx_text ltx_font_italic">confidence estimation</span>, we refer to the method introduced by <cite class="ltx_cite ltx_citemacro_cite">[<span class="ltx_ref ltx_missing_citation ltx_ref_self">junxianhecanllm</span>]</cite>, and we ask the summary agent <math id="S4.p6.1.m1" class="ltx_Math" alttext="s" display="inline" intent=":literal"><semantics><mi>s</mi><annotation encoding="application/x-tex">s</annotation></semantics></math> times to get <math id="S4.p6.2.m2" class="ltx_Math" alttext="s" display="inline" intent=":literal"><semantics><mi>s</mi><annotation encoding="application/x-tex">s</annotation></semantics></math> answers as well as <math id="S4.p6.3.m3" class="ltx_Math" alttext="s" display="inline" intent=":literal"><semantics><mi>s</mi><annotation encoding="application/x-tex">s</annotation></semantics></math> paired confidence lists <math id="S4.p6.4.m4" class="ltx_Math" alttext="c_{1},c_{2},...,c_{s}" display="inline" intent=":literal"><semantics><mrow><msub><mi>c</mi><mn>1</mn></msub><mo>,</mo><msub><mi>c</mi><mn>2</mn></msub><mo>,</mo><mi mathvariant="normal">…</mi><mo>,</mo><msub><mi>c</mi><mi>s</mi></msub></mrow><annotation encoding="application/x-tex">c_{1},c_{2},...,c_{s}</annotation></semantics></math>. We average the confidence levels and use the major voting result from these <math id="S4.p6.5.m5" class="ltx_Math" alttext="s" display="inline" intent=":literal"><semantics><mi>s</mi><annotation encoding="application/x-tex">s</annotation></semantics></math> answers as the final decision. Therefore, the final confidence is <math id="S4.p6.6.m6" class="ltx_Math" alttext="c_{f}=\frac{\sum_{k=1}^{s}c_{k}}{s}" display="inline" intent=":literal"><semantics><mrow><msub><mi>c</mi><mi>f</mi></msub><mo>=</mo><mfrac><mrow><mstyle displaystyle="false"><msubsup><mo>∑</mo><mrow><mi>k</mi><mo>=</mo><mn>1</mn></mrow><mi>s</mi></msubsup></mstyle><msub><mi>c</mi><mi>k</mi></msub></mrow><mi>s</mi></mfrac></mrow><annotation encoding="application/x-tex">c_{f}=\frac{\sum_{k=1}^{s}c_{k}}{s}</annotation></semantics></math>. We have tried other methods, including summarization of logprobs, self-evaluation <cite class="ltx_cite ltx_citemacro_cite">[<span class="ltx_ref ltx_missing_citation ltx_ref_self">kadavath2022language</span>]</cite>, and thinking-twice-before-answering <cite class="ltx_cite ltx_citemacro_cite">[<span class="ltx_ref ltx_missing_citation ltx_ref_self">li2024think</span>]</cite>, but their performances are not good enough to represent the confidence. Since most of the advanced LLMs are closed-source and black-box models, other approaches used for open-source LLMs are not applicable. We have performed statistical tests to demonstrate that our current settings can help us calibrate the model outputs.</p>
+</div>
+<div id="S4.p7" class="ltx_para">
+<p id="S4.p7.1" class="ltx_p"><span id="S4.p7.1.1" class="ltx_text ltx_font_bold">Ablation studies.</span> In Supplementary Figures <a href="https://arxiv.org/html/2605.06226v2#A3.F9" title="Supplementary Fig. 9 ‣ Appendix C Supplementary Figures ‣ A Versatile AI Agent for Rare Disease Diagnosis and Risk Gene Prioritization" class="ltx_ref"><span class="ltx_text ltx_ref_tag">9</span></a> (a) and (b), we show the contributions of adjusting the base models and the input information for these tasks. In both cases, changing the base models from GPT-4o to GPT-5 makes an obvious improvement, and incorporating more context, such as detailed phenotype descriptions, as well as having a verifier, can help Hygieia determine diseases and gene sets. We also find that providing disease information can help Hygieia rank genes; however, since in real clinical cases, physicians must know the results of the genetic tests and then make a diagnosis, we do not use this information as input for the prioritization of risk genes.</p>
+</div>
+<div id="S4.p8" class="ltx_para">
+<p id="S4.p8.1" class="ltx_p"><span id="S4.p8.1.1" class="ltx_text ltx_font_bold">Human-in-the-loop design.</span> We also consider the comparison and collaboration between physicians and AI models in making decisions. We have invited four genetic physicians from YSM, YNHH, and Duke-NUS Medical School, and consider two scenarios.</p>
+</div>
+<div id="S4.p9" class="ltx_para">
+<p id="S4.p9.1" class="ltx_p">In our first experimental setting, we assign 23 questions (13 for disease diagnosis with 2 difficult questions related to extremely rare diseases, and 10 for gene prioritization) for X physicians and Hygieia, and evaluate the performances based on accuracy.</p>
+</div>
+<div id="S4.p10" class="ltx_para">
+<p id="S4.p10.1" class="ltx_p">In the second experimental setting, we allow Hygieia to access the results provided by physicians, and utilize Hygieia for verifying the decision from physicians. If the verification turns out with negative results, we will run the correction pipeline discussed in our Methods and Results section to update the decision.</p>
+</div>
+<div id="S4.p11" class="ltx_para">
+<p id="S4.p11.1" class="ltx_p"><span id="S4.p11.1.1" class="ltx_text ltx_font_bold">Case study investigation.</span> To better demonstrate the advantages of Hygieia, we provide several case studies from different baseline methods and include the reasoning steps of Hygieia. In these questions, only Hygieia makes the correct decision, while the rest of the methods do not give us either correct reasoning paths or correct answers.</p>
+</div>
+<div id="S4.p12" class="ltx_para">
+<p id="S4.p12.1" class="ltx_p"><span id="S4.p12.1.1" class="ltx_text ltx_font_bold">Explanations of baseline methods.</span> For closed-source models, we consider LLMs with reasoning capacities including o4-mini <cite class="ltx_cite ltx_citemacro_cite">[<span class="ltx_ref ltx_missing_citation ltx_ref_self">o3o4mini-systemcard-2025</span>]</cite>, GPT-5 <cite class="ltx_cite ltx_citemacro_cite">[<span class="ltx_ref ltx_missing_citation ltx_ref_self">openai2025gpt5</span>]</cite>, and GPT-5 (search) <cite class="ltx_cite ltx_citemacro_cite">[<span class="ltx_ref ltx_missing_citation ltx_ref_self">openai2025gpt5</span>]</cite>, advanced LLMs including GPT-4o <cite class="ltx_cite ltx_citemacro_cite">[<span class="ltx_ref ltx_missing_citation ltx_ref_self">hurst2024gpt</span>]</cite> and GPT-4o (search) <cite class="ltx_cite ltx_citemacro_cite">[<span class="ltx_ref ltx_missing_citation ltx_ref_self">hurst2024gpt</span>]</cite>. For open-source models, we consider Qwen3-8B <cite class="ltx_cite ltx_citemacro_cite">[<span class="ltx_ref ltx_missing_citation ltx_ref_self">yang2025qwen3</span>]</cite> and Deepseek-v3.1 <cite class="ltx_cite ltx_citemacro_cite">[<span class="ltx_ref ltx_missing_citation ltx_ref_self">liu2024deepseek</span>]</cite>. For domain-expert models, we consider a multi-agent diagnosis system (base model GPT-4o as the recommended setting), as well as DeepRare <cite class="ltx_cite ltx_citemacro_cite">[<span class="ltx_ref ltx_missing_citation ltx_ref_self">zhao2025agentic</span>]</cite>. However, DeepRare’s API version has bugs related to data processing, and we cannot find their released testing datasets, making it hard for us to retrieve the data format. For biomedical agents, we consider Biomni (base model GPT-4o as the recommended setting. For Qwen3-8B, we also consider fine-tuning the base model with both Low-rank adaptation (LoRA) and full parameters (Full) <cite class="ltx_cite ltx_citemacro_cite">[<span class="ltx_ref ltx_missing_citation ltx_ref_self">zheng2024llamafactory</span>]</cite> based on the provided simulation data. The prompts used to query LRM and LLMs are documented in Appendix <a href="https://arxiv.org/html/2605.06226v2#A2" title="Appendix B Prompts ‣ A Versatile AI Agent for Rare Disease Diagnosis and Risk Gene Prioritization" class="ltx_ref"><span class="ltx_text ltx_ref_tag">B</span></a>. For other models, details can be found in our code base.</p>
+</div>
+<div id="S4.p13" class="ltx_para">
+<p id="S4.p13.4" class="ltx_p"><span id="S4.p13.4.1" class="ltx_text ltx_font_bold">Metrics.</span> We follow the settings discussed in <cite class="ltx_cite ltx_citemacro_cite">[<span class="ltx_ref ltx_missing_citation ltx_ref_self">chen2024rarebench</span>, <span class="ltx_ref ltx_missing_citation ltx_ref_self">zhao2025agentic</span>]</cite>, where the Recall<math id="S4.p13.1.m1" class="ltx_Math" alttext="@" display="inline" intent=":literal"><semantics><mi mathvariant="normal">@</mi><annotation encoding="application/x-tex">@</annotation></semantics></math>K is the main metric used in evaluating the generated disease diagnosis and gene rank results. We consider the top 1,5,10 candidates and compute Recall<math id="S4.p13.2.m2" class="ltx_Math" alttext="@" display="inline" intent=":literal"><semantics><mi mathvariant="normal">@</mi><annotation encoding="application/x-tex">@</annotation></semantics></math>1, Recall<math id="S4.p13.3.m3" class="ltx_Math" alttext="@" display="inline" intent=":literal"><semantics><mi mathvariant="normal">@</mi><annotation encoding="application/x-tex">@</annotation></semantics></math>5, Recall<math id="S4.p13.4.m4" class="ltx_Math" alttext="@" display="inline" intent=":literal"><semantics><mi mathvariant="normal">@</mi><annotation encoding="application/x-tex">@</annotation></semantics></math>10, accordingly. We perform metric computation after disease name/gene name normalization.</p>
+</div>
+</section>
+<section id="S5" class="ltx_section" lang="en">
+<h2 class="ltx_title ltx_title_section">
+<span class="ltx_tag ltx_tag_section">5 </span>Code Availability and Data Availability</h2>
+
+<div id="S5.p1" class="ltx_para">
+<p id="S5.p1.1" class="ltx_p">We use the authorized OpenAI API, Claude API, and Gemini API to develop our method and perform benchmark studies. To fine-tune open-source LLMs, we use the Misha cluster from Wu Tsai Institute at Yale with one NVIDIA H100 GPU and 80GB of memory. The codes of Hygieia can be found in <a href="https://github.com/HelloWorldLTY/hygieia" title="" class="ltx_ref ltx_url ltx_font_typewriter">https://github.com/HelloWorldLTY/hygieia</a> with the MIT license.</p>
+</div>
+<div id="S5.p2" class="ltx_para">
+<p id="S5.p2.1" class="ltx_p">All data are available online or upon request. We have summarized the download links of each dataset in Supplementary File 2.</p>
+</div>
+</section>
+<section id="S6" class="ltx_section" lang="en">
+<h2 class="ltx_title ltx_title_section">
+<span class="ltx_tag ltx_tag_section">6 </span>Institutional Review Board (IRB) Approval</h2>
+
+<div id="S6.p1" class="ltx_para">
+<p id="S6.p1.1" class="ltx_p">This project has received approval from Yale IRB, with project number 2000039055.</p>
+</div>
+</section>
+<section id="S7" class="ltx_section" lang="en">
+<h2 class="ltx_title ltx_title_section">
+<span class="ltx_tag ltx_tag_section">7 </span>Acknowledgment</h2>
+
+<div id="S7.p1" class="ltx_para">
+<p id="S7.p1.1" class="ltx_p">We acknowledge the support from the Undiagnosed Diseases Network. T.L. acknowledges the support from the OpenAI Research Access Program.</p>
+</div>
+</section>
+<section id="S8" class="ltx_section" lang="en">
+<h2 class="ltx_title ltx_title_section">
+<span class="ltx_tag ltx_tag_section">8 </span>Author Contribution</h2>
+
+<div id="S8.p1" class="ltx_para">
+<p id="S8.p1.1" class="ltx_p">T.L. designed this study with W.Z. and H.Z. T.L. developed the method. T.L. performed experiments. B.K.G.K., H.Z., and J.L. performed human evaluations. All authors contributed to manuscript writing and reviewing. H.Z. supervised this project.</p>
+</div>
+</section>
+<section id="bib" class="ltx_bibliography" lang="en">
+<h2 class="ltx_title ltx_title_bibliography">References</h2>
+
+<ul id="bib.L1" class="ltx_biblist">
+</ul>
+</section>
+<div class="ltx_pagination ltx_role_newpage"></div>
+<section id="A1" class="ltx_appendix" lang="en">
+<h2 class="ltx_title ltx_title_appendix">
+<span class="ltx_tag ltx_tag_appendix">Appendix A </span>Comparison between Hygieia and other AI agents</h2>
+
+<figure id="A1.T1" class="ltx_table">
+<div id="A1.T1.1" class="ltx_inline-block ltx_align_center ltx_transformed_outer" style="width:338.1pt;height:44pt;vertical-align:-21.0pt;"><span class="ltx_transformed_inner" style="transform:translate(-205.8pt,26.8pt) scale(0.451010941708994,0.451010941708994) ;">
+<table id="A1.T1.1.1" class="ltx_tabular ltx_guessed_headers ltx_align_middle">
+<thead class="ltx_thead">
+<tr id="A1.T1.1.1.1.1" class="ltx_tr">
+<th id="A1.T1.1.1.1.1.1" class="ltx_td ltx_align_left ltx_th ltx_th_column ltx_th_row ltx_border_tt"><span id="A1.T1.1.1.1.1.1.1" class="ltx_text ltx_font_bold" style="font-size:90%;">System</span></th>
+<th id="A1.T1.1.1.1.1.2" class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt"><span id="A1.T1.1.1.1.1.2.1" class="ltx_text ltx_font_bold" style="font-size:90%;">Distinguish</span></th>
+<th id="A1.T1.1.1.1.1.3" class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt"><span id="A1.T1.1.1.1.1.3.1" class="ltx_text ltx_font_bold" style="font-size:90%;">Human</span></th>
+<th id="A1.T1.1.1.1.1.4" class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt"><span id="A1.T1.1.1.1.1.4.1" class="ltx_text ltx_font_bold" style="font-size:90%;">Confidence</span></th>
+<th id="A1.T1.1.1.1.1.5" class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt"><span id="A1.T1.1.1.1.1.5.1" class="ltx_text ltx_font_bold" style="font-size:90%;">Risk Gene</span></th>
+<th id="A1.T1.1.1.1.1.6" class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt"><span id="A1.T1.1.1.1.1.6.1" class="ltx_text ltx_font_bold" style="font-size:90%;">Flexible Input</span></th>
+<th id="A1.T1.1.1.1.1.7" class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt"><span id="A1.T1.1.1.1.1.7.1" class="ltx_text ltx_font_bold" style="font-size:90%;">Open Source</span></th>
+<th id="A1.T1.1.1.1.1.8" class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt"><span id="A1.T1.1.1.1.1.8.1" class="ltx_text ltx_font_bold" style="font-size:90%;">Evaluation Setting</span></th>
+<th id="A1.T1.1.1.1.1.9" class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt"><span id="A1.T1.1.1.1.1.9.1" class="ltx_text ltx_font_bold" style="font-size:90%;">Domain</span></th>
+</tr>
+</thead>
+<tbody class="ltx_tbody">
+<tr id="A1.T1.1.1.2.1" class="ltx_tr">
+<th id="A1.T1.1.1.2.1.1" class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_t">
+<span id="A1.T1.1.1.2.1.1.1" class="ltx_text" style="font-size:90%;">MCA </span><cite class="ltx_cite ltx_citemacro_cite"><span id="A1.T1.1.1.2.1.1.2.1" class="ltx_text" style="font-size:90%;">[</span><span class="ltx_ref ltx_missing_citation ltx_ref_self">chen2025enhancing</span><span id="A1.T1.1.1.2.1.1.3.2" class="ltx_text" style="font-size:90%;">]</span></cite>
+</th>
+<td id="A1.T1.1.1.2.1.2" class="ltx_td ltx_align_center ltx_border_t"><span id="A1.T1.1.1.2.1.2.1" class="ltx_text" style="font-size:90%;">✗</span></td>
+<td id="A1.T1.1.1.2.1.3" class="ltx_td ltx_align_center ltx_border_t"><span id="A1.T1.1.1.2.1.3.1" class="ltx_text" style="font-size:90%;">✗</span></td>
+<td id="A1.T1.1.1.2.1.4" class="ltx_td ltx_align_center ltx_border_t"><span id="A1.T1.1.1.2.1.4.1" class="ltx_text" style="font-size:90%;">✗</span></td>
+<td id="A1.T1.1.1.2.1.5" class="ltx_td ltx_align_center ltx_border_t"><span id="A1.T1.1.1.2.1.5.1" class="ltx_text" style="font-size:90%;">✗</span></td>
+<td id="A1.T1.1.1.2.1.6" class="ltx_td ltx_align_center ltx_border_t"><span id="A1.T1.1.1.2.1.6.1" class="ltx_text" style="font-size:90%;">✓</span></td>
+<td id="A1.T1.1.1.2.1.7" class="ltx_td ltx_align_center ltx_border_t"><span id="A1.T1.1.1.2.1.7.1" class="ltx_text" style="font-size:90%;">✓</span></td>
+<td id="A1.T1.1.1.2.1.8" class="ltx_td ltx_align_center ltx_border_t"><span id="A1.T1.1.1.2.1.8.1" class="ltx_text" style="font-size:90%;">Benchmark</span></td>
+<td id="A1.T1.1.1.2.1.9" class="ltx_td ltx_align_center ltx_border_t"><span id="A1.T1.1.1.2.1.9.1" class="ltx_text" style="font-size:90%;">Rare</span></td>
+</tr>
+<tr id="A1.T1.1.1.3.2" class="ltx_tr">
+<th id="A1.T1.1.1.3.2.1" class="ltx_td ltx_align_left ltx_th ltx_th_row">
+<span id="A1.T1.1.1.3.2.1.1" class="ltx_text" style="font-size:90%;">MDAgent </span><cite class="ltx_cite ltx_citemacro_cite"><span id="A1.T1.1.1.3.2.1.2.1" class="ltx_text" style="font-size:90%;">[</span><span class="ltx_ref ltx_missing_citation ltx_ref_self">kim2024mdagents</span><span id="A1.T1.1.1.3.2.1.3.2" class="ltx_text" style="font-size:90%;">]</span></cite>
+</th>
+<td id="A1.T1.1.1.3.2.2" class="ltx_td ltx_align_center"><span id="A1.T1.1.1.3.2.2.1" class="ltx_text" style="font-size:90%;">✓</span></td>
+<td id="A1.T1.1.1.3.2.3" class="ltx_td ltx_align_center"><span id="A1.T1.1.1.3.2.3.1" class="ltx_text" style="font-size:90%;">✗</span></td>
+<td id="A1.T1.1.1.3.2.4" class="ltx_td ltx_align_center"><span id="A1.T1.1.1.3.2.4.1" class="ltx_text" style="font-size:90%;">✗</span></td>
+<td id="A1.T1.1.1.3.2.5" class="ltx_td ltx_align_center"><span id="A1.T1.1.1.3.2.5.1" class="ltx_text" style="font-size:90%;">✗</span></td>
+<td id="A1.T1.1.1.3.2.6" class="ltx_td ltx_align_center"><span id="A1.T1.1.1.3.2.6.1" class="ltx_text" style="font-size:90%;">✓</span></td>
+<td id="A1.T1.1.1.3.2.7" class="ltx_td ltx_align_center"><span id="A1.T1.1.1.3.2.7.1" class="ltx_text" style="font-size:90%;">✓</span></td>
+<td id="A1.T1.1.1.3.2.8" class="ltx_td ltx_align_center"><span id="A1.T1.1.1.3.2.8.1" class="ltx_text" style="font-size:90%;">Benchmark</span></td>
+<td id="A1.T1.1.1.3.2.9" class="ltx_td ltx_align_center"><span id="A1.T1.1.1.3.2.9.1" class="ltx_text" style="font-size:90%;">General</span></td>
+</tr>
+<tr id="A1.T1.1.1.4.3" class="ltx_tr">
+<th id="A1.T1.1.1.4.3.1" class="ltx_td ltx_align_left ltx_th ltx_th_row">
+<span id="A1.T1.1.1.4.3.1.1" class="ltx_text" style="font-size:90%;">DeepRare </span><cite class="ltx_cite ltx_citemacro_cite"><span id="A1.T1.1.1.4.3.1.2.1" class="ltx_text" style="font-size:90%;">[</span><span class="ltx_ref ltx_missing_citation ltx_ref_self">zhao2025agentic</span><span id="A1.T1.1.1.4.3.1.3.2" class="ltx_text" style="font-size:90%;">]</span></cite>
+</th>
+<td id="A1.T1.1.1.4.3.2" class="ltx_td ltx_align_center"><span id="A1.T1.1.1.4.3.2.1" class="ltx_text" style="font-size:90%;">✗</span></td>
+<td id="A1.T1.1.1.4.3.3" class="ltx_td ltx_align_center"><span id="A1.T1.1.1.4.3.3.1" class="ltx_text" style="font-size:90%;">✗</span></td>
+<td id="A1.T1.1.1.4.3.4" class="ltx_td ltx_align_center"><span id="A1.T1.1.1.4.3.4.1" class="ltx_text" style="font-size:90%;">✗</span></td>
+<td id="A1.T1.1.1.4.3.5" class="ltx_td ltx_align_center"><span id="A1.T1.1.1.4.3.5.1" class="ltx_text" style="font-size:90%;">✗</span></td>
+<td id="A1.T1.1.1.4.3.6" class="ltx_td ltx_align_center"><span id="A1.T1.1.1.4.3.6.1" class="ltx_text" style="font-size:90%;">✗</span></td>
+<td id="A1.T1.1.1.4.3.7" class="ltx_td ltx_align_center"><span id="A1.T1.1.1.4.3.7.1" class="ltx_text" style="font-size:90%;">✓</span></td>
+<td id="A1.T1.1.1.4.3.8" class="ltx_td ltx_align_center"><span id="A1.T1.1.1.4.3.8.1" class="ltx_text" style="font-size:90%;">Benchmark</span></td>
+<td id="A1.T1.1.1.4.3.9" class="ltx_td ltx_align_center"><span id="A1.T1.1.1.4.3.9.1" class="ltx_text" style="font-size:90%;">Rare</span></td>
+</tr>
+<tr id="A1.T1.1.1.5.4" class="ltx_tr">
+<th id="A1.T1.1.1.5.4.1" class="ltx_td ltx_align_left ltx_th ltx_th_row">
+<span id="A1.T1.1.1.5.4.1.1" class="ltx_text" style="font-size:90%;">Biomni </span><cite class="ltx_cite ltx_citemacro_cite"><span id="A1.T1.1.1.5.4.1.2.1" class="ltx_text" style="font-size:90%;">[</span><span class="ltx_ref ltx_missing_citation ltx_ref_self">huang2025biomni</span><span id="A1.T1.1.1.5.4.1.3.2" class="ltx_text" style="font-size:90%;">]</span></cite>
+</th>
+<td id="A1.T1.1.1.5.4.2" class="ltx_td ltx_align_center"><span id="A1.T1.1.1.5.4.2.1" class="ltx_text" style="font-size:90%;">✓</span></td>
+<td id="A1.T1.1.1.5.4.3" class="ltx_td ltx_align_center"><span id="A1.T1.1.1.5.4.3.1" class="ltx_text" style="font-size:90%;">✗</span></td>
+<td id="A1.T1.1.1.5.4.4" class="ltx_td ltx_align_center"><span id="A1.T1.1.1.5.4.4.1" class="ltx_text" style="font-size:90%;">✗</span></td>
+<td id="A1.T1.1.1.5.4.5" class="ltx_td ltx_align_center"><span id="A1.T1.1.1.5.4.5.1" class="ltx_text" style="font-size:90%;">✓</span></td>
+<td id="A1.T1.1.1.5.4.6" class="ltx_td ltx_align_center"><span id="A1.T1.1.1.5.4.6.1" class="ltx_text" style="font-size:90%;">✓</span></td>
+<td id="A1.T1.1.1.5.4.7" class="ltx_td ltx_align_center"><span id="A1.T1.1.1.5.4.7.1" class="ltx_text" style="font-size:90%;">✓</span></td>
+<td id="A1.T1.1.1.5.4.8" class="ltx_td ltx_align_center"><span id="A1.T1.1.1.5.4.8.1" class="ltx_text" style="font-size:90%;">Benchmark &amp; Human Eval</span></td>
+<td id="A1.T1.1.1.5.4.9" class="ltx_td ltx_align_center"><span id="A1.T1.1.1.5.4.9.1" class="ltx_text" style="font-size:90%;">General</span></td>
+</tr>
+<tr id="A1.T1.1.1.6.5" class="ltx_tr">
+<th id="A1.T1.1.1.6.5.1" class="ltx_td ltx_align_left ltx_th ltx_th_row">
+<span id="A1.T1.1.1.6.5.1.1" class="ltx_text" style="font-size:90%;">RDguru </span><cite class="ltx_cite ltx_citemacro_cite"><span id="A1.T1.1.1.6.5.1.2.1" class="ltx_text" style="font-size:90%;">[</span><span class="ltx_ref ltx_missing_citation ltx_ref_self">yang2025rdguru</span><span id="A1.T1.1.1.6.5.1.3.2" class="ltx_text" style="font-size:90%;">]</span></cite>
+</th>
+<td id="A1.T1.1.1.6.5.2" class="ltx_td ltx_align_center"><span id="A1.T1.1.1.6.5.2.1" class="ltx_text" style="font-size:90%;">✗</span></td>
+<td id="A1.T1.1.1.6.5.3" class="ltx_td ltx_align_center"><span id="A1.T1.1.1.6.5.3.1" class="ltx_text" style="font-size:90%;">✗</span></td>
+<td id="A1.T1.1.1.6.5.4" class="ltx_td ltx_align_center"><span id="A1.T1.1.1.6.5.4.1" class="ltx_text" style="font-size:90%;">✗</span></td>
+<td id="A1.T1.1.1.6.5.5" class="ltx_td ltx_align_center"><span id="A1.T1.1.1.6.5.5.1" class="ltx_text" style="font-size:90%;">✗</span></td>
+<td id="A1.T1.1.1.6.5.6" class="ltx_td ltx_align_center"><span id="A1.T1.1.1.6.5.6.1" class="ltx_text" style="font-size:90%;">✗</span></td>
+<td id="A1.T1.1.1.6.5.7" class="ltx_td ltx_align_center"><span id="A1.T1.1.1.6.5.7.1" class="ltx_text" style="font-size:90%;">✗</span></td>
+<td id="A1.T1.1.1.6.5.8" class="ltx_td ltx_align_center"><span id="A1.T1.1.1.6.5.8.1" class="ltx_text" style="font-size:90%;">Benchmark</span></td>
+<td id="A1.T1.1.1.6.5.9" class="ltx_td ltx_align_center"><span id="A1.T1.1.1.6.5.9.1" class="ltx_text" style="font-size:90%;">Rare</span></td>
+</tr>
+<tr id="A1.T1.1.1.7.6" class="ltx_tr">
+<th id="A1.T1.1.1.7.6.1" class="ltx_td ltx_align_left ltx_th ltx_th_row">
+<span id="A1.T1.1.1.7.6.1.1" class="ltx_text" style="font-size:90%;">RareAgent </span><cite class="ltx_cite ltx_citemacro_cite"><span id="A1.T1.1.1.7.6.1.2.1" class="ltx_text" style="font-size:90%;">[</span><span class="ltx_ref ltx_missing_citation ltx_ref_self">chen2024rareagents</span><span id="A1.T1.1.1.7.6.1.3.2" class="ltx_text" style="font-size:90%;">]</span></cite>
+</th>
+<td id="A1.T1.1.1.7.6.2" class="ltx_td ltx_align_center"><span id="A1.T1.1.1.7.6.2.1" class="ltx_text" style="font-size:90%;">✗</span></td>
+<td id="A1.T1.1.1.7.6.3" class="ltx_td ltx_align_center"><span id="A1.T1.1.1.7.6.3.1" class="ltx_text" style="font-size:90%;">✗</span></td>
+<td id="A1.T1.1.1.7.6.4" class="ltx_td ltx_align_center"><span id="A1.T1.1.1.7.6.4.1" class="ltx_text" style="font-size:90%;">✗</span></td>
+<td id="A1.T1.1.1.7.6.5" class="ltx_td ltx_align_center"><span id="A1.T1.1.1.7.6.5.1" class="ltx_text" style="font-size:90%;">✗</span></td>
+<td id="A1.T1.1.1.7.6.6" class="ltx_td ltx_align_center"><span id="A1.T1.1.1.7.6.6.1" class="ltx_text" style="font-size:90%;">✗</span></td>
+<td id="A1.T1.1.1.7.6.7" class="ltx_td ltx_align_center"><span id="A1.T1.1.1.7.6.7.1" class="ltx_text" style="font-size:90%;">✗</span></td>
+<td id="A1.T1.1.1.7.6.8" class="ltx_td ltx_align_center"><span id="A1.T1.1.1.7.6.8.1" class="ltx_text" style="font-size:90%;">Benchmark</span></td>
+<td id="A1.T1.1.1.7.6.9" class="ltx_td ltx_align_center"><span id="A1.T1.1.1.7.6.9.1" class="ltx_text" style="font-size:90%;">Rare</span></td>
+</tr>
+<tr id="A1.T1.1.1.8.7" class="ltx_tr">
+<th id="A1.T1.1.1.8.7.1" class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_bb ltx_border_t"><span id="A1.T1.1.1.8.7.1.1" class="ltx_text" style="font-size:90%;">Hygieia (Ours)</span></th>
+<td id="A1.T1.1.1.8.7.2" class="ltx_td ltx_align_center ltx_border_bb ltx_border_t"><span id="A1.T1.1.1.8.7.2.1" class="ltx_text" style="font-size:90%;">✓</span></td>
+<td id="A1.T1.1.1.8.7.3" class="ltx_td ltx_align_center ltx_border_bb ltx_border_t"><span id="A1.T1.1.1.8.7.3.1" class="ltx_text" style="font-size:90%;">✓</span></td>
+<td id="A1.T1.1.1.8.7.4" class="ltx_td ltx_align_center ltx_border_bb ltx_border_t"><span id="A1.T1.1.1.8.7.4.1" class="ltx_text" style="font-size:90%;">✓</span></td>
+<td id="A1.T1.1.1.8.7.5" class="ltx_td ltx_align_center ltx_border_bb ltx_border_t"><span id="A1.T1.1.1.8.7.5.1" class="ltx_text" style="font-size:90%;">✓</span></td>
+<td id="A1.T1.1.1.8.7.6" class="ltx_td ltx_align_center ltx_border_bb ltx_border_t"><span id="A1.T1.1.1.8.7.6.1" class="ltx_text" style="font-size:90%;">✓</span></td>
+<td id="A1.T1.1.1.8.7.7" class="ltx_td ltx_align_center ltx_border_bb ltx_border_t"><span id="A1.T1.1.1.8.7.7.1" class="ltx_text" style="font-size:90%;">✓</span></td>
+<td id="A1.T1.1.1.8.7.8" class="ltx_td ltx_align_center ltx_border_bb ltx_border_t"><span id="A1.T1.1.1.8.7.8.1" class="ltx_text" style="font-size:90%;">Benchmark &amp; Human Eval</span></td>
+<td id="A1.T1.1.1.8.7.9" class="ltx_td ltx_align_center ltx_border_bb ltx_border_t"><span id="A1.T1.1.1.8.7.9.1" class="ltx_text" style="font-size:90%;">Rare</span></td>
+</tr>
+</tbody>
+</table>
+</span></div>
+<figcaption class="ltx_caption ltx_centering" style="font-size:90%;"><span class="ltx_tag ltx_tag_table">Supplementary Tab. 1: </span>
+Comparison of representative AI Agents for disease-related tasks across different dimensions. Here we consider Distinguish (whether the agent can distinguish common and rare diseases), Human (whether the agent supports human-in-the-loop), Confidence (whether the agent can produce confidence), Risk Gene (whether the agent can also infer risk gene), Flexible Input (whether the agent supports input other than HPO terms), and Open Source (whether the codes are accessible). We also compare their evaluation settings as well as focused domains.
+</figcaption>
+</figure>
+<div id="A1.p1" class="ltx_para">
+<p id="A1.p1.1" class="ltx_p">In Supplementary Table <a href="https://arxiv.org/html/2605.06226v2#A1.T1" title="Supplementary Tab. 1 ‣ Appendix A Comparison between Hygieia and other AI agents ‣ A Versatile AI Agent for Rare Disease Diagnosis and Risk Gene Prioritization" class="ltx_ref"><span class="ltx_text ltx_ref_tag">1</span></a>, we showcase the unique contribution of Hygieia by comparing it with other disease diagnosis agents across multiple dimensions.</p>
+</div>
+</section>
+<section id="A2" class="ltx_appendix" lang="en">
+<h2 class="ltx_title ltx_title_appendix">
+<span class="ltx_tag ltx_tag_appendix">Appendix B </span>Prompts</h2>
+
+<div id="A2.p1" class="ltx_para">
+<p id="A2.p1.1" class="ltx_p">The prompts used for disease diagnosis: “Make diagnosis for this patient. Known phenotypes include: {phenotype_list}. Multiple local hospital evaluations failed to establish a definitive diagnosis."</p>
+</div>
+<div id="A2.p2" class="ltx_para">
+<p id="A2.p2.1" class="ltx_p">The prompts used for gene prioritization: “Consider you are a genetic counselor. The phenotype description of the patient is {phenotype_list}. Can you suggest a list of top 1 possible genes to test?"</p>
+</div>
+<div id="A2.p3" class="ltx_para">
+<p id="A2.p3.1" class="ltx_p">The prompts used for error detection and correction:</p>
+</div>
+<div id="A2.p4" class="ltx_para">
+<p id="A2.p4.1" class="ltx_p">You are a board-certified clinical geneticist and neurologist with expertise in rare neuromuscular and congenital disorders.
+You reason step-by-step using established diagnostic criteria, genotype–phenotype correlations, and differential diagnosis logic.</p>
+</div>
+<div id="A2.p5" class="ltx_para">
+<p id="A2.p5.1" class="ltx_p">Below is a patient’s clinical phenotype and a proposed diagnosis.</p>
+</div>
+<div id="A2.p6" class="ltx_para">
+<p id="A2.p6.1" class="ltx_p">Your task is to determine whether the proposed diagnosis is correct.</p>
+</div>
+<div id="A2.p7" class="ltx_para">
+<p id="A2.p7.1" class="ltx_p">Instructions:
+1. Carefully assess whether the phenotype is consistent with the proposed diagnosis.
+2. If the diagnosis is correct, explicitly state that it is correct and explain why.
+3. If the diagnosis is incorrect or incomplete, clearly state that it is incorrect and:
+- Provide the most likely corrected diagnosis
+- Briefly justify the correction using key phenotype–disease matches
+4. Do not provide multiple diagnoses—return one best diagnosis only.
+5. Be concise, clinically precise, and avoid speculation beyond the given phenotype.</p>
+</div>
+<div id="A2.p8" class="ltx_para">
+<p id="A2.p8.1" class="ltx_p">Patient Phenotype:
+{PHENOTYPE_LIST}</p>
+</div>
+<div id="A2.p9" class="ltx_para">
+<p id="A2.p9.1" class="ltx_p">Proposed Diagnosis:
+{PROPOSED_DIAGNOSIS}</p>
+</div>
+<div id="A2.p10" class="ltx_para">
+<p id="A2.p10.1" class="ltx_p">Output Format (strict):</p>
+</div>
+<div id="A2.p11" class="ltx_para">
+<p id="A2.p11.1" class="ltx_p">Diagnosis Assessment: Correct / Incorrect</p>
+</div>
+<div id="A2.p12" class="ltx_para">
+<p id="A2.p12.1" class="ltx_p">Final Diagnosis: &lt;single diagnosis name&gt;</p>
+</div>
+<div id="A2.p13" class="ltx_para">
+<p id="A2.p13.1" class="ltx_p">Reasoning:
+- Key phenotype–diagnosis alignment (or mismatch)
+- Critical features supporting the final diagnosis</p>
+</div>
+<div class="ltx_pagination ltx_role_newpage"></div>
+</section>
+<section id="A3" class="ltx_appendix" lang="en">
+<h2 class="ltx_title ltx_title_appendix">
+<span class="ltx_tag ltx_tag_appendix">Appendix C </span>Supplementary Figures</h2>
+
+<figure id="A3.F1" class="ltx_figure"><img src="./A Versatile AI Agent for Rare Disease Diagnosis and Risk Gene Prioritization_files/x7.png" id="A3.F1.g1" class="ltx_graphics ltx_centering ltx_img_square" width="747" height="917" alt="Refer to caption">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure">Supplementary Fig. 1: </span>Failure cases of AI agent in disease diagnosis, by using DeepRare as an example. We mask some phenotypes to protect patient information. (a) Failure of diagnosis. (b) Failure of reproducing results.</figcaption>
+</figure>
+<figure id="A3.F2" class="ltx_figure"><img src="./A Versatile AI Agent for Rare Disease Diagnosis and Risk Gene Prioritization_files/x8.png" id="A3.F2.g1" class="ltx_graphics ltx_centering ltx_img_landscape" width="830" height="470" alt="Refer to caption">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure">Supplementary Fig. 2: </span>Classification results of router. (a) Accuracy comparisons of different classification methods. (b) Accuracy comparisons of different testing sets. (c) UMAP colored by sample labels (common diseases, rare diseases, and healthy people).</figcaption>
+</figure>
+<div class="ltx_pagination ltx_role_newpage"></div>
+<figure id="A3.F3" class="ltx_figure"><img src="./A Versatile AI Agent for Rare Disease Diagnosis and Risk Gene Prioritization_files/Figure_supp_rarearena_result.png" id="A3.F3.g1" class="ltx_graphics ltx_centering ltx_img_landscape" width="598" height="357" alt="Refer to caption">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure">Supplementary Fig. 3: </span>Benchmarking results for disease diagnosis based on the RareArena dataset.</figcaption>
+</figure>
+<div class="ltx_pagination ltx_role_newpage"></div>
+<figure id="A3.F4" class="ltx_figure"><img src="./A Versatile AI Agent for Rare Disease Diagnosis and Risk Gene Prioritization_files/x9.png" id="A3.F4.g1" class="ltx_graphics ltx_centering ltx_img_landscape" width="830" height="327" alt="Refer to caption">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure">Supplementary Fig. 4: </span>Estimation of confidence levels based on Hygieia. (a) Comparison of scaled confidence scores tested with MyGene2 dataset. (b) Ablation studies for different estimation methods. The p-value is computed based on two-sided Mann-Whitney U test. </figcaption>
+</figure>
+<div class="ltx_pagination ltx_role_newpage"></div>
+<figure id="A3.F5" class="ltx_figure"><img src="./A Versatile AI Agent for Rare Disease Diagnosis and Risk Gene Prioritization_files/x10.png" id="A3.F5.g1" class="ltx_graphics ltx_centering ltx_img_landscape" width="830" height="496" alt="Refer to caption">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure">Supplementary Fig. 5: </span>Examination of AI agent robustness.</figcaption>
+</figure>
+<div class="ltx_pagination ltx_role_newpage"></div>
+<figure id="A3.F6" class="ltx_figure"><img src="./A Versatile AI Agent for Rare Disease Diagnosis and Risk Gene Prioritization_files/x11.png" id="A3.F6.g1" class="ltx_graphics ltx_centering ltx_img_landscape" width="830" height="578" alt="Refer to caption">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure">Supplementary Fig. 6: </span>Full reasoning paths in two tasks by Hygieia. (a) is for disease diagnosis and (b) is for risk gene prioritization.</figcaption>
+</figure>
+<div class="ltx_pagination ltx_role_newpage"></div>
+<figure id="A3.F7" class="ltx_figure"><img src="./A Versatile AI Agent for Rare Disease Diagnosis and Risk Gene Prioritization_files/x12.png" id="A3.F7.g1" class="ltx_graphics ltx_centering ltx_img_landscape" width="830" height="445" alt="Refer to caption">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure">Supplementary Fig. 7: </span>Questions and answers from Hygieia based on a difficult selected sample from our in-house data.</figcaption>
+</figure>
+<div class="ltx_pagination ltx_role_newpage"></div>
+<figure id="A3.F8" class="ltx_figure"><img src="./A Versatile AI Agent for Rare Disease Diagnosis and Risk Gene Prioritization_files/x13.png" id="A3.F8.g1" class="ltx_graphics ltx_centering ltx_img_landscape" width="830" height="520" alt="Refer to caption">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure">Supplementary Fig. 8: </span>Cost analysis between GPT-5 Search and Hygieia in risk gene prioritization based on MyGene2.</figcaption>
+</figure>
+<figure id="A3.F9" class="ltx_figure"><img src="./A Versatile AI Agent for Rare Disease Diagnosis and Risk Gene Prioritization_files/x14.png" id="A3.F9.g1" class="ltx_graphics ltx_centering ltx_img_square" width="830" height="960" alt="Refer to caption">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure">Supplementary Fig. 9: </span>Ablation studies of Hygieia. (a) represents the results for disease diagnosis and (b) represents the results for risk gene prioritization.</figcaption>
+</figure>
+</section>
+</article>
+</div>
+</div>
+<footer class="arxiv-html-footer">
+  <div class="ltx_page_logo">
+    Experimental support, please
+    <a href="https://arxiv.org/html/2605.06226v2/__stdout.txt" class="ltx_ref" target="_blank" rel="nofollow">view the build logs</a>
+    for errors. Generated by
+    <a href="https://math.nist.gov/~BMiller/LaTeXML/" target="_blank" class="ltx_ref ltx_LaTeXML_logo">
+      <span style="letter-spacing: -0.2em; margin-right: 0.1em;">
+        L
+        <span style="font-size: 70%; position: relative; bottom: 2.2pt;">A</span>
+        T
+        <span style="position: relative; bottom: -0.4ex;">E</span>
+      </span>
+      <span class="ltx_font_smallcaps">xml</span>
+      <img alt="[LOGO]" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAAOCAYAAAD5YeaVAAAAAXNSR0IArs4c6QAAAAZiS0dEAP8A/wD/oL2nkwAAAAlwSFlzAAALEwAACxMBAJqcGAAAAAd0SU1FB9wKExQZLWTEaOUAAAAddEVYdENvbW1lbnQAQ3JlYXRlZCB3aXRoIFRoZSBHSU1Q72QlbgAAAdpJREFUKM9tkL+L2nAARz9fPZNCKFapUn8kyI0e4iRHSR1Kb8ng0lJw6FYHFwv2LwhOpcWxTjeUunYqOmqd6hEoRDhtDWdA8ApRYsSUCDHNt5ul13vz4w0vWCgUnnEc975arX6ORqN3VqtVZbfbTQC4uEHANM3jSqXymFI6yWazP2KxWAXAL9zCUa1Wy2tXVxheKA9YNoR8Pt+aTqe4FVVVvz05O6MBhqUIBGk8Hn8HAOVy+T+XLJfLS4ZhTiRJgqIoVBRFIoric47jPnmeB1mW/9rr9ZpSSn3Lsmir1fJZlqWlUonKsvwWwD8ymc/nXwVBeLjf7xEKhdBut9Hr9WgmkyGEkJwsy5eHG5vN5g0AKIoCAEgkEkin0wQAfN9/cXPdheu6P33fBwB4ngcAcByHJpPJl+fn54mD3Gg0NrquXxeLRQAAwzAYj8cwTZPwPH9/sVg8PXweDAauqqr2cDjEer1GJBLBZDJBs9mE4zjwfZ85lAGg2+06hmGgXq+j3+/DsixYlgVN03a9Xu8jgCNCyIegIAgx13Vfd7vdu+FweG8YRkjXdWy329+dTgeSJD3ieZ7RNO0VAXAPwDEAO5VKndi2fWrb9jWl9Esul6PZbDY9Go1OZ7PZ9z/lyuD3OozU2wAAAABJRU5ErkJggg==">
+    </a>.
+  </div>
+  <div class="keyboard-glossary">
+    <h2>Instructions for reporting errors</h2>
+    <p>We are continuing to improve HTML versions of papers, and your feedback helps enhance accessibility and mobile
+      support. To report errors in the HTML that will help us improve conversion and rendering, choose any of the
+      methods listed below:</p>
+    <ul>
+      <li>Click the "Report Issue" <span class="mobile-only">(<svg role="presentation" style="display: inline-block; vertical-align: middle; fill: var(--text-color);" aria-hidden="true" height="1em" viewBox="0 0 640 640">
+            <path d="M224 160C224 107 267 64 320 64C373 64 416 107 416 160L416 163.6C416 179.3 403.3 192 387.6 192L252.5 192C236.8 192 224.1 179.3 224.1 163.6L224.1 160zM569.6 172.8C580.2 186.9 577.3 207 563.2 217.6L465.4 290.9C470.7 299.8 474.7 309.6 477.2 320L576 320C593.7 320 608 334.3 608 352C608 369.7 593.7 384 576 384L480 384L480 416C480 418.6 479.9 421.3 479.8 423.9L563.2 486.4C577.3 497 580.2 517.1 569.6 531.2C559 545.3 538.9 548.2 524.8 537.6L461.7 490.3C438.5 534.5 395.2 566.5 344 574.2L344 344C344 330.7 333.3 320 320 320C306.7 320 296 330.7 296 344L296 574.2C244.8 566.5 201.5 534.5 178.3 490.3L115.2 537.6C101.1 548.2 81 545.3 70.4 531.2C59.8 517.1 62.7 497 76.8 486.4L160.2 423.9C160.1 421.3 160 418.7 160 416L160 384L64 384C46.3 384 32 369.7 32 352C32 334.3 46.3 320 64 320L162.8 320C165.3 309.6 169.3 299.8 174.6 290.9L76.8 217.6C62.7 207 59.8 186.9 70.4 172.8C81 158.7 101.1 155.8 115.2 166.4L224 248C236.3 242.9 249.8 240 264 240L376 240C390.2 240 403.7 242.8 416 248L524.8 166.4C538.9 155.8 559 158.7 569.6 172.8z"></path>
+          </svg>)</span> button, located in the page header.</li>
+    </ul>
+    <p><strong>Tip:</strong> You can select the relevant text first, to include it in your report.</p>
+    <p>Our team has already identified <a class="ltx_ref" href="https://github.com/arXiv/html_feedback/issues" target="_blank">the following issues</a>. We appreciate your time reviewing and reporting rendering errors we
+      may not have found yet. Your efforts will help us improve the HTML versions for all readers, because disability
+      should not be a barrier to accessing research. Thank you for your continued support in championing open access for
+      all.</p>
+    <p>Have a free development cycle? Help support accessibility at arXiv! Our collaborators at LaTeXML maintain a <a class="ltx_ref" href="https://github.com/brucemiller/LaTeXML/wiki/Porting-LaTeX-packages-for-LaTeXML" target="_blank">list of packages that need conversion</a>, and welcome <a class="ltx_ref" href="https://github.com/brucemiller/LaTeXML/issues" target="_blank">developer contributions</a>.</p>
+  </div>
+</footer>
+<div id="fixed-buttons-container">
+  <div id="beta-badge" aria-hidden="true">BETA</div>
+  <a id="disable-reading-mode-btn" class="header-button" href="javascript:toggleReadingMode();" title="Disable reading mode, show header and footer">
+    <svg role="presentation" height="1.25rem" viewBox="0 0 448 512"><!--!Font Awesome Free v7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2026 Fonticons, Inc.-->
+      <path d="M0 96C0 78.3 14.3 64 32 64l384 0c17.7 0 32 14.3 32 32s-14.3 32-32 32L32 128C14.3 128 0 113.7 0 96zM0 256c0-17.7 14.3-32 32-32l384 0c17.7 0 32 14.3 32 32s-14.3 32-32 32L32 288c-17.7 0-32-14.3-32-32zM448 416c0 17.7-14.3 32-32 32L32 448c-17.7 0-32-14.3-32-32s14.3-32 32-32l384 0c17.7 0 32 14.3 32 32z"></path>
+    </svg>
+  </a>
+</div>
+
+</body></html>
