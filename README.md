@@ -67,6 +67,20 @@
 ---
 ## Последние статьи
 
+### PIGEON: Прогнозирование геолокаций изображений
+[2307.05845] дата публикации в arXiv - 07.2023  
+📅 дата перевода 25.05.2026  
+🏷 `image geolocalization` `semantic geocells` `contrastive pretraining` `haversine loss` `location cluster retrieval` `visual place recognition` `Geoguessr`
+
+Комбинируя семантические геоячейки, многозадачное контрастивное предобучение CLIP и иерархическое уточнение через кластеризацию, авторы создали две модели геолокализации: PIGEON (Street View) и PIGEOTTO (общие изображения). PIGEON побеждает топ-игроков, PIGEOTTO улучшает SOTA на 5 бенчмарках.
+
+- [📖 Русская HTML версия](https://romanzorkin.github.io/arxiv_ru/articles/2307.05845/2307.05845_ru.html)
+- [📄 Оригинальная статья](https://arxiv.org/abs/2307.05845)
+- [🧠 Summary / README](articles/2307.05845/README.md)
+- [⚙ Metadata](articles/2307.05845/metadata.json)
+
+---
+
 ### Универсальный ИИ-агент для диагностики редких заболеваний и приоритизации генов риска
 [2605.06226] дата публикации в arXiv - 05.2026  
 📅 дата перевода 24.05.2026  
@@ -176,19 +190,6 @@ YOLOv26 — сквозной детектор без NMS, использующи
 - [⚙ Metadata](articles/2403.08386/metadata.json)
 
 ---
-### Усиление командной работы с помощью ИИ-агентов в качестве пространственных коллабораторов
-[2503.09794] дата публикации в arXiv - 03.2025  
-📅 дата перевода 24.05.2026  
-🏷 `augmented reality` `human-AI teams` `team dynamics` `spatial AI agents` `immersive collaboration` `proxemics` `context-aware AI`
-
-Позиционная статья, предлагающая проектировать AI-агентов в AR как пространственно-осведомлённых членов команды, а не статичных ассистентов. Авторы ставят 4 исследовательских вопроса по дизайну, пространственным факторам, воплощению и моменту вмешательства таких агентов.
-
-- [📖 Русская HTML версия](https://romanzorkin.github.io/arxiv_ru/articles/2503.09794/2503.09794_ru.html)
-- [📄 Оригинальная статья](https://arxiv.org/abs/2503.09794)
-- [🧠 Summary / README](articles/2503.09794/README.md)
-- [⚙ Metadata](articles/2503.09794/metadata.json)
-
----
 
 
 ## О проекте
@@ -202,6 +203,8 @@ YOLOv26 — сквозной детектор без NMS, использующи
 
 |id статьи|Месяц публикации|Дата перевода| Тема статьи | Ручной контроль|
 |---|---|---|---|---|
+| [2307.05845](articles/2307.05845/README.md) | 07.2023 | 25.05.2026 | PIGEON: Прогнозирование геолокаций изображений (`PIGEON: Predicting Image Geolocations`) ||
+| [2307.05845](articles/2307.05845/README.md) | 07.2023 | 25.05.2026 | PIGEON: Прогнозирование геолокаций изображений (`PIGEON: Predicting Image Geolocations`) ||
 | [2605.06226](articles/2605.06226/README.md) | 05.2026 | 24.05.2026 | Универсальный ИИ-агент для диагностики редких заболеваний и приоритизации генов риска (`A Versatile AI Agent for Rare Disease Diagnosis and Risk Gene Prioritization`) |✅|
 | [2605.15154](articles/2605.15154/README.md) | 05.2026 | 24.05.2026 | RoSHAP: распределительный фреймворк и робастная метрика для стабильной атрибуции признаков (`RoSHAP: A Distributional Framework and Robust Metric for Stable Feature Attribution`) |✅|
 | [2605.02943](articles/2605.02943/README.md) | 05.2026 | 17.05.2026 | Healthcare AI GYM для медицинских агентов (`Healthcare AI GYM for Medical Agents`) |✅ |
