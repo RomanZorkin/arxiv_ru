@@ -67,6 +67,20 @@
 ---
 ## Последние статьи
 
+### RoSHAP: распределительный фреймворк и робастная метрика для стабильной атрибуции признаков
+[2605.15154] дата публикации в arXiv - 05.2026  
+📅 дата перевода 24.05.2026  
+🏷 `SHAP` `Feature Attribution` `Robustness` `Bootstrap` `Kernel Density Estimation` `Feature Selection` `Interpretability`
+
+RoSHAP — устойчивая метрика важности признаков, основанная на оценке распределения SHAP-значений через бутстреп. Учитывает активность, силу сигнала и стабильность, обеспечивая более надёжное ранжирование, чем стандартный SHAP.
+
+- [📖 Русская HTML версия](https://romanzorkin.github.io/arxiv_ru/articles/2605.15154/2605.15154_ru.html)
+- [📄 Оригинальная статья](https://arxiv.org/abs/2605.15154)
+- [🧠 Summary / README](articles/2605.15154/README.md)
+- [⚙ Metadata](articles/2605.15154/metadata.json)
+
+---
+
 ### Healthcare AI GYM для медицинских агентов
 [2605.02943] дата публикации в arXiv - 05.2026  
 📅 дата перевода 17.05.2026  
@@ -174,19 +188,7 @@ YOLOv26 — сквозной детектор без NMS, использующи
 - [⚙ Metadata](articles/2501.02368/metadata.json)
 
 ---
-### Распределенное познание для удаленных операций с поддержкой ИИ: вызовы и направления исследований
-[2504.14996] дата публикации в arXiv - 04.2025  
-📅 дата перевода 24.05.2026  
-🏷 `distributed cognition` `team cognition` `human-AI teaming` `remote operations` `intelligent ports` `AI memory` `fallback operator`
 
-Статья анализирует влияние интеграции AI на распределенное и командное познание в удаленных операциях. На примере интеллектуальных портов выделены три ключевые области: реконфигурация человеко-AI команд, адаптивная память AI и AI как резервный оператор при сбоях связи.
-
-- [📖 Русская HTML версия](https://romanzorkin.github.io/arxiv_ru/articles/2504.14996/2504.14996_ru.html)
-- [📄 Оригинальная статья](https://arxiv.org/abs/2504.14996)
-- [🧠 Summary / README](articles/2504.14996/README.md)
-- [⚙ Metadata](articles/2504.14996/metadata.json)
-
----
 
 ## О проекте
 
@@ -199,6 +201,7 @@ YOLOv26 — сквозной детектор без NMS, использующи
 
 |id статьи|Месяц публикации|Дата перевода| Тема статьи | Ручной контроль|
 |---|---|---|---|---|
+| [2605.15154](articles/2605.15154/README.md) | 05.2026 | 24.05.2026 | RoSHAP: распределительный фреймворк и робастная метрика для стабильной атрибуции признаков (`RoSHAP: A Distributional Framework and Robust Metric for Stable Feature Attribution`) |✅|
 | [2605.02943](articles/2605.02943/README.md) | 05.2026 | 17.05.2026 | Healthcare AI GYM для медицинских агентов (`Healthcare AI GYM for Medical Agents`) |✅ |
 | [2601.12882](articles/2601.12882/README.md) | 01.2026 | 23.05.2026 | YOLO26: Анализ сквозной структуры без NMS для обнаружения объектов в реальном времени (`YOLO26: An Analysis of NMS-Free End to End Framework for Real-Time Object Detection`) |✅ |
 | [2601.16392](articles/2601.16392/README.md) | 01.2026 | 23.05.2026 | К агентивному управлению программными проектами: видение и дорожная карта (`Toward Agentic Software Project Management: A Vision and Roadmap`) |✅ |
