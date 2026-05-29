@@ -1,0 +1,103 @@
+{
+  "project": {
+    "name": "arxiv_ru",
+    "description": "AI-assisted translation and semantic structuring of arXiv papers for LLM/RAG usage.",
+    "type": "knowledge_repository"
+  },
+
+  "entrypoints": [
+    "README.md",
+    "knowledge_index.json"
+  ],
+
+  "core_files": {
+    "README.md": {
+      "type": "documentation",
+      "role": "main navigation and project overview"
+    },
+
+    "repository_map.json": {
+      "type": "llm_navigation_map",
+      "role": "semantic structure map for LLM understanding of repository layout"
+    },
+
+    "knowledge_index.json": {
+      "type": "semantic_index",
+      "role": "global index of all articles and knowledge units"
+    }
+  },
+
+  "directories": {
+    "articles/": {
+      "type": "content_root",
+      "description": "Collection of processed arXiv papers",
+
+      "schema": {
+        "<arxiv_id>/": {
+          "type": "article_package",
+          "description": "Single processed research paper"
+        }
+      }
+    }
+  },
+
+  "article_package_schema": {
+    "<arxiv_id>/": {
+      "files": {
+        "<arxiv_id>.html": {
+          "type": "source_html",
+          "description": "Original arXiv HTML version"
+        },
+
+        "<arxiv_id>_ru.html": {
+          "type": "translated_html",
+          "description": "Russian translated version"
+        },
+
+        "article_rag.json": {
+          "type": "llm_context",
+          "description": "Structured RAG representation optimized for LLM reasoning and retrieval"
+        },
+
+        "metadata.json": {
+          "type": "metadata",
+          "description": "Title, authors, tags, summary, links"
+        },
+
+        "README.md": {
+          "type": "human_summary",
+          "description": "Short explanation and key insights"
+        }
+      },
+
+      "assets": {
+        "<arxiv_id>_files/": {
+          "type": "rendering_assets",
+          "description": "CSS, JS, images for HTML rendering"
+        }
+      }
+    }
+  },
+
+  "llm_navigation_rules": {
+    "start_here": [
+      "README.md",
+      "knowledge_index.json"
+    ],
+
+    "deep_context_files": [
+      "metadata.json",
+      "article_rag.json",
+      "README.md"
+    ],
+
+    "ignore_by_default": [
+      "node_modules/",
+      "__pycache__/",
+      ".git/",
+      "dist/",
+      "build/",
+      "*_files/"
+    ]
+  }
+}
