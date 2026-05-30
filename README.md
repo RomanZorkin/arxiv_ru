@@ -179,39 +179,10 @@ YOLOv26 — сквозной детектор без NMS, использующи
 
 ---
 
-### Влияние LLM на командное сотрудничество в разработке программного обеспечения
-[2510.08612] дата публикации в arXiv - 10.2025  
-📅 дата перевода 23.05.2026  
-🏷 `software engineering` `LLM` `team collaboration` `SDLC` `case study` `survey` `AI-assisted development`
-
-Статья исследует влияние LLM-инструментов (GitHub Copilot, AI-ассистенты) на командную работу в SDLC. На основе опроса и двух кейсов показано повышение эффективности, улучшение коммуникации и документации; выявлены проблемы конфиденциальности и необходимости настройки.
-
-- [📖 Русская HTML версия](https://romanzorkin.github.io/arxiv_ru/articles/2510.08612/2510.08612_ru.html)
-- [📄 Оригинальная статья](https://arxiv.org/abs/2510.08612)
-- [🧠 Summary / README](articles/2510.08612/README.md)
-- [⚙ Metadata](articles/2510.08612/metadata.json)
-
----
-### От автономных агентов к интегрированным системам, новая парадигма: оркестрованный распределенный интеллект
-[2503.13754] дата публикации в arXiv - 03.2025  
-📅 дата перевода 23.05.2026  
-🏷 `multi-agent systems` `orchestration layer` `human-AI synergy` `systems thinking` `enterprise AI` `cognitive density` `systems of action`
-
-Предложена парадигма Orchestrated Distributed Intelligence (ODI), в которой AI рассматривается не как набор изолированных агентов, а как оркестрованные сети, интегрированные с человеческими процессами принятия решений, с акцентом на когнитивную плотность, многоуровневую обратную связь и переход от систем записи к системам действия.
-
-- [📖 Русская HTML версия](https://romanzorkin.github.io/arxiv_ru/articles/2503.13754/2503.13754_ru.html)
-- [📄 Оригинальная статья](https://arxiv.org/abs/2503.13754)
-- [🧠 Summary / README](articles/2503.13754/README.md)
-- [⚙ Metadata](articles/2503.13754/metadata.json)
-
----
-
-
 ## О проекте
 
 
-Проект — личный research digest и открытый архив
-интересных научных материалов.
+Проект — личный research digest и открытый архив интересных научных материалов.
 
 
 ## Архив статей
@@ -222,12 +193,12 @@ YOLOv26 — сквозной детектор без NMS, использующи
 | [2307.05845](articles/2307.05845/README.md) | 07.2023 | 25.05.2026 | PIGEON: Прогнозирование геолокаций изображений (`PIGEON: Predicting Image Geolocations`) ||
 | [2605.06226](articles/2605.06226/README.md) | 05.2026 | 24.05.2026 | Универсальный ИИ-агент для диагностики редких заболеваний и приоритизации генов риска (`A Versatile AI Agent for Rare Disease Diagnosis and Risk Gene Prioritization`) |✅|
 | [2605.15154](articles/2605.15154/README.md) | 05.2026 | 24.05.2026 | RoSHAP: распределительный фреймворк и робастная метрика для стабильной атрибуции признаков (`RoSHAP: A Distributional Framework and Robust Metric for Stable Feature Attribution`) |✅|
-| [2605.02943](articles/2605.02943/README.md) | 05.2026 | 17.05.2026 | Healthcare AI GYM для медицинских агентов (`Healthcare AI GYM for Medical Agents`) |✅ |
-| [2601.12882](articles/2601.12882/README.md) | 01.2026 | 23.05.2026 | YOLO26: Анализ сквозной структуры без NMS для обнаружения объектов в реальном времени (`YOLO26: An Analysis of NMS-Free End to End Framework for Real-Time Object Detection`) |✅ |
-| [2601.16392](articles/2601.16392/README.md) | 01.2026 | 23.05.2026 | К агентивному управлению программными проектами: видение и дорожная карта (`Toward Agentic Software Project Management: A Vision and Roadmap`) |✅ |
-| [2510.08612](articles/2510.08612/README.md) | 10.2025 | 23.05.2026 | Влияние LLM на командное сотрудничество в разработке программного обеспечения (`Impact of LLMs on Team Collaboration in Software Development`) |✅ |
+| [2605.02943](articles/2605.02943/README.md) | 05.2026 | 17.05.2026 | Healthcare AI GYM для медицинских агентов (`Healthcare AI GYM for Medical Agents`) |✅|
+| [2601.12882](articles/2601.12882/README.md) | 01.2026 | 23.05.2026 | YOLO26: Анализ сквозной структуры без NMS для обнаружения объектов в реальном времени (`YOLO26: An Analysis of NMS-Free End to End Framework for Real-Time Object Detection`) |✅|
+| [2601.16392](articles/2601.16392/README.md) | 01.2026 | 23.05.2026 | К агентивному управлению программными проектами: видение и дорожная карта (`Toward Agentic Software Project Management: A Vision and Roadmap`) |✅|
+| [2510.08612](articles/2510.08612/README.md) | 10.2025 | 23.05.2026 | Влияние LLM на командное сотрудничество в разработке программного обеспечения (`Impact of LLMs on Team Collaboration in Software Development`) |✅|
 | [2503.13754](articles/2503.13754/README.md) | 03.2025 | 23.05.2026 | От автономных агентов к интегрированным системам, новая парадигма: оркестрованный распределенный интеллект (`From Autonomous Agents to Integrated Systems, A New Paradigm: Orchestrated Distributed Intelligence`) ||
-| [2403.08386](articles/2403.08386/README.md) | 03.2024 | 24.05.2026 | Оптимизация избегающих риска гибридных команд человек-ИИ (`Optimizing Risk-averse Human-AI Hybrid Teams`) |✅ |
+| [2403.08386](articles/2403.08386/README.md) | 03.2024 | 24.05.2026 | Оптимизация избегающих риска гибридных команд человек-ИИ (`Optimizing Risk-averse Human-AI Hybrid Teams`) |✅|
 | [2503.09794](articles/2503.09794/README.md) | 03.2025 | 24.05.2026 | Усиление командной работы с помощью ИИ-агентов в качестве пространственных коллабораторов (`Augmenting Teamwork through AI Agents as Spatial Collaborators`) ||
 | [2501.02368](articles/2501.02368/README.md) | 01.2025 | 24.05.2026 | Повышение продуктивности и благополучия на рабочем месте с помощью ИИ-агентов (`Enhancing Workplace Productivity and Well-Being using AI Agents`) ||
 | [2504.14996](articles/2504.14996/README.md) | 04.2025 | 24.05.2026 | Распределенное познание для удаленных операций с поддержкой ИИ: вызовы и направления исследований (`Distributed Cognition for AI-supported Remote Operations: Challenges and Research Directions`) ||
