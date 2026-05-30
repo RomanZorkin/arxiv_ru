@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+
+<!-- saved from url=(0046)https://ar5iv.labs.arxiv.org/html/2601.06707v1 -->
+<html data-theme="light" lang="en"><head><meta content="text/html; charset=utf-8" http-equiv="Content-Type"/>
+<title>[2601.06707] Evaluating Accounting Reasoning Capabilities of Large Language Models</title><meta content="Large language models are transforming learning, cognition, and research across many fields. Effectively integrating them into professional domains, such as accounting, is a key challenge for enterprise digital transfo…" property="og:description"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<meta content="summary" name="twitter:card"/>
+<meta content="Evaluating Accounting Reasoning Capabilities of Large Language Models" name="twitter:title"/>
+<meta content="https://ar5iv.labs.arxiv.org/assets/ar5iv_card.png" name="twitter:image:src"/>
+<meta content="ar5iv logo" name="twitter:image:alt"/>
+<meta content="Evaluating Accounting Reasoning Capabilities of Large Language Models" property="og:title"/>
+<meta content="ar5iv" property="og:site_name"/>
+<meta content="https://ar5iv.labs.arxiv.org/assets/ar5iv_card.png" property="og:image"/>
+<meta content="article" property="og:type"/>
+<meta content="https://ar5iv.labs.arxiv.org/html/2601.06707" property="og:url"/>
+<link href="https://ar5iv.labs.arxiv.org/html/2601.06707" rel="canonical" target="_blank"/>
+<!--Generated on Thu Feb  5 19:26:22 2026 by LaTeXML (version 0.8.8) http://dlmf.nist.gov/LaTeXML/.-->
+<meta content="width=device-width, initial-scale=1, shrink-to-fit=no" name="viewport"/>
+<script>
+  function detectColorScheme(){
+    var theme="light";
+    var current_theme = localStorage.getItem("ar5iv_theme");
+    if(current_theme){
+      if(current_theme == "dark"){
+        theme = "dark";
+      } }
+    else if(!window.matchMedia) { return false; }
+    else if(window.matchMedia("(prefers-color-scheme: dark)").matches) {
+      theme = "dark"; }
+    if (theme=="dark") {
+      document.documentElement.setAttribute("data-theme", "dark");
+    } else {
+      document.documentElement.setAttribute("data-theme", "light"); } }
+
+  detectColorScheme();
+
+  function toggleColorScheme(){
+    var current_theme = localStorage.getItem("ar5iv_theme");
+    if (current_theme) {
+      if (current_theme == "light") {
+        localStorage.setItem("ar5iv_theme", "dark"); }
+      else {
+        localStorage.setItem("ar5iv_theme", "light"); } }
+    else {
+        localStorage.setItem("ar5iv_theme", "dark"); }
+    detectColorScheme(); }
+</script>
+<link href="./[2601.06707] Evaluating Accounting Reasoning Capabilities of Large Language Models_files/ar5iv-fonts.0.8.4.css" media="all" rel="stylesheet"/><link href="./[2601.06707] Evaluating Accounting Reasoning Capabilities of Large Language Models_files/ar5iv.0.8.4.css" media="all" rel="stylesheet"/><link href="./[2601.06707] Evaluating Accounting Reasoning Capabilities of Large Language Models_files/ar5iv-site.0.2.2.css" media="all" rel="stylesheet"/>
+<meta content="extension" property="gosuslugi.plugin.extension.content"/></head>
+<body>
+<div class="ltx_page_main">
+<div class="ltx_page_content">
+<article class="ltx_document">
+<h1 class="ltx_title ltx_title_document">Оценка способностей к бухгалтерским рассуждениям больших языковых моделей</h1>
+<div class="ltx_authors">
+<span class="ltx_creator ltx_role_author">
+<span class="ltx_personname">Цзе Чжоу, Синь Чэнь, Цзе Чжан, Хай Ли, Цзе Ван, Чжэ Ли 
+<br class="ltx_break"/>Школа компьютерной инженерии, Цзянсуский океанический университет 
+<br class="ltx_break"/>jzhou23@jou.edu.cn, lizhe@jou.edu.cn
+</span></span>
+</div>
+<div class="ltx_abstract" id="abstract1">
+<h6 class="ltx_title ltx_title_abstract">Аннотация</h6>
+<p class="ltx_p">Большие языковые модели трансформируют обучение, когнитивные процессы и исследования во многих областях. Эффективная интеграция их в профессиональные сферы, такие как бухгалтерский учет, является ключевой задачей цифровой трансформации предприятий. Для решения этой проблемы мы определяем вертикальное доменное бухгалтерское рассуждение и предлагаем критерии оценки, выведенные из анализа характеристик обучающих данных репрезентативных моделей GLM. Эти критерии поддерживают систематическое изучение бухгалтерского рассуждения и предоставляют ориентиры для улучшения производительности. Используя эту структуру, мы оцениваем GLM-6B, GLM-130B, GLM-4 и OpenAI GPT-4 на задачах бухгалтерского рассуждения. Результаты показывают, что дизайн промптов значительно влияет на производительность, причем GPT-4 демонстрирует наибольшую способность. Несмотря на эти достижения, текущие модели остаются недостаточными для реального корпоративного бухгалтерского учета, что указывает на необходимость дальнейшей оптимизации для раскрытия их полной практической ценности..</p>
+</div>
+<div class="ltx_para ltx_noindent" id="p1">
+<div class="ltx_block ltx_align_bottom" id="p1.1">
+<p class="ltx_p ltx_align_center" id="p1.1.1">Оценка способностей к бухгалтерскому рассуждению больших языковых моделей</p>
+<p class="ltx_p ltx_align_center" id="p1.1.2" style="width:345.0pt;">
+
+
+
+Jie Zhou, Xin Chen, Jie Zhang, Hai Li, Jie Wang, Zhe Li
+Школа компьютерной инженерии, Цзянсуский океанический университет
+jzhou23@jou.edu.cn, lizhe@jou.edu.cn
+
+</p>
+</div>
+</div>
+<section class="ltx_section" id="S1">
+<h2 class="ltx_title ltx_title_section">
+<span class="ltx_tag ltx_tag_section">1 </span>Введение</h2>
+<div class="ltx_para" id="S1.p1">
+<p class="ltx_p" id="S1.p1.1">Благодаря стремительному развитию искусственного интеллекта, в том числе технологий больших данных, суперкомпьютеров, нейросетей и больших языковых моделей, языковые модели общего назначения вызывают большой интерес как в научных кругах, так и в промышленности. Искусственный интеллект стал центральным драйвером технологических инноваций, модернизации промышленности и национальной конкурентоспособности. В Китае такие документы, как «План развития искусственного интеллекта нового поколения» и «Временные меры по управлению сервисами генеративного искусственного интеллекта», делают упор на междисциплинарные исследования, ответственное управление и масштабное применение, создавая благоприятные условия для интеграции больших языковых моделей в такие профессиональные сферы, как бухгалтерский учет.</p>
+</div>
+<div class="ltx_para" id="S1.p2">
+<p class="ltx_p" id="S1.p2.1">По мере того как большие языковые модели становятся зрелыми, их фокус развития сместился с масштаба модели на глубокую интеграцию в приложения. Эффективное внедрение этих моделей в профессиональные рабочие процессы и раскрытие предметно-ориентированной ценности стало ключевой исследовательской задачей. По сравнению с узкоспециализированными системами, языковые модели общего назначения показывают преимущества в задачах бухгалтерского учета благодаря более широкому охвату знаний, более сильному пониманию запросов и гибкому рассуждению. Эти возможности поддерживают такие приложения, как финансовый анализ, налогообложение, аудит и управленческая поддержка. Однако систематические предметно-ориентированные бухгалтерские модели все еще недостаточно развиты, и текущая практическая производительность остается ограниченной..</p>
+</div>
+<div class="ltx_para" id="S1.p3">
+<p class="ltx_p" id="S1.p3.1">Большинство существующих бухгалтерских приложений используют промпт-инжиниринг для улучшения результатов моделирования. Хотя этот подход может дать краткосрочные выгоды, он обеспечивает ограниченное понимание внутренних процессов рассуждения и предлагает мало поддержки для систематической оптимизации. Бухгалтерские задачи предъявляют высокие требования к математическому рассуждению, логической последовательности и символьным вычислениям, которые не полностью решаются методами, основанными на подсказках.
+
+В этом исследовании утверждается, что способность к рассуждению является ключевым фактором, лежащим в основе производительности больших языковых моделей в бухгалтерском учете. Поэтому мы предлагаем структурированный анализ и оценку способностей к бухгалтерскому рассуждению. Интегрируя бухгалтерскую экспертизу с задачами оценки, ориентированными на рассуждение, мы создаем специализированный бенчмарк и анализируем экспериментальные результаты для выявления возможностей для улучшения..</p>
+</div>
+<div class="ltx_para" id="S1.p4">
+<p class="ltx_p" id="S1.p4.1">Мы внесли четыре новых элемента. Мы вводим понятие вертикального доменного бухгалтерского учета и уточняем его взаимосвязь с математическими и логическими рассуждениями. Мы разрабатываем всеобъемлющий бенчмарк, охватывающий принципы бухгалтерского учета, финансовую отчетность, учет затрат и аудит. Мы оцениваем репрезентативные модели, включая GPT 4 и модели серии GLM, и анализируем их сильные стороны и ограничения. Наконец, мы исследуем стратегии, которые сочетают предметные знания с оптимизацией рассуждений, чтобы продвинуть интеллектуальные бухгалтерские системы и поддержать развертывание в реальном мире..</p>
+</div>
+</section>
+<section class="ltx_section" id="S2">
+<h2 class="ltx_title ltx_title_section">
+<span class="ltx_tag ltx_tag_section">2 </span>Связанные работы</h2>
+<section class="ltx_subsection" id="S2.SS1">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">2.1 </span>Разработка больших языковых моделей в области бухгалтерского учета</h3>
+<div class="ltx_para" id="S2.SS1.p1">
+<p class="ltx_p" id="S2.SS1.p1.1">Эффективное использование больших языковых моделей общего назначения в вертикальных областях, таких как медицина и юриспруденция, дает полезные идеи для их внедрения в бухгалтерском учете. В медицинских условиях LLM применялись для задач, включая поддержку клинических решений, интерпретацию медицинских изображений и генерацию отчетов <cite class="ltx_cite ltx_citemacro_citep">(Yang<span class="ltx_text ltx_bib_etal"> et al.</span>, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.06707v1#bib.bib1" title="Large language models in health care: development, applications, and challenges">2023</a>)</cite>. Благодаря высокой интерпретируемости медицинских изображений эти модели могут улавливать визуальные паттерны и в сочетании с генерацией естественного языка повышают прозрачность и объяснимость системы, что способствует улучшению принятия клинических решений <cite class="ltx_cite ltx_citemacro_citep">(Guha<span class="ltx_text ltx_bib_etal"> et al.</span>, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.06707v1#bib.bib2" title="Legalbench: a collaboratively built benchmark for measuring legal reasoning in large language models">2023</a>)</cite>.⟧.</p>
+</div>
+<div class="ltx_para" id="S2.SS1.p2">
+<p class="ltx_p" id="S2.SS1.p2.1">Напротив, применения в юридической сфере обычно ограничены вспомогательными ролями, поскольку правовые системы сложны, основаны на правилах и строго регулируются. Автоматизированное рассуждение должно соответствовать правовым и этическим ограничениям, что ограничивает степень автономии модели. Бухгалтерский учет имеет аналогичную структуру, основанную на правилах, но предъявляет более высокие требования к числовой точности, количественным рассуждениям и согласованности между отчетами. В отличие от медицинских задач, ориентированных на зрение, бухгалтерский учет требует от моделей сохранения формальных стандартов, отслеживания причинно-следственных связей и выполнения многошаговых логических и числовых рассуждений. Следовательно, надежная способность к рассуждению особенно важна для случаев использования в бухгалтерском учете..</p>
+</div>
+<div class="ltx_para" id="S2.SS1.p3">
+<p class="ltx_p" id="S2.SS1.p3.1">Существующие работы можно разделить на несколько направлений исследований. Одно направление стремится усилить общие навыки рассуждения, такие как математическое или логическое мышление <cite class="ltx_cite ltx_citemacro_citep">(Huang and Chang, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.06707v1#bib.bib3" title="Towards reasoning in large language models: a survey">2023</a>)</cite>. Эти методы часто рассматривают рассуждение как независимое от предметных знаний, что ограничивает их эффективность в задачах бухгалтерского учета, которые сильно зависят от профессиональной экспертизы <cite class="ltx_cite ltx_citemacro_citep">(Gu<span class="ltx_text ltx_bib_etal"> et al.</span>, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.06707v1#bib.bib4" title="On the effectiveness of large language models in domain-specific code generation">2025</a>)</cite>. Специализированных исследований по бухгалтерским рассуждениям по-прежнему мало.
+
+Другое направление сосредоточено на адаптации к предметной области с помощью специализированных данных или более крупных моделей. Примеры включают BloombergGPT <cite class="ltx_cite ltx_citemacro_citep">(Wu<span class="ltx_text ltx_bib_etal"> et al.</span>, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.06707v1#bib.bib5" title="Bloomberggpt: a large language model for finance">2023</a>)</cite> и FinGPT <cite class="ltx_cite ltx_citemacro_citep">(Wang<span class="ltx_text ltx_bib_etal"> et al.</span>, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.06707v1#bib.bib6" title="Fingpt: instruction tuning benchmark for open-source large language models in financial datasets">2023</a>)</cite>, которые используют финансовые корпуса или увеличенные масштабы параметров. Несмотря на то, что эти модели могут повысить эффективность выполнения задач, они не всегда улучшают способность к логическому мышлению и зачастую не поддаются интерпретации, из-за чего неясно, действительно ли они способствуют развитию мышления или просто заучивают поверхностные шаблоны  <cite class="ltx_cite ltx_citemacro_citep">(Diaz and Madaio, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.06707v1#bib.bib7" title="Scaling laws do not scale">2024</a>)</cite>.
+
+Третье направление делает акцент на оценке на основе точности конечного ответа, например, ответы на финансовые вопросы или извлечение знаний <cite class="ltx_cite ltx_citemacro_citep">(Srivastava<span class="ltx_text ltx_bib_etal"> et al.</span>, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.06707v1#bib.bib8" title="Evaluating llms’ mathematical reasoning in financial document question answering">2024</a>; Xie<span class="ltx_text ltx_bib_etal"> et al.</span>, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.06707v1#bib.bib9" title="Finben: a holistic financial benchmark for large language models">2024</a>; Zhang<span class="ltx_text ltx_bib_etal"> et al.</span>, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.06707v1#bib.bib10" title="Enhancing financial sentiment analysis via retrieval augmented large language models">2023</a>)</cite>. В таких заданиях, ориентированных на работу с текстом, не учитывается структурированный и последовательный характер рассуждений в бухгалтерском деле, поэтому они не позволяют оценить базовые навыки логического мышления.
+
+Наконец, несколько исследовательских работ изучают потенциальную роль LLM в бухгалтерской практике <cite class="ltx_cite ltx_citemacro_citep">(Vasarhelyi<span class="ltx_text ltx_bib_etal"> et al.</span>, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.06707v1#bib.bib11" title="Large language models: an emerging technology in accounting">2023</a>; Zhao and Wang, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.06707v1#bib.bib12" title="Unleashing efficiency and insights: exploring the potential applications and challenges of chatgpt in accounting">2024</a>)</cite>. Хотя они информативны, эти усилия пока не определили систематические рамки оценки или конкретные бенчмарки для бухгалтерских рассуждений..</p>
+</div>
+<div class="ltx_para" id="S2.SS1.p4">
+<p class="ltx_p" id="S2.SS1.p4.1">Подводя итог, можно сказать, что в большинстве существующих исследований большие языковые модели применяются для решения языковых задач на поверхностном уровне в сфере бухгалтерского учета. Комплексных тестов и систем оценки, которые бы напрямую определяли способность к логическому мышлению в сфере бухгалтерского учета, до сих пор не существует.</p>
+</div>
+</section>
+<section class="ltx_subsection" id="S2.SS2">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">2.2 </span>Способность LLM к рассуждению в бухгалтерском учете</h3>
+<div class="ltx_para" id="S2.SS2.p1">
+<p class="ltx_p" id="S2.SS2.p1.1">В исследованиях LLM рассуждение обычно понимается как способность делать выводы из предоставленных фактов и ограничений <cite class="ltx_cite ltx_citemacro_citep">(Huang and Chang, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.06707v1#bib.bib3" title="Towards reasoning in large language models: a survey">2023</a>; Mondorf and Plank, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.06707v1#bib.bib13" title="Beyond accuracy: evaluating the reasoning behavior of large language models–a survey">2024</a>)</cite>. Большинство оценок рассуждения сосредоточены на правильности выходных данных в задачах, основанных на умозаключениях. С точки зрения структуры, мышление принято делить на математическое, логическое, причинно-следственное и основанное на здравом смысле <cite class="ltx_cite ltx_citemacro_citep">(Plaat<span class="ltx_text ltx_bib_etal"> et al.</span>, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.06707v1#bib.bib14" title="Reasoning with large language models, a survey">2024</a>; Huang and Chang, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.06707v1#bib.bib3" title="Towards reasoning in large language models: a survey">2023</a>)</cite>. Среди них математическое и логическое рассуждение наиболее актуальны для бухгалтерских приложений..</p>
+</div>
+<div class="ltx_para" id="S2.SS2.p2">
+<p class="ltx_p" id="S2.SS2.p2.1">Бухгалтерские задачи часто требуют точных числовых вычислений, многошаговых рассуждений и соблюдения четко определенных правил. В результате способность к рассуждению является ключевым фактором эффективности LLM в этой области. Логическое рассуждение оценивает, может ли модель делать обоснованные выводы из посылок в рамках явных правил, что часто оценивается с помощью бенчмарков понимания естественного языка <cite class="ltx_cite ltx_citemacro_citep">(Srivastava<span class="ltx_text ltx_bib_etal"> et al.</span>, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.06707v1#bib.bib15" title="Beyond the imitation game: quantifying and extrapolating the capabilities of language models">2023</a>; Mondorf and Plank, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.06707v1#bib.bib13" title="Beyond accuracy: evaluating the reasoning behavior of large language models–a survey">2024</a>; Fan<span class="ltx_text ltx_bib_etal"> et al.</span>, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.06707v1#bib.bib16" title="Nphardeval: dynamic benchmark on reasoning ability of large language models via complexity classes">2024</a>)</cite>. Однако такие бенчмарки разработаны для понимания языка общего назначения и не отражают структурированную, управляемую правилами природу бухгалтерских рассуждений..</p>
+</div>
+<div class="ltx_para" id="S2.SS2.p3">
+<p class="ltx_p" id="S2.SS2.p3.1">Математическое рассуждение измеряет способность модели выполнять арифметические и символьные операции. Бенчмарки, такие как GSM8K <cite class="ltx_cite ltx_citemacro_citep">(Cobbe<span class="ltx_text ltx_bib_etal"> et al.</span>, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.06707v1#bib.bib17" title="Training verifiers to solve math word problems">2021</a>)</cite>, оценивают эту способность через многошаговые текстовые математические задачи, требующие отслеживания промежуточных значений, что близко к бухгалтерским вычислениям..</p>
+</div>
+<div class="ltx_para" id="S2.SS2.p4">
+<p class="ltx_p" id="S2.SS2.p4.1">На практике большинство бухгалтерских задач опираются на цепочки числовых операций, а не на высокоуровневую финансовую интерпретацию. Ошибки при распространении промежуточных результатов могут накапливаться и приводить к неверным итоговым результатам, что делает надежное многошаговое математическое рассуждение особенно важным. Кроме того, многие бухгалтерские задачи включают сущности и ограничения, зависящие от времени. Включение временных графов знаний <cite class="ltx_cite ltx_citemacro_citep">(<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.06707v1#bib.bib26" title="TILP: differentiable learning of temporal logical rules on knowledge graphs">Xiong<span class="ltx_text ltx_bib_etal"> et al.</span>, </a>; Xiong<span class="ltx_text ltx_bib_etal"> et al.</span>, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.06707v1#bib.bib27" title="Teilp: time prediction over knowledge graphs via logical reasoning">2024b</a>, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.06707v1#bib.bib23" title="Large language models can learn temporal reasoning">a</a>)</cite> в символьные фреймворки рассуждений на основе LLM <cite class="ltx_cite ltx_citemacro_citep">(Yang<span class="ltx_text ltx_bib_etal"> et al.</span>, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.06707v1#bib.bib22" title="Harnessing the power of large language models for natural language to first-order logic translation">2024</a>)</cite> обеспечивает структурированное поддержание состояния и повышает согласованность рассуждений на каждом шаге..</p>
+</div>
+<div class="ltx_para" id="S2.SS2.p5">
+<p class="ltx_p" id="S2.SS2.p5.1">Недавние исследования были направлены на изучение структурно-ориентированных подходов для усиления многошаговых рассуждений. SWAP <cite class="ltx_cite ltx_citemacro_citep">(Xiong<span class="ltx_text ltx_bib_etal"> et al.</span>, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.06707v1#bib.bib25" title="Deliberate reasoning in language models as structure-aware planning with an accurate world model">2025</a>)</cite> вводит механизмы планирования, которые явно моделируют структуру рассуждений. MR-GSM8K <cite class="ltx_cite ltx_citemacro_citep">(Zeng<span class="ltx_text ltx_bib_etal"> et al.</span>, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.06707v1#bib.bib18" title="Mr-gsm8k: a meta-reasoning benchmark for large language model evaluation">2023</a>)</cite> дополнительно увеличивает сложность рассуждений, отфильтровывая задачи с короткими решениями и акцентируя более длинные вычислительные цепочки, что порождает задачи, более близкие к реальным бухгалтерским сценариям. После дополнительной фильтрации остаются 586 задач, требующих не менее трёх вычислительных шагов. Этот поднабор обеспечивает подходящую основу для оценки многошаговых числовых рассуждений в бухгалтерском контексте и называется эталоном Multi-Calculation Benchmark..</p>
+</div>
+</section>
+<section class="ltx_subsection" id="S2.SS3">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">2.3 </span>Бенчмарки оценки для китайского бухгалтерского рассуждения</h3>
+<div class="ltx_para" id="S2.SS3.p1">
+<p class="ltx_p" id="S2.SS3.p1.1">Бенчмарки для оценки китайского бухгалтерского мышления в основном исходят из двух направлений. Одно направление адаптирует общие китайские бенчмарки понимания естественного языка, переведенные с английского, в то время как другое опирается на наборы данных, взятые из экзаменов по бухгалтерскому учету и тестов на профессиональную квалификацию. По сравнению с многошаговым математическим мышлением, оценка бухгалтерского мышления на китайском языке представляет дополнительные трудности из-за различий в стандартах бухгалтерского учета, лингвистической структуре и дизайне задач..</p>
+</div>
+<div class="ltx_para" id="S2.SS3.p2">
+<p class="ltx_p" id="S2.SS3.p2.1">Эталонный тест Chinese Language Understanding Evaluation (CLUE) <cite class="ltx_cite ltx_citemacro_citep">(Xu<span class="ltx_text ltx_bib_etal"> et al.</span>, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.06707v1#bib.bib19" title="CLUE: a chinese language understanding evaluation benchmark">2020</a>)</cite>, часто рассматриваемый как китайский аналог GLUE <cite class="ltx_cite ltx_citemacro_citep">(Wang<span class="ltx_text ltx_bib_etal"> et al.</span>, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.06707v1#bib.bib20" title="GLUE: a multi-task benchmark and analysis platform for natural language understanding">2018</a>)</cite>, предоставляет широкую оценку понимания китайского языка посредством таких задач, как классификация, понимание прочитанного и логический вывод на естественном языке. Несмотря на свой охват, CLUE сосредоточен на общей языковой способности и не направлен явно на бухгалтерские рассуждения..</p>
+</div>
+<div class="ltx_para" id="S2.SS3.p3">
+<p class="ltx_p" id="S2.SS3.p3.1">В рамках CLUE, CMNLI оценивает следование, противоречие и нейтральность между посылкой и гипотезой. OCNLI, разработанный на китайском языке, лучше отражает особенности использования китайского языка и рассуждений. ACMC дополнительно адаптирует CMNLI и OCNLI к сценариям, связанным с финансами и бухгалтерским учетом, но ему все еще не хватает структурированных числовых вычислений и явных цепочек бухгалтерских рассуждений..</p>
+</div>
+<div class="ltx_para" id="S2.SS3.p4">
+<p class="ltx_p" id="S2.SS3.p4.1">Чтобы лучше отразить реальную бухгалтерскую практику, некоторые исследования обращаются к профессиональным экзаменационным вопросам, в том числе из экзаменов для китайских дипломированных бухгалтеров. Эти вопросы охватывают бухгалтерские проводки, финансовые расчеты, аудиторские суждения и налоговые обоснования. Однако задачи из таких экзаменов часто содержат длинные описания и значительный объем предметных знаний, что усложняет оценку. Кроме того, производительность модели сильно зависит от формулировки запроса, а ошибки могут возникать из-за неправильного толкования, а не из-за слабой способности к рассуждению..</p>
+</div>
+<div class="ltx_para" id="S2.SS3.p5">
+<p class="ltx_p" id="S2.SS3.p5.1">В целом существующие бенчмарки либо делают акцент на общем рассуждении без учета бухгалтерской специфики, либо включают бухгалтерский контент без систематической оценки процессов рассуждения. Этот пробел указывает на необходимость разработки ориентированных на бухгалтерский учет тестов, которые сочетают в себе знание предметной области и структурированный численный анализ. Данная работа отвечает на эту потребность путем создания специализированных наборов данных для оценки в области бухгалтерии и анализа производительности LLM по нескольким измерениям рассуждения..</p>
+</div>
+</section>
+</section>
+<section class="ltx_section" id="S3">
+<h2 class="ltx_title ltx_title_section">
+<span class="ltx_tag ltx_tag_section">3 </span>Эксперименты</h2>
+<section class="ltx_subsection" id="S3.SS1">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">3.1 </span>Экспериментальная установка</h3>
+<div class="ltx_para" id="S3.SS1.p1">
+<p class="ltx_p" id="S3.SS1.p1.1">В этой работе исследуются способности больших языковых моделей к бухгалтерским рассуждениям. Мы определяем бухгалтерские рассуждения как совместное использование логического вывода и численных вычислений в рамках специфических бухгалтерских правил.
+
+В соответствии с предыдущими исследованиями, бухгалтерские рассуждения рассматриваются как комбинированная способность, включающая арифметические вычисления, применение правил и последовательные многошаговые выводы. Соответственно, производительность модели оценивается с нескольких точек зрения, включая точность пошаговых вычислений, понимание бухгалтерских принципов и общее качество рассуждений в реалистичных постановках задач..</p>
+</div>
+<div class="ltx_para" id="S3.SS1.p2">
+<p class="ltx_p" id="S3.SS1.p2.1">Эмпирические данные, полученные в рамках проекта Stanford Alpaca, показывают, что тщательно отобранные наборы данных, даже если их размер составляет всего 5 % от исходного, могут существенно повысить эффективность работы модели <cite class="ltx_cite ltx_citemacro_citep">(Li<span class="ltx_text ltx_bib_etal"> et al.</span>, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.06707v1#bib.bib21" title="From quantity to quality: boosting llm performance with self-guided data selection for instruction tuning">2024</a>)</cite>. Таким образом, качество данных играет ключевую роль в укреплении точности и стабильности рассуждений. Следуя этому пониманию, мы сначала оцениваем базовую способность к рассуждению с помощью универсальных тестов, а затем проводим целенаправленные оценки на специфичных для бухгалтерского учета наборах данных..</p>
+</div>
+<div class="ltx_para" id="S3.SS1.p3">
+<p class="ltx_p" id="S3.SS1.p3.1">Чтобы обеспечить структурированный анализ, оценка организована на трех уровнях: математическое рассуждение, рассуждение в области бухгалтерских знаний и интегрированное бухгалтерское рассуждение. Эти уровни отражают возрастающую сложность задач и практическую значимость, переходя от базовых числовых операций к сценарному бухгалтерскому анализу..</p>
+</div>
+<figure class="ltx_table" id="S3.T1">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_table">Table 1: </span>Эталонные наборы данных и задачи рассуждения</figcaption>
+<table class="ltx_tabular ltx_centering ltx_guessed_headers ltx_align_middle" id="S3.T1.1">
+<thead class="ltx_thead">
+<tr class="ltx_tr" id="S3.T1.1.1.1">
+<th class="ltx_td ltx_align_justify ltx_align_top ltx_th ltx_th_column ltx_border_tt" id="S3.T1.1.1.1.1">
+<span class="ltx_inline-block ltx_align_top" id="S3.T1.1.1.1.1.1">
+<span class="ltx_p" id="S3.T1.1.1.1.1.1.1" style="width:130.1pt;"><span class="ltx_text ltx_font_bold" id="S3.T1.1.1.1.1.1.1.1">Reasoning Task</span></span>
+</span>
+</th>
+<th class="ltx_td ltx_align_justify ltx_align_top ltx_th ltx_th_column ltx_border_tt" id="S3.T1.1.1.1.2">
+<span class="ltx_inline-block ltx_align_top" id="S3.T1.1.1.1.2.1">
+<span class="ltx_p" id="S3.T1.1.1.1.2.1.1" style="width:251.5pt;"><span class="ltx_text ltx_font_bold" id="S3.T1.1.1.1.2.1.1.1">Datasets</span></span>
+</span>
+</th>
+</tr>
+</thead>
+<tbody class="ltx_tbody">
+<tr class="ltx_tr" id="S3.T1.1.2.1">
+<td class="ltx_td ltx_align_justify ltx_align_top ltx_border_t" id="S3.T1.1.2.1.1">
+<span class="ltx_inline-block ltx_align_top" id="S3.T1.1.2.1.1.1">
+<span class="ltx_p" id="S3.T1.1.2.1.1.1.1" style="width:130.1pt;">Mathematical and Computational Reasoning</span>
+</span>
+</td>
+<td class="ltx_td ltx_align_justify ltx_align_top ltx_border_t" id="S3.T1.1.2.1.2">
+<span class="ltx_inline-block ltx_align_top" id="S3.T1.1.2.1.2.1">
+<span class="ltx_p" id="S3.T1.1.2.1.2.1.1" style="width:251.5pt;">GSM8K, SVAMP, ASDiv, AQuA-RAT, MAWPS, AddSub, MultiArith, SingleEq, SingleOp</span>
+</span>
+</td>
+</tr>
+<tr class="ltx_tr" id="S3.T1.1.3.2">
+<td class="ltx_td ltx_align_justify ltx_align_top ltx_border_t" id="S3.T1.1.3.2.1">
+<span class="ltx_inline-block ltx_align_top" id="S3.T1.1.3.2.1.1">
+<span class="ltx_p" id="S3.T1.1.3.2.1.1.1" style="width:130.1pt;">Logical Reasoning</span>
+</span>
+</td>
+<td class="ltx_td ltx_align_justify ltx_align_top ltx_border_t" id="S3.T1.1.3.2.2">
+<span class="ltx_inline-block ltx_align_top" id="S3.T1.1.3.2.2.1">
+<span class="ltx_p" id="S3.T1.1.3.2.2.1.1" style="width:251.5pt;">ProofWriter, EntailmentBank, RuleTaker, CLUTRR, FLD</span>
+</span>
+</td>
+</tr>
+<tr class="ltx_tr" id="S3.T1.1.4.3">
+<td class="ltx_td ltx_align_justify ltx_align_top ltx_border_t" id="S3.T1.1.4.3.1">
+<span class="ltx_inline-block ltx_align_top" id="S3.T1.1.4.3.1.1">
+<span class="ltx_p" id="S3.T1.1.4.3.1.1.1" style="width:130.1pt;">Commonsense Reasoning</span>
+</span>
+</td>
+<td class="ltx_td ltx_align_justify ltx_align_top ltx_border_t" id="S3.T1.1.4.3.2">
+<span class="ltx_inline-block ltx_align_top" id="S3.T1.1.4.3.2.1">
+<span class="ltx_p" id="S3.T1.1.4.3.2.1.1" style="width:251.5pt;">CommonsenseQA, StrategyQA, ARC, SayCan, BoolQ, HotpotQA, OpenBookQA, PIQA, WikiWhy, COPA</span>
+</span>
+</td>
+</tr>
+<tr class="ltx_tr" id="S3.T1.1.5.4">
+<td class="ltx_td ltx_align_justify ltx_align_top ltx_border_t" id="S3.T1.1.5.4.1">
+<span class="ltx_inline-block ltx_align_top" id="S3.T1.1.5.4.1.1">
+<span class="ltx_p" id="S3.T1.1.5.4.1.1.1" style="width:130.1pt;">Abstract Reasoning</span>
+</span>
+</td>
+<td class="ltx_td ltx_align_justify ltx_align_top ltx_border_t" id="S3.T1.1.5.4.2">
+<span class="ltx_inline-block ltx_align_top" id="S3.T1.1.5.4.2.1">
+<span class="ltx_p" id="S3.T1.1.5.4.2.1.1" style="width:251.5pt;">Last Letter Concatenation, Coin Flip</span>
+</span>
+</td>
+</tr>
+<tr class="ltx_tr" id="S3.T1.1.6.5">
+<td class="ltx_td ltx_align_justify ltx_align_top ltx_border_bb ltx_border_t" id="S3.T1.1.6.5.1">
+<span class="ltx_inline-block ltx_align_top" id="S3.T1.1.6.5.1.1">
+<span class="ltx_p" id="S3.T1.1.6.5.1.1.1" style="width:130.1pt;">Other</span>
+</span>
+</td>
+<td class="ltx_td ltx_align_justify ltx_align_top ltx_border_bb ltx_border_t" id="S3.T1.1.6.5.2">
+<span class="ltx_inline-block ltx_align_top" id="S3.T1.1.6.5.2.1">
+<span class="ltx_p" id="S3.T1.1.6.5.2.1.1" style="width:251.5pt;">SNLI, MultiNLI, HellaSwag, SQuAD, BIG-bench, SCAN, BBH</span>
+</span>
+</td>
+</tr>
+</tbody>
+</table>
+</figure>
+</section>
+<section class="ltx_subsection" id="S3.SS2">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">3.2 </span>Оценка способности к математическому рассуждению</h3>
+<div class="ltx_para" id="S3.SS2.p1">
+<p class="ltx_p" id="S3.SS2.p1.1">Был предложен ряд бенчмарков для оценки способностей LLMs к математическим рассуждениям, включая наборы данных для логического вывода на естественном языке и многошаговых арифметических рассуждений <cite class="ltx_cite ltx_citemacro_citep">(Srivastava<span class="ltx_text ltx_bib_etal"> et al.</span>, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.06707v1#bib.bib15" title="Beyond the imitation game: quantifying and extrapolating the capabilities of language models">2023</a>; Mondorf and Plank, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.06707v1#bib.bib13" title="Beyond accuracy: evaluating the reasoning behavior of large language models–a survey">2024</a>; Fan<span class="ltx_text ltx_bib_etal"> et al.</span>, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.06707v1#bib.bib16" title="Nphardeval: dynamic benchmark on reasoning ability of large language models via complexity classes">2024</a>)</cite>. Несмотря на их популярность, большинство общих бенчмарков не отражают вычислительные характеристики учетных задач, особенно тех, которые включают условные правила и накопление промежуточных ошибок..</p>
+</div>
+<div class="ltx_para" id="S3.SS2.p2">
+<p class="ltx_p" id="S3.SS2.p2.1">GSM8K <cite class="ltx_cite ltx_citemacro_citep">(Cobbe<span class="ltx_text ltx_bib_etal"> et al.</span>, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.06707v1#bib.bib17" title="Training verifiers to solve math word problems">2021</a>)</cite> — один из наиболее часто используемых наборов данных для оценки многошаговых численных рассуждений.
+Тем не менее, многие задачи из GSM8K включают относительно короткие цепочки рассуждений. Чтобы сделать акцент на более длинных цепочках рассуждений, мы создали модель MR-GSM8K  <cite class="ltx_cite ltx_citemacro_citep">(Zeng<span class="ltx_text ltx_bib_etal"> et al.</span>, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.06707v1#bib.bib18" title="Mr-gsm8k: a meta-reasoning benchmark for large language model evaluation">2023</a>)</cite>, в которой были исключены задачи с короткими траекториями решения и оставлены только те, которые требуют длительных вычислений. В частности, экземпляры с ответами короче 300 слов исключаются, что дает набор данных, который акцентирует устойчивое рассуждение и эффекты накопления ошибок..</p>
+</div>
+<div class="ltx_para" id="S3.SS2.p3">
+<p class="ltx_p" id="S3.SS2.p3.1">После дополнительной фильтрации сохраняется 586 примеров MR-GSM8K, требующих как минимум три шага вычислений. Этот поднабор служит нашим бенчмарком для оценки многошаговых вычислений, называемым Multi-Calculation Benchmark, и хорошо подходит для проверки устойчивости LLM в числовых рассуждениях в бухгалтерском стиле..</p>
+</div>
+</section>
+<section class="ltx_subsection" id="S3.SS3">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">3.3 </span>Оценка способности к рассуждениям в китайской бухгалтерии</h3>
+<div class="ltx_para" id="S3.SS3.p1">
+<p class="ltx_p" id="S3.SS3.p1.1">Оценка бухгалтерского мышления на китайском языке включает дополнительную сложность, возникающую из-за языковой структуры, правил бухгалтерского учета и специализированной терминологии. Современные китайские бенчмарки для оценки мышления в основном делятся на две категории: переведенные наборы данных общего назначения и наборы данных, взятые из профессиональных экзаменов по бухгалтерскому учету..</p>
+</div>
+<div class="ltx_para" id="S3.SS3.p2">
+<p class="ltx_p" id="S3.SS3.p2.1">Бенчмарк CLUE (Chinese Language Understanding Evaluation) <cite class="ltx_cite ltx_citemacro_citep">(Xu<span class="ltx_text ltx_bib_etal"> et al.</span>, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.06707v1#bib.bib19" title="CLUE: a chinese language understanding evaluation benchmark">2020</a>)</cite> обычно используется для измерения понимания и рассуждения на китайском языке. Он включает такие задачи, как классификация, понимание прочитанного и вывод на естественном языке, и часто рассматривается как китайский аналог GLUE <cite class="ltx_cite ltx_citemacro_citep">(Wang<span class="ltx_text ltx_bib_etal"> et al.</span>, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.06707v1#bib.bib20" title="GLUE: a multi-task benchmark and analysis platform for natural language understanding">2018</a>)</cite>. Хотя CLUE обеспечивает широкий охват навыков рассуждения, он не предназначен для оценки специфических для бухгалтерского учета выводов..</p>
+</div>
+<div class="ltx_para" id="S3.SS3.p3">
+<p class="ltx_p" id="S3.SS3.p3.1">Чтобы лучше отразить практику бухгалтерского учета, мы также рассматриваем наборы данных, полученные из профессиональных квалификационных тестов, включая экзамены на получение статуса дипломированного бухгалтера Китая (CPA). Вопросы CPA охватывают методы бухгалтерского учета, числовые вычисления, аудиторские решения и налогообложение, требуя от моделей сочетания арифметических рассуждений с нормативными знаниями.
+
+Несмотря на свою актуальность, оценки на основе CPA вызывают трудности. Вопросы часто включают длинные контексты, плотный технический язык и неявные допущения, что может приводить к ошибкам, возникающим из-за неправильного толкования, а не из-за слабых рассуждений. Кроме того, производительность чувствительна к формулировке запроса, что усложняет выделение способности к рассуждению..</p>
+</div>
+</section>
+<section class="ltx_subsection" id="S3.SS4">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">3.4 </span>Всесторонняя оценка бухгалтерских рассуждений</h3>
+<div class="ltx_para" id="S3.SS4.p1">
+<p class="ltx_p" id="S3.SS4.p1.1">Для получения более надежной оценки данная работа объединяет общие бенчмарки рассуждений, задачи по вычислениям в области бухгалтерского учета и вопросы, смоделированные по образцу профессиональных экзаменов. Изучение производительности в этих условиях позволяет нам лучше охарактеризовать возможности и ограничения LLM в бухгалтерских рассуждениях..</p>
+</div>
+<div class="ltx_para" id="S3.SS4.p2">
+<p class="ltx_p" id="S3.SS4.p2.1">Результаты показывают, что LLM хорошо справляются с базовыми вычислениями и поверхностными задачами рассуждения, но точность заметно снижается по мере удлинения цепочек рассуждений. Ошибки, допущенные на промежуточных этапах, имеют тенденцию накапливаться, и поддержание правильного применения правил бухгалтерского учета становится затруднительным в сценариях, включающих множество взаимозависимых ограничений..</p>
+</div>
+<div class="ltx_para" id="S3.SS4.p3">
+<p class="ltx_p" id="S3.SS4.p3.1">В итоге, современные LLM демонстрируют обнадеживающие базовые навыки рассуждения, но они остаются недостаточными для практических случаев использования в бухгалтерском учете. Устранение этого разрыва потребует улучшений, выходящих за рамки инженерии подсказок, включая более качественные данные предметной области и модели, которые явно поддерживают структурированное и осведомленное о предметной области рассуждение..</p>
+</div>
+<figure class="ltx_figure" id="S3.F1"><img alt="Refer to caption" class="ltx_graphics ltx_centering ltx_img_landscape" height="429" id="S3.F1.g1" src="./[2601.06707] Evaluating Accounting Reasoning Capabilities of Large Language Models_files/Fig2.png" width="539"/>
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure">Figure 1: </span>Мульти-калькуляционный бенчмарк: Результаты оценки с 3-шаговой цепочкой рассуждений.</figcaption>
+</figure>
+</section>
+<section class="ltx_subsection" id="S3.SS5">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">3.5 </span>Результаты оценки и анализ</h3>
+<div class="ltx_para" id="S3.SS5.p1">
+<p class="ltx_p" id="S3.SS5.p1.1">Мы оцениваем производительность OpenAI GPT-4 и сравниваем ее с GLM-6B, GLM-130B и GLM-4. Во время оценки применяется подсказка цепочки рассуждений (Chain-of-Thought, CoT) для стимулирования явного создания промежуточных шагов рассуждения, что улучшает как качество рассуждений, так и интерпретируемость. Кроме того, используется обучение с несколькими примерами (Few-shot Learning) путем предоставления репрезентативных примеров решений для направления процесса рассуждения и генерации ответов..</p>
+</div>
+<div class="ltx_para" id="S3.SS5.p2">
+<p class="ltx_p" id="S3.SS5.p2.1">Сначала мы исследуем поведение модели при различных стратегиях подсказок, включая Zero-shot, Few-shot, CoT и Zero-shot-CoT. Результаты показывают, что результаты Zero-shot и Zero-shot-CoT часто демонстрируют логические несоответствия. Во многих случаях модели генерируют правдоподобный окончательный ответ, в то время как промежуточные рассуждения не полностью поддерживают вывод. Это говорит о том, что оценка, основанная исключительно на окончательных ответах, может переоценивать качество рассуждений. Для решения этой проблемы мы используем подсказки Few-shot-CoT для основной оценки. По сравнению с настройками Zero-shot, подсказки Few-shot приводят к существенному повышению точности, особенно в задачах, требующих многошаговых рассуждений. Эмпирически, Few-shot-CoT повышает точность примерно на 50 процентов. В задачах, связанных с бухгалтерским учетом, эта стратегия позволяет моделям правильно обрабатывать задачи, включающие до девяти арифметических операций, что отражает заметное улучшение глубины рассуждений..</p>
+</div>
+<figure class="ltx_figure" id="S3.F2"><img alt="Refer to caption" class="ltx_graphics ltx_centering ltx_img_square" height="436" id="S3.F2.g1" src="./[2601.06707] Evaluating Accounting Reasoning Capabilities of Large Language Models_files/Fig3.png" width="539"/>
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure">Figure 2: </span>Результаты оценки бенчмарка бухгалтерского рассуждения (3-shot CoT).</figcaption>
+</figure>
+<figure class="ltx_figure" id="S3.F3"><img alt="Refer to caption" class="ltx_graphics ltx_centering ltx_img_landscape" height="177" id="S3.F3.g1" src="./[2601.06707] Evaluating Accounting Reasoning Capabilities of Large Language Models_files/Fig4.png" width="539"/>
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure">Figure 3: </span>Сравнение долей типов ошибок между нормальным и средним уровнями сложности.</figcaption>
+</figure>
+<div class="ltx_para" id="S3.SS5.p3">
+<p class="ltx_p" id="S3.SS5.p3.1">На основе этих наблюдений Few-shot-CoT принимается в качестве настройки оценки по умолчанию. Мы следуем формату Few-shot-CoT в стиле GSM8K, который явно отделяет пошаговые рассуждения от окончательного ответа. Например, при решении бухгалтерских задач, связанных с приобретением активов и амортизацией, модель сначала представляет структурированный процесс рассуждения, а затем сообщает окончательный числовой результат. Такой формат улучшает интерпретируемость и обеспечивает согласованную оценку..</p>
+</div>
+<div class="ltx_para" id="S3.SS5.p4">
+<p class="ltx_p" id="S3.SS5.p4.1">После сбора выходных данных моделей проводится количественная оценка путем сравнения предсказаний с истинными ответами. GLM-4 служит автоматическим оценщиком для ответов, сгенерированных GLM-6B, GLM-130B и GPT-4. Общая точность вычисляется по всем вопросам и сообщается для Multi-Calculation Benchmark..</p>
+</div>
+<div class="ltx_para" id="S3.SS5.p5">
+<p class="ltx_p" id="S3.SS5.p5.1">GPT-4 достигает самой высокой общей точности среди оцененных моделей, устанавливая сильную точку отсчета для бухгалтерского рассуждения. Тем не менее, GPT-4 все еще не справляется с частью сложных бухгалтерских задач, что указывает на возможности для улучшения. Меньшие модели испытывают большие трудности с многошаговым арифметическим рассуждением. GLM-6B достигает точности примерно 20 процентов, в то время как GLM-130B достигает около 60 процентов, оба не дотягивают до уровня точности, обычно требуемого в профессиональной бухгалтерской практике. Хотя GLM-4 показывает конкурентоспособные результаты, его точность остается ниже желаемого порога, подчеркивая ограничения современных LLMs в точных числовых рассуждениях..</p>
+</div>
+<div class="ltx_para" id="S3.SS5.p6">
+<p class="ltx_p" id="S3.SS5.p6.1">Поскольку бенчмарк делает акцент на многошаговых арифметических бухгалтерских задачах, только GPT-4 и GLM-4 дополнительно оцениваются на Accounting Reasoning Benchmark. Результаты показывают, что GPT-4 достигает точности 16.58 процента, тогда как GLM-4 достигает 21.78 процента, что указывает на небольшое преимущество GLM-4 в рассуждениях бухгалтерских знаний. По мере увеличения количества вычислительных шагов производительность обеих моделей ухудшается, и ни одна из них не демонстрирует последовательно надежных бухгалтерских рассуждений..</p>
+</div>
+<div class="ltx_para" id="S3.SS5.p7">
+<p class="ltx_p" id="S3.SS5.p7.1">Анализ ошибок выявляет несколько повторяющихся типов сбоев. Одна из основных категорий — неверное применение логики бухгалтерского учета, например неверная интерпретация обработки активов, стандартов или налоговых правил. Другая распространенная проблема — неполное знание предметной области, когда упускаются из виду важные условия или ограничения. Модели также испытывают трудности с задачами, требующими переплетения бухгалтерских процедур, не отслеживая зависимости на нескольких этапах. Арифметические и логические несоответствия возникают, когда структуры рассуждений верны, но численные расчеты неверны. Дополнительные ошибки проистекают из расплывчатого понимания концепций или неверной интерпретации основополагающих принципов бухгалтерского учета..</p>
+</div>
+<div class="ltx_para" id="S3.SS5.p8">
+<p class="ltx_p" id="S3.SS5.p8.1">Более детальный анализ показывает, что более половины всех ошибок связаны с непониманием принципов бухгалтерского учета и недостаточным концептуальным охватом. Ошибки, связанные с выполнением сложных процедур, таких как ведение бухгалтерского учета или составление финансовой отчетности, встречаются реже, но все же имеют место. Ошибки на уровне принципов особенно вредны, поскольку они часто распространяются на весь процесс рассуждения, тогда как процедурные ошибки обычно затрагивают только локальные шаги. Эта закономерность отражает акцент на концептуальном освоении в профессиональных экзаменах по бухгалтерскому учету..</p>
+</div>
+<div class="ltx_para" id="S3.SS5.p9">
+<p class="ltx_p" id="S3.SS5.p9.1">В целом, результаты показывают, что современные LLM все еще не обладают надежными способностями к бухгалтерским рассуждениям. Хотя они предлагают полезную помощь для задач, связанных с бухгалтерией, необходим значительный прогресс в интеграции предметных знаний, надежности рассуждений и числовой точности, прежде чем развертывание в профессиональных бухгалтерских средах станет возможным..</p>
+</div>
+</section>
+</section>
+<section class="ltx_section" id="S4">
+<h2 class="ltx_title ltx_title_section">
+<span class="ltx_tag ltx_tag_section">4 </span>Заключение</h2>
+<div class="ltx_para" id="S4.p1">
+<p class="ltx_p" id="S4.p1.1">Данное исследование рассматривает логические рассуждения в области бухгалтерского учета в больших языковых моделях с использованием двух специализированных бенчмарков. Результаты показывают, что хотя LLMs эффективно справляются с общими многошаговыми рассуждениями, их производительность заметно снижается на задачах, связанных с бухгалтерским учетом, что выявляет существенный разрыв между широкими навыками рассуждения и компетенцией в предметной области. Дальнейший анализ ошибок демонстрирует устойчивые трудности в корректном применении принципов бухгалтерского учета в сложных сценариях. В целом, эти результаты позволяют предположить, что текущие LLMs остаются непригодными для надежного использования в профессиональных бухгалтерских средах..</p>
+</div>
+</section>
+<section class="ltx_section" id="Sx1">
+<h2 class="ltx_title ltx_title_section">Ограничения</h2>
+<div class="ltx_para" id="Sx1.p1">
+<p class="ltx_p" id="Sx1.p1.1">Данная работа имеет несколько ограничений. Бенчмарк делает акцент на структурированных бухгалтерских рассуждениях и поэтому не отражает весь спектр реальной бухгалтерской практики. Кроме того, оценка охватывает лишь небольшой набор репрезентативных LLMs, поэтому результаты могут не распространяться на модели с другой архитектурой или специализированными обучающими данными. Наконец, анализ опирается на рассуждение на основе промптов, что делает результаты чувствительными к формулировке промптов. Будущие исследования должны решить эти проблемы, расширив охват бенчмарка, оценив более широкий круг моделей и изучив систематические подходы к адаптации предметной области..</p>
+</div>
+</section>
+<section class="ltx_bibliography" id="bib">
+<h2 class="ltx_title ltx_title_bibliography">Список литературы</h2>
+<ul class="ltx_biblist" id="bib.L1">
+<li class="ltx_bibitem ltx_bib_article" id="bib.bib17">
+<span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">K. Cobbe, V. Kosaraju, M. Bavarian, M. Chen, H. Jun, L. Kaiser, M. Plappert, J. Tworek, J. Hilton, R. Nakano, <span class="ltx_text ltx_bib_etal">et al.</span> (2021)</span>
+Обучение верификаторов для решения математических текстовых задач.
+
+arXiv preprint arXiv:2110.14168.
+
+Цитируется: <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.06707v1#S2.SS2.p3.1" title="2.2 Reasoning Capability of LLMs in Accounting ‣ 2 Related Work ‣ Evaluating Accounting Reasoning Capabilities of Large Language Models"><span class="ltx_text ltx_ref_tag">§2.2</span></a>,
+<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.06707v1#S3.SS2.p2.1" title="3.2 Evaluation of Mathematical Reasoning Ability ‣ 3 Experiments ‣ Evaluating Accounting Reasoning Capabilities of Large Language Models"><span class="ltx_text ltx_ref_tag">§3.2</span></a>.
+
+</li>
+<li class="ltx_bibitem ltx_bib_inproceedings" id="bib.bib7">
+<span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">F. Diaz and M. Madaio (2024)</span>
+Законы масштабирования не масштабируются.
+
+В материалах конференции AAAI/ACM по искусственному интеллекту, этике и обществу,
+Том 7,  стр. 341–357.
+Цитируется: <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.06707v1#S2.SS1.p3.1" title="2.1 Development of LLMs in the Accounting Domain ‣ 2 Related Work ‣ Evaluating Accounting Reasoning Capabilities of Large Language Models"><span class="ltx_text ltx_ref_tag">§2.1</span></a>⟧.
+
+</li>
+<li class="ltx_bibitem ltx_bib_inproceedings" id="bib.bib16">
+<span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">L. Fan, W. Hua, L. Li, H. Ling, and Y. Zhang (2024)</span> Nphardeval: динамический бенчмарк на способность к рассуждению больших языковых моделей через классы сложности. В материалах 62-го ежегодного собрания Ассоциации вычислительной лингвистики (Том 1: Длинные статьи), стр. 4092–4114. Цитируется: <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.06707v1#S2.SS2.p2.1" title="2.2 Reasoning Capability of LLMs in Accounting ‣ 2 Related Work ‣ Evaluating Accounting Reasoning Capabilities of Large Language Models"><span class="ltx_text ltx_ref_tag">§2.2</span></a>, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.06707v1#S3.SS2.p1.1" title="3.2 Evaluation of Mathematical Reasoning Ability ‣ 3 Experiments ‣ Evaluating Accounting Reasoning Capabilities of Large Language Models"><span class="ltx_text ltx_ref_tag">§3.2</span></a>⟧.
+
+</li>
+<li class="ltx_bibitem ltx_bib_article" id="bib.bib4">
+<span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">X. Gu, M. Chen, Y. Lin, Y. Hu, H. Zhang, C. Wan, Z. Wei, Y. Xu, and J. Wang (2025)</span>
+Об эффективности больших языковых моделей в генерации кода для конкретных предметных областей.
+
+ACM Transactions on Software Engineering and Methodology 34 (3), стр. 1–22.
+
+Цитируется: <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.06707v1#S2.SS1.p3.1" title="2.1 Development of LLMs in the Accounting Domain ‣ 2 Related Work ‣ Evaluating Accounting Reasoning Capabilities of Large Language Models"><span class="ltx_text ltx_ref_tag">§2.1</span></a>.
+
+</li>
+<li class="ltx_bibitem ltx_bib_article" id="bib.bib2">
+<span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">N. Guha, J. Nyarko, D. Ho, C. Ré, A. Chilton, A. Chohlas-Wood, A. Peters, B. Waldon, D. Rockmore, D. Zambrano, <span class="ltx_text ltx_bib_etal">et al.</span> (2023)</span>
+Legalbench: совместно созданный бенчмарк для измерения юридического рассуждения в больших языковых моделях.
+
+Advances in neural information processing systems 36, pp. 44123–44279.
+
+Цитируется: <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.06707v1#S2.SS1.p1.1" title="2.1 Development of LLMs in the Accounting Domain ‣ 2 Related Work ‣ Evaluating Accounting Reasoning Capabilities of Large Language Models"><span class="ltx_text ltx_ref_tag">§2.1</span></a>⟧.
+
+</li>
+<li class="ltx_bibitem ltx_bib_inproceedings" id="bib.bib3">
+<span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">J. Huang and K. C. Chang (2023)</span>
+К рассуждению в больших языковых моделях: обзор.
+В трудах ассоциации вычислительной лингвистики: ACL 2023,
+ стр. 1049–1065.
+Цитируется: <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.06707v1#S2.SS1.p3.1" title="2.1 Development of LLMs in the Accounting Domain ‣ 2 Related Work ‣ Evaluating Accounting Reasoning Capabilities of Large Language Models"><span class="ltx_text ltx_ref_tag">§2.1</span></a>,
+<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.06707v1#S2.SS2.p1.1" title="2.2 Reasoning Capability of LLMs in Accounting ‣ 2 Related Work ‣ Evaluating Accounting Reasoning Capabilities of Large Language Models"><span class="ltx_text ltx_ref_tag">§2.2</span></a>.
+
+</li>
+<li class="ltx_bibitem ltx_bib_inproceedings" id="bib.bib21">
+⟦<span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">M. Li, Y. Zhang, Z. Li, J. Chen, L. Chen, N. Cheng, J. Wang, T. Zhou, and J. Xiao (2024)</span>
+От количества к качеству: повышение производительности LLM с помощью самоуправляемого выбора данных для настройки инструкций.
+
+В трудах конференции Североамериканского отделения Ассоциации вычислительной лингвистики 2024: Технологии человеческого языка (Том 1: Длинные статьи), стр. 7602–7635.
+
+Цитируется: <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.06707v1#S3.SS1.p2.1" title="3.1 Experimental Setup ‣ 3 Experiments ‣ Evaluating Accounting Reasoning Capabilities of Large Language Models"><span class="ltx_text ltx_ref_tag">§3.1</span></a>⟧.
+
+</li>
+<li class="ltx_bibitem ltx_bib_article" id="bib.bib13">
+<span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">P. Mondorf and B. Plank (2024)</span>
+Помимо точности: оценка рассудительного поведения больших языковых моделей – обзор.
+
+arXiv preprint arXiv:2404.01869.
+
+Цитируется: <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.06707v1#S2.SS2.p1.1" title="2.2 Reasoning Capability of LLMs in Accounting ‣ 2 Related Work ‣ Evaluating Accounting Reasoning Capabilities of Large Language Models"><span class="ltx_text ltx_ref_tag">§2.2</span></a>,
+<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.06707v1#S2.SS2.p2.1" title="2.2 Reasoning Capability of LLMs in Accounting ‣ 2 Related Work ‣ Evaluating Accounting Reasoning Capabilities of Large Language Models"><span class="ltx_text ltx_ref_tag">§2.2</span></a>,
+<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.06707v1#S3.SS2.p1.1" title="3.2 Evaluation of Mathematical Reasoning Ability ‣ 3 Experiments ‣ Evaluating Accounting Reasoning Capabilities of Large Language Models"><span class="ltx_text ltx_ref_tag">§3.2</span></a>.
+
+</li>
+<li class="ltx_bibitem ltx_bib_article" id="bib.bib14">
+<span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">A. Plaat, A. Wong, S. Verberne, J. Broekens, N. van Stein, and T. Back (2024)</span>
+Рассуждение с помощью больших языковых моделей: обзор.
+
+arXiv preprint arXiv:2407.11511.
+
+Цитируется по: <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.06707v1#S2.SS2.p1.1" title="2.2 Reasoning Capability of LLMs in Accounting ‣ 2 Related Work ‣ Evaluating Accounting Reasoning Capabilities of Large Language Models"><span class="ltx_text ltx_ref_tag">§2.2</span></a>.
+
+</li>
+<li class="ltx_bibitem ltx_bib_article" id="bib.bib15">
+<span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">A. Srivastava, A. Rastogi, A. Rao, A. A. M. Shoeb, A. Abid, A. Fisch, A. R. Brown, A. Santoro, A. Gupta, A. Garriga-Alonso, <span class="ltx_text ltx_bib_etal">et al.</span> (2023)</span>
+За пределами имитационной игры: количественная оценка и экстраполяция возможностей языковых моделей.
+
+Труды по исследованиям машинного обучения.
+
+Цитируется: <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.06707v1#S2.SS2.p2.1" title="2.2 Reasoning Capability of LLMs in Accounting ‣ 2 Related Work ‣ Evaluating Accounting Reasoning Capabilities of Large Language Models"><span class="ltx_text ltx_ref_tag">§2.2</span></a>,
+<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.06707v1#S3.SS2.p1.1" title="3.2 Evaluation of Mathematical Reasoning Ability ‣ 3 Experiments ‣ Evaluating Accounting Reasoning Capabilities of Large Language Models"><span class="ltx_text ltx_ref_tag">§3.2</span></a>.
+
+</li>
+<li class="ltx_bibitem ltx_bib_article" id="bib.bib8">
+<span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">P. Srivastava, M. Malik, V. Gupta, T. Ganu, and D. Roth (2024)</span> Оценка математического рассуждения llms в ответах на вопросы по финансовым документам. Препринт arXiv arXiv:2402.11194. Цитируется: <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.06707v1#S2.SS1.p3.1" title="2.1 Development of LLMs in the Accounting Domain ‣ 2 Related Work ‣ Evaluating Accounting Reasoning Capabilities of Large Language Models"><span class="ltx_text ltx_ref_tag">§2.1</span></a>.
+
+</li>
+<li class="ltx_bibitem ltx_bib_article" id="bib.bib11">
+<span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">M. A. Vasarhelyi, K. C. Moffitt, T. Stewart, and D. Sunderland (2023)</span>
+Большие языковые модели: новая технология в бухгалтерском учете.
+
+Журнал новых технологий в бухгалтерском учете 20 (2), стр. 1–10.
+
+Цитируется: <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.06707v1#S2.SS1.p3.1" title="2.1 Development of LLMs in the Accounting Domain ‣ 2 Related Work ‣ Evaluating Accounting Reasoning Capabilities of Large Language Models"><span class="ltx_text ltx_ref_tag">§2.1</span></a>.
+
+</li>
+<li class="ltx_bibitem ltx_bib_inproceedings" id="bib.bib20">
+<span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">A. Wang, A. Singh, J. Michael, F. Hill, O. Levy, and S. Bowman (2018)</span>
+GLUE: многозадачный бенчмарк и платформа анализа для понимания естественного языка.
+
+В трудах семинара BlackboxNLP конференции EMNLP 2018: Анализ и интерпретация нейронных сетей для NLP,
+
+ стр. 353–355.
+
+Цитируется: <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.06707v1#S2.SS3.p2.1" title="2.3 Evaluation Benchmarks for Chinese Accounting Reasoning ‣ 2 Related Work ‣ Evaluating Accounting Reasoning Capabilities of Large Language Models"><span class="ltx_text ltx_ref_tag">§2.3</span></a>,
+<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.06707v1#S3.SS3.p2.1" title="3.3 Evaluation of Chinese Accounting Reasoning Ability ‣ 3 Experiments ‣ Evaluating Accounting Reasoning Capabilities of Large Language Models"><span class="ltx_text ltx_ref_tag">§3.3</span></a>.
+
+</li>
+<li class="ltx_bibitem ltx_bib_article" id="bib.bib6">
+<span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">N. Wang, H. Yang, and C. D. Wang (2023)</span> Fingpt: бенчмарк для настройки инструкций для открытых больших языковых моделей на финансовых наборах данных. arXiv preprint arXiv:2310.04793. Цитируется в: <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.06707v1#S2.SS1.p3.1" title="2.1 Development of LLMs in the Accounting Domain ‣ 2 Related Work ‣ Evaluating Accounting Reasoning Capabilities of Large Language Models"><span class="ltx_text ltx_ref_tag">§2.1</span></a>.
+
+</li>
+<li class="ltx_bibitem ltx_bib_article" id="bib.bib5">
+⟦Bloomberggpt: большая языковая модель для финансов. arXiv preprint arXiv:2303.17564. Цитируется: <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.06707v1#S2.SS1.p3.1" title="2.1 Development of LLMs in the Accounting Domain ‣ 2 Related Work ‣ Evaluating Accounting Reasoning Capabilities of Large Language Models"><span class="ltx_text ltx_ref_tag">§2.1</span></a>.
+
+</li>
+<li class="ltx_bibitem ltx_bib_article" id="bib.bib9">
+<span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">Q. Xie, W. Han, Z. Chen, R. Xiang, X. Zhang, Y. He, M. Xiao, D. Li, Y. Dai, D. Feng, <span class="ltx_text ltx_bib_etal">et al.</span> (2024)</span>
+Finben: комплексный финансовый бенчмарк для больших языковых моделей.
+
+Advances in Neural Information Processing Systems 37, стр. 95716–95743.
+
+Цитируется: <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.06707v1#S2.SS1.p3.1" title="2.1 Development of LLMs in the Accounting Domain ‣ 2 Related Work ‣ Evaluating Accounting Reasoning Capabilities of Large Language Models"><span class="ltx_text ltx_ref_tag">§2.1</span></a>.
+
+</li>
+<li class="ltx_bibitem ltx_bib_inproceedings" id="bib.bib23">
+<span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">S. Xiong, A. Payani, R. Kompella, and F. Fekri (2024a)</span>
+Большие языковые модели могут осваивать временные рассуждения.
+
+В материалах 62-го ежегодного собрания Ассоциации компьютерной лингвистики (Том 1: Длинные статьи),
+
+ стр. 10452–10470.
+
+Цитируется: <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.06707v1#S2.SS2.p4.1" title="2.2 Reasoning Capability of LLMs in Accounting ‣ 2 Related Work ‣ Evaluating Accounting Reasoning Capabilities of Large Language Models"><span class="ltx_text ltx_ref_tag">§2.2</span></a>.
+
+</li>
+<li class="ltx_bibitem ltx_bib_inproceedings" id="bib.bib25">
+<span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">S. Xiong, A. Payani, Y. Yang, and F. Fekri (2025)</span>
+Обдуманное рассуждение в языковых моделях как структурно-осознанное планирование с точной моделью мира.
+
+В трудах 63-й ежегодной встречи Ассоциации компьютерной лингвистики (Том 1: Длинные статьи),
+
+ стр. 31900–31931.
+
+Цитируется: <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.06707v1#S2.SS2.p5.1" title="2.2 Reasoning Capability of LLMs in Accounting ‣ 2 Related Work ‣ Evaluating Accounting Reasoning Capabilities of Large Language Models"><span class="ltx_text ltx_ref_tag">§2.2</span></a>.
+
+</li>
+<li class="ltx_bibitem ltx_bib_inproceedings" id="bib.bib26">
+<span class="ltx_tag ltx_bib_key ltx_role_refnum ltx_tag_bibitem">[19]</span>
+S. Xiong, Y. Yang, F. Fekri, и J. C. Kerce
+
+TILP: дифференцируемое обучение темпоральным логическим правилам на графах знаний.
+
+На Одиннадцатой международной конференции по представлениям обучения,
+
+Цитируется: <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.06707v1#S2.SS2.p4.1" title="2.2 Reasoning Capability of LLMs in Accounting ‣ 2 Related Work ‣ Evaluating Accounting Reasoning Capabilities of Large Language Models"><span class="ltx_text ltx_ref_tag">§2.2</span></a>.
+
+</li>
+<li class="ltx_bibitem ltx_bib_inproceedings" id="bib.bib27">
+<span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">S. Xiong, Y. Yang, A. Payani, J. C. Kerce, and F. Fekri (2024b)</span>
+Teilp: прогнозирование времени по графам знаний с помощью логического рассуждения.
+
+В трудах конференции AAAI по искусственному интеллекту,
+
+Том 38,  стр. 16112–16119.
+
+Цитируется: <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.06707v1#S2.SS2.p4.1" title="2.2 Reasoning Capability of LLMs in Accounting ‣ 2 Related Work ‣ Evaluating Accounting Reasoning Capabilities of Large Language Models"><span class="ltx_text ltx_ref_tag">§2.2</span></a>.
+
+</li>
+<li class="ltx_bibitem ltx_bib_article" id="bib.bib19">
+<span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">L. Xu, H. Hu, X. Zhang, L. Li, C. Cao, Y. Li, Y. Xu, K. Sun, D. Yu, C. Yu, <span class="ltx_text ltx_bib_etal">et al.</span> (2020)</span>
+CLUE: тест для оценки понимания китайского языка.
+
+arXiv preprint arXiv:2004.05986.
+
+Цитируется: <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.06707v1#S2.SS3.p2.1" title="2.3 Evaluation Benchmarks for Chinese Accounting Reasoning ‣ 2 Related Work ‣ Evaluating Accounting Reasoning Capabilities of Large Language Models"><span class="ltx_text ltx_ref_tag">§2.3</span></a>,
+<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.06707v1#S3.SS3.p2.1" title="3.3 Evaluation of Chinese Accounting Reasoning Ability ‣ 3 Experiments ‣ Evaluating Accounting Reasoning Capabilities of Large Language Models"><span class="ltx_text ltx_ref_tag">§3.3</span></a>.
+
+</li>
+<li class="ltx_bibitem ltx_bib_article" id="bib.bib1">
+<span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">R. Yang, T. F. Tan, W. Lu, A. J. Thirunavukarasu, D. S. W. Ting, and N. Liu (2023)</span> Большие языковые модели в здравоохранении: разработка, применение и проблемы. Наука о здравоохранении 2 (4), стр. 255–263. Цитируется: <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.06707v1#S2.SS1.p1.1" title="2.1 Development of LLMs in the Accounting Domain ‣ 2 Related Work ‣ Evaluating Accounting Reasoning Capabilities of Large Language Models"><span class="ltx_text ltx_ref_tag">§2.1</span></a>.
+
+</li>
+<li class="ltx_bibitem ltx_bib_inproceedings" id="bib.bib22">
+⟦<span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">Y. Yang, S. Xiong, A. Payani, E. Shareghi, and F. Fekri (2024)</span>
+Использование возможностей больших языковых моделей для перевода с естественного языка на логику первого порядка.
+
+В трудах 62-го ежегодного собрания Ассоциации вычислительной лингвистики (Том 1: Длинные статьи), стр. 6942–6959.
+
+Цитируется: <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.06707v1#S2.SS2.p4.1" title="2.2 Reasoning Capability of LLMs in Accounting ‣ 2 Related Work ‣ Evaluating Accounting Reasoning Capabilities of Large Language Models"><span class="ltx_text ltx_ref_tag">§2.2</span></a>⟧.
+
+</li>
+<li class="ltx_bibitem ltx_bib_article" id="bib.bib18">
+<span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">Z. Zeng, P. Chen, S. Liu, H. Jiang, and J. Jia (2023)</span> Mr-gsm8k: мета-рассуждающий бенчмарк для оценки больших языковых моделей. arXiv preprint arXiv:2312.17080. Цитируется в: <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.06707v1#S2.SS2.p5.1" title="2.2 Reasoning Capability of LLMs in Accounting ‣ 2 Related Work ‣ Evaluating Accounting Reasoning Capabilities of Large Language Models"><span class="ltx_text ltx_ref_tag">§2.2</span></a>, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.06707v1#S3.SS2.p2.1" title="3.2 Evaluation of Mathematical Reasoning Ability ‣ 3 Experiments ‣ Evaluating Accounting Reasoning Capabilities of Large Language Models"><span class="ltx_text ltx_ref_tag">§3.2</span></a>.
+
+</li>
+<li class="ltx_bibitem ltx_bib_inproceedings" id="bib.bib10">
+<span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">B. Zhang, H. Yang, T. Zhou, M. Ali Babar, and X. Liu (2023)</span>
+Улучшение анализа финансовых настроений с помощью дополненных поиском больших языковых моделей.
+
+В материалах четвертой международной конференции ACM по ИИ в финансах,
+
+стр. 349–356.
+
+Цитируется: <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.06707v1#S2.SS1.p3.1" title="2.1 Development of LLMs in the Accounting Domain ‣ 2 Related Work ‣ Evaluating Accounting Reasoning Capabilities of Large Language Models"><span class="ltx_text ltx_ref_tag">§2.1</span></a>.
+
+</li>
+<li class="ltx_bibitem ltx_bib_article" id="bib.bib12">
+<span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">J. Zhao and X. Wang (2024)</span>
+Раскрывая эффективность и инсайты: изучение потенциальных применений и проблем chatgpt в бухгалтерском учете.
+
+Журнал корпоративного учета и финансов 35 (1), с. 269–276.
+
+Цитируется: <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.06707v1#S2.SS1.p3.1" title="2.1 Development of LLMs in the Accounting Domain ‣ 2 Related Work ‣ Evaluating Accounting Reasoning Capabilities of Large Language Models"><span class="ltx_text ltx_ref_tag">§2.1</span></a>.
+
+</li>
+</ul>
+</section>
+</article>
+</div>
+<div class="ar5iv-footer"><a class="ar5iv-nav-button ar5iv-nav-button-prev" href="https://ar5iv.labs.arxiv.org/html/2601.06706">◄</a>
+<a class="ar5iv-home-button" href="https://ar5iv.labs.arxiv.org/"><img alt="ar5iv homepage" height="40" src="./[2601.06707] Evaluating Accounting Reasoning Capabilities of Large Language Models_files/ar5iv.png"/></a>
+<a class="ar5iv-text-button" href="https://ar5iv.labs.arxiv.org/feeling_lucky">Чувство<br/>удачливый?</a>
+<a aria-hidden="true" href="https://ar5iv.labs.arxiv.org/land_of_honey_and_milk" rel="nofollow" tabindex="-1"></a>
+<a class="ar5iv-text-button ar5iv-severity-ok" href="https://ar5iv.labs.arxiv.org/log/2601.06707">Преобразование<br/>отчет</a>
+<a class="ar5iv-text-button" href="https://github.com/dginev/ar5iv/issues/new?template=improve-article--arxiv-id-.md&amp;title=Improve+article+2601.06707" target="_blank">Отчёт<br/>проблема</a>
+<a class="ar5iv-text-button arxiv-ui-theme" href="https://arxiv.org/abs/2601.06707">Посмотреть оригинал<br/>на arXiv</a><a class="ar5iv-nav-button ar5iv-nav-button-next" href="https://ar5iv.labs.arxiv.org/html/2601.06709">►</a>
+</div><footer class="ltx_page_footer">
+<a class="ar5iv-toggle-color-scheme" href="javascript:toggleColorScheme()" title="Toggle ar5iv color scheme"><span class="color-scheme-icon"></span></a>
+<a class="ar5iv-footer-button" href="https://arxiv.org/help/license" target="_blank">Авторские права</a>
+<a class="ar5iv-footer-button" href="https://arxiv.org/help/policies/privacy_policy" target="_blank">Политика конфиденциальности</a>
+<div class="ltx_page_logo">Сгенерировано  в Чт Фев  5 19:26:22 2026 на <a class="ltx_LaTeXML_logo" href="http://dlmf.nist.gov/LaTeXML/" target="_blank"><span style="letter-spacing:-0.2em; margin-right:0.1em;">Л<span class="ltx_font_smallcaps" style="position:relative; bottom:2.2pt;">а</span>Т<span class="ltx_font_smallcaps" style="font-size:120%;position:relative; bottom:-0.2ex;">е</span></span><span style="font-size:90%; position:relative; bottom:-0.2ex;">XML</span><img alt="Mascot Sammy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAAOCAYAAAD5YeaVAAAAAXNSR0IArs4c6QAAAAZiS0dEAP8A/wD/oL2nkwAAAAlwSFlzAAALEwAACxMBAJqcGAAAAAd0SU1FB9wKExQZLWTEaOUAAAAddEVYdENvbW1lbnQAQ3JlYXRlZCB3aXRoIFRoZSBHSU1Q72QlbgAAAdpJREFUKM9tkL+L2nAARz9fPZNCKFapUn8kyI0e4iRHSR1Kb8ng0lJw6FYHFwv2LwhOpcWxTjeUunYqOmqd6hEoRDhtDWdA8ApRYsSUCDHNt5ul13vz4w0vWCgUnnEc975arX6ORqN3VqtVZbfbTQC4uEHANM3jSqXymFI6yWazP2KxWAXAL9zCUa1Wy2tXVxheKA9YNoR8Pt+aTqe4FVVVvz05O6MBhqUIBGk8Hn8HAOVy+T+XLJfLS4ZhTiRJgqIoVBRFIoric47jPnmeB1mW/9rr9ZpSSn3Lsmir1fJZlqWlUonKsvwWwD8ymc/nXwVBeLjf7xEKhdBut9Hr9WgmkyGEkJwsy5eHG5vN5g0AKIoCAEgkEkin0wQAfN9/cXPdheu6P33fBwB4ngcAcByHJpPJl+fn54mD3Gg0NrquXxeLRQAAwzAYj8cwTZPwPH9/sVg8PXweDAauqqr2cDjEer1GJBLBZDJBs9mE4zjwfZ85lAGg2+06hmGgXq+j3+/DsixYlgVN03a9Xu8jgCNCyIegIAgx13Vfd7vdu+FweG8YRkjXdWy329+dTgeSJD3ieZ7RNO0VAXAPwDEAO5VKndi2fWrb9jWl9Esul6PZbDY9Go1OZ7PZ9z/lyuD3OozU2wAAAABJRU5ErkJggg=="/></a>
+</div></footer>
+</div>
+<script>
+      var canMathML = typeof(MathMLElement) == "function";
+      if (!canMathML) {
+        var body = document.querySelector("body");
+        body.firstElementChild.setAttribute('style', 'opacity: 0;');
+        var loading = document.createElement("div");
+        loading.setAttribute("id", "mathjax-loading-spinner");
+        var message = document.createElement("div");
+        message.setAttribute("id", "mathjax-loading-message");
+        message.innerText = "Typesetting Equations...";
+        body.prepend(loading);
+        body.prepend(message);
+
+        var el = document.createElement("script");
+        el.src = "https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js";
+        document.querySelector("head").appendChild(el);
+
+        window.MathJax = {
+          startup: {
+            pageReady: () => {
+              return MathJax.startup.defaultPageReady().then(() => {
+                body.removeChild(loading);
+                body.removeChild(message);
+                body.firstElementChild.removeAttribute('style');
+              }); } } };
+      }
+    </script>
+<script>
+    // Auxiliary function, building the preview feature when
+    // an inline citation is clicked
+    function clicked_cite(e) {
+      e.preventDefault();
+      let cite = this.closest('.ltx_cite');
+      let next = cite.nextSibling;
+      if (next && next.nodeType == Node.ELEMENT_NODE && next.getAttribute('class') == "ar5iv-bibitem-preview") {
+        next.remove();
+        return; }
+      // Before adding a preview modal,
+      // cleanup older previews, in case they're still open
+      document.querySelectorAll('span.ar5iv-bibitem-preview').forEach(function(node) {
+        node.remove();
+      })
+
+      // Create the preview
+      preview = document.createElement('span');
+      preview.setAttribute('class','ar5iv-bibitem-preview');
+      let target = document.getElementById(this.getAttribute('href').slice(1));
+      target.childNodes.forEach(function (child) {
+        preview.append(child.cloneNode(true));
+      });
+      let close_x = document.createElement('button');
+      close_x.setAttribute("aria-label","Close modal for bibliography item preview");
+      close_x.textContent = "×";
+      close_x.setAttribute('class', 'ar5iv-button-close-preview');
+      close_x.setAttribute('onclick','this.parentNode.remove()');
+      preview.append(close_x);
+      preview.querySelectorAll('.ltx_tag_bibitem').forEach(function(node) {
+        node.remove();
+      });
+      cite.parentNode.insertBefore(preview, cite.nextSibling);
+      return;
+    }
+    // Global Document initialization:
+    // - assign the preview feature to all inline citation links
+    document.querySelectorAll(".ltx_cite .ltx_ref").forEach(function (link) {
+      link.addEventListener("click", clicked_cite);
+    });
+    </script>
+</body></html>
