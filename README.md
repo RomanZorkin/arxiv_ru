@@ -1,8 +1,9 @@
+[![GitHub](https://img.shields.io/badge/Репозиторий-GitHub-blue?style=flat&logo=github&logoColor=white)](https://github.com/RomanZorkin/arxiv_ru)
 
-## Russian arXiv Digest
 
-Русскоязычные переводы и краткие разборы arXiv статей  
-по AI, ML, multi-agent systems и orchestration.
+## Russian arXiv Digest | arxiv_ru
+
+Русскоязычные переводы и краткие разборы arXiv статей  по AI, ML, multi-agent systems и orchestration.
 
 ---
 
