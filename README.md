@@ -4,6 +4,7 @@
 ## Russian arXiv Digest | arxiv_ru
 
 Русскоязычные переводы и краткие разборы arXiv статей  по AI, ML, multi-agent systems и orchestration.
+Новости о еженедельных обновлениях публикуются в сообществе https://t.me/pythonbarnaul
 
 ---
 
