@@ -12,7 +12,7 @@
 
 Для навигации по репозиторию используйте:
 
-[repository_map.json](https://github.com/RomanZorkin/arxiv_ru/blob/main/knowledge_index.json) — структура проекта и правила навигации
+[repository_map.json](https://github.com/RomanZorkin/arxiv_ru/blob/main/repository_map.json) — структура проекта и правила навигации
 
 [knowledge_index.json](https://github.com/RomanZorkin/arxiv_ru/blob/main/knowledge_index.json) — индекс всех статей и метаданные
 
