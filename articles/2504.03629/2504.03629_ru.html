@@ -1,0 +1,1001 @@
+<!DOCTYPE html>
+
+<!-- saved from url=(0044)https://ar5iv.labs.arxiv.org/html/2504.03629 -->
+<html data-theme="light" lang="en"><head><meta content="text/html; charset=utf-8" http-equiv="Content-Type"/>
+<title>[2504.03629] SeGuE: Semantic Guided Exploration for Mobile Robots</title><meta content="The rise of embodied AI applications has enabled robots to perform complex tasks which require a sophisticated understanding of their environment. To enable successful robot operation in such settings, maps must be con…" property="og:description"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<meta content="summary" name="twitter:card"/>
+<meta content="SeGuE: Semantic Guided Exploration for Mobile Robots" name="twitter:title"/>
+<meta content="https://ar5iv.labs.arxiv.org/assets/ar5iv_card.png" name="twitter:image:src"/>
+<meta content="ar5iv logo" name="twitter:image:alt"/>
+<meta content="SeGuE: Semantic Guided Exploration for Mobile Robots" property="og:title"/>
+<meta content="ar5iv" property="og:site_name"/>
+<meta content="https://ar5iv.labs.arxiv.org/assets/ar5iv_card.png" property="og:image"/>
+<meta content="article" property="og:type"/>
+<meta content="https://ar5iv.labs.arxiv.org/html/2504.03629" property="og:url"/>
+<link href="https://ar5iv.labs.arxiv.org/html/2504.03629" rel="canonical" target="_blank"/>
+<!--Generated on Mon May  5 14:57:52 2025 by LaTeXML (version 0.8.8) http://dlmf.nist.gov/LaTeXML/.-->
+<meta content="width=device-width, initial-scale=1, shrink-to-fit=no" name="viewport"/>
+<script>
+  function detectColorScheme(){
+    var theme="light";
+    var current_theme = localStorage.getItem("ar5iv_theme");
+    if(current_theme){
+      if(current_theme == "dark"){
+        theme = "dark";
+      } }
+    else if(!window.matchMedia) { return false; }
+    else if(window.matchMedia("(prefers-color-scheme: dark)").matches) {
+      theme = "dark"; }
+    if (theme=="dark") {
+      document.documentElement.setAttribute("data-theme", "dark");
+    } else {
+      document.documentElement.setAttribute("data-theme", "light"); } }
+
+  detectColorScheme();
+
+  function toggleColorScheme(){
+    var current_theme = localStorage.getItem("ar5iv_theme");
+    if (current_theme) {
+      if (current_theme == "light") {
+        localStorage.setItem("ar5iv_theme", "dark"); }
+      else {
+        localStorage.setItem("ar5iv_theme", "light"); } }
+    else {
+        localStorage.setItem("ar5iv_theme", "dark"); }
+    detectColorScheme(); }
+</script>
+<link href="./[2504.03629] SeGuE_ Semantic Guided Exploration for Mobile Robots_files/ar5iv-fonts.0.8.4.css" media="all" rel="stylesheet"/><link href="./[2504.03629] SeGuE_ Semantic Guided Exploration for Mobile Robots_files/ar5iv.0.8.4.css" media="all" rel="stylesheet"/><link href="./[2504.03629] SeGuE_ Semantic Guided Exploration for Mobile Robots_files/ar5iv-site.0.2.2.css" media="all" rel="stylesheet"/>
+<meta content="extension" property="gosuslugi.plugin.extension.content"/></head>
+<body>
+<div class="ltx_page_main">
+<div class="ltx_page_content">
+<article class="ltx_document ltx_authors_1line">
+<h1 class="ltx_title ltx_title_document">SeGuE: Семантически управляемое исследование для мобильных роботов</h1>
+<div class="ltx_authors">
+<span class="ltx_creator ltx_role_author">
+<span class="ltx_personname">Коди Саймонс, Аритра Саманта, Амит К. Рой-Чоудхури, Константинос Каридис
+</span><span class="ltx_author_notes">Авторы работают в кафедре электротехники и компьютерной инженерии Университета Калифорнии, Риверсайд, 900 University Avenue, Риверсайд, Калифорния 92521, США.
+Электронная почта: <span class="ltx_text ltx_font_typewriter" style="font-size:80%;">{csimo005, asama004, amitrc, karydis}@ucr.edu</span>.
+Мы с благодарностью признаём поддержку NSF # IIS-1901379, # CNS-2312395 и ONR # N00014-18-1-2252, # N00014-19-1-2264. Любые мнения, выводы и заключения или рекомендации, выраженные в этом материале, принадлежат авторам и не обязательно отражают взгляды финансирующих организаций..
+</span></span>
+</div>
+<div class="ltx_abstract">
+<h6 class="ltx_title ltx_title_abstract">Аннотация</h6>
+<p class="ltx_p">Рост приложений воплощённого ИИ позволил роботам выполнять сложные задачи, требующие сложного понимания их окружения. Для обеспечения успешной работы робота в таких условиях необходимо создавать карты, которые включают семантическую информацию, помимо геометрической. В данной статье мы рассматриваем новую задачу семантического исследования, при которой мобильный робот должен автономно исследовать среду, чтобы полностью картировать как её структуру, так и семантический вид объектов. Мы разрабатываем метод, основанный на исследовании следующего лучшего вида, где потенциальные позы (Поза (Pose) в робототехнике — это не просто «точка», а положение + ориентация.) оцениваются на основе семантических признаков, видимых из этой позы. Мы исследуем два альтернативных метода выборки потенциальных видов и демонстрируем эффективность нашей системы как в симуляции, так и в физических экспериментах. Автоматическое создание высококачественных семантических карт может позволить роботам лучше понимать и взаимодействовать с их окружением, а также облегчить развертывание будущих приложений воплощённого ИИ..</p>
+</div>
+<section class="ltx_section" id="S1">
+<h2 class="ltx_title ltx_title_section">
+<span class="ltx_tag ltx_tag_section">I </span><span class="ltx_text ltx_font_smallcaps">Введение</span>
+</h2>
+<div class="ltx_para" id="S1.p1">
+<p class="ltx_p">Достижения в производительности машинного обучения и периферийных вычислениях продвигают роботов к приобретению более высоких, чем когда-либо ранее, способностей к рассуждению и принятию решений. Эти способности критически важны для успешного внедрения их в рабочие среды, такие как автоматизированные кухни <cite class="ltx_cite ltx_citemacro_cite">[<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib1" title="">1</a>]</cite> или беспилотные фермы <cite class="ltx_cite ltx_citemacro_cite">[<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib2" title="">2</a>]</cite>, где роботу необходимо решать совместную задачу навигации и семантического понимания сцены..</p>
+</div>
+<div class="ltx_para" id="S1.p2">
+<p class="ltx_p">Для решения этой проблемы классические метрические карты были объединены с семантическими картами для предоставления соответствующих информационно насыщенных карт.  
+Например, в визуальной навигации по объектам <cite class="ltx_cite ltx_citemacro_cite">[<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib3" title="">3</a>]</cite> агент должен найти объект, соответствующий тексту или изображению.  
+Аналогично, в навигации, управляемой языком <cite class="ltx_cite ltx_citemacro_cite">[<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib4" title="">4</a>]</cite>, агент должен ориентироваться на основе инструкций на естественном языке, ссылающихся на внешний вид окружающей среды.  
+Такие методы часто являются zero-shot, предполагая отсутствие предварительных знаний об окружающей среде.  
+Хотя такая постановка задачи является сложной, она по своей природе временная.  
+В реальных случаях, где требуется непрерывная работа, создание комплексной карты во время или до начала работы было бы весьма полезным.  
+В то же время несколько существующих методов (например, <cite class="ltx_cite ltx_citemacro_cite">[<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib1" title="">1</a>, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib5" title="">5</a>, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib3" title="">3</a>, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib4" title="">4</a>]</cite>) используют карты, дополненные семантическими классами.  
+Хотя информация о семантических классах ценна, её ограниченная повторная используемость может препятствовать переносу на физическое развертывание робота в различных средах.  
+Для решения этой задачи мы предлагаем метод исследования, который отображает семантические особенности окружающей среды, что позволяет использовать их повторно в различных задачах..</p>
+</div>
+<div class="ltx_para" id="S1.p3">
+<p class="ltx_p">Современные семантические карты с поддержкой ИИ могут совместно кодировать геометрию сцены и признаки внешнего вида.  
+Они могут содержать признаки, извлечённые моделями машинного обучения, которые, в свою очередь, могут повторно использоваться в различных задачах.  
+Семантические карты признаков могут создаваться онлайн <cite class="ltx_cite ltx_citemacro_cite">[<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib3" title="">3</a>]</cite>, обычно для помощи в визуальном поиске объектов, или офлайн <cite class="ltx_cite ltx_citemacro_cite">[<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib4" title="">4</a>]</cite>, которые могут использоваться для навигации с помощью языка или других последующих задач.  
+Однако офлайн-картирование обычно требует ручного управления роботом или маршрутов, разработанных вручную, чтобы обеспечить всестороннее покрытие признаков внешнего вида.  
+Хотя автономные методы исследования для картирования структур окружающей среды хорошо развиты в робототехнике, существует заметный пробел в автоматическом управлении исследованием для создания высококачественных семантических карт..</p>
+</div>
+<div class="ltx_para" id="S1.p4">
+<p class="ltx_p">Автономное исследование и картографирование окружающей среды привлекли значительное внимание на протяжении многих лет. Картографирование структуры статической среды в 2D в значительной степени решено существующими подходами SLAM <cite class="ltx_cite ltx_citemacro_cite">[<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib6" title="">6</a>]</cite>. Исследование также хорошо изучено, при этом традиционные подходы в целом делятся на методы, основанные на границах, и методы, основанные на следующем лучшем обзоре. В методах, основанных на границах <cite class="ltx_cite ltx_citemacro_cite">[<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib7" title="">7</a>]</cite>, робот перемещается в места, находящиеся на границе между картированными и некартированными участками среды, в то время как методы следующего лучшего обзора <cite class="ltx_cite ltx_citemacro_cite">[<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib8" title="">8</a>, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib9" title="">9</a>, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib10" title="">10</a>]</cite> выбирают и оценивают потенциальные виды на основе информационно-теоретических метрик. При достаточном времени оба метода могут полностью захватить геометрию среды. Однако они не учитывают признаки внешнего вида среды. Более того, увеличенный диапазон и поле зрения современных датчиков глубины могут приводить к неполным и низкокачественным семантическим картам признаков <cite class="ltx_cite ltx_citemacro_cite">[<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib11" title="">11</a>]</cite>.⟧.</p>
+</div>
+<div class="ltx_para" id="S1.p5">
+<p class="ltx_p">В данной работе мы представляем новый метод автономного исследования, основанный на подходе следующего лучшего обзора, который картографирует структуру окружающей среды и одновременно захватывает её семантический вид.  
+Наш метод оценивает потенциальные обзоры, вычисляя среднюю энтропию видимых семантических признаков, исключая при этом закрытые и сходящиеся признаки.  
+Мы исследуем две альтернативные техники выборки обзоров: равномерную выборку по достижимым позам и итеративный метод важностной выборки, вдохновлённый оптимизацией с помощью particle filter.  
+Для метрической картографии и навигации используются готовые компоненты.  
+Наш подход проверен как в симуляции, так и в экспериментах на физическом оборудовании с использованием колёсного мобильного робота.  
+В итоге, наши вклады включают в себя:
+</p>
+<ol class="ltx_enumerate" id="S1.I1">
+<li class="ltx_item" id="S1.I1.i1" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">1.</span>
+
+Мы предлагаем метод оценки отдельных семантических признаков карты и показываем, как эти оценки могут быть объединены для оценки конкретного вида..
+
+</li>
+<li class="ltx_item" id="S1.I1.i2" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">2.</span>
+
+Мы исследуем два альтернативных метода для выборки потенциальных представлений.
+
+</li>
+<li class="ltx_item" id="S1.I1.i3" style="list-style-type:none;">
+⟦Мы демонстрируем осуществимость нашей структуры в смоделированных и физических экспериментах.
+
+</li>
+</ol>
+</div>
+</section>
+<section class="ltx_section" id="S2">
+<h2 class="ltx_title ltx_title_section">
+<span class="ltx_tag ltx_tag_section">II </span><span class="ltx_text ltx_font_smallcaps">Связанные работы</span>
+</h2>
+<section class="ltx_subsection" id="S2.SS1">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">II-A </span><span class="ltx_text ltx_font_italic">Семантическое отображение</span>
+</h3>
+<div class="ltx_para" id="S2.SS1.p1">
+<p class="ltx_p">Семантическое картографирование исследовалось как в сообществах машинного обучения, так и в робототехнике.  
+Исследования в области машинного обучения сосредоточены на плотных семантических признаках <cite class="ltx_cite ltx_citemacro_cite">[<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib4" title="">4</a>]</cite>.  
+Эти карты позволяют выполнять детальный поиск внутри среды <cite class="ltx_cite ltx_citemacro_cite">[<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib4" title="">4</a>]</cite> и могут использоваться для предсказания планировки неизведанной части среды <cite class="ltx_cite ltx_citemacro_cite">[<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib12" title="">12</a>]</cite>.  
+В робототехнике внимание уделялось семантическим классам.  
+В <cite class="ltx_cite ltx_citemacro_cite">[<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib13" title="">13</a>]</cite> семантические категории использовались для увеличения количества замыканий циклов, а в <cite class="ltx_cite ltx_citemacro_cite">[<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib14" title="">14</a>]</cite> — для создания более эффективных маршрутов.  
+По мере того как ресурсы, доступные на роботах (сенсоры, вычислительные блоки и т. д.), продолжают расти, а модели ИИ становятся более пригодными для edge computing, ожидается рост спроса на карты плотных семантических признаков.  
+Наш метод может помочь автоматически создавать такие карты..</p>
+</div>
+</section>
+<section class="ltx_subsection" id="S2.SS2">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">II-B </span><span class="ltx_text ltx_font_italic">Исследование рубежей</span>
+</h3>
+<div class="ltx_para" id="S2.SS2.p1">
+<p class="ltx_p">Исследование, основанное на фронтире (В данном контексте фронтир (frontier) используется в значении граница между уже изученным (известным) и неизученным (неизвестным) пространством в карте местности), было тщательно изучено в литературе.  
+Изначально предложенные в <cite class="ltx_cite ltx_citemacro_cite">[<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib7" title="">7</a>]</cite>, методы, основанные на фронтире, стремятся полностью исследовать среду, постоянно двигаясь к границе между известным и неизвестным пространством.  
+Более поздние работы стремились повысить вычислительную эффективность вычисления фронтиров <cite class="ltx_cite ltx_citemacro_cite">[<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib15" title="">15</a>]</cite> и создать механизмы ранжирования фронтиров <cite class="ltx_cite ltx_citemacro_cite">[<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib16" title="">16</a>]</cite>.  
+Эти методы исследования сосредоточены исключительно на картографировании геометрии среды, которая может быть непосредственно наблюдаема с помощью современных LiDAR сенсоров, которые обычно интегрированы в современные роботы.  
+В отличие от этого, картографирование семантических признаков может быть значительно осложнено вариабельностью внешнего вида объектов на разных расстояниях, значимостью различных объектов для извлекателей признаков и ограниченным полем зрения большинства камер..</p>
+</div>
+</section>
+<section class="ltx_subsection" id="S2.SS3">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">II-C </span><span class="ltx_text ltx_font_italic">Определение следующего лучшего обзора</span>
+</h3>
+<div class="ltx_para" id="S2.SS3.p1">
+<p class="ltx_p">Конвейер следующего лучшего обзора <cite class="ltx_cite ltx_citemacro_cite">[<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib8" title="">8</a>, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib9" title="">9</a>, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib10" title="">10</a>]</cite> состоит из сэмплера позы, метрики для ранжирования поз, либо с точки зрения прироста информации <cite class="ltx_cite ltx_citemacro_cite">[<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib8" title="">8</a>, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib9" title="">9</a>, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib10" title="">10</a>]</cite>, либо с использованием специфической для задачи метрики <cite class="ltx_cite ltx_citemacro_cite">[<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib5" title="">5</a>, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib1" title="">1</a>]</cite>, и маппера, который обновляет внутреннюю карту во время навигации к определённой позе следующего лучшего обзора.  
+Несколько современных реализаций используют планировщики на основе сэмплинга для выбора поз <cite class="ltx_cite ltx_citemacro_cite">[<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib8" title="">8</a>, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib17" title="">17</a>]</cite>.  
+Однако это может привести к застреванию в локальных максимумах.  
+Один из способов решения этой проблемы — интеграция дополнительного глобального сэмплера <cite class="ltx_cite ltx_citemacro_cite">[<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib10" title="">10</a>]</cite>.  
+Информационно-теоретические метрики <cite class="ltx_cite ltx_citemacro_cite">[<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib18" title="">18</a>, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib9" title="">9</a>]</cite> кодируют структуру и уверенность в текущей карте для ранжирования ценности конкретного обзора.  
+Также использовались семантические категории <cite class="ltx_cite ltx_citemacro_cite">[<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib1" title="">1</a>]</cite> для фокусировки на более релевантных для задачи структурах.  
+Насколько нам известно, ни один метод не включал семантическую карту признаков в алгоритм следующего лучшего обзора..</p>
+</div>
+</section>
+</section>
+<section class="ltx_section" id="S3">
+<h2 class="ltx_title ltx_title_section">
+<span class="ltx_tag ltx_tag_section">III </span><span class="ltx_text ltx_font_smallcaps">Определение проблемы</span>
+</h2>
+<div class="ltx_para" id="S3.p1">
+<p class="ltx_p">В данной работе мы рассматриваем новую задачу семантического исследования. Наша цель — одновременно автономно исследовать и картографировать среду в реальном времени, обеспечивая при этом, чтобы карта полностью отражала семантическую информацию, необходимую для последующих приложений воплощённого ИИ.  
+Конкретно, мы задаёмся вопросом, как мобильный робот, оснащённый RGB-камерой и датчиком глубины, может исследовать среду и строить 2D-карту <math alttext="\mathcal{M}\in\mathbb{R}^{H\times W\times N+1}" class="ltx_Math" display="inline" id="S3.p1.m1"><semantics><mrow><mi class="ltx_font_mathcaligraphic">ℳ</mi><mo>∈</mo><msup><mi>ℝ</mi><mrow><mrow><mi>H</mi><mo lspace="0.222em" rspace="0.222em">×</mo><mi>W</mi><mo lspace="0.222em" rspace="0.222em">×</mo><mi>N</mi></mrow><mo>+</mo><mn>1</mn></mrow></msup></mrow><annotation encoding="application/x-tex">\mathcal{M}\in\mathbb{R}^{H\times W\times N+1}</annotation></semantics></math>, где <math alttext="H" class="ltx_Math" display="inline" id="S3.p1.m2"><semantics><mi>H</mi><annotation encoding="application/x-tex">H</annotation></semantics></math> и <math alttext="W" class="ltx_Math" display="inline" id="S3.p1.m3"><semantics><mi>W</mi><annotation encoding="application/x-tex">W</annotation></semantics></math> обозначают высоту и ширину карты, а <math alttext="N" class="ltx_Math" display="inline" id="S3.p1.m4"><semantics><mi>N</mi><annotation encoding="application/x-tex">N</annotation></semantics></math> — размерность векторов семантических признаков.  
+Дополнительное скалярное значение в третьем измерении представляет информацию о занятости, в виде сетки занятости.  
+Хотя генерация семантических карт является хорошо изученной областью <cite class="ltx_cite ltx_citemacro_cite">[<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib4" title="">4</a>]</cite>, в данной работе мы специально рассматриваем задачу исследования, чтобы обеспечить достаточное покрытие среды и захват высококачественных семантических признаков.  
+Для снижения сложности реализации мы делаем рабочие предположения, что робот действует в физически ограниченной среде, и что среда относительно плоская и проходимая.  
+Эти предположения не являются ограничивающими, поскольку они относятся к большинству распространённых парадигм навигации в помещениях (как мы и проверяем в данной работе), и могут напрямую применяться к навигации на открытом воздухе в структурированных средах..</p>
+</div>
+</section>
+<section class="ltx_section" id="S4">
+<h2 class="ltx_title ltx_title_section">
+<span class="ltx_tag ltx_tag_section">IV </span><span class="ltx_text ltx_font_smallcaps">Предложенный подход</span>
+</h2>
+<div class="ltx_para" id="S4.p1">
+<p class="ltx_p">Мы предлагаем метод Семантического Управляемого Исследования (SeGuE) для мобильных роботов.  
+Наш метод основан на алгоритмах выбора следующего лучшего вида.  
+Во время исследования создаётся семантическая карта, <math alttext="S" class="ltx_Math" display="inline" id="S4.p1.m1"><semantics><mi>S</mi><annotation encoding="application/x-tex">S</annotation></semantics></math>, используя данные из двух различных сенсорных модальностей, а именно RGB-камеры и 3D LiDAR.  
+SeGuE выбирает безопасные для столкновений и достижимые позы из сетки занятости, сформированной во время навигации, основываясь на текущем семантическом понимании окружающей среды.  
+Для оценки потенциального информационного выигрыша от каждой позы вычисляется средняя энтропия предсказания каждой семантической особенности, видимой из данной позы.  
+Чтобы гарантировать, что ячейки с более высокой алеторической неопределённостью не используются чрезмерно, энтропия каждой семантической особенности отслеживается во времени, и особенности, у которых энтропия сошлась, исключаются из расчёта оценки.  
+Этот процесс повторяется до тех пор, пока не будет найдена поза с оценкой выше некоторого порога.  
+SeGuE суммирован в Алгоритме <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2504.03629#alg1" title="Algorithm 1 ‣ IV Proposed Approach ‣ SeGuE: Semantic Guided Exploration for Mobile Robots"><span class="ltx_text ltx_ref_tag">1</span></a>.  
+Далее мы подробно рассмотрим каждый шаг подхода..</p>
+</div>
+<figure class="ltx_float ltx_float_algorithm ltx_framed ltx_framed_top" id="alg1">
+<figcaption class="ltx_caption"><span class="ltx_tag ltx_tag_float"><span class="ltx_text ltx_font_bold">Algorithm 1</span> </span> Алгоритм SeGuE</figcaption>
+<div class="ltx_listing ltx_listing">
+<div class="ltx_listingline" id="alg1.l0">
+<span class="ltx_tag ltx_tag_listingline"><span class="ltx_text" style="font-size:80%;">0:</span></span> Порог завершения <math alttext="\tau" class="ltx_Math" display="inline" id="alg1.l0.m1"><semantics><mi>τ</mi><annotation encoding="application/x-tex">\tau</annotation></semantics></math>
+</div>
+<div class="ltx_listingline" id="alg1.l1">
+<span class="ltx_tag ltx_tag_listingline"><span class="ltx_text" style="font-size:80%;">1:</span></span> Инициализировать пустую семантическую карту <math alttext="S" class="ltx_Math" display="inline" id="alg1.l1.m1"><semantics><mi>S</mi><annotation encoding="application/x-tex">S</annotation></semantics></math> и пустая карта занятости <math alttext="O" class="ltx_Math" display="inline" id="alg1.l1.m2"><semantics><mi>O</mi><annotation encoding="application/x-tex">O</annotation></semantics></math>
+</div>
+<div class="ltx_listingline" id="alg1.l2">
+<span class="ltx_tag ltx_tag_listingline"><span class="ltx_text" style="font-size:80%;">2:</span></span> Получить изображение <math alttext="img" class="ltx_Math" display="inline" id="alg1.l2.m1"><semantics><mrow><mi>i</mi><mo lspace="0em" rspace="0em">​</mo><mi>m</mi><mo lspace="0em" rspace="0em">​</mo><mi>g</mi></mrow><annotation encoding="application/x-tex">img</annotation></semantics></math>, облачко точек <math alttext="ptCloud" class="ltx_Math" display="inline" id="alg1.l2.m2"><semantics><mrow><mi>p</mi><mo lspace="0em" rspace="0em">​</mo><mi>t</mi><mo lspace="0em" rspace="0em">​</mo><mi>C</mi><mo lspace="0em" rspace="0em">​</mo><mi>l</mi><mo lspace="0em" rspace="0em">​</mo><mi>o</mi><mo lspace="0em" rspace="0em">​</mo><mi>u</mi><mo lspace="0em" rspace="0em">​</mo><mi>d</mi></mrow><annotation encoding="application/x-tex">ptCloud</annotation></semantics></math>, и текущая поза <math alttext="p_{curr}" class="ltx_Math" display="inline" id="alg1.l2.m3"><semantics><msub><mi>p</mi><mrow><mi>c</mi><mo lspace="0em" rspace="0em">​</mo><mi>u</mi><mo lspace="0em" rspace="0em">​</mo><mi>r</mi><mo lspace="0em" rspace="0em">​</mo><mi>r</mi></mrow></msub><annotation encoding="application/x-tex">p_{curr}</annotation></semantics></math> от робота
+
+</div>
+<div class="ltx_listingline" id="alg1.l3">
+<span class="ltx_tag ltx_tag_listingline"><span class="ltx_text" style="font-size:80%;">3:</span></span> <math alttext="S.\text{update}(img,ptCloud,p_{curr})" class="ltx_Math" display="inline" id="alg1.l3.m1"><semantics><mrow><mi>S</mi><mo lspace="0em" rspace="0.167em">.</mo><mrow><mtext>update</mtext><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><mrow><mi>i</mi><mo lspace="0em" rspace="0em">​</mo><mi>m</mi><mo lspace="0em" rspace="0em">​</mo><mi>g</mi></mrow><mo>,</mo><mrow><mi>p</mi><mo lspace="0em" rspace="0em">​</mo><mi>t</mi><mo lspace="0em" rspace="0em">​</mo><mi>C</mi><mo lspace="0em" rspace="0em">​</mo><mi>l</mi><mo lspace="0em" rspace="0em">​</mo><mi>o</mi><mo lspace="0em" rspace="0em">​</mo><mi>u</mi><mo lspace="0em" rspace="0em">​</mo><mi>d</mi></mrow><mo>,</mo><msub><mi>p</mi><mrow><mi>c</mi><mo lspace="0em" rspace="0em">​</mo><mi>u</mi><mo lspace="0em" rspace="0em">​</mo><mi>r</mi><mo lspace="0em" rspace="0em">​</mo><mi>r</mi></mrow></msub><mo stretchy="false">)</mo></mrow></mrow></mrow><annotation encoding="application/x-tex">S.\text{update}(img,ptCloud,p_{curr})</annotation></semantics></math>
+</div>
+<div class="ltx_listingline" id="alg1.l4">
+<span class="ltx_tag ltx_tag_listingline"><span class="ltx_text" style="font-size:80%;">4:</span></span> <math alttext="O.\text{update}(ptCloud,p_{curr})" class="ltx_Math" display="inline" id="alg1.l4.m1"><semantics><mrow><mi>O</mi><mo lspace="0em" rspace="0.167em">.</mo><mrow><mtext>update</mtext><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><mrow><mi>p</mi><mo lspace="0em" rspace="0em">​</mo><mi>t</mi><mo lspace="0em" rspace="0em">​</mo><mi>C</mi><mo lspace="0em" rspace="0em">​</mo><mi>l</mi><mo lspace="0em" rspace="0em">​</mo><mi>o</mi><mo lspace="0em" rspace="0em">​</mo><mi>u</mi><mo lspace="0em" rspace="0em">​</mo><mi>d</mi></mrow><mo>,</mo><msub><mi>p</mi><mrow><mi>c</mi><mo lspace="0em" rspace="0em">​</mo><mi>u</mi><mo lspace="0em" rspace="0em">​</mo><mi>r</mi><mo lspace="0em" rspace="0em">​</mo><mi>r</mi></mrow></msub><mo stretchy="false">)</mo></mrow></mrow></mrow><annotation encoding="application/x-tex">O.\text{update}(ptCloud,p_{curr})</annotation></semantics></math>
+</div>
+<div class="ltx_listingline" id="alg1.l5">
+<span class="ltx_tag ltx_tag_listingline"><span class="ltx_text" style="font-size:80%;">5:</span></span> <span class="ltx_text ltx_font_bold">пока</span> Истина <span class="ltx_text ltx_font_bold">делать</span>
+</div>
+<div class="ltx_listingline" id="alg1.l6">
+<span class="ltx_tag ltx_tag_listingline"><span class="ltx_text" style="font-size:80%;">6:</span></span>  Выбрать набор поз <math alttext="P=\{p_{i}\}_{i=0}^{N}" class="ltx_Math" display="inline" id="alg1.l6.m1"><semantics><mrow><mi>P</mi><mo>=</mo><msubsup><mrow><mo stretchy="false">{</mo><msub><mi>p</mi><mi>i</mi></msub><mo stretchy="false">}</mo></mrow><mrow><mi>i</mi><mo>=</mo><mn>0</mn></mrow><mi>N</mi></msubsup></mrow><annotation encoding="application/x-tex">P=\{p_{i}\}_{i=0}^{N}</annotation></semantics></math> использование <math alttext="\text{PoseSampler}(S,O)" class="ltx_Math" display="inline" id="alg1.l6.m2"><semantics><mrow><mtext>PoseSampler</mtext><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><mi>S</mi><mo>,</mo><mi>O</mi><mo stretchy="false">)</mo></mrow></mrow><annotation encoding="application/x-tex">\text{PoseSampler}(S,O)</annotation></semantics></math>
+</div>
+<div class="ltx_listingline" id="alg1.l7">
+<span class="ltx_tag ltx_tag_listingline"><span class="ltx_text" style="font-size:80%;">7:</span></span>  <math alttext="p^{*}=\max_{p\in P}\text{PoseScore}(p,S,O)" class="ltx_Math" display="inline" id="alg1.l7.m1"><semantics><mrow><msup><mi>p</mi><mo>∗</mo></msup><mo>=</mo><mrow><mrow><msub><mi>max</mi><mrow><mi>p</mi><mo>∈</mo><mi>P</mi></mrow></msub><mo lspace="0.167em">⁡</mo><mtext>PoseScore</mtext></mrow><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><mi>p</mi><mo>,</mo><mi>S</mi><mo>,</mo><mi>O</mi><mo stretchy="false">)</mo></mrow></mrow></mrow><annotation encoding="application/x-tex">p^{*}=\max_{p\in P}\text{PoseScore}(p,S,O)</annotation></semantics></math>
+</div>
+<div class="ltx_listingline" id="alg1.l8">
+<span class="ltx_tag ltx_tag_listingline"><span class="ltx_text" style="font-size:80%;">8:</span></span>  <span class="ltx_text ltx_font_bold">если</span> <math alttext="\text{PoseScore}(p^{*},S,O)&lt;\tau" class="ltx_Math" display="inline" id="alg1.l8.m1"><semantics><mrow><mrow><mtext>PoseScore</mtext><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><msup><mi>p</mi><mo>∗</mo></msup><mo>,</mo><mi>S</mi><mo>,</mo><mi>O</mi><mo stretchy="false">)</mo></mrow></mrow><mo>&lt;</mo><mi>τ</mi></mrow><annotation encoding="application/x-tex">\text{PoseScore}(p^{*},S,O)&lt;\tau</annotation></semantics></math> <span class="ltx_text ltx_font_bold">тогда</span>
+</div>
+<div class="ltx_listingline" id="alg1.l9">
+<span class="ltx_tag ltx_tag_listingline"><span class="ltx_text" style="font-size:80%;">9:</span></span>   Завершить исследование
+
+</div>
+<div class="ltx_listingline" id="alg1.l10">
+<span class="ltx_tag ltx_tag_listingline"><span class="ltx_text" style="font-size:80%;">10:</span></span>  <span class="ltx_text ltx_font_bold">конец</span> <span class="ltx_text ltx_font_bold">если</span>
+</div>
+<div class="ltx_listingline" id="alg1.l11">
+<span class="ltx_tag ltx_tag_listingline"><span class="ltx_text" style="font-size:80%;">11:</span></span>  Начать навигацию к позе <math alttext="p^{*}" class="ltx_Math" display="inline" id="alg1.l11.m1"><semantics><msup><mi>p</mi><mo>∗</mo></msup><annotation encoding="application/x-tex">p^{*}</annotation></semantics></math>
+</div>
+<div class="ltx_listingline" id="alg1.l12">
+<span class="ltx_tag ltx_tag_listingline"><span class="ltx_text" style="font-size:80%;">12:</span></span>  <span class="ltx_text ltx_font_bold">пока</span> <math alttext="p^{*}" class="ltx_Math" display="inline" id="alg1.l12.m1"><semantics><msup><mi>p</mi><mo>∗</mo></msup><annotation encoding="application/x-tex">p^{*}</annotation></semantics></math> не достигнуто <span class="ltx_text ltx_font_bold">делать</span>
+</div>
+<div class="ltx_listingline" id="alg1.l13">
+<span class="ltx_tag ltx_tag_listingline"><span class="ltx_text" style="font-size:80%;">13:</span></span>   Получить изображение <math alttext="img" class="ltx_Math" display="inline" id="alg1.l13.m1"><semantics><mrow><mi>i</mi><mo lspace="0em" rspace="0em">​</mo><mi>m</mi><mo lspace="0em" rspace="0em">​</mo><mi>g</mi></mrow><annotation encoding="application/x-tex">img</annotation></semantics></math>, облачко точек <math alttext="ptCloud" class="ltx_Math" display="inline" id="alg1.l13.m2"><semantics><mrow><mi>p</mi><mo lspace="0em" rspace="0em">​</mo><mi>t</mi><mo lspace="0em" rspace="0em">​</mo><mi>C</mi><mo lspace="0em" rspace="0em">​</mo><mi>l</mi><mo lspace="0em" rspace="0em">​</mo><mi>o</mi><mo lspace="0em" rspace="0em">​</mo><mi>u</mi><mo lspace="0em" rspace="0em">​</mo><mi>d</mi></mrow><annotation encoding="application/x-tex">ptCloud</annotation></semantics></math>, и текущая поза <math alttext="p_{curr}" class="ltx_Math" display="inline" id="alg1.l13.m3"><semantics><msub><mi>p</mi><mrow><mi>c</mi><mo lspace="0em" rspace="0em">​</mo><mi>u</mi><mo lspace="0em" rspace="0em">​</mo><mi>r</mi><mo lspace="0em" rspace="0em">​</mo><mi>r</mi></mrow></msub><annotation encoding="application/x-tex">p_{curr}</annotation></semantics></math> от робота
+
+</div>
+<div class="ltx_listingline" id="alg1.l14">
+<span class="ltx_tag ltx_tag_listingline"><span class="ltx_text" style="font-size:80%;">14:</span></span>   <math alttext="S.\text{update}(img,ptCloud,p_{curr})" class="ltx_Math" display="inline" id="alg1.l14.m1"><semantics><mrow><mi>S</mi><mo lspace="0em" rspace="0.167em">.</mo><mrow><mtext>update</mtext><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><mrow><mi>i</mi><mo lspace="0em" rspace="0em">​</mo><mi>m</mi><mo lspace="0em" rspace="0em">​</mo><mi>g</mi></mrow><mo>,</mo><mrow><mi>p</mi><mo lspace="0em" rspace="0em">​</mo><mi>t</mi><mo lspace="0em" rspace="0em">​</mo><mi>C</mi><mo lspace="0em" rspace="0em">​</mo><mi>l</mi><mo lspace="0em" rspace="0em">​</mo><mi>o</mi><mo lspace="0em" rspace="0em">​</mo><mi>u</mi><mo lspace="0em" rspace="0em">​</mo><mi>d</mi></mrow><mo>,</mo><msub><mi>p</mi><mrow><mi>c</mi><mo lspace="0em" rspace="0em">​</mo><mi>u</mi><mo lspace="0em" rspace="0em">​</mo><mi>r</mi><mo lspace="0em" rspace="0em">​</mo><mi>r</mi></mrow></msub><mo stretchy="false">)</mo></mrow></mrow></mrow><annotation encoding="application/x-tex">S.\text{update}(img,ptCloud,p_{curr})</annotation></semantics></math>
+</div>
+<div class="ltx_listingline" id="alg1.l15">
+<span class="ltx_tag ltx_tag_listingline"><span class="ltx_text" style="font-size:80%;">15:</span></span>   <math alttext="O.\text{update}(ptCloud,p_{curr})" class="ltx_Math" display="inline" id="alg1.l15.m1"><semantics><mrow><mi>O</mi><mo lspace="0em" rspace="0.167em">.</mo><mrow><mtext>update</mtext><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><mrow><mi>p</mi><mo lspace="0em" rspace="0em">​</mo><mi>t</mi><mo lspace="0em" rspace="0em">​</mo><mi>C</mi><mo lspace="0em" rspace="0em">​</mo><mi>l</mi><mo lspace="0em" rspace="0em">​</mo><mi>o</mi><mo lspace="0em" rspace="0em">​</mo><mi>u</mi><mo lspace="0em" rspace="0em">​</mo><mi>d</mi></mrow><mo>,</mo><msub><mi>p</mi><mrow><mi>c</mi><mo lspace="0em" rspace="0em">​</mo><mi>u</mi><mo lspace="0em" rspace="0em">​</mo><mi>r</mi><mo lspace="0em" rspace="0em">​</mo><mi>r</mi></mrow></msub><mo stretchy="false">)</mo></mrow></mrow></mrow><annotation encoding="application/x-tex">O.\text{update}(ptCloud,p_{curr})</annotation></semantics></math>
+</div>
+<div class="ltx_listingline" id="alg1.l16">
+<span class="ltx_tag ltx_tag_listingline"><span class="ltx_text" style="font-size:80%;">16:</span></span>  <span class="ltx_text ltx_font_bold">конец</span> <span class="ltx_text ltx_font_bold">пока</span>
+</div>
+<div class="ltx_listingline" id="alg1.l17">
+<span class="ltx_tag ltx_tag_listingline"><span class="ltx_text" style="font-size:80%;">17:</span></span> <span class="ltx_text ltx_font_bold">конец</span> <span class="ltx_text ltx_font_bold">пока</span>
+</div>
+</div>
+</figure>
+<section class="ltx_subsection" id="S4.SS1">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">IV-A </span><span class="ltx_text ltx_font_italic">Оценка позы</span>
+</h3>
+<div class="ltx_para" id="S4.SS1.p1">
+<p class="ltx_p">Позиции оцениваются в соответствии с количеством информации, которую можно получить в этой позиции.  
+Мы используем энтропию в качестве прокси для этого, поощряя робота исследовать области карты, в которых он наиболее не уверен. В процессе исследования семантическая карта оценок постоянно обновляется путем извлечения плотных семантических признаков из текущего наблюдения изображения. Эти признаки затем связываются с различными точками в облаке точек ptCloud.  
+Поскольку 3D-точки теперь представляют семантические признаки, они проецируются на 2D семантическую карту, чтобы связать каждую ячейку с признаком.  
+(Подробности этой процедуры можно найти в <cite class="ltx_cite ltx_citemacro_cite">[<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib4" title="">4</a>]</cite>.)  
+Семантические признаки извлекаются из изображения img с использованием модели машинного обучения <math alttext="h=f\circ g" class="ltx_Math" display="inline" id="S4.SS1.p1.m1"><semantics><mrow><mi>h</mi><mo>=</mo><mrow><mi>f</mi><mo lspace="0.222em" rspace="0.222em">∘</mo><mi>g</mi></mrow></mrow><annotation encoding="application/x-tex">h=f\circ g</annotation></semantics></math>, которая может быть разложена на извлекатель признаков <math alttext="f" class="ltx_Math" display="inline" id="S4.SS1.p1.m2"><semantics><mi>f</mi><annotation encoding="application/x-tex">f</annotation></semantics></math> и классификатор <math alttext="g" class="ltx_Math" display="inline" id="S4.SS1.p1.m3"><semantics><mi>g</mi><annotation encoding="application/x-tex">g</annotation></semantics></math>.  
+Пусть <math alttext="g" class="ltx_Math" display="inline" id="S4.SS1.p1.m4"><semantics><mi>g</mi><annotation encoding="application/x-tex">g</annotation></semantics></math> способен классифицировать <math alttext="M" class="ltx_Math" display="inline" id="S4.SS1.p1.m5"><semantics><mi>M</mi><annotation encoding="application/x-tex">M</annotation></semantics></math> классов.  
+Признаки, хранящиеся в нашей семантической карте, извлекаются из <math alttext="f" class="ltx_Math" display="inline" id="S4.SS1.p1.m6"><semantics><mi>f</mi><annotation encoding="application/x-tex">f</annotation></semantics></math>.  
+Во всех наших экспериментах мы используем DinoV2 <cite class="ltx_cite ltx_citemacro_cite">[<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib19" title="">19</a>]</cite> для извлечения признаков и линейный классификатор, дообученный на наборе данных ADE20K <cite class="ltx_cite ltx_citemacro_cite">[<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib20" title="">20</a>]</cite>.  
+Остальная часть раздела подробно описывает механизм оценки..</p>
+</div>
+<section class="ltx_subsubsection" id="S4.SS1.SSS1">
+<h4 class="ltx_title ltx_title_subsubsection">
+<span class="ltx_tag ltx_tag_subsubsection">IV-A1 </span>Оценка признаков</h4>
+<div class="ltx_para" id="S4.SS1.SSS1.p1">
+<p class="ltx_p">Каждая ячейка в семантической карте содержит вектор семантических признаков, который кодирует внешний вид этого места.  
+Качество каждого семантического признака, связанного с конкретной ячейкой, меняется со временем, по мере изменения соответствующей точки обзора.  
+Для оценки качества семантического признака вычисляется энтропия предсказания каждой ячейки.  
+Используя классификационную голову <math alttext="g" class="ltx_Math" display="inline" id="S4.SS1.SSS1.p1.m1"><semantics><mi>g</mi><annotation encoding="application/x-tex">g</annotation></semantics></math>, которая классифицирует <math alttext="M" class="ltx_Math" display="inline" id="S4.SS1.SSS1.p1.m2"><semantics><mi>M</mi><annotation encoding="application/x-tex">M</annotation></semantics></math> классов, оценка для семантического признака <math alttext="x" class="ltx_Math" display="inline" id="S4.SS1.SSS1.p1.m3"><semantics><mi>x</mi><annotation encoding="application/x-tex">x</annotation></semantics></math> равна</p>
+<table class="ltx_equation ltx_eqn_table" id="S4.E1">
+<tbody><tr class="ltx_equation ltx_eqn_row ltx_align_baseline">
+<td class="ltx_eqn_cell ltx_eqn_center_padleft"></td>
+<td class="ltx_eqn_cell ltx_align_center"><math alttext="s(x)=\frac{H(g(x))}{H(\mathcal{U}(M))}\;," class="ltx_Math" display="block" id="S4.E1.m1"><semantics><mrow><mrow><mrow><mi>s</mi><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo></mrow></mrow><mo>=</mo><mfrac><mrow><mi>H</mi><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><mrow><mi>g</mi><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo></mrow></mrow><mo stretchy="false">)</mo></mrow></mrow><mrow><mi>H</mi><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><mrow><mi class="ltx_font_mathcaligraphic">𝒰</mi><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><mi>M</mi><mo stretchy="false">)</mo></mrow></mrow><mo stretchy="false">)</mo></mrow></mrow></mfrac></mrow><mo lspace="0.280em">,</mo></mrow><annotation encoding="application/x-tex">s(x)=\frac{H(g(x))}{H(\mathcal{U}(M))}\;,</annotation></semantics></math></td>
+<td class="ltx_eqn_cell ltx_eqn_center_padright"></td>
+<td class="ltx_eqn_cell ltx_eqn_eqno ltx_align_middle ltx_align_right" rowspan="1"><span class="ltx_tag ltx_tag_equation ltx_align_right">(1)</span></td>
+</tr></tbody>
+</table>
+<p class="ltx_p">где <math alttext="H" class="ltx_Math" display="inline" id="S4.SS1.SSS1.p1.m4"><semantics><mi>H</mi><annotation encoding="application/x-tex">H</annotation></semantics></math> — энтропия Шеннона, а <math alttext="\mathcal{U}" class="ltx_Math" display="inline" id="S4.SS1.SSS1.p1.m5"><semantics><mi class="ltx_font_mathcaligraphic">𝒰</mi><annotation encoding="application/x-tex">\mathcal{U}</annotation></semantics></math> — равномерное распределение.  
+Оценка нормализуется по максимальной энтропии, чтобы находиться в диапазоне <math alttext="[0,1]" class="ltx_Math" display="inline" id="S4.SS1.SSS1.p1.m6"><semantics><mrow><mo stretchy="false">[</mo><mn>0</mn><mo>,</mo><mn>1</mn><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">[0,1]</annotation></semantics></math>, поскольку максимальная энтропия может произвольно увеличиваться с ростом <math alttext="M" class="ltx_Math" display="inline" id="S4.SS1.SSS1.p1.m7"><semantics><mi>M</mi><annotation encoding="application/x-tex">M</annotation></semantics></math>.  
+Любая ячейка без семантической характеристики получает оценку <math alttext="1" class="ltx_Math" display="inline" id="S4.SS1.SSS1.p1.m8"><semantics><mn>1</mn><annotation encoding="application/x-tex">1</annotation></semantics></math>, что указывает на максимальную неопределённость из-за отсутствия наблюдений в ячейке.  
+После вычисления этих оценок для каждой ячейки в семантической карте, потенциальные виды могут быть ранжированы по среднему значению оценок отдельных ячеек, видимых с данной точки обзора..</p>
+</div>
+</section>
+<section class="ltx_subsubsection" id="S4.SS1.SSS2">
+<h4 class="ltx_title ltx_title_subsubsection">
+<span class="ltx_tag ltx_tag_subsubsection">IV-A2 </span>Маска видимости</h4>
+<div class="ltx_para" id="S4.SS1.SSS2.p1">
+<p class="ltx_p">Мы требуем, чтобы при оценке данной позы учитывались только те локации, которые видимы из этой позы.  
+Для обеспечения этого используется алгоритм трассировки лучей, аналогичный <cite class="ltx_cite ltx_citemacro_cite">[<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib12" title="">12</a>]</cite>, который строит маску обзора клеток, видимых из конкретной позы.  
+Пример такой маски показан на рисунке <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2504.03629#S4.F1" title="Figure 1 ‣ IV-A2 Visibility Mask ‣ IV-A Pose Scoring ‣ IV Proposed Approach ‣ SeGuE: Semantic Guided Exploration for Mobile Robots"><span class="ltx_text ltx_ref_tag">1</span></a>.  
+На рисунке в усреднении участвуют только клетки, выделенные серым цветом; все остальные клетки игнорируются.  
+Это гарантирует, что общая оценка позы не будет искажена отдельными подсчетами, полученными из клеток, не несущих новой информации..</p>
+</div>
+<figure class="ltx_figure" id="S4.F1"><img alt="Refer to caption" class="ltx_graphics ltx_centering ltx_img_square" height="364" id="S4.F1.g1" src="./[2504.03629] SeGuE_ Semantic Guided Exploration for Mobile Robots_files/view_mask.png" width="359"/>
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure"><span class="ltx_text" style="font-size:90%;">Figure 1</span>: </span>Пример маски обзора, сгенерированной нашим алгоритмом трассировки лучей. Известные препятствия показаны черным, а маска обзора — серым.</figcaption>
+</figure>
+</section>
+<section class="ltx_subsubsection" id="S4.SS1.SSS3">
+<h4 class="ltx_title ltx_title_subsubsection">
+<span class="ltx_tag ltx_tag_subsubsection">IV-A3 </span>Отслеживание сходимости признаков</h4>
+<div class="ltx_para" id="S4.SS1.SSS3.p1">
+<p class="ltx_p">Даже после сбора нескольких наблюдений некоторые ячейки могут по-прежнему иметь высокую энтропию из-за алеторической неопределённости, присутствующей в некоторых классах.  
+Таким образом, в случаях, когда дополнительные наблюдения не улучшат оценку семантической характеристики, любое новое наблюдение не должно вносить вклад в вычисление оценки позы.  
+Это может помочь предотвратить эксплуатацию по своей природе неопределённых ячеек.  
+Для решения этой задачи оценка характеристики каждой ячейки отслеживается во времени и контролируется на сходимость..</p>
+</div>
+<div class="ltx_para" id="S4.SS1.SSS3.p2">
+<p class="ltx_p">Для определения сходимости оценки признака используется тест сходимости по отношению.  
+Во время исследования, когда значение оценки признака для несошедшейся ячейки обновляется, вычисляется отношение <math alttext="\frac{s_{0}}{s_{1}}" class="ltx_Math" display="inline" id="S4.SS1.SSS3.p2.m1"><semantics><mfrac><msub><mi>s</mi><mn>0</mn></msub><msub><mi>s</mi><mn>1</mn></msub></mfrac><annotation encoding="application/x-tex">\frac{s_{0}}{s_{1}}</annotation></semantics></math>, где <math alttext="s_{0}" class="ltx_Math" display="inline" id="S4.SS1.SSS3.p2.m2"><semantics><msub><mi>s</mi><mn>0</mn></msub><annotation encoding="application/x-tex">s_{0}</annotation></semantics></math> — предыдущая оценка, а <math alttext="s_{1}" class="ltx_Math" display="inline" id="S4.SS1.SSS3.p2.m3"><semantics><msub><mi>s</mi><mn>1</mn></msub><annotation encoding="application/x-tex">s_{1}</annotation></semantics></math> — новая оценка.  
+Если отношение меньше заданного пользователем порога (установленного здесь в <math alttext="1.1" class="ltx_Math" display="inline" id="S4.SS1.SSS3.p2.m4"><semantics><mn>1.1</mn><annotation encoding="application/x-tex">1.1</annotation></semantics></math>), то оценка для этой ячейки считается сошедшейся.  
+Сошедшиеся признаки могут по-прежнему обновляться, если этот признак случайно наблюдается во время исследования, но после сходимости оценки признака соответствующая ячейка больше не будет использоваться при оценке позы..</p>
+</div>
+</section>
+</section>
+<section class="ltx_subsection" id="S4.SS2">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">IV-B </span><span class="ltx_text ltx_font_italic">Выбор позы</span>
+</h3>
+<div class="ltx_para" id="S4.SS2.p1">
+<p class="ltx_p">Чтобы найти позы, которые максимизируют метрику оценки (<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2504.03629#S4.E1" title="In IV-A1 Feature Scoring ‣ IV-A Pose Scoring ‣ IV Proposed Approach ‣ SeGuE: Semantic Guided Exploration for Mobile Robots"><span class="ltx_text ltx_ref_tag">1</span></a>) и обеспечивают полное отображение семантической информации, необходимо рассмотреть разнообразные позы по всей карте.  
+Для этой цели предлагаются две стратегии выборки поз: равномерная выборка (Uniform Sampling, US) и выборка по важности (Importance Sampling, IS).  
+Обе стратегии используют одинаковый механизм оценки.  
+Независимо от метода выборки, исследование прекращается, если не найдена поза с оценкой, превышающей определённый процент от максимального возможного значения.  
+Это также является гиперпараметром, задаваемым пользователем в нашем методе.  
+Порог установлен на уровне <math alttext="5\%" class="ltx_Math" display="inline" id="S4.SS2.p1.m1"><semantics><mrow><mn>5</mn><mo>%</mo></mrow><annotation encoding="application/x-tex">5\%</annotation></semantics></math> во всех наших экспериментах..</p>
+</div>
+<section class="ltx_subsubsection" id="S4.SS2.SSS1">
+<h4 class="ltx_title ltx_title_subsubsection">
+<span class="ltx_tag ltx_tag_subsubsection">IV-B1 </span>Равномерная выборка</h4>
+<div class="ltx_para" id="S4.SS2.SSS1.p1">
+<p class="ltx_p">В первом методе позы выбираются равномерно по всей карте, а недостижимые позы отбрасываются.  
+Выборка продолжается до тех пор, пока не будет получено желаемое количество достижимых поз.  
+Затем эти позы оцениваются согласно (<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2504.03629#S4.E1" title="In IV-A1 Feature Scoring ‣ IV-A Pose Scoring ‣ IV Proposed Approach ‣ SeGuE: Semantic Guided Exploration for Mobile Robots"><span class="ltx_text ltx_ref_tag">1</span></a>).  
+Поза с наивысшим баллом выбирается как следующая для навигации..</p>
+</div>
+</section>
+<section class="ltx_subsubsection" id="S4.SS2.SSS2">
+<h4 class="ltx_title ltx_title_subsubsection">
+<span class="ltx_tag ltx_tag_subsubsection">IV-B2 </span>Важность выборки</h4>
+<div class="ltx_para" id="S4.SS2.SSS2.p1">
+<p class="ltx_p">В то время как метод US может получать позы с высокой энтропией, для оценки необходимо рассмотреть большое количество образцов, что на практике может быть неэффективно. Вдохновляясь <cite class="ltx_cite ltx_citemacro_cite">[<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib21" title="">21</a>]</cite>, мы также реализуем подход выборки на основе оптимизации с помощью фильтра частиц. Этот метод равномерно выбирает начальный набор поз среди достижимых поз, которые используются для подгонки смеси гауссовских моделей, где вероятность каждой позы прямо пропорциональна её оценке (<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2504.03629#S4.E1" title="In IV-A1 Feature Scoring ‣ IV-A Pose Scoring ‣ IV Proposed Approach ‣ SeGuE: Semantic Guided Exploration for Mobile Robots"><span class="ltx_text ltx_ref_tag">1</span></a>). Затем это распределение используется для выборки нового набора поз, с тем же ограничением достижимости, и процесс повторяется фиксированное число итераций. Среднее значение компоненты смеси с наивысшей оценкой принимается как следующая поза для навигации..</p>
+</div>
+</section>
+</section>
+</section>
+<section class="ltx_section" id="S5">
+<h2 class="ltx_title ltx_title_section">
+<span class="ltx_tag ltx_tag_section">V </span><span class="ltx_text ltx_font_smallcaps">Эксперименты</span>
+</h2>
+<div class="ltx_para" id="S5.p1">
+<p class="ltx_p">Мы оцениваем SeGuE как в смоделированных, так и в реальных условиях с использованием колесного мобильного робота.  
+Весь программный комплекс написан в рамках Robot Operating System (ROS).  
+Картографирование и оценка одометрии для локализации выполняются с использованием 3D LiDAR информации через <cite class="ltx_cite ltx_citemacro_cite">[<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib22" title="">22</a>]</cite>.  
+Информация о точечных облаках также проецируется на плоскость земли для получения 2D сетки занятости для планирования движения.  
+Навигация по путевым точкам осуществляется с помощью встроенного пакета ROS move_base.  
+Особенности сцены извлекаются с помощью RGB камеры..</p>
+</div>
+<div class="ltx_para" id="S5.p2">
+<p class="ltx_p">Для оценки качества сгенерированных семантических карт мы оцениваем покрытие карты и среднюю энтропию.  
+Покрытие карты дает представление о доле признаков внешнего вида, которые были зафиксированы в процессе исследования.  
+Оно вычисляется как процент ячеек карты занятости, которые либо свободны, либо заняты, и имеют соответствующий семантический признак.  
+Более высокие значения покрытия карты считаются лучшими.  
+Средняя энтропия указывает на качество наблюдений по всей карте.  
+Средняя энтропия вычисляет энтропию предсказания всей семантической карты признаков.  
+Любая ячейка, наблюдаемая на карте занятости без соответствующего семантического признака, считается имеющей максимальную энтропию.  
+Низкие значения средней энтропии считаются лучшими..</p>
+</div>
+<section class="ltx_subsection" id="S5.SS1">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">V-A </span><span class="ltx_text ltx_font_italic">Результаты моделирования</span>
+</h3>
+<div class="ltx_para" id="S5.SS1.p1">
+<p class="ltx_p">Мы моделируем Clearpath Jackal в Gazebo<cite class="ltx_cite ltx_citemacro_cite">[<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib23" title="">23</a>]</cite> и соответствующие датчики, используя данные калибровки, доступные в <cite class="ltx_cite ltx_citemacro_cite">[<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib24" title="">24</a>]</cite>.  
+Вся симуляция проводится на настольном компьютере с процессором Intel i7, видеокартой NVIDIA RTX 3090 и 32 ГБ оперативной памяти.  
+Мы показываем результаты в двух различных средах.  
+Среда Small House воспроизводит жилой дом, а среда Bookstore — торговое помещение.  
+Для каждой среды начальные условия сохраняются фиксированными для SeGuE и каждого базового метода..</p>
+</div>
+<div class="ltx_para" id="S5.SS1.p2">
+<p class="ltx_p">Мы сравниваем SeGuE, используя как варианты US, так и IS, с представительным методом исследования на основе фронтира <cite class="ltx_cite ltx_citemacro_cite">[<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib25" title="">25</a>]</cite> и представительным методом выбора следующего лучшего обзора (RRG-NBV) <cite class="ltx_cite ltx_citemacro_cite">[<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib17" title="">17</a>]</cite>.  
+Мы также сравниваем SeGuE с базовой линией No Score, где нашу метрику оценки карты заменяем простой метрикой, при которой каждая неосмотренная ячейка имеет оценку один, а каждая осмотренная ячейка — ноль.  
+Оценка обзора и важностная выборка остаются фиксированными..</p>
+</div>
+<div class="ltx_para" id="S5.SS1.p3">
+<p class="ltx_p">Метрики качества карты для каждого метода приведены в Таблице <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2504.03629#S5.T1" title="TABLE I ‣ V-A Simulation Results ‣ V Experiments ‣ SeGuE: Semantic Guided Exploration for Mobile Robots"><span class="ltx_text ltx_ref_tag">I</span></a>.  
+Можно наблюдать, что в целом подходы на основе фронтира и RRG-NBV показывают низкую эффективность.  
+Это можно объяснить тем, что не учитываются признаки внешнего вида, а вместо этого отображается геометрия сцены.  
+Как SeGuE, так и базовые методы No Score значительно лучше с более низкой средней энтропией и более высоким покрытием семантических признаков, что демонстрирует необходимость методов исследования, учитывающих семантику сцены.  
+Наш метод оценки семантических признаков помогает снизить среднюю энтропию при сочетании с любым из методов выборки..</p>
+</div>
+<figure class="ltx_table" id="S5.T1">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_table"><span class="ltx_text" style="font-size:90%;">TABLE I</span>: </span>Результаты моделирования.</figcaption>
+<div class="ltx_inline-block ltx_align_center ltx_transformed_outer" style="width:433.6pt;height:132.2pt;vertical-align:-0.9pt;"><span class="ltx_transformed_inner" style="transform:translate(-20.9pt,6.3pt) scale(0.911902625373567,0.911902625373567) ;">
+<table class="ltx_tabular ltx_guessed_headers ltx_align_middle">
+<thead class="ltx_thead">
+<tr class="ltx_tr">
+<th class="ltx_td ltx_th ltx_th_row ltx_border_tt" style="padding-top:2.5pt;padding-bottom:2.5pt;"></th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt" colspan="2" style="padding-top:2.5pt;padding-bottom:2.5pt;">Small House</th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt" colspan="2" style="padding-top:2.5pt;padding-bottom:2.5pt;">Bookstore</th>
+</tr>
+<tr class="ltx_tr">
+<th class="ltx_td ltx_th ltx_th_row" style="padding-top:2.5pt;padding-bottom:2.5pt;"></th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_t" style="padding-top:2.5pt;padding-bottom:2.5pt;">Coverage <math alttext="\uparrow" class="ltx_Math" display="inline" id="S5.T1.m1"><semantics><mo stretchy="false">↑</mo><annotation encoding="application/x-tex">\uparrow</annotation></semantics></math>
+</th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_t" style="padding-top:2.5pt;padding-bottom:2.5pt;">Average Entropy <math alttext="\downarrow" class="ltx_Math" display="inline" id="S5.T1.m2"><semantics><mo stretchy="false">↓</mo><annotation encoding="application/x-tex">\downarrow</annotation></semantics></math>
+</th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_t" style="padding-top:2.5pt;padding-bottom:2.5pt;">Coverage <math alttext="\uparrow" class="ltx_Math" display="inline" id="S5.T1.m3"><semantics><mo stretchy="false">↑</mo><annotation encoding="application/x-tex">\uparrow</annotation></semantics></math>
+</th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_t" style="padding-top:2.5pt;padding-bottom:2.5pt;">Average Entropy <math alttext="\downarrow" class="ltx_Math" display="inline" id="S5.T1.m4"><semantics><mo stretchy="false">↓</mo><annotation encoding="application/x-tex">\downarrow</annotation></semantics></math>
+</th>
+</tr>
+</thead>
+<tbody class="ltx_tbody">
+<tr class="ltx_tr">
+<th class="ltx_td ltx_align_center ltx_th ltx_th_row ltx_border_t" style="padding-top:2.5pt;padding-bottom:2.5pt;">Frontiers Based <cite class="ltx_cite ltx_citemacro_cite">[<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib25" title="">25</a>]</cite>
+</th>
+<td class="ltx_td ltx_align_center ltx_border_t" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math alttext="0.303" class="ltx_Math" display="inline" id="S5.T1.m5"><semantics><mn>0.303</mn><annotation encoding="application/x-tex">0.303</annotation></semantics></math></td>
+<td class="ltx_td ltx_align_center ltx_border_t" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math alttext="3.619" class="ltx_Math" display="inline" id="S5.T1.m6"><semantics><mn>3.619</mn><annotation encoding="application/x-tex">3.619</annotation></semantics></math></td>
+<td class="ltx_td ltx_align_center ltx_border_t" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math alttext="0.477" class="ltx_Math" display="inline" id="S5.T1.m7"><semantics><mn>0.477</mn><annotation encoding="application/x-tex">0.477</annotation></semantics></math></td>
+<td class="ltx_td ltx_align_center ltx_border_t" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math alttext="2.862" class="ltx_Math" display="inline" id="S5.T1.m8"><semantics><mn>2.862</mn><annotation encoding="application/x-tex">2.862</annotation></semantics></math></td>
+</tr>
+<tr class="ltx_tr">
+<th class="ltx_td ltx_align_center ltx_th ltx_th_row" style="padding-top:2.5pt;padding-bottom:2.5pt;">RRG-NBV <cite class="ltx_cite ltx_citemacro_cite">[<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib17" title="">17</a>]</cite>
+</th>
+<td class="ltx_td ltx_align_center" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math alttext="0.730" class="ltx_Math" display="inline" id="S5.T1.m9"><semantics><mn>0.730</mn><annotation encoding="application/x-tex">0.730</annotation></semantics></math></td>
+<td class="ltx_td ltx_align_center" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math alttext="1.643" class="ltx_Math" display="inline" id="S5.T1.m10"><semantics><mn>1.643</mn><annotation encoding="application/x-tex">1.643</annotation></semantics></math></td>
+<td class="ltx_td ltx_align_center" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math alttext="0.255" class="ltx_Math" display="inline" id="S5.T1.m11"><semantics><mn>0.255</mn><annotation encoding="application/x-tex">0.255</annotation></semantics></math></td>
+<td class="ltx_td ltx_align_center" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math alttext="3.917" class="ltx_Math" display="inline" id="S5.T1.m12"><semantics><mn>3.917</mn><annotation encoding="application/x-tex">3.917</annotation></semantics></math></td>
+</tr>
+<tr class="ltx_tr">
+<th class="ltx_td ltx_align_center ltx_th ltx_th_row" style="padding-top:2.5pt;padding-bottom:2.5pt;">No Score, US</th>
+<td class="ltx_td ltx_align_center" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math alttext="0.905" class="ltx_Math" display="inline" id="S5.T1.m13"><semantics><mn>0.905</mn><annotation encoding="application/x-tex">0.905</annotation></semantics></math></td>
+<td class="ltx_td ltx_align_center" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math alttext="0.806" class="ltx_Math" display="inline" id="S5.T1.m14"><semantics><mn>0.806</mn><annotation encoding="application/x-tex">0.806</annotation></semantics></math></td>
+<td class="ltx_td ltx_align_center" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math alttext="0.925" class="ltx_Math" display="inline" id="S5.T1.m15"><semantics><mn>0.925</mn><annotation encoding="application/x-tex">0.925</annotation></semantics></math></td>
+<td class="ltx_td ltx_align_center" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math alttext="0.801" class="ltx_Math" display="inline" id="S5.T1.m16"><semantics><mn>0.801</mn><annotation encoding="application/x-tex">0.801</annotation></semantics></math></td>
+</tr>
+<tr class="ltx_tr">
+<th class="ltx_td ltx_align_center ltx_th ltx_th_row" style="padding-top:2.5pt;padding-bottom:2.5pt;">No Score, IS</th>
+<td class="ltx_td ltx_align_center" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math alttext="0.897" class="ltx_Math" display="inline" id="S5.T1.m17"><semantics><mn>0.897</mn><annotation encoding="application/x-tex">0.897</annotation></semantics></math></td>
+<td class="ltx_td ltx_align_center" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math alttext="0.842" class="ltx_Math" display="inline" id="S5.T1.m18"><semantics><mn>0.842</mn><annotation encoding="application/x-tex">0.842</annotation></semantics></math></td>
+<td class="ltx_td ltx_align_center" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math alttext="0.929" class="ltx_Math" display="inline" id="S5.T1.m19"><semantics><mn>0.929</mn><annotation encoding="application/x-tex">0.929</annotation></semantics></math></td>
+<td class="ltx_td ltx_align_center" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math alttext="0.787" class="ltx_Math" display="inline" id="S5.T1.m20"><semantics><mn>0.787</mn><annotation encoding="application/x-tex">0.787</annotation></semantics></math></td>
+</tr>
+<tr class="ltx_tr">
+<th class="ltx_td ltx_align_center ltx_th ltx_th_row" style="padding-top:2.5pt;padding-bottom:2.5pt;">SeGuE, US</th>
+<td class="ltx_td ltx_align_center" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math alttext="0.938" class="ltx_Math" display="inline" id="S5.T1.m21"><semantics><mn>0.938</mn><annotation encoding="application/x-tex">0.938</annotation></semantics></math></td>
+<td class="ltx_td ltx_align_center" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math alttext="0.673" class="ltx_Math" display="inline" id="S5.T1.m22"><semantics><mn>0.673</mn><annotation encoding="application/x-tex">0.673</annotation></semantics></math></td>
+<td class="ltx_td ltx_align_center" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math alttext="0.940" class="ltx_Math" display="inline" id="S5.T1.m23"><semantics><mn>0.940</mn><annotation encoding="application/x-tex">0.940</annotation></semantics></math></td>
+<td class="ltx_td ltx_align_center" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math alttext="0.723" class="ltx_Math" display="inline" id="S5.T1.m24"><semantics><mn>0.723</mn><annotation encoding="application/x-tex">0.723</annotation></semantics></math></td>
+</tr>
+<tr class="ltx_tr">
+<th class="ltx_td ltx_align_center ltx_th ltx_th_row ltx_border_bb" style="padding-top:2.5pt;padding-bottom:2.5pt;">SeGuE, IS</th>
+<td class="ltx_td ltx_align_center ltx_border_bb" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math alttext="0.932" class="ltx_Math" display="inline" id="S5.T1.m25"><semantics><mn>0.932</mn><annotation encoding="application/x-tex">0.932</annotation></semantics></math></td>
+<td class="ltx_td ltx_align_center ltx_border_bb" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math alttext="0.702" class="ltx_Math" display="inline" id="S5.T1.m26"><semantics><mn>0.702</mn><annotation encoding="application/x-tex">0.702</annotation></semantics></math></td>
+<td class="ltx_td ltx_align_center ltx_border_bb" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math alttext="0.939" class="ltx_Math" display="inline" id="S5.T1.m27"><semantics><mn>0.939</mn><annotation encoding="application/x-tex">0.939</annotation></semantics></math></td>
+<td class="ltx_td ltx_align_center ltx_border_bb" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math alttext="0.730" class="ltx_Math" display="inline" id="S5.T1.m28"><semantics><mn>0.730</mn><annotation encoding="application/x-tex">0.730</annotation></semantics></math></td>
+</tr>
+</tbody>
+</table>
+</span></div>
+</figure>
+<div class="ltx_para" id="S5.SS1.p4">
+<p class="ltx_p">Мы визуализируем карты, созданные в каждой среде, используя метод на основе фронтира и SeGuE на Рис. <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2504.03629#S5.F2" title="Figure 2 ‣ V-A Simulation Results ‣ V Experiments ‣ SeGuE: Semantic Guided Exploration for Mobile Robots"><span class="ltx_text ltx_ref_tag">2</span></a> (для Small House) и Рис. <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2504.03629#S5.F3" title="Figure 3 ‣ V-A Simulation Results ‣ V Experiments ‣ SeGuE: Semantic Guided Exploration for Mobile Robots"><span class="ltx_text ltx_ref_tag">3</span></a> (для Bookstore).  
+Поскольку семантические признаки существуют в высокоразмерном абстрактном пространстве признаков, мы пропускаем признаки через предсказательную голову и визуализируем предсказания классов, где каждый цвет представляет отдельный класс.  
+Можно наблюдать, что структура семантической карты признаков хорошо соответствует структуре объектов, отображённых в сетке занятости..</p>
+</div>
+<figure class="ltx_figure" id="S5.F2">
+<div class="ltx_flex_figure">
+<div class="ltx_flex_cell ltx_flex_size_1">
+<figure class="ltx_figure ltx_figure_panel ltx_align_center" id="S5.F2.sf1"><img alt="Refer to caption" class="ltx_graphics ltx_img_portrait" height="241" id="S5.F2.sf1.g1" src="./[2504.03629] SeGuE_ Semantic Guided Exploration for Mobile Robots_files/x1.png" width="143"/>
+<figcaption class="ltx_caption"><span class="ltx_tag ltx_tag_figure"><span class="ltx_text" style="font-size:90%;">(a)</span> </span></figcaption>
+</figure>
+</div>
+<div class="ltx_flex_break"></div>
+<div class="ltx_flex_cell ltx_flex_size_1">
+<figure class="ltx_figure ltx_figure_panel ltx_align_center" id="S5.F2.sf2"><img alt="Refer to caption" class="ltx_graphics ltx_img_portrait" height="240" id="S5.F2.sf2.g1" src="./[2504.03629] SeGuE_ Semantic Guided Exploration for Mobile Robots_files/x2.png" width="143"/>
+<figcaption class="ltx_caption"><span class="ltx_tag ltx_tag_figure"><span class="ltx_text" style="font-size:90%;">(b)</span> </span></figcaption>
+</figure>
+</div>
+<div class="ltx_flex_break"></div>
+<div class="ltx_flex_cell ltx_flex_size_1">
+<figure class="ltx_figure ltx_figure_panel ltx_align_center" id="S5.F2.sf3"><img alt="Refer to caption" class="ltx_graphics ltx_img_portrait" height="240" id="S5.F2.sf3.g1" src="./[2504.03629] SeGuE_ Semantic Guided Exploration for Mobile Robots_files/x3.png" width="143"/>
+<figcaption class="ltx_caption"><span class="ltx_tag ltx_tag_figure"><span class="ltx_text" style="font-size:90%;">(c)</span> </span></figcaption>
+</figure>
+</div>
+<div class="ltx_flex_break"></div>
+<div class="ltx_flex_cell ltx_flex_size_1">
+<figure class="ltx_figure ltx_figure_panel ltx_align_center" id="S5.F2.sf4"><img alt="Refer to caption" class="ltx_graphics ltx_img_portrait" height="238" id="S5.F2.sf4.g1" src="./[2504.03629] SeGuE_ Semantic Guided Exploration for Mobile Robots_files/x4.png" width="143"/>
+<figcaption class="ltx_caption"><span class="ltx_tag ltx_tag_figure"><span class="ltx_text" style="font-size:90%;">(d)</span> </span></figcaption>
+</figure>
+</div>
+</div>
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure"><span class="ltx_text" style="font-size:90%;">Figure 2</span>: </span>Визуализация результатов отображения (a-b) базового метода на основе фронтира и (c-d) SeGuE в среде Small House. Мы показываем как сетку занятости, так и семантическое предсказание, вычисленное на основе карты семантических признаков. На сетке занятости мы отображаем траекторию робота.</figcaption>
+</figure>
+<figure class="ltx_figure" id="S5.F3">
+<div class="ltx_flex_figure">
+<div class="ltx_flex_cell ltx_flex_size_1">
+<figure class="ltx_figure ltx_figure_panel ltx_align_center" id="S5.F3.sf1"><img alt="Refer to caption" class="ltx_graphics ltx_img_square" height="134" id="S5.F3.sf1.g1" src="./[2504.03629] SeGuE_ Semantic Guided Exploration for Mobile Robots_files/x5.png" width="143"/>
+<figcaption class="ltx_caption"><span class="ltx_tag ltx_tag_figure"><span class="ltx_text" style="font-size:90%;">(a)</span> </span></figcaption>
+</figure>
+</div>
+<div class="ltx_flex_break"></div>
+<div class="ltx_flex_cell ltx_flex_size_1">
+<figure class="ltx_figure ltx_figure_panel ltx_align_center" id="S5.F3.sf2"><img alt="Refer to caption" class="ltx_graphics ltx_img_square" height="136" id="S5.F3.sf2.g1" src="./[2504.03629] SeGuE_ Semantic Guided Exploration for Mobile Robots_files/x6.png" width="143"/>
+<figcaption class="ltx_caption"><span class="ltx_tag ltx_tag_figure"><span class="ltx_text" style="font-size:90%;">(b)</span> </span></figcaption>
+</figure>
+</div>
+<div class="ltx_flex_break"></div>
+<div class="ltx_flex_cell ltx_flex_size_1">
+<figure class="ltx_figure ltx_figure_panel ltx_align_center" id="S5.F3.sf3"><img alt="Refer to caption" class="ltx_graphics ltx_img_square" height="134" id="S5.F3.sf3.g1" src="./[2504.03629] SeGuE_ Semantic Guided Exploration for Mobile Robots_files/x7.png" width="143"/>
+<figcaption class="ltx_caption"><span class="ltx_tag ltx_tag_figure"><span class="ltx_text" style="font-size:90%;">(c)</span> </span></figcaption>
+</figure>
+</div>
+<div class="ltx_flex_break"></div>
+<div class="ltx_flex_cell ltx_flex_size_1">
+<figure class="ltx_figure ltx_figure_panel ltx_align_center" id="S5.F3.sf4"><img alt="Refer to caption" class="ltx_graphics ltx_img_square" height="136" id="S5.F3.sf4.g1" src="./[2504.03629] SeGuE_ Semantic Guided Exploration for Mobile Robots_files/x8.png" width="143"/>
+<figcaption class="ltx_caption"><span class="ltx_tag ltx_tag_figure"><span class="ltx_text" style="font-size:90%;">(d)</span> </span></figcaption>
+</figure>
+</div>
+</div>
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure"><span class="ltx_text" style="font-size:90%;">Figure 3</span>: </span>Визуализация результатов отображения (a-b) базового метода на основе фронтира и (c-d) SeGuE в среде Книжного магазина. Мы показываем как сетку занятости, так и семантический прогноз, вычисленные на основе карты семантических признаков. На сетке занятости мы отображаем траекторию робота.</figcaption>
+</figure>
+</section>
+<section class="ltx_subsection" id="S5.SS2">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">V-B </span><span class="ltx_text ltx_font_italic">Номер образца Исследование</span>
+</h3>
+<div class="ltx_para" id="S5.SS2.p1">
+<p class="ltx_p">Мы оцениваем чувствительность обоих рассмотренных методов выборки к количеству выбранных образцов в среде Small House.  
+В случае метода равномерной выборки это прямой перебор по количеству выбранных образцов.  
+Результаты этого абляционного исследования, как с нашим методом семантической оценки, так и без него, показаны в Таблице <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2504.03629#S5.T2" title="TABLE II ‣ V-B Sample Number Study ‣ V Experiments ‣ SeGuE: Semantic Guided Exploration for Mobile Robots"><span class="ltx_text ltx_ref_tag">II</span></a>.  
+Отмечаем, что в целом наш метод семантической оценки увеличивает покрытие и снижает среднюю энтропию.  
+Хотя прямой зависимости между количеством образцов и производительностью, по-видимому, не существует, мы наблюдаем, что как с нашим методом семантической оценки, так и без него, оптимальная производительность достигается при количестве образцов от 100 до 200.  
+Вероятно, это связано с тем, что слишком малое количество образцов не приближает к оптимальному результату, тогда как слишком большое количество образцов приводит к чрезмерной эксплуатации, что в целом снижает исследование..</p>
+</div>
+<figure class="ltx_table" id="S5.T2">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_table"><span class="ltx_text" style="font-size:90%;">TABLE II</span>: </span>Исследование абляции: количество образцов в США.</figcaption>
+<div class="ltx_inline-block ltx_align_center ltx_transformed_outer" style="width:433.6pt;height:170.6pt;vertical-align:-0.0pt;"><span class="ltx_transformed_inner" style="transform:translate(33.8pt,-13.3pt) scale(1.18457229653349,1.18457229653349) ;">
+<table class="ltx_tabular ltx_guessed_headers ltx_align_middle">
+<thead class="ltx_thead">
+<tr class="ltx_tr">
+<th class="ltx_td ltx_th ltx_th_row ltx_border_tt" style="padding-top:2.5pt;padding-bottom:2.5pt;"></th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt" colspan="2" style="padding-top:2.5pt;padding-bottom:2.5pt;">Semantic Score</th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt" colspan="2" style="padding-top:2.5pt;padding-bottom:2.5pt;">No Score</th>
+</tr>
+<tr class="ltx_tr">
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_th_row" style="padding-top:2.5pt;padding-bottom:2.5pt;">Samples</th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_t" style="padding-top:2.5pt;padding-bottom:2.5pt;">Coverage <math alttext="\uparrow" class="ltx_Math" display="inline" id="S5.T2.m1"><semantics><mo stretchy="false">↑</mo><annotation encoding="application/x-tex">\uparrow</annotation></semantics></math>
+</th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_t" style="padding-top:2.5pt;padding-bottom:2.5pt;">Average Entropy <math alttext="\downarrow" class="ltx_Math" display="inline" id="S5.T2.m2"><semantics><mo stretchy="false">↓</mo><annotation encoding="application/x-tex">\downarrow</annotation></semantics></math>
+</th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_t" style="padding-top:2.5pt;padding-bottom:2.5pt;">Coverage <math alttext="\uparrow" class="ltx_Math" display="inline" id="S5.T2.m3"><semantics><mo stretchy="false">↑</mo><annotation encoding="application/x-tex">\uparrow</annotation></semantics></math>
+</th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_t" style="padding-top:2.5pt;padding-bottom:2.5pt;">Average Entropy <math alttext="\downarrow" class="ltx_Math" display="inline" id="S5.T2.m4"><semantics><mo stretchy="false">↓</mo><annotation encoding="application/x-tex">\downarrow</annotation></semantics></math>
+</th>
+</tr>
+</thead>
+<tbody class="ltx_tbody">
+<tr class="ltx_tr">
+<th class="ltx_td ltx_align_center ltx_th ltx_th_row ltx_border_t" style="padding-top:2.5pt;padding-bottom:2.5pt;">10</th>
+<td class="ltx_td ltx_align_center ltx_border_t" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math alttext="0.897" class="ltx_Math" display="inline" id="S5.T2.m5"><semantics><mn>0.897</mn><annotation encoding="application/x-tex">0.897</annotation></semantics></math></td>
+<td class="ltx_td ltx_align_center ltx_border_t" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math alttext="0.842" class="ltx_Math" display="inline" id="S5.T2.m6"><semantics><mn>0.842</mn><annotation encoding="application/x-tex">0.842</annotation></semantics></math></td>
+<td class="ltx_td ltx_align_center ltx_border_t" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math alttext="0.895" class="ltx_Math" display="inline" id="S5.T2.m7"><semantics><mn>0.895</mn><annotation encoding="application/x-tex">0.895</annotation></semantics></math></td>
+<td class="ltx_td ltx_align_center ltx_border_t" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math alttext="0.850" class="ltx_Math" display="inline" id="S5.T2.m8"><semantics><mn>0.850</mn><annotation encoding="application/x-tex">0.850</annotation></semantics></math></td>
+</tr>
+<tr class="ltx_tr">
+<th class="ltx_td ltx_align_center ltx_th ltx_th_row" style="padding-top:2.5pt;padding-bottom:2.5pt;">50</th>
+<td class="ltx_td ltx_align_center" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math alttext="0.928" class="ltx_Math" display="inline" id="S5.T2.m9"><semantics><mn>0.928</mn><annotation encoding="application/x-tex">0.928</annotation></semantics></math></td>
+<td class="ltx_td ltx_align_center" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math alttext="0.711" class="ltx_Math" display="inline" id="S5.T2.m10"><semantics><mn>0.711</mn><annotation encoding="application/x-tex">0.711</annotation></semantics></math></td>
+<td class="ltx_td ltx_align_center" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math alttext="0.899" class="ltx_Math" display="inline" id="S5.T2.m11"><semantics><mn>0.899</mn><annotation encoding="application/x-tex">0.899</annotation></semantics></math></td>
+<td class="ltx_td ltx_align_center" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math alttext="0.837" class="ltx_Math" display="inline" id="S5.T2.m12"><semantics><mn>0.837</mn><annotation encoding="application/x-tex">0.837</annotation></semantics></math></td>
+</tr>
+<tr class="ltx_tr">
+<th class="ltx_td ltx_align_center ltx_th ltx_th_row" style="padding-top:2.5pt;padding-bottom:2.5pt;">100</th>
+<td class="ltx_td ltx_align_center" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math alttext="0.908" class="ltx_Math" display="inline" id="S5.T2.m13"><semantics><mn>0.908</mn><annotation encoding="application/x-tex">0.908</annotation></semantics></math></td>
+<td class="ltx_td ltx_align_center" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math alttext="0.801" class="ltx_Math" display="inline" id="S5.T2.m14"><semantics><mn>0.801</mn><annotation encoding="application/x-tex">0.801</annotation></semantics></math></td>
+<td class="ltx_td ltx_align_center" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math alttext="0.911" class="ltx_Math" display="inline" id="S5.T2.m15"><semantics><mn>0.911</mn><annotation encoding="application/x-tex">0.911</annotation></semantics></math></td>
+<td class="ltx_td ltx_align_center" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math alttext="0.775" class="ltx_Math" display="inline" id="S5.T2.m16"><semantics><mn>0.775</mn><annotation encoding="application/x-tex">0.775</annotation></semantics></math></td>
+</tr>
+<tr class="ltx_tr">
+<th class="ltx_td ltx_align_center ltx_th ltx_th_row" style="padding-top:2.5pt;padding-bottom:2.5pt;">200</th>
+<td class="ltx_td ltx_align_center" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math alttext="0.938" class="ltx_Math" display="inline" id="S5.T2.m17"><semantics><mn>0.938</mn><annotation encoding="application/x-tex">0.938</annotation></semantics></math></td>
+<td class="ltx_td ltx_align_center" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math alttext="0.673" class="ltx_Math" display="inline" id="S5.T2.m18"><semantics><mn>0.673</mn><annotation encoding="application/x-tex">0.673</annotation></semantics></math></td>
+<td class="ltx_td ltx_align_center" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math alttext="0.905" class="ltx_Math" display="inline" id="S5.T2.m19"><semantics><mn>0.905</mn><annotation encoding="application/x-tex">0.905</annotation></semantics></math></td>
+<td class="ltx_td ltx_align_center" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math alttext="0.806" class="ltx_Math" display="inline" id="S5.T2.m20"><semantics><mn>0.806</mn><annotation encoding="application/x-tex">0.806</annotation></semantics></math></td>
+</tr>
+<tr class="ltx_tr">
+<th class="ltx_td ltx_align_center ltx_th ltx_th_row" style="padding-top:2.5pt;padding-bottom:2.5pt;">500</th>
+<td class="ltx_td ltx_align_center" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math alttext="0.904" class="ltx_Math" display="inline" id="S5.T2.m21"><semantics><mn>0.904</mn><annotation encoding="application/x-tex">0.904</annotation></semantics></math></td>
+<td class="ltx_td ltx_align_center" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math alttext="0.812" class="ltx_Math" display="inline" id="S5.T2.m22"><semantics><mn>0.812</mn><annotation encoding="application/x-tex">0.812</annotation></semantics></math></td>
+<td class="ltx_td ltx_align_center" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math alttext="0.887" class="ltx_Math" display="inline" id="S5.T2.m23"><semantics><mn>0.887</mn><annotation encoding="application/x-tex">0.887</annotation></semantics></math></td>
+<td class="ltx_td ltx_align_center" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math alttext="0.903" class="ltx_Math" display="inline" id="S5.T2.m24"><semantics><mn>0.903</mn><annotation encoding="application/x-tex">0.903</annotation></semantics></math></td>
+</tr>
+<tr class="ltx_tr">
+<th class="ltx_td ltx_align_center ltx_th ltx_th_row ltx_border_bb" style="padding-top:2.5pt;padding-bottom:2.5pt;">1000</th>
+<td class="ltx_td ltx_align_center ltx_border_bb" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math alttext="0.912" class="ltx_Math" display="inline" id="S5.T2.m25"><semantics><mn>0.912</mn><annotation encoding="application/x-tex">0.912</annotation></semantics></math></td>
+<td class="ltx_td ltx_align_center ltx_border_bb" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math alttext="0.772" class="ltx_Math" display="inline" id="S5.T2.m26"><semantics><mn>0.772</mn><annotation encoding="application/x-tex">0.772</annotation></semantics></math></td>
+<td class="ltx_td ltx_align_center ltx_border_bb" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math alttext="0.895" class="ltx_Math" display="inline" id="S5.T2.m27"><semantics><mn>0.895</mn><annotation encoding="application/x-tex">0.895</annotation></semantics></math></td>
+<td class="ltx_td ltx_align_center ltx_border_bb" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math alttext="0.851" class="ltx_Math" display="inline" id="S5.T2.m28"><semantics><mn>0.851</mn><annotation encoding="application/x-tex">0.851</annotation></semantics></math></td>
+</tr>
+</tbody>
+</table>
+</span></div>
+</figure>
+<div class="ltx_para" id="S5.SS2.p2">
+<p class="ltx_p">Мы проводим то же исследование для метода IS, изменяя количество образцов, выбираемых на каждой итерации, и общее количество итераций.  
+Мы приводим количественные результаты в Таблице <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2504.03629#S5.T3" title="TABLE III ‣ V-B Sample Number Study ‣ V Experiments ‣ SeGuE: Semantic Guided Exploration for Mobile Robots"><span class="ltx_text ltx_ref_tag">III</span></a>⟧.</p>
+</div>
+<div class="ltx_para" id="S5.SS2.p3">
+<p class="ltx_p">При сравнении производительности No Score между методами сэмплинга (ср. таблицы <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2504.03629#S5.T2" title="TABLE II ‣ V-B Sample Number Study ‣ V Experiments ‣ SeGuE: Semantic Guided Exploration for Mobile Robots"><span class="ltx_text ltx_ref_tag">II</span></a> и <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2504.03629#S5.T3" title="TABLE III ‣ V-B Sample Number Study ‣ V Experiments ‣ SeGuE: Semantic Guided Exploration for Mobile Robots"><span class="ltx_text ltx_ref_tag">III</span></a>), производительность не меняется существенно.  
+Мы наблюдаем заметное улучшение, когда Семантический Скор объединён с IS, что указывает на то, что IS может лучше использовать информацию внутри нашей метрики..</p>
+</div>
+<figure class="ltx_table" id="S5.T3">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_table"><span class="ltx_text" style="font-size:90%;">TABLE III</span>: </span>Исследование абляции: количество образцов и итераций в IS.</figcaption>
+<div class="ltx_inline-block ltx_align_center ltx_transformed_outer" style="width:433.6pt;height:148.6pt;vertical-align:-0.0pt;"><span class="ltx_transformed_inner" style="transform:translate(6.8pt,-2.3pt) scale(1.03222204129241,1.03222204129241) ;">
+<table class="ltx_tabular ltx_guessed_headers ltx_align_middle">
+<thead class="ltx_thead">
+<tr class="ltx_tr">
+<th class="ltx_td ltx_th ltx_th_row ltx_border_tt" style="padding-top:2.5pt;padding-bottom:2.5pt;"></th>
+<th class="ltx_td ltx_th ltx_th_column ltx_th_row ltx_border_tt" style="padding-top:2.5pt;padding-bottom:2.5pt;"></th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt" colspan="2" style="padding-top:2.5pt;padding-bottom:2.5pt;">Semantic Score</th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt" colspan="2" style="padding-top:2.5pt;padding-bottom:2.5pt;">No Score</th>
+</tr>
+<tr class="ltx_tr">
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_th_row" style="padding-top:2.5pt;padding-bottom:2.5pt;">Iterations</th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_th_row" style="padding-top:2.5pt;padding-bottom:2.5pt;">Samples</th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_t" style="padding-top:2.5pt;padding-bottom:2.5pt;">Coverage <math alttext="\uparrow" class="ltx_Math" display="inline" id="S5.T3.m1"><semantics><mo stretchy="false">↑</mo><annotation encoding="application/x-tex">\uparrow</annotation></semantics></math>
+</th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_t" style="padding-top:2.5pt;padding-bottom:2.5pt;">Average Entropy <math alttext="\downarrow" class="ltx_Math" display="inline" id="S5.T3.m2"><semantics><mo stretchy="false">↓</mo><annotation encoding="application/x-tex">\downarrow</annotation></semantics></math>
+</th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_t" style="padding-top:2.5pt;padding-bottom:2.5pt;">Coverage <math alttext="\uparrow" class="ltx_Math" display="inline" id="S5.T3.m3"><semantics><mo stretchy="false">↑</mo><annotation encoding="application/x-tex">\uparrow</annotation></semantics></math>
+</th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_t" style="padding-top:2.5pt;padding-bottom:2.5pt;">Average Entropy <math alttext="\downarrow" class="ltx_Math" display="inline" id="S5.T3.m4"><semantics><mo stretchy="false">↓</mo><annotation encoding="application/x-tex">\downarrow</annotation></semantics></math>
+</th>
+</tr>
+</thead>
+<tbody class="ltx_tbody">
+<tr class="ltx_tr">
+<th class="ltx_td ltx_align_center ltx_th ltx_th_row ltx_border_t" style="padding-top:2.5pt;padding-bottom:2.5pt;">2</th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_row ltx_border_t" style="padding-top:2.5pt;padding-bottom:2.5pt;">50</th>
+<td class="ltx_td ltx_align_center ltx_border_t" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math alttext="0.932" class="ltx_Math" display="inline" id="S5.T3.m5"><semantics><mn>0.932</mn><annotation encoding="application/x-tex">0.932</annotation></semantics></math></td>
+<td class="ltx_td ltx_align_center ltx_border_t" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math alttext="0.702" class="ltx_Math" display="inline" id="S5.T3.m6"><semantics><mn>0.702</mn><annotation encoding="application/x-tex">0.702</annotation></semantics></math></td>
+<td class="ltx_td ltx_align_center ltx_border_t" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math alttext="0.897" class="ltx_Math" display="inline" id="S5.T3.m7"><semantics><mn>0.897</mn><annotation encoding="application/x-tex">0.897</annotation></semantics></math></td>
+<td class="ltx_td ltx_align_center ltx_border_t" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math alttext="0.842" class="ltx_Math" display="inline" id="S5.T3.m8"><semantics><mn>0.842</mn><annotation encoding="application/x-tex">0.842</annotation></semantics></math></td>
+</tr>
+<tr class="ltx_tr">
+<th class="ltx_td ltx_align_center ltx_th ltx_th_row" style="padding-top:2.5pt;padding-bottom:2.5pt;">5</th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_row" style="padding-top:2.5pt;padding-bottom:2.5pt;">20</th>
+<td class="ltx_td ltx_align_center" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math alttext="0.926" class="ltx_Math" display="inline" id="S5.T3.m9"><semantics><mn>0.926</mn><annotation encoding="application/x-tex">0.926</annotation></semantics></math></td>
+<td class="ltx_td ltx_align_center" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math alttext="0.704" class="ltx_Math" display="inline" id="S5.T3.m10"><semantics><mn>0.704</mn><annotation encoding="application/x-tex">0.704</annotation></semantics></math></td>
+<td class="ltx_td ltx_align_center" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math alttext="0.900" class="ltx_Math" display="inline" id="S5.T3.m11"><semantics><mn>0.900</mn><annotation encoding="application/x-tex">0.900</annotation></semantics></math></td>
+<td class="ltx_td ltx_align_center" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math alttext="0.844" class="ltx_Math" display="inline" id="S5.T3.m12"><semantics><mn>0.844</mn><annotation encoding="application/x-tex">0.844</annotation></semantics></math></td>
+</tr>
+<tr class="ltx_tr">
+<th class="ltx_td ltx_align_center ltx_th ltx_th_row" style="padding-top:2.5pt;padding-bottom:2.5pt;">10</th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_row" style="padding-top:2.5pt;padding-bottom:2.5pt;">10</th>
+<td class="ltx_td ltx_align_center" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math alttext="0.905" class="ltx_Math" display="inline" id="S5.T3.m13"><semantics><mn>0.905</mn><annotation encoding="application/x-tex">0.905</annotation></semantics></math></td>
+<td class="ltx_td ltx_align_center" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math alttext="0.807" class="ltx_Math" display="inline" id="S5.T3.m14"><semantics><mn>0.807</mn><annotation encoding="application/x-tex">0.807</annotation></semantics></math></td>
+<td class="ltx_td ltx_align_center" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math alttext="0.881" class="ltx_Math" display="inline" id="S5.T3.m15"><semantics><mn>0.881</mn><annotation encoding="application/x-tex">0.881</annotation></semantics></math></td>
+<td class="ltx_td ltx_align_center" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math alttext="0.921" class="ltx_Math" display="inline" id="S5.T3.m16"><semantics><mn>0.921</mn><annotation encoding="application/x-tex">0.921</annotation></semantics></math></td>
+</tr>
+<tr class="ltx_tr">
+<th class="ltx_td ltx_align_center ltx_th ltx_th_row" style="padding-top:2.5pt;padding-bottom:2.5pt;">10</th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_row" style="padding-top:2.5pt;padding-bottom:2.5pt;">20</th>
+<td class="ltx_td ltx_align_center" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math alttext="0.918" class="ltx_Math" display="inline" id="S5.T3.m17"><semantics><mn>0.918</mn><annotation encoding="application/x-tex">0.918</annotation></semantics></math></td>
+<td class="ltx_td ltx_align_center" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math alttext="0.750" class="ltx_Math" display="inline" id="S5.T3.m18"><semantics><mn>0.750</mn><annotation encoding="application/x-tex">0.750</annotation></semantics></math></td>
+<td class="ltx_td ltx_align_center" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math alttext="0.888" class="ltx_Math" display="inline" id="S5.T3.m19"><semantics><mn>0.888</mn><annotation encoding="application/x-tex">0.888</annotation></semantics></math></td>
+<td class="ltx_td ltx_align_center" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math alttext="0.876" class="ltx_Math" display="inline" id="S5.T3.m20"><semantics><mn>0.876</mn><annotation encoding="application/x-tex">0.876</annotation></semantics></math></td>
+</tr>
+<tr class="ltx_tr">
+<th class="ltx_td ltx_align_center ltx_th ltx_th_row" style="padding-top:2.5pt;padding-bottom:2.5pt;">10</th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_row" style="padding-top:2.5pt;padding-bottom:2.5pt;">50</th>
+<td class="ltx_td ltx_align_center" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math alttext="0.919" class="ltx_Math" display="inline" id="S5.T3.m21"><semantics><mn>0.919</mn><annotation encoding="application/x-tex">0.919</annotation></semantics></math></td>
+<td class="ltx_td ltx_align_center" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math alttext="0.771" class="ltx_Math" display="inline" id="S5.T3.m22"><semantics><mn>0.771</mn><annotation encoding="application/x-tex">0.771</annotation></semantics></math></td>
+<td class="ltx_td ltx_align_center" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math alttext="0.916" class="ltx_Math" display="inline" id="S5.T3.m23"><semantics><mn>0.916</mn><annotation encoding="application/x-tex">0.916</annotation></semantics></math></td>
+<td class="ltx_td ltx_align_center" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math alttext="0.761" class="ltx_Math" display="inline" id="S5.T3.m24"><semantics><mn>0.761</mn><annotation encoding="application/x-tex">0.761</annotation></semantics></math></td>
+</tr>
+<tr class="ltx_tr">
+<th class="ltx_td ltx_align_center ltx_th ltx_th_row ltx_border_bb" style="padding-top:2.5pt;padding-bottom:2.5pt;">10</th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_row ltx_border_bb" style="padding-top:2.5pt;padding-bottom:2.5pt;">100</th>
+<td class="ltx_td ltx_align_center ltx_border_bb" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math alttext="0.898" class="ltx_Math" display="inline" id="S5.T3.m25"><semantics><mn>0.898</mn><annotation encoding="application/x-tex">0.898</annotation></semantics></math></td>
+<td class="ltx_td ltx_align_center ltx_border_bb" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math alttext="0.836" class="ltx_Math" display="inline" id="S5.T3.m26"><semantics><mn>0.836</mn><annotation encoding="application/x-tex">0.836</annotation></semantics></math></td>
+<td class="ltx_td ltx_align_center ltx_border_bb" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math alttext="0.898" class="ltx_Math" display="inline" id="S5.T3.m27"><semantics><mn>0.898</mn><annotation encoding="application/x-tex">0.898</annotation></semantics></math></td>
+<td class="ltx_td ltx_align_center ltx_border_bb" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math alttext="0.850" class="ltx_Math" display="inline" id="S5.T3.m28"><semantics><mn>0.850</mn><annotation encoding="application/x-tex">0.850</annotation></semantics></math></td>
+</tr>
+</tbody>
+</table>
+</span></div>
+</figure>
+</section>
+<section class="ltx_subsection" id="S5.SS3">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">V-C </span><span class="ltx_text ltx_font_italic">Эксперименты в реальных условиях</span>
+</h3>
+<div class="ltx_para" id="S5.SS3.p1">
+<p class="ltx_p">В дополнение к симуляционным исследованиям, мы оцениваем SeGuE в реальной среде (столовая на кампусе).  
+Мы используем колесного мобильного робота Clearpath Jackal, оснащённого LiDAR Velodyne VLP-16 и стереокамерой Zed2i; для полного описания калибровки сенсоров см. <cite class="ltx_cite ltx_citemacro_cite">[<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib26" title="">26</a>]</cite>.  
+Кроме того, мы подключаем робота Clearpath Jackal к ноутбуку с процессором Intel i7, NVIDIA RTX 3060, 32 ГБ оперативной памяти и 512 ГБ хранилища..</p>
+</div>
+<figure class="ltx_figure" id="S5.F4">
+<div class="ltx_flex_figure">
+<div class="ltx_flex_cell ltx_flex_size_1">
+<figure class="ltx_figure ltx_figure_panel ltx_align_center" id="S5.F4.sf1"><img alt="Refer to caption" class="ltx_graphics ltx_img_portrait" height="217" id="S5.F4.sf1.g1" src="./[2504.03629] SeGuE_ Semantic Guided Exploration for Mobile Robots_files/x9.png" width="131"/>
+<figcaption class="ltx_caption"><span class="ltx_tag ltx_tag_figure"><span class="ltx_text" style="font-size:90%;">(a)</span> </span></figcaption>
+</figure>
+</div>
+<div class="ltx_flex_break"></div>
+<div class="ltx_flex_cell ltx_flex_size_1">
+<figure class="ltx_figure ltx_figure_panel ltx_align_center" id="S5.F4.sf2"><img alt="Refer to caption" class="ltx_graphics ltx_img_portrait" height="221" id="S5.F4.sf2.g1" src="./[2504.03629] SeGuE_ Semantic Guided Exploration for Mobile Robots_files/x10.png" width="131"/>
+<figcaption class="ltx_caption"><span class="ltx_tag ltx_tag_figure"><span class="ltx_text" style="font-size:90%;">(b)</span> </span></figcaption>
+</figure>
+</div>
+</div>
+<figcaption class="ltx_caption ltx_centering">⟦Результаты сопоставления SeGuE в экспериментах в реальных условиях K0.</figcaption>
+</figure>
+<div class="ltx_para" id="S5.SS3.p2">
+<p class="ltx_p">Мы протестировали SeGuE с равномерной выборкой, так как было установлено, что она стабильно хорошо работает в симуляционных исследованиях.  
+Экспериментальные результаты показаны на рис. <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2504.03629#S5.F4" title="Figure 4 ‣ V-C Real-world Experiments ‣ V Experiments ‣ SeGuE: Semantic Guided Exploration for Mobile Robots"><span class="ltx_text ltx_ref_tag">4</span></a>.  
+Вычисленное покрытие составляет <math alttext="0.735" class="ltx_Math" display="inline" id="S5.SS3.p2.m1"><semantics><mn>0.735</mn><annotation encoding="application/x-tex">0.735</annotation></semantics></math>, а средняя энтропия — <math alttext="1.753" class="ltx_Math" display="inline" id="S5.SS3.p2.m2"><semantics><mn>1.753</mn><annotation encoding="application/x-tex">1.753</annotation></semantics></math>.  
+Хотя общее покрытие ниже по сравнению со значениями, полученными в симуляционных исследованиях, наш метод всё ещё может отображать большую часть окружения.  
+Это снижение производительности можно объяснить двумя факторами.  
+Во-первых, базовая библиотека планирования движения плохо перенеслась на более загромождённое место.  
+Во-вторых, ограничения по батарее ограничили общее время работы.  
+Настройка базового планировщика движения с учётом энергопотребления (например, на основе <cite class="ltx_cite ltx_citemacro_cite">[<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib27" title="">27</a>]</cite> и <cite class="ltx_cite ltx_citemacro_cite">[<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib28" title="">28</a>]</cite>) могла бы обеспечить оптимальное покрытие с учётом бюджета движения и ограничений задачи (т.е. точки обзора), чтобы окружение можно было исследовать своевременно..</p>
+</div>
+</section>
+</section>
+<section class="ltx_section" id="S6">
+<h2 class="ltx_title ltx_title_section">
+<span class="ltx_tag ltx_tag_section">VI </span><span class="ltx_text ltx_font_smallcaps">Заключение</span>
+</h2>
+<div class="ltx_para" id="S6.p1">
+<p class="ltx_p">Мы разработали SeGuE, метод для автономного исследования окружающей среды, который обеспечивает достаточное наблюдение признаков внешнего вида, чтобы можно было построить высококачественную и полную карту семантических признаков.  
+Мы предложили метод оценки отдельных семантических признаков, содержащихся в карте, и показали, как эти оценки могут агрегироваться для ранжирования потенциальных точек обзора.  
+Рассматривались два метода выборки точек обзора, при этом наши тесты показали, как они взаимодействуют с системой в целом.  
+Результаты как в симуляции, так и в экспериментах на физическом оборудовании показали, что наш метод хорошо объединяет информацию о семантических признаках, улучшая общие метрики исследования, такие как покрытие карты и средняя энтропия, по сравнению с базовыми методами..</p>
+</div>
+<div class="ltx_para" id="S6.p2">
+<p class="ltx_p">Поскольку SeGuE строится на основе алгоритма выбора следующего лучшего вида, он остается связанным с присущими последнему ограничениями, в частности зависимостью производительности от метода выборки и оценки.  
+Далее, мы сосредотачиваемся только на глобальных методах выборки, чтобы избежать попадания в локальные минимумы.  
+В будущей работе мы планируем также интегрировать локальную выборку..
+
+</p>
+</div>
+</section>
+<section class="ltx_bibliography" id="bib">
+<h2 class="ltx_title ltx_title_bibliography">Ссылки</h2>
+<ul class="ltx_biblist">
+<li class="ltx_bibitem" id="bib.bib1">
+⟦N. Blodow, L. C. Goron, Z.-C. Marton, D. Pangercic, T. Rühr, M. Tenorth и M. Beetz, «Автономное семантическое картографирование для роботов, выполняющих повседневные манипуляционные задачи в кухонных условиях», в IEEE/RSJ Международной конференции по интеллектуальным роботам и системам (IROS), стр. 4263–4270, 2011.
+
+
+</li>
+<li class="ltx_bibitem" id="bib.bib2">
+⟦A. Dechemi, D. Chatziparaschis, J. Chen, M. Campbell, A. Shamshirgaran, C. Mucchiani, A. Roy-Chowdhury, S. Carpin и K. Karydis, «Роботизированная оценка потребности культуры в поливе: автоматизация трудоемкой задачи для поддержки устойчивого сельского хозяйства», IEEE Robotics &amp; Automation Magazine, том 30, № 4, стр. 52–67, 2023.
+
+
+</li>
+<li class="ltx_bibitem" id="bib.bib3">
+⟦S. Y. Gadre, M. Wortsman, G. Ilharco, L. Schmidt и S. Song, «Коровы на пастбище: базовые линии и эталоны для языково-управляемой навигации по объектам в режиме zero-shot», в IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR), стр. 23171–23181, 2023.
+
+
+</li>
+<li class="ltx_bibitem" id="bib.bib4">
+<span class="ltx_tag ltx_tag_bibitem">[4]</span>
+
+C. Huang, O. Mees, A. Zeng и W. Burgard, «Визуальные языковые карты для навигации робота», в IEEE Международной конференции по робототехнике и автоматизации (ICRA), стр. 10608–10615, 2023.
+
+
+</li>
+<li class="ltx_bibitem" id="bib.bib5">
+<span class="ltx_tag ltx_tag_bibitem">[5]</span>
+
+С. Ашат, К. Сердель, Ж. Марза и Ж. Мораз, «Кейс-стади семантического картографирования и планирования для автономной навигации робота», SN Computer Science, том 5, 2023.
+
+
+</li>
+<li class="ltx_bibitem" id="bib.bib6">
+<span class="ltx_tag ltx_tag_bibitem">[6]</span>
+
+C. Кадена, Л. Карлоне, Х. Каррильо, Й. Латиф, Д. Скарамузца, Дж. Нейра, И. Рейд и Дж. Дж. Леонард, «Прошлое, настоящее и будущее одновременной локализации и картографирования: к эпохе надежного восприятия», IEEE Transactions on Robotics (TRO), том 32, № 6, стр. 1309–1332, 2016.
+
+
+</li>
+<li class="ltx_bibitem" id="bib.bib7">
+⟦B. Yamauchi, «Подход на основе фронтира для автономного исследования», в IEEE Международном симпозиуме по вычислительному интеллекту в робототехнике и автоматизации (CIRA), стр. 146–151, 1997.
+
+
+</li>
+<li class="ltx_bibitem" id="bib.bib8">
+⟦A. Bircher, M. Kamel, K. Alexis, H. Oleynikova и R. Siegwart, «Планировщик «следующего лучшего вида» с отступающим горизонтом для 3D-исследования», в IEEE Международной конференции по робототехнике и автоматизации (ICRA), стр. 1462–1468, 2016.
+
+
+</li>
+<li class="ltx_bibitem" id="bib.bib9">
+⟦E. Palazzolo и C. Stachniss, «Эффективное исследование для mavs на основе ожидаемого прироста информации», Drones, том 2, № 1, 2018.
+
+
+</li>
+<li class="ltx_bibitem" id="bib.bib10">
+⟦M. Selin, M. Tiger, D. Duberg, F. Heintz и P. Jensfelt, «Эффективное автономное планирование исследования крупномасштабных 3D-сред», IEEE Robotics and Automation Letters, том 4, № 2, стр. 1699–1706, 2019.
+
+
+</li>
+<li class="ltx_bibitem" id="bib.bib11">
+⟦M. Brossard, S. Bonnabel и A. Barrau, «Новый подход к оценке ковариации 3d icp», IEEE Robotics and Automation Letters, том 5, № 2, стр. 744–751, 2020.
+
+
+</li>
+<li class="ltx_bibitem" id="bib.bib12">
+⟦N. Yokoyama, S. Ha, D. Batra, J. Wang и B. Bucher, «Vlfm: Карты переднего края визуально-языкового пространства для семантической навигации без обучения», в IEEE Международной конференции по робототехнике и автоматизации (ICRA), стр. 42–48, 2024.
+
+
+</li>
+<li class="ltx_bibitem" id="bib.bib13">
+<span class="ltx_tag ltx_tag_bibitem">[13]</span>
+
+X. Чен, А. Милиото, Э. Паладзоло, П. Гигер, Дж. Бехли и К. Штахнисс, «Suma++: Эффективный семантический SLAM на основе лидарных данных», в IEEE/RSJ Международной конференции по интеллектуальным роботам и системам (IROS), стр. 4530–4537, 2019.
+
+
+</li>
+<li class="ltx_bibitem" id="bib.bib14">
+⟦J. Liu, Y. Lv, Y. Yuan, W. Chi, G. Chen, и L. Sun, «Эффективный метод исследования робота на основе эвристически смещенной выборки», IEEE Transactions on Industrial Electronics, том 70, № 7, стр. 7102–7112, 2023.
+
+
+</li>
+<li class="ltx_bibitem" id="bib.bib15">
+⟦M. Keirdar и G. A. Kaminka, «Эффективное обнаружение фронтира для исследования роботом», The International Journal of Robotics Research, том 33, № 2, стр. 215–236, 2014.
+
+
+</li>
+<li class="ltx_bibitem" id="bib.bib16">
+⟦D. L. da Silva Lubanco, M. Pichler-Scheder и T. Schlechter, «Новый алгоритм исследования на основе фронтира для мобильных роботов», в IEEE Международной конференции по мехатронике и робототехнике (ICMRE), стр. 1–5, 2020.
+
+
+</li>
+<li class="ltx_bibitem" id="bib.bib17">
+<span class="ltx_tag ltx_tag_bibitem">[17]</span>
+
+M. Штайнбринк, P. Кох, B. Юнг и S. Мэй, «Быстро исследующий случайный граф для выбора следующего лучшего обзора при исследовании наземных транспортных средств», в Европейской конференции по мобильным роботам (ECMR), стр. 1–7, 2021.
+
+
+</li>
+<li class="ltx_bibitem" id="bib.bib18">
+⟦R. Monica и J. Aleotti, «Планирование следующего лучшего обзора на основе контуров из сегментации облака точек неизвестных объектов», Autonomous Robots, стр. 443–458, 2017.
+
+
+</li>
+<li class="ltx_bibitem" id="bib.bib19">
+<span class="ltx_tag ltx_tag_bibitem">[19]</span>
+
+М. Окваб, Т. Дарсе, Т. Мутаканни, Х. В. Во, М. Сзафранец, В. Халидов, П. Фернандес, Д. Хазиза, Ф. Масса, А. Эль-Нуби, Р. Хауз, П.-И. Хуанг, Х. Сюй, В. Шарма, С.-В. Ли, В. Галуба, М. Раббат, М. Ассран, Н. Баллас, Г. Синнев, И. Мисра, Х. Жегу, Ж. Мэрэл, П. Лабатю, А. Жулин и П. Бояновски, «Dinov2: Обучение устойчивым визуальным признакам без надзора», 2023.
+
+
+</li>
+<li class="ltx_bibitem" id="bib.bib20">
+⟦B. Zhou, H. Zhao, X. Puig, S. Fidler, A. Barriuso, и A. Torralba, «Сегментация сцены с использованием набора данных ade20k», в IEEE конференции по компьютерному зрению и распознаванию образов (CVPR), стр. 5122–5130, 2017.
+
+
+</li>
+<li class="ltx_bibitem" id="bib.bib21">
+⟦B. Liu, S. Cheng и Y. Shi, «Оптимизация с помощью фильтра частиц: краткое введение», в книге Advances in Swarm Intelligence, стр. 95–104, Springer, 2016.
+
+
+</li>
+<li class="ltx_bibitem" id="bib.bib22">
+⟦H. Teng, Y. Wang, D. Chatziparaschis и K. Karydis, «Адаптивная лидарная одометрия и картографирование для автономных сельскохозяйственных мобильных роботов на беспилотных фермах», Computers and Electronics in Agriculture, том 232, с. 110023, 2025.
+
+
+</li>
+<li class="ltx_bibitem" id="bib.bib23">
+<span class="ltx_tag ltx_tag_bibitem">[23]</span>
+
+N. Коэниг и А. Ховард, «Парадигмы проектирования и использования для gazebo, открытого мульти-роботного симулятора», в IEEE/RSJ Международной конференции по интеллектуальным роботам и системам (IROS), том 3, стр. 2149–2154, 2004.
+
+
+</li>
+<li class="ltx_bibitem" id="bib.bib24">
+⟦H. Teng, D. Chatziparaschis, X. Kan, A. K. Roy-Chowdhury и K. Karydis, «Детектор ключевых точек на основе расстояния до центра масс для цветных облаков точек», в IEEE/CVF Зимняя конференция по приложениям компьютерного зрения (WACV), стр. 1196–1205, 2023.
+
+
+</li>
+<li class="ltx_bibitem" id="bib.bib25">
+⟦J. Hörner, «Объединение карт для многороботной системы», магистерская диссертация, Карлов университет, факультет математики и физики, 2016.
+
+
+</li>
+<li class="ltx_bibitem" id="bib.bib26">
+⟦H. Teng, Y. Wang, X. Song и K. Karydis, «Мультимодальный набор данных для локализации, картографирования и мониторинга урожая на плантациях цитрусовых деревьев», в Международном симпозиуме по визуальным вычислениям, стр. 571–582, Springer, 2023.
+
+
+</li>
+<li class="ltx_bibitem" id="bib.bib27">
+⟦X. Kan, H. Teng и K. Karydis, «Онлайн исследование и планирование покрытия в неизвестных средах с препятствиями», IEEE Robotics and Automation Letters, том 5, № 4, стр. 5969–5976, 2020.
+
+
+</li>
+<li class="ltx_bibitem" id="bib.bib28">
+⟦X. Kan, T. C. Thayer, S. Carpin и K. Karydis, «Планирование задач на стохастических графах проходов для точного земледелия», IEEE Robotics and Automation Letters, том 6, № 2, стр. 3287–3294, 2021.
+
+
+</li>
+</ul>
+</section>
+<div class="ltx_pagination ltx_role_newpage"></div>
+</article>
+</div>
+<div class="ar5iv-footer"><a class="ar5iv-nav-button ar5iv-nav-button-prev" href="https://ar5iv.labs.arxiv.org/html/2504.03628">◄</a>
+<a class="ar5iv-home-button" href="https://ar5iv.labs.arxiv.org/"><img alt="ar5iv homepage" height="40" src="./[2504.03629] SeGuE_ Semantic Guided Exploration for Mobile Robots_files/ar5iv.png"/></a>
+<a class="ar5iv-text-button" href="https://ar5iv.labs.arxiv.org/feeling_lucky">Чувство<br/>удачливый?</a>
+<a aria-hidden="true" href="https://ar5iv.labs.arxiv.org/land_of_honey_and_milk" rel="nofollow" tabindex="-1"></a>
+<a class="ar5iv-text-button ar5iv-severity-ok" href="https://ar5iv.labs.arxiv.org/log/2504.03629">Преобразование<br/>отчет</a>
+<a class="ar5iv-text-button" href="https://github.com/dginev/ar5iv/issues/new?template=improve-article--arxiv-id-.md&amp;title=Improve+article+2504.03629" target="_blank">Отчёт<br/>проблема</a>
+<a class="ar5iv-text-button arxiv-ui-theme" href="https://arxiv.org/abs/2504.03629">Просмотреть оригинал<br/>на arXiv</a><a class="ar5iv-nav-button ar5iv-nav-button-next" href="https://ar5iv.labs.arxiv.org/html/2504.03630">►</a>
+</div><footer class="ltx_page_footer">
+<a class="ar5iv-toggle-color-scheme" href="javascript:toggleColorScheme()" title="Toggle ar5iv color scheme"><span class="color-scheme-icon"></span></a>
+<a class="ar5iv-footer-button" href="https://arxiv.org/help/license" target="_blank">Авторское право</a>
+<a class="ar5iv-footer-button" href="https://arxiv.org/help/policies/privacy_policy" target="_blank">Политика конфиденциальности</a>
+<div class="ltx_page_logo">Сгенерировано в Пн Май  5 14:57:52 2025 г. системой <a class="ltx_LaTeXML_logo" href="http://dlmf.nist.gov/LaTeXML/" target="_blank"><span style="letter-spacing:-0.2em; margin-right:0.1em;">L<span class="ltx_font_smallcaps" style="position:relative; bottom:2.2pt;">а</span>T<span class="ltx_font_smallcaps" style="font-size:120%;position:relative; bottom:-0.2ex;">е</span></span><span style="font-size:90%; position:relative; bottom:-0.2ex;">XML</span><img alt="Mascot Sammy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAAOCAYAAAD5YeaVAAAAAXNSR0IArs4c6QAAAAZiS0dEAP8A/wD/oL2nkwAAAAlwSFlzAAALEwAACxMBAJqcGAAAAAd0SU1FB9wKExQZLWTEaOUAAAAddEVYdENvbW1lbnQAQ3JlYXRlZCB3aXRoIFRoZSBHSU1Q72QlbgAAAdpJREFUKM9tkL+L2nAARz9fPZNCKFapUn8kyI0e4iRHSR1Kb8ng0lJw6FYHFwv2LwhOpcWxTjeUunYqOmqd6hEoRDhtDWdA8ApRYsSUCDHNt5ul13vz4w0vWCgUnnEc975arX6ORqN3VqtVZbfbTQC4uEHANM3jSqXymFI6yWazP2KxWAXAL9zCUa1Wy2tXVxheKA9YNoR8Pt+aTqe4FVVVvz05O6MBhqUIBGk8Hn8HAOVy+T+XLJfLS4ZhTiRJgqIoVBRFIoric47jPnmeB1mW/9rr9ZpSSn3Lsmir1fJZlqWlUonKsvwWwD8ymc/nXwVBeLjf7xEKhdBut9Hr9WgmkyGEkJwsy5eHG5vN5g0AKIoCAEgkEkin0wQAfN9/cXPdheu6P33fBwB4ngcAcByHJpPJl+fn54mD3Gg0NrquXxeLRQAAwzAYj8cwTZPwPH9/sVg8PXweDAauqqr2cDjEer1GJBLBZDJBs9mE4zjwfZ85lAGg2+06hmGgXq+j3+/DsixYlgVN03a9Xu8jgCNCyIegIAgx13Vfd7vdu+FweG8YRkjXdWy329+dTgeSJD3ieZ7RNO0VAXAPwDEAO5VKndi2fWrb9jWl9Esul6PZbDY9Go1OZ7PZ9z/lyuD3OozU2wAAAABJRU5ErkJggg=="/></a>
+</div></footer>
+</div>
+<script>
+      var canMathML = typeof(MathMLElement) == "function";
+      if (!canMathML) {
+        var body = document.querySelector("body");
+        body.firstElementChild.setAttribute('style', 'opacity: 0;');
+        var loading = document.createElement("div");
+        loading.setAttribute("id", "mathjax-loading-spinner");
+        var message = document.createElement("div");
+        message.setAttribute("id", "mathjax-loading-message");
+        message.innerText = "Typesetting Equations...";
+        body.prepend(loading);
+        body.prepend(message);
+
+        var el = document.createElement("script");
+        el.src = "https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js";
+        document.querySelector("head").appendChild(el);
+
+        window.MathJax = {
+          startup: {
+            pageReady: () => {
+              return MathJax.startup.defaultPageReady().then(() => {
+                body.removeChild(loading);
+                body.removeChild(message);
+                body.firstElementChild.removeAttribute('style');
+              }); } } };
+      }
+    </script>
+<script>
+    // Auxiliary function, building the preview feature when
+    // an inline citation is clicked
+    function clicked_cite(e) {
+      e.preventDefault();
+      let cite = this.closest('.ltx_cite');
+      let next = cite.nextSibling;
+      if (next && next.nodeType == Node.ELEMENT_NODE && next.getAttribute('class') == "ar5iv-bibitem-preview") {
+        next.remove();
+        return; }
+      // Before adding a preview modal,
+      // cleanup older previews, in case they're still open
+      document.querySelectorAll('span.ar5iv-bibitem-preview').forEach(function(node) {
+        node.remove();
+      })
+
+      // Create the preview
+      preview = document.createElement('span');
+      preview.setAttribute('class','ar5iv-bibitem-preview');
+      let target = document.getElementById(this.getAttribute('href').slice(1));
+      target.childNodes.forEach(function (child) {
+        preview.append(child.cloneNode(true));
+      });
+      let close_x = document.createElement('button');
+      close_x.setAttribute("aria-label","Close modal for bibliography item preview");
+      close_x.textContent = "×";
+      close_x.setAttribute('class', 'ar5iv-button-close-preview');
+      close_x.setAttribute('onclick','this.parentNode.remove()');
+      preview.append(close_x);
+      preview.querySelectorAll('.ltx_tag_bibitem').forEach(function(node) {
+        node.remove();
+      });
+      cite.parentNode.insertBefore(preview, cite.nextSibling);
+      return;
+    }
+    // Global Document initialization:
+    // - assign the preview feature to all inline citation links
+    document.querySelectorAll(".ltx_cite .ltx_ref").forEach(function (link) {
+      link.addEventListener("click", clicked_cite);
+    });
+    </script>
+</body></html>

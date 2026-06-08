@@ -1,0 +1,1024 @@
+{
+  "title": "[2504.03629] SeGuE: Semantic Guided Exploration for Mobile Robots",
+  "sections": [
+    {
+      "heading": "SeGuE: Semantic Guided Exploration for Mobile Robots",
+      "level": 1,
+      "content": [],
+      "children": [
+        {
+          "heading": "Abstract",
+          "level": 6,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "The rise of embodied AI applications has enabled robots to perform complex tasks which require a sophisticated understanding of their environment. To enable successful robot operation in such settings, maps must be constructed so that they include semantic information, in addition to geometric information. In this paper, we address the novel problem of semantic exploration, whereby a mobile robot must autonomously explore an environment to fully map both its structure and the semantic appearance of features. We develop a method based on next-best-view exploration, where potential poses are scored based on the semantic features visible from that pose. We explore two alternative methods for sampling potential views and demonstrate the effectiveness of our framework in both simulation and physical experiments. Automatic creation of high-quality semantic maps can enable robots to better understand and interact with their environments and enable future embodied AI applications to be more easily deployed."
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "I Introduction",
+          "level": 2,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "Advancements in machine learning performance and edge computing propel robots toward acquiring higher than ever before reasoning and decision-making capabilities. These capabilities are critical for successfully deploying them in workplace environments such as automated kitchens [[1](https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib1)] or unmanned farms [[2](https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib2)], where a robot needs to solve a joint navigation and semantic scene understanding problem."
+            },
+            {
+              "type": "paragraph",
+              "text": "To solve this problem, classical metric-based maps have been fused with semantic-based maps to offer appropriate information-rich maps. For example, in visual object navigation [[3](https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib3)], an agent must find an object matching a text or picture. Similarly, in language-guided navigation [[4](https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib4)], an agent must navigate based on natural language instructions referencing the environment’s appearance. Such methods are often zero-shot, assuming no prior knowledge of the environment. While this setting is challenging, it is inherently transient. In real-world cases, where continuous operation is needed, constructing a comprehensive map during or before operation would be highly beneficial. At the same time, several existing methods (e.g., [[1](https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib1), [5](https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib5), [3](https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib3), [4](https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib4)]) use maps that have been augmented with semantic classes. While semantic class information is valuable, its limited reusability may hinder transfer to physical robot deployment across environments. To address this challenge, we propose an exploration method that maps the environment’s semantic *features*, thus enabling reusability across diverse tasks."
+            },
+            {
+              "type": "paragraph",
+              "text": "Modern AI-enhanced semantic maps can jointly encode a scene’s geometry and appearance features. They can hold features extracted by machine learning models, which in turn can be reused across many different tasks. Semantic feature maps can be created online [[3](https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib3)], typically to aid in visual object search, or offline [[4](https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib4)], which can be used for language-guided navigation or other downstream tasks. However, offline mapping typically requires manual robot operation or hand-engineered routes to ensure comprehensive coverage of appearance features. Although autonomous exploration methods for mapping environmental structures are well-established in robotics, there is a notable gap in *automatically guiding exploration to create high-quality semantic maps*."
+            },
+            {
+              "type": "paragraph",
+              "text": "Autonomous environment exploration and mapping have received significant attention over the years. Mapping the structure of a static environment in 2D has largely been solved by existing SLAM approaches [[6](https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib6)]. Exploration is also very well studied, with conventional approaches divided broadly into frontier-based and next-best-view-based methods. In frontier-based methods [[7](https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib7)], the robot moves to locations that are on the border between the mapped and unmapped portions of the environment, while next-best-view methods [[8](https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib8), [9](https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib9), [10](https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib10)] sample and score potential views based on information theoretic metrics. Given sufficient time, both the methods can fully capture the geometry of an environment. However, they do not consider the appearance features of the environment. Furthermore, the increased range and field-of-view of modern depth sensors can result in incomplete and low-quality semantic feature maps [[11](https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib11)]."
+            },
+            {
+              "type": "paragraph",
+              "text": "In this work, we introduce a novel autonomous exploration method based on the next-best-view approach, which maps the structure of the environment and simultaneously captures its semantic appearance. Our method scores potential views by computing the average entropy of visible semantic features, excluding occluded and converged features. We investigate two alternative view sampling techniques: uniform sampling across reachable poses and an iterative importance sampling method inspired by particle filter optimization. Off-the-shelf components are leveraged for metric-based mapping and navigation. Our approach is validated through both simulation and physical hardware experiments using a wheeled mobile robot. In sum, our contributions include:"
+            },
+            {
+              "type": "list",
+              "text": "1. 1. We propose a method for scoring individual semantic map features and show how these scores can be combined to score a particular view. 2. 2. We explore two alternative methods for sampling potential views. 3. 3. We demonstrate the feasibility of our framework in simulated and physical experiments."
+            },
+            {
+              "type": "paragraph",
+              "text": "We propose a method for scoring individual semantic map features and show how these scores can be combined to score a particular view."
+            },
+            {
+              "type": "paragraph",
+              "text": "We explore two alternative methods for sampling potential views."
+            },
+            {
+              "type": "paragraph",
+              "text": "We demonstrate the feasibility of our framework in simulated and physical experiments."
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "II Related Work",
+          "level": 2,
+          "content": [],
+          "children": [
+            {
+              "heading": "II-A Semantic Mapping",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "Semantic mapping has been explored both in machine learning and robotics communities. Machine learning research focuses on dense semantic features [[4](https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib4)]. These maps allow for fine-grained search within the environment [[4](https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib4)] and can be used to predict the layout of the unexplored portion of the environment [[12](https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib12)]. Within robotics, there has been a focus on semantic classes. In [[13](https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib13)], semantic categories were used to increase loop closures, and in [[14](https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib14)], semantic categories were used to create more efficient routes. As resources available on robots (sensors, computing units, etc.) continue to grow and AI models continue to become more amenable to edge computing, the demand for maps of dense semantic features is expected to rise. Our method can help construct such maps automatically."
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "II-B Frontier Exploration",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "Frontier-based exploration has been thoroughly explored in the literature. Initially proposed in [[7](https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib7)], frontier-based methods seek to fully explore an environment by constantly moving toward the border between known and unknown space. More recent works have sought to increase the computational efficiency of computing frontiers [[15](https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib15)] and create frontier ranking mechanisms [[16](https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib16)]. These exploration methods are solely concerned with mapping the geometry of an environment, which can be directly observed with current LiDAR sensors that are commonly integrated into contemporary robots. In contrast, mapping semantic features can be significantly complicated by the variability in object appearances at different distances, the salience of various objects to feature extractors, and the limited field of view of most cameras."
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "II-C Next-Best-View Determination",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "The next-best-view pipeline [[8](https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib8), [9](https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib9), [10](https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib10)] consists of a pose sampler, a metric to rank poses, either in terms of information gain [[8](https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib8), [9](https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib9), [10](https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib10)] or a task-specific metric [[5](https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib5), [1](https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib1)], and a mapper which updates an internal map while navigating to the determined next-best-view pose. Several contemporary implementations use sampling-based planners to select poses [[8](https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib8), [17](https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib17)]. However, this can lead to getting trapped in local maxima. One way to address this is by integrating an additional global sampler [[10](https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib10)]. Information-theoretic metrics [[18](https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib18), [9](https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib9)] encode the structure and the confidence in the current map to rank the value of a particular view. Semantic categories have also been used [[1](https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib1)] to focus on more task-relevant structures. To the best of our knowledge, no method has incorporated a semantic feature map into a next-best-view algorithm."
+                }
+              ],
+              "children": []
+            }
+          ]
+        },
+        {
+          "heading": "III Problem Definition",
+          "level": 2,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "In this work, we address a novel semantic exploration problem. We aim to simultaneously explore and map an environment in real time autonomously while ensuring that the map fully captures the semantic information necessary for downstream embodied AI applications. Specifically, we ask how a mobile robot, equipped with an RGB camera and a depth sensor, can explore an environment and construct a 2D map ℳ∈ℝH×W×N+1\\mathcal{M}\\in\\mathbb{R}^{H\\times W\\times N+1}, where HH and WW represent the height and width of the map, and NN represents the dimension of the semantic feature vectors. The additional scalar value in the third dimension represents the occupancy information, in the form of an occupancy grid. While semantic map generation is a thoroughly studied field [[4](https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib4)], in this work, we specifically address the exploration problem to ensure sufficient coverage of the environment and to capture high-quality semantic features. To reduce implementation complexity, we make the working assumptions that the robot operates in a physically bounded environment, and that the environment is relatively flat and traversable. These assumptions are not restrictive since they relate to most common indoor navigation paradigms (as we test herein), and can directly carry over to outdoor navigation in structured environments."
+            },
+            {
+              "type": "formula",
+              "text": "ℳ∈ℝH×W×N+1\\mathcal{M}\\in\\mathbb{R}^{H\\times W\\times N+1}"
+            },
+            {
+              "type": "formula",
+              "text": "HH"
+            },
+            {
+              "type": "formula",
+              "text": "WW"
+            },
+            {
+              "type": "formula",
+              "text": "NN"
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "IV Proposed Approach",
+          "level": 2,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "We propose the Semantic Guided Exploration (SeGuE) method for mobile robots. Our method builds upon next-best-view algorithms. During exploration, a semantic map, SS, is constructed using data from two different sensing modalities, specifically an RGB camera and a 3D LiDAR. SeGuE samples collision-free and reachable poses from the occupancy grid generated during navigation, based on the current semantic understanding of the environment. To estimate the potential information gain from each pose, the average prediction entropy of each semantic features visible from a pose is computed. To ensure that cells with higher aleatoric uncertainty are not overly exploited, the entropy of each semantic feature is tracked over time and features whose entropy has converged are excluded from score calculations. This process is repeated until a pose with a score above some threshold cannot be found. SeGuE is summarized in Algorithm [1](https://ar5iv.labs.arxiv.org/html/2504.03629#alg1 \"Algorithm 1 ‣ IV Proposed Approach ‣ SeGuE: Semantic Guided Exploration for Mobile Robots\"). We elaborate on each step of the approach next."
+            },
+            {
+              "type": "formula",
+              "text": "SS"
+            },
+            {
+              "type": "formula",
+              "text": "τ\\tau"
+            },
+            {
+              "type": "formula",
+              "text": "SS"
+            },
+            {
+              "type": "formula",
+              "text": "OO"
+            },
+            {
+              "type": "formula",
+              "text": "i​m​gimg"
+            },
+            {
+              "type": "formula",
+              "text": "p​t​C​l​o​u​dptCloud"
+            },
+            {
+              "type": "formula",
+              "text": "pc​u​r​rp_{curr}"
+            },
+            {
+              "type": "formula",
+              "text": "S.update​(i​m​g,p​t​C​l​o​u​d,pc​u​r​r)S.\\text{update}(img,ptCloud,p_{curr})"
+            },
+            {
+              "type": "formula",
+              "text": "O.update​(p​t​C​l​o​u​d,pc​u​r​r)O.\\text{update}(ptCloud,p_{curr})"
+            },
+            {
+              "type": "formula",
+              "text": "P={pi}i=0NP=\\{p_{i}\\}_{i=0}^{N}"
+            },
+            {
+              "type": "formula",
+              "text": "PoseSampler​(S,O)\\text{PoseSampler}(S,O)"
+            },
+            {
+              "type": "formula",
+              "text": "p∗=maxp∈P⁡PoseScore​(p,S,O)p^{*}=\\max_{p\\in P}\\text{PoseScore}(p,S,O)"
+            },
+            {
+              "type": "formula",
+              "text": "PoseScore​(p∗,S,O)<τ\\text{PoseScore}(p^{*},S,O)<\\tau"
+            },
+            {
+              "type": "formula",
+              "text": "p∗p^{*}"
+            },
+            {
+              "type": "formula",
+              "text": "p∗p^{*}"
+            },
+            {
+              "type": "formula",
+              "text": "i​m​gimg"
+            },
+            {
+              "type": "formula",
+              "text": "p​t​C​l​o​u​dptCloud"
+            },
+            {
+              "type": "formula",
+              "text": "pc​u​r​rp_{curr}"
+            },
+            {
+              "type": "formula",
+              "text": "S.update​(i​m​g,p​t​C​l​o​u​d,pc​u​r​r)S.\\text{update}(img,ptCloud,p_{curr})"
+            },
+            {
+              "type": "formula",
+              "text": "O.update​(p​t​C​l​o​u​d,pc​u​r​r)O.\\text{update}(ptCloud,p_{curr})"
+            }
+          ],
+          "children": [
+            {
+              "heading": "IV-A Pose Scoring",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "Poses are scored according to the amount of information that can be gained at that pose. We use entropy as a proxy for this, encouraging the robot to explore the areas of the map it is most uncertain about. During the exploration process, the semantic score map is continually updated by extracting dense semantic features from the current image observation. These features are then associated with different points in the point cloud ptCloud. As the 3D points now represent semantic features, they are projected onto the 2D semantic map to associate each cell with a feature. (Details of this procedure can be found in [[4](https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib4)].) The semantic features are extracted from the image img using a machine learning model h=f∘gh=f\\circ g, which can be decomposed into a feature extractor ff and classifier gg. Let gg be able to classify MM classes. The features stored in our semantic map are extracted from ff. Throughout our experiments we make use of DinoV2 [[19](https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib19)] to extract features and a linear classifier fine-tuned on the ADE20K dataset [[20](https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib20)]. The rest of the section describes the scoring mechanism in detail."
+                },
+                {
+                  "type": "formula",
+                  "text": "h=f∘gh=f\\circ g"
+                },
+                {
+                  "type": "formula",
+                  "text": "ff"
+                },
+                {
+                  "type": "formula",
+                  "text": "gg"
+                },
+                {
+                  "type": "formula",
+                  "text": "gg"
+                },
+                {
+                  "type": "formula",
+                  "text": "MM"
+                },
+                {
+                  "type": "formula",
+                  "text": "ff"
+                }
+              ],
+              "children": [
+                {
+                  "heading": "IV-A1 Feature Scoring",
+                  "level": 4,
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "text": "Each cell in the semantic map contains a semantic feature vector that encodes the appearance of that location. The quality of every semantic feature associated with a particular cell changes over time, as the corresponding viewpoint varies. The prediction entropy of each cell is computed to assess the quality of the semantic feature. Using the classification head gg, which classifies MM classes, the score for a semantic feature xx is"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "gg"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "MM"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "xx"
+                    },
+                    {
+                      "type": "table",
+                      "text": "| | | | | | --- | --- | --- | --- | | | s​(x)=H​(g​(x))H​(𝒰​(M)),s(x)=\\frac{H(g(x))}{H(\\mathcal{U}(M))}\\;, | | (1) |"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "s​(x)=H​(g​(x))H​(𝒰​(M)),s(x)=\\frac{H(g(x))}{H(\\mathcal{U}(M))}\\;,"
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "where HH is the Shannon entropy and 𝒰\\mathcal{U} is the uniform distribution. The score is normalized by the maximum entropy to be in the range [0,1][0,1], since the maximum entropy can grow arbitrarily large as MM increases. Any cell with no semantic feature is assigned a score of 11, indicating that no observations in a cell make it maximally uncertain. Once these scores are computed for every cell in the semantic map, potential views can be ranked by averaging the scores of individual cells that are visible from that viewpoint."
+                    },
+                    {
+                      "type": "formula",
+                      "text": "HH"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "𝒰\\mathcal{U}"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "[0,1][0,1]"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "MM"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "11"
+                    }
+                  ],
+                  "children": []
+                },
+                {
+                  "heading": "IV-A2 Visibility Mask",
+                  "level": 4,
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "text": "We require that only locations that are visible from a given pose should be considered when providing a score for that pose. To enforce this, a raytracing algorithm, similar to [[12](https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib12)], is used to construct a view-mask of cells visible from a particular pose. An example mask is shown in Fig. [1](https://ar5iv.labs.arxiv.org/html/2504.03629#S4.F1 \"Figure 1 ‣ IV-A2 Visibility Mask ‣ IV-A Pose Scoring ‣ IV Proposed Approach ‣ SeGuE: Semantic Guided Exploration for Mobile Robots\"). In the figure, only the cells highlighted in gray are included in the aforementioned averaging operation; all other cells are ignored. This ensures that the overall score of a pose is not affected by the individual subscores that may be gathered from cells that provide no new information."
+                    }
+                  ],
+                  "children": []
+                },
+                {
+                  "heading": "IV-A3 Feature Convergence Tracking",
+                  "level": 4,
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "text": "Even after having collected several observations, some cells may still have a high entropy due to the aleatoric uncertainty present in some classes. As such, in cases that additional observations would not improve a semantic feature score, then any new observation should not contribute to the pose score computation. Doing so can help prevent the exploitation of inherently uncertain cells. To address this, each cell’s feature score is tracked over time and monitored for convergence."
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "A ratio convergence test is employed to decide when a feature score has converged. During exploration, when the feature score value of a non-converged cell is updated, the ratio s0s1\\frac{s\\_{0}}{s\\_{1}} is computed, where s0s\\_{0} is the previous score and s1s\\_{1} is the new score. If the ratio is less than a user-defined threshold (set herein to 1.11.1), then the score for that cell is considered to have converged. Converged features can still be updated if that feature is incidentally observed during exploration, but once the feature score has converged, the respective cell will no longer be used in pose scoring."
+                    },
+                    {
+                      "type": "formula",
+                      "text": "s0s1\\frac{s_{0}}{s_{1}}"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "s0s_{0}"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "s1s_{1}"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "1.11.1"
+                    }
+                  ],
+                  "children": []
+                }
+              ]
+            },
+            {
+              "heading": "IV-B Pose Sampling",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "To find the poses which maximize the scoring metric ([1](https://ar5iv.labs.arxiv.org/html/2504.03629#S4.E1 \"In IV-A1 Feature Scoring ‣ IV-A Pose Scoring ‣ IV Proposed Approach ‣ SeGuE: Semantic Guided Exploration for Mobile Robots\")) and ensure the semantic information is fully mapped, diverse poses across the map must be considered. To that end, two pose sampling strategies, Uniform Sampling (US) and Importance Sampling (IS), are proposed. Both strategies employ the same scoring mechanism. Regardless of the sampling method, exploration is terminated if no pose is found within a certain percentage of the maximum possible score. This is also a user-defined hyperparameter of our method. The threshold is set to 5%5\\% throughout our experiments."
+                },
+                {
+                  "type": "formula",
+                  "text": "5%5\\%"
+                }
+              ],
+              "children": [
+                {
+                  "heading": "IV-B1 Uniform Sampling",
+                  "level": 4,
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "text": "In the first method, poses are sampled uniformly across the entire map, and unreachable poses are discarded. Sampling continues until a desired number of reachable poses is obtained. These poses are then scored according to ([1](https://ar5iv.labs.arxiv.org/html/2504.03629#S4.E1 \"In IV-A1 Feature Scoring ‣ IV-A Pose Scoring ‣ IV Proposed Approach ‣ SeGuE: Semantic Guided Exploration for Mobile Robots\")). The pose with the highest score is selected as the next pose to navigate to."
+                    }
+                  ],
+                  "children": []
+                },
+                {
+                  "heading": "IV-B2 Importance Sampling",
+                  "level": 4,
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "text": "While the US method can acquire poses with high entropy, a large number of samples need to be considered for assessment, which may be inefficient in practice. Inspired by [[21](https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib21)], we also implement a sampling approach based on particle filter optimization. This method samples an initial set of poses uniformly across reachable poses, which are used to fit a mixture of Gaussian models where the likelihood of each pose is directly proportional to its score ([1](https://ar5iv.labs.arxiv.org/html/2504.03629#S4.E1 \"In IV-A1 Feature Scoring ‣ IV-A Pose Scoring ‣ IV Proposed Approach ‣ SeGuE: Semantic Guided Exploration for Mobile Robots\")). This distribution is then used to sample a new set of poses, subject to the same reachability constraint, and the process repeats for a fixed number of iterations. The mean of the mixture component with the highest score is taken as the next pose to navigate to."
+                    }
+                  ],
+                  "children": []
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "heading": "V Experiments",
+          "level": 2,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "We evaluate SeGuE in both simulated and real-world environments using a wheeled mobile robot. The entire software suite is written in the Robot Operating System (ROS) framework. Mapping and odometry estimation for localization are conducted using 3D LiDAR information via [[22](https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib22)]. Point cloud information is also projected onto the ground plane to obtain a 2D occupancy grid for motion planning. Waypoint navigation is conducted with the ROS built-in package move\\_base. The scene features are extracted via an RGB camera."
+            },
+            {
+              "type": "paragraph",
+              "text": "To evaluate the quality of the semantic maps generated, we assess the map coverage and average entropy. Map coverage provides an insight into the proportion of the appearance features that have been captured during exploration. It is computed as the percentage of occupancy map cells, which are either free or occupied, that have a corresponding semantic feature. Higher values of map coverage are better. The average entropy indicates the quality of the observations across the map. Average entropy calculates the prediction entropy of the entire semantic feature map. Any cell observed in the occupancy map with no corresponding semantic feature is assumed to have maximum entropy. Lower values of average entropy are better."
+            }
+          ],
+          "children": [
+            {
+              "heading": "V-A Simulation Results",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "We simulate the Clearpath Jackal in Gazebo[[23](https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib23)] and the relevant sensors using the calibration data available in [[24](https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib24)]. All simulation is carried out on a desktop computer equipped with an Intel i7 processor, an NVIDIA RTX 3090 and 32 GB of RAM. We show results in two different environments. The Small House environment replicates a residential home and the Bookstore environment is a retail space. For each environment, the initial conditions are kept fixed across SeGuE and each baseline method."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "We compare SeGuE, using both the US and IS variants, against a representative frontier-based exploration method [[25](https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib25)] and a representative next-best-view method (RRG-NBV) [[17](https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib17)]. We also compare SeGuE to a No Score baseline, where we replace our map scoring metric with a simple metric where every unseen cell has a score of one and every seen cell has a score of zero. The view scoring and importance sampling are kept fixed."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "The map quality metrics for each method are reported in Table [I](https://ar5iv.labs.arxiv.org/html/2504.03629#S5.T1 \"TABLE I ‣ V-A Simulation Results ‣ V Experiments ‣ SeGuE: Semantic Guided Exploration for Mobile Robots\"). It can be observed that, across the board, the frontier-based and RRG-NBV approaches do not perform well. This can be explained based on the fact that no appearance features are considered but instead scene geometry is mapped. Both SeGuE and the No Score baselines are significantly better with lower average entropy and higher coverage of the semantic features, demonstrating the necessity of exploration methods that are aware of scene semantics. Our method of scoring semantic features helps lower the average entropy when combined with either sampling method."
+                },
+                {
+                  "type": "table",
+                  "text": "| | Small House | | Bookstore | | | --- | --- | --- | --- | --- | | | Coverage ↑\\uparrow | Average Entropy ↓\\downarrow | Coverage ↑\\uparrow | Average Entropy ↓\\downarrow | | Frontiers Based [[25](https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib25)] | 0.3030.303 | 3.6193.619 | 0.4770.477 | 2.8622.862 | | RRG-NBV [[17](https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib17)] | 0.7300.730 | 1.6431.643 | 0.2550.255 | 3.9173.917 | | No Score, US | 0.9050.905 | 0.8060.806 | 0.9250.925 | 0.8010.801 | | No Score, IS | 0.8970.897 | 0.8420.842 | 0.9290.929 | 0.7870.787 | | SeGuE, US | 0.9380.938 | 0.6730.673 | 0.9400.940 | 0.7230.723 | | SeGuE, IS | 0.9320.932 | 0.7020.702 | 0.9390.939 | 0.7300.730 |"
+                },
+                {
+                  "type": "formula",
+                  "text": "↑\\uparrow"
+                },
+                {
+                  "type": "formula",
+                  "text": "↓\\downarrow"
+                },
+                {
+                  "type": "formula",
+                  "text": "↑\\uparrow"
+                },
+                {
+                  "type": "formula",
+                  "text": "↓\\downarrow"
+                },
+                {
+                  "type": "formula",
+                  "text": "0.3030.303"
+                },
+                {
+                  "type": "formula",
+                  "text": "3.6193.619"
+                },
+                {
+                  "type": "formula",
+                  "text": "0.4770.477"
+                },
+                {
+                  "type": "formula",
+                  "text": "2.8622.862"
+                },
+                {
+                  "type": "formula",
+                  "text": "0.7300.730"
+                },
+                {
+                  "type": "formula",
+                  "text": "1.6431.643"
+                },
+                {
+                  "type": "formula",
+                  "text": "0.2550.255"
+                },
+                {
+                  "type": "formula",
+                  "text": "3.9173.917"
+                },
+                {
+                  "type": "formula",
+                  "text": "0.9050.905"
+                },
+                {
+                  "type": "formula",
+                  "text": "0.8060.806"
+                },
+                {
+                  "type": "formula",
+                  "text": "0.9250.925"
+                },
+                {
+                  "type": "formula",
+                  "text": "0.8010.801"
+                },
+                {
+                  "type": "formula",
+                  "text": "0.8970.897"
+                },
+                {
+                  "type": "formula",
+                  "text": "0.8420.842"
+                },
+                {
+                  "type": "formula",
+                  "text": "0.9290.929"
+                },
+                {
+                  "type": "formula",
+                  "text": "0.7870.787"
+                },
+                {
+                  "type": "formula",
+                  "text": "0.9380.938"
+                },
+                {
+                  "type": "formula",
+                  "text": "0.6730.673"
+                },
+                {
+                  "type": "formula",
+                  "text": "0.9400.940"
+                },
+                {
+                  "type": "formula",
+                  "text": "0.7230.723"
+                },
+                {
+                  "type": "formula",
+                  "text": "0.9320.932"
+                },
+                {
+                  "type": "formula",
+                  "text": "0.7020.702"
+                },
+                {
+                  "type": "formula",
+                  "text": "0.9390.939"
+                },
+                {
+                  "type": "formula",
+                  "text": "0.7300.730"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "We visualize the maps produced in each environment using the frontier-based method and SeGuE in Fig. [2](https://ar5iv.labs.arxiv.org/html/2504.03629#S5.F2 \"Figure 2 ‣ V-A Simulation Results ‣ V Experiments ‣ SeGuE: Semantic Guided Exploration for Mobile Robots\") (for Small House) and Fig. [3](https://ar5iv.labs.arxiv.org/html/2504.03629#S5.F3 \"Figure 3 ‣ V-A Simulation Results ‣ V Experiments ‣ SeGuE: Semantic Guided Exploration for Mobile Robots\") (for Bookstore). Since the semantic features exist in a high-dimensional abstract feature space, we pass the features through a prediction head and visualize the class predictions, where each color represents a different class. It can be observed that the structure of the semantic feature map corresponds well with the structure of objects mapped in the occupancy grid."
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "V-B Sample Number Study",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "We evaluate the sensitivity of both considered sampling methods to the number of samples chosen in the Small House environment. In the case of the uniform sampling method, this is a direct sweep over the number of samples chosen. The results of this ablation study, both with and without our semantic scoring method, are shown in Table [II](https://ar5iv.labs.arxiv.org/html/2504.03629#S5.T2 \"TABLE II ‣ V-B Sample Number Study ‣ V Experiments ‣ SeGuE: Semantic Guided Exploration for Mobile Robots\"). We note that, overall, our semantic scoring method increases coverage and decreases average entropy. While no direct relation between the number of samples and the performance appears to exist, we observe that, both with and without our semantic scoring method, the optimal performance seems to be between 100 and 200 samples. This is likely because too few samples do not approach an optimal score, while too many samples tend to over-exploit, leading to less exploration overall."
+                },
+                {
+                  "type": "table",
+                  "text": "| | Semantic Score | | No Score | | | --- | --- | --- | --- | --- | | Samples | Coverage ↑\\uparrow | Average Entropy ↓\\downarrow | Coverage ↑\\uparrow | Average Entropy ↓\\downarrow | | 10 | 0.8970.897 | 0.8420.842 | 0.8950.895 | 0.8500.850 | | 50 | 0.9280.928 | 0.7110.711 | 0.8990.899 | 0.8370.837 | | 100 | 0.9080.908 | 0.8010.801 | 0.9110.911 | 0.7750.775 | | 200 | 0.9380.938 | 0.6730.673 | 0.9050.905 | 0.8060.806 | | 500 | 0.9040.904 | 0.8120.812 | 0.8870.887 | 0.9030.903 | | 1000 | 0.9120.912 | 0.7720.772 | 0.8950.895 | 0.8510.851 |"
+                },
+                {
+                  "type": "formula",
+                  "text": "↑\\uparrow"
+                },
+                {
+                  "type": "formula",
+                  "text": "↓\\downarrow"
+                },
+                {
+                  "type": "formula",
+                  "text": "↑\\uparrow"
+                },
+                {
+                  "type": "formula",
+                  "text": "↓\\downarrow"
+                },
+                {
+                  "type": "formula",
+                  "text": "0.8970.897"
+                },
+                {
+                  "type": "formula",
+                  "text": "0.8420.842"
+                },
+                {
+                  "type": "formula",
+                  "text": "0.8950.895"
+                },
+                {
+                  "type": "formula",
+                  "text": "0.8500.850"
+                },
+                {
+                  "type": "formula",
+                  "text": "0.9280.928"
+                },
+                {
+                  "type": "formula",
+                  "text": "0.7110.711"
+                },
+                {
+                  "type": "formula",
+                  "text": "0.8990.899"
+                },
+                {
+                  "type": "formula",
+                  "text": "0.8370.837"
+                },
+                {
+                  "type": "formula",
+                  "text": "0.9080.908"
+                },
+                {
+                  "type": "formula",
+                  "text": "0.8010.801"
+                },
+                {
+                  "type": "formula",
+                  "text": "0.9110.911"
+                },
+                {
+                  "type": "formula",
+                  "text": "0.7750.775"
+                },
+                {
+                  "type": "formula",
+                  "text": "0.9380.938"
+                },
+                {
+                  "type": "formula",
+                  "text": "0.6730.673"
+                },
+                {
+                  "type": "formula",
+                  "text": "0.9050.905"
+                },
+                {
+                  "type": "formula",
+                  "text": "0.8060.806"
+                },
+                {
+                  "type": "formula",
+                  "text": "0.9040.904"
+                },
+                {
+                  "type": "formula",
+                  "text": "0.8120.812"
+                },
+                {
+                  "type": "formula",
+                  "text": "0.8870.887"
+                },
+                {
+                  "type": "formula",
+                  "text": "0.9030.903"
+                },
+                {
+                  "type": "formula",
+                  "text": "0.9120.912"
+                },
+                {
+                  "type": "formula",
+                  "text": "0.7720.772"
+                },
+                {
+                  "type": "formula",
+                  "text": "0.8950.895"
+                },
+                {
+                  "type": "formula",
+                  "text": "0.8510.851"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "We perform the same study on the IS method, varying the number of samples chosen every iteration and the total number of iterations. We report the quantitative results in Table [III](https://ar5iv.labs.arxiv.org/html/2504.03629#S5.T3 \"TABLE III ‣ V-B Sample Number Study ‣ V Experiments ‣ SeGuE: Semantic Guided Exploration for Mobile Robots\")."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "When comparing the No Score performance between sampling methods (cf. Tables [II](https://ar5iv.labs.arxiv.org/html/2504.03629#S5.T2 \"TABLE II ‣ V-B Sample Number Study ‣ V Experiments ‣ SeGuE: Semantic Guided Exploration for Mobile Robots\") and [III](https://ar5iv.labs.arxiv.org/html/2504.03629#S5.T3 \"TABLE III ‣ V-B Sample Number Study ‣ V Experiments ‣ SeGuE: Semantic Guided Exploration for Mobile Robots\")), the performance does not change significantly. We observe a marked improvement when the Semantic Score is combined with IS, indicating that IS can better exploit the information within our metric."
+                },
+                {
+                  "type": "table",
+                  "text": "| | | Semantic Score | | No Score | | | --- | --- | --- | --- | --- | --- | | Iterations | Samples | Coverage ↑\\uparrow | Average Entropy ↓\\downarrow | Coverage ↑\\uparrow | Average Entropy ↓\\downarrow | | 2 | 50 | 0.9320.932 | 0.7020.702 | 0.8970.897 | 0.8420.842 | | 5 | 20 | 0.9260.926 | 0.7040.704 | 0.9000.900 | 0.8440.844 | | 10 | 10 | 0.9050.905 | 0.8070.807 | 0.8810.881 | 0.9210.921 | | 10 | 20 | 0.9180.918 | 0.7500.750 | 0.8880.888 | 0.8760.876 | | 10 | 50 | 0.9190.919 | 0.7710.771 | 0.9160.916 | 0.7610.761 | | 10 | 100 | 0.8980.898 | 0.8360.836 | 0.8980.898 | 0.8500.850 |"
+                },
+                {
+                  "type": "formula",
+                  "text": "↑\\uparrow"
+                },
+                {
+                  "type": "formula",
+                  "text": "↓\\downarrow"
+                },
+                {
+                  "type": "formula",
+                  "text": "↑\\uparrow"
+                },
+                {
+                  "type": "formula",
+                  "text": "↓\\downarrow"
+                },
+                {
+                  "type": "formula",
+                  "text": "0.9320.932"
+                },
+                {
+                  "type": "formula",
+                  "text": "0.7020.702"
+                },
+                {
+                  "type": "formula",
+                  "text": "0.8970.897"
+                },
+                {
+                  "type": "formula",
+                  "text": "0.8420.842"
+                },
+                {
+                  "type": "formula",
+                  "text": "0.9260.926"
+                },
+                {
+                  "type": "formula",
+                  "text": "0.7040.704"
+                },
+                {
+                  "type": "formula",
+                  "text": "0.9000.900"
+                },
+                {
+                  "type": "formula",
+                  "text": "0.8440.844"
+                },
+                {
+                  "type": "formula",
+                  "text": "0.9050.905"
+                },
+                {
+                  "type": "formula",
+                  "text": "0.8070.807"
+                },
+                {
+                  "type": "formula",
+                  "text": "0.8810.881"
+                },
+                {
+                  "type": "formula",
+                  "text": "0.9210.921"
+                },
+                {
+                  "type": "formula",
+                  "text": "0.9180.918"
+                },
+                {
+                  "type": "formula",
+                  "text": "0.7500.750"
+                },
+                {
+                  "type": "formula",
+                  "text": "0.8880.888"
+                },
+                {
+                  "type": "formula",
+                  "text": "0.8760.876"
+                },
+                {
+                  "type": "formula",
+                  "text": "0.9190.919"
+                },
+                {
+                  "type": "formula",
+                  "text": "0.7710.771"
+                },
+                {
+                  "type": "formula",
+                  "text": "0.9160.916"
+                },
+                {
+                  "type": "formula",
+                  "text": "0.7610.761"
+                },
+                {
+                  "type": "formula",
+                  "text": "0.8980.898"
+                },
+                {
+                  "type": "formula",
+                  "text": "0.8360.836"
+                },
+                {
+                  "type": "formula",
+                  "text": "0.8980.898"
+                },
+                {
+                  "type": "formula",
+                  "text": "0.8500.850"
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "V-C Real-world Experiments",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "In addition to the simulation studies, we evaluate SeGuE in a real-world environment (campus cafeteria). We use the Clearpath Jackal wheeled mobile robot equipped with the Velodyne VLP-16 LiDAR and Zed2i stereo camera; for a full description on sensor calibration see [[26](https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib26)]. Additionally, we connect the Clearpath Jackal robot with a laptop equipped with an Intel i7 processor, an NVIDIA RTX 3060, 32 GB of RAM and 512 GB of storage."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "We tested SeGuE with uniform sampling since this was found to perform well consistently across simulation studies. Experimental results are shown in Fig. [4](https://ar5iv.labs.arxiv.org/html/2504.03629#S5.F4 \"Figure 4 ‣ V-C Real-world Experiments ‣ V Experiments ‣ SeGuE: Semantic Guided Exploration for Mobile Robots\"). The computed coverage is 0.7350.735 and average entropy is 1.7531.753. While the overall coverage is lower compared to the values found in the simulation studies, our method can still map most of the environment. This performance degradation can be attributed to two factors. First, the underlying motion planning library did not transfer well to a more cluttered location. Second, battery constraints limited the total run time. Adjusting the underlying motion planner to be more energy-aware (e.g., by building on top of [[27](https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib27)] and [[28](https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib28)]) could enable optimal coverage subject to motion budget and task (i.e. viewpoint) constraints, so that the environment can be explored timely."
+                },
+                {
+                  "type": "formula",
+                  "text": "0.7350.735"
+                },
+                {
+                  "type": "formula",
+                  "text": "1.7531.753"
+                }
+              ],
+              "children": []
+            }
+          ]
+        },
+        {
+          "heading": "VI Conclusion",
+          "level": 2,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "We developed SeGuE, a method to autonomously explore an environment which ensures that appearance features are sufficiently observed so that a high-quality and complete map of semantic features may be constructed. We proposed a method to score the individual semantic features contained within the map and showed how these scores may be aggregated to rank potential viewpoints. Two viewpoint sampling methods were considered, with our tests showing how they interact with the system as a whole. Results in both simulation and physical hardware experiments showed that our method can fuse semantic feature information well, improving overall exploration metrics like map coverage and average entropy in comparison to baseline methods."
+            },
+            {
+              "type": "paragraph",
+              "text": "Since SeGuE builds on top of a next-best-view algorithm, it remains bound to inherent limitations of the latter, particularly the performance dependence on the sampling method and scoring. Further, we focus only on global sampling methods to avoid getting trapped in local minima. In future work, we aim to integrate local sampling as well."
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "References",
+          "level": 2,
+          "content": [
+            {
+              "type": "list",
+              "text": "* [1] N. Blodow, L. C. Goron, Z.-C. Marton, D. Pangercic, T. Rühr, M. Tenorth, and M. Beetz, “Autonomous semantic mapping for robots performing everyday manipulation tasks in kitchen environments,” in IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS), pp. 4263–4270, 2011. * [2] A. Dechemi, D. Chatziparaschis, J. Chen, M. Campbell, A. Shamshirgaran, C. Mucchiani, A. Roy-Chowdhury, S. Carpin, and K. Karydis, “Robotic assessment of a crop’s need for watering: Automating a time-consuming task to support sustainable agriculture,” IEEE Robotics & Automation Magazine, vol. 30, no. 4, pp. 52–67, 2023. * [3] S. Y. Gadre, M. Wortsman, G. Ilharco, L. Schmidt, and S. Song, “Cows on pasture: Baselines and benchmarks for language-driven zero-shot object navigation,” in IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR), pp. 23171–23181, 2023. * [4] C. Huang, O. Mees, A. Zeng, and W. Burgard, “Visual language maps for robot navigation,” in IEEE International Conference on Robotics and Automation (ICRA), pp. 10608–10615, 2023. * [5] S. Achat, Q. Serdel, J. Marzat, and J. Moras, “A case study of semantic mapping and planning for autonomous robot navigation,” SN Computer Science, vol. 5, 2023. * [6] C. Cadena, L. Carlone, H. Carrillo, Y. Latif, D. Scaramuzza, J. Neira, I. Reid, and J. J. Leonard, “Past, present, and future of simultaneous localization and mapping: Toward the robust-perception age,” IEEE Transactions on Robotics (TRO), vol. 32, no. 6, pp. 1309–1332, 2016. * [7] B. Yamauchi, “A frontier-based approach for autonomous exploration,” in IEEE International Symposium on Computational Intelligence in Robotics and Automation (CIRA), pp. 146–151, 1997. * [8] A. Bircher, M. Kamel, K. Alexis, H. Oleynikova, and R. Siegwart, “Receding horizon ”next-best-view” planner for 3d exploration,” in IEEE International Conference on Robotics and Automation (ICRA), pp. 1462–1468, 2016. * [9] E. Palazzolo and C. Stachniss, “Effective exploration for mavs based on the expected information gain,” Drones, vol. 2, no. 1, 2018. * [10] M. Selin, M. Tiger, D. Duberg, F. Heintz, and P. Jensfelt, “Efficient autonomous exploration planning of large-scale 3-d environments,” IEEE Robotics and Automation Letters, vol. 4, no. 2, pp. 1699–1706, 2019. * [11] M. Brossard, S. Bonnabel, and A. Barrau, “A new approach to 3d icp covariance estimation,” IEEE Robotics and Automation Letters, vol. 5, no. 2, pp. 744–751, 2020. * [12] N. Yokoyama, S. Ha, D. Batra, J. Wang, and B. Bucher, “Vlfm: Vision-language frontier maps for zero-shot semantic navigation,” in IEEE International Conference on Robotics and Automation (ICRA), pp. 42–48, 2024. * [13] X. Chen, A. Milioto, E. Palazzolo, P. Giguère, J. Behley, and C. Stachniss, “Suma++: Efficient lidar-based semantic slam,” in IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS), pp. 4530–4537, 2019. * [14] J. Liu, Y. Lv, Y. Yuan, W. Chi, G. Chen, and L. Sun, “An efficient robot exploration method based on heuristics biased sampling,” IEEE Transactions on Industrial Electronics, vol. 70, no. 7, pp. 7102–7112, 2023. * [15] M. Keirdar and G. A. Kaminka, “Efficient frontier detection for robot exploration,” The International Journal of Robotics Research, vol. 33, no. 2, pp. 215–236, 2014. * [16] D. L. da Silva Lubanco, M. Pichler-Scheder, and T. Schlechter, “A novel frontier-based exploration algorithm for mobile robots,” in IEEE International Conference on Mechatronics and Robotics Engineering (ICMRE), pp. 1–5, 2020. * [17] M. Steinbrink, P. Koch, B. Jung, and S. May, “Rapidly-exploring random graph next-best view exploration for ground vehicles,” in European Conference on Mobile Robots (ECMR), pp. 1–7, 2021. * [18] R. Monica and J. Aleotti, “Contour-based next-best view planning from point cloud segmentation of unknown objects,” Autonomous Robots, pp. 443–458, 2017. * [19] M. Oquab, T. Darcet, T. Moutakanni, H. V. Vo, M. Szafraniec, V. Khalidov, P. Fernandez, D. Haziza, F. Massa, A. El-Nouby, R. Howes, P.-Y. Huang, H. Xu, V. Sharma, S.-W. Li, W. Galuba, M. Rabbat, M. Assran, N. Ballas, G. Synnaeve, I. Misra, H. Jegou, J. Mairal, P. Labatut, A. Joulin, and P. Bojanowski, “Dinov2: Learning robust visual features without supervision,” 2023. * [20] B. Zhou, H. Zhao, X. Puig, S. Fidler, A. Barriuso, and A. Torralba, “Scene parsing through ade20k dataset,” in IEEE Conference on Computer Vision and Pattern Recognition (CVPR), pp. 5122–5130, 2017. * [21] B. Liu, S. Cheng, and Y. Shi, “Particle filter optimization: A brief introduction,” in Advances in Swarm Intelligence, pp. 95–104, Springer, 2016. * [22] H. Teng, Y. Wang, D. Chatziparaschis, and K. Karydis, “Adaptive lidar odometry and mapping for autonomous agricultural mobile robots in unmanned farms,” Computers and Electronics in Agriculture, vol. 232, p. 110023, 2025. * [23] N. Koenig and A. Howard, “Design and use paradigms for gazebo, an open-source multi-robot simulator,” in IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS), vol. 3, pp. 2149–2154, 2004. * [24] H. Teng, D. Chatziparaschis, X. Kan, A. K. Roy-Chowdhury, and K. Karydis, “Centroid distance keypoint detector for colored point clouds,” in IEEE/CVF Winter Conference on Applications of Computer Vision (WACV), pp. 1196–1205, 2023. * [25] J. Hörner, “Map-merging for multi-robot system,” Master’s thesis, Charles University, Faculty of Mathematics and Physics, 2016. * [26] H. Teng, Y. Wang, X. Song, and K. Karydis, “Multimodal dataset for localization, mapping and crop monitoring in citrus tree farms,” in International Symposium on Visual Computing, pp. 571–582, Springer, 2023. * [27] X. Kan, H. Teng, and K. Karydis, “Online exploration and coverage planning in unknown obstacle-cluttered environments,” IEEE Robotics and Automation Letters, vol. 5, no. 4, pp. 5969–5976, 2020. * [28] X. Kan, T. C. Thayer, S. Carpin, and K. Karydis, “Task planning on stochastic aisle graphs for precision agriculture,” IEEE Robotics and Automation Letters, vol. 6, no. 2, pp. 3287–3294, 2021."
+            }
+          ],
+          "children": []
+        }
+      ]
+    }
+  ],
+  "chunks": [
+    {
+      "heading_path": [
+        "SeGuE: Semantic Guided Exploration for Mobile Robots"
+      ],
+      "text": "# SeGuE: Semantic Guided Exploration for Mobile Robots"
+    },
+    {
+      "heading_path": [
+        "SeGuE: Semantic Guided Exploration for Mobile Robots",
+        "Abstract"
+      ],
+      "text": "###### Abstract\n\nThe rise of embodied AI applications has enabled robots to perform complex tasks which require a sophisticated understanding of their environment. To enable successful robot operation in such settings, maps must be constructed so that they include semantic information, in addition to geometric information. In this paper, we address the novel problem of semantic exploration, whereby a mobile robot must autonomously explore an environment to fully map both its structure and the semantic appearance of features. We develop a method based on next-best-view exploration, where potential poses are scored based on the semantic features visible from that pose. We explore two alternative methods for sampling potential views and demonstrate the effectiveness of our framework in both simulation and physical experiments. Automatic creation of high-quality semantic maps can enable robots to better understand and interact with their environments and enable future embodied AI applications to be more easily deployed."
+    },
+    {
+      "heading_path": [
+        "SeGuE: Semantic Guided Exploration for Mobile Robots",
+        "I Introduction"
+      ],
+      "text": "## I Introduction\n\nAdvancements in machine learning performance and edge computing propel robots toward acquiring higher than ever before reasoning and decision-making capabilities. These capabilities are critical for successfully deploying them in workplace environments such as automated kitchens [[1](https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib1)] or unmanned farms [[2](https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib2)], where a robot needs to solve a joint navigation and semantic scene understanding problem.\n\nTo solve this problem, classical metric-based maps have been fused with semantic-based maps to offer appropriate information-rich maps. For example, in visual object navigation [[3](https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib3)], an agent must find an object matching a text or picture. Similarly, in language-guided navigation [[4](https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib4)], an agent must navigate based on natural language instructions referencing the environment’s appearance. Such methods are often zero-shot, assuming no prior knowledge of the environment. While this setting is challenging, it is inherently transient. In real-world cases, where continuous operation is needed, constructing a comprehensive map during or before operation would be highly beneficial. At the same time, several existing methods (e.g., [[1](https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib1), [5](https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib5), [3](https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib3), [4](https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib4)]) use maps that have been augmented with semantic classes. While semantic class information is valuable, its limited reusability may hinder transfer to physical robot deployment across environments. To address this challenge, we propose an exploration method that maps the environment’s semantic *features*, thus enabling reusability across diverse tasks.\n\nModern AI-enhanced semantic maps can jointly encode a scene’s geometry and appearance features. They can hold features extracted by machine learning models, which in turn can be reused across many different tasks. Semantic feature maps can be created online [[3](https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib3)], typically to aid in visual object search, or offline [[4](https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib4)], which can be used for language-guided navigation or other downstream tasks. However, offline mapping typically requires manual robot operation or hand-engineered routes to ensure comprehensive coverage of appearance features. Although autonomous exploration methods for mapping environmental structures are well-established in robotics, there is a notable gap in *automatically guiding exploration to create high-quality semantic maps*.\n\nAutonomous environment exploration and mapping have received significant attention over the years. Mapping the structure of a static environment in 2D has largely been solved by existing SLAM approaches [[6](https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib6)]. Exploration is also very well studied, with conventional approaches divided broadly into frontier-based and next-best-view-based methods. In frontier-based methods [[7](https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib7)], the robot moves to locations that are on the border between the mapped and unmapped portions of the environment, while next-best-view methods [[8](https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib8), [9](https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib9), [10](https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib10)] sample and score potential views based on information theoretic metrics. Given sufficient time, both the methods can fully capture the geometry of an environment. However, they do not consider the appearance features of the environment. Furthermore, the increased range and field-of-view of modern depth sensors can result in incomplete and low-quality semantic feature maps [[11](https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib11)].\n\nIn this work, we introduce a novel autonomous exploration method based on the next-best-view approach, which maps the structure of the environment and simultaneously captures its semantic appearance. Our method scores potential views by computing the average entropy of visible semantic features, excluding occluded and converged features. We investigate two alternative view sampling techniques: uniform sampling across reachable poses and an iterative importance sampling method inspired by particle filter optimization. Off-the-shelf components are leveraged for metric-based mapping and navigation. Our approach is validated through both simulation and physical hardware experiments using a wheeled mobile robot. In sum, our contributions include:\n\n1. 1. We propose a method for scoring individual semantic map features and show how these scores can be combined to score a particular view. 2. 2. We explore two alternative methods for sampling potential views. 3. 3. We demonstrate the feasibility of our framework in simulated and physical experiments.\n\nWe propose a method for scoring individual semantic map features and show how these scores can be combined to score a particular view.\n\nWe explore two alternative methods for sampling potential views.\n\nWe demonstrate the feasibility of our framework in simulated and physical experiments."
+    },
+    {
+      "heading_path": [
+        "SeGuE: Semantic Guided Exploration for Mobile Robots",
+        "II Related Work"
+      ],
+      "text": "## II Related Work"
+    },
+    {
+      "heading_path": [
+        "SeGuE: Semantic Guided Exploration for Mobile Robots",
+        "II Related Work",
+        "II-A Semantic Mapping"
+      ],
+      "text": "### II-A Semantic Mapping\n\nSemantic mapping has been explored both in machine learning and robotics communities. Machine learning research focuses on dense semantic features [[4](https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib4)]. These maps allow for fine-grained search within the environment [[4](https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib4)] and can be used to predict the layout of the unexplored portion of the environment [[12](https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib12)]. Within robotics, there has been a focus on semantic classes. In [[13](https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib13)], semantic categories were used to increase loop closures, and in [[14](https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib14)], semantic categories were used to create more efficient routes. As resources available on robots (sensors, computing units, etc.) continue to grow and AI models continue to become more amenable to edge computing, the demand for maps of dense semantic features is expected to rise. Our method can help construct such maps automatically."
+    },
+    {
+      "heading_path": [
+        "SeGuE: Semantic Guided Exploration for Mobile Robots",
+        "II Related Work",
+        "II-B Frontier Exploration"
+      ],
+      "text": "### II-B Frontier Exploration\n\nFrontier-based exploration has been thoroughly explored in the literature. Initially proposed in [[7](https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib7)], frontier-based methods seek to fully explore an environment by constantly moving toward the border between known and unknown space. More recent works have sought to increase the computational efficiency of computing frontiers [[15](https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib15)] and create frontier ranking mechanisms [[16](https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib16)]. These exploration methods are solely concerned with mapping the geometry of an environment, which can be directly observed with current LiDAR sensors that are commonly integrated into contemporary robots. In contrast, mapping semantic features can be significantly complicated by the variability in object appearances at different distances, the salience of various objects to feature extractors, and the limited field of view of most cameras."
+    },
+    {
+      "heading_path": [
+        "SeGuE: Semantic Guided Exploration for Mobile Robots",
+        "II Related Work",
+        "II-C Next-Best-View Determination"
+      ],
+      "text": "### II-C Next-Best-View Determination\n\nThe next-best-view pipeline [[8](https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib8), [9](https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib9), [10](https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib10)] consists of a pose sampler, a metric to rank poses, either in terms of information gain [[8](https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib8), [9](https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib9), [10](https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib10)] or a task-specific metric [[5](https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib5), [1](https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib1)], and a mapper which updates an internal map while navigating to the determined next-best-view pose. Several contemporary implementations use sampling-based planners to select poses [[8](https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib8), [17](https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib17)]. However, this can lead to getting trapped in local maxima. One way to address this is by integrating an additional global sampler [[10](https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib10)]. Information-theoretic metrics [[18](https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib18), [9](https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib9)] encode the structure and the confidence in the current map to rank the value of a particular view. Semantic categories have also been used [[1](https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib1)] to focus on more task-relevant structures. To the best of our knowledge, no method has incorporated a semantic feature map into a next-best-view algorithm."
+    },
+    {
+      "heading_path": [
+        "SeGuE: Semantic Guided Exploration for Mobile Robots",
+        "III Problem Definition"
+      ],
+      "text": "## III Problem Definition\n\nIn this work, we address a novel semantic exploration problem. We aim to simultaneously explore and map an environment in real time autonomously while ensuring that the map fully captures the semantic information necessary for downstream embodied AI applications. Specifically, we ask how a mobile robot, equipped with an RGB camera and a depth sensor, can explore an environment and construct a 2D map ℳ∈ℝH×W×N+1\\mathcal{M}\\in\\mathbb{R}^{H\\times W\\times N+1}, where HH and WW represent the height and width of the map, and NN represents the dimension of the semantic feature vectors. The additional scalar value in the third dimension represents the occupancy information, in the form of an occupancy grid. While semantic map generation is a thoroughly studied field [[4](https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib4)], in this work, we specifically address the exploration problem to ensure sufficient coverage of the environment and to capture high-quality semantic features. To reduce implementation complexity, we make the working assumptions that the robot operates in a physically bounded environment, and that the environment is relatively flat and traversable. These assumptions are not restrictive since they relate to most common indoor navigation paradigms (as we test herein), and can directly carry over to outdoor navigation in structured environments.\n\nℳ∈ℝH×W×N+1\\mathcal{M}\\in\\mathbb{R}^{H\\times W\\times N+1}\n\nHH\n\nWW\n\nNN"
+    },
+    {
+      "heading_path": [
+        "SeGuE: Semantic Guided Exploration for Mobile Robots",
+        "IV Proposed Approach"
+      ],
+      "text": "## IV Proposed Approach\n\nWe propose the Semantic Guided Exploration (SeGuE) method for mobile robots. Our method builds upon next-best-view algorithms. During exploration, a semantic map, SS, is constructed using data from two different sensing modalities, specifically an RGB camera and a 3D LiDAR. SeGuE samples collision-free and reachable poses from the occupancy grid generated during navigation, based on the current semantic understanding of the environment. To estimate the potential information gain from each pose, the average prediction entropy of each semantic features visible from a pose is computed. To ensure that cells with higher aleatoric uncertainty are not overly exploited, the entropy of each semantic feature is tracked over time and features whose entropy has converged are excluded from score calculations. This process is repeated until a pose with a score above some threshold cannot be found. SeGuE is summarized in Algorithm [1](https://ar5iv.labs.arxiv.org/html/2504.03629#alg1 \"Algorithm 1 ‣ IV Proposed Approach ‣ SeGuE: Semantic Guided Exploration for Mobile Robots\"). We elaborate on each step of the approach next.\n\nSS\n\nτ\\tau\n\nSS\n\nOO\n\ni​m​gimg\n\np​t​C​l​o​u​dptCloud\n\npc​u​r​rp_{curr}\n\nS.update​(i​m​g,p​t​C​l​o​u​d,pc​u​r​r)S.\\text{update}(img,ptCloud,p_{curr})\n\nO.update​(p​t​C​l​o​u​d,pc​u​r​r)O.\\text{update}(ptCloud,p_{curr})\n\nP={pi}i=0NP=\\{p_{i}\\}_{i=0}^{N}\n\nPoseSampler​(S,O)\\text{PoseSampler}(S,O)\n\np∗=maxp∈P⁡PoseScore​(p,S,O)p^{*}=\\max_{p\\in P}\\text{PoseScore}(p,S,O)\n\nPoseScore​(p∗,S,O)<τ\\text{PoseScore}(p^{*},S,O)<\\tau\n\np∗p^{*}\n\np∗p^{*}\n\ni​m​gimg\n\np​t​C​l​o​u​dptCloud\n\npc​u​r​rp_{curr}\n\nS.update​(i​m​g,p​t​C​l​o​u​d,pc​u​r​r)S.\\text{update}(img,ptCloud,p_{curr})\n\nO.update​(p​t​C​l​o​u​d,pc​u​r​r)O.\\text{update}(ptCloud,p_{curr})"
+    },
+    {
+      "heading_path": [
+        "SeGuE: Semantic Guided Exploration for Mobile Robots",
+        "IV Proposed Approach",
+        "IV-A Pose Scoring"
+      ],
+      "text": "### IV-A Pose Scoring\n\nPoses are scored according to the amount of information that can be gained at that pose. We use entropy as a proxy for this, encouraging the robot to explore the areas of the map it is most uncertain about. During the exploration process, the semantic score map is continually updated by extracting dense semantic features from the current image observation. These features are then associated with different points in the point cloud ptCloud. As the 3D points now represent semantic features, they are projected onto the 2D semantic map to associate each cell with a feature. (Details of this procedure can be found in [[4](https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib4)].) The semantic features are extracted from the image img using a machine learning model h=f∘gh=f\\circ g, which can be decomposed into a feature extractor ff and classifier gg. Let gg be able to classify MM classes. The features stored in our semantic map are extracted from ff. Throughout our experiments we make use of DinoV2 [[19](https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib19)] to extract features and a linear classifier fine-tuned on the ADE20K dataset [[20](https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib20)]. The rest of the section describes the scoring mechanism in detail.\n\nh=f∘gh=f\\circ g\n\nff\n\ngg\n\ngg\n\nMM\n\nff"
+    },
+    {
+      "heading_path": [
+        "SeGuE: Semantic Guided Exploration for Mobile Robots",
+        "IV Proposed Approach",
+        "IV-A Pose Scoring",
+        "IV-A1 Feature Scoring"
+      ],
+      "text": "#### IV-A1 Feature Scoring\n\nEach cell in the semantic map contains a semantic feature vector that encodes the appearance of that location. The quality of every semantic feature associated with a particular cell changes over time, as the corresponding viewpoint varies. The prediction entropy of each cell is computed to assess the quality of the semantic feature. Using the classification head gg, which classifies MM classes, the score for a semantic feature xx is\n\ngg\n\nMM\n\nxx\n\n| | | | | | --- | --- | --- | --- | | | s​(x)=H​(g​(x))H​(𝒰​(M)),s(x)=\\frac{H(g(x))}{H(\\mathcal{U}(M))}\\;, | | (1) |\n\ns​(x)=H​(g​(x))H​(𝒰​(M)),s(x)=\\frac{H(g(x))}{H(\\mathcal{U}(M))}\\;,\n\nwhere HH is the Shannon entropy and 𝒰\\mathcal{U} is the uniform distribution. The score is normalized by the maximum entropy to be in the range [0,1][0,1], since the maximum entropy can grow arbitrarily large as MM increases. Any cell with no semantic feature is assigned a score of 11, indicating that no observations in a cell make it maximally uncertain. Once these scores are computed for every cell in the semantic map, potential views can be ranked by averaging the scores of individual cells that are visible from that viewpoint.\n\nHH\n\n𝒰\\mathcal{U}\n\n[0,1][0,1]\n\nMM\n\n11"
+    },
+    {
+      "heading_path": [
+        "SeGuE: Semantic Guided Exploration for Mobile Robots",
+        "IV Proposed Approach",
+        "IV-A Pose Scoring",
+        "IV-A2 Visibility Mask"
+      ],
+      "text": "#### IV-A2 Visibility Mask\n\nWe require that only locations that are visible from a given pose should be considered when providing a score for that pose. To enforce this, a raytracing algorithm, similar to [[12](https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib12)], is used to construct a view-mask of cells visible from a particular pose. An example mask is shown in Fig. [1](https://ar5iv.labs.arxiv.org/html/2504.03629#S4.F1 \"Figure 1 ‣ IV-A2 Visibility Mask ‣ IV-A Pose Scoring ‣ IV Proposed Approach ‣ SeGuE: Semantic Guided Exploration for Mobile Robots\"). In the figure, only the cells highlighted in gray are included in the aforementioned averaging operation; all other cells are ignored. This ensures that the overall score of a pose is not affected by the individual subscores that may be gathered from cells that provide no new information."
+    },
+    {
+      "heading_path": [
+        "SeGuE: Semantic Guided Exploration for Mobile Robots",
+        "IV Proposed Approach",
+        "IV-A Pose Scoring",
+        "IV-A3 Feature Convergence Tracking"
+      ],
+      "text": "#### IV-A3 Feature Convergence Tracking\n\nEven after having collected several observations, some cells may still have a high entropy due to the aleatoric uncertainty present in some classes. As such, in cases that additional observations would not improve a semantic feature score, then any new observation should not contribute to the pose score computation. Doing so can help prevent the exploitation of inherently uncertain cells. To address this, each cell’s feature score is tracked over time and monitored for convergence.\n\nA ratio convergence test is employed to decide when a feature score has converged. During exploration, when the feature score value of a non-converged cell is updated, the ratio s0s1\\frac{s\\_{0}}{s\\_{1}} is computed, where s0s\\_{0} is the previous score and s1s\\_{1} is the new score. If the ratio is less than a user-defined threshold (set herein to 1.11.1), then the score for that cell is considered to have converged. Converged features can still be updated if that feature is incidentally observed during exploration, but once the feature score has converged, the respective cell will no longer be used in pose scoring.\n\ns0s1\\frac{s_{0}}{s_{1}}\n\ns0s_{0}\n\ns1s_{1}\n\n1.11.1"
+    },
+    {
+      "heading_path": [
+        "SeGuE: Semantic Guided Exploration for Mobile Robots",
+        "IV Proposed Approach",
+        "IV-B Pose Sampling"
+      ],
+      "text": "### IV-B Pose Sampling\n\nTo find the poses which maximize the scoring metric ([1](https://ar5iv.labs.arxiv.org/html/2504.03629#S4.E1 \"In IV-A1 Feature Scoring ‣ IV-A Pose Scoring ‣ IV Proposed Approach ‣ SeGuE: Semantic Guided Exploration for Mobile Robots\")) and ensure the semantic information is fully mapped, diverse poses across the map must be considered. To that end, two pose sampling strategies, Uniform Sampling (US) and Importance Sampling (IS), are proposed. Both strategies employ the same scoring mechanism. Regardless of the sampling method, exploration is terminated if no pose is found within a certain percentage of the maximum possible score. This is also a user-defined hyperparameter of our method. The threshold is set to 5%5\\% throughout our experiments.\n\n5%5\\%"
+    },
+    {
+      "heading_path": [
+        "SeGuE: Semantic Guided Exploration for Mobile Robots",
+        "IV Proposed Approach",
+        "IV-B Pose Sampling",
+        "IV-B1 Uniform Sampling"
+      ],
+      "text": "#### IV-B1 Uniform Sampling\n\nIn the first method, poses are sampled uniformly across the entire map, and unreachable poses are discarded. Sampling continues until a desired number of reachable poses is obtained. These poses are then scored according to ([1](https://ar5iv.labs.arxiv.org/html/2504.03629#S4.E1 \"In IV-A1 Feature Scoring ‣ IV-A Pose Scoring ‣ IV Proposed Approach ‣ SeGuE: Semantic Guided Exploration for Mobile Robots\")). The pose with the highest score is selected as the next pose to navigate to."
+    },
+    {
+      "heading_path": [
+        "SeGuE: Semantic Guided Exploration for Mobile Robots",
+        "IV Proposed Approach",
+        "IV-B Pose Sampling",
+        "IV-B2 Importance Sampling"
+      ],
+      "text": "#### IV-B2 Importance Sampling\n\nWhile the US method can acquire poses with high entropy, a large number of samples need to be considered for assessment, which may be inefficient in practice. Inspired by [[21](https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib21)], we also implement a sampling approach based on particle filter optimization. This method samples an initial set of poses uniformly across reachable poses, which are used to fit a mixture of Gaussian models where the likelihood of each pose is directly proportional to its score ([1](https://ar5iv.labs.arxiv.org/html/2504.03629#S4.E1 \"In IV-A1 Feature Scoring ‣ IV-A Pose Scoring ‣ IV Proposed Approach ‣ SeGuE: Semantic Guided Exploration for Mobile Robots\")). This distribution is then used to sample a new set of poses, subject to the same reachability constraint, and the process repeats for a fixed number of iterations. The mean of the mixture component with the highest score is taken as the next pose to navigate to."
+    },
+    {
+      "heading_path": [
+        "SeGuE: Semantic Guided Exploration for Mobile Robots",
+        "V Experiments"
+      ],
+      "text": "## V Experiments\n\nWe evaluate SeGuE in both simulated and real-world environments using a wheeled mobile robot. The entire software suite is written in the Robot Operating System (ROS) framework. Mapping and odometry estimation for localization are conducted using 3D LiDAR information via [[22](https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib22)]. Point cloud information is also projected onto the ground plane to obtain a 2D occupancy grid for motion planning. Waypoint navigation is conducted with the ROS built-in package move\\_base. The scene features are extracted via an RGB camera.\n\nTo evaluate the quality of the semantic maps generated, we assess the map coverage and average entropy. Map coverage provides an insight into the proportion of the appearance features that have been captured during exploration. It is computed as the percentage of occupancy map cells, which are either free or occupied, that have a corresponding semantic feature. Higher values of map coverage are better. The average entropy indicates the quality of the observations across the map. Average entropy calculates the prediction entropy of the entire semantic feature map. Any cell observed in the occupancy map with no corresponding semantic feature is assumed to have maximum entropy. Lower values of average entropy are better."
+    },
+    {
+      "heading_path": [
+        "SeGuE: Semantic Guided Exploration for Mobile Robots",
+        "V Experiments",
+        "V-A Simulation Results"
+      ],
+      "text": "### V-A Simulation Results\n\nWe simulate the Clearpath Jackal in Gazebo[[23](https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib23)] and the relevant sensors using the calibration data available in [[24](https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib24)]. All simulation is carried out on a desktop computer equipped with an Intel i7 processor, an NVIDIA RTX 3090 and 32 GB of RAM. We show results in two different environments. The Small House environment replicates a residential home and the Bookstore environment is a retail space. For each environment, the initial conditions are kept fixed across SeGuE and each baseline method.\n\nWe compare SeGuE, using both the US and IS variants, against a representative frontier-based exploration method [[25](https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib25)] and a representative next-best-view method (RRG-NBV) [[17](https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib17)]. We also compare SeGuE to a No Score baseline, where we replace our map scoring metric with a simple metric where every unseen cell has a score of one and every seen cell has a score of zero. The view scoring and importance sampling are kept fixed.\n\nThe map quality metrics for each method are reported in Table [I](https://ar5iv.labs.arxiv.org/html/2504.03629#S5.T1 \"TABLE I ‣ V-A Simulation Results ‣ V Experiments ‣ SeGuE: Semantic Guided Exploration for Mobile Robots\"). It can be observed that, across the board, the frontier-based and RRG-NBV approaches do not perform well. This can be explained based on the fact that no appearance features are considered but instead scene geometry is mapped. Both SeGuE and the No Score baselines are significantly better with lower average entropy and higher coverage of the semantic features, demonstrating the necessity of exploration methods that are aware of scene semantics. Our method of scoring semantic features helps lower the average entropy when combined with either sampling method.\n\n| | Small House | | Bookstore | | | --- | --- | --- | --- | --- | | | Coverage ↑\\uparrow | Average Entropy ↓\\downarrow | Coverage ↑\\uparrow | Average Entropy ↓\\downarrow | | Frontiers Based [[25](https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib25)] | 0.3030.303 | 3.6193.619 | 0.4770.477 | 2.8622.862 | | RRG-NBV [[17](https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib17)] | 0.7300.730 | 1.6431.643 | 0.2550.255 | 3.9173.917 | | No Score, US | 0.9050.905 | 0.8060.806 | 0.9250.925 | 0.8010.801 | | No Score, IS | 0.8970.897 | 0.8420.842 | 0.9290.929 | 0.7870.787 | | SeGuE, US | 0.9380.938 | 0.6730.673 | 0.9400.940 | 0.7230.723 | | SeGuE, IS | 0.9320.932 | 0.7020.702 | 0.9390.939 | 0.7300.730 |\n\n↑\\uparrow\n\n↓\\downarrow\n\n↑\\uparrow\n\n↓\\downarrow\n\n0.3030.303\n\n3.6193.619\n\n0.4770.477\n\n2.8622.862\n\n0.7300.730\n\n1.6431.643\n\n0.2550.255\n\n3.9173.917\n\n0.9050.905\n\n0.8060.806\n\n0.9250.925\n\n0.8010.801\n\n0.8970.897\n\n0.8420.842\n\n0.9290.929\n\n0.7870.787\n\n0.9380.938\n\n0.6730.673\n\n0.9400.940\n\n0.7230.723\n\n0.9320.932\n\n0.7020.702\n\n0.9390.939\n\n0.7300.730\n\nWe visualize the maps produced in each environment using the frontier-based method and SeGuE in Fig. [2](https://ar5iv.labs.arxiv.org/html/2504.03629#S5.F2 \"Figure 2 ‣ V-A Simulation Results ‣ V Experiments ‣ SeGuE: Semantic Guided Exploration for Mobile Robots\") (for Small House) and Fig. [3](https://ar5iv.labs.arxiv.org/html/2504.03629#S5.F3 \"Figure 3 ‣ V-A Simulation Results ‣ V Experiments ‣ SeGuE: Semantic Guided Exploration for Mobile Robots\") (for Bookstore). Since the semantic features exist in a high-dimensional abstract feature space, we pass the features through a prediction head and visualize the class predictions, where each color represents a different class. It can be observed that the structure of the semantic feature map corresponds well with the structure of objects mapped in the occupancy grid."
+    },
+    {
+      "heading_path": [
+        "SeGuE: Semantic Guided Exploration for Mobile Robots",
+        "V Experiments",
+        "V-B Sample Number Study"
+      ],
+      "text": "### V-B Sample Number Study\n\nWe evaluate the sensitivity of both considered sampling methods to the number of samples chosen in the Small House environment. In the case of the uniform sampling method, this is a direct sweep over the number of samples chosen. The results of this ablation study, both with and without our semantic scoring method, are shown in Table [II](https://ar5iv.labs.arxiv.org/html/2504.03629#S5.T2 \"TABLE II ‣ V-B Sample Number Study ‣ V Experiments ‣ SeGuE: Semantic Guided Exploration for Mobile Robots\"). We note that, overall, our semantic scoring method increases coverage and decreases average entropy. While no direct relation between the number of samples and the performance appears to exist, we observe that, both with and without our semantic scoring method, the optimal performance seems to be between 100 and 200 samples. This is likely because too few samples do not approach an optimal score, while too many samples tend to over-exploit, leading to less exploration overall.\n\n| | Semantic Score | | No Score | | | --- | --- | --- | --- | --- | | Samples | Coverage ↑\\uparrow | Average Entropy ↓\\downarrow | Coverage ↑\\uparrow | Average Entropy ↓\\downarrow | | 10 | 0.8970.897 | 0.8420.842 | 0.8950.895 | 0.8500.850 | | 50 | 0.9280.928 | 0.7110.711 | 0.8990.899 | 0.8370.837 | | 100 | 0.9080.908 | 0.8010.801 | 0.9110.911 | 0.7750.775 | | 200 | 0.9380.938 | 0.6730.673 | 0.9050.905 | 0.8060.806 | | 500 | 0.9040.904 | 0.8120.812 | 0.8870.887 | 0.9030.903 | | 1000 | 0.9120.912 | 0.7720.772 | 0.8950.895 | 0.8510.851 |\n\n↑\\uparrow\n\n↓\\downarrow\n\n↑\\uparrow\n\n↓\\downarrow\n\n0.8970.897\n\n0.8420.842\n\n0.8950.895\n\n0.8500.850\n\n0.9280.928\n\n0.7110.711\n\n0.8990.899\n\n0.8370.837\n\n0.9080.908\n\n0.8010.801\n\n0.9110.911\n\n0.7750.775\n\n0.9380.938\n\n0.6730.673\n\n0.9050.905\n\n0.8060.806\n\n0.9040.904\n\n0.8120.812\n\n0.8870.887\n\n0.9030.903\n\n0.9120.912\n\n0.7720.772\n\n0.8950.895\n\n0.8510.851\n\nWe perform the same study on the IS method, varying the number of samples chosen every iteration and the total number of iterations. We report the quantitative results in Table [III](https://ar5iv.labs.arxiv.org/html/2504.03629#S5.T3 \"TABLE III ‣ V-B Sample Number Study ‣ V Experiments ‣ SeGuE: Semantic Guided Exploration for Mobile Robots\").\n\nWhen comparing the No Score performance between sampling methods (cf. Tables [II](https://ar5iv.labs.arxiv.org/html/2504.03629#S5.T2 \"TABLE II ‣ V-B Sample Number Study ‣ V Experiments ‣ SeGuE: Semantic Guided Exploration for Mobile Robots\") and [III](https://ar5iv.labs.arxiv.org/html/2504.03629#S5.T3 \"TABLE III ‣ V-B Sample Number Study ‣ V Experiments ‣ SeGuE: Semantic Guided Exploration for Mobile Robots\")), the performance does not change significantly. We observe a marked improvement when the Semantic Score is combined with IS, indicating that IS can better exploit the information within our metric.\n\n| | | Semantic Score | | No Score | | | --- | --- | --- | --- | --- | --- | | Iterations | Samples | Coverage ↑\\uparrow | Average Entropy ↓\\downarrow | Coverage ↑\\uparrow | Average Entropy ↓\\downarrow | | 2 | 50 | 0.9320.932 | 0.7020.702 | 0.8970.897 | 0.8420.842 | | 5 | 20 | 0.9260.926 | 0.7040.704 | 0.9000.900 | 0.8440.844 | | 10 | 10 | 0.9050.905 | 0.8070.807 | 0.8810.881 | 0.9210.921 | | 10 | 20 | 0.9180.918 | 0.7500.750 | 0.8880.888 | 0.8760.876 | | 10 | 50 | 0.9190.919 | 0.7710.771 | 0.9160.916 | 0.7610.761 | | 10 | 100 | 0.8980.898 | 0.8360.836 | 0.8980.898 | 0.8500.850 |\n\n↑\\uparrow\n\n↓\\downarrow\n\n↑\\uparrow\n\n↓\\downarrow\n\n0.9320.932\n\n0.7020.702\n\n0.8970.897\n\n0.8420.842\n\n0.9260.926\n\n0.7040.704\n\n0.9000.900\n\n0.8440.844\n\n0.9050.905\n\n0.8070.807\n\n0.8810.881\n\n0.9210.921\n\n0.9180.918\n\n0.7500.750\n\n0.8880.888\n\n0.8760.876\n\n0.9190.919\n\n0.7710.771\n\n0.9160.916\n\n0.7610.761\n\n0.8980.898\n\n0.8360.836\n\n0.8980.898\n\n0.8500.850"
+    },
+    {
+      "heading_path": [
+        "SeGuE: Semantic Guided Exploration for Mobile Robots",
+        "V Experiments",
+        "V-C Real-world Experiments"
+      ],
+      "text": "### V-C Real-world Experiments\n\nIn addition to the simulation studies, we evaluate SeGuE in a real-world environment (campus cafeteria). We use the Clearpath Jackal wheeled mobile robot equipped with the Velodyne VLP-16 LiDAR and Zed2i stereo camera; for a full description on sensor calibration see [[26](https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib26)]. Additionally, we connect the Clearpath Jackal robot with a laptop equipped with an Intel i7 processor, an NVIDIA RTX 3060, 32 GB of RAM and 512 GB of storage.\n\nWe tested SeGuE with uniform sampling since this was found to perform well consistently across simulation studies. Experimental results are shown in Fig. [4](https://ar5iv.labs.arxiv.org/html/2504.03629#S5.F4 \"Figure 4 ‣ V-C Real-world Experiments ‣ V Experiments ‣ SeGuE: Semantic Guided Exploration for Mobile Robots\"). The computed coverage is 0.7350.735 and average entropy is 1.7531.753. While the overall coverage is lower compared to the values found in the simulation studies, our method can still map most of the environment. This performance degradation can be attributed to two factors. First, the underlying motion planning library did not transfer well to a more cluttered location. Second, battery constraints limited the total run time. Adjusting the underlying motion planner to be more energy-aware (e.g., by building on top of [[27](https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib27)] and [[28](https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib28)]) could enable optimal coverage subject to motion budget and task (i.e. viewpoint) constraints, so that the environment can be explored timely.\n\n0.7350.735\n\n1.7531.753"
+    },
+    {
+      "heading_path": [
+        "SeGuE: Semantic Guided Exploration for Mobile Robots",
+        "VI Conclusion"
+      ],
+      "text": "## VI Conclusion\n\nWe developed SeGuE, a method to autonomously explore an environment which ensures that appearance features are sufficiently observed so that a high-quality and complete map of semantic features may be constructed. We proposed a method to score the individual semantic features contained within the map and showed how these scores may be aggregated to rank potential viewpoints. Two viewpoint sampling methods were considered, with our tests showing how they interact with the system as a whole. Results in both simulation and physical hardware experiments showed that our method can fuse semantic feature information well, improving overall exploration metrics like map coverage and average entropy in comparison to baseline methods.\n\nSince SeGuE builds on top of a next-best-view algorithm, it remains bound to inherent limitations of the latter, particularly the performance dependence on the sampling method and scoring. Further, we focus only on global sampling methods to avoid getting trapped in local minima. In future work, we aim to integrate local sampling as well."
+    },
+    {
+      "heading_path": [
+        "SeGuE: Semantic Guided Exploration for Mobile Robots",
+        "References"
+      ],
+      "text": "## References\n\n* [1] N. Blodow, L. C. Goron, Z.-C. Marton, D. Pangercic, T. Rühr, M. Tenorth, and M. Beetz, “Autonomous semantic mapping for robots performing everyday manipulation tasks in kitchen environments,” in IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS), pp. 4263–4270, 2011. * [2] A. Dechemi, D. Chatziparaschis, J. Chen, M. Campbell, A. Shamshirgaran, C. Mucchiani, A. Roy-Chowdhury, S. Carpin, and K. Karydis, “Robotic assessment of a crop’s need for watering: Automating a time-consuming task to support sustainable agriculture,” IEEE Robotics & Automation Magazine, vol. 30, no. 4, pp. 52–67, 2023. * [3] S. Y. Gadre, M. Wortsman, G. Ilharco, L. Schmidt, and S. Song, “Cows on pasture: Baselines and benchmarks for language-driven zero-shot object navigation,” in IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR), pp. 23171–23181, 2023. * [4] C. Huang, O. Mees, A. Zeng, and W. Burgard, “Visual language maps for robot navigation,” in IEEE International Conference on Robotics and Automation (ICRA), pp. 10608–10615, 2023. * [5] S. Achat, Q. Serdel, J. Marzat, and J. Moras, “A case study of semantic mapping and planning for autonomous robot navigation,” SN Computer Science, vol. 5, 2023. * [6] C. Cadena, L. Carlone, H. Carrillo, Y. Latif, D. Scaramuzza, J. Neira, I. Reid, and J. J. Leonard, “Past, present, and future of simultaneous localization and mapping: Toward the robust-perception age,” IEEE Transactions on Robotics (TRO), vol. 32, no. 6, pp. 1309–1332, 2016. * [7] B. Yamauchi, “A frontier-based approach for autonomous exploration,” in IEEE International Symposium on Computational Intelligence in Robotics and Automation (CIRA), pp. 146–151, 1997. * [8] A. Bircher, M. Kamel, K. Alexis, H. Oleynikova, and R. Siegwart, “Receding horizon ”next-best-view” planner for 3d exploration,” in IEEE International Conference on Robotics and Automation (ICRA), pp. 1462–1468, 2016. * [9] E. Palazzolo and C. Stachniss, “Effective exploration for mavs based on the expected information gain,” Drones, vol. 2, no. 1, 2018. * [10] M. Selin, M. Tiger, D. Duberg, F. Heintz, and P. Jensfelt, “Efficient autonomous exploration planning of large-scale 3-d environments,” IEEE Robotics and Automation Letters, vol. 4, no. 2, pp. 1699–1706, 2019. * [11] M. Brossard, S. Bonnabel, and A. Barrau, “A new approach to 3d icp covariance estimation,” IEEE Robotics and Automation Letters, vol. 5, no. 2, pp. 744–751, 2020. * [12] N. Yokoyama, S. Ha, D. Batra, J. Wang, and B. Bucher, “Vlfm: Vision-language frontier maps for zero-shot semantic navigation,” in IEEE International Conference on Robotics and Automation (ICRA), pp. 42–48, 2024. * [13] X. Chen, A. Milioto, E. Palazzolo, P. Giguère, J. Behley, and C. Stachniss, “Suma++: Efficient lidar-based semantic slam,” in IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS), pp. 4530–4537, 2019. * [14] J. Liu, Y. Lv, Y. Yuan, W. Chi, G. Chen, and L. Sun, “An efficient robot exploration method based on heuristics biased sampling,” IEEE Transactions on Industrial Electronics, vol. 70, no. 7, pp. 7102–7112, 2023. * [15] M. Keirdar and G. A. Kaminka, “Efficient frontier detection for robot exploration,” The International Journal of Robotics Research, vol. 33, no. 2, pp. 215–236, 2014. * [16] D. L. da Silva Lubanco, M. Pichler-Scheder, and T. Schlechter, “A novel frontier-based exploration algorithm for mobile robots,” in IEEE International Conference on Mechatronics and Robotics Engineering (ICMRE), pp. 1–5, 2020. * [17] M. Steinbrink, P. Koch, B. Jung, and S. May, “Rapidly-exploring random graph next-best view exploration for ground vehicles,” in European Conference on Mobile Robots (ECMR), pp. 1–7, 2021. * [18] R. Monica and J. Aleotti, “Contour-based next-best view planning from point cloud segmentation of unknown objects,” Autonomous Robots, pp. 443–458, 2017. * [19] M. Oquab, T. Darcet, T. Moutakanni, H. V. Vo, M. Szafraniec, V. Khalidov, P. Fernandez, D. Haziza, F. Massa, A. El-Nouby, R. Howes, P.-Y. Huang, H. Xu, V. Sharma, S.-W. Li, W. Galuba, M. Rabbat, M. Assran, N. Ballas, G. Synnaeve, I. Misra, H. Jegou, J. Mairal, P. Labatut, A. Joulin, and P. Bojanowski, “Dinov2: Learning robust visual features without supervision,” 2023. * [20] B. Zhou, H. Zhao, X. Puig, S. Fidler, A. Barriuso, and A. Torralba, “Scene parsing through ade20k dataset,” in IEEE Conference on Computer Vision and Pattern Recognition (CVPR), pp. 5122–5130, 2017. * [21] B. Liu, S. Cheng, and Y. Shi, “Particle filter optimization: A brief introduction,” in Advances in Swarm Intelligence, pp. 95–104, Springer, 2016. * [22] H. Teng, Y. Wang, D. Chatziparaschis, and K. Karydis, “Adaptive lidar odometry and mapping for autonomous agricultural mobile robots in unmanned farms,” Computers and Electronics in Agriculture, vol. 232, p. 110023, 2025. * [23] N. Koenig and A. Howard, “Design and use paradigms for gazebo, an open-source multi-robot simulator,” in IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS), vol. 3, pp. 2149–2154, 2004. * [24] H. Teng, D. Chatziparaschis, X. Kan, A. K. Roy-Chowdhury, and K. Karydis, “Centroid distance keypoint detector for colored point clouds,” in IEEE/CVF Winter Conference on Applications of Computer Vision (WACV), pp. 1196–1205, 2023. * [25] J. Hörner, “Map-merging for multi-robot system,” Master’s thesis, Charles University, Faculty of Mathematics and Physics, 2016. * [26] H. Teng, Y. Wang, X. Song, and K. Karydis, “Multimodal dataset for localization, mapping and crop monitoring in citrus tree farms,” in International Symposium on Visual Computing, pp. 571–582, Springer, 2023. * [27] X. Kan, H. Teng, and K. Karydis, “Online exploration and coverage planning in unknown obstacle-cluttered environments,” IEEE Robotics and Automation Letters, vol. 5, no. 4, pp. 5969–5976, 2020. * [28] X. Kan, T. C. Thayer, S. Carpin, and K. Karydis, “Task planning on stochastic aisle graphs for precision agriculture,” IEEE Robotics and Automation Letters, vol. 6, no. 2, pp. 3287–3294, 2021."
+    }
+  ]
+}

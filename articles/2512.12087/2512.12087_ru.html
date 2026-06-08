@@ -1,0 +1,1235 @@
+<!DOCTYPE html>
+
+<!-- saved from url=(0046)https://ar5iv.labs.arxiv.org/html/2512.12087v3 -->
+<html data-theme="light" lang="en" prefix="dcterms: http://purl.org/dc/terms/"><head><meta content="text/html; charset=utf-8" http-equiv="Content-Type"/>
+<title>[2512.12087] 1 Introduction</title><meta content="The growing demand for long-context inference capabilities in Large Language Models (LLMs) has intensified the computational and memory bottlenecks inherent to the standard attention mechanism. To address this challeng…" property="og:description"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<meta content="summary" name="twitter:card"/>
+<meta content="1 Introduction" name="twitter:title"/>
+<meta content="https://ar5iv.labs.arxiv.org/assets/ar5iv_card.png" name="twitter:image:src"/>
+<meta content="ar5iv logo" name="twitter:image:alt"/>
+<meta content="1 Introduction" property="og:title"/>
+<meta content="ar5iv" property="og:site_name"/>
+<meta content="https://ar5iv.labs.arxiv.org/assets/ar5iv_card.png" property="og:image"/>
+<meta content="article" property="og:type"/>
+<meta content="https://ar5iv.labs.arxiv.org/html/2512.12087" property="og:url"/>
+<link href="https://ar5iv.labs.arxiv.org/html/2512.12087" rel="canonical" target="_blank"/>
+<!--Generated on Tue Jan  6 07:06:38 2026 by LaTeXML (version 0.8.8) http://dlmf.nist.gov/LaTeXML/.-->
+<meta content="width=device-width, initial-scale=1, shrink-to-fit=no" name="viewport"/>
+<script>
+  function detectColorScheme(){
+    var theme="light";
+    var current_theme = localStorage.getItem("ar5iv_theme");
+    if(current_theme){
+      if(current_theme == "dark"){
+        theme = "dark";
+      } }
+    else if(!window.matchMedia) { return false; }
+    else if(window.matchMedia("(prefers-color-scheme: dark)").matches) {
+      theme = "dark"; }
+    if (theme=="dark") {
+      document.documentElement.setAttribute("data-theme", "dark");
+    } else {
+      document.documentElement.setAttribute("data-theme", "light"); } }
+
+  detectColorScheme();
+
+  function toggleColorScheme(){
+    var current_theme = localStorage.getItem("ar5iv_theme");
+    if (current_theme) {
+      if (current_theme == "light") {
+        localStorage.setItem("ar5iv_theme", "dark"); }
+      else {
+        localStorage.setItem("ar5iv_theme", "light"); } }
+    else {
+        localStorage.setItem("ar5iv_theme", "dark"); }
+    detectColorScheme(); }
+</script>
+<link href="./[2512.12087] 1 Introduction_files/ar5iv-fonts.0.8.4.css" media="all" rel="stylesheet"/><link href="./[2512.12087] 1 Introduction_files/ar5iv.0.8.4.css" media="all" rel="stylesheet"/><link href="./[2512.12087] 1 Introduction_files/ar5iv-site.0.2.2.css" media="all" rel="stylesheet"/>
+<meta content="extension" property="gosuslugi.plugin.extension.content"/></head>
+<body>
+<div class="ltx_page_main">
+<div class="ltx_page_content">
+<article class="ltx_document">
+<div class="ltx_para" id="p1">
+<p class="ltx_p" id="p1.1">marginparsep был изменён.
+topmargin был изменён.
+marginparwidth был изменён.
+marginparpush был изменён.
+Разметка страницы нарушает стиль ICML. Пожалуйста, не изменяйте разметку страницы и не подключайте пакеты вроде geometry, savetrees или fullpage, которые меняют её за вас.
+Мы не можем надёжно отменить произвольные изменения стиля. Пожалуйста, удалите
+проблемный(е) пакет(ы) или команды, изменяющие разметку, и повторите попытку..</p>
+</div>
+<span class="ltx_rule ltx_align_center" style="width:100%;height:2.0pt;--ltx-bg-color:black;display:inline-block;"> </span>
+<div class="ltx_para ltx_noindent ltx_align_center" id="p3">
+<p class="ltx_p" id="p3.1">BLASST: динамическое блочное разрежение механизма внимания с использованием порогового отсечения Softmax</p>
+</div>
+<span class="ltx_rule ltx_align_center" style="width:100%;height:1.0pt;--ltx-bg-color:black;display:inline-block;"> </span>
+<div class="ltx_para" id="p4">
+<p class="ltx_p ltx_align_center" id="p4.1">Авторы без указания1 </p>
+</div>
+<div class="ltx_abstract">
+<h6 class="ltx_title ltx_title_abstract">Аннотация</h6>
+<p class="ltx_p" id="id2.2">Растущий спрос на возможности долгосрочного контекстного вывода в больших языковых моделях (LLMs) усугубил проблемы с производительностью и памятью, присущие стандартному механизму внимания. Для решения этой задачи мы представляем BLASST — метод разреженного внимания по принципу «вставь и работай», который динамически обрезает матрицу внимания без каких-либо предварительных вычислений или оценок-прокси. Наша методика использует фиксированный порог и имеющуюся информацию из online softmax для выявления пренебрежимо малых оценок внимания, пропуская вычисление softmax, загрузку Value block и последующее матричное умножение. Это естественным образом встраивается в существующие конструкции ядер FlashAttention с пренебрежимо малым накладным временем. Подход применим как на стадиях prefill, так и decode для всех вариантов внимания (MHA, GQA, MQA и MLA), обеспечивая единое решение для ускорения вывода с длинным контекстом. Мы разрабатываем автоматизированную процедуру калибровки, которая выявляет простую обратную зависимость между оптимальным порогом и длиной контекста, позволяя надежно разворачивать метод в разнообразных сценариях. Сохраняя высокую точность, мы демонстрируем ускорение 1.62<math alttext="\times" class="ltx_Math" display="inline" id="id1.1.m1" intent=":literal"><semantics><mo>×</mo><annotation encoding="application/x-tex">\times</annotation></semantics></math> для prefill при разреженности 74.7% и ускорение 1.48<math alttext="\times" class="ltx_Math" display="inline" id="id2.2.m2" intent=":literal"><semantics><mo>×</mo><annotation encoding="application/x-tex">\times</annotation></semantics></math> для decode при разреженности 73.2% на современных GPU. Кроме того, мы изучаем обучение с учетом разреженности как естественное продолжение, показывая, что модели можно обучать так, чтобы они изначально были более устойчивыми к разреженным паттернам внимания, продвигая границу «точность—разреженность» еще дальше.</p>
+</div>
+<span class="ltx_note ltx_role_footnotetext" id="footnotex1"><sup class="ltx_note_mark">†</sup><span class="ltx_note_outer"><span class="ltx_note_content"><sup class="ltx_note_mark">†</sup><span class="ltx_note_type">сноска: </span><sup class="ltx_sup" id="footnotex1.1">1</sup>Анонимное учреждение, Анонимный город, Анонимный регион, Анонимная страна.  
+Сведения для переписки: Анонимный автор &lt;anon.email@domain.com&gt;&gt;.
+ 
+<br class="ltx_break"/>Предварительная работа. На рассмотрении в
+конференции Machine Learning and Systems (MLSys). Не распространять.</span></span></span>
+<section class="ltx_section" id="S1">
+<h2 class="ltx_title ltx_title_section">
+<span class="ltx_tag ltx_tag_section">1 </span>Введение</h2>
+<div class="ltx_para" id="S1.p1">
+<p class="ltx_p" id="S1.p1.2">Большие языковые модели (LLMs) произвели революцию в обработке естественного языка, продемонстрировав выдающуюся производительность на разнообразных задачах. Однако при их практическом развертывании возникает критическое узкое место: квадратичная вычислительная сложность механизма внимания. По мере того как приложения все чаще требуют более длинных окон контекста — от обработки целых баз кода <cite class="ltx_cite ltx_citemacro_cite"><span class="ltx_ref ltx_missing_citation ltx_ref_self">roziere2023code</span></cite> до анализа объемных документов <cite class="ltx_cite ltx_citemacro_cite"><span class="ltx_ref ltx_missing_citation ltx_ref_self">zeng2025glm</span></cite> и поддержания продолжительных разговоров <cite class="ltx_cite ltx_citemacro_cite"><span class="ltx_ref ltx_missing_citation ltx_ref_self">achiam2023gpt</span></cite> — это узкое место становится все более серьезным. Недавние модели, такие как Deepseek-R1 <cite class="ltx_cite ltx_citemacro_cite"><span class="ltx_ref ltx_missing_citation ltx_ref_self">guo2025deepseek</span></cite> и Qwen3 <cite class="ltx_cite ltx_citemacro_cite"><span class="ltx_ref ltx_missing_citation ltx_ref_self">yang2025qwen3</span></cite>, поддерживают длины контекста до 128K токенов, а некоторые модели продвигаются до 1M токенов <cite class="ltx_cite ltx_citemacro_cite"><span class="ltx_ref ltx_missing_citation ltx_ref_self">comanici2025gemini</span></cite>. Тем не менее обработка таких длинных последовательностей по‑прежнему оказывается вычислительно неприемлемой, поскольку вычисления внимания доминируют как по задержке, так и по потреблению памяти. Для последовательности длины <math alttext="n" class="ltx_Math" display="inline" id="S1.p1.1.m1" intent=":literal"><semantics><mi>n</mi><annotation encoding="application/x-tex">n</annotation></semantics></math> механизм внимания требует <math alttext="O(n^{2})" class="ltx_Math" display="inline" id="S1.p1.2.m2" intent=":literal"><semantics><mrow><mi>O</mi><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><msup><mi>n</mi><mn>2</mn></msup><mo stretchy="false">)</mo></mrow></mrow><annotation encoding="application/x-tex">O(n^{2})</annotation></semantics></math> операций и обращений к памяти, что делает реальное развертывание длинноконтекстных</p>
+</div>
+<figure class="ltx_figure" id="S1.F1"><img alt="Refer to caption" class="ltx_graphics ltx_centering ltx_img_portrait" height="877" id="S1.F1.g1" src="./[2512.12087] 1 Introduction_files/x1.png" width="664"/>
+<figcaption class="ltx_caption ltx_centering">⟦<span class="ltx_tag ltx_tag_figure">Figure 1: </span>Обзор BLASST. Блоки вдоль строки матрицы внимания последовательно обрабатываются. Мы (1) обновляем текущий максимум строки (<math alttext="m^{(j)}" class="ltx_Math" display="inline" id="S1.F1.6.m1" intent=":literal"><semantics><msup><mi>m</mi><mrow><mo stretchy="false">(</mo><mi>j</mi><mo stretchy="false">)</mo></mrow></msup><annotation encoding="application/x-tex">m^{(j)}</annotation></semantics></math>) как в FlashAttention, (2) вычисляем максимальное значение блока (<math alttext="\tilde{m}^{(j)}" class="ltx_Math" display="inline" id="S1.F1.7.m2" intent=":literal"><semantics><msup><mover accent="true"><mi>m</mi><mo>~</mo></mover><mrow><mo stretchy="false">(</mo><mi>j</mi><mo stretchy="false">)</mo></mrow></msup><annotation encoding="application/x-tex">\tilde{m}^{(j)}</annotation></semantics></math>) для каждого блока <math alttext="S_{j}" class="ltx_Math" display="inline" id="S1.F1.8.m3" intent=":literal"><semantics><msub><mi>S</mi><mi>j</mi></msub><annotation encoding="application/x-tex">S_{j}</annotation></semantics></math> (<math alttext="QK_{j}^{\top}" class="ltx_Math" display="inline" id="S1.F1.9.m4" intent=":literal"><semantics><mrow><mi>Q</mi><mo lspace="0em" rspace="0em">​</mo><msubsup><mi>K</mi><mi>j</mi><mo>⊤</mo></msubsup></mrow><annotation encoding="application/x-tex">QK_{j}^{\top}</annotation></semantics></math>) и (3) пропускаем последующую работу, если максимальное значение блока ниже текущего максимума более чем на входной порог, <math alttext="\ln(\lambda)" class="ltx_Math" display="inline" id="S1.F1.10.m5" intent=":literal"><semantics><mrow><mi>ln</mi><mo>⁡</mo><mrow><mo stretchy="false">(</mo><mi>λ</mi><mo stretchy="false">)</mo></mrow></mrow><annotation encoding="application/x-tex">\ln(\lambda)</annotation></semantics></math>. Полные подробности приведены в алгоритме <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2512.12087v3#alg1" title="Algorithm 1 ‣ 3.1.2 Algorithm Design ‣ 3.1 Pruning Attention with Running Maximums ‣ 3 Methodology"><span class="ltx_text ltx_ref_tag">1</span></a>.</figcaption>
+</figure>
+<div class="ltx_para ltx_noindent" id="S1.p2">
+<p class="ltx_p" id="S1.p2.1">моделей сложным даже при использовании современного оборудования. Хотя FlashAttention <cite class="ltx_cite ltx_citemacro_cite"><span class="ltx_ref ltx_missing_citation ltx_ref_self">dao2022flashattention</span></cite> и его последователи оптимизировали использование пропускной способности памяти за счет разбиения на блоки и слияния ядер, они по-прежнему вычисляют полную матрицу внимания, оставляя фундаментальную квадратичную сложность без решения.</p>
+</div>
+<div class="ltx_para ltx_noindent" id="S1.p3">
+<p class="ltx_p" id="S1.p3.1">Методы разреженного внимания стали многообещающим решением благодаря тому, что вычисляют только подмножество полной матрицы внимания. Однако существующие подходы страдают от фундаментальных ограничений. Во‑первых, они требуют нетривиальных операций для определения шаблонов разреженности: методы вроде MInference <cite class="ltx_cite ltx_citemacro_cite"><span class="ltx_ref ltx_missing_citation ltx_ref_self">jiang2024minference</span></cite> и XAttention <cite class="ltx_cite ltx_citemacro_cite"><span class="ltx_ref ltx_missing_citation ltx_ref_self">xu2025xattention</span></cite> выполняют дорогие предварительные проходы для выявления важных блоков, что часто сводит теоретическое ускорение к минимуму; в то время как статические шаблоны разреженности <cite class="ltx_cite ltx_citemacro_cite"><span class="ltx_ref ltx_missing_citation ltx_ref_self">xiao2023efficient</span></cite> позволяют избежать предварительных вычислений, но являются негибкими и часто неоптимальными для разнообразных распределений внимания в разных задачах и для разных длины контекста. Во‑вторых, эти методы опираются на косвенные оценки важности, такие как накопленные веса внимания или сходство запрос–ключ, которые могут быть неточными и упускать критические взаимодействия токенов. В‑третьих, большинство существующих методов разреженного внимания ориентированы исключительно либо на фазу prefill, либо на фазу decode, упуская возможности для сквозной оптимизации..</p>
+</div>
+<div class="ltx_para ltx_noindent" id="S1.p4">
+<p class="ltx_p" id="S1.p4.1">В данной статье мы представляем BLASST (BLocked Attention Sparsity via Softmax Thresholding), простoй, но при этом эффективный метод разреженного внимания, который динамически отсекает незначимые блоки внимания без какого-либо дополнительного накладного вычислительного расхода на предварительное вычисление. Наш ключевой вывод заключается в том, что в ходе блочной онлайн-реализации softmax в FlashAttention мы можем определять и пропускать блоки, вклад которых в итоговый выход будет пренебрежимо малым, опираясь только на уже вычисленную информацию. В частности, при последовательной обработке блоков мы поддерживаем текущее максимальное значение оценок внимания. Как показано на Рисунке <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2512.12087v3#S1.F1" title="Figure 1 ‣ 1 Introduction"><span class="ltx_text ltx_ref_tag">1</span></a>, если локальная максимальная оценка блока существенно меньше текущего максимума (на величину порога <math alttext="\lambda" class="ltx_Math" display="inline" id="S1.p4.1.m1" intent=":literal"><semantics><mi>λ</mi><annotation encoding="application/x-tex">\lambda</annotation></semantics></math>), то его значения после softmax будут близки к нулю после нормализации. Поэтому для таких блоков мы можем пропустить три дорогостоящие операции: (1) вычисление экспоненты для softmax, (2) загрузку соответствующего блока значений из HBM и (3) выполнение матричного умножения с этими значениями. Это простое правило отсечения требует лишь одного сравнения на блок и без труда встраивается в существующие реализации FlashAttention.</p>
+</div>
+<div class="ltx_para ltx_noindent" id="S1.p5">
+<p class="ltx_p" id="S1.p5.2">Чтобы максимизировать практическое влияние BLASST, мы разрабатываем высоко оптимизированные CUDA-ядра, реализующие наш алгоритм разреженного внимания. Наши ядра ориентированы на две ключевые цели: (1) обеспечить минимальные накладные расходы для логики принятия решения о пропуске блоков за счет повторного использования уже вычисленных статистик и (2) стратегически воздействовать на узкие места ресурсов на каждом этапе — снижать использование CUDA core и tensor core при вычислительно-насыщенном prefill и снижать потребление пропускной способности памяти при память-ограниченном decode. Мы реализуем специализированные ядра как для этапа prefill, так и для decode, с оптимизациями, соответствующими их различным вычислительным шаблонам. На современных GPU (H200, B200) наши ядра достигают до 1.62<math alttext="\times" class="ltx_Math" display="inline" id="S1.p5.1.m1" intent=":literal"><semantics><mo>×</mo><annotation encoding="application/x-tex">\times</annotation></semantics></math> ускорения для prefill при 74.7% разреженности и 1.48<math alttext="\times" class="ltx_Math" display="inline" id="S1.p5.2.m2" intent=":literal"><semantics><mo>×</mo><annotation encoding="application/x-tex">\times</annotation></semantics></math> ускорения для decode при 73.2% разреженности по сравнению с базовыми вариантами FlashAttention <cite class="ltx_cite ltx_citemacro_cite"><span class="ltx_ref ltx_missing_citation ltx_ref_self">shah2024flashattention</span></cite>, при этом сохраняя численную устойчивость и поддерживая различные варианты внимания, включая grouped-query attention и sliding window attention.</p>
+</div>
+<div class="ltx_para ltx_noindent" id="S1.p6">
+<p class="ltx_p" id="S1.p6.2">Помимо базового алгоритма и реализации ядра, мы разрабатываем две ключевые техники для улучшения развертывания и производительности BLASST. Во-первых, мы предлагаем автоматизированную процедуру калибровки, которая определяет оптимальные пороги для любого целевого уровня разреженности. Наша калибровка выявляет устойчивую обратную зависимость <math alttext="\lambda=a/L" class="ltx_Math" display="inline" id="S1.p6.1.m1" intent=":literal"><semantics><mrow><mi>λ</mi><mo>=</mo><mrow><mi>a</mi><mo>/</mo><mi>L</mi></mrow></mrow><annotation encoding="application/x-tex">\lambda=a/L</annotation></semantics></math> между порогом и длиной контекста <math alttext="L" class="ltx_Math" display="inline" id="S1.p6.2.m2" intent=":literal"><semantics><mi>L</mi><annotation encoding="application/x-tex">L</annotation></semantics></math>, обеспечивая надежное развертывание в различных сценариях без ручной настройки. Во-вторых, мы исследуем обучение с учетом разреженности как естественное продолжение, показывая, что модели можно обучать так, чтобы они были изначально более устойчивыми к разреженным шаблонам внимания. Такой подход к обучению дополнительно продвигает границу точность-разреженность, позволяя достигать еще более высоких уровней разреженности при минимальной потере точности.</p>
+</div>
+<div class="ltx_para ltx_noindent" id="S1.p7">
+<p class="ltx_p" id="S1.p7.1">Наши вклад(ы) включают:</p>
+</div>
+<div class="ltx_para ltx_noindent" id="S1.p8">
+<ol class="ltx_enumerate" id="S1.I1">
+<li class="ltx_item" id="S1.I1.i1" style="list-style-type:none;">
+⟦<span class="ltx_tag ltx_tag_item">1.</span>
+
+Метод «подставь и работай» без накладных расходов на предварительные вычисления и без прокси-оценок, обеспечивающий минимальную потерю точности.
+
+</li>
+<li class="ltx_item" id="S1.I1.i2" style="list-style-type:none;">
+⟦<span class="ltx_tag ltx_tag_item">2.</span>
+
+Автоматический подбор гиперпараметров и обучение с учетом разреженности для надежного, гибкого и расширяемого развертывания.
+
+</li>
+<li class="ltx_item" id="S1.I1.i3" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">3.</span>
+
+Оптимизированные CUDA-ядра на базе FlashAttention для как префилла, так и декодирования, с высокой производительностью.
+
+</li>
+</ol>
+</div>
+</section>
+<section class="ltx_section" id="S2">
+<h2 class="ltx_title ltx_title_section">
+<span class="ltx_tag ltx_tag_section">2 </span>Смежные работы</h2>
+<div class="ltx_para ltx_noindent" id="S2.p1">
+<p class="ltx_p" id="S2.p1.1">Эффективное использование свойства разреженного внимания требует либо уменьшения вычислений для неважных взаимодействий, либо уменьшения занимаемой памяти (например, KV cache - Key (К) и Value (V) для каждого уже обработанного токена) без дорогостоящих накладных расходов на выбор или переобучение. По сравнению со следующими связанными работами BLASST одновременно решает оба этих аспекта, в режиме без обучения.</p>
+</div>
+<section class="ltx_subsection" id="S2.SS1">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">2.1 </span>Сжатие с разреженностью, оптимизированной для вычислений</h3>
+<div class="ltx_para ltx_noindent" id="S2.SS1.p1">
+<p class="ltx_p" id="S2.SS1.p1.1">Несколько подходов снижают вычисления внимания за счет выбора важных взаимодействий. Статические методы по шаблонам, такие как Sparse Transformer <cite class="ltx_cite ltx_citemacro_cite"><span class="ltx_ref ltx_missing_citation ltx_ref_self">child2019generating</span></cite>, LongFormer <cite class="ltx_cite ltx_citemacro_cite"><span class="ltx_ref ltx_missing_citation ltx_ref_self">beltagy2020longformer</span></cite> и BigBird <cite class="ltx_cite ltx_citemacro_cite"><span class="ltx_ref ltx_missing_citation ltx_ref_self">zaheer2020big</span></cite>, уменьшают сложность за счет локального или блочного внимания. Методы на основе retrieval-головок <cite class="ltx_cite ltx_citemacro_cite"><span class="ltx_ref ltx_missing_citation ltx_ref_self">wu2024retrieval</span>; <span class="ltx_ref ltx_missing_citation ltx_ref_self">xiao2024duoattention</span></cite> ускоряют декодирование модели, сосредоточивая вычисления на ключевых retrieval-головках. Динамические методы разреженности, такие как MInference <cite class="ltx_cite ltx_citemacro_cite"><span class="ltx_ref ltx_missing_citation ltx_ref_self">jiang2024minference</span></cite>, используют предварительно вычисленные оценки важности, XAttention <cite class="ltx_cite ltx_citemacro_cite"><span class="ltx_ref ltx_missing_citation ltx_ref_self">xu2025xattention</span></cite> ранжирует антидиагональные блоки, а FlexPrefill <cite class="ltx_cite ltx_citemacro_cite"><span class="ltx_ref ltx_missing_citation ltx_ref_self">lai2025flexprefill</span></cite> предлагает поддерживаемые компилятором гибкие блочные шаблоны; при этом эффективные для prefill, их предварительные вычисления и накладные расходы планирования могут ограничивать достигнутые ускорения. Разреженность, обусловленная обучением, такая как SeerAttention <cite class="ltx_cite ltx_citemacro_cite"><span class="ltx_ref ltx_missing_citation ltx_ref_self">gao2025seerattention</span></cite>, индуцирует высокую разреженность через (пред)обучающие затворы, улучшая эффективность, но добавляя стоимость обучения и демонстрируя смешанную эффективность на последующих задачах.</p>
+</div>
+<div class="ltx_para ltx_noindent" id="S2.SS1.p2">
+<p class="ltx_p" id="S2.SS1.p2.1">SpargeAttention <cite class="ltx_cite ltx_citemacro_cite"><span class="ltx_ref ltx_missing_citation ltx_ref_self">zhang2025spargeattn</span></cite> имеет самое близкое по замыслу к BLASST. Мы отличаемся в трех ключевых аспектах: (1) BLASST оптимизирует и prefill, и decode с помощью специализированных ядер, тогда как SpargeAttention нацелена только на prefill; (2) мы принимаем решения о пропуске напрямую, используя уже вычисленную статистику, без нулевых накладных расходов, в то время как SpargeAttention использует отдельный шаг предсказания; (3) наше decode-ядро пропускает загрузку Value из HBM, устраняя проблемные места, ограниченные памятью, поверх экономии на вычислениях. Кроме того, мы предоставляем автоматическую калибровку и обучение с учетом разреженности.</p>
+</div>
+</section>
+<section class="ltx_subsection" id="S2.SS2">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">2.2 </span>Память-оптимизированная разреженность</h3>
+<div class="ltx_para ltx_noindent" id="S2.SS2.p1">
+<p class="ltx_p" id="S2.SS2.p1.1">Сконцентрированность токенов/сведений KV на разрежении направлена на сокращение объёма памяти и издержек по времени декодирования. H2O <cite class="ltx_cite ltx_citemacro_cite"><span class="ltx_ref ltx_missing_citation ltx_ref_self">zhang2023h2o</span></cite>, TOVA <cite class="ltx_cite ltx_citemacro_cite"><span class="ltx_ref ltx_missing_citation ltx_ref_self">oren2024transformers</span></cite> и InfLLM <cite class="ltx_cite ltx_citemacro_cite"><span class="ltx_ref ltx_missing_citation ltx_ref_self">xiao2024infllm</span></cite> отбрасывают токены на основе шаблонов запросов. StreamingLLM <cite class="ltx_cite ltx_citemacro_cite"><span class="ltx_ref ltx_missing_citation ltx_ref_self">xiao2023efficient</span></cite> сохраняет исходные и последние токены для согласованной задержки и использования памяти. Quest <cite class="ltx_cite ltx_citemacro_cite"><span class="ltx_ref ltx_missing_citation ltx_ref_self">tang2024quest</span></cite> производит отсечение токенов, обусловленное текущим запросом; Rectified Sparse Attention <cite class="ltx_cite ltx_citemacro_cite"><span class="ltx_ref ltx_missing_citation ltx_ref_self">sun2025rectified</span></cite> адаптивно выбирает токены, чтобы поддерживать точность при высокой разреженности; RocketKV <cite class="ltx_cite ltx_citemacro_cite"><span class="ltx_ref ltx_missing_citation ltx_ref_self">behnam2025rocketkv</span></cite> сжимает кэш KV с избирательным вытеснением, а недавнее сжатие KV для гипермасштабирования <cite class="ltx_cite ltx_citemacro_cite"><span class="ltx_ref ltx_missing_citation ltx_ref_self">lancucki2025inference</span></cite> дополнительно расширяет эффективный контекст; TidalDecode <cite class="ltx_cite ltx_citemacro_cite"><span class="ltx_ref ltx_missing_citation ltx_ref_self">yang2024tidaldecode</span></cite> стабилизирует эффективность декодирования с помощью устойчивых к позиции шаблонов. Эти подходы в первую очередь нацелены на память посредством отсечения/сжатия KV на фазе декодирования, тогда как BLASST напрямую снижает вычисления и на стадии prefill, и на стадии декодирования, оставаясь без обучения.</p>
+</div>
+</section>
+<section class="ltx_subsection" id="S2.SS3">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">2.3 </span>Новые варианты внимания</h3>
+<div class="ltx_para ltx_noindent" id="S2.SS3.p1">
+<p class="ltx_p" id="S2.SS3.p1.1">Помимо упомянутых методов, альтернативные механизмы включают Sliding Window Attention <cite class="ltx_cite ltx_citemacro_cite"><span class="ltx_ref ltx_missing_citation ltx_ref_self">beltagy2020longformer</span></cite>, Linear or Gated Attention <cite class="ltx_cite ltx_citemacro_cite"><span class="ltx_ref ltx_missing_citation ltx_ref_self">qiu2025gated</span></cite> и State-Space Models (SSM) <cite class="ltx_cite ltx_citemacro_cite"><span class="ltx_ref ltx_missing_citation ltx_ref_self">gu2023mamba</span></cite>. Native Sparse Attention (NSA) <cite class="ltx_cite ltx_citemacro_cite"><span class="ltx_ref ltx_missing_citation ltx_ref_self">yuan2025native</span></cite> и DeepSeek Sparse Attention (DSA) <cite class="ltx_cite ltx_citemacro_cite"><span class="ltx_ref ltx_missing_citation ltx_ref_self">deepseekai2024deepseekv32</span></cite>, хотя и эффективны в некоторых режимах, часто требуют архитектурных изменений или переобучения. В отличие от этого, BLASST — это метод после обучения, который ускоряет как prefill, так и decode без прокси-оценок или сложных предварительных вычислений, при этом он бесшовно интегрируется с реализациями FlashAttention.</p>
+</div>
+</section>
+</section>
+<section class="ltx_section" id="S3">
+<h2 class="ltx_title ltx_title_section">
+<span class="ltx_tag ltx_tag_section">3 </span>Методология</h2>
+<section class="ltx_subsection" id="S3.SS1">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">3.1 </span>Сокращение внимания с помощью текущих максимумов</h3>
+<div class="ltx_para ltx_noindent" id="S3.SS1.p1">
+<p class="ltx_p" id="S3.SS1.p1.1">Ключевая идея BLASST заключается в том, что при вычислении оценок внимания в FlashAttention многие блоки вносят пренебрежимо малый вклад в итоговый результат после нормализации softmax. Наша методика динамически находит и пропускает эти блоки во время прямого прохода, не требуя предварительного вычисления или вычисления прокси-оценок.</p>
+</div>
+<section class="ltx_subsubsection" id="S3.SS1.SSS1">
+<h4 class="ltx_title ltx_title_subsubsection">
+<span class="ltx_tag ltx_tag_subsubsection">3.1.1 </span>Ключевая идея</h4>
+<div class="ltx_para ltx_noindent" id="S3.SS1.SSS1.p1">
+<p class="ltx_p" id="S3.SS1.SSS1.p1.1">В стандартном механизме внимания операция softmax вычисляет:</p>
+<table class="ltx_equation ltx_eqn_table" id="S3.E1">
+<tbody><tr class="ltx_equation ltx_eqn_row ltx_align_baseline">
+<td class="ltx_eqn_cell ltx_eqn_center_padleft"></td>
+<td class="ltx_eqn_cell ltx_align_center"><math alttext="\text{Attention}(Q,K,V)=\text{softmax}\left(\frac{QK^{\top}}{\sqrt{d_{k}}}\right)V" class="ltx_Math" display="block" id="S3.E1.m1" intent=":literal"><semantics><mrow><mrow><mtext>Attention</mtext><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><mi>Q</mi><mo>,</mo><mi>K</mi><mo>,</mo><mi>V</mi><mo stretchy="false">)</mo></mrow></mrow><mo>=</mo><mrow><mtext>softmax</mtext><mo lspace="0em" rspace="0em">​</mo><mrow><mo>(</mo><mfrac><mrow><mi>Q</mi><mo lspace="0em" rspace="0em">​</mo><msup><mi>K</mi><mo>⊤</mo></msup></mrow><msqrt><msub><mi>d</mi><mi>k</mi></msub></msqrt></mfrac><mo>)</mo></mrow><mo lspace="0em" rspace="0em">​</mo><mi>V</mi></mrow></mrow><annotation encoding="application/x-tex">\text{Attention}(Q,K,V)=\text{softmax}\left(\frac{QK^{\top}}{\sqrt{d_{k}}}\right)V</annotation></semantics></math></td>
+<td class="ltx_eqn_cell ltx_eqn_center_padright"></td>
+<td class="ltx_eqn_cell ltx_eqn_eqno ltx_align_middle ltx_align_right" rowspan="1"><span class="ltx_tag ltx_tag_equation ltx_align_right">(1)</span></td>
+</tr></tbody>
+</table>
+</div>
+<div class="ltx_para ltx_noindent" id="S3.SS1.SSS1.p2">
+<p class="ltx_p" id="S3.SS1.SSS1.p2.4">Во время блочно-ориентированных вычислений FlashAttention мы поддерживаем текущий максимум <math alttext="m_{i}^{(j)}" class="ltx_Math" display="inline" id="S3.SS1.SSS1.p2.1.m1" intent=":literal"><semantics><msubsup><mi>m</mi><mi>i</mi><mrow><mo stretchy="false">(</mo><mi>j</mi><mo stretchy="false">)</mo></mrow></msubsup><annotation encoding="application/x-tex">m_{i}^{(j)}</annotation></semantics></math> по блокам. Если локальный максимум блока <math alttext="\tilde{m}_{i}^{(j)}" class="ltx_Math" display="inline" id="S3.SS1.SSS1.p2.2.m2" intent=":literal"><semantics><msubsup><mover accent="true"><mi>m</mi><mo>~</mo></mover><mi>i</mi><mrow><mo stretchy="false">(</mo><mi>j</mi><mo stretchy="false">)</mo></mrow></msubsup><annotation encoding="application/x-tex">\tilde{m}_{i}^{(j)}</annotation></semantics></math> существенно меньше текущего текущего максимума, то есть <math alttext="\tilde{m}_{i}^{(j)}-m_{i}^{(j)}&lt;\ln(\lambda)" class="ltx_Math" display="inline" id="S3.SS1.SSS1.p2.3.m3" intent=":literal"><semantics><mrow><mrow><msubsup><mover accent="true"><mi>m</mi><mo>~</mo></mover><mi>i</mi><mrow><mo stretchy="false">(</mo><mi>j</mi><mo stretchy="false">)</mo></mrow></msubsup><mo>−</mo><msubsup><mi>m</mi><mi>i</mi><mrow><mo stretchy="false">(</mo><mi>j</mi><mo stretchy="false">)</mo></mrow></msubsup></mrow><mo>&lt;</mo><mrow><mi>ln</mi><mo>⁡</mo><mrow><mo stretchy="false">(</mo><mi>λ</mi><mo stretchy="false">)</mo></mrow></mrow></mrow><annotation encoding="application/x-tex">\tilde{m}_{i}^{(j)}-m_{i}^{(j)}&lt;\ln(\lambda)</annotation></semantics></math> для некоторого порога <math alttext="\lambda" class="ltx_Math" display="inline" id="S3.SS1.SSS1.p2.4.m4" intent=":literal"><semantics><mi>λ</mi><annotation encoding="application/x-tex">\lambda</annotation></semantics></math>, тогда после возведения в степень:</p>
+<table class="ltx_equation ltx_eqn_table" id="S3.E2">
+<tbody><tr class="ltx_equation ltx_eqn_row ltx_align_baseline">
+<td class="ltx_eqn_cell ltx_eqn_center_padleft"></td>
+<td class="ltx_eqn_cell ltx_align_center"><math alttext="\exp(\tilde{m}_{i}^{(j)}-m_{i}^{(j)})&lt;\lambda\approx 0" class="ltx_Math" display="block" id="S3.E2.m1" intent=":literal"><semantics><mrow><mrow><mi>exp</mi><mo>⁡</mo><mrow><mo stretchy="false">(</mo><mrow><msubsup><mover accent="true"><mi>m</mi><mo>~</mo></mover><mi>i</mi><mrow><mo stretchy="false">(</mo><mi>j</mi><mo stretchy="false">)</mo></mrow></msubsup><mo>−</mo><msubsup><mi>m</mi><mi>i</mi><mrow><mo stretchy="false">(</mo><mi>j</mi><mo stretchy="false">)</mo></mrow></msubsup></mrow><mo stretchy="false">)</mo></mrow></mrow><mo>&lt;</mo><mi>λ</mi><mo>≈</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">\exp(\tilde{m}_{i}^{(j)}-m_{i}^{(j)})&lt;\lambda\approx 0</annotation></semantics></math></td>
+<td class="ltx_eqn_cell ltx_eqn_center_padright"></td>
+<td class="ltx_eqn_cell ltx_eqn_eqno ltx_align_middle ltx_align_right" rowspan="1"><span class="ltx_tag ltx_tag_equation ltx_align_right">(2)</span></td>
+</tr></tbody>
+</table>
+</div>
+<div class="ltx_para ltx_noindent" id="S3.SS1.SSS1.p3">
+<p class="ltx_p" id="S3.SS1.SSS1.p3.1">Поскольку максимальное значение ограничено <math alttext="\lambda" class="ltx_Math" display="inline" id="S3.SS1.SSS1.p3.1.m1" intent=":literal"><semantics><mi>λ</mi><annotation encoding="application/x-tex">\lambda</annotation></semantics></math>, вклад блока в итоговый выход внимания будет пренебрежимо малым, что позволяет нам полностью пропустить его вычисление.</p>
+</div>
+<div class="ltx_para ltx_noindent" id="S3.SS1.SSS1.p4">
+<p class="ltx_p" id="S3.SS1.SSS1.p4.4">Интуитивно, это критерий следует трехшаговому приближению. Во-первых, идеальная значимость каждого балла <math alttext="S_{ij}" class="ltx_Math" display="inline" id="S3.SS1.SSS1.p4.1.m1" intent=":literal"><semantics><msub><mi>S</mi><mrow><mi>i</mi><mo lspace="0em" rspace="0em">​</mo><mi>j</mi></mrow></msub><annotation encoding="application/x-tex">S_{ij}</annotation></semantics></math> — это его значение относительно (неизвестного) глобального максимума. Во-вторых, вычисление истинного максимума на лету слишком дорого, поэтому мы используем текущий максимум как удобный заменитель и сравниваем <math alttext="S_{ij}" class="ltx_Math" display="inline" id="S3.SS1.SSS1.p4.2.m2" intent=":literal"><semantics><msub><mi>S</mi><mrow><mi>i</mi><mo lspace="0em" rspace="0em">​</mo><mi>j</mi></mrow></msub><annotation encoding="application/x-tex">S_{ij}</annotation></semantics></math> с ним. В-третьих, чтобы обеспечить эффективное блочно-уровневое принятие решения внутри ядра, мы заменяем токен-уровневое <math alttext="S_{ij}" class="ltx_Math" display="inline" id="S3.SS1.SSS1.p4.3.m3" intent=":literal"><semantics><msub><mi>S</mi><mrow><mi>i</mi><mo lspace="0em" rspace="0em">​</mo><mi>j</mi></mrow></msub><annotation encoding="application/x-tex">S_{ij}</annotation></semantics></math> на блочно-локальный максимум, получая недорогое условие <math alttext="(\text{block\_max}-\text{running\_max})&lt;\ln(\lambda)" class="ltx_Math" display="inline" id="S3.SS1.SSS1.p4.4.m4" intent=":literal"><semantics><mrow><mrow><mo stretchy="false">(</mo><mrow><mtext>block_max</mtext><mo>−</mo><mtext>running_max</mtext></mrow><mo stretchy="false">)</mo></mrow><mo>&lt;</mo><mrow><mi>ln</mi><mo>⁡</mo><mrow><mo stretchy="false">(</mo><mi>λ</mi><mo stretchy="false">)</mo></mrow></mrow></mrow><annotation encoding="application/x-tex">(\text{block\_max}-\text{running\_max})&lt;\ln(\lambda)</annotation></semantics></math>.</p>
+</div>
+</section>
+<section class="ltx_subsubsection" id="S3.SS1.SSS2">
+<h4 class="ltx_title ltx_title_subsubsection">
+<span class="ltx_tag ltx_tag_subsubsection">3.1.2 </span>Дизайн алгоритмов</h4>
+<div class="ltx_para ltx_noindent" id="S3.SS1.SSS2.p1">
+<p class="ltx_p" id="S3.SS1.SSS2.p1.1">Алгоритм <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2512.12087v3#alg1" title="Algorithm 1 ‣ 3.1.2 Algorithm Design ‣ 3.1 Pruning Attention with Running Maximums ‣ 3 Methodology"><span class="ltx_text ltx_ref_tag">1</span></a> представляет наш модифицированный прямой проход FlashAttention. Ключевое изменение заключается во введении динамического условия отсечения, которое экономит как вычисления, так и полосу пропускания памяти. Где мы экономим: Когда <math alttext="\tilde{m}_{i}^{(j)}-m_{i}^{(j)}&lt;\ln(\lambda)" class="ltx_Math" display="inline" id="S3.SS1.SSS2.p1.1.m1" intent=":literal"><semantics><mrow><mrow><msubsup><mover accent="true"><mi>m</mi><mo>~</mo></mover><mi>i</mi><mrow><mo stretchy="false">(</mo><mi>j</mi><mo stretchy="false">)</mo></mrow></msubsup><mo>−</mo><msubsup><mi>m</mi><mi>i</mi><mrow><mo stretchy="false">(</mo><mi>j</mi><mo stretchy="false">)</mo></mrow></msubsup></mrow><mo>&lt;</mo><mrow><mi>ln</mi><mo>⁡</mo><mrow><mo stretchy="false">(</mo><mi>λ</mi><mo stretchy="false">)</mo></mrow></mrow></mrow><annotation encoding="application/x-tex">\tilde{m}_{i}^{(j)}-m_{i}^{(j)}&lt;\ln(\lambda)</annotation></semantics></math> (строка 7), мы пропускаем:</p>
+<ol class="ltx_enumerate" id="S3.I1">
+<li class="ltx_item" id="S3.I1.i1" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">1.</span>
+
+Вычислительные сбережения (CUDA cores): Дорогие <math alttext="\exp(\cdot)" class="ltx_Math" display="inline" id="S3.I1.i1.p1.1.m1" intent=":literal"><semantics><mrow><mi>exp</mi><mo>⁡</mo><mrow><mo stretchy="false">(</mo><mo lspace="0em" rspace="0em">⋅</mo><mo stretchy="false">)</mo></mrow></mrow><annotation encoding="application/x-tex">\exp(\cdot)</annotation></semantics></math> операции для вычисления <math alttext="\tilde{P}_{ij}" class="ltx_Math" display="inline" id="S3.I1.i1.p1.2.m2" intent=":literal"><semantics><msub><mover accent="true"><mi>P</mi><mo>~</mo></mover><mrow><mi>i</mi><mo lspace="0em" rspace="0em">​</mo><mi>j</mi></mrow></msub><annotation encoding="application/x-tex">\tilde{P}_{ij}</annotation></semantics></math> требуют нескольких инструкций на элемент: MUFU.EX2 (экспоненциальная), FMUL (умножение) и FADD (сложение). Мы также пропускаем операции редукции rowsum (инструкции FADD) для нормализации весов внимания. Для типичного блока это экономит тысячи инструкций CUDA core.
+
+</li>
+<li class="ltx_item" id="S3.I1.i2" style="list-style-type:none;">
+⟦<span class="ltx_tag ltx_tag_item">2.</span>
+
+Вычислительная экономия (Tensor cores) при умножении матриц <math alttext="\tilde{P}_{ij}V_{j}" class="ltx_Math" display="inline" id="S3.I1.i2.p1.1.m1" intent=":literal"><semantics><mrow><msub><mover accent="true"><mi>P</mi><mo>~</mo></mover><mrow><mi>i</mi><mo lspace="0em" rspace="0em">​</mo><mi>j</mi></mrow></msub><mo lspace="0em" rspace="0em">​</mo><msub><mi>V</mi><mi>j</mi></msub></mrow><annotation encoding="application/x-tex">\tilde{P}_{ij}V_{j}</annotation></semantics></math>. На фазе prefill, когда вычисления ограничены производительностью, обход этих операций MMA обеспечивает существенное ускорение.
+
+</li>
+<li class="ltx_item" id="S3.I1.i3" style="list-style-type:none;">
+⟦Экономия пропускной способности памяти: загрузка блока Value <math alttext="V_{j}" class="ltx_Math" display="inline" id="S3.I1.i3.p1.1.m1" intent=":literal"><semantics><msub><mi>V</mi><mi>j</mi></msub><annotation encoding="application/x-tex">V_{j}</annotation></semantics></math> из HBM в SRAM. Это особенно критично на фазе декодирования, где внимание ограничено памятью.
+
+</li>
+</ol>
+</div>
+<figure class="ltx_float ltx_float_algorithm ltx_framed ltx_framed_top" id="alg1">
+<figcaption class="ltx_caption"><span class="ltx_tag ltx_tag_float"><span class="ltx_text ltx_font_bold" id="alg1.2.1.1">Algorithm 1</span> </span> FlashAttention с BLASST</figcaption>
+<div class="ltx_listing ltx_listing" id="alg1.3">
+<div class="ltx_listingline" id="alg1.l1">
+<span class="ltx_tag ltx_tag_listingline">1:</span>Блоки запросов <math alttext="\{Q_{i}\}_{i=1}^{T_{r}}" class="ltx_Math" display="inline" id="alg1.l1.m1" intent=":literal"><semantics><msubsup><mrow><mo stretchy="false">{</mo><msub><mi>Q</mi><mi>i</mi></msub><mo stretchy="false">}</mo></mrow><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><msub><mi>T</mi><mi>r</mi></msub></msubsup><annotation encoding="application/x-tex">\{Q_{i}\}_{i=1}^{T_{r}}</annotation></semantics></math>, Ключевые блоки <math alttext="\{K_{j}\}_{j=1}^{T_{c}}" class="ltx_Math" display="inline" id="alg1.l1.m2" intent=":literal"><semantics><msubsup><mrow><mo stretchy="false">{</mo><msub><mi>K</mi><mi>j</mi></msub><mo stretchy="false">}</mo></mrow><mrow><mi>j</mi><mo>=</mo><mn>1</mn></mrow><msub><mi>T</mi><mi>c</mi></msub></msubsup><annotation encoding="application/x-tex">\{K_{j}\}_{j=1}^{T_{c}}</annotation></semantics></math>, Блоки значений <math alttext="\{V_{j}\}_{j=1}^{T_{c}}" class="ltx_Math" display="inline" id="alg1.l1.m3" intent=":literal"><semantics><msubsup><mrow><mo stretchy="false">{</mo><msub><mi>V</mi><mi>j</mi></msub><mo stretchy="false">}</mo></mrow><mrow><mi>j</mi><mo>=</mo><mn>1</mn></mrow><msub><mi>T</mi><mi>c</mi></msub></msubsup><annotation encoding="application/x-tex">\{V_{j}\}_{j=1}^{T_{c}}</annotation></semantics></math>, порог <math alttext="\lambda" class="ltx_Math" display="inline" id="alg1.l1.m4" intent=":literal"><semantics><mi>λ</mi><annotation encoding="application/x-tex">\lambda</annotation></semantics></math>
+</div>
+<div class="ltx_listingline" id="alg1.l2">
+<span class="ltx_tag ltx_tag_listingline">2:</span>Блоки вывода <math alttext="\{O_{i}\}_{i=1}^{T_{r}}" class="ltx_Math" display="inline" id="alg1.l2.m1" intent=":literal"><semantics><msubsup><mrow><mo stretchy="false">{</mo><msub><mi>O</mi><mi>i</mi></msub><mo stretchy="false">}</mo></mrow><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><msub><mi>T</mi><mi>r</mi></msub></msubsup><annotation encoding="application/x-tex">\{O_{i}\}_{i=1}^{T_{r}}</annotation></semantics></math>
+</div>
+<div class="ltx_listingline" id="alg1.l3">
+<span class="ltx_tag ltx_tag_listingline">3:</span><span class="ltx_text ltx_font_bold" id="alg1.l3.1">для</span> <math alttext="i=1" class="ltx_Math" display="inline" id="alg1.l3.m1" intent=":literal"><semantics><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">i=1</annotation></semantics></math> кроме <math alttext="T_{r}" class="ltx_Math" display="inline" id="alg1.l3.m2" intent=":literal"><semantics><msub><mi>T</mi><mi>r</mi></msub><annotation encoding="application/x-tex">T_{r}</annotation></semantics></math> <span class="ltx_text ltx_font_bold" id="alg1.l3.2">дело</span>
+</div>
+<div class="ltx_listingline" id="alg1.l4">
+<span class="ltx_tag ltx_tag_listingline">4:</span>  Инициализация <math alttext="m_{i}^{(0)}=-\infty" class="ltx_Math" display="inline" id="alg1.l4.m1" intent=":literal"><semantics><mrow><msubsup><mi>m</mi><mi>i</mi><mrow><mo stretchy="false">(</mo><mn>0</mn><mo stretchy="false">)</mo></mrow></msubsup><mo>=</mo><mrow><mo>−</mo><mi mathvariant="normal">∞</mi></mrow></mrow><annotation encoding="application/x-tex">m_{i}^{(0)}=-\infty</annotation></semantics></math>, <math alttext="O_{i}^{(0)}=0" class="ltx_Math" display="inline" id="alg1.l4.m2" intent=":literal"><semantics><mrow><msubsup><mi>O</mi><mi>i</mi><mrow><mo stretchy="false">(</mo><mn>0</mn><mo stretchy="false">)</mo></mrow></msubsup><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">O_{i}^{(0)}=0</annotation></semantics></math>, <math alttext="l_{i}^{(0)}=0" class="ltx_Math" display="inline" id="alg1.l4.m3" intent=":literal"><semantics><mrow><msubsup><mi>l</mi><mi>i</mi><mrow><mo stretchy="false">(</mo><mn>0</mn><mo stretchy="false">)</mo></mrow></msubsup><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">l_{i}^{(0)}=0</annotation></semantics></math>
+</div>
+<div class="ltx_listingline" id="alg1.l5">
+<span class="ltx_tag ltx_tag_listingline">5:</span>  <span class="ltx_text ltx_font_bold" id="alg1.l5.1">для</span> <math alttext="j=1" class="ltx_Math" display="inline" id="alg1.l5.m1" intent=":literal"><semantics><mrow><mi>j</mi><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">j=1</annotation></semantics></math> кто <math alttext="T_{c}" class="ltx_Math" display="inline" id="alg1.l5.m2" intent=":literal"><semantics><msub><mi>T</mi><mi>c</mi></msub><annotation encoding="application/x-tex">T_{c}</annotation></semantics></math> <span class="ltx_text ltx_font_bold" id="alg1.l5.2">do</span>
+</div>
+<div class="ltx_listingline" id="alg1.l6">
+<span class="ltx_tag ltx_tag_listingline">6:</span>   Вычислить <math alttext="S_{ij}=Q_{i}K_{j}^{\top}" class="ltx_Math" display="inline" id="alg1.l6.m1" intent=":literal"><semantics><mrow><msub><mi>S</mi><mrow><mi>i</mi><mo lspace="0em" rspace="0em">​</mo><mi>j</mi></mrow></msub><mo>=</mo><mrow><msub><mi>Q</mi><mi>i</mi></msub><mo lspace="0em" rspace="0em">​</mo><msubsup><mi>K</mi><mi>j</mi><mo>⊤</mo></msubsup></mrow></mrow><annotation encoding="application/x-tex">S_{ij}=Q_{i}K_{j}^{\top}</annotation></semantics></math> <span class="ltx_text" id="alg1.l6.1" style="float:right;"><math alttext="\triangleright" class="ltx_Math" display="inline" id="alg1.l6.1.m1" intent=":literal"><semantics><mo>⊳</mo><annotation encoding="application/x-tex">\triangleright</annotation></semantics></math> Оценки внимания
+</span>
+</div>
+<div class="ltx_listingline" id="alg1.l7">
+<span class="ltx_tag ltx_tag_listingline">7:</span>   <math alttext="\tilde{m}_{i}^{(j)}=\operatorname{rowmax}(S_{ij})" class="ltx_Math" display="inline" id="alg1.l7.m1" intent=":literal"><semantics><mrow><msubsup><mover accent="true"><mi>m</mi><mo>~</mo></mover><mi>i</mi><mrow><mo stretchy="false">(</mo><mi>j</mi><mo stretchy="false">)</mo></mrow></msubsup><mo>=</mo><mrow><mi>rowmax</mi><mo>⁡</mo><mrow><mo stretchy="false">(</mo><msub><mi>S</mi><mrow><mi>i</mi><mo lspace="0em" rspace="0em">​</mo><mi>j</mi></mrow></msub><mo stretchy="false">)</mo></mrow></mrow></mrow><annotation encoding="application/x-tex">\tilde{m}_{i}^{(j)}=\operatorname{rowmax}(S_{ij})</annotation></semantics></math> <span class="ltx_text" id="alg1.l7.1" style="float:right;"><math alttext="\triangleright" class="ltx_Math" display="inline" id="alg1.l7.1.m1" intent=":literal"><semantics><mo>⊳</mo><annotation encoding="application/x-tex">\triangleright</annotation></semantics></math> Локальный максимум
+</span>
+</div>
+<div class="ltx_listingline" id="alg1.l8">
+<span class="ltx_tag ltx_tag_listingline">8:</span>   <math alttext="m_{i}^{(j)}=\max(m_{i}^{(j-1)},\tilde{m}_{i}^{(j)})" class="ltx_Math" display="inline" id="alg1.l8.m1" intent=":literal"><semantics><mrow><msubsup><mi>m</mi><mi>i</mi><mrow><mo stretchy="false">(</mo><mi>j</mi><mo stretchy="false">)</mo></mrow></msubsup><mo>=</mo><mrow><mi>max</mi><mo>⁡</mo><mrow><mo stretchy="false">(</mo><msubsup><mi>m</mi><mi>i</mi><mrow><mo stretchy="false">(</mo><mrow><mi>j</mi><mo>−</mo><mn>1</mn></mrow><mo stretchy="false">)</mo></mrow></msubsup><mo>,</mo><msubsup><mover accent="true"><mi>m</mi><mo>~</mo></mover><mi>i</mi><mrow><mo stretchy="false">(</mo><mi>j</mi><mo stretchy="false">)</mo></mrow></msubsup><mo stretchy="false">)</mo></mrow></mrow></mrow><annotation encoding="application/x-tex">m_{i}^{(j)}=\max(m_{i}^{(j-1)},\tilde{m}_{i}^{(j)})</annotation></semantics></math> <span class="ltx_text" id="alg1.l8.1" style="float:right;"><math alttext="\triangleright" class="ltx_Math" display="inline" id="alg1.l8.1.m1" intent=":literal"><semantics><mo>⊳</mo><annotation encoding="application/x-tex">\triangleright</annotation></semantics></math> Максимум нарастающим итогом
+</span>
+</div>
+<div class="ltx_listingline" id="alg1.l9">
+<span class="ltx_tag ltx_tag_listingline">9:</span>   <span class="ltx_text ltx_font_bold" id="alg1.l9.1">если</span> <math alttext="\tilde{m}_{i}^{(j)}-m_{i}^{(j)}&lt;\ln(\boldsymbol{\lambda})" class="ltx_Math" display="inline" id="alg1.l9.m1" intent=":literal"><semantics><mrow><mrow><msubsup><mover accent="true"><mi>m</mi><mo>~</mo></mover><mi>i</mi><mrow><mo stretchy="false">(</mo><mi>j</mi><mo stretchy="false">)</mo></mrow></msubsup><mo>−</mo><msubsup><mi>m</mi><mi>i</mi><mrow><mo stretchy="false">(</mo><mi>j</mi><mo stretchy="false">)</mo></mrow></msubsup></mrow><mo>&lt;</mo><mrow><mi>ln</mi><mo>⁡</mo><mrow><mo stretchy="false">(</mo><mi>𝝀</mi><mo stretchy="false">)</mo></mrow></mrow></mrow><annotation encoding="application/x-tex">\tilde{m}_{i}^{(j)}-m_{i}^{(j)}&lt;\ln(\boldsymbol{\lambda})</annotation></semantics></math> <span class="ltx_text ltx_font_bold" id="alg1.l9.2">тогда</span>
+</div>
+<div class="ltx_listingline" id="alg1.l10">
+<span class="ltx_tag ltx_tag_listingline">10:</span>     <span class="ltx_text ltx_font_bold" id="alg1.l10.2">continue</span> <span class="ltx_text" id="alg1.l10.1" style="float:right;"><math alttext="\triangleright" class="ltx_Math" display="inline" id="alg1.l10.1.m1" intent=":literal"><semantics><mo>⊳</mo><annotation encoding="application/x-tex">\triangleright</annotation></semantics></math> <em class="ltx_emph ltx_font_bold ltx_font_italic" id="alg1.l10.1.1">Skip this block</em>
+</span>
+</div>
+<div class="ltx_listingline" id="alg1.l11">
+<span class="ltx_tag ltx_tag_listingline">11:</span>   <span class="ltx_text ltx_font_bold" id="alg1.l11.1">конец</span> <span class="ltx_text ltx_font_bold" id="alg1.l11.2">если</span>
+</div>
+<div class="ltx_listingline" id="alg1.l12">
+<span class="ltx_tag ltx_tag_listingline">12:</span>   <math alttext="\tilde{P}_{ij}=\exp(S_{ij}-m_{i}^{(j)})" class="ltx_Math" display="inline" id="alg1.l12.m1" intent=":literal"><semantics><mrow><msub><mover accent="true"><mi>P</mi><mo>~</mo></mover><mrow><mi>i</mi><mo lspace="0em" rspace="0em">​</mo><mi>j</mi></mrow></msub><mo>=</mo><mrow><mi>exp</mi><mo>⁡</mo><mrow><mo stretchy="false">(</mo><mrow><msub><mi>S</mi><mrow><mi>i</mi><mo lspace="0em" rspace="0em">​</mo><mi>j</mi></mrow></msub><mo>−</mo><msubsup><mi>m</mi><mi>i</mi><mrow><mo stretchy="false">(</mo><mi>j</mi><mo stretchy="false">)</mo></mrow></msubsup></mrow><mo stretchy="false">)</mo></mrow></mrow></mrow><annotation encoding="application/x-tex">\tilde{P}_{ij}=\exp(S_{ij}-m_{i}^{(j)})</annotation></semantics></math> <span class="ltx_text" id="alg1.l12.1" style="float:right;"><math alttext="\triangleright" class="ltx_Math" display="inline" id="alg1.l12.1.m1" intent=":literal"><semantics><mo>⊳</mo><annotation encoding="application/x-tex">\triangleright</annotation></semantics></math> Вычислите весовые коэффициенты внимания
+</span>
+</div>
+<div class="ltx_listingline" id="alg1.l13">
+<span class="ltx_tag ltx_tag_listingline">13:</span>   <math alttext="l_{i}^{(j)}=e^{m_{i}^{(j-1)}-m_{i}^{(j)}}l_{i}^{(j-1)}+\operatorname{rowsum}(\tilde{P}_{ij})" class="ltx_Math" display="inline" id="alg1.l13.m1" intent=":literal"><semantics><mrow><msubsup><mi>l</mi><mi>i</mi><mrow><mo stretchy="false">(</mo><mi>j</mi><mo stretchy="false">)</mo></mrow></msubsup><mo>=</mo><mrow><mrow><msup><mi>e</mi><mrow><msubsup><mi>m</mi><mi>i</mi><mrow><mo stretchy="false">(</mo><mrow><mi>j</mi><mo>−</mo><mn>1</mn></mrow><mo stretchy="false">)</mo></mrow></msubsup><mo>−</mo><msubsup><mi>m</mi><mi>i</mi><mrow><mo stretchy="false">(</mo><mi>j</mi><mo stretchy="false">)</mo></mrow></msubsup></mrow></msup><mo lspace="0em" rspace="0em">​</mo><msubsup><mi>l</mi><mi>i</mi><mrow><mo stretchy="false">(</mo><mrow><mi>j</mi><mo>−</mo><mn>1</mn></mrow><mo stretchy="false">)</mo></mrow></msubsup></mrow><mo>+</mo><mrow><mi>rowsum</mi><mo>⁡</mo><mrow><mo stretchy="false">(</mo><msub><mover accent="true"><mi>P</mi><mo>~</mo></mover><mrow><mi>i</mi><mo lspace="0em" rspace="0em">​</mo><mi>j</mi></mrow></msub><mo stretchy="false">)</mo></mrow></mrow></mrow></mrow><annotation encoding="application/x-tex">l_{i}^{(j)}=e^{m_{i}^{(j-1)}-m_{i}^{(j)}}l_{i}^{(j-1)}+\operatorname{rowsum}(\tilde{P}_{ij})</annotation></semantics></math>
+</div>
+<div class="ltx_listingline" id="alg1.l14">
+<span class="ltx_tag ltx_tag_listingline">14:</span>   <math alttext="O_{i}^{(j)}=e^{m_{i}^{(j-1)}-m_{i}^{(j)}}O_{i}^{(j-1)}+\tilde{P}_{ij}V_{j}" class="ltx_Math" display="inline" id="alg1.l14.m1" intent=":literal"><semantics><mrow><msubsup><mi>O</mi><mi>i</mi><mrow><mo stretchy="false">(</mo><mi>j</mi><mo stretchy="false">)</mo></mrow></msubsup><mo>=</mo><mrow><mrow><msup><mi>e</mi><mrow><msubsup><mi>m</mi><mi>i</mi><mrow><mo stretchy="false">(</mo><mrow><mi>j</mi><mo>−</mo><mn>1</mn></mrow><mo stretchy="false">)</mo></mrow></msubsup><mo>−</mo><msubsup><mi>m</mi><mi>i</mi><mrow><mo stretchy="false">(</mo><mi>j</mi><mo stretchy="false">)</mo></mrow></msubsup></mrow></msup><mo lspace="0em" rspace="0em">​</mo><msubsup><mi>O</mi><mi>i</mi><mrow><mo stretchy="false">(</mo><mrow><mi>j</mi><mo>−</mo><mn>1</mn></mrow><mo stretchy="false">)</mo></mrow></msubsup></mrow><mo>+</mo><mrow><msub><mover accent="true"><mi>P</mi><mo>~</mo></mover><mrow><mi>i</mi><mo lspace="0em" rspace="0em">​</mo><mi>j</mi></mrow></msub><mo lspace="0em" rspace="0em">​</mo><msub><mi>V</mi><mi>j</mi></msub></mrow></mrow></mrow><annotation encoding="application/x-tex">O_{i}^{(j)}=e^{m_{i}^{(j-1)}-m_{i}^{(j)}}O_{i}^{(j-1)}+\tilde{P}_{ij}V_{j}</annotation></semantics></math>
+</div>
+<div class="ltx_listingline" id="alg1.l15">
+<span class="ltx_tag ltx_tag_listingline">15:</span>  <span class="ltx_text ltx_font_bold" id="alg1.l15.1">end</span> <span class="ltx_text ltx_font_bold" id="alg1.l15.2">для</span>
+</div>
+<div class="ltx_listingline" id="alg1.l16">
+<span class="ltx_tag ltx_tag_listingline">16:</span>  <math alttext="O_{i}=O_{i}^{(T_{c})}/l_{i}^{(T_{c})}" class="ltx_Math" display="inline" id="alg1.l16.m1" intent=":literal"><semantics><mrow><msub><mi>O</mi><mi>i</mi></msub><mo>=</mo><mrow><msubsup><mi>O</mi><mi>i</mi><mrow><mo stretchy="false">(</mo><msub><mi>T</mi><mi>c</mi></msub><mo stretchy="false">)</mo></mrow></msubsup><mo>/</mo><msubsup><mi>l</mi><mi>i</mi><mrow><mo stretchy="false">(</mo><msub><mi>T</mi><mi>c</mi></msub><mo stretchy="false">)</mo></mrow></msubsup></mrow></mrow><annotation encoding="application/x-tex">O_{i}=O_{i}^{(T_{c})}/l_{i}^{(T_{c})}</annotation></semantics></math> <span class="ltx_text" id="alg1.l16.1" style="float:right;"><math alttext="\triangleright" class="ltx_Math" display="inline" id="alg1.l16.1.m1" intent=":literal"><semantics><mo>⊳</mo><annotation encoding="application/x-tex">\triangleright</annotation></semantics></math> Окончательная нормализация
+</span>
+</div>
+<div class="ltx_listingline" id="alg1.l17">
+<span class="ltx_tag ltx_tag_listingline">17:</span><span class="ltx_text ltx_font_bold" id="alg1.l17.1">end</span> <span class="ltx_text ltx_font_bold" id="alg1.l17.2">для</span>
+</div>
+<div class="ltx_listingline" id="alg1.l18">
+<span class="ltx_tag ltx_tag_listingline">18:</span><span class="ltx_text ltx_font_bold" id="alg1.l18.1">return</span> <math alttext="\{O_{i}\}_{i=1}^{T_{r}}" class="ltx_Math" display="inline" id="alg1.l18.m1" intent=":literal"><semantics><msubsup><mrow><mo stretchy="false">{</mo><msub><mi>O</mi><mi>i</mi></msub><mo stretchy="false">}</mo></mrow><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><msub><mi>T</mi><mi>r</mi></msub></msubsup><annotation encoding="application/x-tex">\{O_{i}\}_{i=1}^{T_{r}}</annotation></semantics></math>
+</div>
+</div>
+</figure>
+<div class="ltx_para ltx_noindent" id="S3.SS1.SSS2.p2">
+<p class="ltx_p" id="S3.SS1.SSS2.p2.1">Наш подход напрямую снижает общее количество вычислений за счет динамического выявления и пропуска пренебрежимо малозначимых блоков внимания во время прямого прохода. Это простое, но эффективное изменение требует минимальных доработок существующей реализации FlashAttention и при этом обеспечивает существенную экономию вычислений.</p>
+</div>
+</section>
+</section>
+<section class="ltx_subsection" id="S3.SS2">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">3.2 </span>Калибровка для оптимальной разреженности</h3>
+<div class="ltx_para ltx_noindent" id="S3.SS2.p1">
+<p class="ltx_p" id="S3.SS2.p1.1">Критической задачей при развертывании BLASST является выбор подходящего порога <math alttext="\lambda" class="ltx_Math" display="inline" id="S3.SS2.p1.1.m1" intent=":literal"><semantics><mi>λ</mi><annotation encoding="application/x-tex">\lambda</annotation></semantics></math>, который обеспечивает баланс между разреженностью и точностью. Чтобы понять эту взаимосвязь, мы провели эксперименты на Llama-3.1-8B на сложных подмножествах бенчмарка RULER (NIAH_MULTI, VT, FWE) с длинами контекста от 8K до 64K токенов.</p>
+</div>
+<div class="ltx_para ltx_noindent" id="S3.SS2.p2">
+<p class="ltx_p" id="S3.SS2.p2.1">Сходимость разреженности определяет точность. Рисунок <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2512.12087v3#S3.F2" title="Figure 2 ‣ 3.2 Calibration for Optimal Sparsity ‣ 3 Methodology"><span class="ltx_text ltx_ref_tag">2</span></a> (слева) показывает относительное ухудшение точности в зависимости от коэффициента разреженности. Мы нормализуем каждую кривую по результату полного внимания для корректного сравнения. Примечательно, что все кривые демонстрируют согласованные закономерности ухудшения: производительность остается стабильной вплоть до разреженности  60-70%, после чего точность резко падает. Эта согласованность для различных задач и длин последовательностей показывает, что ухудшение точности в первую очередь определяется самим коэффициентом разреженности, а не типом набора данных или длиной последовательности.</p>
+</div>
+<div class="ltx_para ltx_noindent" id="S3.SS2.p3">
+<p class="ltx_p" id="S3.SS2.p3.2">Калибровка порога необходима. Для достижения согласованной производительности следует поддерживать фиксированное соотношение разреженности, а не фиксированный порог. Однако рисунок <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2512.12087v3#S3.F2" title="Figure 2 ‣ 3.2 Calibration for Optimal Sparsity ‣ 3 Methodology"><span class="ltx_text ltx_ref_tag">2</span></a> (справа) показывает, что для достижения 75% разреженности требуется <math alttext="\lambda\approx 1e-4" class="ltx_Math" display="inline" id="S3.SS2.p3.1.m1" intent=":literal"><semantics><mrow><mi>λ</mi><mo>≈</mo><mrow><mrow><mn>1</mn><mo lspace="0em" rspace="0em">​</mo><mi>e</mi></mrow><mo>−</mo><mn>4</mn></mrow></mrow><annotation encoding="application/x-tex">\lambda\approx 1e-4</annotation></semantics></math> для контекстов 8K, но только <math alttext="1e-5" class="ltx_Math" display="inline" id="S3.SS2.p3.2.m2" intent=":literal"><semantics><mrow><mrow><mn>1</mn><mo lspace="0em" rspace="0em">​</mo><mi>e</mi></mrow><mo>−</mo><mn>5</mn></mrow><annotation encoding="application/x-tex">1e-5</annotation></semantics></math> для контекстов 64K. Это требует адаптивной калибровки. Важно, что при нацеливании на фиксированную разреженность посредством калибровки пользователи могут управлять и предвидеть ускорение вычислений, поскольку выигрыш в производительности масштабируется предсказуемо в зависимости от достигнутого уровня разреженности.</p>
+</div>
+<figure class="ltx_figure" id="S3.F2">
+<div class="ltx_flex_figure">
+<div class="ltx_flex_cell ltx_flex_size_2">
+<figure class="ltx_figure ltx_figure_panel ltx_align_center" id="S3.F2.1"><img alt="Refer to caption" class="ltx_graphics ltx_centering ltx_img_landscape" height="546" id="S3.F2.1.g1" src="./[2512.12087] 1 Introduction_files/x2.png" width="830"/>
+</figure>
+</div>
+<div class="ltx_flex_cell ltx_flex_size_2">
+<figure class="ltx_figure ltx_figure_panel ltx_align_center" id="S3.F2.2"><img alt="Refer to caption" class="ltx_graphics ltx_centering ltx_img_landscape" height="567" id="S3.F2.2.g1" src="./[2512.12087] 1 Introduction_files/x3.png" width="830"/>
+</figure>
+</div>
+</div>
+<figcaption class="ltx_caption ltx_centering">⟦<span class="ltx_tag ltx_tag_figure">Figure 2: </span>(Слева) Относительное снижение точности на разных наборах данных и длинах контекста демонстрирует согласованные закономерности ухудшения. Все кривые нормированы к своей исходной точности. (Справа) Связь между порогом и достигнутыми уровнями разреженности на разных длинах последовательностей, показывающая необходимость калибровки порога для поддержания фиксированной разреженности в различных контекстах.</figcaption>
+</figure>
+<div class="ltx_para ltx_noindent" id="S3.SS2.p4">
+<p class="ltx_p" id="S3.SS2.p4.1">Путем эмпирического анализа мы обнаруживаем, что оптимальный порог следует обратно пропорциональной зависимости от длины контекста <math alttext="L" class="ltx_Math" display="inline" id="S3.SS2.p4.1.m1" intent=":literal"><semantics><mi>L</mi><annotation encoding="application/x-tex">L</annotation></semantics></math>⟧:</p>
+<table class="ltx_equation ltx_eqn_table" id="S3.E3">
+<tbody><tr class="ltx_equation ltx_eqn_row ltx_align_baseline">
+<td class="ltx_eqn_cell ltx_eqn_center_padleft"></td>
+<td class="ltx_eqn_cell ltx_align_center"><math alttext="\lambda=\frac{a}{L}" class="ltx_Math" display="block" id="S3.E3.m1" intent=":literal"><semantics><mrow><mi>λ</mi><mo>=</mo><mfrac><mi>a</mi><mi>L</mi></mfrac></mrow><annotation encoding="application/x-tex">\lambda=\frac{a}{L}</annotation></semantics></math></td>
+<td class="ltx_eqn_cell ltx_eqn_center_padright"></td>
+<td class="ltx_eqn_cell ltx_eqn_eqno ltx_align_middle ltx_align_right" rowspan="1"><span class="ltx_tag ltx_tag_equation ltx_align_right">(3)</span></td>
+</tr></tbody>
+</table>
+<p class="ltx_p" id="S3.SS2.p4.2">где <math alttext="a" class="ltx_Math" display="inline" id="S3.SS2.p4.2.m1" intent=":literal"><semantics><mi>a</mi><annotation encoding="application/x-tex">a</annotation></semantics></math> — это константа, зависящая от модели. Эта обратная зависимость имеет теоретическое обоснование: поскольку оценки внимания нормируются по строкам так, что их сумма равна 1, для более длинных последовательностей характерны более низкие средние оценки на токен, что требует пропорционально меньших порогов. Без калибровки фиксированные пороги приводили бы к существенно различающимся уровням разреженности между последовательностями разной длины.</p>
+</div>
+<figure class="ltx_float ltx_float_algorithm ltx_framed ltx_framed_top" id="alg2">
+<figcaption class="ltx_caption"><span class="ltx_tag ltx_tag_float"><span class="ltx_text ltx_font_bold" id="alg2.2.1.1">Algorithm 2</span> </span> Калибровка BLASST</figcaption>
+<div class="ltx_listing ltx_listing" id="alg2.3">
+<div class="ltx_listingline" id="alg2.l1">
+<span class="ltx_tag ltx_tag_listingline">1:</span>Целевая разреженность <math alttext="S" class="ltx_Math" display="inline" id="alg2.l1.m1" intent=":literal"><semantics><mi>S</mi><annotation encoding="application/x-tex">S</annotation></semantics></math>, калибровочный набор данных <math alttext="\mathcal{D}" class="ltx_Math" display="inline" id="alg2.l1.m2" intent=":literal"><semantics><mi class="ltx_font_mathcaligraphic">𝒟</mi><annotation encoding="application/x-tex">\mathcal{D}</annotation></semantics></math>, длины контекста <math alttext="\{L_{k}\}_{k=1}^{K}" class="ltx_Math" display="inline" id="alg2.l1.m3" intent=":literal"><semantics><msubsup><mrow><mo stretchy="false">{</mo><msub><mi>L</mi><mi>k</mi></msub><mo stretchy="false">}</mo></mrow><mrow><mi>k</mi><mo>=</mo><mn>1</mn></mrow><mi>K</mi></msubsup><annotation encoding="application/x-tex">\{L_{k}\}_{k=1}^{K}</annotation></semantics></math>, lambda set <math alttext="\Lambda" class="ltx_Math" display="inline" id="alg2.l1.m4" intent=":literal"><semantics><mi mathvariant="normal">Λ</mi><annotation encoding="application/x-tex">\Lambda</annotation></semantics></math>, допуск <math alttext="\delta" class="ltx_Math" display="inline" id="alg2.l1.m5" intent=":literal"><semantics><mi>δ</mi><annotation encoding="application/x-tex">\delta</annotation></semantics></math>
+</div>
+<div class="ltx_listingline" id="alg2.l2">
+<span class="ltx_tag ltx_tag_listingline">2:</span>Параметр калибровки <math alttext="a" class="ltx_Math" display="inline" id="alg2.l2.m1" intent=":literal"><semantics><mi>a</mi><annotation encoding="application/x-tex">a</annotation></semantics></math>
+</div>
+<div class="ltx_listingline" id="alg2.l3">
+<span class="ltx_tag ltx_tag_listingline">3:</span>Инициализировать точки данных <math alttext="\mathcal{P}=\emptyset" class="ltx_Math" display="inline" id="alg2.l3.m1" intent=":literal"><semantics><mrow><mi class="ltx_font_mathcaligraphic">𝒫</mi><mo>=</mo><mi mathvariant="normal">∅</mi></mrow><annotation encoding="application/x-tex">\mathcal{P}=\emptyset</annotation></semantics></math>
+</div>
+<div class="ltx_listingline" id="alg2.l4">
+<span class="ltx_tag ltx_tag_listingline">4:</span><span class="ltx_text ltx_font_bold" id="alg2.l4.1">для</span> каждая длина контекста <math alttext="L_{k}" class="ltx_Math" display="inline" id="alg2.l4.m1" intent=":literal"><semantics><msub><mi>L</mi><mi>k</mi></msub><annotation encoding="application/x-tex">L_{k}</annotation></semantics></math> <span class="ltx_text ltx_font_bold" id="alg2.l4.2">делай</span>
+</div>
+<div class="ltx_listingline" id="alg2.l5">
+<span class="ltx_tag ltx_tag_listingline">5:</span>  Примеры последовательностей длины <math alttext="L_{k}" class="ltx_Math" display="inline" id="alg2.l5.m1" intent=":literal"><semantics><msub><mi>L</mi><mi>k</mi></msub><annotation encoding="application/x-tex">L_{k}</annotation></semantics></math> from <math alttext="\mathcal{D}" class="ltx_Math" display="inline" id="alg2.l5.m2" intent=":literal"><semantics><mi class="ltx_font_mathcaligraphic">𝒟</mi><annotation encoding="application/x-tex">\mathcal{D}</annotation></semantics></math>
+</div>
+<div class="ltx_listingline" id="alg2.l6">
+<span class="ltx_tag ltx_tag_listingline">6:</span>  Инициализировать <math alttext="\lambda_{\text{best}}=\text{None}" class="ltx_Math" display="inline" id="alg2.l6.m1" intent=":literal"><semantics><mrow><msub><mi>λ</mi><mtext>best</mtext></msub><mo>=</mo><mtext>None</mtext></mrow><annotation encoding="application/x-tex">\lambda_{\text{best}}=\text{None}</annotation></semantics></math>, <math alttext="\text{min\_gap}=\infty" class="ltx_Math" display="inline" id="alg2.l6.m2" intent=":literal"><semantics><mrow><mtext>min_gap</mtext><mo>=</mo><mi mathvariant="normal">∞</mi></mrow><annotation encoding="application/x-tex">\text{min\_gap}=\infty</annotation></semantics></math>
+</div>
+<div class="ltx_listingline" id="alg2.l7">
+<span class="ltx_tag ltx_tag_listingline">7:</span>  <span class="ltx_text ltx_font_bold" id="alg2.l7.1">для</span> каждое <math alttext="\lambda\in\Lambda" class="ltx_Math" display="inline" id="alg2.l7.m1" intent=":literal"><semantics><mrow><mi>λ</mi><mo>∈</mo><mi mathvariant="normal">Λ</mi></mrow><annotation encoding="application/x-tex">\lambda\in\Lambda</annotation></semantics></math> <span class="ltx_text ltx_font_bold" id="alg2.l7.2">do</span>
+</div>
+<div class="ltx_listingline" id="alg2.l8">
+<span class="ltx_tag ltx_tag_listingline">8:</span>   <math alttext="s=\text{MeasureSparsity}(\lambda,L_{k})" class="ltx_Math" display="inline" id="alg2.l8.m1" intent=":literal"><semantics><mrow><mi>s</mi><mo>=</mo><mrow><mtext>MeasureSparsity</mtext><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><mi>λ</mi><mo>,</mo><msub><mi>L</mi><mi>k</mi></msub><mo stretchy="false">)</mo></mrow></mrow></mrow><annotation encoding="application/x-tex">s=\text{MeasureSparsity}(\lambda,L_{k})</annotation></semantics></math>
+</div>
+<div class="ltx_listingline" id="alg2.l9">
+<span class="ltx_tag ltx_tag_listingline">9:</span>   <math alttext="\text{gap}=|s-S|" class="ltx_Math" display="inline" id="alg2.l9.m1" intent=":literal"><semantics><mrow><mtext>gap</mtext><mo>=</mo><mrow><mo stretchy="false">|</mo><mrow><mi>s</mi><mo>−</mo><mi>S</mi></mrow><mo stretchy="false">|</mo></mrow></mrow><annotation encoding="application/x-tex">\text{gap}=|s-S|</annotation></semantics></math>
+</div>
+<div class="ltx_listingline" id="alg2.l10">
+<span class="ltx_tag ltx_tag_listingline">10:</span>   <span class="ltx_text ltx_font_bold" id="alg2.l10.1">если</span> <math alttext="\text{gap}&lt;\text{min\_gap}" class="ltx_Math" display="inline" id="alg2.l10.m1" intent=":literal"><semantics><mrow><mtext>gap</mtext><mo>&lt;</mo><mtext>min_gap</mtext></mrow><annotation encoding="application/x-tex">\text{gap}&lt;\text{min\_gap}</annotation></semantics></math> <span class="ltx_text ltx_font_bold" id="alg2.l10.2">затем</span>
+</div>
+<div class="ltx_listingline" id="alg2.l11">
+<span class="ltx_tag ltx_tag_listingline">11:</span>     <math alttext="\lambda_{\text{best}}=\lambda" class="ltx_Math" display="inline" id="alg2.l11.m1" intent=":literal"><semantics><mrow><msub><mi>λ</mi><mtext>best</mtext></msub><mo>=</mo><mi>λ</mi></mrow><annotation encoding="application/x-tex">\lambda_{\text{best}}=\lambda</annotation></semantics></math>
+</div>
+<div class="ltx_listingline" id="alg2.l12">
+<span class="ltx_tag ltx_tag_listingline">12:</span>     <math alttext="\text{min\_gap}=\text{gap}" class="ltx_Math" display="inline" id="alg2.l12.m1" intent=":literal"><semantics><mrow><mtext>min_gap</mtext><mo>=</mo><mtext>gap</mtext></mrow><annotation encoding="application/x-tex">\text{min\_gap}=\text{gap}</annotation></semantics></math>
+</div>
+<div class="ltx_listingline" id="alg2.l13">
+<span class="ltx_tag ltx_tag_listingline">13:</span>   <span class="ltx_text ltx_font_bold" id="alg2.l13.1">end</span> <span class="ltx_text ltx_font_bold" id="alg2.l13.2">если</span>
+</div>
+<div class="ltx_listingline" id="alg2.l14">
+<span class="ltx_tag ltx_tag_listingline">14:</span>  <span class="ltx_text ltx_font_bold" id="alg2.l14.1">end</span> <span class="ltx_text ltx_font_bold" id="alg2.l14.2">для</span>
+</div>
+<div class="ltx_listingline" id="alg2.l15">
+<span class="ltx_tag ltx_tag_listingline">15:</span>  <span class="ltx_text ltx_font_bold" id="alg2.l15.2">если</span> <math alttext="\text{min\_gap}&lt;\delta" class="ltx_Math" display="inline" id="alg2.l15.m1" intent=":literal"><semantics><mrow><mtext>min_gap</mtext><mo>&lt;</mo><mi>δ</mi></mrow><annotation encoding="application/x-tex">\text{min\_gap}&lt;\delta</annotation></semantics></math> <span class="ltx_text ltx_font_bold" id="alg2.l15.3">тогда</span> <span class="ltx_text" id="alg2.l15.1" style="float:right;"><math alttext="\triangleright" class="ltx_Math" display="inline" id="alg2.l15.1.m1" intent=":literal"><semantics><mo>⊳</mo><annotation encoding="application/x-tex">\triangleright</annotation></semantics></math> Сохраняйте только если разреженность достаточно близка
+</span>
+</div>
+<div class="ltx_listingline" id="alg2.l16">
+<span class="ltx_tag ltx_tag_listingline">16:</span>   Добавить <math alttext="(1/L_{k},\lambda_{\text{best}})" class="ltx_Math" display="inline" id="alg2.l16.m1" intent=":literal"><semantics><mrow><mo stretchy="false">(</mo><mrow><mn>1</mn><mo>/</mo><msub><mi>L</mi><mi>k</mi></msub></mrow><mo>,</mo><msub><mi>λ</mi><mtext>best</mtext></msub><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(1/L_{k},\lambda_{\text{best}})</annotation></semantics></math> к <math alttext="\mathcal{P}" class="ltx_Math" display="inline" id="alg2.l16.m2" intent=":literal"><semantics><mi class="ltx_font_mathcaligraphic">𝒫</mi><annotation encoding="application/x-tex">\mathcal{P}</annotation></semantics></math>
+</div>
+<div class="ltx_listingline" id="alg2.l17">
+<span class="ltx_tag ltx_tag_listingline">17:</span>  <span class="ltx_text ltx_font_bold" id="alg2.l17.1">end</span> <span class="ltx_text ltx_font_bold" id="alg2.l17.2">если</span>
+</div>
+<div class="ltx_listingline" id="alg2.l18">
+<span class="ltx_tag ltx_tag_listingline">18:</span><span class="ltx_text ltx_font_bold" id="alg2.l18.1">конец</span> <span class="ltx_text ltx_font_bold" id="alg2.l18.2">для</span>
+</div>
+<div class="ltx_listingline" id="alg2.l19">
+<span class="ltx_tag ltx_tag_listingline">19:</span>Подбор линейной регрессии: <math alttext="\lambda=a\cdot(1/L)" class="ltx_Math" display="inline" id="alg2.l19.m1" intent=":literal"><semantics><mrow><mi>λ</mi><mo>=</mo><mrow><mi>a</mi><mo lspace="0.222em" rspace="0.222em">⋅</mo><mrow><mo stretchy="false">(</mo><mrow><mn>1</mn><mo>/</mo><mi>L</mi></mrow><mo stretchy="false">)</mo></mrow></mrow></mrow><annotation encoding="application/x-tex">\lambda=a\cdot(1/L)</annotation></semantics></math> используя <math alttext="\mathcal{P}" class="ltx_Math" display="inline" id="alg2.l19.m2" intent=":literal"><semantics><mi class="ltx_font_mathcaligraphic">𝒫</mi><annotation encoding="application/x-tex">\mathcal{P}</annotation></semantics></math>
+</div>
+<div class="ltx_listingline" id="alg2.l20">
+<span class="ltx_tag ltx_tag_listingline">20:</span><span class="ltx_text ltx_font_bold" id="alg2.l20.1">return</span> Коэффициент регрессии <math alttext="a" class="ltx_Math" display="inline" id="alg2.l20.m1" intent=":literal"><semantics><mi>a</mi><annotation encoding="application/x-tex">a</annotation></semantics></math>
+</div>
+</div>
+</figure>
+<figure class="ltx_figure" id="S3.F3">
+<div class="ltx_flex_figure">
+<div class="ltx_flex_cell ltx_flex_size_1">
+<figure class="ltx_figure ltx_figure_panel ltx_align_center" id="S3.F3.sf1">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure">(a) </span>Нормальный график предзаполнения канала prefill для FlashAttention.</figcaption><img alt="Refer to caption" class="ltx_graphics ltx_centering ltx_img_landscape" height="131" id="S3.F3.sf1.g1" src="./[2512.12087] 1 Introduction_files/x4.png" width="830"/>
+</figure>
+</div>
+<div class="ltx_flex_break"></div>
+<div class="ltx_flex_cell ltx_flex_size_1">
+<figure class="ltx_figure ltx_figure_panel ltx_align_center" id="S3.F3.sf2">
+<figcaption class="ltx_caption ltx_centering">⟦<span class="ltx_tag ltx_tag_figure">(b) </span>Планирование конвейера предварительного заполнения BLASST с T0 и T1, оба пропускают циклы 1 и 3.</figcaption><img alt="Refer to caption" class="ltx_graphics ltx_centering ltx_img_landscape" height="131" id="S3.F3.sf2.g1" src="./[2512.12087] 1 Introduction_files/x5.png" width="830"/>
+</figure>
+</div>
+</div>
+<figcaption class="ltx_caption ltx_centering">⟦<span class="ltx_tag ltx_tag_figure">Figure 3: </span>Планирование этапа предварительного заполнения (prefill) для FlashAttention и BLASST при разреженности 50% на протяжении 4 итераций цикла (L0-L3). Строки разделены в зависимости от специализаций warp/warpgroup. Более тёмные и более светлые оттенки соответствуют операциям для различных рядов тайлов (T0/T1). Операции BMM1 и BMM2 для warp уровня MMA обозначены как B1 и B2. Группы softmax в первую очередь ограничены возведением в степень (EX2), но также выполняют проверку пропуска, вычисление суммы по строкам и масштабирование softmax (не показано). Основные итерации цикла заключены сплошными линиями.</figcaption>
+</figure>
+<div class="ltx_para ltx_noindent" id="S3.SS2.p5">
+<p class="ltx_p" id="S3.SS2.p5.9">Чтобы найти оптимальное значение <math alttext="a" class="ltx_Math" display="inline" id="S3.SS2.p5.1.m1" intent=":literal"><semantics><mi>a</mi><annotation encoding="application/x-tex">a</annotation></semantics></math> для заданной целевой разреженности <math alttext="S" class="ltx_Math" display="inline" id="S3.SS2.p5.2.m2" intent=":literal"><semantics><mi>S</mi><annotation encoding="application/x-tex">S</annotation></semantics></math>, мы предлагаем процедуру калибровки, подробно описанную в алгоритме <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2512.12087v3#alg2" title="Algorithm 2 ‣ 3.2 Calibration for Optimal Sparsity ‣ 3 Methodology"><span class="ltx_text ltx_ref_tag">2</span></a>. Процесс включает эмпирический поиск наилучшего порога <math alttext="\lambda_{\text{best}}" class="ltx_Math" display="inline" id="S3.SS2.p5.3.m3" intent=":literal"><semantics><msub><mi>λ</mi><mtext>best</mtext></msub><annotation encoding="application/x-tex">\lambda_{\text{best}}</annotation></semantics></math> для нескольких длин контекста <math alttext="\{L_{k}\}" class="ltx_Math" display="inline" id="S3.SS2.p5.4.m4" intent=":literal"><semantics><mrow><mo stretchy="false">{</mo><msub><mi>L</mi><mi>k</mi></msub><mo stretchy="false">}</mo></mrow><annotation encoding="application/x-tex">\{L_{k}\}</annotation></semantics></math>, который обеспечивает заданную целевую разреженность <math alttext="S" class="ltx_Math" display="inline" id="S3.SS2.p5.5.m5" intent=":literal"><semantics><mi>S</mi><annotation encoding="application/x-tex">S</annotation></semantics></math> (в пределах допуска <math alttext="\delta" class="ltx_Math" display="inline" id="S3.SS2.p5.6.m6" intent=":literal"><semantics><mi>δ</mi><annotation encoding="application/x-tex">\delta</annotation></semantics></math>). Затем мы выполняем линейную регрессию по преобразованным точкам данных <math alttext="(1/L_{k},\lambda_{\text{best}})" class="ltx_Math" display="inline" id="S3.SS2.p5.7.m7" intent=":literal"><semantics><mrow><mo stretchy="false">(</mo><mrow><mn>1</mn><mo>/</mo><msub><mi>L</mi><mi>k</mi></msub></mrow><mo>,</mo><msub><mi>λ</mi><mtext>best</mtext></msub><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(1/L_{k},\lambda_{\text{best}})</annotation></semantics></math>, чтобы найти наклон <math alttext="a" class="ltx_Math" display="inline" id="S3.SS2.p5.8.m8" intent=":literal"><semantics><mi>a</mi><annotation encoding="application/x-tex">a</annotation></semantics></math>, который задает нашу функцию калибровки <math alttext="\lambda(L)=a/L" class="ltx_Math" display="inline" id="S3.SS2.p5.9.m9" intent=":literal"><semantics><mrow><mrow><mi>λ</mi><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><mi>L</mi><mo stretchy="false">)</mo></mrow></mrow><mo>=</mo><mrow><mi>a</mi><mo>/</mo><mi>L</mi></mrow></mrow><annotation encoding="application/x-tex">\lambda(L)=a/L</annotation></semantics></math>.</p>
+</div>
+<div class="ltx_para ltx_noindent" id="S3.SS2.p6">
+<p class="ltx_p" id="S3.SS2.p6.1">Более того, нацеливаясь на фиксированные уровни разреженности, наша калибровка обеспечивает предсказуемое ускорение вычислений на различных длинах контекста. Это важное свойство для производственного развертывания, где требуется стабильная производительность.</p>
+</div>
+</section>
+<section class="ltx_subsection" id="S3.SS3">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">3.3 </span>Обучение с учетом разреженности</h3>
+<div class="ltx_para ltx_noindent" id="S3.SS3.p1">
+<p class="ltx_p" id="S3.SS3.p1.1">Хотя BLASST в первую очередь предназначен для оптимизации инференса после обучения, мы рассматриваем обучение с учетом разреженности как простое расширение, позволяющее далее улучшить компромисс между точностью и разреженностью. Мотивация понятна: если модели в процессе обучения учатся концентрировать важную информацию в блоках внимания с высокими оценками, то они должны сохранять более высокую точность, когда эти блоки будут обрезаны во время инференса.</p>
+</div>
+<div class="ltx_para ltx_noindent" id="S3.SS3.p2">
+<p class="ltx_p" id="S3.SS3.p2.1">Наш метод прост: при дообучении мы применяем BLASST в прямом проходе, чтобы пропускать незначимые блоки внимания на основе порогового критерия. В обратном проходе пропущенные блоки естественным образом не получают градиентов, поскольку они не вычислялись в прямом проходе. Это побуждает модель адаптировать свои шаблоны внимания к большей совместимости с разреженностью, концентрируя важную информацию в блоках, которые проходят пороговый тест. Этот подход не требует изменений архитектуры или дополнительных потерь — это просто обучение с той же разреженной схемой внимания, которая будет использоваться во время вывода.</p>
+</div>
+</section>
+</section>
+<section class="ltx_section" id="S4">
+<h2 class="ltx_title ltx_title_section">
+<span class="ltx_tag ltx_tag_section">4 </span>Дизайн ядра</h2>
+<div class="ltx_para ltx_noindent" id="S4.p1">
+<p class="ltx_p" id="S4.p1.1">Ядра BLASST были разработаны с двумя основными целями: (1) минимальные изменения существующих интерфейсов ядра FlashAttention и структуры реализации и (2) минимальные накладные расходы для логики принятия решений о пропуске блоков. Наш ключевой вывод заключается в повторном использовании статистик, уже вычисляемых в стандартном алгоритме FlashAttention — в частности, локального максимума и текущих значений максимума, которые существуют в каждом потоке при выполнении онлайн softmax.</p>
+</div>
+<div class="ltx_para ltx_noindent" id="S4.p2">
+<p class="ltx_p" id="S4.p2.1">Пропуск реализации решения. Процесс принятия решения (строка 7 в алгоритме <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2512.12087v3#alg1" title="Algorithm 1 ‣ 3.1.2 Algorithm Design ‣ 3.1 Pruning Attention with Running Maximums ‣ 3 Methodology"><span class="ltx_text ltx_ref_tag">1</span></a>) требует лишь нескольких дополнительных инструкций на блок: (1) установка предиката для каждого потока на основе сравнения с порогом, (2) выдача инструкции VOTE для определения, согласны ли все потоки внутри warp на пропуск, и (3) одна инструкция ATOMIC в общую память, выдаваемая одним потоком на warp, чтобы координировать решение уровня блока между softmax warpgroup. Мы тщательно проектируем ядро так, чтобы инструкции принятия решений были скрыты за существующими операциями, добавляя пренебрежимо малое увеличение задержки.</p>
+</div>
+<div class="ltx_para ltx_noindent" id="S4.p3">
+<p class="ltx_p" id="S4.p3.1">Поскольку фаза предзаполнения и фаза декодирования имеют принципиально разные характеристики производительности, мы реализуем специализированные оптимизации для каждой.</p>
+</div>
+<figure class="ltx_figure" id="S4.F4">
+<div class="ltx_flex_figure">
+<div class="ltx_flex_cell ltx_flex_size_1">
+<figure class="ltx_figure ltx_figure_panel ltx_align_center" id="S4.F4.sf1">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure">(a) </span>Нормальный планировщик декодирования для FlashAttention.</figcaption><img alt="Refer to caption" class="ltx_graphics ltx_centering ltx_img_landscape" height="79" id="S4.F4.sf1.g1" src="./[2512.12087] 1 Introduction_files/x6.png" width="830"/>
+</figure>
+</div>
+<div class="ltx_flex_break"></div>
+<div class="ltx_flex_cell ltx_flex_size_1">
+<figure class="ltx_figure ltx_figure_panel ltx_align_center" id="S4.F4.sf2">
+<figcaption class="ltx_caption ltx_centering">⟦<span class="ltx_tag ltx_tag_figure">(b) </span>BLASST decode pipeline schedule при пропуске циклов 1, 2 и 4.</figcaption><img alt="Refer to caption" class="ltx_graphics ltx_centering ltx_img_landscape" height="79" id="S4.F4.sf2.g1" src="./[2512.12087] 1 Introduction_files/x7.png" width="830"/>
+</figure>
+</div>
+</div>
+<figcaption class="ltx_caption ltx_centering">⟦<span class="ltx_tag ltx_tag_figure">Figure 4: </span>Декодирование конвейерных расписаний для FlashAttention и BLASST с пропуском циклов 1, 2 и 4. Пролог не показан, и мы сосредоточены на установившемся режиме первых 6 итераций цикла (L0-L5). Мы выделяем стадии конвейера TMA warps, чтобы показать, как одновременно выдаются несколько загрузок TMA. Загрузки на рисунке <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2512.12087v3#S4.F4.sf2" title="In Figure 4 ‣ 4 Kernel Design"><span class="ltx_text ltx_ref_tag">4(b)</span></a> завершаются быстрее, потому что имеется меньше одновременных загрузок. Стрелки указывают зависимости по scoreboard от проверки пропуска после BMM1. Обратите внимание, что операции MMA warp BMM1 и BMM2 обозначены как B1 и B2.</figcaption>
+</figure>
+<section class="ltx_subsection" id="S4.SS1">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">4.1 </span>Префилл ядро: оптимизация, ограниченная вычислениями</h3>
+<div class="ltx_para ltx_noindent" id="S4.SS1.p1">
+<p class="ltx_p" id="S4.SS1.p1.1">Предзаполнение ядер обычно является вычислительно ограниченным, упирающимся в пропускную способность вычислительных блоков CUDA core (softmax) и tensor core (умножение матриц), а не в пропускную способность памяти. Поэтому наше предзаполнение ядра предназначено для пропуска как вычисления softmax, так и операций MMA (умножение внимание-значение) для обрезанных блоков.</p>
+</div>
+<div class="ltx_para ltx_noindent" id="S4.SS1.p2">
+<p class="ltx_p" id="S4.SS1.p2.1">Рисунок <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2512.12087v3#S3.F3" title="Figure 3 ‣ 3.2 Calibration for Optimal Sparsity ‣ 3 Methodology"><span class="ltx_text ltx_ref_tag">3</span></a> иллюстрирует наши изменения в расписании конвейера для префилл-ядра BLASST, оптимизированного для сценариев с вычислительной насыщенностью за счет перекрытия различных вычислительных задач. Конвейерные расписания распределяют операции между Tensor Cores (математический warp/умножение матриц) и CUDA cores (логика softmax и коррекции). Рисунок <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2512.12087v3#S3.F3.sf2" title="In Figure 3 ‣ 3.2 Calibration for Optimal Sparsity ‣ 3 Methodology"><span class="ltx_text ltx_ref_tag">3(b)</span></a> показывает, что даже когда выполняются все <math alttext="QK^{\top}" class="ltx_Math" display="inline" id="S4.SS1.p2.1.m1" intent=":literal"><semantics><mrow><mi>Q</mi><mo lspace="0em" rspace="0em">​</mo><msup><mi>K</mi><mo>⊤</mo></msup></mrow><annotation encoding="application/x-tex">QK^{\top}</annotation></semantics></math> (BMM1) операции, ядро динамически пропускает вычислительно затратные операции softmax и умножение attention-value (BMM2) для блоков, определенных как незначимые (например, loop 1 и loop 3 на рисунке <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2512.12087v3#S3.F3.sf2" title="In Figure 3 ‣ 3.2 Calibration for Optimal Sparsity ‣ 3 Methodology"><span class="ltx_text ltx_ref_tag">3(b)</span></a>). Пропуская эти вычислительные операции, ядро освобождает вычислительные модули, что позволяет последующим операциям планироваться раньше. Это сжимает общее расписание, уменьшая общее время выполнения с 18 временных единиц на рисунке <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2512.12087v3#S3.F3.sf1" title="In Figure 3 ‣ 3.2 Calibration for Optimal Sparsity ‣ 3 Methodology"><span class="ltx_text ltx_ref_tag">3(a)</span></a> до 14 единиц на рисунке <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2512.12087v3#S3.F3.sf2" title="In Figure 3 ‣ 3.2 Calibration for Optimal Sparsity ‣ 3 Methodology"><span class="ltx_text ltx_ref_tag">3(b)</span></a>.</p>
+</div>
+<div class="ltx_para ltx_noindent" id="S4.SS1.p3">
+<p class="ltx_p" id="S4.SS1.p3.1">Блоки Value остаются загруженными из HBM в ядре prefill потому что: (1) пропускная способность памяти не является узким местом, (2) конвейер предварительной выборки выигрывает от предсказуемых шаблонов доступа к памяти, и (3) задержка условной загрузки Value превысит получаемую экономию. Сосредоточившись на устранении вычислительных операций, мы добиваемся ускорений, которые масштабируются почти линейно с разреженностью в вычислительно-ограниченном режиме. Наша текущая конструкция отдает приоритет типичному случаю, когда prefill на современных GPU является вычислительно-ограниченным; однако загрузку Value можно пропустить в prefill, если будущие рабочие нагрузки или архитектуры оборудования сместят узкое место в область ограничений пропускной способности памяти.</p>
+</div>
+<figure class="ltx_table" id="S4.T1">
+<figcaption class="ltx_caption ltx_centering">⟦<span class="ltx_tag ltx_tag_table">Table 1: </span>Производительность BLASST на разных уровнях разреженности во всех моделях и тестовых наборах. Мы оцениваем на Llama-3.1-8B и Qwen3-8B в трех сценариях развертывания: оптимизация только prefill (задачи с длинным контекстом: RULER, LongBench), оптимизация только decode (задачи на рассуждение: MATH500, AIME 2024, GPQA) и комбинированная оптимизация prefill+decode. Результаты показывают минимальную деградацию точности даже при <math alttext="\sim" class="ltx_Math" display="inline" id="S4.T1.2.m1" intent=":literal"><semantics><mo>∼</mo><annotation encoding="application/x-tex">\sim</annotation></semantics></math>75% разреженности, с периодическими улучшениями по сравнению с плотным базовым уровнем.</figcaption>
+<div class="ltx_inline-block ltx_align_center ltx_transformed_outer" id="S4.T1.6" style="width:433.6pt;height:72.3pt;vertical-align:-34.3pt;"><span class="ltx_transformed_inner" style="transform:translate(-78.4pt,13.1pt) scale(0.734379626581672,0.734379626581672) ;">
+<table class="ltx_tabular ltx_guessed_headers ltx_align_middle" id="S4.T1.6.4">
+<thead class="ltx_thead">
+<tr class="ltx_tr" id="S4.T1.6.4.5.1">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_column ltx_th_row ltx_border_tt" id="S4.T1.6.4.5.1.1" rowspan="2"><span class="ltx_text ltx_font_bold" id="S4.T1.6.4.5.1.1.1">Model</span></th>
+<th class="ltx_td ltx_align_left ltx_th ltx_th_column ltx_th_row ltx_border_tt" id="S4.T1.6.4.5.1.2" rowspan="2"><span class="ltx_text ltx_font_bold" id="S4.T1.6.4.5.1.2.1">Sparsity</span></th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt" colspan="2" id="S4.T1.6.4.5.1.3"><span class="ltx_text ltx_font_bold" id="S4.T1.6.4.5.1.3.1">Prefill Phase</span></th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt" colspan="3" id="S4.T1.6.4.5.1.4"><span class="ltx_text ltx_font_bold" id="S4.T1.6.4.5.1.4.1">Decode Phase</span></th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt" colspan="2" id="S4.T1.6.4.5.1.5"><span class="ltx_text ltx_font_bold" id="S4.T1.6.4.5.1.5.1">Prefill + Decode Phase</span></th>
+</tr>
+<tr class="ltx_tr" id="S4.T1.6.4.6.2">
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_t" id="S4.T1.6.4.6.2.1"><span class="ltx_text ltx_font_bold" id="S4.T1.6.4.6.2.1.1">RULER-32K</span></th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_t" id="S4.T1.6.4.6.2.2"><span class="ltx_text ltx_font_bold" id="S4.T1.6.4.6.2.2.1">LongBench</span></th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_t" id="S4.T1.6.4.6.2.3"><span class="ltx_text ltx_font_bold" id="S4.T1.6.4.6.2.3.1">MATH500</span></th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_t" id="S4.T1.6.4.6.2.4"><span class="ltx_text ltx_font_bold" id="S4.T1.6.4.6.2.4.1">AIME2024</span></th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_t" id="S4.T1.6.4.6.2.5"><span class="ltx_text ltx_font_bold" id="S4.T1.6.4.6.2.5.1">GPQA</span></th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_t" id="S4.T1.6.4.6.2.6"><span class="ltx_text ltx_font_bold" id="S4.T1.6.4.6.2.6.1">RULER-32K</span></th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_t" id="S4.T1.6.4.6.2.7"><span class="ltx_text ltx_font_bold" id="S4.T1.6.4.6.2.7.1">LongBench</span></th>
+</tr>
+</thead>
+<tbody class="ltx_tbody">
+<tr class="ltx_tr" id="S4.T1.6.4.7.1">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_t" id="S4.T1.6.4.7.1.1" rowspan="3"><span class="ltx_text" id="S4.T1.6.4.7.1.1.1">Llama-3.1-8B</span></th>
+<th class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_t" id="S4.T1.6.4.7.1.2">Dense</th>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S4.T1.6.4.7.1.3">92.33</td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S4.T1.6.4.7.1.4">31.40</td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S4.T1.6.4.7.1.5">73.40</td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S4.T1.6.4.7.1.6">46.66</td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S4.T1.6.4.7.1.7">46.71</td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S4.T1.6.4.7.1.8">92.33</td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S4.T1.6.4.7.1.9">31.40</td>
+</tr>
+<tr class="ltx_tr" id="S4.T1.3.1.1">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_row" id="S4.T1.3.1.1.1">
+<math alttext="\sim" class="ltx_Math" display="inline" id="S4.T1.3.1.1.1.m1" intent=":literal"><semantics><mo>∼</mo><annotation encoding="application/x-tex">\sim</annotation></semantics></math>50%</th>
+<td class="ltx_td ltx_align_center" id="S4.T1.3.1.1.2">91.81</td>
+<td class="ltx_td ltx_align_center" id="S4.T1.3.1.1.3">31.80</td>
+<td class="ltx_td ltx_align_center" id="S4.T1.3.1.1.4">73.71</td>
+<td class="ltx_td ltx_align_center" id="S4.T1.3.1.1.5">46.15</td>
+<td class="ltx_td ltx_align_center" id="S4.T1.3.1.1.6">46.31</td>
+<td class="ltx_td ltx_align_center" id="S4.T1.3.1.1.7">91.79</td>
+<td class="ltx_td ltx_align_center" id="S4.T1.3.1.1.8">32.40</td>
+</tr>
+<tr class="ltx_tr" id="S4.T1.4.2.2">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_row" id="S4.T1.4.2.2.1">
+<math alttext="\sim" class="ltx_Math" display="inline" id="S4.T1.4.2.2.1.m1" intent=":literal"><semantics><mo>∼</mo><annotation encoding="application/x-tex">\sim</annotation></semantics></math>75%</th>
+<td class="ltx_td ltx_align_center" id="S4.T1.4.2.2.2">91.67</td>
+<td class="ltx_td ltx_align_center" id="S4.T1.4.2.2.3">31.80</td>
+<td class="ltx_td ltx_align_center" id="S4.T1.4.2.2.4">73.89</td>
+<td class="ltx_td ltx_align_center" id="S4.T1.4.2.2.5">46.01</td>
+<td class="ltx_td ltx_align_center" id="S4.T1.4.2.2.6">45.95</td>
+<td class="ltx_td ltx_align_center" id="S4.T1.4.2.2.7">91.67</td>
+<td class="ltx_td ltx_align_center" id="S4.T1.4.2.2.8">31.80</td>
+</tr>
+<tr class="ltx_tr" id="S4.T1.6.4.8.2">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_bb ltx_border_t" id="S4.T1.6.4.8.2.1" rowspan="3"><span class="ltx_text" id="S4.T1.6.4.8.2.1.1">Qwen3-8B</span></th>
+<th class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_t" id="S4.T1.6.4.8.2.2">Dense</th>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S4.T1.6.4.8.2.3">91.90</td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S4.T1.6.4.8.2.4">33.60</td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S4.T1.6.4.8.2.5">95.87</td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S4.T1.6.4.8.2.6">75.00</td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S4.T1.6.4.8.2.7">61.21</td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S4.T1.6.4.8.2.8">91.90</td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S4.T1.6.4.8.2.9">33.60</td>
+</tr>
+<tr class="ltx_tr" id="S4.T1.5.3.3">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_row" id="S4.T1.5.3.3.1">
+<math alttext="\sim" class="ltx_Math" display="inline" id="S4.T1.5.3.3.1.m1" intent=":literal"><semantics><mo>∼</mo><annotation encoding="application/x-tex">\sim</annotation></semantics></math>50%</th>
+<td class="ltx_td ltx_align_center" id="S4.T1.5.3.3.2">92.08</td>
+<td class="ltx_td ltx_align_center" id="S4.T1.5.3.3.3">35.10</td>
+<td class="ltx_td ltx_align_center" id="S4.T1.5.3.3.4">96.23</td>
+<td class="ltx_td ltx_align_center" id="S4.T1.5.3.3.5">76.50</td>
+<td class="ltx_td ltx_align_center" id="S4.T1.5.3.3.6">61.56</td>
+<td class="ltx_td ltx_align_center" id="S4.T1.5.3.3.7">92.07</td>
+<td class="ltx_td ltx_align_center" id="S4.T1.5.3.3.8">33.30</td>
+</tr>
+<tr class="ltx_tr" id="S4.T1.6.4.4">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_bb" id="S4.T1.6.4.4.1">
+<math alttext="\sim" class="ltx_Math" display="inline" id="S4.T1.6.4.4.1.m1" intent=":literal"><semantics><mo>∼</mo><annotation encoding="application/x-tex">\sim</annotation></semantics></math>75%</th>
+<td class="ltx_td ltx_align_center ltx_border_bb" id="S4.T1.6.4.4.2">92.11</td>
+<td class="ltx_td ltx_align_center ltx_border_bb" id="S4.T1.6.4.4.3">34.40</td>
+<td class="ltx_td ltx_align_center ltx_border_bb" id="S4.T1.6.4.4.4">96.07</td>
+<td class="ltx_td ltx_align_center ltx_border_bb" id="S4.T1.6.4.4.5">75.33</td>
+<td class="ltx_td ltx_align_center ltx_border_bb" id="S4.T1.6.4.4.6">61.51</td>
+<td class="ltx_td ltx_align_center ltx_border_bb" id="S4.T1.6.4.4.7">91.74</td>
+<td class="ltx_td ltx_align_center ltx_border_bb" id="S4.T1.6.4.4.8">33.10</td>
+</tr>
+</tbody>
+</table>
+</span></div>
+</figure>
+</section>
+<section class="ltx_subsection" id="S4.SS2">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">4.2 </span>Декодирование ядра: оптимизация, ограниченная памятью</h3>
+<div class="ltx_para ltx_noindent" id="S4.SS2.p1">
+<p class="ltx_p" id="S4.SS2.p1.1">Декодирующие ядра обычно являются ограниченными по памяти, упираясь в узкое место пропускной способности HBM, необходимой для выборки KV-кэша, а не в вычисления, поскольку внимание предполагает только один запрос Query ко всем ключам Keys. Поэтому наше ядро сосредоточено на пропуске ресурсоемкой загрузки матрицы значений Value <math alttext="V_{j}" class="ltx_Math" display="inline" id="S4.SS2.p1.1.m1" intent=":literal"><semantics><msub><mi>V</mi><mi>j</mi></msub><annotation encoding="application/x-tex">V_{j}</annotation></semantics></math> для обрезанных блоков, напрямую устраняя это узкое место по HBM. Эта оптимизация уменьшает объем трафика памяти пропорционально уровню разреженности, при этом накладывая пороговые и операции с Key на оставшиеся загрузки Value, чтобы обеспечить существенное ускорение, отражающее различающиеся характеристики производительности при декодировании по сравнению с prefill.</p>
+</div>
+<div class="ltx_para ltx_noindent" id="S4.SS2.p2">
+<p class="ltx_p" id="S4.SS2.p2.3">Рисунок <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2512.12087v3#S4.F4" title="Figure 4 ‣ 4 Kernel Design"><span class="ltx_text ltx_ref_tag">4</span></a> иллюстрирует наши изменения в расписании конвейера для декодирующего ядра BLASST. Длительные времена загрузки плиток <math alttext="K" class="ltx_Math" display="inline" id="S4.SS2.p2.1.m1" intent=":literal"><semantics><mi>K</mi><annotation encoding="application/x-tex">K</annotation></semantics></math> и <math alttext="V" class="ltx_Math" display="inline" id="S4.SS2.p2.2.m2" intent=":literal"><semantics><mi>V</mi><annotation encoding="application/x-tex">V</annotation></semantics></math> показывают, как ведет себя ядро в этой памяти-ограниченной ситуации. Пропуская загрузку плитки <math alttext="V" class="ltx_Math" display="inline" id="S4.SS2.p2.3.m3" intent=":literal"><semantics><mi>V</mi><annotation encoding="application/x-tex">V</annotation></semantics></math> и BMM2 для циклов 1, 2 и 4, графический процессор может завершить ожидающие загрузки из других стадий конвейера TMA быстрее. В результате Рисунок <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2512.12087v3#S4.F4.sf1" title="In Figure 4 ‣ 4 Kernel Design"><span class="ltx_text ltx_ref_tag">4(a)</span></a> занимает 30 единиц времени, чтобы завершить все V-загрузки, тогда как Рисунок <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2512.12087v3#S4.F4.sf2" title="In Figure 4 ‣ 4 Kernel Design"><span class="ltx_text ltx_ref_tag">4(b)</span></a> занимает 23 единицы.</p>
+</div>
+<div class="ltx_para ltx_noindent" id="S4.SS2.p3">
+<p class="ltx_p" id="S4.SS2.p3.1">Для механизмов внимания вроде Multi-head Latent Attention (MLA) <cite class="ltx_cite ltx_citemacro_cite"><span class="ltx_ref ltx_missing_citation ltx_ref_self">liu2024deepseek</span></cite>, которые даже при декодировании являются более вычислительно ограниченными, мы дополнительно пропускаем операции softmax для вырезанных блоков, обеспечивая дополнительное ускорение помимо одних только сбережений памяти.</p>
+</div>
+</section>
+</section>
+<section class="ltx_section" id="S5">
+<h2 class="ltx_title ltx_title_section">
+<span class="ltx_tag ltx_tag_section">5 </span>Эксперименты</h2>
+<section class="ltx_subsection" id="S5.SS1">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">5.1 </span>Экспериментальная установка</h3>
+<div class="ltx_para ltx_noindent" id="S5.SS1.p1">
+<p class="ltx_p" id="S5.SS1.p1.1">Модели. Мы оцениваем BLASST на современнейших языковых моделях, чтобы продемонстрировать его эффективность на различных архитектурах. Наша оценка сосредоточена на двух моделях с 8B параметров: Llama-3.1-8B-Instruct и Qwen3-8B-Instruct, обе поддерживают контекстные длины до 128K токенов. Для задач длительного генеративного рассуждения мы используем Llama-3.1-8B-Instruct, дистиллированную из DeepSeek-R1 <cite class="ltx_cite ltx_citemacro_cite"><span class="ltx_ref ltx_missing_citation ltx_ref_self">guo2025deepseek</span></cite>, которая обеспечивает улучшенные способности к рассуждению при сохранении совместимости с нашим подходом к разреженному вниманию.</p>
+</div>
+<div class="ltx_para ltx_noindent" id="S5.SS1.p2">
+<p class="ltx_p" id="S5.SS1.p2.1">Базовые методы. Мы сравниваем BLASST с плотным вниманием и современными методами разреженного внимания. Для оптимизации префилла мы сравниваем с MInference <cite class="ltx_cite ltx_citemacro_cite"><span class="ltx_ref ltx_missing_citation ltx_ref_self">jiang2024minference</span></cite>, FlexPrefill <cite class="ltx_cite ltx_citemacro_cite"><span class="ltx_ref ltx_missing_citation ltx_ref_self">lai2025flexprefill</span></cite> и XAttention <cite class="ltx_cite ltx_citemacro_cite"><span class="ltx_ref ltx_missing_citation ltx_ref_self">xu2025xattention</span></cite>. Для оптимизации декодирования мы оцениваем в сравнении с Quest <cite class="ltx_cite ltx_citemacro_cite"><span class="ltx_ref ltx_missing_citation ltx_ref_self">tang2024quest</span></cite> и RocketKV <cite class="ltx_cite ltx_citemacro_cite"><span class="ltx_ref ltx_missing_citation ltx_ref_self">behnam2025rocketkv</span></cite>. Для каждого базового метода мы используем его наилучшую по результатам конфигурацию, указанную в соответствующей статье, чтобы обеспечить справедливое сравнение.</p>
+</div>
+<div class="ltx_para ltx_noindent" id="S5.SS1.p3">
+<p class="ltx_p" id="S5.SS1.p3.1">Наборы данных. Мы оцениваем на двух категориях наборов тестов: (1) Задачи с длинным контекстом: RULER <cite class="ltx_cite ltx_citemacro_cite"><span class="ltx_ref ltx_missing_citation ltx_ref_self">hsieh2024ruler</span></cite> (синтетическое извлечение и рассуждение по 4K-128K токенам) и LongBench v2 <cite class="ltx_cite ltx_citemacro_cite"><span class="ltx_ref ltx_missing_citation ltx_ref_self">bai2024longbench</span></cite> (прикладные задачи QA, суммаризация и дополнение кода). (2) Задачи на рассуждение: MATH500 (решение математических задач), AIME 2024 (продвинутая математика), GPQA (научные дисциплины на уровне аспирантуры) и LiveCodeBench (генерация кода). Эти проверочные наборы на рассуждение тестируют, сохраняет ли разреженное внимание сложные многошаговые рассуждательные способности. Мы используем фреймворк NVIDIA NeMo-Skills framework11<span class="ltx_tag ltx_tag_note">1</span>https://github.com/NVIDIA-NeMo/Skills для стандартизированной оценки задач на рассуждение.</p>
+</div>
+<div class="ltx_para ltx_noindent" id="S5.SS1.p4">
+<p class="ltx_p" id="S5.SS1.p4.1">Сведения по реализации. Мы реализуем BLASST как оптимизированные CUDA-ядра, интегрированные с фреймворком flashinfer <cite class="ltx_cite ltx_citemacro_cite"><span class="ltx_ref ltx_missing_citation ltx_ref_self">ye2025flashinfer</span></cite>. Для калибровки (Алгоритм <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2512.12087v3#alg2" title="Algorithm 2 ‣ 3.2 Calibration for Optimal Sparsity ‣ 3 Methodology"><span class="ltx_text ltx_ref_tag">2</span></a>) мы отбираем приблизительно 1000 последовательностей из набора данных RULER для разных длин контекста (4K, 8K, 16K, 32K, 64K), чтобы определить оптимальную зависимость порога <math alttext="\lambda=a/L" class="ltx_Math" display="inline" id="S5.SS1.p4.1.m1" intent=":literal"><semantics><mrow><mi>λ</mi><mo>=</mo><mrow><mi>a</mi><mo>/</mo><mi>L</mi></mrow></mrow><annotation encoding="application/x-tex">\lambda=a/L</annotation></semantics></math> для заданных уровней разреженности. Для обучения с учетом разреженности мы используем подход к обучению по учебному плану из ProLong <cite class="ltx_cite ltx_citemacro_cite"><span class="ltx_ref ltx_missing_citation ltx_ref_self">gao2024train</span></cite>, применяя BLASST на этапе дообучения с фиксированным порогом разреженности.</p>
+</div>
+<div class="ltx_para ltx_noindent" id="S5.SS1.p5">
+<p class="ltx_p" id="S5.SS1.p5.3">Для оценки мы используем различные стратегии выборки в зависимости от типа задачи. Для тестов с длинным контекстом (RULER и LongBench) мы используем жадекодирование с температурой <math alttext="=0" class="ltx_Math" display="inline" id="S5.SS1.p5.1.m1" intent=":literal"><semantics><mrow><mi></mi><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">=0</annotation></semantics></math> и выполняем один запуск на каждый пример, чтобы обеспечить детерминированные и воспроизводимые результаты. Для задач рассуждения, которым полезно разнообразие выборок, мы используем температуру <math alttext="=0.6" class="ltx_Math" display="inline" id="S5.SS1.p5.2.m2" intent=":literal"><semantics><mrow><mi></mi><mo>=</mo><mn>0.6</mn></mrow><annotation encoding="application/x-tex">=0.6</annotation></semantics></math> и top-p <math alttext="=0.95" class="ltx_Math" display="inline" id="S5.SS1.p5.3.m3" intent=":literal"><semantics><mrow><mi></mi><mo>=</mo><mn>0.95</mn></mrow><annotation encoding="application/x-tex">=0.95</annotation></semantics></math>. А именно, мы генерируем 10 образцов на задачу для MATH500, GPQA и LiveCodeBench, и 20 образцов на задачу для AIME 2024 из-за его большей сложности. Для этих задач рассуждения мы сообщаем наилучшее из N (best-of-N) по тому, как окончательный ответ выбирается с помощью мажоритарного голосования или самосогласованности.</p>
+</div>
+<figure class="ltx_table" id="S5.T2">
+<figcaption class="ltx_caption ltx_centering">⟦<span class="ltx_tag ltx_tag_table">Table 2: </span>Сравнение фазы prefill на Llama-3.1-8B-Instruct между RULER и LongBench. BLASST достигает наилучшей производительности среди всех методов разреженного внимания, вплотную приближаясь к плотному вниманию при этом не требуя предварительных вычислений или оценок-прокси.</figcaption>
+<div class="ltx_inline-block ltx_align_center ltx_transformed_outer" id="S5.T2.1" style="width:390.3pt;height:59.2pt;vertical-align:-27.9pt;"><span class="ltx_transformed_inner" style="transform:translate(-88.6pt,13.4pt) scale(0.687715807159514,0.687715807159514) ;">
+<table class="ltx_tabular ltx_guessed_headers ltx_align_middle" id="S5.T2.1.1">
+<thead class="ltx_thead">
+<tr class="ltx_tr" id="S5.T2.1.1.2.1">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_column ltx_th_row ltx_border_tt" id="S5.T2.1.1.2.1.1" rowspan="2"><span class="ltx_text ltx_font_bold" id="S5.T2.1.1.2.1.1.1">Method</span></th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt" colspan="6" id="S5.T2.1.1.2.1.2"><span class="ltx_text ltx_font_bold" id="S5.T2.1.1.2.1.2.1">RULER</span></th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt" colspan="6" id="S5.T2.1.1.2.1.3"><span class="ltx_text ltx_font_bold" id="S5.T2.1.1.2.1.3.1">LongBench</span></th>
+</tr>
+<tr class="ltx_tr" id="S5.T2.1.1.3.2">
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_t" id="S5.T2.1.1.3.2.1"><span class="ltx_text ltx_font_bold" id="S5.T2.1.1.3.2.1.1">4K</span></th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_t" id="S5.T2.1.1.3.2.2"><span class="ltx_text ltx_font_bold" id="S5.T2.1.1.3.2.2.1">8K</span></th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_t" id="S5.T2.1.1.3.2.3"><span class="ltx_text ltx_font_bold" id="S5.T2.1.1.3.2.3.1">16K</span></th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_t" id="S5.T2.1.1.3.2.4"><span class="ltx_text ltx_font_bold" id="S5.T2.1.1.3.2.4.1">32K</span></th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_t" id="S5.T2.1.1.3.2.5"><span class="ltx_text ltx_font_bold" id="S5.T2.1.1.3.2.5.1">64K</span></th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_t" id="S5.T2.1.1.3.2.6"><span class="ltx_text ltx_font_bold" id="S5.T2.1.1.3.2.6.1">Average</span></th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_t" id="S5.T2.1.1.3.2.7"><span class="ltx_text ltx_font_bold" id="S5.T2.1.1.3.2.7.1">Easy</span></th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_t" id="S5.T2.1.1.3.2.8"><span class="ltx_text ltx_font_bold" id="S5.T2.1.1.3.2.8.1">Hard</span></th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_t" id="S5.T2.1.1.3.2.9"><span class="ltx_text ltx_font_bold" id="S5.T2.1.1.3.2.9.1">Short</span></th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_t" id="S5.T2.1.1.3.2.10"><span class="ltx_text ltx_font_bold" id="S5.T2.1.1.3.2.10.1">Medium</span></th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_t" id="S5.T2.1.1.3.2.11"><span class="ltx_text ltx_font_bold" id="S5.T2.1.1.3.2.11.1">Long</span></th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_t" id="S5.T2.1.1.3.2.12"><span class="ltx_text ltx_font_bold" id="S5.T2.1.1.3.2.12.1">Overall</span></th>
+</tr>
+</thead>
+<tbody class="ltx_tbody">
+<tr class="ltx_tr" id="S5.T2.1.1.4.1">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_t" id="S5.T2.1.1.4.1.1">Dense Attention</th>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S5.T2.1.1.4.1.2">96.16</td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S5.T2.1.1.4.1.3">95.07</td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S5.T2.1.1.4.1.4">94.80</td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S5.T2.1.1.4.1.5">92.33</td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S5.T2.1.1.4.1.6">87.69</td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S5.T2.1.1.4.1.7">93.21</td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S5.T2.1.1.4.1.8">29.7</td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S5.T2.1.1.4.1.9">32.5</td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S5.T2.1.1.4.1.10">38.3</td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S5.T2.1.1.4.1.11">28.8</td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S5.T2.1.1.4.1.12">25.0</td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S5.T2.1.1.4.1.13">31.4</td>
+</tr>
+<tr class="ltx_tr" id="S5.T2.1.1.5.2">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_row" id="S5.T2.1.1.5.2.1">FlexPrefill</th>
+<td class="ltx_td ltx_align_center" id="S5.T2.1.1.5.2.2">95.99</td>
+<td class="ltx_td ltx_align_center" id="S5.T2.1.1.5.2.3">93.67</td>
+<td class="ltx_td ltx_align_center" id="S5.T2.1.1.5.2.4">92.73</td>
+<td class="ltx_td ltx_align_center" id="S5.T2.1.1.5.2.5">88.14</td>
+<td class="ltx_td ltx_align_center" id="S5.T2.1.1.5.2.6">81.14</td>
+<td class="ltx_td ltx_align_center" id="S5.T2.1.1.5.2.7">87.72</td>
+<td class="ltx_td ltx_align_center" id="S5.T2.1.1.5.2.8">28.8</td>
+<td class="ltx_td ltx_align_center" id="S5.T2.1.1.5.2.9">23.8</td>
+<td class="ltx_td ltx_align_center" id="S5.T2.1.1.5.2.10">24.4</td>
+<td class="ltx_td ltx_align_center" id="S5.T2.1.1.5.2.11">26.5</td>
+<td class="ltx_td ltx_align_center" id="S5.T2.1.1.5.2.12">26.2</td>
+<td class="ltx_td ltx_align_center" id="S5.T2.1.1.5.2.13">25.7</td>
+</tr>
+<tr class="ltx_tr" id="S5.T2.1.1.6.3">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_row" id="S5.T2.1.1.6.3.1">MInference</th>
+<td class="ltx_td ltx_align_center" id="S5.T2.1.1.6.3.2">96.54</td>
+<td class="ltx_td ltx_align_center" id="S5.T2.1.1.6.3.3">94.06</td>
+<td class="ltx_td ltx_align_center" id="S5.T2.1.1.6.3.4">91.37</td>
+<td class="ltx_td ltx_align_center" id="S5.T2.1.1.6.3.5">85.79</td>
+<td class="ltx_td ltx_align_center" id="S5.T2.1.1.6.3.6">83.03</td>
+<td class="ltx_td ltx_align_center" id="S5.T2.1.1.6.3.7">84.15</td>
+<td class="ltx_td ltx_align_center" id="S5.T2.1.1.6.3.8">28.6</td>
+<td class="ltx_td ltx_align_center" id="S5.T2.1.1.6.3.9">32.8</td>
+<td class="ltx_td ltx_align_center" id="S5.T2.1.1.6.3.10">36.7</td>
+<td class="ltx_td ltx_align_center" id="S5.T2.1.1.6.3.11">30.2</td>
+<td class="ltx_td ltx_align_center" id="S5.T2.1.1.6.3.12">24.1</td>
+<td class="ltx_td ltx_align_center" id="S5.T2.1.1.6.3.13">31.2</td>
+</tr>
+<tr class="ltx_tr" id="S5.T2.1.1.7.4">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_row" id="S5.T2.1.1.7.4.1">XAttention</th>
+<td class="ltx_td ltx_align_center" id="S5.T2.1.1.7.4.2">96.37</td>
+<td class="ltx_td ltx_align_center" id="S5.T2.1.1.7.4.3">94.47</td>
+<td class="ltx_td ltx_align_center" id="S5.T2.1.1.7.4.4">94.48</td>
+<td class="ltx_td ltx_align_center" id="S5.T2.1.1.7.4.5">91.91</td>
+<td class="ltx_td ltx_align_center" id="S5.T2.1.1.7.4.6">85.01</td>
+<td class="ltx_td ltx_align_center" id="S5.T2.1.1.7.4.7">92.44</td>
+<td class="ltx_td ltx_align_center" id="S5.T2.1.1.7.4.8">29.2</td>
+<td class="ltx_td ltx_align_center" id="S5.T2.1.1.7.4.9">31.5</td>
+<td class="ltx_td ltx_align_center" id="S5.T2.1.1.7.4.10">38.3</td>
+<td class="ltx_td ltx_align_center" id="S5.T2.1.1.7.4.11">26.0</td>
+<td class="ltx_td ltx_align_center" id="S5.T2.1.1.7.4.12">26.9</td>
+<td class="ltx_td ltx_align_center" id="S5.T2.1.1.7.4.13">30.6</td>
+</tr>
+<tr class="ltx_tr" id="S5.T2.1.1.1">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_bb ltx_border_t" id="S5.T2.1.1.1.1">BLASST (<math alttext="\sim" class="ltx_Math" display="inline" id="S5.T2.1.1.1.1.m1" intent=":literal"><semantics><mo>∼</mo><annotation encoding="application/x-tex">\sim</annotation></semantics></math>50%)</th>
+<td class="ltx_td ltx_align_center ltx_border_bb ltx_border_t" id="S5.T2.1.1.1.2">96.17</td>
+<td class="ltx_td ltx_align_center ltx_border_bb ltx_border_t" id="S5.T2.1.1.1.3">94.70</td>
+<td class="ltx_td ltx_align_center ltx_border_bb ltx_border_t" id="S5.T2.1.1.1.4">94.61</td>
+<td class="ltx_td ltx_align_center ltx_border_bb ltx_border_t" id="S5.T2.1.1.1.5">91.81</td>
+<td class="ltx_td ltx_align_center ltx_border_bb ltx_border_t" id="S5.T2.1.1.1.6">87.06</td>
+<td class="ltx_td ltx_align_center ltx_border_bb ltx_border_t" id="S5.T2.1.1.1.7">92.87</td>
+<td class="ltx_td ltx_align_center ltx_border_bb ltx_border_t" id="S5.T2.1.1.1.8">30.7</td>
+<td class="ltx_td ltx_align_center ltx_border_bb ltx_border_t" id="S5.T2.1.1.1.9">32.5</td>
+<td class="ltx_td ltx_align_center ltx_border_bb ltx_border_t" id="S5.T2.1.1.1.10">38.3</td>
+<td class="ltx_td ltx_align_center ltx_border_bb ltx_border_t" id="S5.T2.1.1.1.11">29.8</td>
+<td class="ltx_td ltx_align_center ltx_border_bb ltx_border_t" id="S5.T2.1.1.1.12">25.0</td>
+<td class="ltx_td ltx_align_center ltx_border_bb ltx_border_t" id="S5.T2.1.1.1.13">31.8</td>
+</tr>
+</tbody>
+</table>
+</span></div>
+</figure>
+<figure class="ltx_table" id="S5.T3">
+<figcaption class="ltx_caption ltx_centering">⟦<span class="ltx_tag ltx_tag_table">Table 3: </span>Сравнение фаз декодирования на Qwen3-8B в различных задачах рассуждения и генерации. BLASST соответствует или превосходит плотную базовую линию на всех наборах тестов, включая математическое рассуждение (MATH500, AIME 2024), науку уровня аспирантуры (GPQA) и генерацию кода (LiveCodeBench), при этом сохраняя производительность для длинного контекста (RULER, LongBench).</figcaption>
+<div class="ltx_inline-block ltx_align_center ltx_transformed_outer" id="S5.T3.1" style="width:346.9pt;height:38.7pt;vertical-align:-17.8pt;"><span class="ltx_transformed_inner" style="transform:translate(-102.8pt,11.5pt) scale(0.627894321527184,0.627894321527184) ;">
+<table class="ltx_tabular ltx_guessed_headers ltx_align_middle" id="S5.T3.1.1">
+<thead class="ltx_thead">
+<tr class="ltx_tr" id="S5.T3.1.1.2.1">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_column ltx_th_row ltx_border_tt" id="S5.T3.1.1.2.1.1"><span class="ltx_text ltx_font_bold" id="S5.T3.1.1.2.1.1.1">Method</span></th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt" id="S5.T3.1.1.2.1.2"><span class="ltx_text ltx_font_bold" id="S5.T3.1.1.2.1.2.1">RULER-32K</span></th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt" id="S5.T3.1.1.2.1.3"><span class="ltx_text ltx_font_bold" id="S5.T3.1.1.2.1.3.1">LongBench</span></th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt" id="S5.T3.1.1.2.1.4"><span class="ltx_text ltx_font_bold" id="S5.T3.1.1.2.1.4.1">MATH500</span></th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt" id="S5.T3.1.1.2.1.5"><span class="ltx_text ltx_font_bold" id="S5.T3.1.1.2.1.5.1">AIME 2024</span></th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt" id="S5.T3.1.1.2.1.6"><span class="ltx_text ltx_font_bold" id="S5.T3.1.1.2.1.6.1">LiveCodeBench</span></th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt" id="S5.T3.1.1.2.1.7"><span class="ltx_text ltx_font_bold" id="S5.T3.1.1.2.1.7.1">GPQA</span></th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt" id="S5.T3.1.1.2.1.8"><span class="ltx_text ltx_font_bold" id="S5.T3.1.1.2.1.8.1">Average</span></th>
+</tr>
+</thead>
+<tbody class="ltx_tbody">
+<tr class="ltx_tr" id="S5.T3.1.1.3.1">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_t" id="S5.T3.1.1.3.1.1">Dense Attention</th>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S5.T3.1.1.3.1.2">91.90</td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S5.T3.1.1.3.1.3">33.60</td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S5.T3.1.1.3.1.4">95.87</td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S5.T3.1.1.3.1.5">75.00</td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S5.T3.1.1.3.1.6">53.83</td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S5.T3.1.1.3.1.7">61.21</td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S5.T3.1.1.3.1.8">68.57</td>
+</tr>
+<tr class="ltx_tr" id="S5.T3.1.1.4.2">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_row" id="S5.T3.1.1.4.2.1">Quest</th>
+<td class="ltx_td ltx_align_center" id="S5.T3.1.1.4.2.2">56.23</td>
+<td class="ltx_td ltx_align_center" id="S5.T3.1.1.4.2.3">30.30</td>
+<td class="ltx_td ltx_align_center" id="S5.T3.1.1.4.2.4">94.18</td>
+<td class="ltx_td ltx_align_center" id="S5.T3.1.1.4.2.5">71.50</td>
+<td class="ltx_td ltx_align_center" id="S5.T3.1.1.4.2.6">52.17</td>
+<td class="ltx_td ltx_align_center" id="S5.T3.1.1.4.2.7">60.12</td>
+<td class="ltx_td ltx_align_center" id="S5.T3.1.1.4.2.8">60.75</td>
+</tr>
+<tr class="ltx_tr" id="S5.T3.1.1.5.3">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_row" id="S5.T3.1.1.5.3.1">RocketKV</th>
+<td class="ltx_td ltx_align_center" id="S5.T3.1.1.5.3.2">87.89</td>
+<td class="ltx_td ltx_align_center" id="S5.T3.1.1.5.3.3">30.60</td>
+<td class="ltx_td ltx_align_center" id="S5.T3.1.1.5.3.4">95.88</td>
+<td class="ltx_td ltx_align_center" id="S5.T3.1.1.5.3.5">73.54</td>
+<td class="ltx_td ltx_align_center" id="S5.T3.1.1.5.3.6">53.10</td>
+<td class="ltx_td ltx_align_center" id="S5.T3.1.1.5.3.7">60.50</td>
+<td class="ltx_td ltx_align_center" id="S5.T3.1.1.5.3.8">66.91</td>
+</tr>
+<tr class="ltx_tr" id="S5.T3.1.1.1">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_bb ltx_border_t" id="S5.T3.1.1.1.1">BLASST <math alttext="\sim" class="ltx_Math" display="inline" id="S5.T3.1.1.1.1.m1" intent=":literal"><semantics><mo>∼</mo><annotation encoding="application/x-tex">\sim</annotation></semantics></math>50%</th>
+<td class="ltx_td ltx_align_center ltx_border_bb ltx_border_t" id="S5.T3.1.1.1.2">91.55</td>
+<td class="ltx_td ltx_align_center ltx_border_bb ltx_border_t" id="S5.T3.1.1.1.3">33.90</td>
+<td class="ltx_td ltx_align_center ltx_border_bb ltx_border_t" id="S5.T3.1.1.1.4">96.23</td>
+<td class="ltx_td ltx_align_center ltx_border_bb ltx_border_t" id="S5.T3.1.1.1.5">76.50</td>
+<td class="ltx_td ltx_align_center ltx_border_bb ltx_border_t" id="S5.T3.1.1.1.6">54.15</td>
+<td class="ltx_td ltx_align_center ltx_border_bb ltx_border_t" id="S5.T3.1.1.1.7">61.51</td>
+<td class="ltx_td ltx_align_center ltx_border_bb ltx_border_t" id="S5.T3.1.1.1.8">68.97</td>
+</tr>
+</tbody>
+</table>
+</span></div>
+</figure>
+</section>
+<section class="ltx_subsection" id="S5.SS2">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">5.2 </span>Основные результаты</h3>
+<div class="ltx_para ltx_noindent" id="S5.SS2.p1">
+<p class="ltx_p" id="S5.SS2.p1.2">Итоговая производительность. Таблица <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2512.12087v3#S4.T1" title="Table 1 ‣ 4.1 Prefill Kernel: Compute-Bound Optimization ‣ 4 Kernel Design"><span class="ltx_text ltx_ref_tag">1</span></a> демонстрирует производительность BLASST при уровнях разреженности <math alttext="\sim" class="ltx_Math" display="inline" id="S5.SS2.p1.1.m1" intent=":literal"><semantics><mo>∼</mo><annotation encoding="application/x-tex">\sim</annotation></semantics></math>50% и <math alttext="\sim" class="ltx_Math" display="inline" id="S5.SS2.p1.2.m2" intent=":literal"><semantics><mo>∼</mo><annotation encoding="application/x-tex">\sim</annotation></semantics></math>75% для Llama-3.1-8B и Qwen3-8B на различных наборах тестов. Примечательно, что BLASST не только сохраняет точность с минимальным ухудшением, но иногда превосходит плотную базовую модель. Например, для Qwen3-8B наблюдаются улучшения на MATH500 (96.23 против 95.87) и AIME 2024 (76.50 против 75.00) при разреженности 50%. Этот контринтуитивный результат можно объяснить двумя факторами. Во-первых, в задачах с длинным контекстом, где информация по своей природе разреженная, отсечение блоков с низкой значимостью внимания заставляет модель концентрировать плотность вероятности на наиболее релевантных токенах, фактически выступая как неявное подавление шума. Во-вторых, для задач рассуждений с длинной генерацией некоторые промежуточные шаги рассуждений или токены могут быть избыточными или даже вредными <cite class="ltx_cite ltx_citemacro_cite"><span class="ltx_ref ltx_missing_citation ltx_ref_self">sui2025stop</span></cite>; пропуская блоки с пренебрежимо малыми значениями внимания, мы отсеиваем такие отвлекающие факторы, позволяя модели сосредоточиться на ключевых цепочках рассуждений. Эти результаты показывают, что BLASST обеспечивает не только вычислительную эффективность, но и улучшает качество вывода в некоторых сценариях.</p>
+</div>
+<div class="ltx_para ltx_noindent" id="S5.SS2.p2">
+<p class="ltx_p" id="S5.SS2.p2.1">Сравнение фазы предварительного заполнения. Таблица <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2512.12087v3#S5.T2" title="Table 2 ‣ 5.1 Experimental Setup ‣ 5 Experiments"><span class="ltx_text ltx_ref_tag">2</span></a> сравнивает BLASST с современными методами разреженного внимания, оптимизированными для предварительного заполнения, на Llama-3.1-8B. На протяжении RULER (длины контекста 4K-64K) и LongBench BLASST обеспечивает наилучшую общую производительность (92.87 RULER в среднем, 31.8 LongBench) среди всех разреженных методов, почти совпадая с плотным вниманием (93.21, 31.4), при этом не требуя предварительных вычислений. Примечательно, что BLASST существенно превосходит MInference (84.15 RULER) и FlexPrefill (87.72 RULER), демонстрируя эффективность нашего порогового отсечения по сравнению с оцениванием важности на основе прокси.</p>
+</div>
+<div class="ltx_para ltx_noindent" id="S5.SS2.p3">
+<p class="ltx_p" id="S5.SS2.p3.1">Сравнение фаз декодирования. Таблица <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2512.12087v3#S5.T3" title="Table 3 ‣ 5.1 Experimental Setup ‣ 5 Experiments"><span class="ltx_text ltx_ref_tag">3</span></a> оценивает BLASST на Qwen3-8B на задачах, требующих интенсивного рассуждения. При <math alttext="\sim" class="ltx_Math" display="inline" id="S5.SS2.p3.1.m1" intent=":literal"><semantics><mo>∼</mo><annotation encoding="application/x-tex">\sim</annotation></semantics></math> и 50% разреженности BLASST соответствует или превосходит по показателям производительности плотную базовую модель на всех наборах данных, при этом сохраняя возможности работы с длинным контекстом. Мы отмечаем, что все существующие методы используют разные стратегии оптимизации и ориентируются на разные сценарии развертывания, что делает прямое сравнение затруднительным. Мы включаем Quest и RocketKV в качестве точек отсчета, чтобы контекстуализировать производительность BLASST. Например, RocketKV демонстрирует 87.89 RULER и 30.60 точность LongBench, что иллюстрирует компромиссы, связанные с агрессивным сжатием кэша KV, по сравнению с подходом BLASST, сохраняющим критические паттерны внимания.</p>
+</div>
+<figure class="ltx_table" id="S5.T4">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_table">Table 4: </span> Ускорения BLASST для предварительной обработки и декодирования при увеличении уровней разреженности на GPU B200 (Blackwell). Мы варьируем порог (<math alttext="\lambda" class="ltx_Math" display="inline" id="S5.T4.2.m1" intent=":literal"><semantics><mi>λ</mi><annotation encoding="application/x-tex">\lambda</annotation></semantics></math>), чтобы продемонстрировать производительность на диапазоне разреженностей.  
+Конфигурация предварительной обработки: размер пакета 148, 1 Q head, 1 KV head, длина последовательности 32K, dim головки 128. Конфигурация декодирования: размер пакета 148, 32 Q heads, 4 KV heads, длина последовательности 32K, dim головки 128.</figcaption>
+<div class="ltx_inline-block ltx_align_center ltx_transformed_outer" id="S5.T4.18" style="width:303.5pt;height:171.1pt;vertical-align:-82.0pt;"><span class="ltx_transformed_inner" style="transform:translate(43.9pt,-24.7pt) scale(1.40704113414819,1.40704113414819) ;">
+<table class="ltx_tabular ltx_guessed_headers ltx_align_middle" id="S5.T4.18.16">
+<thead class="ltx_thead">
+<tr class="ltx_tr" id="S5.T4.18.16.17.1">
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_th_row ltx_border_r ltx_border_tt" colspan="2" id="S5.T4.18.16.17.1.1"><span class="ltx_text ltx_font_bold" id="S5.T4.18.16.17.1.1.1">Blackwell Prefill</span></th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_th_row ltx_border_tt" colspan="2" id="S5.T4.18.16.17.1.2"><span class="ltx_text ltx_font_bold" id="S5.T4.18.16.17.1.2.1">Blackwell Decode</span></th>
+</tr>
+<tr class="ltx_tr" id="S5.T4.18.16.18.2">
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_th_row ltx_border_t" id="S5.T4.18.16.18.2.1"><span class="ltx_text ltx_font_bold" id="S5.T4.18.16.18.2.1.1">Sparsity</span></th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_r ltx_border_t" id="S5.T4.18.16.18.2.2"><span class="ltx_text ltx_font_bold" id="S5.T4.18.16.18.2.2.1">Speedup</span></th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_th_row ltx_border_t" id="S5.T4.18.16.18.2.3"><span class="ltx_text ltx_font_bold" id="S5.T4.18.16.18.2.3.1">Sparsity</span></th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_t" id="S5.T4.18.16.18.2.4"><span class="ltx_text ltx_font_bold" id="S5.T4.18.16.18.2.4.1">Speedup</span></th>
+</tr>
+</thead>
+<tbody class="ltx_tbody">
+<tr class="ltx_tr" id="S5.T4.4.2.2">
+<th class="ltx_td ltx_align_center ltx_th ltx_th_row ltx_border_t" id="S5.T4.4.2.2.3">0.00%</th>
+<td class="ltx_td ltx_align_center ltx_border_r ltx_border_t" id="S5.T4.3.1.1.1">0.99<math alttext="\times" class="ltx_Math" display="inline" id="S5.T4.3.1.1.1.m1" intent=":literal"><semantics><mo>×</mo><annotation encoding="application/x-tex">\times</annotation></semantics></math>
+</td>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_row ltx_border_t" id="S5.T4.4.2.2.4">0.00%</th>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S5.T4.4.2.2.2">0.98<math alttext="\times" class="ltx_Math" display="inline" id="S5.T4.4.2.2.2.m1" intent=":literal"><semantics><mo>×</mo><annotation encoding="application/x-tex">\times</annotation></semantics></math>
+</td>
+</tr>
+<tr class="ltx_tr" id="S5.T4.6.4.4">
+<th class="ltx_td ltx_align_center ltx_th ltx_th_row" id="S5.T4.6.4.4.3">23.24%</th>
+<td class="ltx_td ltx_align_center ltx_border_r" id="S5.T4.5.3.3.1">1.07<math alttext="\times" class="ltx_Math" display="inline" id="S5.T4.5.3.3.1.m1" intent=":literal"><semantics><mo>×</mo><annotation encoding="application/x-tex">\times</annotation></semantics></math>
+</td>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_row" id="S5.T4.6.4.4.4">36.91%</th>
+<td class="ltx_td ltx_align_center" id="S5.T4.6.4.4.2">1.18<math alttext="\times" class="ltx_Math" display="inline" id="S5.T4.6.4.4.2.m1" intent=":literal"><semantics><mo>×</mo><annotation encoding="application/x-tex">\times</annotation></semantics></math>
+</td>
+</tr>
+<tr class="ltx_tr" id="S5.T4.8.6.6">
+<th class="ltx_td ltx_align_center ltx_th ltx_th_row" id="S5.T4.8.6.6.3">32.78%</th>
+<td class="ltx_td ltx_align_center ltx_border_r" id="S5.T4.7.5.5.1">1.13<math alttext="\times" class="ltx_Math" display="inline" id="S5.T4.7.5.5.1.m1" intent=":literal"><semantics><mo>×</mo><annotation encoding="application/x-tex">\times</annotation></semantics></math>
+</td>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_row" id="S5.T4.8.6.6.4">46.68%</th>
+<td class="ltx_td ltx_align_center" id="S5.T4.8.6.6.2">1.25<math alttext="\times" class="ltx_Math" display="inline" id="S5.T4.8.6.6.2.m1" intent=":literal"><semantics><mo>×</mo><annotation encoding="application/x-tex">\times</annotation></semantics></math>
+</td>
+</tr>
+<tr class="ltx_tr" id="S5.T4.10.8.8">
+<th class="ltx_td ltx_align_center ltx_th ltx_th_row" id="S5.T4.10.8.8.3">42.26%</th>
+<td class="ltx_td ltx_align_center ltx_border_r" id="S5.T4.9.7.7.1">1.18<math alttext="\times" class="ltx_Math" display="inline" id="S5.T4.9.7.7.1.m1" intent=":literal"><semantics><mo>×</mo><annotation encoding="application/x-tex">\times</annotation></semantics></math>
+</td>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_row" id="S5.T4.10.8.8.4">61.23%</th>
+<td class="ltx_td ltx_align_center" id="S5.T4.10.8.8.2">1.34<math alttext="\times" class="ltx_Math" display="inline" id="S5.T4.10.8.8.2.m1" intent=":literal"><semantics><mo>×</mo><annotation encoding="application/x-tex">\times</annotation></semantics></math>
+</td>
+</tr>
+<tr class="ltx_tr" id="S5.T4.12.10.10">
+<th class="ltx_td ltx_align_center ltx_th ltx_th_row" id="S5.T4.12.10.10.3">50.67%</th>
+<td class="ltx_td ltx_align_center ltx_border_r" id="S5.T4.11.9.9.1">1.24<math alttext="\times" class="ltx_Math" display="inline" id="S5.T4.11.9.9.1.m1" intent=":literal"><semantics><mo>×</mo><annotation encoding="application/x-tex">\times</annotation></semantics></math>
+</td>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_row" id="S5.T4.12.10.10.4">73.15%</th>
+<td class="ltx_td ltx_align_center" id="S5.T4.12.10.10.2">1.48<math alttext="\times" class="ltx_Math" display="inline" id="S5.T4.12.10.10.2.m1" intent=":literal"><semantics><mo>×</mo><annotation encoding="application/x-tex">\times</annotation></semantics></math>
+</td>
+</tr>
+<tr class="ltx_tr" id="S5.T4.14.12.12">
+<th class="ltx_td ltx_align_center ltx_th ltx_th_row" id="S5.T4.14.12.12.3">63.96%</th>
+<td class="ltx_td ltx_align_center ltx_border_r" id="S5.T4.13.11.11.1">1.34<math alttext="\times" class="ltx_Math" display="inline" id="S5.T4.13.11.11.1.m1" intent=":literal"><semantics><mo>×</mo><annotation encoding="application/x-tex">\times</annotation></semantics></math>
+</td>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_row" id="S5.T4.14.12.12.4">82.62%</th>
+<td class="ltx_td ltx_align_center" id="S5.T4.14.12.12.2">1.64<math alttext="\times" class="ltx_Math" display="inline" id="S5.T4.14.12.12.2.m1" intent=":literal"><semantics><mo>×</mo><annotation encoding="application/x-tex">\times</annotation></semantics></math>
+</td>
+</tr>
+<tr class="ltx_tr" id="S5.T4.16.14.14">
+<th class="ltx_td ltx_align_center ltx_th ltx_th_row" id="S5.T4.16.14.14.3">73.47%</th>
+<td class="ltx_td ltx_align_center ltx_border_r" id="S5.T4.15.13.13.1">1.41<math alttext="\times" class="ltx_Math" display="inline" id="S5.T4.15.13.13.1.m1" intent=":literal"><semantics><mo>×</mo><annotation encoding="application/x-tex">\times</annotation></semantics></math>
+</td>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_row" id="S5.T4.16.14.14.4">87.01%</th>
+<td class="ltx_td ltx_align_center" id="S5.T4.16.14.14.2">1.71<math alttext="\times" class="ltx_Math" display="inline" id="S5.T4.16.14.14.2.m1" intent=":literal"><semantics><mo>×</mo><annotation encoding="application/x-tex">\times</annotation></semantics></math>
+</td>
+</tr>
+<tr class="ltx_tr" id="S5.T4.18.16.16">
+<th class="ltx_td ltx_align_center ltx_th ltx_th_row ltx_border_bb" id="S5.T4.18.16.16.3">80.35%</th>
+<td class="ltx_td ltx_align_center ltx_border_bb ltx_border_r" id="S5.T4.17.15.15.1">1.49<math alttext="\times" class="ltx_Math" display="inline" id="S5.T4.17.15.15.1.m1" intent=":literal"><semantics><mo>×</mo><annotation encoding="application/x-tex">\times</annotation></semantics></math>
+</td>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_row ltx_border_bb" id="S5.T4.18.16.16.4">91.99%</th>
+<td class="ltx_td ltx_align_center ltx_border_bb" id="S5.T4.18.16.16.2">1.79<math alttext="\times" class="ltx_Math" display="inline" id="S5.T4.18.16.16.2.m1" intent=":literal"><semantics><mo>×</mo><annotation encoding="application/x-tex">\times</annotation></semantics></math>
+</td>
+</tr>
+</tbody>
+</table>
+</span></div>
+</figure>
+<figure class="ltx_figure" id="S5.F5"><img alt="Refer to caption" class="ltx_graphics ltx_centering ltx_img_landscape" height="395" id="S5.F5.g1" src="./[2512.12087] 1 Introduction_files/x8.png" width="746"/>
+<figcaption class="ltx_caption ltx_centering">⟦<span class="ltx_tag ltx_tag_figure">Figure 5: </span>Ускорение предзаполнения BLASST на графическом процессоре Hopper GPU (H200)</figcaption>
+</figure>
+</section>
+<section class="ltx_subsection" id="S5.SS3">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">5.3 </span>Производительность GPU-ядра</h3>
+<div class="ltx_para ltx_noindent" id="S5.SS3.p1">
+<p class="ltx_p" id="S5.SS3.p1.1">Мы реализуем и проводим бенчмаркинг высоко оптимизированных ядер для архитектур GPU Blackwell (B200) и Hopper (H200), демонстрируя, что BLASST обеспечивает существенные ускорения в реальных условиях. Таблица <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2512.12087v3#S5.T4" title="Table 4 ‣ 5.2 Main Results ‣ 5 Experiments"><span class="ltx_text ltx_ref_tag">4</span></a> и рисунок <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2512.12087v3#S5.F5" title="Figure 5 ‣ 5.2 Main Results ‣ 5 Experiments"><span class="ltx_text ltx_ref_tag">5</span></a> показывают масштабирование производительности при росте уровней разреженности для обеих фаз: prefill и decode. Все ускорения измеряются по сравнению с базовыми вариантами FlashAttention-3 BF16.</p>
+</div>
+<div class="ltx_para ltx_noindent" id="S5.SS3.p2">
+<p class="ltx_p" id="S5.SS3.p2.6">Ключевые результаты. При близкой к безошибочной точности (<math alttext="\sim" class="ltx_Math" display="inline" id="S5.SS3.p2.1.m1" intent=":literal"><semantics><mo>∼</mo><annotation encoding="application/x-tex">\sim</annotation></semantics></math>50% разреженности) мы достигаем приблизительно 1.24<math alttext="\times" class="ltx_Math" display="inline" id="S5.SS3.p2.2.m2" intent=":literal"><semantics><mo>×</mo><annotation encoding="application/x-tex">\times</annotation></semantics></math> ускорения для prefill и 1.23<math alttext="\times" class="ltx_Math" display="inline" id="S5.SS3.p2.3.m3" intent=":literal"><semantics><mo>×</mo><annotation encoding="application/x-tex">\times</annotation></semantics></math> ускорения для decode на Blackwell. При более высокой разреженности (<math alttext="\sim" class="ltx_Math" display="inline" id="S5.SS3.p2.4.m4" intent=":literal"><semantics><mo>∼</mo><annotation encoding="application/x-tex">\sim</annotation></semantics></math>70%) ускорение prefill и decode увеличивается до 1.40<math alttext="\times" class="ltx_Math" display="inline" id="S5.SS3.p2.5.m5" intent=":literal"><semantics><mo>×</mo><annotation encoding="application/x-tex">\times</annotation></semantics></math>. На Hopper prefill обеспечивает до 1.62<math alttext="\times" class="ltx_Math" display="inline" id="S5.SS3.p2.6.m6" intent=":literal"><semantics><mo>×</mo><annotation encoding="application/x-tex">\times</annotation></semantics></math> ускорения при 74.7% разреженности. Эти ускорения предсказуемо масштабируются с разреженностью: более высокая разреженность дает большие приросты производительности, позволяя пользователям выбирать предпочитаемый компромисс точность—эффективность.</p>
+</div>
+<div class="ltx_para ltx_noindent" id="S5.SS3.p3">
+<p class="ltx_p" id="S5.SS3.p3.1">Важно, что мы не наблюдаем значимого ухудшения производительности при 0% разреженности (0.99-1.03<math alttext="\times" class="ltx_Math" display="inline" id="S5.SS3.p3.1.m1" intent=":literal"><semantics><mo>×</mo><annotation encoding="application/x-tex">\times</annotation></semantics></math> базовый уровень), что гарантирует, что BLASST добавляет минимальные накладные расходы при низкой разреженности.</p>
+</div>
+</section>
+<section class="ltx_subsection" id="S5.SS4">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">5.4 </span>Результаты калибровки</h3>
+<div class="ltx_para ltx_noindent" id="S5.SS4.p1">
+<p class="ltx_p" id="S5.SS4.p1.1">Ключевая мотивация нашего подхода к калибровке заключается в том, что фиксированные пороги дают несогласованную разреженность при разных длинах контекста, что делает развертывание ненадежным. Таблица <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2512.12087v3#S5.T5" title="Table 5 ‣ 5.4 Calibration Results ‣ 5 Experiments"><span class="ltx_text ltx_ref_tag">5</span></a> демонстрирует эффективность нашего метода калибровки при изменяющихся длинах последовательностей. Для целевой разреженности 50% подход с фиксированным порогом приводит к крайне нестабильной разреженности от 23% при 4K до 75% при 64K, что делает его непригодным для производственного развертывания. В отличие от этого наш откалиброванный подход <math alttext="\lambda=a/L" class="ltx_Math" display="inline" id="S5.SS4.p1.1.m1" intent=":literal"><semantics><mrow><mi>λ</mi><mo>=</mo><mrow><mi>a</mi><mo>/</mo><mi>L</mi></mrow></mrow><annotation encoding="application/x-tex">\lambda=a/L</annotation></semantics></math> поддерживает разреженность в узком диапазоне со средним отклонением всего 1,2% от целевого значения. Аналогичные улучшения наблюдаются при целевой разреженности 70%. Эти результаты подтверждают, что наша калибровка обеспечивает надежное, предсказуемое управление разреженностью при различных длинах последовательностей без ручной настройки.</p>
+</div>
+<figure class="ltx_table" id="S5.T5">
+<figcaption class="ltx_caption ltx_centering">⟦Sparsity стабильность across context lengths: calibrated vs. fixed threshold on Llama-3.1-8B. Наш метод калибровки поддерживает согласованный уровень sparsity при разных длинах контекста, тогда как фиксированные пороги приводят к высокой дисперсии. Значения в скобках указывают отклонение достигнутого sparsity от целевого значения.</figcaption>
+<div class="ltx_inline-block ltx_align_center ltx_transformed_outer" id="S5.T5.4" style="width:433.6pt;height:171.4pt;vertical-align:-82.5pt;"><span class="ltx_transformed_inner" style="transform:translate(46.8pt,-18.5pt) scale(1.27552923898388,1.27552923898388) ;">
+<table class="ltx_tabular ltx_guessed_headers ltx_align_middle" id="S5.T5.4.4">
+<thead class="ltx_thead">
+<tr class="ltx_tr" id="S5.T5.4.4.5.1">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_column ltx_th_row ltx_border_tt" id="S5.T5.4.4.5.1.1"><span class="ltx_text ltx_font_bold" id="S5.T5.4.4.5.1.1.1">Method</span></th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt" id="S5.T5.4.4.5.1.2"><span class="ltx_text ltx_font_bold" id="S5.T5.4.4.5.1.2.1">4K</span></th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt" id="S5.T5.4.4.5.1.3"><span class="ltx_text ltx_font_bold" id="S5.T5.4.4.5.1.3.1">8K</span></th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt" id="S5.T5.4.4.5.1.4"><span class="ltx_text ltx_font_bold" id="S5.T5.4.4.5.1.4.1">16K</span></th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt" id="S5.T5.4.4.5.1.5"><span class="ltx_text ltx_font_bold" id="S5.T5.4.4.5.1.5.1">32K</span></th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt" id="S5.T5.4.4.5.1.6"><span class="ltx_text ltx_font_bold" id="S5.T5.4.4.5.1.6.1">64K</span></th>
+</tr>
+<tr class="ltx_tr" id="S5.T5.4.4.6.2">
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_th_row ltx_border_t" colspan="6" id="S5.T5.4.4.6.2.1"><span class="ltx_text ltx_font_italic" id="S5.T5.4.4.6.2.1.1">Target Sparsity: 50%</span></th>
+</tr>
+</thead>
+<tbody class="ltx_tbody">
+<tr class="ltx_tr" id="S5.T5.1.1.1">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_t" id="S5.T5.1.1.1.1">Fixed <math alttext="\lambda=1e-3" class="ltx_Math" display="inline" id="S5.T5.1.1.1.1.m1" intent=":literal"><semantics><mrow><mi>λ</mi><mo>=</mo><mrow><mrow><mn>1</mn><mo lspace="0em" rspace="0em">​</mo><mi>e</mi></mrow><mo>−</mo><mn>3</mn></mrow></mrow><annotation encoding="application/x-tex">\lambda=1e-3</annotation></semantics></math>
+</th>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S5.T5.1.1.1.2">23.09</td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S5.T5.1.1.1.3">37.92</td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S5.T5.1.1.1.4">52.38</td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S5.T5.1.1.1.5">65.72</td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S5.T5.1.1.1.6">74.63</td>
+</tr>
+<tr class="ltx_tr" id="S5.T5.4.4.7.1">
+<th class="ltx_td ltx_th ltx_th_row" id="S5.T5.4.4.7.1.1"></th>
+<td class="ltx_td ltx_align_center" id="S5.T5.4.4.7.1.2">(-26.91)</td>
+<td class="ltx_td ltx_align_center" id="S5.T5.4.4.7.1.3">(-12.08)</td>
+<td class="ltx_td ltx_align_center" id="S5.T5.4.4.7.1.4">(+2.38)</td>
+<td class="ltx_td ltx_align_center" id="S5.T5.4.4.7.1.5">(+15.72)</td>
+<td class="ltx_td ltx_align_center" id="S5.T5.4.4.7.1.6">(+24.63)</td>
+</tr>
+<tr class="ltx_tr" id="S5.T5.2.2.2">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_row" id="S5.T5.2.2.2.1">Calibrated <math alttext="\lambda=a/L" class="ltx_Math" display="inline" id="S5.T5.2.2.2.1.m1" intent=":literal"><semantics><mrow><mi>λ</mi><mo>=</mo><mrow><mi>a</mi><mo>/</mo><mi>L</mi></mrow></mrow><annotation encoding="application/x-tex">\lambda=a/L</annotation></semantics></math>
+</th>
+<td class="ltx_td ltx_align_center" id="S5.T5.2.2.2.2">54.20</td>
+<td class="ltx_td ltx_align_center" id="S5.T5.2.2.2.3">49.70</td>
+<td class="ltx_td ltx_align_center" id="S5.T5.2.2.2.4">52.20</td>
+<td class="ltx_td ltx_align_center" id="S5.T5.2.2.2.5">46.96</td>
+<td class="ltx_td ltx_align_center" id="S5.T5.2.2.2.6">48.75</td>
+</tr>
+<tr class="ltx_tr" id="S5.T5.4.4.8.2">
+<th class="ltx_td ltx_th ltx_th_row" id="S5.T5.4.4.8.2.1"></th>
+<td class="ltx_td ltx_align_center" id="S5.T5.4.4.8.2.2">(+4.20)</td>
+<td class="ltx_td ltx_align_center" id="S5.T5.4.4.8.2.3">(-0.30)</td>
+<td class="ltx_td ltx_align_center" id="S5.T5.4.4.8.2.4">(+2.20)</td>
+<td class="ltx_td ltx_align_center" id="S5.T5.4.4.8.2.5">(-3.04)</td>
+<td class="ltx_td ltx_align_center" id="S5.T5.4.4.8.2.6">(-1.25)</td>
+</tr>
+<tr class="ltx_tr" id="S5.T5.4.4.9.3">
+<th class="ltx_td ltx_align_center ltx_th ltx_th_row ltx_border_t" colspan="6" id="S5.T5.4.4.9.3.1"><span class="ltx_text ltx_font_italic" id="S5.T5.4.4.9.3.1.1">Target Sparsity: 70%</span></th>
+</tr>
+<tr class="ltx_tr" id="S5.T5.3.3.3">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_t" id="S5.T5.3.3.3.1">Fixed <math alttext="\lambda=3e-3" class="ltx_Math" display="inline" id="S5.T5.3.3.3.1.m1" intent=":literal"><semantics><mrow><mi>λ</mi><mo>=</mo><mrow><mrow><mn>3</mn><mo lspace="0em" rspace="0em">​</mo><mi>e</mi></mrow><mo>−</mo><mn>3</mn></mrow></mrow><annotation encoding="application/x-tex">\lambda=3e-3</annotation></semantics></math>
+</th>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S5.T5.3.3.3.2">42.35</td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S5.T5.3.3.3.3">57.54</td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S5.T5.3.3.3.4">69.83</td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S5.T5.3.3.3.5">79.36</td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S5.T5.3.3.3.6">84.63</td>
+</tr>
+<tr class="ltx_tr" id="S5.T5.4.4.10.4">
+<th class="ltx_td ltx_th ltx_th_row" id="S5.T5.4.4.10.4.1"></th>
+<td class="ltx_td ltx_align_center" id="S5.T5.4.4.10.4.2">(-27.65)</td>
+<td class="ltx_td ltx_align_center" id="S5.T5.4.4.10.4.3">(-12.46)</td>
+<td class="ltx_td ltx_align_center" id="S5.T5.4.4.10.4.4">(-0.17)</td>
+<td class="ltx_td ltx_align_center" id="S5.T5.4.4.10.4.5">(+9.36)</td>
+<td class="ltx_td ltx_align_center" id="S5.T5.4.4.10.4.6">(+14.63)</td>
+</tr>
+<tr class="ltx_tr" id="S5.T5.4.4.4">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_row" id="S5.T5.4.4.4.1">Calibrated <math alttext="\lambda=a/L" class="ltx_Math" display="inline" id="S5.T5.4.4.4.1.m1" intent=":literal"><semantics><mrow><mi>λ</mi><mo>=</mo><mrow><mi>a</mi><mo>/</mo><mi>L</mi></mrow></mrow><annotation encoding="application/x-tex">\lambda=a/L</annotation></semantics></math>
+</th>
+<td class="ltx_td ltx_align_center" id="S5.T5.4.4.4.2">67.99</td>
+<td class="ltx_td ltx_align_center" id="S5.T5.4.4.4.3">74.65</td>
+<td class="ltx_td ltx_align_center" id="S5.T5.4.4.4.4">73.64</td>
+<td class="ltx_td ltx_align_center" id="S5.T5.4.4.4.5">72.54</td>
+<td class="ltx_td ltx_align_center" id="S5.T5.4.4.4.6">74.63</td>
+</tr>
+<tr class="ltx_tr" id="S5.T5.4.4.11.5">
+<th class="ltx_td ltx_th ltx_th_row ltx_border_bb" id="S5.T5.4.4.11.5.1"></th>
+<td class="ltx_td ltx_align_center ltx_border_bb" id="S5.T5.4.4.11.5.2">(-2.01)</td>
+<td class="ltx_td ltx_align_center ltx_border_bb" id="S5.T5.4.4.11.5.3">(+4.65)</td>
+<td class="ltx_td ltx_align_center ltx_border_bb" id="S5.T5.4.4.11.5.4">(+3.64)</td>
+<td class="ltx_td ltx_align_center ltx_border_bb" id="S5.T5.4.4.11.5.5">(+2.54)</td>
+<td class="ltx_td ltx_align_center ltx_border_bb" id="S5.T5.4.4.11.5.6">(+4.63)</td>
+</tr>
+</tbody>
+</table>
+</span></div>
+</figure>
+<figure class="ltx_figure" id="S5.F6"><img alt="Refer to caption" class="ltx_graphics ltx_centering ltx_img_landscape" height="370" id="S5.F6.g1" src="./[2512.12087] 1 Introduction_files/x9.png" width="705"/>
+<figcaption class="ltx_caption ltx_centering">⟦Sparsity-aware training pushes the accuracy-sparsity frontier. Модели, дообученные с помощью BLASST, активного во время обучения, сохраняют более высокую точность на агрессивных уровнях разреженности по сравнению с применением разреженности после обучения. Обучаясь с разреженным вниманием, модели учатся концентрировать информацию в блоках с высокими оценками, делая их более устойчивыми к обрезанию.</figcaption>
+</figure>
+</section>
+<section class="ltx_subsection" id="S5.SS5">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">5.5 </span>Результаты обучения с учетом разреженности</h3>
+<div class="ltx_para ltx_noindent" id="S5.SS5.p1">
+<p class="ltx_p" id="S5.SS5.p1.1">Рисунок <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2512.12087v3#S5.F6" title="Figure 6 ‣ 5.4 Calibration Results ‣ 5 Experiments"><span class="ltx_text ltx_ref_tag">6</span></a> демонстрирует, что обучение с учетом разреженности улучшает компромисс «точность—разреженность» на бенчмарках RULER. На низких уровнях разреженности модели, обученные с разреженностью, даже немного превосходят базовую плотную модель, что указывает на то, что модель усваивает более устойчивые паттерны внимания. В целевом диапазоне разреженности 50%-75% модели, обученные с разреженностью, достигают существенно более высокой точности по сравнению с применением разреженности после обучения, снижая деградацию точности на величину до 1.7<math alttext="\times" class="ltx_Math" display="inline" id="S5.SS5.p1.1.m1" intent=":literal"><semantics><mo>×</mo><annotation encoding="application/x-tex">\times</annotation></semantics></math>. Эти результаты подтверждают, что модели можно обучать так, чтобы концентрировать информацию в блоках внимания с высокими оценками, делая их по своей сути более совместимыми с разреженными паттернами внимания и продвигая границу Парето эффективного внимания.</p>
+</div>
+</section>
+<section class="ltx_subsection" id="S5.SS6">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">5.6 </span>Абляционные исследования</h3>
+<div class="ltx_para ltx_noindent" id="S5.SS6.p1">
+<p class="ltx_p" id="S5.SS6.p1.1">Анализ распределения разреженности. Рисунок <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2512.12087v3#S5.F7" title="Figure 7 ‣ 5.6 Ablation Studies ‣ 5 Experiments"><span class="ltx_text ltx_ref_tag">7</span></a> иллюстрирует, как разреженность меняется между слоями и внимательными головками, раскрывая естественное распределение важности внимания и закономерности в модели. Мы наблюдаем существенную неоднородность: разные слои демонстрируют различные уровни разреженности, а отдельные головки внутри каждого слоя также показывают заметную вариативность. Ключевым образом BLASST естественным образом включает эту неоднородность без необходимости явных механизмов вроде выбора top-k или отсечения головок — применяя один и тот же порог ко всем слоям и головкам, наш метод автоматически адаптируется к естественному распределению внимания для каждого слоя и каждой головки, удаляя более агрессивно там, где внимание естественным образом более сосредоточено, и сохраняя больше блоков там, где внимание более рассеяно.</p>
+</div>
+<figure class="ltx_figure" id="S5.F7"><img alt="Refer to caption" class="ltx_graphics ltx_centering ltx_img_square" height="751" id="S5.F7.g1" src="./[2512.12087] 1 Introduction_files/x10.png" width="830"/>
+<figcaption class="ltx_caption ltx_centering">⟦<span class="ltx_tag ltx_tag_figure">Figure 7: </span> Распределение разреженности по слоям и головам для Llama-8B в контексте 8K. Взято из выборки бенчмарка NIAH с порогом <math alttext="\lambda=0.03" class="ltx_Math" display="inline" id="S5.F7.2.m1" intent=":literal"><semantics><mrow><mi>λ</mi><mo>=</mo><mn>0.03</mn></mrow><annotation encoding="application/x-tex">\lambda=0.03</annotation></semantics></math>. Существенная вариативность на уровне голов и на уровне слоёв мотивирует стратегии адаптивного порогового значения.
+</figcaption>
+</figure>
+<div class="ltx_para ltx_noindent" id="S5.SS6.p2">
+<p class="ltx_p" id="S5.SS6.p2.1">Комбинация с другими методами разреженности. В таблице <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2512.12087v3#S5.T6" title="Table 6 ‣ 5.6 Ablation Studies ‣ 5 Experiments"><span class="ltx_text ltx_ref_tag">6</span></a> рассматривается сочетание BLASST с другими методами разрежения внимания. Мы обнаружили, что BLASST может быть эффективно объединена как с методами, оптимизированными для prefill (XAttention), так и с методами сжатия KV cache (RocketKV). При объединении XAttention (prefill) с BLASST (decode) ухудшение точности остается минимальным, что демонстрирует, что методы в значительной степени ортогональны. Аналогично, при объединении BLASST (prefill) с RocketKV сохраняется высокая производительность. Эти результаты показывают, что BLASST является гибким строительным блоком для сквозной оптимизации в существующих конвейерах разреженного внимания.</p>
+</div>
+<figure class="ltx_table" id="S5.T6">
+<figcaption class="ltx_caption ltx_centering">⟦<span class="ltx_tag ltx_tag_table">Table 6: </span> Производительность объединения BLASST с другими методами разреженности на Qwen 8b. BLASST может быть эффективно объединена как с методами, оптимизированными для prefill (XAttention), так и с методами сжатия KV cache (RocketKV), обеспечивая гибкие варианты развертывания. Числа в скобках показывают изменение по сравнению с плотной базовой моделью.</figcaption>
+<div class="ltx_inline-block ltx_align_center ltx_transformed_outer" id="S5.T6.1" style="width:433.6pt;height:92.4pt;vertical-align:-43.1pt;"><span class="ltx_transformed_inner" style="transform:translate(43.1pt,-9.2pt) scale(1.2483817399023,1.2483817399023) ;">
+<table class="ltx_tabular ltx_guessed_headers ltx_align_middle" id="S5.T6.1.1">
+<tbody class="ltx_tbody">
+<tr class="ltx_tr" id="S5.T6.1.1.1.1">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_tt" id="S5.T6.1.1.1.1.1"><span class="ltx_text ltx_font_bold" id="S5.T6.1.1.1.1.1.1">Prefill Method</span></th>
+<th class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_tt" id="S5.T6.1.1.1.1.2"><span class="ltx_text ltx_font_bold" id="S5.T6.1.1.1.1.2.1">Decode Method</span></th>
+<td class="ltx_td ltx_align_center ltx_border_tt" id="S5.T6.1.1.1.1.3"><span class="ltx_text ltx_font_bold" id="S5.T6.1.1.1.1.3.1">RULER-16K</span></td>
+<td class="ltx_td ltx_align_center ltx_border_tt" id="S5.T6.1.1.1.1.4"><span class="ltx_text ltx_font_bold" id="S5.T6.1.1.1.1.4.1">LongBench-16K</span></td>
+</tr>
+<tr class="ltx_tr" id="S5.T6.1.1.2.2">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_t" id="S5.T6.1.1.2.2.1">Dense Attention</th>
+<th class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_t" id="S5.T6.1.1.2.2.2">Dense Attention</th>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S5.T6.1.1.2.2.3">93.22</td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S5.T6.1.1.2.2.4">29.4</td>
+</tr>
+<tr class="ltx_tr" id="S5.T6.1.1.3.3">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_t" id="S5.T6.1.1.3.3.1">XAttention</th>
+<th class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_t" id="S5.T6.1.1.3.3.2">Dense Attention</th>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S5.T6.1.1.3.3.3">92.99 (-0.23)</td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S5.T6.1.1.3.3.4">29.1 (-0.3)</td>
+</tr>
+<tr class="ltx_tr" id="S5.T6.1.1.4.4">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_row" id="S5.T6.1.1.4.4.1">XAttention</th>
+<th class="ltx_td ltx_align_left ltx_th ltx_th_row" id="S5.T6.1.1.4.4.2">BLASST</th>
+<td class="ltx_td ltx_align_center" id="S5.T6.1.1.4.4.3">92.89 (-0.33)</td>
+<td class="ltx_td ltx_align_center" id="S5.T6.1.1.4.4.4">28.8 (-0.6)</td>
+</tr>
+<tr class="ltx_tr" id="S5.T6.1.1.5.5">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_t" id="S5.T6.1.1.5.5.1">Dense Attention</th>
+<th class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_t" id="S5.T6.1.1.5.5.2">RocketKV</th>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S5.T6.1.1.5.5.3">92.72 (-0.50)</td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S5.T6.1.1.5.5.4">30.0 (+0.6)</td>
+</tr>
+<tr class="ltx_tr" id="S5.T6.1.1.6.6">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_bb" id="S5.T6.1.1.6.6.1">BLASST</th>
+<th class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_bb" id="S5.T6.1.1.6.6.2">RocketKV</th>
+<td class="ltx_td ltx_align_center ltx_border_bb" id="S5.T6.1.1.6.6.3">92.60 (-0.62)</td>
+<td class="ltx_td ltx_align_center ltx_border_bb" id="S5.T6.1.1.6.6.4">29.4 (-0.0)</td>
+</tr>
+</tbody>
+</table>
+</span></div>
+</figure>
+<figure class="ltx_table" id="S5.T7">
+<figcaption class="ltx_caption ltx_centering">⟦<span class="ltx_tag ltx_tag_table">Table 7: </span>Производительность на очень длинных последовательностях с набором RepoQA для оценивания. Мы оцениваем BLASST на задачах понимания исходных репозиториев на длинах контекста 16K и 200K, демонстрируя разреженность на фазах предварительной обработки (P) и декодирования (D)..</figcaption>
+<div class="ltx_inline-block ltx_align_center ltx_transformed_outer" id="S5.T7.1" style="width:433.6pt;height:125.9pt;vertical-align:-60.1pt;"><span class="ltx_transformed_inner" style="transform:translate(26.7pt,-7.8pt) scale(1.140474509975,1.140474509975) ;">
+<table class="ltx_tabular ltx_guessed_headers ltx_align_middle" id="S5.T7.1.1">
+<thead class="ltx_thead">
+<tr class="ltx_tr" id="S5.T7.1.1.1.1">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_column ltx_th_row ltx_border_tt" id="S5.T7.1.1.1.1.1"><span class="ltx_text ltx_font_bold" id="S5.T7.1.1.1.1.1.1">Context</span></th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt" id="S5.T7.1.1.1.1.2"><span class="ltx_text ltx_font_bold" id="S5.T7.1.1.1.1.2.1">Attention Mode</span></th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt" id="S5.T7.1.1.1.1.3"><span class="ltx_text ltx_font_bold" id="S5.T7.1.1.1.1.3.1">Sparsity (P)</span></th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt" id="S5.T7.1.1.1.1.4"><span class="ltx_text ltx_font_bold" id="S5.T7.1.1.1.1.4.1">Sparsity (D)</span></th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt" id="S5.T7.1.1.1.1.5"><span class="ltx_text ltx_font_bold" id="S5.T7.1.1.1.1.5.1">Accuracy</span></th>
+</tr>
+<tr class="ltx_tr" id="S5.T7.1.1.2.2">
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_th_row ltx_border_t" colspan="5" id="S5.T7.1.1.2.2.1"><span class="ltx_text ltx_font_italic" id="S5.T7.1.1.2.2.1.1">Qwen3-Coder-30B-A3B-Instruct, 16K Context</span></th>
+</tr>
+</thead>
+<tbody class="ltx_tbody">
+<tr class="ltx_tr" id="S5.T7.1.1.3.1">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_t" id="S5.T7.1.1.3.1.1">16K</th>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S5.T7.1.1.3.1.2">Full (Dense)</td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S5.T7.1.1.3.1.3">0%</td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S5.T7.1.1.3.1.4">0%</td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S5.T7.1.1.3.1.5">0.897</td>
+</tr>
+<tr class="ltx_tr" id="S5.T7.1.1.4.2">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_row" id="S5.T7.1.1.4.2.1">16K</th>
+<td class="ltx_td ltx_align_center" id="S5.T7.1.1.4.2.2">BLASST Prefill</td>
+<td class="ltx_td ltx_align_center" id="S5.T7.1.1.4.2.3">64.1%</td>
+<td class="ltx_td ltx_align_center" id="S5.T7.1.1.4.2.4">0%</td>
+<td class="ltx_td ltx_align_center" id="S5.T7.1.1.4.2.5">0.904</td>
+</tr>
+<tr class="ltx_tr" id="S5.T7.1.1.5.3">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_row" id="S5.T7.1.1.5.3.1">16K</th>
+<td class="ltx_td ltx_align_center" id="S5.T7.1.1.5.3.2">BLASST Prefill+Decode</td>
+<td class="ltx_td ltx_align_center" id="S5.T7.1.1.5.3.3">64.1%</td>
+<td class="ltx_td ltx_align_center" id="S5.T7.1.1.5.3.4">48.4%</td>
+<td class="ltx_td ltx_align_center" id="S5.T7.1.1.5.3.5">0.882</td>
+</tr>
+<tr class="ltx_tr" id="S5.T7.1.1.6.4">
+<th class="ltx_td ltx_align_center ltx_th ltx_th_row ltx_border_t" colspan="5" id="S5.T7.1.1.6.4.1"><span class="ltx_text ltx_font_italic" id="S5.T7.1.1.6.4.1.1">Qwen3-Coder-30B-A3B-Instruct, 200K Context</span></th>
+</tr>
+<tr class="ltx_tr" id="S5.T7.1.1.7.5">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_t" id="S5.T7.1.1.7.5.1">200K</th>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S5.T7.1.1.7.5.2">Full (Dense)</td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S5.T7.1.1.7.5.3">0%</td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S5.T7.1.1.7.5.4">0%</td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S5.T7.1.1.7.5.5">0.850</td>
+</tr>
+<tr class="ltx_tr" id="S5.T7.1.1.8.6">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_row" id="S5.T7.1.1.8.6.1">200K</th>
+<td class="ltx_td ltx_align_center" id="S5.T7.1.1.8.6.2">BLASST Prefill</td>
+<td class="ltx_td ltx_align_center" id="S5.T7.1.1.8.6.3">57.5%</td>
+<td class="ltx_td ltx_align_center" id="S5.T7.1.1.8.6.4">0%</td>
+<td class="ltx_td ltx_align_center" id="S5.T7.1.1.8.6.5">0.841</td>
+</tr>
+<tr class="ltx_tr" id="S5.T7.1.1.9.7">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_bb" id="S5.T7.1.1.9.7.1">200K</th>
+<td class="ltx_td ltx_align_center ltx_border_bb" id="S5.T7.1.1.9.7.2">BLASST Prefill+Decode</td>
+<td class="ltx_td ltx_align_center ltx_border_bb" id="S5.T7.1.1.9.7.3">57.5%</td>
+<td class="ltx_td ltx_align_center ltx_border_bb" id="S5.T7.1.1.9.7.4">40.8%</td>
+<td class="ltx_td ltx_align_center ltx_border_bb" id="S5.T7.1.1.9.7.5">0.838</td>
+</tr>
+</tbody>
+</table>
+</span></div>
+</figure>
+<div class="ltx_para ltx_noindent" id="S5.SS6.p3">
+<p class="ltx_p" id="S5.SS6.p3.1">Очень длинные длины последовательностей. Мы оцениваем BLASST на чрезвычайно длинных последовательностях с использованием бенчмарка RepoQA <cite class="ltx_cite ltx_citemacro_cite"><span class="ltx_ref ltx_missing_citation ltx_ref_self">liu2024repoqa</span></cite>. Таблица <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2512.12087v3#S5.T7" title="Table 7 ‣ 5.6 Ablation Studies ‣ 5 Experiments"><span class="ltx_text ltx_ref_tag">7</span></a> представляет результаты для Qwen3-Coder-30B при длинах контекста 16K и 200K. При 200K токенах BLASST достигает высокой разреженности префила (<math alttext="\sim" class="ltx_Math" display="inline" id="S5.SS6.p3.1.m1" intent=":literal"><semantics><mo>∼</mo><annotation encoding="application/x-tex">\sim</annotation></semantics></math>58%) при минимальном снижении точности, а применение разреженности как к фазе префила, так и к фазе декодирования обеспечивает дополнительные вычислительные сбережения при пренебрежимо малых дополнительных затратах. Примечательно, что для более длинных контекстов характерна более высокая естественная разреженность, что делает наш метод все более эффективным для сценариев с экстремальной длиной, где плотное внимание становится непрактичным.</p>
+</div>
+<div class="ltx_para ltx_noindent" id="S5.SS6.p4">
+<p class="ltx_p" id="S5.SS6.p4.1">Перестановка порядка строк плитки. Мы исследовали, может ли перестановка порядка обработки строк плитки повысить точность отсечения. Мотивация исходит из локального феномена окна, наблюдаемого в StreamingLLM <cite class="ltx_cite ltx_citemacro_cite"><span class="ltx_ref ltx_missing_citation ltx_ref_self">xiao2023efficient</span></cite>, где последние токены (локальное окно) часто получают высокие оценки внимания наряду с токенами sink внимания в начале. Обрабатывая плитки, содержащие локальное окно, в первую очередь, текущий максимум <math alttext="m_{i}" class="ltx_Math" display="inline" id="S5.SS6.p4.1.m1" intent=":literal"><semantics><msub><mi>m</mi><mi>i</mi></msub><annotation encoding="application/x-tex">m_{i}</annotation></semantics></math> можно быстро заполнить этими токенами с высокими оценками, тем самым раньше в вычислении сформировав более удачную аппроксимацию глобального максимума. Это позволило бы принимать более точные решения об пропуске для последующих блоков. Важно, что BLASST поддерживает такую гибкость перестановок на уровне планирования ядер с пренебрежимо малым накладным расходом.</p>
+</div>
+<div class="ltx_para ltx_noindent" id="S5.SS6.p5">
+<p class="ltx_p" id="S5.SS6.p5.1">Рисунок <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2512.12087v3#S5.F8" title="Figure 8 ‣ 5.6 Ablation Studies ‣ 5 Experiments"><span class="ltx_text ltx_ref_tag">8</span></a> сравнивает стандартную последовательную обработку с переставленной обработкой в задачах VT и FWE. Результаты показывают поведение, зависящее от набора данных: перестановка обеспечивает сопоставительную производительность на VT, но дает заметные улучшения на FWE. Это указывает на то, что эффективность перестановки в значительной степени зависит от конкретных шаблонов внимания в каждом наборе данных. Тем не менее, это демонстрирует ценное свойство BLASST: алгоритм устойчив к различным порядкам обработки и может адаптироваться к различным стратегиям оптимизации. Гибкость для поддержки перестановки плит (tile reordering) показывает потенциал оптимизаций, специфичных для набора данных, без необходимости в фундаментальных изменениях алгоритма.</p>
+</div>
+<figure class="ltx_figure" id="S5.F8"><img alt="Refer to caption" class="ltx_graphics ltx_centering ltx_img_landscape" height="311" id="S5.F8.g1" src="./[2512.12087] 1 Introduction_files/x11.png" width="830"/>
+<figcaption class="ltx_caption ltx_centering">⟦<span class="ltx_tag ltx_tag_figure">Figure 8: </span>Влияние перестановки строк плиток на компромисс точность- разреженность для Llama 3.1 8B (ctx=8192). Мы сравниваем Standard Cummax (обработка плиток последовательно) с Reordered Cummax (обработка плиток в обратном порядке). Графики для обоих тестов VT и FWE показывают, что перестановка оказывает пренебрежимо малое влияние на точность модели при заданном уровне разреженности.</figcaption>
+</figure>
+<figure class="ltx_figure" id="S5.F9"><img alt="Refer to caption" class="ltx_graphics ltx_centering ltx_img_landscape" height="408" id="S5.F9.g1" src="./[2512.12087] 1 Introduction_files/x12.png" width="747"/>
+<figcaption class="ltx_caption ltx_centering">⟦<span class="ltx_tag ltx_tag_figure">Figure 9: </span>Точность-скупость trade-off на высоких уровнях скудости на RULER-16K для Qwen3-8B. BLASST демонстрирует более стабильное ухудшение по сравнению с XAttention, сохраняя лучшую точность при агрессивных настройках скудости. Это показывает эффективность использования фактической статистики softmax вместо показателей важности, основанных на прокси.</figcaption>
+</figure>
+<div class="ltx_para ltx_noindent" id="S5.SS6.p6">
+<p class="ltx_p" id="S5.SS6.p6.1">Анализ экстремальной разреженности. Рисунок <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2512.12087v3#S5.F9" title="Figure 9 ‣ 5.6 Ablation Studies ‣ 5 Experiments"><span class="ltx_text ltx_ref_tag">9</span></a> показывает поведение BLASST на RULER-бенчмарках при более высоких уровнях разреженности (70–90%). По сравнению с XAttention, BLASST демонстрирует более стабильное снижение точности при увеличении уровней разреженности. Хотя XAttention показывает более резкие падения точности при высокой разреженности, пороговое отсечение в BLASST с использованием фактической статистики softmax (а не оценок-заменителей) обеспечивает более плавную деградацию. Эта устойчивость делает BLASST более подходящим для агрессивных режимов разреженности, где критически важна вычислительная эффективность.</p>
+</div>
+</section>
+</section>
+<section class="ltx_section" id="S6">
+<h2 class="ltx_title ltx_title_section">
+<span class="ltx_tag ltx_tag_section">6 </span>Заключение</h2>
+<div class="ltx_para ltx_noindent" id="S6.p1">
+<p class="ltx_p" id="S6.p1.1">Мы представили BLASST — простую, но эффективную методику разреженного внимания, которая динамически исключает вычисления внимания, повторно используя онлайн-статистики softmax, и не требует предварительных вычислений или прокси-оценок. Достигая более 50% разреженности при минимальном снижении точности и обеспечивая до 1.6<math alttext="\times" class="ltx_Math" display="inline" id="S6.p1.1.m1" intent=":literal"><semantics><mo>×</mo><annotation encoding="application/x-tex">\times</annotation></semantics></math> ускорения на современных GPU, BLASST делает вывод для длинного контекста заметно более практичным. Автоматическая калибровка и обучение с учетом разреженности дополнительно повышают ее надежность и гибкость, закладывая практическую основу для эффективных transformers с длинным контекстом.</p>
+</div>
+<div class="ltx_para ltx_noindent" id="S6.p2">
+<p class="ltx_p" id="S6.p2.1">В дальнейшем мы считаем, что сочетание аппаратно-зависимых разреженных шаблонов, обучаемой разреженности в процессе обучения и адаптивных гибридных методов станет ключом к раскрытию полного потенциала будущих агентных систем ИИ.</p>
+</div>
+</section><div about="" class="ltx_rdf" content="Anonymous Authors" property="dcterms:creator"></div>
+<div about="" class="ltx_rdf" content="Machine Learning, MLSys" property="dcterms:subject"></div>
+<div about="" class="ltx_rdf" content="mlsys 2025" property="dcterms:description"></div>
+<div about="" class="ltx_rdf" content="BLASST: Dynamic BLocked Attention Sparsity\\ via Softmax Thresholding" property="dcterms:title"></div>
+</article>
+</div>
+<div class="ar5iv-footer"><a class="ar5iv-nav-button ar5iv-nav-button-prev" href="https://ar5iv.labs.arxiv.org/html/2512.12086">◄</a>
+<a class="ar5iv-home-button" href="https://ar5iv.labs.arxiv.org/"><img alt="ar5iv homepage" height="40" src="./[2512.12087] 1 Introduction_files/ar5iv.png"/></a>
+<a class="ar5iv-text-button" href="https://ar5iv.labs.arxiv.org/feeling_lucky">Чувство<br/>lucky?</a>
+<a aria-hidden="true" href="https://ar5iv.labs.arxiv.org/land_of_honey_and_milk" rel="nofollow" tabindex="-1"></a>
+<a class="ar5iv-text-button ar5iv-severity-warning" href="https://ar5iv.labs.arxiv.org/log/2512.12087">Преобразование<br/>report</a>
+<a class="ar5iv-text-button" href="https://github.com/dginev/ar5iv/issues/new?template=improve-article--arxiv-id-.md&amp;title=Improve+article+2512.12087" target="_blank">Отчет<br/>проблема</a>
+<a class="ar5iv-text-button arxiv-ui-theme" href="https://arxiv.org/abs/2512.12087">Просмотреть оригинал<br/>на arXiv</a><a class="ar5iv-nav-button ar5iv-nav-button-next" href="https://ar5iv.labs.arxiv.org/html/2512.12088">►</a>
+</div><footer class="ltx_page_footer">
+<a class="ar5iv-toggle-color-scheme" href="javascript:toggleColorScheme()" title="Toggle ar5iv color scheme"><span class="color-scheme-icon"></span></a>
+<a class="ar5iv-footer-button" href="https://arxiv.org/help/license" target="_blank">Copyright</a>
+<a class="ar5iv-footer-button" href="https://arxiv.org/help/policies/privacy_policy" target="_blank">Политика конфиденциальности</a>
+<div class="ltx_page_logo">Сгенерировано  во вторник, 6 января 07:06:38 2026 года, пользователем <a class="ltx_LaTeXML_logo" href="http://dlmf.nist.gov/LaTeXML/" target="_blank"><span style="letter-spacing:-0.2em; margin-right:0.1em;">L<span class="ltx_font_smallcaps" style="position:relative; bottom:2.2pt;">a</span>T<span class="ltx_font_smallcaps" style="font-size:120%;position:relative; bottom:-0.2ex;">e</span></span><span style="font-size:90%; position:relative; bottom:-0.2ex;">XML</span><img alt="Mascot Sammy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAAOCAYAAAD5YeaVAAAAAXNSR0IArs4c6QAAAAZiS0dEAP8A/wD/oL2nkwAAAAlwSFlzAAALEwAACxMBAJqcGAAAAAd0SU1FB9wKExQZLWTEaOUAAAAddEVYdENvbW1lbnQAQ3JlYXRlZCB3aXRoIFRoZSBHSU1Q72QlbgAAAdpJREFUKM9tkL+L2nAARz9fPZNCKFapUn8kyI0e4iRHSR1Kb8ng0lJw6FYHFwv2LwhOpcWxTjeUunYqOmqd6hEoRDhtDWdA8ApRYsSUCDHNt5ul13vz4w0vWCgUnnEc975arX6ORqN3VqtVZbfbTQC4uEHANM3jSqXymFI6yWazP2KxWAXAL9zCUa1Wy2tXVxheKA9YNoR8Pt+aTqe4FVVVvz05O6MBhqUIBGk8Hn8HAOVy+T+XLJfLS4ZhTiRJgqIoVBRFIoric47jPnmeB1mW/9rr9ZpSSn3Lsmir1fJZlqWlUonKsvwWwD8ymc/nXwVBeLjf7xEKhdBut9Hr9WgmkyGEkJwsy5eHG5vN5g0AKIoCAEgkEkin0wQAfN9/cXPdheu6P33fBwB4ngcAcByHJpPJl+fn54mD3Gg0NrquXxeLRQAAwzAYj8cwTZPwPH9/sVg8PXweDAauqqr2cDjEer1GJBLBZDJBs9mE4zjwfZ85lAGg2+06hmGgXq+j3+/DsixYlgVN03a9Xu8jgCNCyIegIAgx13Vfd7vdu+FweG8YRkjXdWy329+dTgeSJD3ieZ7RNO0VAXAPwDEAO5VKndi2fWrb9jWl9Esul6PZbDY9Go1OZ7PZ9z/lyuD3OozU2wAAAABJRU5ErkJggg=="/></a>
+</div></footer>
+</div>
+<script>
+      var canMathML = typeof(MathMLElement) == "function";
+      if (!canMathML) {
+        var body = document.querySelector("body");
+        body.firstElementChild.setAttribute('style', 'opacity: 0;');
+        var loading = document.createElement("div");
+        loading.setAttribute("id", "mathjax-loading-spinner");
+        var message = document.createElement("div");
+        message.setAttribute("id", "mathjax-loading-message");
+        message.innerText = "Typesetting Equations...";
+        body.prepend(loading);
+        body.prepend(message);
+
+        var el = document.createElement("script");
+        el.src = "https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js";
+        document.querySelector("head").appendChild(el);
+
+        window.MathJax = {
+          startup: {
+            pageReady: () => {
+              return MathJax.startup.defaultPageReady().then(() => {
+                body.removeChild(loading);
+                body.removeChild(message);
+                body.firstElementChild.removeAttribute('style');
+              }); } } };
+      }
+    </script>
+<script>
+    // Auxiliary function, building the preview feature when
+    // an inline citation is clicked
+    function clicked_cite(e) {
+      e.preventDefault();
+      let cite = this.closest('.ltx_cite');
+      let next = cite.nextSibling;
+      if (next && next.nodeType == Node.ELEMENT_NODE && next.getAttribute('class') == "ar5iv-bibitem-preview") {
+        next.remove();
+        return; }
+      // Before adding a preview modal,
+      // cleanup older previews, in case they're still open
+      document.querySelectorAll('span.ar5iv-bibitem-preview').forEach(function(node) {
+        node.remove();
+      })
+
+      // Create the preview
+      preview = document.createElement('span');
+      preview.setAttribute('class','ar5iv-bibitem-preview');
+      let target = document.getElementById(this.getAttribute('href').slice(1));
+      target.childNodes.forEach(function (child) {
+        preview.append(child.cloneNode(true));
+      });
+      let close_x = document.createElement('button');
+      close_x.setAttribute("aria-label","Close modal for bibliography item preview");
+      close_x.textContent = "×";
+      close_x.setAttribute('class', 'ar5iv-button-close-preview');
+      close_x.setAttribute('onclick','this.parentNode.remove()');
+      preview.append(close_x);
+      preview.querySelectorAll('.ltx_tag_bibitem').forEach(function(node) {
+        node.remove();
+      });
+      cite.parentNode.insertBefore(preview, cite.nextSibling);
+      return;
+    }
+    // Global Document initialization:
+    // - assign the preview feature to all inline citation links
+    document.querySelectorAll(".ltx_cite .ltx_ref").forEach(function (link) {
+      link.addEventListener("click", clicked_cite);
+    });
+    </script>
+</body></html>

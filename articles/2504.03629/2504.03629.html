@@ -1,0 +1,1099 @@
+<!DOCTYPE html>
+<!-- saved from url=(0044)https://ar5iv.labs.arxiv.org/html/2504.03629 -->
+<html lang="en" data-theme="light"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<title>[2504.03629] SeGuE: Semantic Guided Exploration for Mobile Robots</title><meta property="og:description" content="The rise of embodied AI applications has enabled robots to perform complex tasks which require a sophisticated understanding of their environment. To enable successful robot operation in such settings, maps must be con…">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="SeGuE: Semantic Guided Exploration for Mobile Robots">
+<meta name="twitter:image:src" content="https://ar5iv.labs.arxiv.org/assets/ar5iv_card.png">
+<meta name="twitter:image:alt" content="ar5iv logo">
+<meta property="og:title" content="SeGuE: Semantic Guided Exploration for Mobile Robots">
+<meta property="og:site_name" content="ar5iv">
+<meta property="og:image" content="https://ar5iv.labs.arxiv.org/assets/ar5iv_card.png">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://ar5iv.labs.arxiv.org/html/2504.03629">
+<link rel="canonical" target="_blank" href="https://ar5iv.labs.arxiv.org/html/2504.03629">
+
+<!--Generated on Mon May  5 14:57:52 2025 by LaTeXML (version 0.8.8) http://dlmf.nist.gov/LaTeXML/.-->
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+<script>
+  function detectColorScheme(){
+    var theme="light";
+    var current_theme = localStorage.getItem("ar5iv_theme");
+    if(current_theme){
+      if(current_theme == "dark"){
+        theme = "dark";
+      } }
+    else if(!window.matchMedia) { return false; }
+    else if(window.matchMedia("(prefers-color-scheme: dark)").matches) {
+      theme = "dark"; }
+    if (theme=="dark") {
+      document.documentElement.setAttribute("data-theme", "dark");
+    } else {
+      document.documentElement.setAttribute("data-theme", "light"); } }
+
+  detectColorScheme();
+
+  function toggleColorScheme(){
+    var current_theme = localStorage.getItem("ar5iv_theme");
+    if (current_theme) {
+      if (current_theme == "light") {
+        localStorage.setItem("ar5iv_theme", "dark"); }
+      else {
+        localStorage.setItem("ar5iv_theme", "light"); } }
+    else {
+        localStorage.setItem("ar5iv_theme", "dark"); }
+    detectColorScheme(); }
+</script>
+<link media="all" rel="stylesheet" href="./[2504.03629] SeGuE_ Semantic Guided Exploration for Mobile Robots_files/ar5iv-fonts.0.8.4.css"><link media="all" rel="stylesheet" href="./[2504.03629] SeGuE_ Semantic Guided Exploration for Mobile Robots_files/ar5iv.0.8.4.css"><link media="all" rel="stylesheet" href="./[2504.03629] SeGuE_ Semantic Guided Exploration for Mobile Robots_files/ar5iv-site.0.2.2.css">
+<meta content="extension" property="gosuslugi.plugin.extension.content"></head>
+<body>
+<div class="ltx_page_main">
+<div class="ltx_page_content">
+<article class="ltx_document ltx_authors_1line">
+<h1 class="ltx_title ltx_title_document">SeGuE: Semantic Guided Exploration for Mobile Robots</h1>
+<div class="ltx_authors">
+<span class="ltx_creator ltx_role_author">
+<span class="ltx_personname">Cody Simons, Aritra Samanta, Amit K. Roy-Chowdhury, Konstantinos Karydis
+</span><span class="ltx_author_notes">The authors are with the Dept. of Electrical and Computer Eng. at the Univ. of California, Riverside, 900 University Avenue, Riverside, CA 92521, USA.
+Email: <span class="ltx_text ltx_font_typewriter" style="font-size:80%;">{csimo005, asama004, amitrc, karydis}@ucr.edu</span>.
+We gratefully acknowledge the support of NSF # IIS-1901379, # CNS-2312395 and ONR # N00014-18-1-2252, # N00014-19-1-2264. Any opinions, findings, and conclusions or recommendations expressed in this material are those of the authors and do not necessarily reflect the views of the funding agencies.
+</span></span>
+</div>
+
+<div class="ltx_abstract">
+<h6 class="ltx_title ltx_title_abstract">Abstract</h6>
+<p class="ltx_p">The rise of embodied AI applications has enabled robots to perform complex tasks which require a sophisticated understanding of their environment. To enable successful robot operation in such settings, maps must be constructed so that they include semantic information, in addition to geometric information. In this paper, we address the novel problem of semantic exploration, whereby a mobile robot must autonomously explore an environment to fully map both its structure and the semantic appearance of features. We develop a method based on next-best-view exploration, where potential poses are scored based on the semantic features visible from that pose. We explore two alternative methods for sampling potential views and demonstrate the effectiveness of our framework in both simulation and physical experiments. Automatic creation of high-quality semantic maps can enable robots to better understand and interact with their environments and enable future embodied AI applications to be more easily deployed.</p>
+</div>
+<section id="S1" class="ltx_section">
+<h2 class="ltx_title ltx_title_section">
+<span class="ltx_tag ltx_tag_section">I </span><span class="ltx_text ltx_font_smallcaps">Introduction</span>
+</h2>
+
+<div id="S1.p1" class="ltx_para">
+<p class="ltx_p">Advancements in machine learning performance and edge computing propel robots toward acquiring higher than ever before reasoning and decision-making capabilities.
+These capabilities are critical for successfully deploying them in workplace environments such as automated kitchens&nbsp;<cite class="ltx_cite ltx_citemacro_cite">[<a href="https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib1" title="" class="ltx_ref">1</a>]</cite> or unmanned farms&nbsp;<cite class="ltx_cite ltx_citemacro_cite">[<a href="https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib2" title="" class="ltx_ref">2</a>]</cite>, where a robot needs to solve a joint navigation and semantic scene understanding problem.</p>
+</div>
+<div id="S1.p2" class="ltx_para">
+<p class="ltx_p">To solve this problem, classical metric-based maps have been fused with semantic-based maps to offer appropriate information-rich maps.
+For example, in visual object navigation&nbsp;<cite class="ltx_cite ltx_citemacro_cite">[<a href="https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib3" title="" class="ltx_ref">3</a>]</cite>, an agent must find an object matching a text or picture.
+Similarly, in language-guided navigation&nbsp;<cite class="ltx_cite ltx_citemacro_cite">[<a href="https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib4" title="" class="ltx_ref">4</a>]</cite>, an agent must navigate based on natural language instructions referencing the environment’s appearance.
+Such methods are often zero-shot, assuming no prior knowledge of the environment.
+While this setting is challenging, it is inherently transient.
+In real-world cases, where continuous operation is needed, constructing a comprehensive map during or before operation would be highly beneficial.
+At the same time, several existing methods (e.g.,&nbsp;<cite class="ltx_cite ltx_citemacro_cite">[<a href="https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib1" title="" class="ltx_ref">1</a>, <a href="https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib5" title="" class="ltx_ref">5</a>, <a href="https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib3" title="" class="ltx_ref">3</a>, <a href="https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib4" title="" class="ltx_ref">4</a>]</cite>) use maps that have been augmented with semantic classes.
+While semantic class information is valuable, its limited reusability may hinder transfer to physical robot deployment across environments.
+To address this challenge, we propose an exploration method that maps the environment’s semantic <em class="ltx_emph ltx_font_italic">features</em>, thus enabling reusability across diverse tasks.</p>
+</div>
+<div id="S1.p3" class="ltx_para">
+<p class="ltx_p">Modern AI-enhanced semantic maps can jointly encode a scene’s geometry and appearance features.
+They can hold features extracted by machine learning models, which in turn can be reused across many different tasks.
+Semantic feature maps can be created online&nbsp;<cite class="ltx_cite ltx_citemacro_cite">[<a href="https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib3" title="" class="ltx_ref">3</a>]</cite>, typically to aid in visual object search, or offline&nbsp;<cite class="ltx_cite ltx_citemacro_cite">[<a href="https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib4" title="" class="ltx_ref">4</a>]</cite>, which can be used for language-guided navigation or other downstream tasks.
+However, offline mapping typically requires manual robot operation or hand-engineered routes to ensure comprehensive coverage of appearance features.
+Although autonomous exploration methods for mapping environmental structures are well-established in robotics, there is a notable gap in <em class="ltx_emph ltx_font_italic">automatically guiding exploration to create high-quality semantic maps</em>.</p>
+</div>
+<div id="S1.p4" class="ltx_para">
+<p class="ltx_p">Autonomous environment exploration and mapping have received significant attention over the years.
+Mapping the structure of a static environment in 2D has largely been solved by existing SLAM approaches&nbsp;<cite class="ltx_cite ltx_citemacro_cite">[<a href="https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib6" title="" class="ltx_ref">6</a>]</cite>.
+Exploration is also very well studied, with conventional approaches divided broadly into frontier-based and next-best-view-based methods.
+In frontier-based methods&nbsp;<cite class="ltx_cite ltx_citemacro_cite">[<a href="https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib7" title="" class="ltx_ref">7</a>]</cite>, the robot moves to locations that are on the border between the mapped and unmapped portions of the environment, while next-best-view methods&nbsp;<cite class="ltx_cite ltx_citemacro_cite">[<a href="https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib8" title="" class="ltx_ref">8</a>, <a href="https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib9" title="" class="ltx_ref">9</a>, <a href="https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib10" title="" class="ltx_ref">10</a>]</cite> sample and score potential views based on information theoretic metrics. Given sufficient time, both the methods can fully capture the geometry of an environment. However, they do not consider the appearance features of the environment. Furthermore, the increased range and field-of-view of modern depth sensors can result in incomplete and low-quality semantic feature maps <cite class="ltx_cite ltx_citemacro_cite">[<a href="https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib11" title="" class="ltx_ref">11</a>]</cite>.</p>
+</div>
+<div id="S1.p5" class="ltx_para">
+<p class="ltx_p">In this work, we introduce a novel autonomous exploration method based on the next-best-view approach, which maps the structure of the environment and simultaneously captures its semantic appearance.
+Our method scores potential views by computing the average entropy of visible semantic features, excluding occluded and converged features.
+We investigate two alternative view sampling techniques: uniform sampling across reachable poses and an iterative importance sampling method inspired by particle filter optimization.
+Off-the-shelf components are leveraged for metric-based mapping and navigation.
+Our approach is validated through both simulation and physical hardware experiments using a wheeled mobile robot.
+In sum, our contributions include:
+</p>
+<ol id="S1.I1" class="ltx_enumerate">
+<li id="S1.I1.i1" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">1.</span> 
+<div id="S1.I1.i1.p1" class="ltx_para">
+<p class="ltx_p">We propose a method for scoring individual semantic map features and show how these scores can be combined to score a particular view.</p>
+</div>
+</li>
+<li id="S1.I1.i2" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">2.</span> 
+<div id="S1.I1.i2.p1" class="ltx_para">
+<p class="ltx_p">We explore two alternative methods for sampling potential views.</p>
+</div>
+</li>
+<li id="S1.I1.i3" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">3.</span> 
+<div id="S1.I1.i3.p1" class="ltx_para">
+<p class="ltx_p">We demonstrate the feasibility of our framework in simulated and physical experiments.</p>
+</div>
+</li>
+</ol>
+</div>
+</section>
+<section id="S2" class="ltx_section">
+<h2 class="ltx_title ltx_title_section">
+<span class="ltx_tag ltx_tag_section">II </span><span class="ltx_text ltx_font_smallcaps">Related Work</span>
+</h2>
+
+<section id="S2.SS1" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">II-A </span><span class="ltx_text ltx_font_italic">Semantic Mapping</span>
+</h3>
+
+<div id="S2.SS1.p1" class="ltx_para">
+<p class="ltx_p">Semantic mapping has been explored both in machine learning and robotics communities.
+Machine learning research focuses on dense semantic features&nbsp;<cite class="ltx_cite ltx_citemacro_cite">[<a href="https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib4" title="" class="ltx_ref">4</a>]</cite>.
+These maps allow for fine-grained search within the environment&nbsp;<cite class="ltx_cite ltx_citemacro_cite">[<a href="https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib4" title="" class="ltx_ref">4</a>]</cite> and can be used to predict the layout of the unexplored portion of the environment&nbsp;<cite class="ltx_cite ltx_citemacro_cite">[<a href="https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib12" title="" class="ltx_ref">12</a>]</cite>.
+Within robotics, there has been a focus on semantic classes.
+In&nbsp;<cite class="ltx_cite ltx_citemacro_cite">[<a href="https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib13" title="" class="ltx_ref">13</a>]</cite>, semantic categories were used to increase loop closures, and in&nbsp;<cite class="ltx_cite ltx_citemacro_cite">[<a href="https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib14" title="" class="ltx_ref">14</a>]</cite>, semantic categories were used to create more efficient routes.
+As resources available on robots (sensors, computing units, etc.) continue to grow and AI models continue to become more amenable to edge computing, the demand for maps of dense semantic features is expected to rise.
+Our method can help construct such maps automatically.</p>
+</div>
+</section>
+<section id="S2.SS2" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">II-B </span><span class="ltx_text ltx_font_italic">Frontier Exploration</span>
+</h3>
+
+<div id="S2.SS2.p1" class="ltx_para">
+<p class="ltx_p">Frontier-based exploration has been thoroughly explored in the literature.
+Initially proposed in&nbsp;<cite class="ltx_cite ltx_citemacro_cite">[<a href="https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib7" title="" class="ltx_ref">7</a>]</cite>, frontier-based methods seek to fully explore an environment by constantly moving toward the border between known and unknown space.
+More recent works have sought to increase the computational efficiency of computing frontiers&nbsp;<cite class="ltx_cite ltx_citemacro_cite">[<a href="https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib15" title="" class="ltx_ref">15</a>]</cite> and create frontier ranking mechanisms&nbsp;<cite class="ltx_cite ltx_citemacro_cite">[<a href="https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib16" title="" class="ltx_ref">16</a>]</cite>.
+These exploration methods are solely concerned with mapping the geometry of an environment, which can be directly observed with current LiDAR sensors that are commonly integrated into contemporary robots.
+In contrast, mapping semantic features can be significantly complicated by the variability in object appearances at different distances, the salience of various objects to feature extractors, and the limited field of view of most cameras.</p>
+</div>
+</section>
+<section id="S2.SS3" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">II-C </span><span class="ltx_text ltx_font_italic">Next-Best-View Determination</span>
+</h3>
+
+<div id="S2.SS3.p1" class="ltx_para">
+<p class="ltx_p">The next-best-view pipeline&nbsp;<cite class="ltx_cite ltx_citemacro_cite">[<a href="https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib8" title="" class="ltx_ref">8</a>, <a href="https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib9" title="" class="ltx_ref">9</a>, <a href="https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib10" title="" class="ltx_ref">10</a>]</cite> consists of a pose sampler, a metric to rank poses, either in terms of information gain&nbsp;<cite class="ltx_cite ltx_citemacro_cite">[<a href="https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib8" title="" class="ltx_ref">8</a>, <a href="https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib9" title="" class="ltx_ref">9</a>, <a href="https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib10" title="" class="ltx_ref">10</a>]</cite> or a task-specific metric&nbsp;<cite class="ltx_cite ltx_citemacro_cite">[<a href="https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib5" title="" class="ltx_ref">5</a>, <a href="https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib1" title="" class="ltx_ref">1</a>]</cite>, and a mapper which updates an internal map while navigating to the determined next-best-view pose.
+Several contemporary implementations use sampling-based planners to select poses&nbsp;<cite class="ltx_cite ltx_citemacro_cite">[<a href="https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib8" title="" class="ltx_ref">8</a>, <a href="https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib17" title="" class="ltx_ref">17</a>]</cite>.
+However, this can lead to getting trapped in local maxima.
+One way to address this is by integrating an additional global sampler&nbsp;<cite class="ltx_cite ltx_citemacro_cite">[<a href="https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib10" title="" class="ltx_ref">10</a>]</cite>.
+Information-theoretic metrics&nbsp;<cite class="ltx_cite ltx_citemacro_cite">[<a href="https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib18" title="" class="ltx_ref">18</a>, <a href="https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib9" title="" class="ltx_ref">9</a>]</cite> encode the structure and the confidence in the current map to rank the value of a particular view.
+Semantic categories have also been used&nbsp;<cite class="ltx_cite ltx_citemacro_cite">[<a href="https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib1" title="" class="ltx_ref">1</a>]</cite> to focus on more task-relevant structures.
+To the best of our knowledge, no method has incorporated a semantic feature map into a next-best-view algorithm.</p>
+</div>
+</section>
+</section>
+<section id="S3" class="ltx_section">
+<h2 class="ltx_title ltx_title_section">
+<span class="ltx_tag ltx_tag_section">III </span><span class="ltx_text ltx_font_smallcaps">Problem Definition</span>
+</h2>
+
+<div id="S3.p1" class="ltx_para">
+<p class="ltx_p">In this work, we address a novel semantic exploration problem. We aim to simultaneously explore and map an environment in real time autonomously while ensuring that the map fully captures the semantic information necessary for downstream embodied AI applications.
+Specifically, we ask how a mobile robot, equipped with an RGB camera and a depth sensor, can explore an environment and construct a 2D map <math id="S3.p1.m1" class="ltx_Math" alttext="\mathcal{M}\in\mathbb{R}^{H\times W\times N+1}" display="inline"><semantics><mrow><mi class="ltx_font_mathcaligraphic">ℳ</mi><mo>∈</mo><msup><mi>ℝ</mi><mrow><mrow><mi>H</mi><mo lspace="0.222em" rspace="0.222em">×</mo><mi>W</mi><mo lspace="0.222em" rspace="0.222em">×</mo><mi>N</mi></mrow><mo>+</mo><mn>1</mn></mrow></msup></mrow><annotation encoding="application/x-tex">\mathcal{M}\in\mathbb{R}^{H\times W\times N+1}</annotation></semantics></math>, where <math id="S3.p1.m2" class="ltx_Math" alttext="H" display="inline"><semantics><mi>H</mi><annotation encoding="application/x-tex">H</annotation></semantics></math> and <math id="S3.p1.m3" class="ltx_Math" alttext="W" display="inline"><semantics><mi>W</mi><annotation encoding="application/x-tex">W</annotation></semantics></math> represent the height and width of the map, and <math id="S3.p1.m4" class="ltx_Math" alttext="N" display="inline"><semantics><mi>N</mi><annotation encoding="application/x-tex">N</annotation></semantics></math> represents the dimension of the semantic feature vectors.
+The additional scalar value in the third dimension represents the occupancy information, in the form of an occupancy grid.
+While semantic map generation is a thoroughly studied field&nbsp;<cite class="ltx_cite ltx_citemacro_cite">[<a href="https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib4" title="" class="ltx_ref">4</a>]</cite>, in this work, we specifically address the exploration problem to ensure sufficient coverage of the environment and to capture high-quality semantic features.
+To reduce implementation complexity, we make the working assumptions that the robot operates in a physically bounded environment, and that the environment is relatively flat and traversable.
+These assumptions are not restrictive since they relate to most common indoor navigation paradigms (as we test herein), and can directly carry over to outdoor navigation in structured environments.</p>
+</div>
+</section>
+<section id="S4" class="ltx_section">
+<h2 class="ltx_title ltx_title_section">
+<span class="ltx_tag ltx_tag_section">IV </span><span class="ltx_text ltx_font_smallcaps">Proposed Approach</span>
+</h2>
+
+<div id="S4.p1" class="ltx_para">
+<p class="ltx_p">We propose the Semantic Guided Exploration (SeGuE) method for mobile robots.
+Our method builds upon next-best-view algorithms.
+During exploration, a semantic map, <math id="S4.p1.m1" class="ltx_Math" alttext="S" display="inline"><semantics><mi>S</mi><annotation encoding="application/x-tex">S</annotation></semantics></math>, is constructed using data from two different sensing modalities, specifically an RGB camera and a 3D LiDAR.
+SeGuE samples collision-free and reachable poses from the occupancy grid generated during navigation, based on the current semantic understanding of the environment.
+To estimate the potential information gain from each pose, the average prediction entropy of each semantic features visible from a pose is computed.
+To ensure that cells with higher aleatoric uncertainty are not overly exploited, the entropy of each semantic feature is tracked over time and features whose entropy has converged are excluded from score calculations.
+This process is repeated until a pose with a score above some threshold cannot be found.
+SeGuE is summarized in Algorithm <a href="https://ar5iv.labs.arxiv.org/html/2504.03629#alg1" title="Algorithm 1 ‣ IV Proposed Approach ‣ SeGuE: Semantic Guided Exploration for Mobile Robots" class="ltx_ref"><span class="ltx_text ltx_ref_tag">1</span></a>.
+We elaborate on each step of the approach next.</p>
+</div>
+<figure id="alg1" class="ltx_float ltx_float_algorithm ltx_framed ltx_framed_top">
+<figcaption class="ltx_caption"><span class="ltx_tag ltx_tag_float"><span class="ltx_text ltx_font_bold">Algorithm 1</span> </span> SeGuE Algorithm</figcaption>
+<div class="ltx_listing ltx_listing">
+<div id="alg1.l0" class="ltx_listingline">
+<span class="ltx_tag ltx_tag_listingline"><span class="ltx_text" style="font-size:80%;">0:</span></span> Termination Threshold <math id="alg1.l0.m1" class="ltx_Math" alttext="\tau" display="inline"><semantics><mi>τ</mi><annotation encoding="application/x-tex">\tau</annotation></semantics></math>
+
+</div>
+<div id="alg1.l1" class="ltx_listingline">
+<span class="ltx_tag ltx_tag_listingline"><span class="ltx_text" style="font-size:80%;">1:</span></span> Initialize an empty semantic map <math id="alg1.l1.m1" class="ltx_Math" alttext="S" display="inline"><semantics><mi>S</mi><annotation encoding="application/x-tex">S</annotation></semantics></math> and empty occupancy map <math id="alg1.l1.m2" class="ltx_Math" alttext="O" display="inline"><semantics><mi>O</mi><annotation encoding="application/x-tex">O</annotation></semantics></math>
+
+</div>
+<div id="alg1.l2" class="ltx_listingline">
+<span class="ltx_tag ltx_tag_listingline"><span class="ltx_text" style="font-size:80%;">2:</span></span> Get image <math id="alg1.l2.m1" class="ltx_Math" alttext="img" display="inline"><semantics><mrow><mi>i</mi><mo lspace="0em" rspace="0em">​</mo><mi>m</mi><mo lspace="0em" rspace="0em">​</mo><mi>g</mi></mrow><annotation encoding="application/x-tex">img</annotation></semantics></math>, point cloud <math id="alg1.l2.m2" class="ltx_Math" alttext="ptCloud" display="inline"><semantics><mrow><mi>p</mi><mo lspace="0em" rspace="0em">​</mo><mi>t</mi><mo lspace="0em" rspace="0em">​</mo><mi>C</mi><mo lspace="0em" rspace="0em">​</mo><mi>l</mi><mo lspace="0em" rspace="0em">​</mo><mi>o</mi><mo lspace="0em" rspace="0em">​</mo><mi>u</mi><mo lspace="0em" rspace="0em">​</mo><mi>d</mi></mrow><annotation encoding="application/x-tex">ptCloud</annotation></semantics></math>, and current pose <math id="alg1.l2.m3" class="ltx_Math" alttext="p_{curr}" display="inline"><semantics><msub><mi>p</mi><mrow><mi>c</mi><mo lspace="0em" rspace="0em">​</mo><mi>u</mi><mo lspace="0em" rspace="0em">​</mo><mi>r</mi><mo lspace="0em" rspace="0em">​</mo><mi>r</mi></mrow></msub><annotation encoding="application/x-tex">p_{curr}</annotation></semantics></math> from robot
+
+</div>
+<div id="alg1.l3" class="ltx_listingline">
+<span class="ltx_tag ltx_tag_listingline"><span class="ltx_text" style="font-size:80%;">3:</span></span> <math id="alg1.l3.m1" class="ltx_Math" alttext="S.\text{update}(img,ptCloud,p_{curr})" display="inline"><semantics><mrow><mi>S</mi><mo lspace="0em" rspace="0.167em">.</mo><mrow><mtext>update</mtext><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><mrow><mi>i</mi><mo lspace="0em" rspace="0em">​</mo><mi>m</mi><mo lspace="0em" rspace="0em">​</mo><mi>g</mi></mrow><mo>,</mo><mrow><mi>p</mi><mo lspace="0em" rspace="0em">​</mo><mi>t</mi><mo lspace="0em" rspace="0em">​</mo><mi>C</mi><mo lspace="0em" rspace="0em">​</mo><mi>l</mi><mo lspace="0em" rspace="0em">​</mo><mi>o</mi><mo lspace="0em" rspace="0em">​</mo><mi>u</mi><mo lspace="0em" rspace="0em">​</mo><mi>d</mi></mrow><mo>,</mo><msub><mi>p</mi><mrow><mi>c</mi><mo lspace="0em" rspace="0em">​</mo><mi>u</mi><mo lspace="0em" rspace="0em">​</mo><mi>r</mi><mo lspace="0em" rspace="0em">​</mo><mi>r</mi></mrow></msub><mo stretchy="false">)</mo></mrow></mrow></mrow><annotation encoding="application/x-tex">S.\text{update}(img,ptCloud,p_{curr})</annotation></semantics></math>
+
+</div>
+<div id="alg1.l4" class="ltx_listingline">
+<span class="ltx_tag ltx_tag_listingline"><span class="ltx_text" style="font-size:80%;">4:</span></span> <math id="alg1.l4.m1" class="ltx_Math" alttext="O.\text{update}(ptCloud,p_{curr})" display="inline"><semantics><mrow><mi>O</mi><mo lspace="0em" rspace="0.167em">.</mo><mrow><mtext>update</mtext><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><mrow><mi>p</mi><mo lspace="0em" rspace="0em">​</mo><mi>t</mi><mo lspace="0em" rspace="0em">​</mo><mi>C</mi><mo lspace="0em" rspace="0em">​</mo><mi>l</mi><mo lspace="0em" rspace="0em">​</mo><mi>o</mi><mo lspace="0em" rspace="0em">​</mo><mi>u</mi><mo lspace="0em" rspace="0em">​</mo><mi>d</mi></mrow><mo>,</mo><msub><mi>p</mi><mrow><mi>c</mi><mo lspace="0em" rspace="0em">​</mo><mi>u</mi><mo lspace="0em" rspace="0em">​</mo><mi>r</mi><mo lspace="0em" rspace="0em">​</mo><mi>r</mi></mrow></msub><mo stretchy="false">)</mo></mrow></mrow></mrow><annotation encoding="application/x-tex">O.\text{update}(ptCloud,p_{curr})</annotation></semantics></math>
+
+</div>
+<div id="alg1.l5" class="ltx_listingline">
+<span class="ltx_tag ltx_tag_listingline"><span class="ltx_text" style="font-size:80%;">5:</span></span> <span class="ltx_text ltx_font_bold">while</span>&nbsp;True&nbsp;<span class="ltx_text ltx_font_bold">do</span>
+
+
+
+</div>
+<div id="alg1.l6" class="ltx_listingline">
+<span class="ltx_tag ltx_tag_listingline"><span class="ltx_text" style="font-size:80%;">6:</span></span>  Sample a set of pose <math id="alg1.l6.m1" class="ltx_Math" alttext="P=\{p_{i}\}_{i=0}^{N}" display="inline"><semantics><mrow><mi>P</mi><mo>=</mo><msubsup><mrow><mo stretchy="false">{</mo><msub><mi>p</mi><mi>i</mi></msub><mo stretchy="false">}</mo></mrow><mrow><mi>i</mi><mo>=</mo><mn>0</mn></mrow><mi>N</mi></msubsup></mrow><annotation encoding="application/x-tex">P=\{p_{i}\}_{i=0}^{N}</annotation></semantics></math> using <math id="alg1.l6.m2" class="ltx_Math" alttext="\text{PoseSampler}(S,O)" display="inline"><semantics><mrow><mtext>PoseSampler</mtext><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><mi>S</mi><mo>,</mo><mi>O</mi><mo stretchy="false">)</mo></mrow></mrow><annotation encoding="application/x-tex">\text{PoseSampler}(S,O)</annotation></semantics></math>
+
+</div>
+<div id="alg1.l7" class="ltx_listingline">
+<span class="ltx_tag ltx_tag_listingline"><span class="ltx_text" style="font-size:80%;">7:</span></span>  <math id="alg1.l7.m1" class="ltx_Math" alttext="p^{*}=\max_{p\in P}\text{PoseScore}(p,S,O)" display="inline"><semantics><mrow><msup><mi>p</mi><mo>∗</mo></msup><mo>=</mo><mrow><mrow><msub><mi>max</mi><mrow><mi>p</mi><mo>∈</mo><mi>P</mi></mrow></msub><mo lspace="0.167em">⁡</mo><mtext>PoseScore</mtext></mrow><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><mi>p</mi><mo>,</mo><mi>S</mi><mo>,</mo><mi>O</mi><mo stretchy="false">)</mo></mrow></mrow></mrow><annotation encoding="application/x-tex">p^{*}=\max_{p\in P}\text{PoseScore}(p,S,O)</annotation></semantics></math>
+
+</div>
+<div id="alg1.l8" class="ltx_listingline">
+<span class="ltx_tag ltx_tag_listingline"><span class="ltx_text" style="font-size:80%;">8:</span></span>  <span class="ltx_text ltx_font_bold">if</span>&nbsp;<math id="alg1.l8.m1" class="ltx_Math" alttext="\text{PoseScore}(p^{*},S,O)&lt;\tau" display="inline"><semantics><mrow><mrow><mtext>PoseScore</mtext><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><msup><mi>p</mi><mo>∗</mo></msup><mo>,</mo><mi>S</mi><mo>,</mo><mi>O</mi><mo stretchy="false">)</mo></mrow></mrow><mo>&lt;</mo><mi>τ</mi></mrow><annotation encoding="application/x-tex">\text{PoseScore}(p^{*},S,O)&lt;\tau</annotation></semantics></math>&nbsp;<span class="ltx_text ltx_font_bold">then</span>
+
+
+
+</div>
+<div id="alg1.l9" class="ltx_listingline">
+<span class="ltx_tag ltx_tag_listingline"><span class="ltx_text" style="font-size:80%;">9:</span></span>   End exploration
+
+</div>
+<div id="alg1.l10" class="ltx_listingline">
+<span class="ltx_tag ltx_tag_listingline"><span class="ltx_text" style="font-size:80%;">10:</span></span>  <span class="ltx_text ltx_font_bold">end</span>&nbsp;<span class="ltx_text ltx_font_bold">if</span>
+</div>
+<div id="alg1.l11" class="ltx_listingline">
+<span class="ltx_tag ltx_tag_listingline"><span class="ltx_text" style="font-size:80%;">11:</span></span>  Begin navigating to pose <math id="alg1.l11.m1" class="ltx_Math" alttext="p^{*}" display="inline"><semantics><msup><mi>p</mi><mo>∗</mo></msup><annotation encoding="application/x-tex">p^{*}</annotation></semantics></math>
+
+</div>
+<div id="alg1.l12" class="ltx_listingline">
+<span class="ltx_tag ltx_tag_listingline"><span class="ltx_text" style="font-size:80%;">12:</span></span>  <span class="ltx_text ltx_font_bold">while</span>&nbsp;<math id="alg1.l12.m1" class="ltx_Math" alttext="p^{*}" display="inline"><semantics><msup><mi>p</mi><mo>∗</mo></msup><annotation encoding="application/x-tex">p^{*}</annotation></semantics></math> not reached&nbsp;<span class="ltx_text ltx_font_bold">do</span>
+
+
+
+</div>
+<div id="alg1.l13" class="ltx_listingline">
+<span class="ltx_tag ltx_tag_listingline"><span class="ltx_text" style="font-size:80%;">13:</span></span>   Get image <math id="alg1.l13.m1" class="ltx_Math" alttext="img" display="inline"><semantics><mrow><mi>i</mi><mo lspace="0em" rspace="0em">​</mo><mi>m</mi><mo lspace="0em" rspace="0em">​</mo><mi>g</mi></mrow><annotation encoding="application/x-tex">img</annotation></semantics></math>, point cloud <math id="alg1.l13.m2" class="ltx_Math" alttext="ptCloud" display="inline"><semantics><mrow><mi>p</mi><mo lspace="0em" rspace="0em">​</mo><mi>t</mi><mo lspace="0em" rspace="0em">​</mo><mi>C</mi><mo lspace="0em" rspace="0em">​</mo><mi>l</mi><mo lspace="0em" rspace="0em">​</mo><mi>o</mi><mo lspace="0em" rspace="0em">​</mo><mi>u</mi><mo lspace="0em" rspace="0em">​</mo><mi>d</mi></mrow><annotation encoding="application/x-tex">ptCloud</annotation></semantics></math>, and current pose <math id="alg1.l13.m3" class="ltx_Math" alttext="p_{curr}" display="inline"><semantics><msub><mi>p</mi><mrow><mi>c</mi><mo lspace="0em" rspace="0em">​</mo><mi>u</mi><mo lspace="0em" rspace="0em">​</mo><mi>r</mi><mo lspace="0em" rspace="0em">​</mo><mi>r</mi></mrow></msub><annotation encoding="application/x-tex">p_{curr}</annotation></semantics></math> from robot
+
+</div>
+<div id="alg1.l14" class="ltx_listingline">
+<span class="ltx_tag ltx_tag_listingline"><span class="ltx_text" style="font-size:80%;">14:</span></span>   <math id="alg1.l14.m1" class="ltx_Math" alttext="S.\text{update}(img,ptCloud,p_{curr})" display="inline"><semantics><mrow><mi>S</mi><mo lspace="0em" rspace="0.167em">.</mo><mrow><mtext>update</mtext><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><mrow><mi>i</mi><mo lspace="0em" rspace="0em">​</mo><mi>m</mi><mo lspace="0em" rspace="0em">​</mo><mi>g</mi></mrow><mo>,</mo><mrow><mi>p</mi><mo lspace="0em" rspace="0em">​</mo><mi>t</mi><mo lspace="0em" rspace="0em">​</mo><mi>C</mi><mo lspace="0em" rspace="0em">​</mo><mi>l</mi><mo lspace="0em" rspace="0em">​</mo><mi>o</mi><mo lspace="0em" rspace="0em">​</mo><mi>u</mi><mo lspace="0em" rspace="0em">​</mo><mi>d</mi></mrow><mo>,</mo><msub><mi>p</mi><mrow><mi>c</mi><mo lspace="0em" rspace="0em">​</mo><mi>u</mi><mo lspace="0em" rspace="0em">​</mo><mi>r</mi><mo lspace="0em" rspace="0em">​</mo><mi>r</mi></mrow></msub><mo stretchy="false">)</mo></mrow></mrow></mrow><annotation encoding="application/x-tex">S.\text{update}(img,ptCloud,p_{curr})</annotation></semantics></math>
+
+</div>
+<div id="alg1.l15" class="ltx_listingline">
+<span class="ltx_tag ltx_tag_listingline"><span class="ltx_text" style="font-size:80%;">15:</span></span>   <math id="alg1.l15.m1" class="ltx_Math" alttext="O.\text{update}(ptCloud,p_{curr})" display="inline"><semantics><mrow><mi>O</mi><mo lspace="0em" rspace="0.167em">.</mo><mrow><mtext>update</mtext><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><mrow><mi>p</mi><mo lspace="0em" rspace="0em">​</mo><mi>t</mi><mo lspace="0em" rspace="0em">​</mo><mi>C</mi><mo lspace="0em" rspace="0em">​</mo><mi>l</mi><mo lspace="0em" rspace="0em">​</mo><mi>o</mi><mo lspace="0em" rspace="0em">​</mo><mi>u</mi><mo lspace="0em" rspace="0em">​</mo><mi>d</mi></mrow><mo>,</mo><msub><mi>p</mi><mrow><mi>c</mi><mo lspace="0em" rspace="0em">​</mo><mi>u</mi><mo lspace="0em" rspace="0em">​</mo><mi>r</mi><mo lspace="0em" rspace="0em">​</mo><mi>r</mi></mrow></msub><mo stretchy="false">)</mo></mrow></mrow></mrow><annotation encoding="application/x-tex">O.\text{update}(ptCloud,p_{curr})</annotation></semantics></math>
+
+</div>
+<div id="alg1.l16" class="ltx_listingline">
+<span class="ltx_tag ltx_tag_listingline"><span class="ltx_text" style="font-size:80%;">16:</span></span>  <span class="ltx_text ltx_font_bold">end</span>&nbsp;<span class="ltx_text ltx_font_bold">while</span>
+</div>
+<div id="alg1.l17" class="ltx_listingline">
+<span class="ltx_tag ltx_tag_listingline"><span class="ltx_text" style="font-size:80%;">17:</span></span> <span class="ltx_text ltx_font_bold">end</span>&nbsp;<span class="ltx_text ltx_font_bold">while</span>
+</div>
+</div>
+</figure>
+<section id="S4.SS1" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">IV-A </span><span class="ltx_text ltx_font_italic">Pose Scoring</span>
+</h3>
+
+<div id="S4.SS1.p1" class="ltx_para">
+<p class="ltx_p">Poses are scored according to the amount of information that can be gained at that pose.
+We use entropy as a proxy for this, encouraging the robot to explore the areas of the map it is most uncertain about. During the exploration process, the semantic score map is continually updated by extracting dense semantic features from the current image observation. These features are then associated with different points in the point cloud <span class="ltx_text ltx_font_italic">ptCloud</span>.
+As the 3D points now represent semantic features, they are projected onto the 2D semantic map to associate each cell with a feature.
+(Details of this procedure can be found in&nbsp;<cite class="ltx_cite ltx_citemacro_cite">[<a href="https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib4" title="" class="ltx_ref">4</a>]</cite>.)
+The semantic features are extracted from the image <span class="ltx_text ltx_font_italic">img</span> using a machine learning model <math id="S4.SS1.p1.m1" class="ltx_Math" alttext="h=f\circ g" display="inline"><semantics><mrow><mi>h</mi><mo>=</mo><mrow><mi>f</mi><mo lspace="0.222em" rspace="0.222em">∘</mo><mi>g</mi></mrow></mrow><annotation encoding="application/x-tex">h=f\circ g</annotation></semantics></math>, which can be decomposed into a feature extractor <math id="S4.SS1.p1.m2" class="ltx_Math" alttext="f" display="inline"><semantics><mi>f</mi><annotation encoding="application/x-tex">f</annotation></semantics></math> and classifier <math id="S4.SS1.p1.m3" class="ltx_Math" alttext="g" display="inline"><semantics><mi>g</mi><annotation encoding="application/x-tex">g</annotation></semantics></math>.
+Let <math id="S4.SS1.p1.m4" class="ltx_Math" alttext="g" display="inline"><semantics><mi>g</mi><annotation encoding="application/x-tex">g</annotation></semantics></math> be able to classify <math id="S4.SS1.p1.m5" class="ltx_Math" alttext="M" display="inline"><semantics><mi>M</mi><annotation encoding="application/x-tex">M</annotation></semantics></math> classes.
+The features stored in our semantic map are extracted from <math id="S4.SS1.p1.m6" class="ltx_Math" alttext="f" display="inline"><semantics><mi>f</mi><annotation encoding="application/x-tex">f</annotation></semantics></math>.
+Throughout our experiments we make use of DinoV2&nbsp;<cite class="ltx_cite ltx_citemacro_cite">[<a href="https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib19" title="" class="ltx_ref">19</a>]</cite> to extract features and a linear classifier fine-tuned on the ADE20K dataset&nbsp;<cite class="ltx_cite ltx_citemacro_cite">[<a href="https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib20" title="" class="ltx_ref">20</a>]</cite>.
+The rest of the section describes the scoring mechanism in detail.</p>
+</div>
+<section id="S4.SS1.SSS1" class="ltx_subsubsection">
+<h4 class="ltx_title ltx_title_subsubsection">
+<span class="ltx_tag ltx_tag_subsubsection">IV-A1 </span>Feature Scoring</h4>
+
+<div id="S4.SS1.SSS1.p1" class="ltx_para">
+<p class="ltx_p">Each cell in the semantic map contains a semantic feature vector that encodes the appearance of that location.
+The quality of every semantic feature associated with a particular cell changes over time, as the corresponding viewpoint varies.
+The prediction entropy of each cell is computed to assess the quality of the semantic feature.
+Using the classification head <math id="S4.SS1.SSS1.p1.m1" class="ltx_Math" alttext="g" display="inline"><semantics><mi>g</mi><annotation encoding="application/x-tex">g</annotation></semantics></math>, which classifies <math id="S4.SS1.SSS1.p1.m2" class="ltx_Math" alttext="M" display="inline"><semantics><mi>M</mi><annotation encoding="application/x-tex">M</annotation></semantics></math> classes, the score for a semantic feature <math id="S4.SS1.SSS1.p1.m3" class="ltx_Math" alttext="x" display="inline"><semantics><mi>x</mi><annotation encoding="application/x-tex">x</annotation></semantics></math> is</p>
+<table id="S4.E1" class="ltx_equation ltx_eqn_table">
+
+<tbody><tr class="ltx_equation ltx_eqn_row ltx_align_baseline">
+<td class="ltx_eqn_cell ltx_eqn_center_padleft"></td>
+<td class="ltx_eqn_cell ltx_align_center"><math id="S4.E1.m1" class="ltx_Math" alttext="s(x)=\frac{H(g(x))}{H(\mathcal{U}(M))}\;," display="block"><semantics><mrow><mrow><mrow><mi>s</mi><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo></mrow></mrow><mo>=</mo><mfrac><mrow><mi>H</mi><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><mrow><mi>g</mi><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo></mrow></mrow><mo stretchy="false">)</mo></mrow></mrow><mrow><mi>H</mi><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><mrow><mi class="ltx_font_mathcaligraphic">𝒰</mi><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><mi>M</mi><mo stretchy="false">)</mo></mrow></mrow><mo stretchy="false">)</mo></mrow></mrow></mfrac></mrow><mo lspace="0.280em">,</mo></mrow><annotation encoding="application/x-tex">s(x)=\frac{H(g(x))}{H(\mathcal{U}(M))}\;,</annotation></semantics></math></td>
+<td class="ltx_eqn_cell ltx_eqn_center_padright"></td>
+<td rowspan="1" class="ltx_eqn_cell ltx_eqn_eqno ltx_align_middle ltx_align_right"><span class="ltx_tag ltx_tag_equation ltx_align_right">(1)</span></td>
+</tr></tbody>
+</table>
+<p class="ltx_p">where <math id="S4.SS1.SSS1.p1.m4" class="ltx_Math" alttext="H" display="inline"><semantics><mi>H</mi><annotation encoding="application/x-tex">H</annotation></semantics></math> is the Shannon entropy and <math id="S4.SS1.SSS1.p1.m5" class="ltx_Math" alttext="\mathcal{U}" display="inline"><semantics><mi class="ltx_font_mathcaligraphic">𝒰</mi><annotation encoding="application/x-tex">\mathcal{U}</annotation></semantics></math> is the uniform distribution.
+The score is normalized by the maximum entropy to be in the range <math id="S4.SS1.SSS1.p1.m6" class="ltx_Math" alttext="[0,1]" display="inline"><semantics><mrow><mo stretchy="false">[</mo><mn>0</mn><mo>,</mo><mn>1</mn><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">[0,1]</annotation></semantics></math>, since the maximum entropy can grow arbitrarily large as <math id="S4.SS1.SSS1.p1.m7" class="ltx_Math" alttext="M" display="inline"><semantics><mi>M</mi><annotation encoding="application/x-tex">M</annotation></semantics></math> increases.
+Any cell with no semantic feature is assigned a score of <math id="S4.SS1.SSS1.p1.m8" class="ltx_Math" alttext="1" display="inline"><semantics><mn>1</mn><annotation encoding="application/x-tex">1</annotation></semantics></math>, indicating that no observations in a cell make it maximally uncertain.
+Once these scores are computed for every cell in the semantic map, potential views can be ranked by averaging the scores of individual cells that are visible from that viewpoint.</p>
+</div>
+</section>
+<section id="S4.SS1.SSS2" class="ltx_subsubsection">
+<h4 class="ltx_title ltx_title_subsubsection">
+<span class="ltx_tag ltx_tag_subsubsection">IV-A2 </span>Visibility Mask</h4>
+
+<div id="S4.SS1.SSS2.p1" class="ltx_para">
+<p class="ltx_p">We require that only locations that are visible from a given pose should be considered when providing a score for that pose.
+To enforce this, a raytracing algorithm, similar to&nbsp;<cite class="ltx_cite ltx_citemacro_cite">[<a href="https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib12" title="" class="ltx_ref">12</a>]</cite>, is used to construct a view-mask of cells visible from a particular pose.
+An example mask is shown in Fig.&nbsp;<a href="https://ar5iv.labs.arxiv.org/html/2504.03629#S4.F1" title="Figure 1 ‣ IV-A2 Visibility Mask ‣ IV-A Pose Scoring ‣ IV Proposed Approach ‣ SeGuE: Semantic Guided Exploration for Mobile Robots" class="ltx_ref"><span class="ltx_text ltx_ref_tag">1</span></a>.
+In the figure, only the cells highlighted in gray are included in the aforementioned averaging operation; all other cells are ignored.
+This ensures that the overall score of a pose is not affected by the individual subscores that may be gathered from cells that provide no new information.</p>
+</div>
+<figure id="S4.F1" class="ltx_figure"><img src="./[2504.03629] SeGuE_ Semantic Guided Exploration for Mobile Robots_files/view_mask.png" id="S4.F1.g1" class="ltx_graphics ltx_centering ltx_img_square" width="359" height="364" alt="Refer to caption">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure"><span class="ltx_text" style="font-size:90%;">Figure 1</span>: </span><span class="ltx_text" style="font-size:90%;">An example of the view mask generated by our raytracing algorithm. Known obstacles are shown in black and the view mask is shown in gray.</span></figcaption>
+</figure>
+</section>
+<section id="S4.SS1.SSS3" class="ltx_subsubsection">
+<h4 class="ltx_title ltx_title_subsubsection">
+<span class="ltx_tag ltx_tag_subsubsection">IV-A3 </span>Feature Convergence Tracking</h4>
+
+<div id="S4.SS1.SSS3.p1" class="ltx_para">
+<p class="ltx_p">Even after having collected several observations, some cells may still have a high entropy due to the aleatoric uncertainty present in some classes.
+As such, in cases that additional observations would not improve a semantic feature score, then any new observation should not contribute to the pose score computation.
+Doing so can help prevent the exploitation of inherently uncertain cells.
+To address this, each cell’s feature score is tracked over time and monitored for convergence.</p>
+</div>
+<div id="S4.SS1.SSS3.p2" class="ltx_para">
+<p class="ltx_p">A ratio convergence test is employed to decide when a feature score has converged.
+During exploration, when the feature score value of a non-converged cell is updated, the ratio <math id="S4.SS1.SSS3.p2.m1" class="ltx_Math" alttext="\frac{s_{0}}{s_{1}}" display="inline"><semantics><mfrac><msub><mi>s</mi><mn>0</mn></msub><msub><mi>s</mi><mn>1</mn></msub></mfrac><annotation encoding="application/x-tex">\frac{s_{0}}{s_{1}}</annotation></semantics></math> is computed, where <math id="S4.SS1.SSS3.p2.m2" class="ltx_Math" alttext="s_{0}" display="inline"><semantics><msub><mi>s</mi><mn>0</mn></msub><annotation encoding="application/x-tex">s_{0}</annotation></semantics></math> is the previous score and <math id="S4.SS1.SSS3.p2.m3" class="ltx_Math" alttext="s_{1}" display="inline"><semantics><msub><mi>s</mi><mn>1</mn></msub><annotation encoding="application/x-tex">s_{1}</annotation></semantics></math> is the new score.
+If the ratio is less than a user-defined threshold (set herein to <math id="S4.SS1.SSS3.p2.m4" class="ltx_Math" alttext="1.1" display="inline"><semantics><mn>1.1</mn><annotation encoding="application/x-tex">1.1</annotation></semantics></math>), then the score for that cell is considered to have converged.
+Converged features can still be updated if that feature is incidentally observed during exploration, but once the feature score has converged, the respective cell will no longer be used in pose scoring.</p>
+</div>
+</section>
+</section>
+<section id="S4.SS2" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">IV-B </span><span class="ltx_text ltx_font_italic">Pose Sampling</span>
+</h3>
+
+<div id="S4.SS2.p1" class="ltx_para">
+<p class="ltx_p">To find the poses which maximize the scoring metric&nbsp;(<a href="https://ar5iv.labs.arxiv.org/html/2504.03629#S4.E1" title="In IV-A1 Feature Scoring ‣ IV-A Pose Scoring ‣ IV Proposed Approach ‣ SeGuE: Semantic Guided Exploration for Mobile Robots" class="ltx_ref"><span class="ltx_text ltx_ref_tag">1</span></a>) and ensure the semantic information is fully mapped, diverse poses across the map must be considered.
+To that end, two pose sampling strategies, Uniform Sampling (US) and Importance Sampling (IS), are proposed.
+Both strategies employ the same scoring mechanism.
+Regardless of the sampling method, exploration is terminated if no pose is found within a certain percentage of the maximum possible score.
+This is also a user-defined hyperparameter of our method.
+The threshold is set to <math id="S4.SS2.p1.m1" class="ltx_Math" alttext="5\%" display="inline"><semantics><mrow><mn>5</mn><mo>%</mo></mrow><annotation encoding="application/x-tex">5\%</annotation></semantics></math> throughout our experiments.</p>
+</div>
+<section id="S4.SS2.SSS1" class="ltx_subsubsection">
+<h4 class="ltx_title ltx_title_subsubsection">
+<span class="ltx_tag ltx_tag_subsubsection">IV-B1 </span>Uniform Sampling</h4>
+
+<div id="S4.SS2.SSS1.p1" class="ltx_para">
+<p class="ltx_p">In the first method, poses are sampled uniformly across the entire map, and unreachable poses are discarded.
+Sampling continues until a desired number of reachable poses is obtained.
+These poses are then scored according to&nbsp;(<a href="https://ar5iv.labs.arxiv.org/html/2504.03629#S4.E1" title="In IV-A1 Feature Scoring ‣ IV-A Pose Scoring ‣ IV Proposed Approach ‣ SeGuE: Semantic Guided Exploration for Mobile Robots" class="ltx_ref"><span class="ltx_text ltx_ref_tag">1</span></a>).
+The pose with the highest score is selected as the next pose to navigate to.</p>
+</div>
+</section>
+<section id="S4.SS2.SSS2" class="ltx_subsubsection">
+<h4 class="ltx_title ltx_title_subsubsection">
+<span class="ltx_tag ltx_tag_subsubsection">IV-B2 </span>Importance Sampling</h4>
+
+<div id="S4.SS2.SSS2.p1" class="ltx_para">
+<p class="ltx_p">While the US method can acquire poses with high entropy, a large number of samples need to be considered for assessment, which may be inefficient in practice.
+Inspired by&nbsp;<cite class="ltx_cite ltx_citemacro_cite">[<a href="https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib21" title="" class="ltx_ref">21</a>]</cite>, we also implement a sampling approach based on particle filter optimization.
+This method samples an initial set of poses uniformly across reachable poses, which are used to fit a mixture of Gaussian models where the likelihood of each pose is directly proportional to its score&nbsp;(<a href="https://ar5iv.labs.arxiv.org/html/2504.03629#S4.E1" title="In IV-A1 Feature Scoring ‣ IV-A Pose Scoring ‣ IV Proposed Approach ‣ SeGuE: Semantic Guided Exploration for Mobile Robots" class="ltx_ref"><span class="ltx_text ltx_ref_tag">1</span></a>).
+This distribution is then used to sample a new set of poses, subject to the same reachability constraint, and the process repeats for a fixed number of iterations.
+The mean of the mixture component with the highest score is taken as the next pose to navigate to.</p>
+</div>
+</section>
+</section>
+</section>
+<section id="S5" class="ltx_section">
+<h2 class="ltx_title ltx_title_section">
+<span class="ltx_tag ltx_tag_section">V </span><span class="ltx_text ltx_font_smallcaps">Experiments</span>
+</h2>
+
+<div id="S5.p1" class="ltx_para">
+<p class="ltx_p">We evaluate SeGuE in both simulated and real-world environments using a wheeled mobile robot.
+The entire software suite is written in the Robot Operating System (ROS) framework.
+Mapping and odometry estimation for localization are conducted using 3D LiDAR information via&nbsp;<cite class="ltx_cite ltx_citemacro_cite">[<a href="https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib22" title="" class="ltx_ref">22</a>]</cite>.
+Point cloud information is also projected onto the ground plane to obtain a 2D occupancy grid for motion planning.
+Waypoint navigation is conducted with the ROS built-in package <span class="ltx_text ltx_font_italic">move_base</span>.
+The scene features are extracted via an RGB camera.</p>
+</div>
+<div id="S5.p2" class="ltx_para">
+<p class="ltx_p">To evaluate the quality of the semantic maps generated, we assess the map coverage and average entropy.
+Map coverage provides an insight into the proportion of the appearance features that have been captured during exploration.
+It is computed as the percentage of occupancy map cells, which are either free or occupied, that have a corresponding semantic feature.
+Higher values of map coverage are better.
+The average entropy indicates the quality of the observations across the map.
+Average entropy calculates the prediction entropy of the entire semantic feature map.
+Any cell observed in the occupancy map with no corresponding semantic feature is assumed to have maximum entropy.
+Lower values of average entropy are better.</p>
+</div>
+<section id="S5.SS1" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">V-A </span><span class="ltx_text ltx_font_italic">Simulation Results</span>
+</h3>
+
+<div id="S5.SS1.p1" class="ltx_para">
+<p class="ltx_p">We simulate the Clearpath Jackal in Gazebo<cite class="ltx_cite ltx_citemacro_cite">[<a href="https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib23" title="" class="ltx_ref">23</a>]</cite> and the relevant sensors using the calibration data available in&nbsp;<cite class="ltx_cite ltx_citemacro_cite">[<a href="https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib24" title="" class="ltx_ref">24</a>]</cite>.
+All simulation is carried out on a desktop computer equipped with an Intel i7 processor, an NVIDIA RTX 3090 and 32 GB of RAM.
+We show results in two different environments.
+The Small House environment replicates a residential home and the Bookstore environment is a retail space.
+For each environment, the initial conditions are kept fixed across SeGuE and each baseline method.</p>
+</div>
+<div id="S5.SS1.p2" class="ltx_para">
+<p class="ltx_p">We compare SeGuE, using both the US and IS variants, against a representative frontier-based exploration method&nbsp;<cite class="ltx_cite ltx_citemacro_cite">[<a href="https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib25" title="" class="ltx_ref">25</a>]</cite> and a representative next-best-view method (RRG-NBV)&nbsp;<cite class="ltx_cite ltx_citemacro_cite">[<a href="https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib17" title="" class="ltx_ref">17</a>]</cite>.
+We also compare SeGuE to a <span class="ltx_text ltx_font_italic">No Score</span> baseline, where we replace our map scoring metric with a simple metric where every unseen cell has a score of one and every seen cell has a score of zero.
+The view scoring and importance sampling are kept fixed.</p>
+</div>
+<div id="S5.SS1.p3" class="ltx_para">
+<p class="ltx_p">The map quality metrics for each method are reported in Table&nbsp;<a href="https://ar5iv.labs.arxiv.org/html/2504.03629#S5.T1" title="TABLE I ‣ V-A Simulation Results ‣ V Experiments ‣ SeGuE: Semantic Guided Exploration for Mobile Robots" class="ltx_ref"><span class="ltx_text ltx_ref_tag">I</span></a>.
+It can be observed that, across the board, the frontier-based and RRG-NBV approaches do not perform well.
+This can be explained based on the fact that no appearance features are considered but instead scene geometry is mapped.
+Both SeGuE and the <span class="ltx_text ltx_font_italic">No Score</span> baselines are significantly better with lower average entropy and higher coverage of the semantic features, demonstrating the necessity of exploration methods that are aware of scene semantics.
+Our method of scoring semantic features helps lower the average entropy when combined with either sampling method.</p>
+</div>
+<figure id="S5.T1" class="ltx_table">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_table"><span class="ltx_text" style="font-size:90%;">TABLE I</span>: </span><span class="ltx_text" style="font-size:90%;">Simulation Results.</span></figcaption>
+<div class="ltx_inline-block ltx_align_center ltx_transformed_outer" style="width:433.6pt;height:132.2pt;vertical-align:-0.9pt;"><span class="ltx_transformed_inner" style="transform:translate(-20.9pt,6.3pt) scale(0.911902625373567,0.911902625373567) ;">
+<table class="ltx_tabular ltx_guessed_headers ltx_align_middle">
+<thead class="ltx_thead">
+<tr class="ltx_tr">
+<th class="ltx_td ltx_th ltx_th_row ltx_border_tt" style="padding-top:2.5pt;padding-bottom:2.5pt;"></th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt" style="padding-top:2.5pt;padding-bottom:2.5pt;" colspan="2">Small House</th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt" style="padding-top:2.5pt;padding-bottom:2.5pt;" colspan="2">Bookstore</th>
+</tr>
+<tr class="ltx_tr">
+<th class="ltx_td ltx_th ltx_th_row" style="padding-top:2.5pt;padding-bottom:2.5pt;"></th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_t" style="padding-top:2.5pt;padding-bottom:2.5pt;">Coverage <math id="S5.T1.m1" class="ltx_Math" alttext="\uparrow" display="inline"><semantics><mo stretchy="false">↑</mo><annotation encoding="application/x-tex">\uparrow</annotation></semantics></math>
+</th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_t" style="padding-top:2.5pt;padding-bottom:2.5pt;">Average Entropy <math id="S5.T1.m2" class="ltx_Math" alttext="\downarrow" display="inline"><semantics><mo stretchy="false">↓</mo><annotation encoding="application/x-tex">\downarrow</annotation></semantics></math>
+</th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_t" style="padding-top:2.5pt;padding-bottom:2.5pt;">Coverage <math id="S5.T1.m3" class="ltx_Math" alttext="\uparrow" display="inline"><semantics><mo stretchy="false">↑</mo><annotation encoding="application/x-tex">\uparrow</annotation></semantics></math>
+</th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_t" style="padding-top:2.5pt;padding-bottom:2.5pt;">Average Entropy <math id="S5.T1.m4" class="ltx_Math" alttext="\downarrow" display="inline"><semantics><mo stretchy="false">↓</mo><annotation encoding="application/x-tex">\downarrow</annotation></semantics></math>
+</th>
+</tr>
+</thead>
+<tbody class="ltx_tbody">
+<tr class="ltx_tr">
+<th class="ltx_td ltx_align_center ltx_th ltx_th_row ltx_border_t" style="padding-top:2.5pt;padding-bottom:2.5pt;">Frontiers Based&nbsp;<cite class="ltx_cite ltx_citemacro_cite">[<a href="https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib25" title="" class="ltx_ref">25</a>]</cite>
+</th>
+<td class="ltx_td ltx_align_center ltx_border_t" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math id="S5.T1.m5" class="ltx_Math" alttext="0.303" display="inline"><semantics><mn>0.303</mn><annotation encoding="application/x-tex">0.303</annotation></semantics></math></td>
+<td class="ltx_td ltx_align_center ltx_border_t" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math id="S5.T1.m6" class="ltx_Math" alttext="3.619" display="inline"><semantics><mn>3.619</mn><annotation encoding="application/x-tex">3.619</annotation></semantics></math></td>
+<td class="ltx_td ltx_align_center ltx_border_t" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math id="S5.T1.m7" class="ltx_Math" alttext="0.477" display="inline"><semantics><mn>0.477</mn><annotation encoding="application/x-tex">0.477</annotation></semantics></math></td>
+<td class="ltx_td ltx_align_center ltx_border_t" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math id="S5.T1.m8" class="ltx_Math" alttext="2.862" display="inline"><semantics><mn>2.862</mn><annotation encoding="application/x-tex">2.862</annotation></semantics></math></td>
+</tr>
+<tr class="ltx_tr">
+<th class="ltx_td ltx_align_center ltx_th ltx_th_row" style="padding-top:2.5pt;padding-bottom:2.5pt;">RRG-NBV&nbsp;<cite class="ltx_cite ltx_citemacro_cite">[<a href="https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib17" title="" class="ltx_ref">17</a>]</cite>
+</th>
+<td class="ltx_td ltx_align_center" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math id="S5.T1.m9" class="ltx_Math" alttext="0.730" display="inline"><semantics><mn>0.730</mn><annotation encoding="application/x-tex">0.730</annotation></semantics></math></td>
+<td class="ltx_td ltx_align_center" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math id="S5.T1.m10" class="ltx_Math" alttext="1.643" display="inline"><semantics><mn>1.643</mn><annotation encoding="application/x-tex">1.643</annotation></semantics></math></td>
+<td class="ltx_td ltx_align_center" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math id="S5.T1.m11" class="ltx_Math" alttext="0.255" display="inline"><semantics><mn>0.255</mn><annotation encoding="application/x-tex">0.255</annotation></semantics></math></td>
+<td class="ltx_td ltx_align_center" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math id="S5.T1.m12" class="ltx_Math" alttext="3.917" display="inline"><semantics><mn>3.917</mn><annotation encoding="application/x-tex">3.917</annotation></semantics></math></td>
+</tr>
+<tr class="ltx_tr">
+<th class="ltx_td ltx_align_center ltx_th ltx_th_row" style="padding-top:2.5pt;padding-bottom:2.5pt;">No Score, US</th>
+<td class="ltx_td ltx_align_center" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math id="S5.T1.m13" class="ltx_Math" alttext="0.905" display="inline"><semantics><mn>0.905</mn><annotation encoding="application/x-tex">0.905</annotation></semantics></math></td>
+<td class="ltx_td ltx_align_center" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math id="S5.T1.m14" class="ltx_Math" alttext="0.806" display="inline"><semantics><mn>0.806</mn><annotation encoding="application/x-tex">0.806</annotation></semantics></math></td>
+<td class="ltx_td ltx_align_center" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math id="S5.T1.m15" class="ltx_Math" alttext="0.925" display="inline"><semantics><mn>0.925</mn><annotation encoding="application/x-tex">0.925</annotation></semantics></math></td>
+<td class="ltx_td ltx_align_center" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math id="S5.T1.m16" class="ltx_Math" alttext="0.801" display="inline"><semantics><mn>0.801</mn><annotation encoding="application/x-tex">0.801</annotation></semantics></math></td>
+</tr>
+<tr class="ltx_tr">
+<th class="ltx_td ltx_align_center ltx_th ltx_th_row" style="padding-top:2.5pt;padding-bottom:2.5pt;">No Score, IS</th>
+<td class="ltx_td ltx_align_center" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math id="S5.T1.m17" class="ltx_Math" alttext="0.897" display="inline"><semantics><mn>0.897</mn><annotation encoding="application/x-tex">0.897</annotation></semantics></math></td>
+<td class="ltx_td ltx_align_center" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math id="S5.T1.m18" class="ltx_Math" alttext="0.842" display="inline"><semantics><mn>0.842</mn><annotation encoding="application/x-tex">0.842</annotation></semantics></math></td>
+<td class="ltx_td ltx_align_center" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math id="S5.T1.m19" class="ltx_Math" alttext="0.929" display="inline"><semantics><mn>0.929</mn><annotation encoding="application/x-tex">0.929</annotation></semantics></math></td>
+<td class="ltx_td ltx_align_center" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math id="S5.T1.m20" class="ltx_Math" alttext="0.787" display="inline"><semantics><mn>0.787</mn><annotation encoding="application/x-tex">0.787</annotation></semantics></math></td>
+</tr>
+<tr class="ltx_tr">
+<th class="ltx_td ltx_align_center ltx_th ltx_th_row" style="padding-top:2.5pt;padding-bottom:2.5pt;">SeGuE, US</th>
+<td class="ltx_td ltx_align_center" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math id="S5.T1.m21" class="ltx_Math" alttext="0.938" display="inline"><semantics><mn>0.938</mn><annotation encoding="application/x-tex">0.938</annotation></semantics></math></td>
+<td class="ltx_td ltx_align_center" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math id="S5.T1.m22" class="ltx_Math" alttext="0.673" display="inline"><semantics><mn>0.673</mn><annotation encoding="application/x-tex">0.673</annotation></semantics></math></td>
+<td class="ltx_td ltx_align_center" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math id="S5.T1.m23" class="ltx_Math" alttext="0.940" display="inline"><semantics><mn>0.940</mn><annotation encoding="application/x-tex">0.940</annotation></semantics></math></td>
+<td class="ltx_td ltx_align_center" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math id="S5.T1.m24" class="ltx_Math" alttext="0.723" display="inline"><semantics><mn>0.723</mn><annotation encoding="application/x-tex">0.723</annotation></semantics></math></td>
+</tr>
+<tr class="ltx_tr">
+<th class="ltx_td ltx_align_center ltx_th ltx_th_row ltx_border_bb" style="padding-top:2.5pt;padding-bottom:2.5pt;">SeGuE, IS</th>
+<td class="ltx_td ltx_align_center ltx_border_bb" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math id="S5.T1.m25" class="ltx_Math" alttext="0.932" display="inline"><semantics><mn>0.932</mn><annotation encoding="application/x-tex">0.932</annotation></semantics></math></td>
+<td class="ltx_td ltx_align_center ltx_border_bb" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math id="S5.T1.m26" class="ltx_Math" alttext="0.702" display="inline"><semantics><mn>0.702</mn><annotation encoding="application/x-tex">0.702</annotation></semantics></math></td>
+<td class="ltx_td ltx_align_center ltx_border_bb" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math id="S5.T1.m27" class="ltx_Math" alttext="0.939" display="inline"><semantics><mn>0.939</mn><annotation encoding="application/x-tex">0.939</annotation></semantics></math></td>
+<td class="ltx_td ltx_align_center ltx_border_bb" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math id="S5.T1.m28" class="ltx_Math" alttext="0.730" display="inline"><semantics><mn>0.730</mn><annotation encoding="application/x-tex">0.730</annotation></semantics></math></td>
+</tr>
+</tbody>
+</table>
+</span></div>
+</figure>
+<div id="S5.SS1.p4" class="ltx_para">
+<p class="ltx_p">We visualize the maps produced in each environment using the frontier-based method and SeGuE in Fig.&nbsp;<a href="https://ar5iv.labs.arxiv.org/html/2504.03629#S5.F2" title="Figure 2 ‣ V-A Simulation Results ‣ V Experiments ‣ SeGuE: Semantic Guided Exploration for Mobile Robots" class="ltx_ref"><span class="ltx_text ltx_ref_tag">2</span></a> (for Small House) and Fig.&nbsp;<a href="https://ar5iv.labs.arxiv.org/html/2504.03629#S5.F3" title="Figure 3 ‣ V-A Simulation Results ‣ V Experiments ‣ SeGuE: Semantic Guided Exploration for Mobile Robots" class="ltx_ref"><span class="ltx_text ltx_ref_tag">3</span></a> (for Bookstore).
+Since the semantic features exist in a high-dimensional abstract feature space, we pass the features through a prediction head and visualize the class predictions, where each color represents a different class.
+It can be observed that the structure of the semantic feature map corresponds well with the structure of objects mapped in the occupancy grid.</p>
+</div>
+<figure id="S5.F2" class="ltx_figure">
+<div class="ltx_flex_figure">
+<div class="ltx_flex_cell ltx_flex_size_1">
+<figure id="S5.F2.sf1" class="ltx_figure ltx_figure_panel ltx_align_center"><img src="./[2504.03629] SeGuE_ Semantic Guided Exploration for Mobile Robots_files/x1.png" id="S5.F2.sf1.g1" class="ltx_graphics ltx_img_portrait" width="143" height="241" alt="Refer to caption">
+<figcaption class="ltx_caption"><span class="ltx_tag ltx_tag_figure"><span class="ltx_text" style="font-size:90%;">(a)</span> </span></figcaption>
+</figure>
+</div>
+<div class="ltx_flex_break"></div>
+<div class="ltx_flex_cell ltx_flex_size_1">
+<figure id="S5.F2.sf2" class="ltx_figure ltx_figure_panel ltx_align_center"><img src="./[2504.03629] SeGuE_ Semantic Guided Exploration for Mobile Robots_files/x2.png" id="S5.F2.sf2.g1" class="ltx_graphics ltx_img_portrait" width="143" height="240" alt="Refer to caption">
+<figcaption class="ltx_caption"><span class="ltx_tag ltx_tag_figure"><span class="ltx_text" style="font-size:90%;">(b)</span> </span></figcaption>
+</figure>
+</div>
+<div class="ltx_flex_break"></div>
+<div class="ltx_flex_cell ltx_flex_size_1">
+<figure id="S5.F2.sf3" class="ltx_figure ltx_figure_panel ltx_align_center"><img src="./[2504.03629] SeGuE_ Semantic Guided Exploration for Mobile Robots_files/x3.png" id="S5.F2.sf3.g1" class="ltx_graphics ltx_img_portrait" width="143" height="240" alt="Refer to caption">
+<figcaption class="ltx_caption"><span class="ltx_tag ltx_tag_figure"><span class="ltx_text" style="font-size:90%;">(c)</span> </span></figcaption>
+</figure>
+</div>
+<div class="ltx_flex_break"></div>
+<div class="ltx_flex_cell ltx_flex_size_1">
+<figure id="S5.F2.sf4" class="ltx_figure ltx_figure_panel ltx_align_center"><img src="./[2504.03629] SeGuE_ Semantic Guided Exploration for Mobile Robots_files/x4.png" id="S5.F2.sf4.g1" class="ltx_graphics ltx_img_portrait" width="143" height="238" alt="Refer to caption">
+<figcaption class="ltx_caption"><span class="ltx_tag ltx_tag_figure"><span class="ltx_text" style="font-size:90%;">(d)</span> </span></figcaption>
+</figure>
+</div>
+</div>
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure"><span class="ltx_text" style="font-size:90%;">Figure 2</span>: </span><span class="ltx_text" style="font-size:90%;">Visualization of the mapping results of (a-b) the frontier-based baseline and (c-d) SeGuE in the Small House environment. We show both the occupancy grid and semantic prediction, computed from the map of semantic features. On the occupancy grid, we plot the trajectory of the robot.</span></figcaption>
+</figure>
+<figure id="S5.F3" class="ltx_figure">
+<div class="ltx_flex_figure">
+<div class="ltx_flex_cell ltx_flex_size_1">
+<figure id="S5.F3.sf1" class="ltx_figure ltx_figure_panel ltx_align_center"><img src="./[2504.03629] SeGuE_ Semantic Guided Exploration for Mobile Robots_files/x5.png" id="S5.F3.sf1.g1" class="ltx_graphics ltx_img_square" width="143" height="134" alt="Refer to caption">
+<figcaption class="ltx_caption"><span class="ltx_tag ltx_tag_figure"><span class="ltx_text" style="font-size:90%;">(a)</span> </span></figcaption>
+</figure>
+</div>
+<div class="ltx_flex_break"></div>
+<div class="ltx_flex_cell ltx_flex_size_1">
+<figure id="S5.F3.sf2" class="ltx_figure ltx_figure_panel ltx_align_center"><img src="./[2504.03629] SeGuE_ Semantic Guided Exploration for Mobile Robots_files/x6.png" id="S5.F3.sf2.g1" class="ltx_graphics ltx_img_square" width="143" height="136" alt="Refer to caption">
+<figcaption class="ltx_caption"><span class="ltx_tag ltx_tag_figure"><span class="ltx_text" style="font-size:90%;">(b)</span> </span></figcaption>
+</figure>
+</div>
+<div class="ltx_flex_break"></div>
+<div class="ltx_flex_cell ltx_flex_size_1">
+<figure id="S5.F3.sf3" class="ltx_figure ltx_figure_panel ltx_align_center"><img src="./[2504.03629] SeGuE_ Semantic Guided Exploration for Mobile Robots_files/x7.png" id="S5.F3.sf3.g1" class="ltx_graphics ltx_img_square" width="143" height="134" alt="Refer to caption">
+<figcaption class="ltx_caption"><span class="ltx_tag ltx_tag_figure"><span class="ltx_text" style="font-size:90%;">(c)</span> </span></figcaption>
+</figure>
+</div>
+<div class="ltx_flex_break"></div>
+<div class="ltx_flex_cell ltx_flex_size_1">
+<figure id="S5.F3.sf4" class="ltx_figure ltx_figure_panel ltx_align_center"><img src="./[2504.03629] SeGuE_ Semantic Guided Exploration for Mobile Robots_files/x8.png" id="S5.F3.sf4.g1" class="ltx_graphics ltx_img_square" width="143" height="136" alt="Refer to caption">
+<figcaption class="ltx_caption"><span class="ltx_tag ltx_tag_figure"><span class="ltx_text" style="font-size:90%;">(d)</span> </span></figcaption>
+</figure>
+</div>
+</div>
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure"><span class="ltx_text" style="font-size:90%;">Figure 3</span>: </span><span class="ltx_text" style="font-size:90%;">Visualization of the mapping results of (a-b) the frontier-based baseline and (c-d) SeGuE in the Bookstore environment. We show both the occupancy grid and semantic prediction, computed from the map of semantic features. On the occupancy grid, we plot the trajectory of the robot.</span></figcaption>
+</figure>
+</section>
+<section id="S5.SS2" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">V-B </span><span class="ltx_text ltx_font_italic">Sample Number Study</span>
+</h3>
+
+<div id="S5.SS2.p1" class="ltx_para">
+<p class="ltx_p">We evaluate the sensitivity of both considered sampling methods to the number of samples chosen in the Small House environment.
+In the case of the uniform sampling method, this is a direct sweep over the number of samples chosen.
+The results of this ablation study, both with and without our semantic scoring method, are shown in Table&nbsp;<a href="https://ar5iv.labs.arxiv.org/html/2504.03629#S5.T2" title="TABLE II ‣ V-B Sample Number Study ‣ V Experiments ‣ SeGuE: Semantic Guided Exploration for Mobile Robots" class="ltx_ref"><span class="ltx_text ltx_ref_tag">II</span></a>.
+We note that, overall, our semantic scoring method increases coverage and decreases average entropy.
+While no direct relation between the number of samples and the performance appears to exist, we observe that, both with and without our semantic scoring method, the optimal performance seems to be between 100 and 200 samples.
+This is likely because too few samples do not approach an optimal score, while too many samples tend to over-exploit, leading to less exploration overall.</p>
+</div>
+<figure id="S5.T2" class="ltx_table">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_table"><span class="ltx_text" style="font-size:90%;">TABLE II</span>: </span><span class="ltx_text" style="font-size:90%;">Ablation Study: Sample Number in US.</span></figcaption>
+<div class="ltx_inline-block ltx_align_center ltx_transformed_outer" style="width:433.6pt;height:170.6pt;vertical-align:-0.0pt;"><span class="ltx_transformed_inner" style="transform:translate(33.8pt,-13.3pt) scale(1.18457229653349,1.18457229653349) ;">
+<table class="ltx_tabular ltx_guessed_headers ltx_align_middle">
+<thead class="ltx_thead">
+<tr class="ltx_tr">
+<th class="ltx_td ltx_th ltx_th_row ltx_border_tt" style="padding-top:2.5pt;padding-bottom:2.5pt;"></th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt" style="padding-top:2.5pt;padding-bottom:2.5pt;" colspan="2">Semantic Score</th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt" style="padding-top:2.5pt;padding-bottom:2.5pt;" colspan="2">No Score</th>
+</tr>
+<tr class="ltx_tr">
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_th_row" style="padding-top:2.5pt;padding-bottom:2.5pt;">Samples</th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_t" style="padding-top:2.5pt;padding-bottom:2.5pt;">Coverage <math id="S5.T2.m1" class="ltx_Math" alttext="\uparrow" display="inline"><semantics><mo stretchy="false">↑</mo><annotation encoding="application/x-tex">\uparrow</annotation></semantics></math>
+</th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_t" style="padding-top:2.5pt;padding-bottom:2.5pt;">Average Entropy <math id="S5.T2.m2" class="ltx_Math" alttext="\downarrow" display="inline"><semantics><mo stretchy="false">↓</mo><annotation encoding="application/x-tex">\downarrow</annotation></semantics></math>
+</th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_t" style="padding-top:2.5pt;padding-bottom:2.5pt;">Coverage <math id="S5.T2.m3" class="ltx_Math" alttext="\uparrow" display="inline"><semantics><mo stretchy="false">↑</mo><annotation encoding="application/x-tex">\uparrow</annotation></semantics></math>
+</th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_t" style="padding-top:2.5pt;padding-bottom:2.5pt;">Average Entropy <math id="S5.T2.m4" class="ltx_Math" alttext="\downarrow" display="inline"><semantics><mo stretchy="false">↓</mo><annotation encoding="application/x-tex">\downarrow</annotation></semantics></math>
+</th>
+</tr>
+</thead>
+<tbody class="ltx_tbody">
+<tr class="ltx_tr">
+<th class="ltx_td ltx_align_center ltx_th ltx_th_row ltx_border_t" style="padding-top:2.5pt;padding-bottom:2.5pt;">10</th>
+<td class="ltx_td ltx_align_center ltx_border_t" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math id="S5.T2.m5" class="ltx_Math" alttext="0.897" display="inline"><semantics><mn>0.897</mn><annotation encoding="application/x-tex">0.897</annotation></semantics></math></td>
+<td class="ltx_td ltx_align_center ltx_border_t" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math id="S5.T2.m6" class="ltx_Math" alttext="0.842" display="inline"><semantics><mn>0.842</mn><annotation encoding="application/x-tex">0.842</annotation></semantics></math></td>
+<td class="ltx_td ltx_align_center ltx_border_t" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math id="S5.T2.m7" class="ltx_Math" alttext="0.895" display="inline"><semantics><mn>0.895</mn><annotation encoding="application/x-tex">0.895</annotation></semantics></math></td>
+<td class="ltx_td ltx_align_center ltx_border_t" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math id="S5.T2.m8" class="ltx_Math" alttext="0.850" display="inline"><semantics><mn>0.850</mn><annotation encoding="application/x-tex">0.850</annotation></semantics></math></td>
+</tr>
+<tr class="ltx_tr">
+<th class="ltx_td ltx_align_center ltx_th ltx_th_row" style="padding-top:2.5pt;padding-bottom:2.5pt;">50</th>
+<td class="ltx_td ltx_align_center" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math id="S5.T2.m9" class="ltx_Math" alttext="0.928" display="inline"><semantics><mn>0.928</mn><annotation encoding="application/x-tex">0.928</annotation></semantics></math></td>
+<td class="ltx_td ltx_align_center" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math id="S5.T2.m10" class="ltx_Math" alttext="0.711" display="inline"><semantics><mn>0.711</mn><annotation encoding="application/x-tex">0.711</annotation></semantics></math></td>
+<td class="ltx_td ltx_align_center" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math id="S5.T2.m11" class="ltx_Math" alttext="0.899" display="inline"><semantics><mn>0.899</mn><annotation encoding="application/x-tex">0.899</annotation></semantics></math></td>
+<td class="ltx_td ltx_align_center" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math id="S5.T2.m12" class="ltx_Math" alttext="0.837" display="inline"><semantics><mn>0.837</mn><annotation encoding="application/x-tex">0.837</annotation></semantics></math></td>
+</tr>
+<tr class="ltx_tr">
+<th class="ltx_td ltx_align_center ltx_th ltx_th_row" style="padding-top:2.5pt;padding-bottom:2.5pt;">100</th>
+<td class="ltx_td ltx_align_center" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math id="S5.T2.m13" class="ltx_Math" alttext="0.908" display="inline"><semantics><mn>0.908</mn><annotation encoding="application/x-tex">0.908</annotation></semantics></math></td>
+<td class="ltx_td ltx_align_center" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math id="S5.T2.m14" class="ltx_Math" alttext="0.801" display="inline"><semantics><mn>0.801</mn><annotation encoding="application/x-tex">0.801</annotation></semantics></math></td>
+<td class="ltx_td ltx_align_center" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math id="S5.T2.m15" class="ltx_Math" alttext="0.911" display="inline"><semantics><mn>0.911</mn><annotation encoding="application/x-tex">0.911</annotation></semantics></math></td>
+<td class="ltx_td ltx_align_center" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math id="S5.T2.m16" class="ltx_Math" alttext="0.775" display="inline"><semantics><mn>0.775</mn><annotation encoding="application/x-tex">0.775</annotation></semantics></math></td>
+</tr>
+<tr class="ltx_tr">
+<th class="ltx_td ltx_align_center ltx_th ltx_th_row" style="padding-top:2.5pt;padding-bottom:2.5pt;">200</th>
+<td class="ltx_td ltx_align_center" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math id="S5.T2.m17" class="ltx_Math" alttext="0.938" display="inline"><semantics><mn>0.938</mn><annotation encoding="application/x-tex">0.938</annotation></semantics></math></td>
+<td class="ltx_td ltx_align_center" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math id="S5.T2.m18" class="ltx_Math" alttext="0.673" display="inline"><semantics><mn>0.673</mn><annotation encoding="application/x-tex">0.673</annotation></semantics></math></td>
+<td class="ltx_td ltx_align_center" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math id="S5.T2.m19" class="ltx_Math" alttext="0.905" display="inline"><semantics><mn>0.905</mn><annotation encoding="application/x-tex">0.905</annotation></semantics></math></td>
+<td class="ltx_td ltx_align_center" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math id="S5.T2.m20" class="ltx_Math" alttext="0.806" display="inline"><semantics><mn>0.806</mn><annotation encoding="application/x-tex">0.806</annotation></semantics></math></td>
+</tr>
+<tr class="ltx_tr">
+<th class="ltx_td ltx_align_center ltx_th ltx_th_row" style="padding-top:2.5pt;padding-bottom:2.5pt;">500</th>
+<td class="ltx_td ltx_align_center" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math id="S5.T2.m21" class="ltx_Math" alttext="0.904" display="inline"><semantics><mn>0.904</mn><annotation encoding="application/x-tex">0.904</annotation></semantics></math></td>
+<td class="ltx_td ltx_align_center" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math id="S5.T2.m22" class="ltx_Math" alttext="0.812" display="inline"><semantics><mn>0.812</mn><annotation encoding="application/x-tex">0.812</annotation></semantics></math></td>
+<td class="ltx_td ltx_align_center" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math id="S5.T2.m23" class="ltx_Math" alttext="0.887" display="inline"><semantics><mn>0.887</mn><annotation encoding="application/x-tex">0.887</annotation></semantics></math></td>
+<td class="ltx_td ltx_align_center" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math id="S5.T2.m24" class="ltx_Math" alttext="0.903" display="inline"><semantics><mn>0.903</mn><annotation encoding="application/x-tex">0.903</annotation></semantics></math></td>
+</tr>
+<tr class="ltx_tr">
+<th class="ltx_td ltx_align_center ltx_th ltx_th_row ltx_border_bb" style="padding-top:2.5pt;padding-bottom:2.5pt;">1000</th>
+<td class="ltx_td ltx_align_center ltx_border_bb" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math id="S5.T2.m25" class="ltx_Math" alttext="0.912" display="inline"><semantics><mn>0.912</mn><annotation encoding="application/x-tex">0.912</annotation></semantics></math></td>
+<td class="ltx_td ltx_align_center ltx_border_bb" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math id="S5.T2.m26" class="ltx_Math" alttext="0.772" display="inline"><semantics><mn>0.772</mn><annotation encoding="application/x-tex">0.772</annotation></semantics></math></td>
+<td class="ltx_td ltx_align_center ltx_border_bb" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math id="S5.T2.m27" class="ltx_Math" alttext="0.895" display="inline"><semantics><mn>0.895</mn><annotation encoding="application/x-tex">0.895</annotation></semantics></math></td>
+<td class="ltx_td ltx_align_center ltx_border_bb" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math id="S5.T2.m28" class="ltx_Math" alttext="0.851" display="inline"><semantics><mn>0.851</mn><annotation encoding="application/x-tex">0.851</annotation></semantics></math></td>
+</tr>
+</tbody>
+</table>
+</span></div>
+</figure>
+<div id="S5.SS2.p2" class="ltx_para">
+<p class="ltx_p">We perform the same study on the IS method, varying the number of samples chosen every iteration and the total number of iterations.
+We report the quantitative results in Table&nbsp;<a href="https://ar5iv.labs.arxiv.org/html/2504.03629#S5.T3" title="TABLE III ‣ V-B Sample Number Study ‣ V Experiments ‣ SeGuE: Semantic Guided Exploration for Mobile Robots" class="ltx_ref"><span class="ltx_text ltx_ref_tag">III</span></a>.</p>
+</div>
+<div id="S5.SS2.p3" class="ltx_para">
+<p class="ltx_p">When comparing the <span class="ltx_text ltx_font_italic">No Score</span> performance between sampling methods (cf. Tables&nbsp;<a href="https://ar5iv.labs.arxiv.org/html/2504.03629#S5.T2" title="TABLE II ‣ V-B Sample Number Study ‣ V Experiments ‣ SeGuE: Semantic Guided Exploration for Mobile Robots" class="ltx_ref"><span class="ltx_text ltx_ref_tag">II</span></a> and&nbsp;<a href="https://ar5iv.labs.arxiv.org/html/2504.03629#S5.T3" title="TABLE III ‣ V-B Sample Number Study ‣ V Experiments ‣ SeGuE: Semantic Guided Exploration for Mobile Robots" class="ltx_ref"><span class="ltx_text ltx_ref_tag">III</span></a>), the performance does not change significantly.
+We observe a marked improvement when the <span class="ltx_text ltx_font_italic">Semantic Score</span> is combined with IS, indicating that IS can better exploit the information within our metric.</p>
+</div>
+<figure id="S5.T3" class="ltx_table">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_table"><span class="ltx_text" style="font-size:90%;">TABLE III</span>: </span><span class="ltx_text" style="font-size:90%;">Ablation Study: Number of Samples and Iterations in IS.</span></figcaption>
+<div class="ltx_inline-block ltx_align_center ltx_transformed_outer" style="width:433.6pt;height:148.6pt;vertical-align:-0.0pt;"><span class="ltx_transformed_inner" style="transform:translate(6.8pt,-2.3pt) scale(1.03222204129241,1.03222204129241) ;">
+<table class="ltx_tabular ltx_guessed_headers ltx_align_middle">
+<thead class="ltx_thead">
+<tr class="ltx_tr">
+<th class="ltx_td ltx_th ltx_th_row ltx_border_tt" style="padding-top:2.5pt;padding-bottom:2.5pt;"></th>
+<th class="ltx_td ltx_th ltx_th_column ltx_th_row ltx_border_tt" style="padding-top:2.5pt;padding-bottom:2.5pt;"></th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt" style="padding-top:2.5pt;padding-bottom:2.5pt;" colspan="2">Semantic Score</th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt" style="padding-top:2.5pt;padding-bottom:2.5pt;" colspan="2">No Score</th>
+</tr>
+<tr class="ltx_tr">
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_th_row" style="padding-top:2.5pt;padding-bottom:2.5pt;">Iterations</th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_th_row" style="padding-top:2.5pt;padding-bottom:2.5pt;">Samples</th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_t" style="padding-top:2.5pt;padding-bottom:2.5pt;">Coverage <math id="S5.T3.m1" class="ltx_Math" alttext="\uparrow" display="inline"><semantics><mo stretchy="false">↑</mo><annotation encoding="application/x-tex">\uparrow</annotation></semantics></math>
+</th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_t" style="padding-top:2.5pt;padding-bottom:2.5pt;">Average Entropy <math id="S5.T3.m2" class="ltx_Math" alttext="\downarrow" display="inline"><semantics><mo stretchy="false">↓</mo><annotation encoding="application/x-tex">\downarrow</annotation></semantics></math>
+</th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_t" style="padding-top:2.5pt;padding-bottom:2.5pt;">Coverage <math id="S5.T3.m3" class="ltx_Math" alttext="\uparrow" display="inline"><semantics><mo stretchy="false">↑</mo><annotation encoding="application/x-tex">\uparrow</annotation></semantics></math>
+</th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_t" style="padding-top:2.5pt;padding-bottom:2.5pt;">Average Entropy <math id="S5.T3.m4" class="ltx_Math" alttext="\downarrow" display="inline"><semantics><mo stretchy="false">↓</mo><annotation encoding="application/x-tex">\downarrow</annotation></semantics></math>
+</th>
+</tr>
+</thead>
+<tbody class="ltx_tbody">
+<tr class="ltx_tr">
+<th class="ltx_td ltx_align_center ltx_th ltx_th_row ltx_border_t" style="padding-top:2.5pt;padding-bottom:2.5pt;">2</th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_row ltx_border_t" style="padding-top:2.5pt;padding-bottom:2.5pt;">50</th>
+<td class="ltx_td ltx_align_center ltx_border_t" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math id="S5.T3.m5" class="ltx_Math" alttext="0.932" display="inline"><semantics><mn>0.932</mn><annotation encoding="application/x-tex">0.932</annotation></semantics></math></td>
+<td class="ltx_td ltx_align_center ltx_border_t" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math id="S5.T3.m6" class="ltx_Math" alttext="0.702" display="inline"><semantics><mn>0.702</mn><annotation encoding="application/x-tex">0.702</annotation></semantics></math></td>
+<td class="ltx_td ltx_align_center ltx_border_t" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math id="S5.T3.m7" class="ltx_Math" alttext="0.897" display="inline"><semantics><mn>0.897</mn><annotation encoding="application/x-tex">0.897</annotation></semantics></math></td>
+<td class="ltx_td ltx_align_center ltx_border_t" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math id="S5.T3.m8" class="ltx_Math" alttext="0.842" display="inline"><semantics><mn>0.842</mn><annotation encoding="application/x-tex">0.842</annotation></semantics></math></td>
+</tr>
+<tr class="ltx_tr">
+<th class="ltx_td ltx_align_center ltx_th ltx_th_row" style="padding-top:2.5pt;padding-bottom:2.5pt;">5</th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_row" style="padding-top:2.5pt;padding-bottom:2.5pt;">20</th>
+<td class="ltx_td ltx_align_center" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math id="S5.T3.m9" class="ltx_Math" alttext="0.926" display="inline"><semantics><mn>0.926</mn><annotation encoding="application/x-tex">0.926</annotation></semantics></math></td>
+<td class="ltx_td ltx_align_center" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math id="S5.T3.m10" class="ltx_Math" alttext="0.704" display="inline"><semantics><mn>0.704</mn><annotation encoding="application/x-tex">0.704</annotation></semantics></math></td>
+<td class="ltx_td ltx_align_center" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math id="S5.T3.m11" class="ltx_Math" alttext="0.900" display="inline"><semantics><mn>0.900</mn><annotation encoding="application/x-tex">0.900</annotation></semantics></math></td>
+<td class="ltx_td ltx_align_center" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math id="S5.T3.m12" class="ltx_Math" alttext="0.844" display="inline"><semantics><mn>0.844</mn><annotation encoding="application/x-tex">0.844</annotation></semantics></math></td>
+</tr>
+<tr class="ltx_tr">
+<th class="ltx_td ltx_align_center ltx_th ltx_th_row" style="padding-top:2.5pt;padding-bottom:2.5pt;">10</th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_row" style="padding-top:2.5pt;padding-bottom:2.5pt;">10</th>
+<td class="ltx_td ltx_align_center" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math id="S5.T3.m13" class="ltx_Math" alttext="0.905" display="inline"><semantics><mn>0.905</mn><annotation encoding="application/x-tex">0.905</annotation></semantics></math></td>
+<td class="ltx_td ltx_align_center" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math id="S5.T3.m14" class="ltx_Math" alttext="0.807" display="inline"><semantics><mn>0.807</mn><annotation encoding="application/x-tex">0.807</annotation></semantics></math></td>
+<td class="ltx_td ltx_align_center" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math id="S5.T3.m15" class="ltx_Math" alttext="0.881" display="inline"><semantics><mn>0.881</mn><annotation encoding="application/x-tex">0.881</annotation></semantics></math></td>
+<td class="ltx_td ltx_align_center" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math id="S5.T3.m16" class="ltx_Math" alttext="0.921" display="inline"><semantics><mn>0.921</mn><annotation encoding="application/x-tex">0.921</annotation></semantics></math></td>
+</tr>
+<tr class="ltx_tr">
+<th class="ltx_td ltx_align_center ltx_th ltx_th_row" style="padding-top:2.5pt;padding-bottom:2.5pt;">10</th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_row" style="padding-top:2.5pt;padding-bottom:2.5pt;">20</th>
+<td class="ltx_td ltx_align_center" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math id="S5.T3.m17" class="ltx_Math" alttext="0.918" display="inline"><semantics><mn>0.918</mn><annotation encoding="application/x-tex">0.918</annotation></semantics></math></td>
+<td class="ltx_td ltx_align_center" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math id="S5.T3.m18" class="ltx_Math" alttext="0.750" display="inline"><semantics><mn>0.750</mn><annotation encoding="application/x-tex">0.750</annotation></semantics></math></td>
+<td class="ltx_td ltx_align_center" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math id="S5.T3.m19" class="ltx_Math" alttext="0.888" display="inline"><semantics><mn>0.888</mn><annotation encoding="application/x-tex">0.888</annotation></semantics></math></td>
+<td class="ltx_td ltx_align_center" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math id="S5.T3.m20" class="ltx_Math" alttext="0.876" display="inline"><semantics><mn>0.876</mn><annotation encoding="application/x-tex">0.876</annotation></semantics></math></td>
+</tr>
+<tr class="ltx_tr">
+<th class="ltx_td ltx_align_center ltx_th ltx_th_row" style="padding-top:2.5pt;padding-bottom:2.5pt;">10</th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_row" style="padding-top:2.5pt;padding-bottom:2.5pt;">50</th>
+<td class="ltx_td ltx_align_center" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math id="S5.T3.m21" class="ltx_Math" alttext="0.919" display="inline"><semantics><mn>0.919</mn><annotation encoding="application/x-tex">0.919</annotation></semantics></math></td>
+<td class="ltx_td ltx_align_center" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math id="S5.T3.m22" class="ltx_Math" alttext="0.771" display="inline"><semantics><mn>0.771</mn><annotation encoding="application/x-tex">0.771</annotation></semantics></math></td>
+<td class="ltx_td ltx_align_center" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math id="S5.T3.m23" class="ltx_Math" alttext="0.916" display="inline"><semantics><mn>0.916</mn><annotation encoding="application/x-tex">0.916</annotation></semantics></math></td>
+<td class="ltx_td ltx_align_center" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math id="S5.T3.m24" class="ltx_Math" alttext="0.761" display="inline"><semantics><mn>0.761</mn><annotation encoding="application/x-tex">0.761</annotation></semantics></math></td>
+</tr>
+<tr class="ltx_tr">
+<th class="ltx_td ltx_align_center ltx_th ltx_th_row ltx_border_bb" style="padding-top:2.5pt;padding-bottom:2.5pt;">10</th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_row ltx_border_bb" style="padding-top:2.5pt;padding-bottom:2.5pt;">100</th>
+<td class="ltx_td ltx_align_center ltx_border_bb" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math id="S5.T3.m25" class="ltx_Math" alttext="0.898" display="inline"><semantics><mn>0.898</mn><annotation encoding="application/x-tex">0.898</annotation></semantics></math></td>
+<td class="ltx_td ltx_align_center ltx_border_bb" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math id="S5.T3.m26" class="ltx_Math" alttext="0.836" display="inline"><semantics><mn>0.836</mn><annotation encoding="application/x-tex">0.836</annotation></semantics></math></td>
+<td class="ltx_td ltx_align_center ltx_border_bb" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math id="S5.T3.m27" class="ltx_Math" alttext="0.898" display="inline"><semantics><mn>0.898</mn><annotation encoding="application/x-tex">0.898</annotation></semantics></math></td>
+<td class="ltx_td ltx_align_center ltx_border_bb" style="padding-top:2.5pt;padding-bottom:2.5pt;"><math id="S5.T3.m28" class="ltx_Math" alttext="0.850" display="inline"><semantics><mn>0.850</mn><annotation encoding="application/x-tex">0.850</annotation></semantics></math></td>
+</tr>
+</tbody>
+</table>
+</span></div>
+</figure>
+</section>
+<section id="S5.SS3" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">V-C </span><span class="ltx_text ltx_font_italic">Real-world Experiments</span>
+</h3>
+
+<div id="S5.SS3.p1" class="ltx_para">
+<p class="ltx_p">In addition to the simulation studies, we evaluate SeGuE in a real-world environment (campus cafeteria).
+We use the Clearpath Jackal wheeled mobile robot equipped with the Velodyne VLP-16 LiDAR and Zed2i stereo camera; for a full description on sensor calibration see&nbsp;<cite class="ltx_cite ltx_citemacro_cite">[<a href="https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib26" title="" class="ltx_ref">26</a>]</cite>.
+Additionally, we connect the Clearpath Jackal robot with a laptop equipped with an Intel i7 processor, an NVIDIA RTX 3060, 32 GB of RAM and 512 GB of storage.</p>
+</div>
+<figure id="S5.F4" class="ltx_figure">
+<div class="ltx_flex_figure">
+<div class="ltx_flex_cell ltx_flex_size_1">
+<figure id="S5.F4.sf1" class="ltx_figure ltx_figure_panel ltx_align_center"><img src="./[2504.03629] SeGuE_ Semantic Guided Exploration for Mobile Robots_files/x9.png" id="S5.F4.sf1.g1" class="ltx_graphics ltx_img_portrait" width="131" height="217" alt="Refer to caption">
+<figcaption class="ltx_caption"><span class="ltx_tag ltx_tag_figure"><span class="ltx_text" style="font-size:90%;">(a)</span> </span></figcaption>
+</figure>
+</div>
+<div class="ltx_flex_break"></div>
+<div class="ltx_flex_cell ltx_flex_size_1">
+<figure id="S5.F4.sf2" class="ltx_figure ltx_figure_panel ltx_align_center"><img src="./[2504.03629] SeGuE_ Semantic Guided Exploration for Mobile Robots_files/x10.png" id="S5.F4.sf2.g1" class="ltx_graphics ltx_img_portrait" width="131" height="221" alt="Refer to caption">
+<figcaption class="ltx_caption"><span class="ltx_tag ltx_tag_figure"><span class="ltx_text" style="font-size:90%;">(b)</span> </span></figcaption>
+</figure>
+</div>
+</div>
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure"><span class="ltx_text" style="font-size:90%;">Figure 4</span>: </span><span class="ltx_text" style="font-size:90%;">Mapping results of SeGuE in real-world experiments.</span></figcaption>
+</figure>
+<div id="S5.SS3.p2" class="ltx_para">
+<p class="ltx_p">We tested SeGuE with uniform sampling since this was found to perform well consistently across simulation studies.
+Experimental results are shown in Fig.&nbsp;<a href="https://ar5iv.labs.arxiv.org/html/2504.03629#S5.F4" title="Figure 4 ‣ V-C Real-world Experiments ‣ V Experiments ‣ SeGuE: Semantic Guided Exploration for Mobile Robots" class="ltx_ref"><span class="ltx_text ltx_ref_tag">4</span></a>.
+The computed coverage is <math id="S5.SS3.p2.m1" class="ltx_Math" alttext="0.735" display="inline"><semantics><mn>0.735</mn><annotation encoding="application/x-tex">0.735</annotation></semantics></math> and average entropy is <math id="S5.SS3.p2.m2" class="ltx_Math" alttext="1.753" display="inline"><semantics><mn>1.753</mn><annotation encoding="application/x-tex">1.753</annotation></semantics></math>.
+While the overall coverage is lower compared to the values found in the simulation studies, our method can still map most of the environment.
+This performance degradation can be attributed to two factors.
+First, the underlying motion planning library did not transfer well to a more cluttered location.
+Second, battery constraints limited the total run time.
+Adjusting the underlying motion planner to be more energy-aware (e.g., by building on top of&nbsp;<cite class="ltx_cite ltx_citemacro_cite">[<a href="https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib27" title="" class="ltx_ref">27</a>]</cite> and&nbsp;<cite class="ltx_cite ltx_citemacro_cite">[<a href="https://ar5iv.labs.arxiv.org/html/2504.03629#bib.bib28" title="" class="ltx_ref">28</a>]</cite>) could enable optimal coverage subject to motion budget and task (i.e. viewpoint) constraints, so that the environment can be explored timely.</p>
+</div>
+</section>
+</section>
+<section id="S6" class="ltx_section">
+<h2 class="ltx_title ltx_title_section">
+<span class="ltx_tag ltx_tag_section">VI </span><span class="ltx_text ltx_font_smallcaps">Conclusion</span>
+</h2>
+
+<div id="S6.p1" class="ltx_para">
+<p class="ltx_p">We developed SeGuE, a method to autonomously explore an environment which ensures that appearance features are sufficiently observed so that a high-quality and complete map of semantic features may be constructed.
+We proposed a method to score the individual semantic features contained within the map and showed how these scores may be aggregated to rank potential viewpoints.
+Two viewpoint sampling methods were considered, with our tests showing how they interact with the system as a whole.
+Results in both simulation and physical hardware experiments showed that our method can fuse semantic feature information well, improving overall exploration metrics like map coverage and average entropy in comparison to baseline methods.</p>
+</div>
+<div id="S6.p2" class="ltx_para">
+<p class="ltx_p">Since SeGuE builds on top of a next-best-view algorithm, it remains bound to inherent limitations of the latter, particularly the performance dependence on the sampling method and scoring.
+Further, we focus only on global sampling methods to avoid getting trapped in local minima.
+In future work, we aim to integrate local sampling as well.
+
+</p>
+</div>
+</section>
+<section id="bib" class="ltx_bibliography">
+<h2 class="ltx_title ltx_title_bibliography">References</h2>
+
+<ul class="ltx_biblist">
+<li id="bib.bib1" class="ltx_bibitem">
+<span class="ltx_tag ltx_tag_bibitem">[1]</span>
+<span class="ltx_bibblock">
+N.&nbsp;Blodow, L.&nbsp;C. Goron, Z.-C. Marton, D.&nbsp;Pangercic, T.&nbsp;Rühr, M.&nbsp;Tenorth, and M.&nbsp;Beetz, “Autonomous semantic mapping for robots performing everyday manipulation tasks in kitchen environments,” in <span class="ltx_text ltx_font_italic">IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS)</span>, pp.&nbsp;4263–4270, 2011.
+
+</span>
+</li>
+<li id="bib.bib2" class="ltx_bibitem">
+<span class="ltx_tag ltx_tag_bibitem">[2]</span>
+<span class="ltx_bibblock">
+A.&nbsp;Dechemi, D.&nbsp;Chatziparaschis, J.&nbsp;Chen, M.&nbsp;Campbell, A.&nbsp;Shamshirgaran, C.&nbsp;Mucchiani, A.&nbsp;Roy-Chowdhury, S.&nbsp;Carpin, and K.&nbsp;Karydis, “Robotic assessment of a crop’s need for watering: Automating a time-consuming task to support sustainable agriculture,” <span class="ltx_text ltx_font_italic">IEEE Robotics &amp; Automation Magazine</span>, vol.&nbsp;30, no.&nbsp;4, pp.&nbsp;52–67, 2023.
+
+</span>
+</li>
+<li id="bib.bib3" class="ltx_bibitem">
+<span class="ltx_tag ltx_tag_bibitem">[3]</span>
+<span class="ltx_bibblock">
+S.&nbsp;Y. Gadre, M.&nbsp;Wortsman, G.&nbsp;Ilharco, L.&nbsp;Schmidt, and S.&nbsp;Song, “Cows on pasture: Baselines and benchmarks for language-driven zero-shot object navigation,” in <span class="ltx_text ltx_font_italic">IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)</span>, pp.&nbsp;23171–23181, 2023.
+
+</span>
+</li>
+<li id="bib.bib4" class="ltx_bibitem">
+<span class="ltx_tag ltx_tag_bibitem">[4]</span>
+<span class="ltx_bibblock">
+C.&nbsp;Huang, O.&nbsp;Mees, A.&nbsp;Zeng, and W.&nbsp;Burgard, “Visual language maps for robot navigation,” in <span class="ltx_text ltx_font_italic">IEEE International Conference on Robotics and Automation (ICRA)</span>, pp.&nbsp;10608–10615, 2023.
+
+</span>
+</li>
+<li id="bib.bib5" class="ltx_bibitem">
+<span class="ltx_tag ltx_tag_bibitem">[5]</span>
+<span class="ltx_bibblock">
+S.&nbsp;Achat, Q.&nbsp;Serdel, J.&nbsp;Marzat, and J.&nbsp;Moras, “A case study of semantic mapping and planning for autonomous robot navigation,” <span class="ltx_text ltx_font_italic">SN Computer Science</span>, vol.&nbsp;5, 2023.
+
+</span>
+</li>
+<li id="bib.bib6" class="ltx_bibitem">
+<span class="ltx_tag ltx_tag_bibitem">[6]</span>
+<span class="ltx_bibblock">
+C.&nbsp;Cadena, L.&nbsp;Carlone, H.&nbsp;Carrillo, Y.&nbsp;Latif, D.&nbsp;Scaramuzza, J.&nbsp;Neira, I.&nbsp;Reid, and J.&nbsp;J. Leonard, “Past, present, and future of simultaneous localization and mapping: Toward the robust-perception age,” <span class="ltx_text ltx_font_italic">IEEE Transactions on Robotics (TRO)</span>, vol.&nbsp;32, no.&nbsp;6, pp.&nbsp;1309–1332, 2016.
+
+</span>
+</li>
+<li id="bib.bib7" class="ltx_bibitem">
+<span class="ltx_tag ltx_tag_bibitem">[7]</span>
+<span class="ltx_bibblock">
+B.&nbsp;Yamauchi, “A frontier-based approach for autonomous exploration,” in <span class="ltx_text ltx_font_italic">IEEE International Symposium on Computational Intelligence in Robotics and Automation (CIRA)</span>, pp.&nbsp;146–151, 1997.
+
+</span>
+</li>
+<li id="bib.bib8" class="ltx_bibitem">
+<span class="ltx_tag ltx_tag_bibitem">[8]</span>
+<span class="ltx_bibblock">
+A.&nbsp;Bircher, M.&nbsp;Kamel, K.&nbsp;Alexis, H.&nbsp;Oleynikova, and R.&nbsp;Siegwart, “Receding horizon ”next-best-view” planner for 3d exploration,” in <span class="ltx_text ltx_font_italic">IEEE International Conference on Robotics and Automation (ICRA)</span>, pp.&nbsp;1462–1468, 2016.
+
+</span>
+</li>
+<li id="bib.bib9" class="ltx_bibitem">
+<span class="ltx_tag ltx_tag_bibitem">[9]</span>
+<span class="ltx_bibblock">
+E.&nbsp;Palazzolo and C.&nbsp;Stachniss, “Effective exploration for mavs based on the expected information gain,” <span class="ltx_text ltx_font_italic">Drones</span>, vol.&nbsp;2, no.&nbsp;1, 2018.
+
+</span>
+</li>
+<li id="bib.bib10" class="ltx_bibitem">
+<span class="ltx_tag ltx_tag_bibitem">[10]</span>
+<span class="ltx_bibblock">
+M.&nbsp;Selin, M.&nbsp;Tiger, D.&nbsp;Duberg, F.&nbsp;Heintz, and P.&nbsp;Jensfelt, “Efficient autonomous exploration planning of large-scale 3-d environments,” <span class="ltx_text ltx_font_italic">IEEE Robotics and Automation Letters</span>, vol.&nbsp;4, no.&nbsp;2, pp.&nbsp;1699–1706, 2019.
+
+</span>
+</li>
+<li id="bib.bib11" class="ltx_bibitem">
+<span class="ltx_tag ltx_tag_bibitem">[11]</span>
+<span class="ltx_bibblock">
+M.&nbsp;Brossard, S.&nbsp;Bonnabel, and A.&nbsp;Barrau, “A new approach to 3d icp covariance estimation,” <span class="ltx_text ltx_font_italic">IEEE Robotics and Automation Letters</span>, vol.&nbsp;5, no.&nbsp;2, pp.&nbsp;744–751, 2020.
+
+</span>
+</li>
+<li id="bib.bib12" class="ltx_bibitem">
+<span class="ltx_tag ltx_tag_bibitem">[12]</span>
+<span class="ltx_bibblock">
+N.&nbsp;Yokoyama, S.&nbsp;Ha, D.&nbsp;Batra, J.&nbsp;Wang, and B.&nbsp;Bucher, “Vlfm: Vision-language frontier maps for zero-shot semantic navigation,” in <span class="ltx_text ltx_font_italic">IEEE International Conference on Robotics and Automation (ICRA)</span>, pp.&nbsp;42–48, 2024.
+
+</span>
+</li>
+<li id="bib.bib13" class="ltx_bibitem">
+<span class="ltx_tag ltx_tag_bibitem">[13]</span>
+<span class="ltx_bibblock">
+X.&nbsp;Chen, A.&nbsp;Milioto, E.&nbsp;Palazzolo, P.&nbsp;Giguère, J.&nbsp;Behley, and C.&nbsp;Stachniss, “Suma++: Efficient lidar-based semantic slam,” in <span class="ltx_text ltx_font_italic">IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS)</span>, pp.&nbsp;4530–4537, 2019.
+
+</span>
+</li>
+<li id="bib.bib14" class="ltx_bibitem">
+<span class="ltx_tag ltx_tag_bibitem">[14]</span>
+<span class="ltx_bibblock">
+J.&nbsp;Liu, Y.&nbsp;Lv, Y.&nbsp;Yuan, W.&nbsp;Chi, G.&nbsp;Chen, and L.&nbsp;Sun, “An efficient robot exploration method based on heuristics biased sampling,” <span class="ltx_text ltx_font_italic">IEEE Transactions on Industrial Electronics</span>, vol.&nbsp;70, no.&nbsp;7, pp.&nbsp;7102–7112, 2023.
+
+</span>
+</li>
+<li id="bib.bib15" class="ltx_bibitem">
+<span class="ltx_tag ltx_tag_bibitem">[15]</span>
+<span class="ltx_bibblock">
+M.&nbsp;Keirdar and G.&nbsp;A. Kaminka, “Efficient frontier detection for robot exploration,” <span class="ltx_text ltx_font_italic">The International Journal of Robotics Research</span>, vol.&nbsp;33, no.&nbsp;2, pp.&nbsp;215–236, 2014.
+
+</span>
+</li>
+<li id="bib.bib16" class="ltx_bibitem">
+<span class="ltx_tag ltx_tag_bibitem">[16]</span>
+<span class="ltx_bibblock">
+D.&nbsp;L. da&nbsp;Silva&nbsp;Lubanco, M.&nbsp;Pichler-Scheder, and T.&nbsp;Schlechter, “A novel frontier-based exploration algorithm for mobile robots,” in <span class="ltx_text ltx_font_italic">IEEE International Conference on Mechatronics and Robotics Engineering (ICMRE)</span>, pp.&nbsp;1–5, 2020.
+
+</span>
+</li>
+<li id="bib.bib17" class="ltx_bibitem">
+<span class="ltx_tag ltx_tag_bibitem">[17]</span>
+<span class="ltx_bibblock">
+M.&nbsp;Steinbrink, P.&nbsp;Koch, B.&nbsp;Jung, and S.&nbsp;May, “Rapidly-exploring random graph next-best view exploration for ground vehicles,” in <span class="ltx_text ltx_font_italic">European Conference on Mobile Robots (ECMR)</span>, pp.&nbsp;1–7, 2021.
+
+</span>
+</li>
+<li id="bib.bib18" class="ltx_bibitem">
+<span class="ltx_tag ltx_tag_bibitem">[18]</span>
+<span class="ltx_bibblock">
+R.&nbsp;Monica and J.&nbsp;Aleotti, “Contour-based next-best view planning from point cloud segmentation of unknown objects,” <span class="ltx_text ltx_font_italic">Autonomous Robots</span>, pp.&nbsp;443–458, 2017.
+
+</span>
+</li>
+<li id="bib.bib19" class="ltx_bibitem">
+<span class="ltx_tag ltx_tag_bibitem">[19]</span>
+<span class="ltx_bibblock">
+M.&nbsp;Oquab, T.&nbsp;Darcet, T.&nbsp;Moutakanni, H.&nbsp;V. Vo, M.&nbsp;Szafraniec, V.&nbsp;Khalidov, P.&nbsp;Fernandez, D.&nbsp;Haziza, F.&nbsp;Massa, A.&nbsp;El-Nouby, R.&nbsp;Howes, P.-Y. Huang, H.&nbsp;Xu, V.&nbsp;Sharma, S.-W. Li, W.&nbsp;Galuba, M.&nbsp;Rabbat, M.&nbsp;Assran, N.&nbsp;Ballas, G.&nbsp;Synnaeve, I.&nbsp;Misra, H.&nbsp;Jegou, J.&nbsp;Mairal, P.&nbsp;Labatut, A.&nbsp;Joulin, and P.&nbsp;Bojanowski, “Dinov2: Learning robust visual features without supervision,” 2023.
+
+</span>
+</li>
+<li id="bib.bib20" class="ltx_bibitem">
+<span class="ltx_tag ltx_tag_bibitem">[20]</span>
+<span class="ltx_bibblock">
+B.&nbsp;Zhou, H.&nbsp;Zhao, X.&nbsp;Puig, S.&nbsp;Fidler, A.&nbsp;Barriuso, and A.&nbsp;Torralba, “Scene parsing through ade20k dataset,” in <span class="ltx_text ltx_font_italic">IEEE Conference on Computer Vision and Pattern Recognition (CVPR)</span>, pp.&nbsp;5122–5130, 2017.
+
+</span>
+</li>
+<li id="bib.bib21" class="ltx_bibitem">
+<span class="ltx_tag ltx_tag_bibitem">[21]</span>
+<span class="ltx_bibblock">
+B.&nbsp;Liu, S.&nbsp;Cheng, and Y.&nbsp;Shi, “Particle filter optimization: A brief introduction,” in <span class="ltx_text ltx_font_italic">Advances in Swarm Intelligence</span>, pp.&nbsp;95–104, Springer, 2016.
+
+</span>
+</li>
+<li id="bib.bib22" class="ltx_bibitem">
+<span class="ltx_tag ltx_tag_bibitem">[22]</span>
+<span class="ltx_bibblock">
+H.&nbsp;Teng, Y.&nbsp;Wang, D.&nbsp;Chatziparaschis, and K.&nbsp;Karydis, “Adaptive lidar odometry and mapping for autonomous agricultural mobile robots in unmanned farms,” <span class="ltx_text ltx_font_italic">Computers and Electronics in Agriculture</span>, vol.&nbsp;232, p.&nbsp;110023, 2025.
+
+</span>
+</li>
+<li id="bib.bib23" class="ltx_bibitem">
+<span class="ltx_tag ltx_tag_bibitem">[23]</span>
+<span class="ltx_bibblock">
+N.&nbsp;Koenig and A.&nbsp;Howard, “Design and use paradigms for gazebo, an open-source multi-robot simulator,” in <span class="ltx_text ltx_font_italic">IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS)</span>, vol.&nbsp;3, pp.&nbsp;2149–2154, 2004.
+
+</span>
+</li>
+<li id="bib.bib24" class="ltx_bibitem">
+<span class="ltx_tag ltx_tag_bibitem">[24]</span>
+<span class="ltx_bibblock">
+H.&nbsp;Teng, D.&nbsp;Chatziparaschis, X.&nbsp;Kan, A.&nbsp;K. Roy-Chowdhury, and K.&nbsp;Karydis, “Centroid distance keypoint detector for colored point clouds,” in <span class="ltx_text ltx_font_italic">IEEE/CVF Winter Conference on Applications of Computer Vision (WACV)</span>, pp.&nbsp;1196–1205, 2023.
+
+</span>
+</li>
+<li id="bib.bib25" class="ltx_bibitem">
+<span class="ltx_tag ltx_tag_bibitem">[25]</span>
+<span class="ltx_bibblock">
+J.&nbsp;Hörner, “Map-merging for multi-robot system,” Master’s thesis, Charles University, Faculty of Mathematics and Physics, 2016.
+
+</span>
+</li>
+<li id="bib.bib26" class="ltx_bibitem">
+<span class="ltx_tag ltx_tag_bibitem">[26]</span>
+<span class="ltx_bibblock">
+H.&nbsp;Teng, Y.&nbsp;Wang, X.&nbsp;Song, and K.&nbsp;Karydis, “Multimodal dataset for localization, mapping and crop monitoring in citrus tree farms,” in <span class="ltx_text ltx_font_italic">International Symposium on Visual Computing</span>, pp.&nbsp;571–582, Springer, 2023.
+
+</span>
+</li>
+<li id="bib.bib27" class="ltx_bibitem">
+<span class="ltx_tag ltx_tag_bibitem">[27]</span>
+<span class="ltx_bibblock">
+X.&nbsp;Kan, H.&nbsp;Teng, and K.&nbsp;Karydis, “Online exploration and coverage planning in unknown obstacle-cluttered environments,” <span class="ltx_text ltx_font_italic">IEEE Robotics and Automation Letters</span>, vol.&nbsp;5, no.&nbsp;4, pp.&nbsp;5969–5976, 2020.
+
+</span>
+</li>
+<li id="bib.bib28" class="ltx_bibitem">
+<span class="ltx_tag ltx_tag_bibitem">[28]</span>
+<span class="ltx_bibblock">
+X.&nbsp;Kan, T.&nbsp;C. Thayer, S.&nbsp;Carpin, and K.&nbsp;Karydis, “Task planning on stochastic aisle graphs for precision agriculture,” <span class="ltx_text ltx_font_italic">IEEE Robotics and Automation Letters</span>, vol.&nbsp;6, no.&nbsp;2, pp.&nbsp;3287–3294, 2021.
+
+</span>
+</li>
+</ul>
+</section>
+<div class="ltx_pagination ltx_role_newpage"></div>
+</article>
+</div>
+<div class="ar5iv-footer"><a href="https://ar5iv.labs.arxiv.org/html/2504.03628" class="ar5iv-nav-button ar5iv-nav-button-prev">◄</a>
+    <a class="ar5iv-home-button" href="https://ar5iv.labs.arxiv.org/"><img height="40" alt="ar5iv homepage" src="./[2504.03629] SeGuE_ Semantic Guided Exploration for Mobile Robots_files/ar5iv.png"></a>
+    <a href="https://ar5iv.labs.arxiv.org/feeling_lucky" class="ar5iv-text-button">Feeling<br>lucky?</a>
+    <a href="https://ar5iv.labs.arxiv.org/land_of_honey_and_milk" rel="nofollow" aria-hidden="true" tabindex="-1"></a>
+    <a href="https://ar5iv.labs.arxiv.org/log/2504.03629" class="ar5iv-text-button ar5iv-severity-ok">Conversion<br>report</a>
+    <a class="ar5iv-text-button" target="_blank" href="https://github.com/dginev/ar5iv/issues/new?template=improve-article--arxiv-id-.md&amp;title=Improve+article+2504.03629">Report<br>an issue</a>
+    <a href="https://arxiv.org/abs/2504.03629" class="ar5iv-text-button arxiv-ui-theme">View&nbsp;original<br>on&nbsp;arXiv</a><a href="https://ar5iv.labs.arxiv.org/html/2504.03630" class="ar5iv-nav-button ar5iv-nav-button-next">►</a>
+</div><footer class="ltx_page_footer">
+<a class="ar5iv-toggle-color-scheme" href="javascript:toggleColorScheme()" title="Toggle ar5iv color scheme"><span class="color-scheme-icon"></span></a>
+<a class="ar5iv-footer-button" href="https://arxiv.org/help/license" target="_blank">Copyright</a>
+<a class="ar5iv-footer-button" href="https://arxiv.org/help/policies/privacy_policy" target="_blank">Privacy Policy</a>
+
+<div class="ltx_page_logo">Generated  on Mon May  5 14:57:52 2025 by <a target="_blank" href="http://dlmf.nist.gov/LaTeXML/" class="ltx_LaTeXML_logo"><span style="letter-spacing:-0.2em; margin-right:0.1em;">L<span class="ltx_font_smallcaps" style="position:relative; bottom:2.2pt;">a</span>T<span class="ltx_font_smallcaps" style="font-size:120%;position:relative; bottom:-0.2ex;">e</span></span><span style="font-size:90%; position:relative; bottom:-0.2ex;">XML</span><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAAOCAYAAAD5YeaVAAAAAXNSR0IArs4c6QAAAAZiS0dEAP8A/wD/oL2nkwAAAAlwSFlzAAALEwAACxMBAJqcGAAAAAd0SU1FB9wKExQZLWTEaOUAAAAddEVYdENvbW1lbnQAQ3JlYXRlZCB3aXRoIFRoZSBHSU1Q72QlbgAAAdpJREFUKM9tkL+L2nAARz9fPZNCKFapUn8kyI0e4iRHSR1Kb8ng0lJw6FYHFwv2LwhOpcWxTjeUunYqOmqd6hEoRDhtDWdA8ApRYsSUCDHNt5ul13vz4w0vWCgUnnEc975arX6ORqN3VqtVZbfbTQC4uEHANM3jSqXymFI6yWazP2KxWAXAL9zCUa1Wy2tXVxheKA9YNoR8Pt+aTqe4FVVVvz05O6MBhqUIBGk8Hn8HAOVy+T+XLJfLS4ZhTiRJgqIoVBRFIoric47jPnmeB1mW/9rr9ZpSSn3Lsmir1fJZlqWlUonKsvwWwD8ymc/nXwVBeLjf7xEKhdBut9Hr9WgmkyGEkJwsy5eHG5vN5g0AKIoCAEgkEkin0wQAfN9/cXPdheu6P33fBwB4ngcAcByHJpPJl+fn54mD3Gg0NrquXxeLRQAAwzAYj8cwTZPwPH9/sVg8PXweDAauqqr2cDjEer1GJBLBZDJBs9mE4zjwfZ85lAGg2+06hmGgXq+j3+/DsixYlgVN03a9Xu8jgCNCyIegIAgx13Vfd7vdu+FweG8YRkjXdWy329+dTgeSJD3ieZ7RNO0VAXAPwDEAO5VKndi2fWrb9jWl9Esul6PZbDY9Go1OZ7PZ9z/lyuD3OozU2wAAAABJRU5ErkJggg==" alt="Mascot Sammy"></a>
+</div></footer>
+</div>
+
+    <script>
+      var canMathML = typeof(MathMLElement) == "function";
+      if (!canMathML) {
+        var body = document.querySelector("body");
+        body.firstElementChild.setAttribute('style', 'opacity: 0;');
+        var loading = document.createElement("div");
+        loading.setAttribute("id", "mathjax-loading-spinner");
+        var message = document.createElement("div");
+        message.setAttribute("id", "mathjax-loading-message");
+        message.innerText = "Typesetting Equations...";
+        body.prepend(loading);
+        body.prepend(message);
+
+        var el = document.createElement("script");
+        el.src = "https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js";
+        document.querySelector("head").appendChild(el);
+
+        window.MathJax = {
+          startup: {
+            pageReady: () => {
+              return MathJax.startup.defaultPageReady().then(() => {
+                body.removeChild(loading);
+                body.removeChild(message);
+                body.firstElementChild.removeAttribute('style');
+              }); } } };
+      }
+    </script>
+    <script>
+    // Auxiliary function, building the preview feature when
+    // an inline citation is clicked
+    function clicked_cite(e) {
+      e.preventDefault();
+      let cite = this.closest('.ltx_cite');
+      let next = cite.nextSibling;
+      if (next && next.nodeType == Node.ELEMENT_NODE && next.getAttribute('class') == "ar5iv-bibitem-preview") {
+        next.remove();
+        return; }
+      // Before adding a preview modal,
+      // cleanup older previews, in case they're still open
+      document.querySelectorAll('span.ar5iv-bibitem-preview').forEach(function(node) {
+        node.remove();
+      })
+
+      // Create the preview
+      preview = document.createElement('span');
+      preview.setAttribute('class','ar5iv-bibitem-preview');
+      let target = document.getElementById(this.getAttribute('href').slice(1));
+      target.childNodes.forEach(function (child) {
+        preview.append(child.cloneNode(true));
+      });
+      let close_x = document.createElement('button');
+      close_x.setAttribute("aria-label","Close modal for bibliography item preview");
+      close_x.textContent = "×";
+      close_x.setAttribute('class', 'ar5iv-button-close-preview');
+      close_x.setAttribute('onclick','this.parentNode.remove()');
+      preview.append(close_x);
+      preview.querySelectorAll('.ltx_tag_bibitem').forEach(function(node) {
+        node.remove();
+      });
+      cite.parentNode.insertBefore(preview, cite.nextSibling);
+      return;
+    }
+    // Global Document initialization:
+    // - assign the preview feature to all inline citation links
+    document.querySelectorAll(".ltx_cite .ltx_ref").forEach(function (link) {
+      link.addEventListener("click", clicked_cite);
+    });
+    </script>
+    
+
+</body></html>

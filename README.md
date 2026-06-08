@@ -80,101 +80,101 @@ LLM должна начинать работу с этих файлов, а не
 > Новые переводы и разборы arXiv-статей
 ---
 
-### Оценка способностей к бухгалтерским рассуждениям больших языковых моделей
-[2601.06707] дата публикации в arXiv - 01.2026  
-📅 дата перевода 25.05.2026  
-🏷 `large language models` `accounting reasoning` `benchmark` `multi-step reasoning` `GPT-4` `GLM` `chain-of-thought`
+### Переосмысление ранней остановки: уточните, затем откалибруйте
+[2501.19195] дата публикации в arXiv - 01.2025  
+📅 дата перевода 06.06.2026  
+🏷 `calibration error` `refinement error` `early stopping` `temperature scaling` `probabilistic classification` `logistic regression` `model calibration`
 
-Статья оценивает способности LLM (GPT-4, GLM) к бухгалтерским рассуждениям через специальные бенчмарки. Результаты показывают, что даже лучшие модели недостаточно точны для реального применения из-за ошибок в многошаговых вычислениях и непонимании правил.
+Авторы показывают, что минимизация функции потерь при обучении классификаторов не приводит к одновременному снижению ошибок калибровки и уточнения. Предлагается новый критерий ранней остановки, основанный на минимизации ошибки уточнения, а калибровка проводится постфактум с помощью temperature scaling, что улучшает качество вероятностных предсказаний.
 
-- [📖 Русская HTML версия](https://romanzorkin.github.io/arxiv_ru/articles/2601.06707/2601.06707_ru.html)
-- [📄 Оригинальная статья](https://arxiv.org/abs/2601.06707)
-- [🧠 Summary / README](articles/2601.06707/README.md)
-- [⚙ Metadata](articles/2601.06707/metadata.json)
-
----
-
-### PIGEON: Прогнозирование геолокаций изображений
-[2307.05845] дата публикации в arXiv - 07.2023  
-📅 дата перевода 25.05.2026  
-🏷 `image geolocalization` `semantic geocells` `contrastive pretraining` `haversine loss` `location cluster retrieval` `visual place recognition` `Geoguessr`
-
-Комбинируя семантические геоячейки, многозадачное контрастивное предобучение CLIP и иерархическое уточнение через кластеризацию, авторы создали две модели геолокализации: PIGEON (Street View) и PIGEOTTO (общие изображения). PIGEON побеждает топ-игроков, PIGEOTTO улучшает SOTA на 5 бенчмарках.
-
-- [📖 Русская HTML версия](https://romanzorkin.github.io/arxiv_ru/articles/2307.05845/2307.05845_ru.html)
-- [📄 Оригинальная статья](https://arxiv.org/abs/2307.05845)
-- [🧠 Summary / README](articles/2307.05845/README.md)
-- [⚙ Metadata](articles/2307.05845/metadata.json)
+- [📖 Русская HTML версия](https://romanzorkin.github.io/arxiv_ru/articles/2501.19195/2501.19195_ru.html)
+- [📄 Оригинальная статья](https://arxiv.org/abs/2501.19195)
+- [🧠 Summary / README](articles/2501.19195/README.md)
+- [⚙ Metadata](articles/2501.19195/metadata.json)
 
 ---
 
-### Универсальный ИИ-агент для диагностики редких заболеваний и приоритизации генов риска
-[2605.06226] дата публикации в arXiv - 05.2026  
-📅 дата перевода 24.05.2026  
-🏷 `rare disease diagnosis` `multi-agent system` `risk gene prioritization` `clinical decision support` `knowledge retrieval` `confidence estimation` `Hygieia agent`
+### SeGuE: Семантически управляемое исследование для мобильных роботов
+[2504.03629] дата публикации в arXiv - 04.2025  
+📅 дата перевода 01.06.2026  
+🏷 `semantic mapping` `next-best-view` `mobile robots` `semantic features` `importance sampling` `autonomous exploration` `embodied AI`
 
-Представлен Hygieia — мультимодальный ИИ-агент для диагностики редких болезней и приоритизации генов риска. Использует роутер для разделения редких и частых случаев, верификатор для повышения надёжности и выдаёт оценку уверенности. Превосходит врачей на 12–60% и экономит время.
+Предложен метод SeGuE для автономного исследования мобильным роботом, который строит карту с семантическими признаками, используя оценку энтропии видимых семантических признаков для выбора следующей точки обзора. Метод проверен в симуляции и на реальном роботе, показывая улучшение качества семантических карт по сравнению с базовыми подходами.
 
-- [📖 Русская HTML версия](https://romanzorkin.github.io/arxiv_ru/articles/2605.06226/2605.06226_ru.html)
-- [📄 Оригинальная статья](https://arxiv.org/abs/2605.06226)
-- [🧠 Summary / README](articles/2605.06226/README.md)
-- [⚙ Metadata](articles/2605.06226/metadata.json)
-
----
-
-### RoSHAP: распределительный фреймворк и робастная метрика для стабильной атрибуции признаков
-[2605.15154] дата публикации в arXiv - 05.2026  
-📅 дата перевода 24.05.2026  
-🏷 `SHAP` `Feature Attribution` `Robustness` `Bootstrap` `Kernel Density Estimation` `Feature Selection` `Interpretability`
-
-RoSHAP — устойчивая метрика важности признаков, основанная на оценке распределения SHAP-значений через бутстреп. Учитывает активность, силу сигнала и стабильность, обеспечивая более надёжное ранжирование, чем стандартный SHAP.
-
-- [📖 Русская HTML версия](https://romanzorkin.github.io/arxiv_ru/articles/2605.15154/2605.15154_ru.html)
-- [📄 Оригинальная статья](https://arxiv.org/abs/2605.15154)
-- [🧠 Summary / README](articles/2605.15154/README.md)
-- [⚙ Metadata](articles/2605.15154/metadata.json)
+- [📖 Русская HTML версия](https://romanzorkin.github.io/arxiv_ru/articles/2504.03629/2504.03629_ru.html)
+- [📄 Оригинальная статья](https://arxiv.org/abs/2504.03629)
+- [🧠 Summary / README](articles/2504.03629/README.md)
+- [⚙ Metadata](articles/2504.03629/metadata.json)
 
 ---
 
-### Healthcare AI GYM для медицинских агентов
-[2605.02943] дата публикации в arXiv - 05.2026  
-📅 дата перевода 17.05.2026  
-🏷 `medical AI` `reinforcement learning` `multi-turn agents` `clinical reasoning` `tool-augmented LLMs` `on-policy distillation` `healthcare simulation`
+### BLASST: динамическое блочное разрежение механизма внимания с использованием порогового отсечения Softmax
+[2512.12087] дата публикации в arXiv - 12.2025  
+📅 дата перевода 31.05.2026  
+🏷 `sparse attention` `FlashAttention` `CUDA kernels` `long-context inference` `threshold pruning` `sparsity-aware training` `Llama-3.1-8B`
 
-Создана среда Healthcare AI GYM для обучения медицинских AI-агентов с подкреплением в многопоточном режиме. Предложен метод TT-OPD, стабилизирующий обучение через дистилляцию с учителем на основе EMA, что улучшает точность на 10 из 18 медицинских бенчмарков в среднем на 3.9 процентных пункта.
+BLASST — метод динамического разрежения внимания, который без предвычислений и прокси-оценок пропускает незначимые блоки внимания, достигая до 1.62× ускорения при 74.7% разреженности с минимальной потерей точности на современных GPU.
 
-- [📖 Русская HTML версия](https://romanzorkin.github.io/arxiv_ru/articles/2605.02943/2605.02943_ru.html)
-- [📄 Оригинальная статья](https://arxiv.org/abs/2605.02943v1)
-- [🧠 Summary / README](articles/2605.02943/README.md)
-- [⚙ Metadata](articles/2605.02943/metadata.json)
-
----
-
-### YOLO26: Анализ сквозной структуры без NMS для обнаружения объектов в реальном времени
-[2601.12882] дата публикации в arXiv - 01.2026  
-📅 дата перевода 23.05.2026  
-🏷 `YOLOv26` `real-time object detection` `NMS-free` `end-to-end detection` `MuSGD optimizer` `edge AI` `small object detection`
-
-YOLOv26 — сквозной детектор без NMS, использующий MuSGD, STAL и ProgLoss. Достигает 40+ mAP на nano-версии за 1.5 мс и 57.5 mAP на extra-large за 11.5 мс, превосходя YOLO11 и RTMDet по скорости и точности.
-
-- [📖 Русская HTML версия](https://romanzorkin.github.io/arxiv_ru/articles/2601.12882/2601.12882_ru.html)
-- [📄 Оригинальная статья](https://arxiv.org/abs/2601.12882)
-- [🧠 Summary / README](articles/2601.12882/README.md)
-- [⚙ Metadata](articles/2601.12882/metadata.json)
+- [📖 Русская HTML версия](https://romanzorkin.github.io/arxiv_ru/articles/2512.12087/2512.12087_ru.html)
+- [📄 Оригинальная статья](https://arxiv.org/abs/2512.12087)
+- [🧠 Summary / README](articles/2512.12087/README.md)
+- [⚙ Metadata](articles/2512.12087/metadata.json)
 
 ---
 
-### К агентивному управлению программными проектами: видение и дорожная карта
-[2601.16392] дата публикации в arXiv - 01.2026  
-📅 дата перевода 23.05.2026  
-🏷 `agentic AI` `software project management` `multi-agent system` `human-AI collaboration` `autonomy levels` `software engineering 3.0` `ethical AI`
+### Finch: Бенчмаркинг финансов и бухгалтерии в корпоративных рабочих процессах, основанных на таблицах
+[2512.13168] дата публикации в arXiv - 12.2025  
+📅 дата перевода 01.06.2026  
+🏷 `finance workflows` `spreadsheet reasoning` `large language models` `multimodal data` `workflow benchmarking` `enterprise AI` `long-horizon tasks`
 
-Предложена концепция агентного PM как мультиагентной системы с четырьмя режимами автономии, работающей как помощник человека. Статья описывает эволюцию SPM, этические аспекты и новую роль PM как коуча.
+Finch — это новый комплексный бенчмарк для оценки ИИ-агентов на реальных финансово-бухгалтерских рабочих процессах, основанных на сложных, разнородных и многомодальных данных из электронных таблиц и сопутствующих документов. Даже передовые модели проходят менее 40% задач, демонстрируя значительные вызовы.
 
-- [📖 Русская HTML версия](https://romanzorkin.github.io/arxiv_ru/articles/2601.16392/2601.16392_ru.html)
-- [📄 Оригинальная статья](https://arxiv.org/abs/2601.16392)
-- [🧠 Summary / README](articles/2601.16392/README.md)
-- [⚙ Metadata](articles/2601.16392/metadata.json)
+- [📖 Русская HTML версия](https://romanzorkin.github.io/arxiv_ru/articles/2512.13168/2512.13168_ru.html)
+- [📄 Оригинальная статья](https://arxiv.org/abs/2512.13168)
+- [🧠 Summary / README](articles/2512.13168/README.md)
+- [⚙ Metadata](articles/2512.13168/metadata.json)
+
+---
+
+### К парадигме «Зрение–Звук–Язык–Действие»: фреймворк HEAR для манипулирования, ориентированного на звук
+[2603.16086] дата публикации в arXiv - 03.2026  
+📅 дата перевода 01.06.2026  
+🏷 `robotic manipulation` `audio perception` `vision-language-action` `streaming audio` `causal memory` `flow-matching policy` `multi-sensory integration`
+
+Предложена парадигма VSLA и архитектура HEAR для звукоцентричного управления роботами, решающая проблему потери кратковременных аудиосигналов из-за задержек и пакетной обработки действий. HEAR достигает 81% успеха в симуляции и 54% на реальном роботе, существенно превосходя существующие методы.
+
+- [📖 Русская HTML версия](https://romanzorkin.github.io/arxiv_ru/articles/2603.16086/2603.16086_ru.html)
+- [📄 Оригинальная статья](https://arxiv.org/abs/2603.16086)
+- [🧠 Summary / README](articles/2603.16086/README.md)
+- [⚙ Metadata](articles/2603.16086/metadata.json)
+
+---
+
+### Агентное использование инструментов в больших языковых моделях
+[2604.00835] дата публикации в arXiv - 04.2026  
+📅 дата перевода 01.06.2026  
+🏷 `large language models` `tool use` `reinforcement learning` `supervised fine-tuning` `prompt engineering` `autonomous agents` `evaluation benchmarks`
+
+Статья систематизирует методы использования инструментов большими языковыми моделями (LLM) в трёх парадигмах: plug-and-play prompting, supervised tool learning и reward-driven policy learning, анализирует их эволюцию, сильные и слабые стороны, а также обзор существующих бенчмарков и вызовов.
+
+- [📖 Русская HTML версия](https://romanzorkin.github.io/arxiv_ru/articles/2604.00835/2604.00835_ru.html)
+- [📄 Оригинальная статья](https://arxiv.org/abs/2604.00835)
+- [🧠 Summary / README](articles/2604.00835/README.md)
+- [⚙ Metadata](articles/2604.00835/metadata.json)
+
+---
+
+### Реализуемая Байесовская согласованность для общих функций потерь метрик
+[2605.03823] дата публикации в arXiv - 05.2026  
+📅 дата перевода 06.06.2026  
+🏷 `metric learning` `Bayes consistency` `Littlestone tree` `universal learning` `unbounded loss` `realizable setting` `combinatorial characterization`
+
+Статья даёт необходимое и достаточное условие для сильной универсальной байесовской сходимости в реализуемой постановке при общих метрических потерях. Ключевой критерий — отсутствие бесконечного неубывающего Littlestone-дерева с растущими разрывами.
+
+- [📖 Русская HTML версия](https://romanzorkin.github.io/arxiv_ru/articles/2605.03823/2605.03823_ru.html)
+- [📄 Оригинальная статья](https://arxiv.org/abs/2605.03823)
+- [🧠 Summary / README](articles/2605.03823/README.md)
+- [⚙ Metadata](articles/2605.03823/metadata.json)
 
 ---
 
@@ -188,6 +188,14 @@ YOLOv26 — сквозной детектор без NMS, использующи
 
 |id статьи|Месяц публикации|Дата перевода| Тема статьи | Ручной контроль|
 |---|---|---|---|---|
+| [2501.19195](articles/2501.19195/README.md) | 01.2025 | 06.06.2026 | Переосмысление ранней остановки: уточните, затем откалибруйте (`Rethinking Early Stopping: Refine, Then Calibrate`) |✅|
+| [2504.03629](articles/2504.03629/README.md) | 04.2025 | 01.06.2026 | SeGuE: Семантически управляемое исследование для мобильных роботов (`SeGuE: Semantic Guided Exploration for Mobile Robots`) |✅|
+| [2512.12087](articles/2512.12087/README.md) | 12.2025 | 31.05.2026 | BLASST: динамическое блочное разрежение механизма внимания с использованием порогового отсечения Softmax (`BLASST: Dynamic BLocked Attention Sparsity via Softmax Thresholding`) |✅|
+| [2512.13168](articles/2512.13168/README.md) | 12.2025 | 01.06.2026 | Finch: Бенчмаркинг финансов и бухгалтерии в корпоративных рабочих процессах, основанных на таблицах (`Finch: Benchmarking Finance & Accounting across Spreadsheet-Centric Enterprise Workflows`) |✅|
+| [2603.16086](articles/2603.16086/README.md) | 03.2026 | 01.06.2026 | К парадигме «Зрение–Звук–Язык–Действие»: фреймворк HEAR для манипулирования, ориентированного на звук (`Towards the Vision-Sound-Language-Action Paradigm: The HEAR Framework for Sound-Centric Manipulation`) |✅|
+| [2604.00835](articles/2604.00835/README.md) | 04.2026 | 01.06.2026 | Агентное использование инструментов в больших языковых моделях (`Agentic Tool Use in Large Language Models`) |✅|
+| [2604.00835](articles/2604.00835/README.md) | 04.2026 | 01.06.2026 | Агентное использование инструментов в больших языковых моделях (`Agentic Tool Use in Large Language Models`) |✅|
+| [2605.03823](articles/2605.03823/README.md) | 05.2026 | 06.06.2026 | Реализуемая Байесовская согласованность для общих функций потерь метрик (`Realizable Bayes-Consistency for General Metric Losses`) |✅|
 | [2601.06707](articles/2601.06707/README.md) | 01.2026 | 25.05.2026 | Оценка способностей к бухгалтерским рассуждениям больших языковых моделей (`Evaluating Accounting Reasoning Capabilities of Large Language Models`) |✅|
 | [2307.05845](articles/2307.05845/README.md) | 07.2023 | 25.05.2026 | PIGEON: Прогнозирование геолокаций изображений (`PIGEON: Predicting Image Geolocations`) ||
 | [2605.06226](articles/2605.06226/README.md) | 05.2026 | 24.05.2026 | Универсальный ИИ-агент для диагностики редких заболеваний и приоритизации генов риска (`A Versatile AI Agent for Rare Disease Diagnosis and Risk Gene Prioritization`) |✅|

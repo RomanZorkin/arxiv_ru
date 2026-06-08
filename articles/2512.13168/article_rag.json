@@ -1,0 +1,1177 @@
+{
+  "title": "[2512.13168] Finch: Benchmarking Finance & Accounting across Spreadsheet-Centric Enterprise Workflows",
+  "sections": [
+    {
+      "heading": "Finch: Benchmarking Finance & Accounting across Spreadsheet-Centric Enterprise Workflows",
+      "level": 1,
+      "content": [],
+      "children": [
+        {
+          "heading": "Abstract",
+          "level": 6,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "We introduce a finance & accounting benchmark (Finch) for evaluating AI agents on real-world, enterprise-grade professional workflows—interleaving data entry, structuring, formatting, web search, cross-file retrieval, calculation, modeling, validation, translation, visualization, and reporting. Finch is sourced from authentic enterprise workspaces at Enron (15,000 spreadsheets and 500,000 emails from 150 employees) and other financial institutions, preserving in-the-wild messiness across multimodal artifacts (text, tables, formulas, charts, code, and images) and spanning diverse domains such as budgeting, trading, and asset management."
+            },
+            {
+              "type": "paragraph",
+              "text": "We propose a workflow construction process that combines LLM-assisted discovery with expert annotation: (1) LLM-assisted, expert-verified derivation of workflows from real-world email threads and version histories of spreadsheet files, and (2) meticulous expert annotation for workflows, requiring over 700 hours of domain-expert effort. This yields 172 composite workflows with 384 tasks, involving 1,710 spreadsheets with 27 million cells, along with PDFs and other artifacts, capturing the intrinsically messy, long-horizon, knowledge-intensive, and collaborative nature of real-world enterprise work."
+            },
+            {
+              "type": "paragraph",
+              "text": "We conduct both human and automated evaluations of frontier AI systems including GPT 5.1, Claude Sonnet 4.5, Gemini 3 Pro, Grok 4, and Qwen 3 Max, and GPT 5.1 Pro spends 48 hours in total yet passes only 38.4% of workflows, while Claude Sonnet 4.5 passes just 25.0%. Comprehensive case studies further surface the challenges that real-world enterprise workflows pose for AI agents."
+            },
+            {
+              "type": "paragraph",
+              "text": "[![[Uncaptioned image]](./[2512.13168] Finch_ Benchmarking Finance & Accounting across Spreadsheet-Centric Enterprise Workflows_files/hf-logo.png) Dataset: https://huggingface.co/FinWorkBench](https://huggingface.co/FinWorkBench)"
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "1 Introduction",
+          "level": 2,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "Frontier AI systems are increasingly transforming professional workspaces. AI-assisted tools like ChatGPT [openai\\_agent], Claude [claude\\_excel], Gemini [gemini\\_workspace], and Copilot [microsoft\\_copilot] are now embedded in daily enterprise workflows—helping professionals draft documents, explore data, manipulate spreadsheets, and generate reports. These tools are particularly impactful in finance and accounting (F&A), a high-stakes, knowledge- and labor-intensive domain critical to every organization."
+            },
+            {
+              "type": "paragraph",
+              "text": "However, real-world F&A work is inherently messy with substantial contextual complexity: artifacts are interconnected across heterogeneous spreadsheets, PDFs, and more, evolving through multiple versions with collaborative edits [klimt2004enron]; spreadsheets contain large, complex structures [spreadsheetllm2024] with cross-sheet references, intricate layouts, inconsistent formatting, cryptic terms, erroneous formulas, and multimodal artifacts such as charts, images, and code. It is also long-horizon [gdpval2025]: workflows demand multi-step reasoning spanning data entry, editing, retrieval, calculation, modeling, validation, reporting, and more."
+            },
+            {
+              "type": "paragraph",
+              "text": "This raises a key question: Can today’s frontier AI agents actually handle the messy, long-horizon, and knowledge-intensive workflows that professionals face daily?"
+            },
+            {
+              "type": "paragraph",
+              "text": "To answer this, we introduce Finch, an enterprise-grade F&A benchmark sourced from authentic enterprise environments. Finch captures the intrinsic complexity of professional work through:"
+            },
+            {
+              "type": "list",
+              "text": "* • In-the-wild enterprise sourcing: Finch is built around authentic enterprise spreadsheets, emails, and PDFs from real-world enterprise workspaces—primarily Enron [enrondata\\_pst] (about 15,000 spreadsheet files and 500,000 emails from 150 executives and employees) and EUSES [fisher2005euses] (about 450 financial spreadsheets from various sources), along with securities and asset management firms, global organizations such as World Bank [worldbank\\_idr\\_2024], and Canadian and British governments [financecanada\\_fiscalref\\_2025, hmt\\_pesa\\_2023]. Documents are large, cross-referenced, and messy—containing rich multimodal artifacts such as tables, formulas, charts, pivots, and images. * • Rigorous construction process: We propose a novel workflow construction pipeline grounded in real collaborative context of emails and versioned artifacts. We induce workflows from enterprise email threads and attachments, where collaborators naturally describe, discuss, and track workflows as part of their daily work. And we propose an LLM-assisted, expert-verified method to derive workflows by analyzing changes across versioned spreadsheets, surfacing the underlying goals that drive professionals’ work. Annotators must reason over large multi-sheet workbooks, and subtle version deltas to infer what the original analyst was trying to achieve, making the annotation process substantially more difficult than curating QA pairs over isolated tables."
+            },
+            {
+              "type": "paragraph",
+              "text": "In-the-wild enterprise sourcing: Finch is built around authentic enterprise spreadsheets, emails, and PDFs from real-world enterprise workspaces—primarily Enron [enrondata\\_pst] (about 15,000 spreadsheet files and 500,000 emails from 150 executives and employees) and EUSES [fisher2005euses] (about 450 financial spreadsheets from various sources), along with securities and asset management firms, global organizations such as World Bank [worldbank\\_idr\\_2024], and Canadian and British governments [financecanada\\_fiscalref\\_2025, hmt\\_pesa\\_2023]. Documents are large, cross-referenced, and messy—containing rich multimodal artifacts such as tables, formulas, charts, pivots, and images."
+            },
+            {
+              "type": "paragraph",
+              "text": "Rigorous construction process: We propose a novel workflow construction pipeline grounded in real collaborative context of emails and versioned artifacts. We induce workflows from enterprise email threads and attachments, where collaborators naturally describe, discuss, and track workflows as part of their daily work. And we propose an LLM-assisted, expert-verified method to derive workflows by analyzing changes across versioned spreadsheets, surfacing the underlying goals that drive professionals’ work. Annotators must reason over large multi-sheet workbooks, and subtle version deltas to infer what the original analyst was trying to achieve, making the annotation process substantially more difficult than curating QA pairs over isolated tables."
+            },
+            {
+              "type": "paragraph",
+              "text": "We compile 172 meticulously annotated, enterprise-grade workflows built on 1,710 spreadsheets, along with PDFs and other artifacts, collectively capturing the compositional, messy, knowledge-intensive, and collaborative nature of real work. Each workflow spans one or more interdependent tasks—data entry, editing, retrieval, calculation, modeling, validation, translation, visualization, and reporting—mirroring how professionals actually work on artifact manipulation and creation."
+            },
+            {
+              "type": "paragraph",
+              "text": "We evaluate a spectrum of frontier AI systems—including Claude Sonnet 4.5, GPT 5.1, Gemini 3, Grok 4, and Qwen 3—using both expert evaluation and a novel automated evaluation pipeline that closely aligns with expert judgments. Our experiments reveal that even the frontier agents pass fewer than 40% of workflows (GPT 5.1 Pro spends 16.8 minutes per workflow on average), highlighting the substantial challenges that Finch poses for AI agents. Comprehensive case analyses further surface concrete challenges that real-world enterprise workflows pose for AI agents."
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "2 Finch: A Real-world Finance & Accounting Workflow Benchmark",
+          "level": 2,
+          "content": [],
+          "children": [
+            {
+              "heading": "2.1 Dataset Construction",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "We propose a novel workflow construction pipeline grounded in the real collaborative context of emails and versioned artifacts, as illustrated in Figure [4](https://ar5iv.labs.arxiv.org/html/2512.13168v5#S2.F4 \"Fig. 4 ‣ 2.1 Dataset Construction ‣ 2 Finch: A Real-world Finance & Accounting Workflow Benchmark ‣ Finch: Benchmarking Finance & Accounting across Spreadsheet-Centric Enterprise Workflows\") (a–c). First, we induce workflows from enterprise email threads and versioned documents, where collaborators naturally describe, discuss, and track work as part of their daily routines. Second, we derive workflows by analyzing changes across versioned spreadsheets, surfacing the actual data transformations and analysis steps that professionals performed. Third, we leverage high-quality spreadsheets and reports: we design workflows, author task instructions, and revise these spreadsheets and reports so that they serve as the input files and reference solutions."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "All annotated workflows from these different channels are consolidated into a unified schema with consistent fields (NL instruction, input files, reference outputs), and each workflow is tagged with task types (e.g., data entry/import, structuring, validation) and business types (e.g., planning and budgeting, pricing and valuation, operations, asset management). Note that the reference outputs include both file-based reference answers (for most generation/editing cases) and textual reference answers (for a small number of QA and summary/visualization cases)."
+                }
+              ],
+              "children": [
+                {
+                  "heading": "2.1.1 Workflow from Enterprise Email Threads",
+                  "level": 4,
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "text": "We first mine enterprise email threads to surface workflows. Starting from the Enron Email Corpus, we prompt GPT-5 to identify collaborative messages that (i) explicitly state a business goal (e.g., “update the RAC rankings” or “revise the 2002 allocations”) and (ii) reference one or more attached spreadsheets. For each selected thread, the model summarizes the communicative intent and articulates a workflow description."
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "We distinguish two cases. In the *strongly grounded* case illustrated in Figure [4](https://ar5iv.labs.arxiv.org/html/2512.13168v5#S2.F4 \"Fig. 4 ‣ 2.1 Dataset Construction ‣ 2 Finch: A Real-world Finance & Accounting Workflow Benchmark ‣ Finch: Benchmarking Finance & Accounting across Spreadsheet-Centric Enterprise Workflows\") (a), both the input and the final reference artifacts for the workflow are already present as attachments in the thread (e.g., an initial ranking file and a corrected version). Strongly grounded cases well motivated this benchmark, but they are relatively rare. In the *partially grounded* case illustrated in Figure [4](https://ar5iv.labs.arxiv.org/html/2512.13168v5#S2.F4 \"Fig. 4 ‣ 2.1 Dataset Construction ‣ 2 Finch: A Real-world Finance & Accounting Workflow Benchmark ‣ Finch: Benchmarking Finance & Accounting across Spreadsheet-Centric Enterprise Workflows\") (b), the email specifies a clear goal, but only some of the required artifacts are attached (e.g., just the updated schedule, or an intermediate report). Across both cases, human experts normalize conversational email text into task instructions and abstract away idiosyncratic details while preserving the business intent. For strongly grounded threads, annotators primarily verify that the attached files exactly implement the requested change without extra edits. For partially grounded threads, they either identify the missing artifacts from versioned spreadsheets and revise them to align with the described workflow—carefully avoiding the introduction of new changes—or create the missing artifacts themselves, which typically requires much more effort."
+                    }
+                  ],
+                  "children": []
+                },
+                {
+                  "heading": "2.1.2 Workflow Derivation from Versioned Spreadsheets",
+                  "level": 4,
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "text": "Beyond explicit messages in email threads, we propose to discover workflows that are implicitly captured in spreadsheet version histories, as illustrated in Figure [4](https://ar5iv.labs.arxiv.org/html/2512.13168v5#S2.F4 \"Fig. 4 ‣ 2.1 Dataset Construction ‣ 2 Finch: A Real-world Finance & Accounting Workflow Benchmark ‣ Finch: Benchmarking Finance & Accounting across Spreadsheet-Centric Enterprise Workflows\")(c). We collect families of versioned workbooks from the Enron and EUSES repositories and apply an LLM-based differencing procedure that recognizes consecutive versions and infers the underlying workflow."
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "For each recognized pair (or chain) of versions, we prompt GPT-5 to propose (i) one or more workflow types (e.g., “date-stamped versioning, assumption updates, and error correction”, “data entry, structuring, and visualization”) and (ii) a detailed NL description of all changes. Human experts then validate and refine these LLM-induced workflow candidates. They first determine whether the proposed diffs constitute a coherent and meaningful workflow rather than incidental churn. For accepted cases, they (i) rewrite the draft description into a precise task instruction that describes the transformation, and (ii) edit the corresponding workbook versions so that the designated input and reference files cleanly realize the described workflow without introducing out-of-scope changes beyond the instruction. The corresponding input and reference files are thus grounded in the actual versions used in the diff, yielding workflow instances that do not rely on email context but are anchored in real enterprise spreadsheet evolution."
+                    }
+                  ],
+                  "children": []
+                },
+                {
+                  "heading": "2.1.3 Workflow Sourced from High-quality Artifacts",
+                  "level": 4,
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "text": "Finally, we curate workflows from high-quality spreadsheets and reports drawn from the Enron and EUSES corpora, various investment and securities companies, international organizations, and national governments (e.g., the World Bank and the Canadian and British governments). Domain experts decompose these finalized financial artifacts into intermediate artifacts that serve as inputs, while treating the original documents as reference outputs, and then author realistic workflow instructions. For example, a valuation model from an investment firm can be turned into a financial modeling task; a World Bank report can be used to define a data-driven summarization and visualization task; and bilingual reports from the Canadian government can be used to construct translation and consistency-checking tasks. We additionally leverage labeled samples from existing datasets: we adapt 10 financial cases from WideSearch [wong2025widesearch] into web-search-centric workflows and extend them into multi-step calculation and visualization pipelines, and we leverage 3 examples from DABStep [egg2025dabstep] to construct multi-source question answering workflows."
+                    }
+                  ],
+                  "children": []
+                },
+                {
+                  "heading": "2.1.4 Quality Control",
+                  "level": 4,
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "text": "Given the high complexity of each workflow, rigorous quality control is essential. We perform inter-annotator validation on all workflows and use the ChatGPT 5.1 Pro and Claude-Sonnet-4.5 product-side agents as secondary checkers: given the instruction and the input and reference files, the model is asked to judge whether the reference output is consistent with the instruction and whether any obvious steps are missing. LLM-based judgments are used to flag potential defects for human review. Together, these quality-control procedures yield a collection of workflows whose NL instructions, input files, and reference outputs are well aligned."
+                    }
+                  ],
+                  "children": []
+                }
+              ]
+            },
+            {
+              "heading": "2.2 Dataset Characteristics",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "Finch comprises 172 meticulously annotated, enterprise-grade workflows that collectively capture the compositional, messy, multimodal, and collaborative nature of real finance and accounting work. Across these workflows, the corpus contains 1,710 spreadsheets together with 13 PDFs, 7 images, 3 Word documents, and additional files such as JSON, CSV, and Markdown. This mixture reflects how real analysts coordinate over heterogeneous artifacts rather than clean, single-table inputs."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Figure [5](https://ar5iv.labs.arxiv.org/html/2512.13168v5#S2.F5 \"Fig. 5 ‣ 2.2 Dataset Characteristics ‣ 2 Finch: A Real-world Finance & Accounting Workflow Benchmark ‣ Finch: Benchmarking Finance & Accounting across Spreadsheet-Centric Enterprise Workflows\") summarizes the coverage of task and business types. On the task side, categories are:"
+                },
+                {
+                  "type": "list",
+                  "text": "* • Calculation (119 workflows): filling in formulas or computing figures (e.g., net value). * • Structuring / Formatting (86): reorganizing tables (e.g., adjusting hierarchies), formatting content (e.g., font size and cell fill), and inserting/deleting rows or columns. * • Data Entry / Import (44): transcribing or importing data from spreadsheets, PDFs, images, or external sources into spreadsheets. * • Validation / Review (37): checking consistency and reconciling calculations within a sheet or across sheets/files. * • Cross-sheet/file Retrieval (36): pulling values from multiple sheets or files into a target workbook. * • Summary / Visualization (33): producing summaries or charts that surface key financial insights. * • Financial Modeling (15): extending or calibrating valuation and timing models, often via scenario and sensitivity analysis. * • Web Search (11): collecting financial data from the web and integrating it into spreadsheets. * • Translation (3): translating spreadsheets or reports while preserving structure, formatting, and layout."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Calculation (119 workflows): filling in formulas or computing figures (e.g., net value)."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Structuring / Formatting (86): reorganizing tables (e.g., adjusting hierarchies), formatting content (e.g., font size and cell fill), and inserting/deleting rows or columns."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Data Entry / Import (44): transcribing or importing data from spreadsheets, PDFs, images, or external sources into spreadsheets."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Validation / Review (37): checking consistency and reconciling calculations within a sheet or across sheets/files."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Cross-sheet/file Retrieval (36): pulling values from multiple sheets or files into a target workbook."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Summary / Visualization (33): producing summaries or charts that surface key financial insights."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Financial Modeling (15): extending or calibrating valuation and timing models, often via scenario and sensitivity analysis."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Web Search (11): collecting financial data from the web and integrating it into spreadsheets."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Translation (3): translating spreadsheets or reports while preserving structure, formatting, and layout."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "On the business side, workflows span reporting (48 workflows), trading and risk management (35), predictive modeling (33), operational management (36), planning and budgeting (26), pricing and valuation (15), accounts payable/receivable (10), as well as procurement and sales (7) and asset management (3); some workflows are tagged with multiple business types. Overall, the distribution indicates that Finch targets core finance and accounting verticals rather than curated toy tasks."
+                }
+              ],
+              "children": [
+                {
+                  "heading": "2.2.1 Task Compositionality",
+                  "level": 4,
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "text": "Finch is explicitly designed around composite workflows rather than isolated tasks. As shown in Figure [5](https://ar5iv.labs.arxiv.org/html/2512.13168v5#S2.F5 \"Fig. 5 ‣ 2.2 Dataset Characteristics ‣ 2 Finch: A Real-world Finance & Accounting Workflow Benchmark ‣ Finch: Benchmarking Finance & Accounting across Spreadsheet-Centric Enterprise Workflows\"), only 37 workflows (21.5%) are single-task; the remaining 135 (78.5%) involve multiple tasks. Importantly, each “task” itself typically requires substantial multi-turn reasoning: for example, web search often entails many rounds of LLM calls to discover, filter, and verify evidence; cross-sheet retrieval requires repeated calls to read and locate key information across multiple sheets; and calculation usually spans many formulas distributed over different rows and columns."
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "These tasks are not independent subtasks, but are interleaved around shared spreadsheets and files. A typical workflow may begin with structuring or importing raw data, proceed to cross-sheet or cross-file retrieval, and then culminate in calculations, modeling, or reporting. The distribution in Figure [5](https://ar5iv.labs.arxiv.org/html/2512.13168v5#S2.F5 \"Fig. 5 ‣ 2.2 Dataset Characteristics ‣ 2 Finch: A Real-world Finance & Accounting Workflow Benchmark ‣ Finch: Benchmarking Finance & Accounting across Spreadsheet-Centric Enterprise Workflows\") shows that most workflows weave multiple tasks."
+                    }
+                  ],
+                  "children": []
+                },
+                {
+                  "heading": "2.2.2 Messiness",
+                  "level": 4,
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "text": "The source files in Finch are intentionally large, multi-sheet, and structurally complex. At the file level, 86.6% of workflows involve more than one file when counting both input and reference artifacts, and some workflows touch up to 14 distinct files. At the spreadsheet level, 92.4% of workflows involve multiple sheets, with an average of 8 sheets and a long tail reaching 91 sheets. As a result, systems must navigate cross-sheet dependencies, hidden logic, and scattered intermediate calculations rather than operating on a single “analysis” sheet. Moreover, most spreadsheets exhibit complex layouts that interleave text, tables, formulas, and charts, as well as intricate table structures with merged cells, nested headers, hierarchical data, blank rows and columns, and other irregularities."
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "Cell-level statistics further highlight the scale of the data. The median workflow covers 15K cells (157K on average for all workflows), with the largest workbook scaling to 3.7 million cells. Formula density is similarly skewed: while workflows contain an average of 21.5K formulas (the median is 212), the most complex ones have hundreds of thousands of formulas, reflecting deeply nested calculations and long dependency chains. Taken together, these properties create a challenging regime in which models must reason over large, noisy, and highly irregular spreadsheet layouts, rather than clean, rectangular tables."
+                    }
+                  ],
+                  "children": []
+                },
+                {
+                  "heading": "2.2.3 Multimodality",
+                  "level": 4,
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "text": "Although Finch is spreadsheet-centric, the workflows are inherently multimodal. Around 10.5% of workflows link spreadsheets with additional non-spreadsheet artifacts such as PDFs, Word documents, and images, and 7.6% explicitly require reasoning over PDFs or images. Within the spreadsheets themselves, 20.3% of workflows include charts and 2.3% feature pivot tables, so models must understand not only raw cell values but also derived visual summaries and explicit aggregation structures (and most workflows involve implicit aggregation structures). This multimodal, cross-artifact structure stands in contrast to prior benchmarks that operate purely on isolated tables, and better reflects the environments in which enterprise finance and accounting tasks actually occur."
+                    }
+                  ],
+                  "children": []
+                }
+              ]
+            },
+            {
+              "heading": "2.3 Evaluation Method",
+              "level": 3,
+              "content": [],
+              "children": [
+                {
+                  "heading": "2.3.1 Human Evaluation",
+                  "level": 4,
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "text": "We conduct human evaluation on all workflows to directly assess model performance. For each workflow, annotators read the NL instruction, inspect the input, reference, and model output files side by side (typically by aligning spreadsheets or documents in adjacent tabs), and determine whether the model has faithfully completed the requested job. A workflow is marked as successful only if the model generates or revises the content and structure in accordance with the instruction and no critical errors, omissions, or unintended changes are introduced; otherwise, it is labeled as a failure. Importantly, evaluation is based on whether the instruction has been satisfactorily fulfilled rather than on a purely mechanical comparison between model and reference outputs, since there may be multiple acceptable solutions for summarization, visualization, formatting, formulas, and related aspects. To reduce subjectivity and ambiguity, annotators ultimately assign a binary pass/fail label for each workflow. These human judgments serve as the gold standard for measuring model performance and for validating the reliability of our automatic evaluation method."
+                    }
+                  ],
+                  "children": []
+                },
+                {
+                  "heading": "2.3.2 LLM-as-Judge Evaluation",
+                  "level": 4,
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "text": "To scale evaluation, we employ an LLM-as-judge framework that supports the three high-level task types in Finch: *modify* (editing input artifacts), *generate* (creating new files such as workbooks and documents), and *QA* (answering questions based on one or more artifacts). The framework accepts heterogeneous inputs—including .xlsx, .txt, .docx, .md, .pdf, and images—and normalizes them into a sequence of textual inputs and screenshot images for the judge model."
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "For modification tasks, especially on spreadsheets, the framework computes structured diffs between the input and the reference output (diff\\_ref) and between the input and the model output (diff\\_model), and then builds a compact “input snapshot” (snapshot) that, for each modified sheet, retains only the first and last ten rows and the first five columns (which typically capture table headers and layout) together with rows and columns that contain edited cells. This preserves the crucial context for diff\\_ref and diff\\_model while dramatically reducing token length. In parallel, the framework renders screenshots (screenshot) of sheets containing changes from the input, reference, and model output, so that the judge perceives merged cells, conditional formatting, charts, and other layout-sensitive properties that are difficult to encode as text alone."
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "For generation tasks involving spreadsheets, the framework extracts all cell values and formulas from both the reference and the model output, and captures screenshots of every sheet, since the entire generated artifact must be verified rather than just localized edits. For QA tasks, it feeds a rich text-and-image sequence constructed from the reference answer and the model’s response, optionally augmented with relevant input files when the question requires grounding in external artifacts."
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "We design three task-specific judge prompts for modify, generate, and QA, respectively, but they share a common evaluation rubric. In all cases, the judge is instructed to focus on (i) *completeness* with respect to the NL instruction, (ii) *numerical and logical correctness* of derived values and formulas, (iii) the *over-edit avoidance*, penalizing unnecessary and unexpected changes of the workbook beyond instruction, and (iv) readability of the formatting and structure. Exact cell-by-cell equality with the reference is not required when multiple solutions are acceptable (e.g., alternative layouts, equivalent formulas, or different but semantically equivalent summaries); instead, the judge decides whether the model has satisfactorily fulfilled the instruction. To reduce subjectivity, the judge outputs a binary score (pass/fail) along with a short NL rationale. In some web search tasks, the rubric permits small tolerance bands when comparing values, allowing for discrepancies in data from different sources."
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "This LLM-as-judge framework not only automates large-scale evaluation but also surfaces subtle spreadsheet errors (such as formulas silently replaced with static values) that are difficult to catch with GUI-based human inspection alone. In Section [3.2](https://ar5iv.labs.arxiv.org/html/2512.13168v5#S3.SS2 \"3.2 Experimental Results ‣ 3 Experiments ‣ Finch: Benchmarking Finance & Accounting across Spreadsheet-Centric Enterprise Workflows\"), we report the consistency between human and automated evaluations and show that the LLM-as-judge scores closely track human judgments."
+                    }
+                  ],
+                  "children": []
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "heading": "3 Experiments",
+          "level": 2,
+          "content": [],
+          "children": [
+            {
+              "heading": "3.1 Agents and Models",
+              "level": 3,
+              "content": [],
+              "children": [
+                {
+                  "heading": "3.1.1 Product-side Agents",
+                  "level": 4,
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "text": "We evaluate two frontier product-side agents: (i) *ChatGPT* using the GPT 5.1 model in Pro mode, and (ii) *Claude* using the Sonnet 4.5 model in thinking mode. We focus on these two systems rather than alternatives such as Gemini or Grok because they natively support returning downloadable files (e.g., spreadsheets) as outputs, rather than emitting code or markdown-formatted tables that are not intuitive for human evaluation. For both agents, we enable their external web browsing, but disable using historical chats so that each workflow is evaluated independently and without cross-run leakage. Since model updates are frequent and manual evaluation is very time-consuming, we used the latest model from our final round of experiments and did not consider subsequent updates."
+                    }
+                  ],
+                  "children": []
+                },
+                {
+                  "heading": "3.1.2 API-based Models",
+                  "level": 4,
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "text": "We evaluate five frontier large language models (LLMs), shown in Table [1](https://ar5iv.labs.arxiv.org/html/2512.13168v5#S3.T1 \"Tab. 1 ‣ 3.1.2 API-based Models ‣ 3.1 Agents and Models ‣ 3 Experiments ‣ Finch: Benchmarking Finance & Accounting across Spreadsheet-Centric Enterprise Workflows\"), through API interfaces. Our evaluation pipeline builds upon the open-source SpreadsheetBench framework [ma2024spreadsheetbench]. Details of the execution paradigm and prompting strategies are deferred to the Appendix [B.1](https://ar5iv.labs.arxiv.org/html/2512.13168v5#A2.SS1 \"B.1 API-based Models ‣ Appendix B Experiment Details ‣ Finch: Benchmarking Finance & Accounting across Spreadsheet-Centric Enterprise Workflows\"). While SpreadsheetBench provides only a baseline implementation, we introduce several practical enhancements to improve its applicability to real-world tasks."
+                    },
+                    {
+                      "type": "table",
+                      "text": "| Model | Provider | Context | Max Output | Vision | Native PDF | | --- | --- | --- | --- | --- | --- | | GPT 5.1 [gpt5openai] | OpenAI | 400K | 128K | ✓ | ✓ | | Claude Sonnet 4.5 [claudesonnet45] | Anthropic | 1M† | 64K | ✓ | ✓ | | Grok 4 [grok4] | xAI | 256K | 256K | ✓ | — | | Qwen 3 Max [qwen3technicalreport] | Alibaba | 256K | 32.8K | — | — | | Gemini 3 Pro Preview [gemini3pro] | Google | 1.05M | 65.5K | ✓ | ✓ |"
+                    }
+                  ],
+                  "children": [
+                    {
+                      "heading": "Spreadsheet Encoding.",
+                      "level": 5,
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "text": "SpreadsheetBench only produces simple text tables without preserving cell addresses, data types, or formulas. However, these details are essential for tasks in Finch. We extend SpreadsheetLLM [spreadsheetllm2024] encoding and introduce a *semantic-rich tuple encoding* that preserves full structural and semantic fidelity. Each sheet begins with its name and the corresponding data bounding box (e.g. ## Sheet: [name] (A1:Z100)). We then serialize the bounded region using a Markdown-based format. Each cell is encoded as a tuple (Address, Value, Type, Formula), where Address denotes the cell reference (e.g. A3), Type indicates the data type (T = Text, I = Integer, F = Float, D = Date, B = Boolean), and Formula records the cell formula (e.g., =SUM(A1:A10)->100)."
+                        }
+                      ],
+                      "children": []
+                    },
+                    {
+                      "heading": "Multimodal Input Handling.",
+                      "level": 5,
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "text": "We extend the framework to support multimodal inputs involving images and PDFs. For vision-capable models (GPT 5.1, Claude Sonnet 4.5, Grok 4, and Gemini 3 Pro), we use each provider’s official multimodal API to transmit visual inputs alongside text prompts. For PDF documents, we adopt a tiered strategy. Models with native PDF support—GPT 5.1, Claude Sonnet 4.5, and Gemini 3 Pro Preview—directly ingest PDF files via their file upload interfaces, enabling analysis of both textual and visual elements without pre-extraction. For Grok 4, which lacks native PDF support, we extract text using PyMuPDF and include it in the pdf\\_content field. For Qwen 3 Max, which lacks multimodal support entirely, both image and PDF content are converted to textual descriptions. While this fallback retains semantic cues, it loses layout and visual context."
+                        }
+                      ],
+                      "children": []
+                    },
+                    {
+                      "heading": "Context Management.",
+                      "level": 5,
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "text": "To handle large spreadsheets that may exceed model context limits, we implement automatic truncation. We reserve 32K tokens for model output—sufficient for comprehensive code generation and analysis while remaining within the output limits of all evaluated models. Truncation is triggered when input exceeds the remaining capacity, removing content from the end of spreadsheet data with an explicit notice appended to inform the model of data loss."
+                        }
+                      ],
+                      "children": []
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "heading": "3.2 Experimental Results",
+              "level": 3,
+              "content": [],
+              "children": [
+                {
+                  "heading": "Web agents (ChatGPT 5.1 Pro vs. Claude Sonnet 4.5).",
+                  "level": 5,
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "text": "As shown in Figure [2](https://ar5iv.labs.arxiv.org/html/2512.13168v5#S1.F2 \"Fig. 2 ‣ 1 Introduction ‣ Finch: Benchmarking Finance & Accounting across Spreadsheet-Centric Enterprise Workflows\") and Table [3](https://ar5iv.labs.arxiv.org/html/2512.13168v5#S3.T3 \"Tab. 3 ‣ 3.2.1 Consistency Between Human and Automated Evaluation ‣ 3.2 Experimental Results ‣ 3 Experiments ‣ Finch: Benchmarking Finance & Accounting across Spreadsheet-Centric Enterprise Workflows\"), ChatGPT 5.1 Pro achieves the best overall pass rates on Finch. Their advantage largely comes from rich interactive affordances: they can iteratively inspect spreadsheets, revise intermediate states, and recover from partial errors over many tool calls. However, it solves fewer than 40% of the Finch workflows, suggesting that real-world finance and accounting work remains far from “solved” even for frontier agents. The detailed analysis in Figure [8](https://ar5iv.labs.arxiv.org/html/2512.13168v5#S3.F8 \"Fig. 8 ‣ Web agents (ChatGPT 5.1 Pro vs. Claude Sonnet 4.5). ‣ 3.2 Experimental Results ‣ 3 Experiments ‣ Finch: Benchmarking Finance & Accounting across Spreadsheet-Centric Enterprise Workflows\") further highlights that long-horizon composition is a key bottleneck: when a workflow contains more than two tasks, the pass rate drops sharply—GPT 5.1 Pro decreases from 44.3% (workflows with ≤2\\leq 2 tasks) to 23.5% (workflows with >2>2 tasks), and Claude Sonnet 4.5 decreases from 30.3% to 11.8%. This indicates that error accumulation across steps and missing intermediate affordances disproportionately hurt multi-step execution."
+                    },
+                    {
+                      "type": "formula",
+                      "text": "≤2\\leq 2"
+                    },
+                    {
+                      "type": "formula",
+                      "text": ">2>2"
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "Pass rate also varies substantially by task type (Figure [8](https://ar5iv.labs.arxiv.org/html/2512.13168v5#S3.F8 \"Fig. 8 ‣ Web agents (ChatGPT 5.1 Pro vs. Claude Sonnet 4.5). ‣ 3.2 Experimental Results ‣ 3 Experiments ‣ Finch: Benchmarking Finance & Accounting across Spreadsheet-Centric Enterprise Workflows\")). Data Entry / Import and Structuring / Formatting are consistently among the most challenging categories, which aligns with Finch spreadsheets exhibiting messy layouts, irregular tables, and nontrivial structural constraints. Moreover, Data Entry / Import workflows are frequently entangled with web search or PDF parsing, introducing multimodal dependencies that amplify failure modes. Notably, Translation—a task where modern LLMs typically excel in standard NLP settings—performs surprisingly poorly in Finch. In finance-heavy tables, translation can easily distort or drop critical structure and layout cues (e.g., header hierarchies, row/column alignment), and large grids make omissions more likely, leading to systematic failures. Detailed error analysis can be found in Section [3.3](https://ar5iv.labs.arxiv.org/html/2512.13168v5#S3.SS3 \"3.3 Error Analysis ‣ 3 Experiments ‣ Finch: Benchmarking Finance & Accounting across Spreadsheet-Centric Enterprise Workflows\")."
+                    },
+                    {
+                      "type": "table",
+                      "text": "| | | | | | --- | --- | --- | --- | | # Tasks per workflow | # Workflows | Pass Rate (%) | Avg. time (min) | | 1 | 37 | 48.6 | 13.1 | | 2 | 84 | 42.4 | 17.4 | | 3 | 33 | 33.3 | 18.7 | | 4 | 10 | 0 | 21.3 | | 5 | 8 | 12.5 | 13.6 |"
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "We further analyze how GPT 5.1 web completion time scales with the number of tasks in a workflow (Table [2](https://ar5iv.labs.arxiv.org/html/2512.13168v5#S3.T2 \"Tab. 2 ‣ Web agents (ChatGPT 5.1 Pro vs. Claude Sonnet 4.5). ‣ 3.2 Experimental Results ‣ 3 Experiments ‣ Finch: Benchmarking Finance & Accounting across Spreadsheet-Centric Enterprise Workflows\")). The longest individual workflow run takes roughly 60 minutes to complete—but fails, highlighting how challenging workflows can be for current agents. On average, single-task workflows take 13.1 minutes, while workflows with two, three, and four tasks require 17.4, 18.7, and 21.3 minutes, respectively, reflecting the increased compositional complexity of multi-task settings. Interestingly, five-task workflows show a lower average time (13.6 minutes), most of which involve web search and almost all of which result in failure."
+                    },
+                    {
+                      "type": "formula",
+                      "text": "kk"
+                    }
+                  ],
+                  "children": []
+                },
+                {
+                  "heading": "API-based.",
+                  "level": 5,
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "text": "Figure [2](https://ar5iv.labs.arxiv.org/html/2512.13168v5#S1.F2 \"Fig. 2 ‣ 1 Introduction ‣ Finch: Benchmarking Finance & Accounting across Spreadsheet-Centric Enterprise Workflows\") further shows that our API-based method remains competitive despite using only a single LLM call. In automated evaluation, for example, GPT 5.1 Pro achieves 41.9%, while GPT 5.1 with our API-based agent design reaches 32.0%—a relatively small gap given the much weaker interaction budget. Our agent design narrows the gap by supplying more efficient spreadsheet representations and task-appropriate tool outputs within the single-call budget, thereby reducing brittle reasoning over complex layouts and mitigating cascading mistakes."
+                    }
+                  ],
+                  "children": []
+                },
+                {
+                  "heading": "3.2.1 Consistency Between Human and Automated Evaluation",
+                  "level": 4,
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "text": "We adopt a lightweight multimodal model, GPT-5-mini, as the judge to validate the performance of our automated evaluation framework. As shown in Table [3](https://ar5iv.labs.arxiv.org/html/2512.13168v5#S3.T3 \"Tab. 3 ‣ 3.2.1 Consistency Between Human and Automated Evaluation ‣ 3.2 Experimental Results ‣ 3 Experiments ‣ Finch: Benchmarking Finance & Accounting across Spreadsheet-Centric Enterprise Workflows\"), the automated evaluation largely aligns with human judgments: for GPT 5.1 Pro and Claude Sonnet 4.5, the judge agrees with human labels on 82.1% and 90.2% of workflows, respectively. The judge also achieves high recall (83.3% and 88.4%), meaning it recovers most human-labeled passes, and reasonably strong precision (73.6% and 76.0%), indicating that the majority of automatically predicted passes are also accepted by human evaluators. Overall, this suggests that automated evaluation may overestimate accuracy by several percentage points."
+                    },
+                    {
+                      "type": "table",
+                      "text": "| Model (Product) | Automated Eval | | Human Eval | | Agreement w/ Human Eval | | | | --- | --- | --- | --- | --- | --- | --- | --- | | Pass | Pass Rate (%) | Pass | Pass Rate (%) | Acc (%) | Recall (%) | Precision (%) | | GPT 5.1 Pro | 72/172 | 41.9 | 66/172 | 38.4 | 82.1 | 83.3 | 73.6 | | Claude Sonnet 4.5 | 50/172 | 29.1 | 43/172 | 25.0 | 90.2 | 88.4 | 76.0 |"
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "On the model side, the LLM judge can occasionally miss nuances in the rubric—either failing to catch subtle visual or numerical errors in large spreadsheets or, conversely, being overly literal about certain instructions (e.g., penalizing benign formula-to-constant conversions). However, we also observe cases where the LLM-based judge is correct but human raters are wrong—for example, when formulas are silently replaced with static values, which are difficult to detect through GUI-based inspection alone. On the system side, limitations of our spreadsheet tooling and data pipeline (e.g., incomplete support for corrupted but human-readable workbooks or uncommon file formats) can cause valid outputs to be marked as failures. Taken together, these factors mean that our automated scores should be interpreted as approximate rather than exact, and that human review remains important for borderline or high-impact workflows."
+                    }
+                  ],
+                  "children": []
+                }
+              ]
+            },
+            {
+              "heading": "3.3 Error Analysis",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "To understand the sources of failure on Finch, we conducted a qualitative error analysis of GPT 5.1 Pro and Claude Sonnet 4.5 in both their web-agent and API configurations. For all failed workflows in our evaluation, we manually inspected the trajectories and annotated the primary cause of failure."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "From a workflow-centric perspective, we identify five dominant categories of error.111For this study, once we identify the first clear error in a failed workflow, we stop further analysis for that workflow. Take Claude Sonnet 4.5 web-agent as an example. Across all examined failures, 10% stem from *task misunderstanding*: enterprise tasks often rely on implicit context in enterprise artifacts (e.g., spreadsheets), which models frequently overlook, leading them to misinterpret what is being asked and the required deliverable. 25% are *data retrieval errors*, including selecting the wrong cross-sheet, cross-table, or intra-table row/column ranges. 35% arise from *formula reasoning errors*, such as failing to reconstruct the latent business logic encoded in formulas or deriving incorrect new formulas. 25% are due to *code generation errors*, where generated scripts (e.g., Python with spreadsheet APIs) are syntactically invalid or misaligned with the spreadsheet layout. The remaining 5% correspond to *data rendering errors*, including incorrect formatting, misconfigured charts, or flawed final reports that deviate from the requested layout or narrative—for example, creating a brand-new spreadsheet instead of modifying the original one as requested. We also compare error patterns between web-based agents and API-based setups, with details provided in Appendix [C](https://ar5iv.labs.arxiv.org/html/2512.13168v5#A3 \"Appendix C Detailed Analysis ‣ Finch: Benchmarking Finance & Accounting across Spreadsheet-Centric Enterprise Workflows\")."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Notably, all of these error types correspond to *generic capabilities* that modern LLMs already appear to master on many existing benchmarks. The question, then, is why these ostensibly strong base abilities degrade so sharply on Finch. Our analysis points to five intertwined properties of real-world enterprise Finance & Accounting workflows that make failures more likely and more catastrophic. First, Finch workflows routinely involve *large, fragmented spreadsheet ecosystems*: dozens of interlinked workbooks and thousands of rows distributed across many sheets. Executing these workflows accurately requires long-range cross-sheet navigation and precise referencing, which substantially increases the likelihood of small retrieval errors. Second, the *content is dense and semantically homogeneous*: many cells contain domain-specific financial concepts that are subtly different yet lexically similar (e.g., variants of revenue/expense items, adjusted vs. unadjusted metrics), making entity disambiguation and cell grounding unusually difficult. Third, the *table layouts and structures are complex and often irregular*, including multi-level headers, merged cells, nested subtotals, and bespoke layouts that force the model to infer structure from noisy contents and ad hoc formatting. For example, at the code level, even tiny misinterpretations of these layouts (e.g., off-by-one errors when specifying ranges) can then propagate into globally incorrect outputs, especially when logic is applied in batch across many such sheets. Fourth, *formulas encode latent structure and logic*. In the Finch dataset, each sheet contains a large number of formulas that encode latent business logic, temporal assumptions, and fine-grained dependencies that are not visible from displayed values alone; yet models typically prioritize cell values and under-use formulas, leading to systematic misinterpretations. For example, in a pricing sheet with the column header IF NGPL MidContinent index (@ Baker), the apparent semantics from the header alone suggest a daily exposure metric. However, inspecting the associated formula (25 \\* V21 + C41 \\* C22) reveals that the column in fact encodes a 55-day payment timing. Models that ignore or under-utilize formulas systematically misinterpret such columns’ roles in downstream calculations, and this misinterpretation then propagates through subsequent steps. Finally, many workflows involve *multimodal artifacts and chat-centric tasks* such as combining spreadsheets with PDFs, charts, and screenshots requiring the agent to jointly reason over heterogeneous formats. For example, tables embedded in PDFs are often only partially referenced, with key entries missing or truncated."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Many of these factors have been examined in prior work (e.g., multi-spreadsheet settings, complex table structures, formula reasoning, and multi-step workflows), and state-of-the-art models can perform reasonably well on benchmarks that emphasize a limited subset of these factors. In Finch, however, these factors co-occur within the same workflow in real-world enterprise data, and our results suggest this composition is what drives the sharp performance drop. Finch does not demand fundamentally new abilities; rather, it probes these abilities under an enterprise “extreme” regime of high complexity, noise, and long-horizon dependencies—closely mirroring real Finance & Accounting work. Progress on compositional capability, therefore, requires training and evaluation on long-running, computation- and reasoning-intensive workflows over large, messy multimodal enterprise artifacts."
+                }
+              ],
+              "children": []
+            }
+          ]
+        },
+        {
+          "heading": "4 Related Work",
+          "level": 2,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "The integration of LLMs into enterprise productivity tools has accelerated dramatically recently. The recently launched ChatGPT Agent [openai\\_agent] extends these capabilities to autonomous task completion, enabling multi-step workflows across web browsing, code execution, and spreadsheet manipulation. Microsoft Copilot [microsoft\\_copilot] embeds AI capabilities across the Microsoft 365 suite, enabling users to draft documents, analyze spreadsheets, and automate workflows through natural language interaction. Similarly, Google has integrated Gemini [gemini\\_workspace] into Google Workspace, providing AI-assisted features in Docs, Sheets, and Gmail. Anthropic’s Claude Excel has also entered the enterprise space with spreadsheet automation capabilities [claude\\_excel], while remarkable tools like Shortcut AI [shortcut\\_spreadsheet] focus specifically on AI-powered spreadsheet manipulation."
+            },
+            {
+              "type": "paragraph",
+              "text": "The emergence of agentic AI systems marks a significant shift from understanding and QA to autonomous task completion [li2023sheetcopilot, chen2024sheetagent, ma2024spreadsheetbench]. However, there are long-standing challenges such as messy inputs and multimodal processing. SpreadsheetLLM [spreadsheetllm2024] introduces novel encoding and compression methods to help LLMs understand large and messy spreadsheet structures, and further addresses this challenge through spreadsheet post-training. Beyond structural understanding, multimodal processing remains challenging for spreadsheet AI systems. On the formatting front, early work explored neural approaches for table formatting [dong2020neural]. Recent advances in formula generation have progressed from pretraining with numerical reasoning [cheng2022fortap] to natural language-driven formula synthesis [zhao2024nl2formula], contrastive learning-based recommendation [chen2024auto], and interactive formula prediction through hierarchical expansion [he2023hermes]."
+            },
+            {
+              "type": "paragraph",
+              "text": "Recent years have seen significant progress in benchmarks for financial reasoning [chen2021finqa, islam2023financebench, finance\\_agent\\_benchmark, finben2024, findabench2025, finagentbench2025, finauditing2025, li2025investorbench, visfineval2025, gdpval2025, finsearchcomp2025, xfinbench2025], spreadsheet reasoning [li2023sheetcopilot, chen2024sheetagent, ma2024spreadsheetbench, sodbench2025, li2023auto, dong2019tablesense, sheetmind2025, spreadsheetllm2024, wu2025realhitbench, li2025mimotable, dong2025machinelearninglm, dong2025reasoning, li2024tapilot, zhao2024nl2formula, odysseybench2025, officebench2024], and multimodal document [mathew2021docvqa], table [li2020tablebank, zheng2024multimodal], chart [wang2024charxiv], table-chart [dong2024ttc], and spreadsheet [xia2024vision, dong2019tablesense] reasoning, driving advances in LLM-based agents for enterprise tasks. However, Finch proposes a new benchmark for the messy artifacts and long-horizon workflows in wild F&A enterprise settings."
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "5 Conclusion",
+          "level": 2,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "We introduced Finch, a new benchmark for real-world F&A enterprise workflows. Finch combines workflows induced from enterprise email threads, version histories of spreadsheets, and high-quality financial artifacts with rigorous expert annotation and a calibrated LLM-as-judge framework, enabling systematic evaluation of agents on diverse workflows that operate over large, messy, and multimodal enterprise artifacts and require long-horizon, spreadsheet-centric reasoning. Our experiments show that even the strongest frontier systems pass fewer than 40% of workflows after spending 48 hours on the benchmark, revealing a substantial gap between current AI capabilities and the demands of real enterprise practice. We hope Finch will serve as a foundation for developing agents to tackle real, messy and long-horizon professional work."
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "Appendix A Author List",
+          "level": 2,
+          "content": [
+            {
+              "type": "list",
+              "text": "* • Haoyu Dong\\* (University of Chinese Academy of Sciences) [donghaoyu82@gmail.com](mailto:donghaoyu82@gmail.com) * • Pengkun Zhang (South China University of Technology) [sezhangpengkun@mail.scut.edu.cn](mailto:sezhangpengkun@mail.scut.edu.cn) * • Yan Gao (Zhongguancun Academy) [gaoyan@zgci.ac.cn](mailto:gaoyan@zgci.ac.cn) * • Xuanyu Dong (Harvest Fund) [qianmuxuanyu@126.com](mailto:qianmuxuanyu@126.com) * • Yilin Cheng (Fudan University, Zhongguancun Academy) [ylcheng23@m.fudan.edu.cn](mailto:ylcheng23@m.fudan.edu.cn) * • Mingzhe Lu (University of Chinese Academy of Sciences) [lumingzhe23@mails.ucas.edu.cn](mailto:lumingzhe23@mails.ucas.edu.cn) * • Adina Yakefu (Hugging Face) [adina@huggingface.co](mailto:adina@huggingface.co) * • Shuxin Zheng (Zhongguancun Academy) [sz@bjzgca.edu.cn](mailto:sz@bjzgca.edu.cn)"
+            },
+            {
+              "type": "paragraph",
+              "text": "Haoyu Dong\\* (University of Chinese Academy of Sciences) [donghaoyu82@gmail.com](mailto:donghaoyu82@gmail.com)"
+            },
+            {
+              "type": "paragraph",
+              "text": "Pengkun Zhang (South China University of Technology) [sezhangpengkun@mail.scut.edu.cn](mailto:sezhangpengkun@mail.scut.edu.cn)"
+            },
+            {
+              "type": "paragraph",
+              "text": "Yan Gao (Zhongguancun Academy) [gaoyan@zgci.ac.cn](mailto:gaoyan@zgci.ac.cn)"
+            },
+            {
+              "type": "paragraph",
+              "text": "Xuanyu Dong (Harvest Fund) [qianmuxuanyu@126.com](mailto:qianmuxuanyu@126.com)"
+            },
+            {
+              "type": "paragraph",
+              "text": "Yilin Cheng (Fudan University, Zhongguancun Academy) [ylcheng23@m.fudan.edu.cn](mailto:ylcheng23@m.fudan.edu.cn)"
+            },
+            {
+              "type": "paragraph",
+              "text": "Mingzhe Lu (University of Chinese Academy of Sciences) [lumingzhe23@mails.ucas.edu.cn](mailto:lumingzhe23@mails.ucas.edu.cn)"
+            },
+            {
+              "type": "paragraph",
+              "text": "Adina Yakefu (Hugging Face) [adina@huggingface.co](mailto:adina@huggingface.co)"
+            },
+            {
+              "type": "paragraph",
+              "text": "Shuxin Zheng (Zhongguancun Academy) [sz@bjzgca.edu.cn](mailto:sz@bjzgca.edu.cn)"
+            },
+            {
+              "type": "paragraph",
+              "text": "\\*Corresponding author."
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "Appendix B Experiment Details",
+          "level": 2,
+          "content": [],
+          "children": [
+            {
+              "heading": "B.1 API-based Models",
+              "level": 3,
+              "content": [],
+              "children": [
+                {
+                  "heading": "Execution Paradigm.",
+                  "level": 5,
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "text": "We frame the API evaluation as a code generation task. Models are instructed to solve spreadsheet manipulation and generation workflows by generating executable Python scripts, which are then executed in a sandboxed environment to produce output artifacts. This paradigm aligns with SpreadsheetBench’s philosophy of treating model-written code as the primary action space, but is adapted here to accommodate long-horizon, multimodal enterprise tasks."
+                    },
+                    {
+                      "type": "list",
+                      "text": "* • Action Space: Models generate Python code using standard libraries including openpyxl (for Excel manipulation), pandas (for data processing), matplotlib (for visualization), and scikit-learn (for statistical analysis). * • Output Format: Models must produce complete, self-contained Python scripts wrapped in markdown code blocks (‘‘‘python ... ‘‘‘). * • Sandboxed Execution: Generated code is extracted via regex parsing and executed in isolated Docker containers running Jupyter Kernel Gateway. Each container mounts the dataset volume at /mnt/data/ with a 10-minute session timeout. * • Single-shot Protocol: We employ a strict one-shot generation protocol without iterative refinement—each model produces exactly one solution per workflow. If the generated code fails to execute (e.g., due to syntax errors or runtime exceptions), the workflow is marked as failed without retry. This strict setting is designed to evaluate the model’s raw code generation capability under realistic deployment constraints."
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "Action Space: Models generate Python code using standard libraries including openpyxl (for Excel manipulation), pandas (for data processing), matplotlib (for visualization), and scikit-learn (for statistical analysis)."
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "Output Format: Models must produce complete, self-contained Python scripts wrapped in markdown code blocks (‘‘‘python ... ‘‘‘)."
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "Sandboxed Execution: Generated code is extracted via regex parsing and executed in isolated Docker containers running Jupyter Kernel Gateway. Each container mounts the dataset volume at /mnt/data/ with a 10-minute session timeout."
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "Single-shot Protocol: We employ a strict one-shot generation protocol without iterative refinement—each model produces exactly one solution per workflow. If the generated code fails to execute (e.g., due to syntax errors or runtime exceptions), the workflow is marked as failed without retry. This strict setting is designed to evaluate the model’s raw code generation capability under realistic deployment constraints."
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "This unified code-as-action setting ensures that the measured performance reflects the model’s inherent competence on complex workflows rather than benefits derived from interactive debugging."
+                    }
+                  ],
+                  "children": []
+                },
+                {
+                  "heading": "Prompting Strategy.",
+                  "level": 5,
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "text": "We employ a zero-shot setting with a structured system prompt comprising:"
+                    },
+                    {
+                      "type": "list",
+                      "text": "1. 1. A role definition: “You are an expert who can manipulate spreadsheets through Python code.” 2. 2. A detailed description of the compact spreadsheet encoding format with illustrative examples. 3. 3. The task instruction and explicit input/output file paths. 4. 4. Library-specific best practices (e.g., openpyxl chart creation patterns) to mitigate common code errors. 5. 5. An explicit directive to generate Python code as the final output."
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "A role definition: “You are an expert who can manipulate spreadsheets through Python code.”"
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "A detailed description of the compact spreadsheet encoding format with illustrative examples."
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "The task instruction and explicit input/output file paths."
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "Library-specific best practices (e.g., openpyxl chart creation patterns) to mitigate common code errors."
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "An explicit directive to generate Python code as the final output."
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "This structured design explicitly guides models toward generating valid, context-aligned Python code, minimizing ambiguity in task interpretation. However, for models that support reasoning traces (GPT 5.1, Gemini 3 Pro), we request explicit reasoning via the include\\_reasoning API parameter, enabling us to capture the model’s internal deliberation process for subsequent qualitative error analysis. Temperature is set to 0.7 across all models."
+                    }
+                  ],
+                  "children": []
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "heading": "Appendix C Detailed Analysis",
+          "level": 2,
+          "content": [],
+          "children": [
+            {
+              "heading": "Web agents (ChatGPT 5.1 Pro vs. Claude Sonnet 4.5).",
+              "level": 5,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "ChatGPT 5.1 Pro tends to decompose workflows into more, smaller steps, with explicit reasoning, tool calls, execution, and self-checking at each step. This leads to longer traces and noticeably higher latency, but also more opportunities for intermediate validation (e.g., sanity-checking partial results). However, the code it generates is often hidden behind tool abstractions, so our error attribution is limited to observed behavior and natural language reasoning rather than the exact implementation details. Claude Sonnet 4.5 typically uses fewer steps and produces more direct solutions. In visualization-heavy workflows, its generated charts are often both more accurate and more aesthetically polished than those produced by ChatGPT 5.1 Pro, leading to relatively fewer failures in the data visualization sub-tasks."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "ChatGPT 5.1 Pro and Claude Sonnet 4.5 agents can explore Excel files through many API calls within a single workflow, but their encoding methods are not well-suited to spreadsheets with complex layouts and structures. Thanks to efficient encoding and appropriate tool use, the following single-call API-based method achieves a pass rate that is much closer to that of product-side agents."
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "API-based",
+              "level": 5,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "Our API-based runs are single-call: they leverage the models’ underlying reasoning capabilities but lack two crucial affordances that web agents exploit. (i) interleaved code execution with feedback, and (ii) explicit reflection based on intermediate tool outputs. As a result, the API agents must generate the entire plan, code, and outputs within a single LLM call. When their initial structural assumptions about a spreadsheet are slightly off, they have no mechanism to detect or correct the mistake, leading to a significantly higher error rate, particularly in categories related to schema understanding and table manipulation. It’s desirable for future work to explore agentic methods with multiple round of API calls."
+                }
+              ],
+              "children": []
+            }
+          ]
+        },
+        {
+          "heading": "Appendix D Ethics Statement",
+          "level": 2,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "The Finch benchmark is constructed entirely from existing, publicly available data sources. Concretely, our workflows are derived from (1) the Enron email corpora, including the parsed Enron email dataset on Kaggle (released under the CC0 Public Domain dedication) and the Enron Email Dataset from EnronData.org (licensed under CC BY 3.0 US); (2) the EUSES spreadsheet corpus and its modified variants (CC BY 4.0); and (3) a diverse collection of enterprise-like artifacts, including documents from investment and securities companies, the World Bank (CC BY 3.0), Canadian and British government websites (Open Government License), and public corpora such as WideSearch (MIT license) and DABStep (CC BY 4.0). We respect the original licenses of all upstream resources and only redistribute content within the terms they allow."
+            },
+            {
+              "type": "paragraph",
+              "text": "On top of these sources, we apply additional filtering, normalization, and expert annotation to organize spreadsheets and related documents into coherent workflows with task instructions, input files, and reference outputs. We do not introduce any new personally identifiable information. During curation, we remove obviously sensitive fields when they are not necessary for the task (e.g., personal contact information or signatures) and avoid annotating workflows whose successful completion would depend on sensitive personal attributes rather than business logic. The resulting Finch dataset is released under the Creative Commons Attribution 3.0 United States license (CC BY 3.0 US), which permits broad reuse while requiring appropriate attribution."
+            },
+            {
+              "type": "paragraph",
+              "text": "The language in Finch is primarily English, reflecting the dominant language of the underlying Enron and EUSES corpora and many of the public institutional sources. Because some artifacts originate from funds and securities institutions and from Canadian government materials, a small fraction of workflows include Chinese or French content."
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "Appendix E Examples",
+          "level": 2,
+          "content": [],
+          "children": [
+            {
+              "heading": "E.1 Example 1",
+              "level": 3,
+              "content": [],
+              "children": []
+            },
+            {
+              "heading": "E.2 Example 2",
+              "level": 3,
+              "content": [],
+              "children": []
+            },
+            {
+              "heading": "E.3 Example 3",
+              "level": 3,
+              "content": [],
+              "children": []
+            },
+            {
+              "heading": "E.4 Example 4",
+              "level": 3,
+              "content": [],
+              "children": []
+            },
+            {
+              "heading": "E.5 Example 5",
+              "level": 3,
+              "content": [],
+              "children": []
+            },
+            {
+              "heading": "E.6 Example 6",
+              "level": 3,
+              "content": [],
+              "children": []
+            },
+            {
+              "heading": "E.7 Example 7",
+              "level": 3,
+              "content": [],
+              "children": []
+            },
+            {
+              "heading": "E.8 Example 8",
+              "level": 3,
+              "content": [],
+              "children": []
+            },
+            {
+              "heading": "E.9 Example 9",
+              "level": 3,
+              "content": [],
+              "children": []
+            },
+            {
+              "heading": "E.10 Example 10",
+              "level": 3,
+              "content": [],
+              "children": []
+            },
+            {
+              "heading": "E.11 Example 11",
+              "level": 3,
+              "content": [],
+              "children": []
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "chunks": [
+    {
+      "heading_path": [
+        "Finch: Benchmarking Finance & Accounting across Spreadsheet-Centric Enterprise Workflows"
+      ],
+      "text": "# Finch: Benchmarking Finance & Accounting across Spreadsheet-Centric Enterprise Workflows"
+    },
+    {
+      "heading_path": [
+        "Finch: Benchmarking Finance & Accounting across Spreadsheet-Centric Enterprise Workflows",
+        "Abstract"
+      ],
+      "text": "###### Abstract\n\nWe introduce a finance & accounting benchmark (Finch) for evaluating AI agents on real-world, enterprise-grade professional workflows—interleaving data entry, structuring, formatting, web search, cross-file retrieval, calculation, modeling, validation, translation, visualization, and reporting. Finch is sourced from authentic enterprise workspaces at Enron (15,000 spreadsheets and 500,000 emails from 150 employees) and other financial institutions, preserving in-the-wild messiness across multimodal artifacts (text, tables, formulas, charts, code, and images) and spanning diverse domains such as budgeting, trading, and asset management.\n\nWe propose a workflow construction process that combines LLM-assisted discovery with expert annotation: (1) LLM-assisted, expert-verified derivation of workflows from real-world email threads and version histories of spreadsheet files, and (2) meticulous expert annotation for workflows, requiring over 700 hours of domain-expert effort. This yields 172 composite workflows with 384 tasks, involving 1,710 spreadsheets with 27 million cells, along with PDFs and other artifacts, capturing the intrinsically messy, long-horizon, knowledge-intensive, and collaborative nature of real-world enterprise work.\n\nWe conduct both human and automated evaluations of frontier AI systems including GPT 5.1, Claude Sonnet 4.5, Gemini 3 Pro, Grok 4, and Qwen 3 Max, and GPT 5.1 Pro spends 48 hours in total yet passes only 38.4% of workflows, while Claude Sonnet 4.5 passes just 25.0%. Comprehensive case studies further surface the challenges that real-world enterprise workflows pose for AI agents.\n\n[![[Uncaptioned image]](./[2512.13168] Finch_ Benchmarking Finance & Accounting across Spreadsheet-Centric Enterprise Workflows_files/hf-logo.png) Dataset: https://huggingface.co/FinWorkBench](https://huggingface.co/FinWorkBench)"
+    },
+    {
+      "heading_path": [
+        "Finch: Benchmarking Finance & Accounting across Spreadsheet-Centric Enterprise Workflows",
+        "1 Introduction"
+      ],
+      "text": "## 1 Introduction\n\nFrontier AI systems are increasingly transforming professional workspaces. AI-assisted tools like ChatGPT [openai\\_agent], Claude [claude\\_excel], Gemini [gemini\\_workspace], and Copilot [microsoft\\_copilot] are now embedded in daily enterprise workflows—helping professionals draft documents, explore data, manipulate spreadsheets, and generate reports. These tools are particularly impactful in finance and accounting (F&A), a high-stakes, knowledge- and labor-intensive domain critical to every organization.\n\nHowever, real-world F&A work is inherently messy with substantial contextual complexity: artifacts are interconnected across heterogeneous spreadsheets, PDFs, and more, evolving through multiple versions with collaborative edits [klimt2004enron]; spreadsheets contain large, complex structures [spreadsheetllm2024] with cross-sheet references, intricate layouts, inconsistent formatting, cryptic terms, erroneous formulas, and multimodal artifacts such as charts, images, and code. It is also long-horizon [gdpval2025]: workflows demand multi-step reasoning spanning data entry, editing, retrieval, calculation, modeling, validation, reporting, and more.\n\nThis raises a key question: Can today’s frontier AI agents actually handle the messy, long-horizon, and knowledge-intensive workflows that professionals face daily?\n\nTo answer this, we introduce Finch, an enterprise-grade F&A benchmark sourced from authentic enterprise environments. Finch captures the intrinsic complexity of professional work through:\n\n* • In-the-wild enterprise sourcing: Finch is built around authentic enterprise spreadsheets, emails, and PDFs from real-world enterprise workspaces—primarily Enron [enrondata\\_pst] (about 15,000 spreadsheet files and 500,000 emails from 150 executives and employees) and EUSES [fisher2005euses] (about 450 financial spreadsheets from various sources), along with securities and asset management firms, global organizations such as World Bank [worldbank\\_idr\\_2024], and Canadian and British governments [financecanada\\_fiscalref\\_2025, hmt\\_pesa\\_2023]. Documents are large, cross-referenced, and messy—containing rich multimodal artifacts such as tables, formulas, charts, pivots, and images. * • Rigorous construction process: We propose a novel workflow construction pipeline grounded in real collaborative context of emails and versioned artifacts. We induce workflows from enterprise email threads and attachments, where collaborators naturally describe, discuss, and track workflows as part of their daily work. And we propose an LLM-assisted, expert-verified method to derive workflows by analyzing changes across versioned spreadsheets, surfacing the underlying goals that drive professionals’ work. Annotators must reason over large multi-sheet workbooks, and subtle version deltas to infer what the original analyst was trying to achieve, making the annotation process substantially more difficult than curating QA pairs over isolated tables.\n\nIn-the-wild enterprise sourcing: Finch is built around authentic enterprise spreadsheets, emails, and PDFs from real-world enterprise workspaces—primarily Enron [enrondata\\_pst] (about 15,000 spreadsheet files and 500,000 emails from 150 executives and employees) and EUSES [fisher2005euses] (about 450 financial spreadsheets from various sources), along with securities and asset management firms, global organizations such as World Bank [worldbank\\_idr\\_2024], and Canadian and British governments [financecanada\\_fiscalref\\_2025, hmt\\_pesa\\_2023]. Documents are large, cross-referenced, and messy—containing rich multimodal artifacts such as tables, formulas, charts, pivots, and images.\n\nRigorous construction process: We propose a novel workflow construction pipeline grounded in real collaborative context of emails and versioned artifacts. We induce workflows from enterprise email threads and attachments, where collaborators naturally describe, discuss, and track workflows as part of their daily work. And we propose an LLM-assisted, expert-verified method to derive workflows by analyzing changes across versioned spreadsheets, surfacing the underlying goals that drive professionals’ work. Annotators must reason over large multi-sheet workbooks, and subtle version deltas to infer what the original analyst was trying to achieve, making the annotation process substantially more difficult than curating QA pairs over isolated tables.\n\nWe compile 172 meticulously annotated, enterprise-grade workflows built on 1,710 spreadsheets, along with PDFs and other artifacts, collectively capturing the compositional, messy, knowledge-intensive, and collaborative nature of real work. Each workflow spans one or more interdependent tasks—data entry, editing, retrieval, calculation, modeling, validation, translation, visualization, and reporting—mirroring how professionals actually work on artifact manipulation and creation.\n\nWe evaluate a spectrum of frontier AI systems—including Claude Sonnet 4.5, GPT 5.1, Gemini 3, Grok 4, and Qwen 3—using both expert evaluation and a novel automated evaluation pipeline that closely aligns with expert judgments. Our experiments reveal that even the frontier agents pass fewer than 40% of workflows (GPT 5.1 Pro spends 16.8 minutes per workflow on average), highlighting the substantial challenges that Finch poses for AI agents. Comprehensive case analyses further surface concrete challenges that real-world enterprise workflows pose for AI agents."
+    },
+    {
+      "heading_path": [
+        "Finch: Benchmarking Finance & Accounting across Spreadsheet-Centric Enterprise Workflows",
+        "2 Finch: A Real-world Finance & Accounting Workflow Benchmark"
+      ],
+      "text": "## 2 Finch: A Real-world Finance & Accounting Workflow Benchmark"
+    },
+    {
+      "heading_path": [
+        "Finch: Benchmarking Finance & Accounting across Spreadsheet-Centric Enterprise Workflows",
+        "2 Finch: A Real-world Finance & Accounting Workflow Benchmark",
+        "2.1 Dataset Construction"
+      ],
+      "text": "### 2.1 Dataset Construction\n\nWe propose a novel workflow construction pipeline grounded in the real collaborative context of emails and versioned artifacts, as illustrated in Figure [4](https://ar5iv.labs.arxiv.org/html/2512.13168v5#S2.F4 \"Fig. 4 ‣ 2.1 Dataset Construction ‣ 2 Finch: A Real-world Finance & Accounting Workflow Benchmark ‣ Finch: Benchmarking Finance & Accounting across Spreadsheet-Centric Enterprise Workflows\") (a–c). First, we induce workflows from enterprise email threads and versioned documents, where collaborators naturally describe, discuss, and track work as part of their daily routines. Second, we derive workflows by analyzing changes across versioned spreadsheets, surfacing the actual data transformations and analysis steps that professionals performed. Third, we leverage high-quality spreadsheets and reports: we design workflows, author task instructions, and revise these spreadsheets and reports so that they serve as the input files and reference solutions.\n\nAll annotated workflows from these different channels are consolidated into a unified schema with consistent fields (NL instruction, input files, reference outputs), and each workflow is tagged with task types (e.g., data entry/import, structuring, validation) and business types (e.g., planning and budgeting, pricing and valuation, operations, asset management). Note that the reference outputs include both file-based reference answers (for most generation/editing cases) and textual reference answers (for a small number of QA and summary/visualization cases)."
+    },
+    {
+      "heading_path": [
+        "Finch: Benchmarking Finance & Accounting across Spreadsheet-Centric Enterprise Workflows",
+        "2 Finch: A Real-world Finance & Accounting Workflow Benchmark",
+        "2.1 Dataset Construction",
+        "2.1.1 Workflow from Enterprise Email Threads"
+      ],
+      "text": "#### 2.1.1 Workflow from Enterprise Email Threads\n\nWe first mine enterprise email threads to surface workflows. Starting from the Enron Email Corpus, we prompt GPT-5 to identify collaborative messages that (i) explicitly state a business goal (e.g., “update the RAC rankings” or “revise the 2002 allocations”) and (ii) reference one or more attached spreadsheets. For each selected thread, the model summarizes the communicative intent and articulates a workflow description.\n\nWe distinguish two cases. In the *strongly grounded* case illustrated in Figure [4](https://ar5iv.labs.arxiv.org/html/2512.13168v5#S2.F4 \"Fig. 4 ‣ 2.1 Dataset Construction ‣ 2 Finch: A Real-world Finance & Accounting Workflow Benchmark ‣ Finch: Benchmarking Finance & Accounting across Spreadsheet-Centric Enterprise Workflows\") (a), both the input and the final reference artifacts for the workflow are already present as attachments in the thread (e.g., an initial ranking file and a corrected version). Strongly grounded cases well motivated this benchmark, but they are relatively rare. In the *partially grounded* case illustrated in Figure [4](https://ar5iv.labs.arxiv.org/html/2512.13168v5#S2.F4 \"Fig. 4 ‣ 2.1 Dataset Construction ‣ 2 Finch: A Real-world Finance & Accounting Workflow Benchmark ‣ Finch: Benchmarking Finance & Accounting across Spreadsheet-Centric Enterprise Workflows\") (b), the email specifies a clear goal, but only some of the required artifacts are attached (e.g., just the updated schedule, or an intermediate report). Across both cases, human experts normalize conversational email text into task instructions and abstract away idiosyncratic details while preserving the business intent. For strongly grounded threads, annotators primarily verify that the attached files exactly implement the requested change without extra edits. For partially grounded threads, they either identify the missing artifacts from versioned spreadsheets and revise them to align with the described workflow—carefully avoiding the introduction of new changes—or create the missing artifacts themselves, which typically requires much more effort."
+    },
+    {
+      "heading_path": [
+        "Finch: Benchmarking Finance & Accounting across Spreadsheet-Centric Enterprise Workflows",
+        "2 Finch: A Real-world Finance & Accounting Workflow Benchmark",
+        "2.1 Dataset Construction",
+        "2.1.2 Workflow Derivation from Versioned Spreadsheets"
+      ],
+      "text": "#### 2.1.2 Workflow Derivation from Versioned Spreadsheets\n\nBeyond explicit messages in email threads, we propose to discover workflows that are implicitly captured in spreadsheet version histories, as illustrated in Figure [4](https://ar5iv.labs.arxiv.org/html/2512.13168v5#S2.F4 \"Fig. 4 ‣ 2.1 Dataset Construction ‣ 2 Finch: A Real-world Finance & Accounting Workflow Benchmark ‣ Finch: Benchmarking Finance & Accounting across Spreadsheet-Centric Enterprise Workflows\")(c). We collect families of versioned workbooks from the Enron and EUSES repositories and apply an LLM-based differencing procedure that recognizes consecutive versions and infers the underlying workflow.\n\nFor each recognized pair (or chain) of versions, we prompt GPT-5 to propose (i) one or more workflow types (e.g., “date-stamped versioning, assumption updates, and error correction”, “data entry, structuring, and visualization”) and (ii) a detailed NL description of all changes. Human experts then validate and refine these LLM-induced workflow candidates. They first determine whether the proposed diffs constitute a coherent and meaningful workflow rather than incidental churn. For accepted cases, they (i) rewrite the draft description into a precise task instruction that describes the transformation, and (ii) edit the corresponding workbook versions so that the designated input and reference files cleanly realize the described workflow without introducing out-of-scope changes beyond the instruction. The corresponding input and reference files are thus grounded in the actual versions used in the diff, yielding workflow instances that do not rely on email context but are anchored in real enterprise spreadsheet evolution."
+    },
+    {
+      "heading_path": [
+        "Finch: Benchmarking Finance & Accounting across Spreadsheet-Centric Enterprise Workflows",
+        "2 Finch: A Real-world Finance & Accounting Workflow Benchmark",
+        "2.1 Dataset Construction",
+        "2.1.3 Workflow Sourced from High-quality Artifacts"
+      ],
+      "text": "#### 2.1.3 Workflow Sourced from High-quality Artifacts\n\nFinally, we curate workflows from high-quality spreadsheets and reports drawn from the Enron and EUSES corpora, various investment and securities companies, international organizations, and national governments (e.g., the World Bank and the Canadian and British governments). Domain experts decompose these finalized financial artifacts into intermediate artifacts that serve as inputs, while treating the original documents as reference outputs, and then author realistic workflow instructions. For example, a valuation model from an investment firm can be turned into a financial modeling task; a World Bank report can be used to define a data-driven summarization and visualization task; and bilingual reports from the Canadian government can be used to construct translation and consistency-checking tasks. We additionally leverage labeled samples from existing datasets: we adapt 10 financial cases from WideSearch [wong2025widesearch] into web-search-centric workflows and extend them into multi-step calculation and visualization pipelines, and we leverage 3 examples from DABStep [egg2025dabstep] to construct multi-source question answering workflows."
+    },
+    {
+      "heading_path": [
+        "Finch: Benchmarking Finance & Accounting across Spreadsheet-Centric Enterprise Workflows",
+        "2 Finch: A Real-world Finance & Accounting Workflow Benchmark",
+        "2.1 Dataset Construction",
+        "2.1.4 Quality Control"
+      ],
+      "text": "#### 2.1.4 Quality Control\n\nGiven the high complexity of each workflow, rigorous quality control is essential. We perform inter-annotator validation on all workflows and use the ChatGPT 5.1 Pro and Claude-Sonnet-4.5 product-side agents as secondary checkers: given the instruction and the input and reference files, the model is asked to judge whether the reference output is consistent with the instruction and whether any obvious steps are missing. LLM-based judgments are used to flag potential defects for human review. Together, these quality-control procedures yield a collection of workflows whose NL instructions, input files, and reference outputs are well aligned."
+    },
+    {
+      "heading_path": [
+        "Finch: Benchmarking Finance & Accounting across Spreadsheet-Centric Enterprise Workflows",
+        "2 Finch: A Real-world Finance & Accounting Workflow Benchmark",
+        "2.2 Dataset Characteristics"
+      ],
+      "text": "### 2.2 Dataset Characteristics\n\nFinch comprises 172 meticulously annotated, enterprise-grade workflows that collectively capture the compositional, messy, multimodal, and collaborative nature of real finance and accounting work. Across these workflows, the corpus contains 1,710 spreadsheets together with 13 PDFs, 7 images, 3 Word documents, and additional files such as JSON, CSV, and Markdown. This mixture reflects how real analysts coordinate over heterogeneous artifacts rather than clean, single-table inputs.\n\nFigure [5](https://ar5iv.labs.arxiv.org/html/2512.13168v5#S2.F5 \"Fig. 5 ‣ 2.2 Dataset Characteristics ‣ 2 Finch: A Real-world Finance & Accounting Workflow Benchmark ‣ Finch: Benchmarking Finance & Accounting across Spreadsheet-Centric Enterprise Workflows\") summarizes the coverage of task and business types. On the task side, categories are:\n\n* • Calculation (119 workflows): filling in formulas or computing figures (e.g., net value). * • Structuring / Formatting (86): reorganizing tables (e.g., adjusting hierarchies), formatting content (e.g., font size and cell fill), and inserting/deleting rows or columns. * • Data Entry / Import (44): transcribing or importing data from spreadsheets, PDFs, images, or external sources into spreadsheets. * • Validation / Review (37): checking consistency and reconciling calculations within a sheet or across sheets/files. * • Cross-sheet/file Retrieval (36): pulling values from multiple sheets or files into a target workbook. * • Summary / Visualization (33): producing summaries or charts that surface key financial insights. * • Financial Modeling (15): extending or calibrating valuation and timing models, often via scenario and sensitivity analysis. * • Web Search (11): collecting financial data from the web and integrating it into spreadsheets. * • Translation (3): translating spreadsheets or reports while preserving structure, formatting, and layout.\n\nCalculation (119 workflows): filling in formulas or computing figures (e.g., net value).\n\nStructuring / Formatting (86): reorganizing tables (e.g., adjusting hierarchies), formatting content (e.g., font size and cell fill), and inserting/deleting rows or columns.\n\nData Entry / Import (44): transcribing or importing data from spreadsheets, PDFs, images, or external sources into spreadsheets.\n\nValidation / Review (37): checking consistency and reconciling calculations within a sheet or across sheets/files.\n\nCross-sheet/file Retrieval (36): pulling values from multiple sheets or files into a target workbook.\n\nSummary / Visualization (33): producing summaries or charts that surface key financial insights.\n\nFinancial Modeling (15): extending or calibrating valuation and timing models, often via scenario and sensitivity analysis.\n\nWeb Search (11): collecting financial data from the web and integrating it into spreadsheets.\n\nTranslation (3): translating spreadsheets or reports while preserving structure, formatting, and layout.\n\nOn the business side, workflows span reporting (48 workflows), trading and risk management (35), predictive modeling (33), operational management (36), planning and budgeting (26), pricing and valuation (15), accounts payable/receivable (10), as well as procurement and sales (7) and asset management (3); some workflows are tagged with multiple business types. Overall, the distribution indicates that Finch targets core finance and accounting verticals rather than curated toy tasks."
+    },
+    {
+      "heading_path": [
+        "Finch: Benchmarking Finance & Accounting across Spreadsheet-Centric Enterprise Workflows",
+        "2 Finch: A Real-world Finance & Accounting Workflow Benchmark",
+        "2.2 Dataset Characteristics",
+        "2.2.1 Task Compositionality"
+      ],
+      "text": "#### 2.2.1 Task Compositionality\n\nFinch is explicitly designed around composite workflows rather than isolated tasks. As shown in Figure [5](https://ar5iv.labs.arxiv.org/html/2512.13168v5#S2.F5 \"Fig. 5 ‣ 2.2 Dataset Characteristics ‣ 2 Finch: A Real-world Finance & Accounting Workflow Benchmark ‣ Finch: Benchmarking Finance & Accounting across Spreadsheet-Centric Enterprise Workflows\"), only 37 workflows (21.5%) are single-task; the remaining 135 (78.5%) involve multiple tasks. Importantly, each “task” itself typically requires substantial multi-turn reasoning: for example, web search often entails many rounds of LLM calls to discover, filter, and verify evidence; cross-sheet retrieval requires repeated calls to read and locate key information across multiple sheets; and calculation usually spans many formulas distributed over different rows and columns.\n\nThese tasks are not independent subtasks, but are interleaved around shared spreadsheets and files. A typical workflow may begin with structuring or importing raw data, proceed to cross-sheet or cross-file retrieval, and then culminate in calculations, modeling, or reporting. The distribution in Figure [5](https://ar5iv.labs.arxiv.org/html/2512.13168v5#S2.F5 \"Fig. 5 ‣ 2.2 Dataset Characteristics ‣ 2 Finch: A Real-world Finance & Accounting Workflow Benchmark ‣ Finch: Benchmarking Finance & Accounting across Spreadsheet-Centric Enterprise Workflows\") shows that most workflows weave multiple tasks."
+    },
+    {
+      "heading_path": [
+        "Finch: Benchmarking Finance & Accounting across Spreadsheet-Centric Enterprise Workflows",
+        "2 Finch: A Real-world Finance & Accounting Workflow Benchmark",
+        "2.2 Dataset Characteristics",
+        "2.2.2 Messiness"
+      ],
+      "text": "#### 2.2.2 Messiness\n\nThe source files in Finch are intentionally large, multi-sheet, and structurally complex. At the file level, 86.6% of workflows involve more than one file when counting both input and reference artifacts, and some workflows touch up to 14 distinct files. At the spreadsheet level, 92.4% of workflows involve multiple sheets, with an average of 8 sheets and a long tail reaching 91 sheets. As a result, systems must navigate cross-sheet dependencies, hidden logic, and scattered intermediate calculations rather than operating on a single “analysis” sheet. Moreover, most spreadsheets exhibit complex layouts that interleave text, tables, formulas, and charts, as well as intricate table structures with merged cells, nested headers, hierarchical data, blank rows and columns, and other irregularities.\n\nCell-level statistics further highlight the scale of the data. The median workflow covers 15K cells (157K on average for all workflows), with the largest workbook scaling to 3.7 million cells. Formula density is similarly skewed: while workflows contain an average of 21.5K formulas (the median is 212), the most complex ones have hundreds of thousands of formulas, reflecting deeply nested calculations and long dependency chains. Taken together, these properties create a challenging regime in which models must reason over large, noisy, and highly irregular spreadsheet layouts, rather than clean, rectangular tables."
+    },
+    {
+      "heading_path": [
+        "Finch: Benchmarking Finance & Accounting across Spreadsheet-Centric Enterprise Workflows",
+        "2 Finch: A Real-world Finance & Accounting Workflow Benchmark",
+        "2.2 Dataset Characteristics",
+        "2.2.3 Multimodality"
+      ],
+      "text": "#### 2.2.3 Multimodality\n\nAlthough Finch is spreadsheet-centric, the workflows are inherently multimodal. Around 10.5% of workflows link spreadsheets with additional non-spreadsheet artifacts such as PDFs, Word documents, and images, and 7.6% explicitly require reasoning over PDFs or images. Within the spreadsheets themselves, 20.3% of workflows include charts and 2.3% feature pivot tables, so models must understand not only raw cell values but also derived visual summaries and explicit aggregation structures (and most workflows involve implicit aggregation structures). This multimodal, cross-artifact structure stands in contrast to prior benchmarks that operate purely on isolated tables, and better reflects the environments in which enterprise finance and accounting tasks actually occur."
+    },
+    {
+      "heading_path": [
+        "Finch: Benchmarking Finance & Accounting across Spreadsheet-Centric Enterprise Workflows",
+        "2 Finch: A Real-world Finance & Accounting Workflow Benchmark",
+        "2.3 Evaluation Method"
+      ],
+      "text": "### 2.3 Evaluation Method"
+    },
+    {
+      "heading_path": [
+        "Finch: Benchmarking Finance & Accounting across Spreadsheet-Centric Enterprise Workflows",
+        "2 Finch: A Real-world Finance & Accounting Workflow Benchmark",
+        "2.3 Evaluation Method",
+        "2.3.1 Human Evaluation"
+      ],
+      "text": "#### 2.3.1 Human Evaluation\n\nWe conduct human evaluation on all workflows to directly assess model performance. For each workflow, annotators read the NL instruction, inspect the input, reference, and model output files side by side (typically by aligning spreadsheets or documents in adjacent tabs), and determine whether the model has faithfully completed the requested job. A workflow is marked as successful only if the model generates or revises the content and structure in accordance with the instruction and no critical errors, omissions, or unintended changes are introduced; otherwise, it is labeled as a failure. Importantly, evaluation is based on whether the instruction has been satisfactorily fulfilled rather than on a purely mechanical comparison between model and reference outputs, since there may be multiple acceptable solutions for summarization, visualization, formatting, formulas, and related aspects. To reduce subjectivity and ambiguity, annotators ultimately assign a binary pass/fail label for each workflow. These human judgments serve as the gold standard for measuring model performance and for validating the reliability of our automatic evaluation method."
+    },
+    {
+      "heading_path": [
+        "Finch: Benchmarking Finance & Accounting across Spreadsheet-Centric Enterprise Workflows",
+        "2 Finch: A Real-world Finance & Accounting Workflow Benchmark",
+        "2.3 Evaluation Method",
+        "2.3.2 LLM-as-Judge Evaluation"
+      ],
+      "text": "#### 2.3.2 LLM-as-Judge Evaluation\n\nTo scale evaluation, we employ an LLM-as-judge framework that supports the three high-level task types in Finch: *modify* (editing input artifacts), *generate* (creating new files such as workbooks and documents), and *QA* (answering questions based on one or more artifacts). The framework accepts heterogeneous inputs—including .xlsx, .txt, .docx, .md, .pdf, and images—and normalizes them into a sequence of textual inputs and screenshot images for the judge model.\n\nFor modification tasks, especially on spreadsheets, the framework computes structured diffs between the input and the reference output (diff\\_ref) and between the input and the model output (diff\\_model), and then builds a compact “input snapshot” (snapshot) that, for each modified sheet, retains only the first and last ten rows and the first five columns (which typically capture table headers and layout) together with rows and columns that contain edited cells. This preserves the crucial context for diff\\_ref and diff\\_model while dramatically reducing token length. In parallel, the framework renders screenshots (screenshot) of sheets containing changes from the input, reference, and model output, so that the judge perceives merged cells, conditional formatting, charts, and other layout-sensitive properties that are difficult to encode as text alone.\n\nFor generation tasks involving spreadsheets, the framework extracts all cell values and formulas from both the reference and the model output, and captures screenshots of every sheet, since the entire generated artifact must be verified rather than just localized edits. For QA tasks, it feeds a rich text-and-image sequence constructed from the reference answer and the model’s response, optionally augmented with relevant input files when the question requires grounding in external artifacts.\n\nWe design three task-specific judge prompts for modify, generate, and QA, respectively, but they share a common evaluation rubric. In all cases, the judge is instructed to focus on (i) *completeness* with respect to the NL instruction, (ii) *numerical and logical correctness* of derived values and formulas, (iii) the *over-edit avoidance*, penalizing unnecessary and unexpected changes of the workbook beyond instruction, and (iv) readability of the formatting and structure. Exact cell-by-cell equality with the reference is not required when multiple solutions are acceptable (e.g., alternative layouts, equivalent formulas, or different but semantically equivalent summaries); instead, the judge decides whether the model has satisfactorily fulfilled the instruction. To reduce subjectivity, the judge outputs a binary score (pass/fail) along with a short NL rationale. In some web search tasks, the rubric permits small tolerance bands when comparing values, allowing for discrepancies in data from different sources.\n\nThis LLM-as-judge framework not only automates large-scale evaluation but also surfaces subtle spreadsheet errors (such as formulas silently replaced with static values) that are difficult to catch with GUI-based human inspection alone. In Section [3.2](https://ar5iv.labs.arxiv.org/html/2512.13168v5#S3.SS2 \"3.2 Experimental Results ‣ 3 Experiments ‣ Finch: Benchmarking Finance & Accounting across Spreadsheet-Centric Enterprise Workflows\"), we report the consistency between human and automated evaluations and show that the LLM-as-judge scores closely track human judgments."
+    },
+    {
+      "heading_path": [
+        "Finch: Benchmarking Finance & Accounting across Spreadsheet-Centric Enterprise Workflows",
+        "3 Experiments"
+      ],
+      "text": "## 3 Experiments"
+    },
+    {
+      "heading_path": [
+        "Finch: Benchmarking Finance & Accounting across Spreadsheet-Centric Enterprise Workflows",
+        "3 Experiments",
+        "3.1 Agents and Models"
+      ],
+      "text": "### 3.1 Agents and Models"
+    },
+    {
+      "heading_path": [
+        "Finch: Benchmarking Finance & Accounting across Spreadsheet-Centric Enterprise Workflows",
+        "3 Experiments",
+        "3.1 Agents and Models",
+        "3.1.1 Product-side Agents"
+      ],
+      "text": "#### 3.1.1 Product-side Agents\n\nWe evaluate two frontier product-side agents: (i) *ChatGPT* using the GPT 5.1 model in Pro mode, and (ii) *Claude* using the Sonnet 4.5 model in thinking mode. We focus on these two systems rather than alternatives such as Gemini or Grok because they natively support returning downloadable files (e.g., spreadsheets) as outputs, rather than emitting code or markdown-formatted tables that are not intuitive for human evaluation. For both agents, we enable their external web browsing, but disable using historical chats so that each workflow is evaluated independently and without cross-run leakage. Since model updates are frequent and manual evaluation is very time-consuming, we used the latest model from our final round of experiments and did not consider subsequent updates."
+    },
+    {
+      "heading_path": [
+        "Finch: Benchmarking Finance & Accounting across Spreadsheet-Centric Enterprise Workflows",
+        "3 Experiments",
+        "3.1 Agents and Models",
+        "3.1.2 API-based Models"
+      ],
+      "text": "#### 3.1.2 API-based Models\n\nWe evaluate five frontier large language models (LLMs), shown in Table [1](https://ar5iv.labs.arxiv.org/html/2512.13168v5#S3.T1 \"Tab. 1 ‣ 3.1.2 API-based Models ‣ 3.1 Agents and Models ‣ 3 Experiments ‣ Finch: Benchmarking Finance & Accounting across Spreadsheet-Centric Enterprise Workflows\"), through API interfaces. Our evaluation pipeline builds upon the open-source SpreadsheetBench framework [ma2024spreadsheetbench]. Details of the execution paradigm and prompting strategies are deferred to the Appendix [B.1](https://ar5iv.labs.arxiv.org/html/2512.13168v5#A2.SS1 \"B.1 API-based Models ‣ Appendix B Experiment Details ‣ Finch: Benchmarking Finance & Accounting across Spreadsheet-Centric Enterprise Workflows\"). While SpreadsheetBench provides only a baseline implementation, we introduce several practical enhancements to improve its applicability to real-world tasks.\n\n| Model | Provider | Context | Max Output | Vision | Native PDF | | --- | --- | --- | --- | --- | --- | | GPT 5.1 [gpt5openai] | OpenAI | 400K | 128K | ✓ | ✓ | | Claude Sonnet 4.5 [claudesonnet45] | Anthropic | 1M† | 64K | ✓ | ✓ | | Grok 4 [grok4] | xAI | 256K | 256K | ✓ | — | | Qwen 3 Max [qwen3technicalreport] | Alibaba | 256K | 32.8K | — | — | | Gemini 3 Pro Preview [gemini3pro] | Google | 1.05M | 65.5K | ✓ | ✓ |"
+    },
+    {
+      "heading_path": [
+        "Finch: Benchmarking Finance & Accounting across Spreadsheet-Centric Enterprise Workflows",
+        "3 Experiments",
+        "3.1 Agents and Models",
+        "3.1.2 API-based Models",
+        "Spreadsheet Encoding."
+      ],
+      "text": "##### Spreadsheet Encoding.\n\nSpreadsheetBench only produces simple text tables without preserving cell addresses, data types, or formulas. However, these details are essential for tasks in Finch. We extend SpreadsheetLLM [spreadsheetllm2024] encoding and introduce a *semantic-rich tuple encoding* that preserves full structural and semantic fidelity. Each sheet begins with its name and the corresponding data bounding box (e.g. ## Sheet: [name] (A1:Z100)). We then serialize the bounded region using a Markdown-based format. Each cell is encoded as a tuple (Address, Value, Type, Formula), where Address denotes the cell reference (e.g. A3), Type indicates the data type (T = Text, I = Integer, F = Float, D = Date, B = Boolean), and Formula records the cell formula (e.g., =SUM(A1:A10)->100)."
+    },
+    {
+      "heading_path": [
+        "Finch: Benchmarking Finance & Accounting across Spreadsheet-Centric Enterprise Workflows",
+        "3 Experiments",
+        "3.1 Agents and Models",
+        "3.1.2 API-based Models",
+        "Multimodal Input Handling."
+      ],
+      "text": "##### Multimodal Input Handling.\n\nWe extend the framework to support multimodal inputs involving images and PDFs. For vision-capable models (GPT 5.1, Claude Sonnet 4.5, Grok 4, and Gemini 3 Pro), we use each provider’s official multimodal API to transmit visual inputs alongside text prompts. For PDF documents, we adopt a tiered strategy. Models with native PDF support—GPT 5.1, Claude Sonnet 4.5, and Gemini 3 Pro Preview—directly ingest PDF files via their file upload interfaces, enabling analysis of both textual and visual elements without pre-extraction. For Grok 4, which lacks native PDF support, we extract text using PyMuPDF and include it in the pdf\\_content field. For Qwen 3 Max, which lacks multimodal support entirely, both image and PDF content are converted to textual descriptions. While this fallback retains semantic cues, it loses layout and visual context."
+    },
+    {
+      "heading_path": [
+        "Finch: Benchmarking Finance & Accounting across Spreadsheet-Centric Enterprise Workflows",
+        "3 Experiments",
+        "3.1 Agents and Models",
+        "3.1.2 API-based Models",
+        "Context Management."
+      ],
+      "text": "##### Context Management.\n\nTo handle large spreadsheets that may exceed model context limits, we implement automatic truncation. We reserve 32K tokens for model output—sufficient for comprehensive code generation and analysis while remaining within the output limits of all evaluated models. Truncation is triggered when input exceeds the remaining capacity, removing content from the end of spreadsheet data with an explicit notice appended to inform the model of data loss."
+    },
+    {
+      "heading_path": [
+        "Finch: Benchmarking Finance & Accounting across Spreadsheet-Centric Enterprise Workflows",
+        "3 Experiments",
+        "3.2 Experimental Results"
+      ],
+      "text": "### 3.2 Experimental Results"
+    },
+    {
+      "heading_path": [
+        "Finch: Benchmarking Finance & Accounting across Spreadsheet-Centric Enterprise Workflows",
+        "3 Experiments",
+        "3.2 Experimental Results",
+        "Web agents (ChatGPT 5.1 Pro vs. Claude Sonnet 4.5)."
+      ],
+      "text": "##### Web agents (ChatGPT 5.1 Pro vs. Claude Sonnet 4.5).\n\nAs shown in Figure [2](https://ar5iv.labs.arxiv.org/html/2512.13168v5#S1.F2 \"Fig. 2 ‣ 1 Introduction ‣ Finch: Benchmarking Finance & Accounting across Spreadsheet-Centric Enterprise Workflows\") and Table [3](https://ar5iv.labs.arxiv.org/html/2512.13168v5#S3.T3 \"Tab. 3 ‣ 3.2.1 Consistency Between Human and Automated Evaluation ‣ 3.2 Experimental Results ‣ 3 Experiments ‣ Finch: Benchmarking Finance & Accounting across Spreadsheet-Centric Enterprise Workflows\"), ChatGPT 5.1 Pro achieves the best overall pass rates on Finch. Their advantage largely comes from rich interactive affordances: they can iteratively inspect spreadsheets, revise intermediate states, and recover from partial errors over many tool calls. However, it solves fewer than 40% of the Finch workflows, suggesting that real-world finance and accounting work remains far from “solved” even for frontier agents. The detailed analysis in Figure [8](https://ar5iv.labs.arxiv.org/html/2512.13168v5#S3.F8 \"Fig. 8 ‣ Web agents (ChatGPT 5.1 Pro vs. Claude Sonnet 4.5). ‣ 3.2 Experimental Results ‣ 3 Experiments ‣ Finch: Benchmarking Finance & Accounting across Spreadsheet-Centric Enterprise Workflows\") further highlights that long-horizon composition is a key bottleneck: when a workflow contains more than two tasks, the pass rate drops sharply—GPT 5.1 Pro decreases from 44.3% (workflows with ≤2\\leq 2 tasks) to 23.5% (workflows with >2>2 tasks), and Claude Sonnet 4.5 decreases from 30.3% to 11.8%. This indicates that error accumulation across steps and missing intermediate affordances disproportionately hurt multi-step execution.\n\n≤2\\leq 2\n\n>2>2\n\nPass rate also varies substantially by task type (Figure [8](https://ar5iv.labs.arxiv.org/html/2512.13168v5#S3.F8 \"Fig. 8 ‣ Web agents (ChatGPT 5.1 Pro vs. Claude Sonnet 4.5). ‣ 3.2 Experimental Results ‣ 3 Experiments ‣ Finch: Benchmarking Finance & Accounting across Spreadsheet-Centric Enterprise Workflows\")). Data Entry / Import and Structuring / Formatting are consistently among the most challenging categories, which aligns with Finch spreadsheets exhibiting messy layouts, irregular tables, and nontrivial structural constraints. Moreover, Data Entry / Import workflows are frequently entangled with web search or PDF parsing, introducing multimodal dependencies that amplify failure modes. Notably, Translation—a task where modern LLMs typically excel in standard NLP settings—performs surprisingly poorly in Finch. In finance-heavy tables, translation can easily distort or drop critical structure and layout cues (e.g., header hierarchies, row/column alignment), and large grids make omissions more likely, leading to systematic failures. Detailed error analysis can be found in Section [3.3](https://ar5iv.labs.arxiv.org/html/2512.13168v5#S3.SS3 \"3.3 Error Analysis ‣ 3 Experiments ‣ Finch: Benchmarking Finance & Accounting across Spreadsheet-Centric Enterprise Workflows\").\n\n| | | | | | --- | --- | --- | --- | | # Tasks per workflow | # Workflows | Pass Rate (%) | Avg. time (min) | | 1 | 37 | 48.6 | 13.1 | | 2 | 84 | 42.4 | 17.4 | | 3 | 33 | 33.3 | 18.7 | | 4 | 10 | 0 | 21.3 | | 5 | 8 | 12.5 | 13.6 |\n\nWe further analyze how GPT 5.1 web completion time scales with the number of tasks in a workflow (Table [2](https://ar5iv.labs.arxiv.org/html/2512.13168v5#S3.T2 \"Tab. 2 ‣ Web agents (ChatGPT 5.1 Pro vs. Claude Sonnet 4.5). ‣ 3.2 Experimental Results ‣ 3 Experiments ‣ Finch: Benchmarking Finance & Accounting across Spreadsheet-Centric Enterprise Workflows\")). The longest individual workflow run takes roughly 60 minutes to complete—but fails, highlighting how challenging workflows can be for current agents. On average, single-task workflows take 13.1 minutes, while workflows with two, three, and four tasks require 17.4, 18.7, and 21.3 minutes, respectively, reflecting the increased compositional complexity of multi-task settings. Interestingly, five-task workflows show a lower average time (13.6 minutes), most of which involve web search and almost all of which result in failure.\n\nkk"
+    },
+    {
+      "heading_path": [
+        "Finch: Benchmarking Finance & Accounting across Spreadsheet-Centric Enterprise Workflows",
+        "3 Experiments",
+        "3.2 Experimental Results",
+        "API-based."
+      ],
+      "text": "##### API-based.\n\nFigure [2](https://ar5iv.labs.arxiv.org/html/2512.13168v5#S1.F2 \"Fig. 2 ‣ 1 Introduction ‣ Finch: Benchmarking Finance & Accounting across Spreadsheet-Centric Enterprise Workflows\") further shows that our API-based method remains competitive despite using only a single LLM call. In automated evaluation, for example, GPT 5.1 Pro achieves 41.9%, while GPT 5.1 with our API-based agent design reaches 32.0%—a relatively small gap given the much weaker interaction budget. Our agent design narrows the gap by supplying more efficient spreadsheet representations and task-appropriate tool outputs within the single-call budget, thereby reducing brittle reasoning over complex layouts and mitigating cascading mistakes."
+    },
+    {
+      "heading_path": [
+        "Finch: Benchmarking Finance & Accounting across Spreadsheet-Centric Enterprise Workflows",
+        "3 Experiments",
+        "3.2 Experimental Results",
+        "3.2.1 Consistency Between Human and Automated Evaluation"
+      ],
+      "text": "#### 3.2.1 Consistency Between Human and Automated Evaluation\n\nWe adopt a lightweight multimodal model, GPT-5-mini, as the judge to validate the performance of our automated evaluation framework. As shown in Table [3](https://ar5iv.labs.arxiv.org/html/2512.13168v5#S3.T3 \"Tab. 3 ‣ 3.2.1 Consistency Between Human and Automated Evaluation ‣ 3.2 Experimental Results ‣ 3 Experiments ‣ Finch: Benchmarking Finance & Accounting across Spreadsheet-Centric Enterprise Workflows\"), the automated evaluation largely aligns with human judgments: for GPT 5.1 Pro and Claude Sonnet 4.5, the judge agrees with human labels on 82.1% and 90.2% of workflows, respectively. The judge also achieves high recall (83.3% and 88.4%), meaning it recovers most human-labeled passes, and reasonably strong precision (73.6% and 76.0%), indicating that the majority of automatically predicted passes are also accepted by human evaluators. Overall, this suggests that automated evaluation may overestimate accuracy by several percentage points.\n\n| Model (Product) | Automated Eval | | Human Eval | | Agreement w/ Human Eval | | | | --- | --- | --- | --- | --- | --- | --- | --- | | Pass | Pass Rate (%) | Pass | Pass Rate (%) | Acc (%) | Recall (%) | Precision (%) | | GPT 5.1 Pro | 72/172 | 41.9 | 66/172 | 38.4 | 82.1 | 83.3 | 73.6 | | Claude Sonnet 4.5 | 50/172 | 29.1 | 43/172 | 25.0 | 90.2 | 88.4 | 76.0 |\n\nOn the model side, the LLM judge can occasionally miss nuances in the rubric—either failing to catch subtle visual or numerical errors in large spreadsheets or, conversely, being overly literal about certain instructions (e.g., penalizing benign formula-to-constant conversions). However, we also observe cases where the LLM-based judge is correct but human raters are wrong—for example, when formulas are silently replaced with static values, which are difficult to detect through GUI-based inspection alone. On the system side, limitations of our spreadsheet tooling and data pipeline (e.g., incomplete support for corrupted but human-readable workbooks or uncommon file formats) can cause valid outputs to be marked as failures. Taken together, these factors mean that our automated scores should be interpreted as approximate rather than exact, and that human review remains important for borderline or high-impact workflows."
+    },
+    {
+      "heading_path": [
+        "Finch: Benchmarking Finance & Accounting across Spreadsheet-Centric Enterprise Workflows",
+        "3 Experiments",
+        "3.3 Error Analysis"
+      ],
+      "text": "### 3.3 Error Analysis\n\nTo understand the sources of failure on Finch, we conducted a qualitative error analysis of GPT 5.1 Pro and Claude Sonnet 4.5 in both their web-agent and API configurations. For all failed workflows in our evaluation, we manually inspected the trajectories and annotated the primary cause of failure.\n\nFrom a workflow-centric perspective, we identify five dominant categories of error.111For this study, once we identify the first clear error in a failed workflow, we stop further analysis for that workflow. Take Claude Sonnet 4.5 web-agent as an example. Across all examined failures, 10% stem from *task misunderstanding*: enterprise tasks often rely on implicit context in enterprise artifacts (e.g., spreadsheets), which models frequently overlook, leading them to misinterpret what is being asked and the required deliverable. 25% are *data retrieval errors*, including selecting the wrong cross-sheet, cross-table, or intra-table row/column ranges. 35% arise from *formula reasoning errors*, such as failing to reconstruct the latent business logic encoded in formulas or deriving incorrect new formulas. 25% are due to *code generation errors*, where generated scripts (e.g., Python with spreadsheet APIs) are syntactically invalid or misaligned with the spreadsheet layout. The remaining 5% correspond to *data rendering errors*, including incorrect formatting, misconfigured charts, or flawed final reports that deviate from the requested layout or narrative—for example, creating a brand-new spreadsheet instead of modifying the original one as requested. We also compare error patterns between web-based agents and API-based setups, with details provided in Appendix [C](https://ar5iv.labs.arxiv.org/html/2512.13168v5#A3 \"Appendix C Detailed Analysis ‣ Finch: Benchmarking Finance & Accounting across Spreadsheet-Centric Enterprise Workflows\").\n\nNotably, all of these error types correspond to *generic capabilities* that modern LLMs already appear to master on many existing benchmarks. The question, then, is why these ostensibly strong base abilities degrade so sharply on Finch. Our analysis points to five intertwined properties of real-world enterprise Finance & Accounting workflows that make failures more likely and more catastrophic. First, Finch workflows routinely involve *large, fragmented spreadsheet ecosystems*: dozens of interlinked workbooks and thousands of rows distributed across many sheets. Executing these workflows accurately requires long-range cross-sheet navigation and precise referencing, which substantially increases the likelihood of small retrieval errors. Second, the *content is dense and semantically homogeneous*: many cells contain domain-specific financial concepts that are subtly different yet lexically similar (e.g., variants of revenue/expense items, adjusted vs. unadjusted metrics), making entity disambiguation and cell grounding unusually difficult. Third, the *table layouts and structures are complex and often irregular*, including multi-level headers, merged cells, nested subtotals, and bespoke layouts that force the model to infer structure from noisy contents and ad hoc formatting. For example, at the code level, even tiny misinterpretations of these layouts (e.g., off-by-one errors when specifying ranges) can then propagate into globally incorrect outputs, especially when logic is applied in batch across many such sheets. Fourth, *formulas encode latent structure and logic*. In the Finch dataset, each sheet contains a large number of formulas that encode latent business logic, temporal assumptions, and fine-grained dependencies that are not visible from displayed values alone; yet models typically prioritize cell values and under-use formulas, leading to systematic misinterpretations. For example, in a pricing sheet with the column header IF NGPL MidContinent index (@ Baker), the apparent semantics from the header alone suggest a daily exposure metric. However, inspecting the associated formula (25 \\* V21 + C41 \\* C22) reveals that the column in fact encodes a 55-day payment timing. Models that ignore or under-utilize formulas systematically misinterpret such columns’ roles in downstream calculations, and this misinterpretation then propagates through subsequent steps. Finally, many workflows involve *multimodal artifacts and chat-centric tasks* such as combining spreadsheets with PDFs, charts, and screenshots requiring the agent to jointly reason over heterogeneous formats. For example, tables embedded in PDFs are often only partially referenced, with key entries missing or truncated.\n\nMany of these factors have been examined in prior work (e.g., multi-spreadsheet settings, complex table structures, formula reasoning, and multi-step workflows), and state-of-the-art models can perform reasonably well on benchmarks that emphasize a limited subset of these factors. In Finch, however, these factors co-occur within the same workflow in real-world enterprise data, and our results suggest this composition is what drives the sharp performance drop. Finch does not demand fundamentally new abilities; rather, it probes these abilities under an enterprise “extreme” regime of high complexity, noise, and long-horizon dependencies—closely mirroring real Finance & Accounting work. Progress on compositional capability, therefore, requires training and evaluation on long-running, computation- and reasoning-intensive workflows over large, messy multimodal enterprise artifacts."
+    },
+    {
+      "heading_path": [
+        "Finch: Benchmarking Finance & Accounting across Spreadsheet-Centric Enterprise Workflows",
+        "4 Related Work"
+      ],
+      "text": "## 4 Related Work\n\nThe integration of LLMs into enterprise productivity tools has accelerated dramatically recently. The recently launched ChatGPT Agent [openai\\_agent] extends these capabilities to autonomous task completion, enabling multi-step workflows across web browsing, code execution, and spreadsheet manipulation. Microsoft Copilot [microsoft\\_copilot] embeds AI capabilities across the Microsoft 365 suite, enabling users to draft documents, analyze spreadsheets, and automate workflows through natural language interaction. Similarly, Google has integrated Gemini [gemini\\_workspace] into Google Workspace, providing AI-assisted features in Docs, Sheets, and Gmail. Anthropic’s Claude Excel has also entered the enterprise space with spreadsheet automation capabilities [claude\\_excel], while remarkable tools like Shortcut AI [shortcut\\_spreadsheet] focus specifically on AI-powered spreadsheet manipulation.\n\nThe emergence of agentic AI systems marks a significant shift from understanding and QA to autonomous task completion [li2023sheetcopilot, chen2024sheetagent, ma2024spreadsheetbench]. However, there are long-standing challenges such as messy inputs and multimodal processing. SpreadsheetLLM [spreadsheetllm2024] introduces novel encoding and compression methods to help LLMs understand large and messy spreadsheet structures, and further addresses this challenge through spreadsheet post-training. Beyond structural understanding, multimodal processing remains challenging for spreadsheet AI systems. On the formatting front, early work explored neural approaches for table formatting [dong2020neural]. Recent advances in formula generation have progressed from pretraining with numerical reasoning [cheng2022fortap] to natural language-driven formula synthesis [zhao2024nl2formula], contrastive learning-based recommendation [chen2024auto], and interactive formula prediction through hierarchical expansion [he2023hermes].\n\nRecent years have seen significant progress in benchmarks for financial reasoning [chen2021finqa, islam2023financebench, finance\\_agent\\_benchmark, finben2024, findabench2025, finagentbench2025, finauditing2025, li2025investorbench, visfineval2025, gdpval2025, finsearchcomp2025, xfinbench2025], spreadsheet reasoning [li2023sheetcopilot, chen2024sheetagent, ma2024spreadsheetbench, sodbench2025, li2023auto, dong2019tablesense, sheetmind2025, spreadsheetllm2024, wu2025realhitbench, li2025mimotable, dong2025machinelearninglm, dong2025reasoning, li2024tapilot, zhao2024nl2formula, odysseybench2025, officebench2024], and multimodal document [mathew2021docvqa], table [li2020tablebank, zheng2024multimodal], chart [wang2024charxiv], table-chart [dong2024ttc], and spreadsheet [xia2024vision, dong2019tablesense] reasoning, driving advances in LLM-based agents for enterprise tasks. However, Finch proposes a new benchmark for the messy artifacts and long-horizon workflows in wild F&A enterprise settings."
+    },
+    {
+      "heading_path": [
+        "Finch: Benchmarking Finance & Accounting across Spreadsheet-Centric Enterprise Workflows",
+        "5 Conclusion"
+      ],
+      "text": "## 5 Conclusion\n\nWe introduced Finch, a new benchmark for real-world F&A enterprise workflows. Finch combines workflows induced from enterprise email threads, version histories of spreadsheets, and high-quality financial artifacts with rigorous expert annotation and a calibrated LLM-as-judge framework, enabling systematic evaluation of agents on diverse workflows that operate over large, messy, and multimodal enterprise artifacts and require long-horizon, spreadsheet-centric reasoning. Our experiments show that even the strongest frontier systems pass fewer than 40% of workflows after spending 48 hours on the benchmark, revealing a substantial gap between current AI capabilities and the demands of real enterprise practice. We hope Finch will serve as a foundation for developing agents to tackle real, messy and long-horizon professional work."
+    },
+    {
+      "heading_path": [
+        "Finch: Benchmarking Finance & Accounting across Spreadsheet-Centric Enterprise Workflows",
+        "Appendix A Author List"
+      ],
+      "text": "## Appendix A Author List\n\n* • Haoyu Dong\\* (University of Chinese Academy of Sciences) [donghaoyu82@gmail.com](mailto:donghaoyu82@gmail.com) * • Pengkun Zhang (South China University of Technology) [sezhangpengkun@mail.scut.edu.cn](mailto:sezhangpengkun@mail.scut.edu.cn) * • Yan Gao (Zhongguancun Academy) [gaoyan@zgci.ac.cn](mailto:gaoyan@zgci.ac.cn) * • Xuanyu Dong (Harvest Fund) [qianmuxuanyu@126.com](mailto:qianmuxuanyu@126.com) * • Yilin Cheng (Fudan University, Zhongguancun Academy) [ylcheng23@m.fudan.edu.cn](mailto:ylcheng23@m.fudan.edu.cn) * • Mingzhe Lu (University of Chinese Academy of Sciences) [lumingzhe23@mails.ucas.edu.cn](mailto:lumingzhe23@mails.ucas.edu.cn) * • Adina Yakefu (Hugging Face) [adina@huggingface.co](mailto:adina@huggingface.co) * • Shuxin Zheng (Zhongguancun Academy) [sz@bjzgca.edu.cn](mailto:sz@bjzgca.edu.cn)\n\nHaoyu Dong\\* (University of Chinese Academy of Sciences) [donghaoyu82@gmail.com](mailto:donghaoyu82@gmail.com)\n\nPengkun Zhang (South China University of Technology) [sezhangpengkun@mail.scut.edu.cn](mailto:sezhangpengkun@mail.scut.edu.cn)\n\nYan Gao (Zhongguancun Academy) [gaoyan@zgci.ac.cn](mailto:gaoyan@zgci.ac.cn)\n\nXuanyu Dong (Harvest Fund) [qianmuxuanyu@126.com](mailto:qianmuxuanyu@126.com)\n\nYilin Cheng (Fudan University, Zhongguancun Academy) [ylcheng23@m.fudan.edu.cn](mailto:ylcheng23@m.fudan.edu.cn)\n\nMingzhe Lu (University of Chinese Academy of Sciences) [lumingzhe23@mails.ucas.edu.cn](mailto:lumingzhe23@mails.ucas.edu.cn)\n\nAdina Yakefu (Hugging Face) [adina@huggingface.co](mailto:adina@huggingface.co)\n\nShuxin Zheng (Zhongguancun Academy) [sz@bjzgca.edu.cn](mailto:sz@bjzgca.edu.cn)\n\n\\*Corresponding author."
+    },
+    {
+      "heading_path": [
+        "Finch: Benchmarking Finance & Accounting across Spreadsheet-Centric Enterprise Workflows",
+        "Appendix B Experiment Details"
+      ],
+      "text": "## Appendix B Experiment Details"
+    },
+    {
+      "heading_path": [
+        "Finch: Benchmarking Finance & Accounting across Spreadsheet-Centric Enterprise Workflows",
+        "Appendix B Experiment Details",
+        "B.1 API-based Models"
+      ],
+      "text": "### B.1 API-based Models"
+    },
+    {
+      "heading_path": [
+        "Finch: Benchmarking Finance & Accounting across Spreadsheet-Centric Enterprise Workflows",
+        "Appendix B Experiment Details",
+        "B.1 API-based Models",
+        "Execution Paradigm."
+      ],
+      "text": "##### Execution Paradigm.\n\nWe frame the API evaluation as a code generation task. Models are instructed to solve spreadsheet manipulation and generation workflows by generating executable Python scripts, which are then executed in a sandboxed environment to produce output artifacts. This paradigm aligns with SpreadsheetBench’s philosophy of treating model-written code as the primary action space, but is adapted here to accommodate long-horizon, multimodal enterprise tasks.\n\n* • Action Space: Models generate Python code using standard libraries including openpyxl (for Excel manipulation), pandas (for data processing), matplotlib (for visualization), and scikit-learn (for statistical analysis). * • Output Format: Models must produce complete, self-contained Python scripts wrapped in markdown code blocks (‘‘‘python ... ‘‘‘). * • Sandboxed Execution: Generated code is extracted via regex parsing and executed in isolated Docker containers running Jupyter Kernel Gateway. Each container mounts the dataset volume at /mnt/data/ with a 10-minute session timeout. * • Single-shot Protocol: We employ a strict one-shot generation protocol without iterative refinement—each model produces exactly one solution per workflow. If the generated code fails to execute (e.g., due to syntax errors or runtime exceptions), the workflow is marked as failed without retry. This strict setting is designed to evaluate the model’s raw code generation capability under realistic deployment constraints.\n\nAction Space: Models generate Python code using standard libraries including openpyxl (for Excel manipulation), pandas (for data processing), matplotlib (for visualization), and scikit-learn (for statistical analysis).\n\nOutput Format: Models must produce complete, self-contained Python scripts wrapped in markdown code blocks (‘‘‘python ... ‘‘‘).\n\nSandboxed Execution: Generated code is extracted via regex parsing and executed in isolated Docker containers running Jupyter Kernel Gateway. Each container mounts the dataset volume at /mnt/data/ with a 10-minute session timeout.\n\nSingle-shot Protocol: We employ a strict one-shot generation protocol without iterative refinement—each model produces exactly one solution per workflow. If the generated code fails to execute (e.g., due to syntax errors or runtime exceptions), the workflow is marked as failed without retry. This strict setting is designed to evaluate the model’s raw code generation capability under realistic deployment constraints.\n\nThis unified code-as-action setting ensures that the measured performance reflects the model’s inherent competence on complex workflows rather than benefits derived from interactive debugging."
+    },
+    {
+      "heading_path": [
+        "Finch: Benchmarking Finance & Accounting across Spreadsheet-Centric Enterprise Workflows",
+        "Appendix B Experiment Details",
+        "B.1 API-based Models",
+        "Prompting Strategy."
+      ],
+      "text": "##### Prompting Strategy.\n\nWe employ a zero-shot setting with a structured system prompt comprising:\n\n1. 1. A role definition: “You are an expert who can manipulate spreadsheets through Python code.” 2. 2. A detailed description of the compact spreadsheet encoding format with illustrative examples. 3. 3. The task instruction and explicit input/output file paths. 4. 4. Library-specific best practices (e.g., openpyxl chart creation patterns) to mitigate common code errors. 5. 5. An explicit directive to generate Python code as the final output.\n\nA role definition: “You are an expert who can manipulate spreadsheets through Python code.”\n\nA detailed description of the compact spreadsheet encoding format with illustrative examples.\n\nThe task instruction and explicit input/output file paths.\n\nLibrary-specific best practices (e.g., openpyxl chart creation patterns) to mitigate common code errors.\n\nAn explicit directive to generate Python code as the final output.\n\nThis structured design explicitly guides models toward generating valid, context-aligned Python code, minimizing ambiguity in task interpretation. However, for models that support reasoning traces (GPT 5.1, Gemini 3 Pro), we request explicit reasoning via the include\\_reasoning API parameter, enabling us to capture the model’s internal deliberation process for subsequent qualitative error analysis. Temperature is set to 0.7 across all models."
+    },
+    {
+      "heading_path": [
+        "Finch: Benchmarking Finance & Accounting across Spreadsheet-Centric Enterprise Workflows",
+        "Appendix C Detailed Analysis"
+      ],
+      "text": "## Appendix C Detailed Analysis"
+    },
+    {
+      "heading_path": [
+        "Finch: Benchmarking Finance & Accounting across Spreadsheet-Centric Enterprise Workflows",
+        "Appendix C Detailed Analysis",
+        "Web agents (ChatGPT 5.1 Pro vs. Claude Sonnet 4.5)."
+      ],
+      "text": "##### Web agents (ChatGPT 5.1 Pro vs. Claude Sonnet 4.5).\n\nChatGPT 5.1 Pro tends to decompose workflows into more, smaller steps, with explicit reasoning, tool calls, execution, and self-checking at each step. This leads to longer traces and noticeably higher latency, but also more opportunities for intermediate validation (e.g., sanity-checking partial results). However, the code it generates is often hidden behind tool abstractions, so our error attribution is limited to observed behavior and natural language reasoning rather than the exact implementation details. Claude Sonnet 4.5 typically uses fewer steps and produces more direct solutions. In visualization-heavy workflows, its generated charts are often both more accurate and more aesthetically polished than those produced by ChatGPT 5.1 Pro, leading to relatively fewer failures in the data visualization sub-tasks.\n\nChatGPT 5.1 Pro and Claude Sonnet 4.5 agents can explore Excel files through many API calls within a single workflow, but their encoding methods are not well-suited to spreadsheets with complex layouts and structures. Thanks to efficient encoding and appropriate tool use, the following single-call API-based method achieves a pass rate that is much closer to that of product-side agents."
+    },
+    {
+      "heading_path": [
+        "Finch: Benchmarking Finance & Accounting across Spreadsheet-Centric Enterprise Workflows",
+        "Appendix C Detailed Analysis",
+        "API-based"
+      ],
+      "text": "##### API-based\n\nOur API-based runs are single-call: they leverage the models’ underlying reasoning capabilities but lack two crucial affordances that web agents exploit. (i) interleaved code execution with feedback, and (ii) explicit reflection based on intermediate tool outputs. As a result, the API agents must generate the entire plan, code, and outputs within a single LLM call. When their initial structural assumptions about a spreadsheet are slightly off, they have no mechanism to detect or correct the mistake, leading to a significantly higher error rate, particularly in categories related to schema understanding and table manipulation. It’s desirable for future work to explore agentic methods with multiple round of API calls."
+    },
+    {
+      "heading_path": [
+        "Finch: Benchmarking Finance & Accounting across Spreadsheet-Centric Enterprise Workflows",
+        "Appendix D Ethics Statement"
+      ],
+      "text": "## Appendix D Ethics Statement\n\nThe Finch benchmark is constructed entirely from existing, publicly available data sources. Concretely, our workflows are derived from (1) the Enron email corpora, including the parsed Enron email dataset on Kaggle (released under the CC0 Public Domain dedication) and the Enron Email Dataset from EnronData.org (licensed under CC BY 3.0 US); (2) the EUSES spreadsheet corpus and its modified variants (CC BY 4.0); and (3) a diverse collection of enterprise-like artifacts, including documents from investment and securities companies, the World Bank (CC BY 3.0), Canadian and British government websites (Open Government License), and public corpora such as WideSearch (MIT license) and DABStep (CC BY 4.0). We respect the original licenses of all upstream resources and only redistribute content within the terms they allow.\n\nOn top of these sources, we apply additional filtering, normalization, and expert annotation to organize spreadsheets and related documents into coherent workflows with task instructions, input files, and reference outputs. We do not introduce any new personally identifiable information. During curation, we remove obviously sensitive fields when they are not necessary for the task (e.g., personal contact information or signatures) and avoid annotating workflows whose successful completion would depend on sensitive personal attributes rather than business logic. The resulting Finch dataset is released under the Creative Commons Attribution 3.0 United States license (CC BY 3.0 US), which permits broad reuse while requiring appropriate attribution.\n\nThe language in Finch is primarily English, reflecting the dominant language of the underlying Enron and EUSES corpora and many of the public institutional sources. Because some artifacts originate from funds and securities institutions and from Canadian government materials, a small fraction of workflows include Chinese or French content."
+    },
+    {
+      "heading_path": [
+        "Finch: Benchmarking Finance & Accounting across Spreadsheet-Centric Enterprise Workflows",
+        "Appendix E Examples"
+      ],
+      "text": "## Appendix E Examples"
+    },
+    {
+      "heading_path": [
+        "Finch: Benchmarking Finance & Accounting across Spreadsheet-Centric Enterprise Workflows",
+        "Appendix E Examples",
+        "E.1 Example 1"
+      ],
+      "text": "### E.1 Example 1"
+    },
+    {
+      "heading_path": [
+        "Finch: Benchmarking Finance & Accounting across Spreadsheet-Centric Enterprise Workflows",
+        "Appendix E Examples",
+        "E.2 Example 2"
+      ],
+      "text": "### E.2 Example 2"
+    },
+    {
+      "heading_path": [
+        "Finch: Benchmarking Finance & Accounting across Spreadsheet-Centric Enterprise Workflows",
+        "Appendix E Examples",
+        "E.3 Example 3"
+      ],
+      "text": "### E.3 Example 3"
+    },
+    {
+      "heading_path": [
+        "Finch: Benchmarking Finance & Accounting across Spreadsheet-Centric Enterprise Workflows",
+        "Appendix E Examples",
+        "E.4 Example 4"
+      ],
+      "text": "### E.4 Example 4"
+    },
+    {
+      "heading_path": [
+        "Finch: Benchmarking Finance & Accounting across Spreadsheet-Centric Enterprise Workflows",
+        "Appendix E Examples",
+        "E.5 Example 5"
+      ],
+      "text": "### E.5 Example 5"
+    },
+    {
+      "heading_path": [
+        "Finch: Benchmarking Finance & Accounting across Spreadsheet-Centric Enterprise Workflows",
+        "Appendix E Examples",
+        "E.6 Example 6"
+      ],
+      "text": "### E.6 Example 6"
+    },
+    {
+      "heading_path": [
+        "Finch: Benchmarking Finance & Accounting across Spreadsheet-Centric Enterprise Workflows",
+        "Appendix E Examples",
+        "E.7 Example 7"
+      ],
+      "text": "### E.7 Example 7"
+    },
+    {
+      "heading_path": [
+        "Finch: Benchmarking Finance & Accounting across Spreadsheet-Centric Enterprise Workflows",
+        "Appendix E Examples",
+        "E.8 Example 8"
+      ],
+      "text": "### E.8 Example 8"
+    },
+    {
+      "heading_path": [
+        "Finch: Benchmarking Finance & Accounting across Spreadsheet-Centric Enterprise Workflows",
+        "Appendix E Examples",
+        "E.9 Example 9"
+      ],
+      "text": "### E.9 Example 9"
+    },
+    {
+      "heading_path": [
+        "Finch: Benchmarking Finance & Accounting across Spreadsheet-Centric Enterprise Workflows",
+        "Appendix E Examples",
+        "E.10 Example 10"
+      ],
+      "text": "### E.10 Example 10"
+    },
+    {
+      "heading_path": [
+        "Finch: Benchmarking Finance & Accounting across Spreadsheet-Centric Enterprise Workflows",
+        "Appendix E Examples",
+        "E.11 Example 11"
+      ],
+      "text": "### E.11 Example 11"
+    }
+  ]
+}
