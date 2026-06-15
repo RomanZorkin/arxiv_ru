@@ -1,0 +1,544 @@
+{
+  "title": "[2605.10181] A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection",
+  "sections": [
+    {
+      "heading": "A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection",
+      "level": 1,
+      "content": [],
+      "children": [
+        {
+          "heading": "Abstract",
+          "level": 6,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "Out-of-distribution (OOD) detection is essential for building reliable AI systems, as models that produce outputs for invalid inputs cannot be trusted. Although deep learning (DL) is often assumed to outperform traditional machine learning (ML), medical imaging data are typically acquired under standardized protocols, leading to relatively constrained image variability in OOD detection tasks. This motivates a direct comparison between ML and DL approaches in this setting. The two approaches are evaluated on open datasets comprising over 60,000 fundus and non-fundus images across multiple resolutions. Both approaches achieved an AUROC of 1.000 and accuracies between 0.999 and 1.000 on internal and external validation sets, showing comparable detection performance. The ML approach, however, exhibited substantially lower end-to-end latency while maintaining equivalent accuracy, indicating greater computational efficiency. These results suggest that for OOD detection tasks of limited visual complexity, lightweight ML approaches can achieve DL-level performance with significantly reduced computational cost, supporting practical real-world deployment."
+            },
+            {
+              "type": "paragraph",
+              "text": "Index Terms— out-of-distribution detection, fundus imaging, machine learning, deep learning, latency"
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "1 Introduction",
+          "level": 2,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "Real-world computer-aided detection (CADe) and diagnosis (CADx) systems are frequently exposed to out-of-distribution (OOD) inputs that are irrelevant to their intended tasks. OOD detection mitigates this risk by filtering such inputs before downstream inference. In ophthalmology, for instance, non-fundus images—such as external-eye photographs, slit-lamp views, or even chest radiographs—can inadvertently enter fundus imaging workflows. Without proper screening, conventional CADe/CADx systems may still generate outputs for these invalid inputs, producing spurious probabilities and potentially disrupting clinical workflows. This behavior undermines system reliability and highlights the need for explicit OOD detection in safety-critical medical artificial intelligence (AI) applications. While academic benchmarks typically assume fixed in-distribution datasets, real-world deployment requires robustness to unforeseen inputs through integrated OOD detection mechanisms."
+            },
+            {
+              "type": "paragraph",
+              "text": "The research community has explored a wide range of OOD detection strategies, including confidence thresholds, energy scores, distance metrics in latent space, generative reconstruction errors, and ensemble-based uncertainty estimation [[15](https://ar5iv.labs.arxiv.org/html/2605.10181#bib.bib19 \"Energy-based out-of-distribution detection\"), [14](https://ar5iv.labs.arxiv.org/html/2605.10181#bib.bib26 \"A simple unified framework for detecting out-of-distribution samples and adversarial attacks\")]. Although these methods have advanced the field, most rely on high-capacity deep encoders and substantial computational resources to achieve adequate performance. Consequently, much of the OOD literature implicitly assumes that the task itself is inherently complex and requires deep learning (DL)–level representation power [[24](https://ar5iv.labs.arxiv.org/html/2605.10181#bib.bib65 \"Generalized out-of-distribution detection: a survey\")]."
+            },
+            {
+              "type": "paragraph",
+              "text": "In medical imaging, however, data are generally acquired under standardized conditions with dedicated imaging devices, leading to limited variation in viewpoint, illumination, and anatomical context. As a result, OOD detection between fundus and non-fundus images in this domain may be relatively straightforward. In such settings, a classical machine learning (ML) approach may be both sufficient and preferable, providing comparable accuracy with significantly higher computational efficiency and interpretability."
+            },
+            {
+              "type": "paragraph",
+              "text": "Based on these assumptions, this study investigates whether the complexity of DL is justified for OOD detection in medical imaging. Using diverse open datasets covering multiple medical imaging modalities and resolutions, we evaluate accuracy, computational efficiency, and robustness, with the aim of assessing the trade-offs between model complexity and practical deployment."
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "2 Methods",
+          "level": 2,
+          "content": [],
+          "children": [
+            {
+              "heading": "2.1 Datasets",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "The representative task in this study was to classify each image as either fundus or non-fundus. A total of 61,143 images from publicly available datasets were used for model training and evaluation, categorized into two groups: internal validation set (IV) and external validation set (EV). The IV set refers to all datasets used for model training and internal evaluation, while the EV set was strictly held out for test-only evaluation."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Seven publicly available color fundus photography (CFP) datasets, namely ADAM [[10](https://ar5iv.labs.arxiv.org/html/2605.10181#bib.bib44 \"ADAM: automatic detection challenge on age-related macular degeneration\")], FIVES [[12](https://ar5iv.labs.arxiv.org/html/2605.10181#bib.bib45 \"Fives: a fundus image dataset for artificial intelligence based vessel segmentation\")], G1020 [[2](https://ar5iv.labs.arxiv.org/html/2605.10181#bib.bib46 \"G1020: a benchmark retinal fundus image dataset for computer-aided glaucoma detection\")], MESSIDOR [[1](https://ar5iv.labs.arxiv.org/html/2605.10181#bib.bib36 \"An open-access breast lesion ultrasound image database: applicable in artificial intelligence studies\")], PAPILA [[13](https://ar5iv.labs.arxiv.org/html/2605.10181#bib.bib48 \"PAPILA: dataset with fundus images and clinical data of both eyes of the same patient for glaucoma assessment\")], REFUGE [[9](https://ar5iv.labs.arxiv.org/html/2605.10181#bib.bib49 \"REFUGE: retinal fundus glaucoma challenge\")], and RFMiD [[19](https://ar5iv.labs.arxiv.org/html/2605.10181#bib.bib50 \"Retinal fundus multi-disease image dataset (rfmid): a dataset for multi-disease detection research\")], were included in the IV set. In addition to these fundus datasets, the IV set also covered non-fundus and retinal OOD modalities such as fluorescein angiography (FA) and ultra-wide-field (UWF) fundus images from the DRAC dataset [[21](https://ar5iv.labs.arxiv.org/html/2605.10181#bib.bib52 \"DRAC 2022: a public benchmark for diabetic retinopathy analysis on ultra-wide optical coherence tomography angiography images\"), [23](https://ar5iv.labs.arxiv.org/html/2605.10181#bib.bib51 \"An ultra-wide-field fundus image dataset for intelligent diagnosis of intraocular tumors\")], brain MRI [[5](https://ar5iv.labs.arxiv.org/html/2605.10181#bib.bib53 \"Brain mri dataset\")], cervical spine [[22](https://ar5iv.labs.arxiv.org/html/2605.10181#bib.bib37 \"A high-quality dataset featuring classified and annotated cervical spine x-ray atlas\")], chest X-ray [[18](https://ar5iv.labs.arxiv.org/html/2605.10181#bib.bib38 \"VinDr-cxr: an open dataset of chest x-rays with radiologist’s annotations\")], dental and oral images [[7](https://ar5iv.labs.arxiv.org/html/2605.10181#bib.bib43 \"Teeth or dental image dataset\")], skin lesion photographs [[17](https://ar5iv.labs.arxiv.org/html/2605.10181#bib.bib42 \"Skin diseases and skin cancer recognition dataset\")], and endoscopic datasets such as CVC-Clinic [[3](https://ar5iv.labs.arxiv.org/html/2605.10181#bib.bib40 \"WM-dova maps for accurate polyp highlighting in colonoscopy: validation vs. saliency maps from physicians\")] and Hyper-Kvasir [[4](https://ar5iv.labs.arxiv.org/html/2605.10181#bib.bib41 \"HyperKvasir, a comprehensive multi-class image and video dataset for gastrointestinal endoscopy\")]."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "The EV set was used exclusively for independent testing to assess model generalization on unseen data. Specifically, the EV set included TOP [[8](https://ar5iv.labs.arxiv.org/html/2605.10181#bib.bib61 \"Detection of multiple retinal diseases in ultra-widefield fundus images using deep learning: data-driven identification of relevant regions\")], IDRiD [[20](https://ar5iv.labs.arxiv.org/html/2605.10181#bib.bib47 \"Indian diabetic retinopathy image dataset (idrid)\")], skin lesion photographs [[17](https://ar5iv.labs.arxiv.org/html/2605.10181#bib.bib42 \"Skin diseases and skin cancer recognition dataset\")], and CVC-Clinic [[3](https://ar5iv.labs.arxiv.org/html/2605.10181#bib.bib40 \"WM-dova maps for accurate polyp highlighting in colonoscopy: validation vs. saliency maps from physicians\")], encompassing both fundus and non-fundus modalities. These datasets were not used during model training and served solely as test-only sources."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "For model development and evaluation, the IV set, comprising a total of 45,909 images, was divided into training, validation, and testing subsets at a 3:1:1 ratio. The EV set consisted of 15,234 images. The IV set included 9,108 fundus and 36,801 non-fundus images, whereas the EV set contained 597 fundus and 14,637 non-fundus images."
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "2.2 Preprocessing",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "For ML models, original images were used without center cropping. Instead, images were analyzed at multiple relative resolutions (1×1{\\times}, 1/2×1/2{\\times}, 1/4×1/4{\\times}, and 1/8×1/8{\\times}) to evaluate scale-dependent feature behavior. Grayscale (Y=0.299​R+0.587​G+0.114​BY{=}0.299R{+}0.587G{+}0.114B) and HSV representations were generated when required for feature extraction. Local Binary Pattern (LBP) features were computed on YY with (P=8,R=1)(P{=}8,R{=}1) using uniform mapping. For DL models, all input images were center-cropped to the maximal square region and resized to multiple resolutions (512×512512{\\times}512, 256×256256{\\times}256, 128×128128{\\times}128, and 64×6464{\\times}64) to assess resolution-dependent performance. RGB values were normalized to [0,1][0,1], ensuring consistent input scaling for convolutional processing."
+                },
+                {
+                  "type": "formula",
+                  "text": "Y=0.299​R+0.587​G+0.114​BY{=}0.299R{+}0.587G{+}0.114B"
+                },
+                {
+                  "type": "formula",
+                  "text": "YY"
+                },
+                {
+                  "type": "formula",
+                  "text": "(P=8,R=1)(P{=}8,R{=}1)"
+                },
+                {
+                  "type": "formula",
+                  "text": "512×512512{\\times}512"
+                },
+                {
+                  "type": "formula",
+                  "text": "256×256256{\\times}256"
+                },
+                {
+                  "type": "formula",
+                  "text": "128×128128{\\times}128"
+                },
+                {
+                  "type": "formula",
+                  "text": "64×6464{\\times}64"
+                },
+                {
+                  "type": "formula",
+                  "text": "[0,1][0,1]"
+                },
+                {
+                  "type": "table",
+                  "text": "| Resolution | | ML-CPU (ms) | | | | DL-CPU (ms) | | | | DL-GPU (ms) | | | | ML (accuracy) | | DL (accuracy) | | | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | | ML | DL | L | F | C | Overall | L | P | F | Overall | L | P | F | Overall | IV | EV | IV | EV | | 1×\\times | 512×512512{\\times}512 | 15 | 378 | 3 | 396 | 177 | 8 | 44 | 229 | 198 | 9 | 7 | 214 | 1.000 | 0.988 | 1.000 | 1.000 | | 1/2×\\times | 256×256256{\\times}256 | 15 | 101 | 3 | 119 | 175 | 6 | 16 | 197 | 187 | 5 | 4 | 196 | 1.000 | 0.985 | 1.000 | 1.000 | | 1/4×\\times | 128×128128{\\times}128 | 15 | 32 | 3 | 50 | 173 | 5 | 10 | 188 | 188 | 4 | 4 | 196 | 1.000 | 0.995 | 1.000 | 0.995 | | 1/8×\\times | 64×6464{\\times}64 | 15 | 13 | 3 | 31 | 173 | 4 | 6 | 183 | 191 | 3 | 3 | 197 | 1.000 | 0.999 | 1.000 | 0.997 |"
+                },
+                {
+                  "type": "formula",
+                  "text": "×\\times"
+                },
+                {
+                  "type": "formula",
+                  "text": "512×512512{\\times}512"
+                },
+                {
+                  "type": "formula",
+                  "text": "×\\times"
+                },
+                {
+                  "type": "formula",
+                  "text": "256×256256{\\times}256"
+                },
+                {
+                  "type": "formula",
+                  "text": "×\\times"
+                },
+                {
+                  "type": "formula",
+                  "text": "128×128128{\\times}128"
+                },
+                {
+                  "type": "formula",
+                  "text": "×\\times"
+                },
+                {
+                  "type": "formula",
+                  "text": "64×6464{\\times}64"
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "2.3 Machine Learning Pipeline and Hand-crafted Features",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "We extracted 39 hand-crafted features, organized into five categories: intensity and background statistics, color and texture, spatial distribution, shape and morphology, and global structural indicators. These features were designed to capture domain-specific characteristics of CFP, including its circular field of view, dark peripheral background, and reddish–orange hue distribution. They provide transparent and clinically interpretable cues for distinguishing fundus images from non-fundus images, including both retinal and non-retinal modalities."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "The feature categories are summarized as follows: (1) Intensity and background statistics: measure global brightness, contrast, and peripheral darkness (e.g., min, max, mean, variance, background flag); (2) Color and texture: capture chromatic consistency and fine-grained texture using hue/saturation statistics and local descriptors such as LBP and GLCM (e.g., hue mean, sat var, glcm contrast, lbp mean); (3) Spatial distribution: represent center–periphery intensity gradients and hemispheric brightness asymmetries (e.g., radial slope mean, center minus outer, hemisphere asymmetry); (4) Shape and morphology: capture geometric characteristics of the retinal mask that reflect the circular shape of fundus images, including measures of circularity, eccentricity, solidity, and boundary irregularity (e.g., circularity, solidity, circle residual mean, eccentricity). Most of these features are designed to quantify how closely the observed retinal region follows the typical round structure of CFP, thereby serving as strong indicators for distinguishing in-domain fundus samples from OOD or non-retinal images; and (5) Global structural indicators: summarize overall image composition, including color type and the proportion of dark regions (e.g., is rgb, black pixel ratio)."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "An Extremely Randomized Trees (ExtraTrees) [[11](https://ar5iv.labs.arxiv.org/html/2605.10181#bib.bib66 \"Extremely randomized trees\")] classifier was trained using 100 estimators, a maximum depth of 10, and the square-root feature subset strategy. To balance generalization and model simplicity, each internal split required at least 10 samples, and leaf nodes contained a minimum of two samples. Inference was executed on a single CPU thread to enable accurate measurement of per-image cold-start latency. The model was implemented using the scikit-learn library. For interpretability, SHapley Additive exPlanations (SHAP) [[16](https://ar5iv.labs.arxiv.org/html/2605.10181#bib.bib70 \"A unified approach to interpreting model predictions\")] values were computed to quantify feature-level contributions for each image."
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "2.4 Deep learning pipeline",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "A ResNet-18 backbone pretrained on ImageNet was employed as the DL baseline. The network was fine-tuned using the AdamW optimizer with a learning rate of 1×10−41\\times 10^{-4}, weight decay of 1×10−41\\times 10^{-4}, a batch size of 128, and trained for 3 epochs. The best checkpoint was selected according to the minimum validation loss, and cross-entropy loss was used as the optimization objective."
+                },
+                {
+                  "type": "formula",
+                  "text": "1×10−41\\times 10^{-4}"
+                },
+                {
+                  "type": "formula",
+                  "text": "1×10−41\\times 10^{-4}"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "All images were center-cropped according to the shorter side of width or height, then resized to the target training resolution. Each image was standardized using the ImageNet mean and standard deviation. To improve model robustness and generalization, probabilistic data augmentations were applied, including horizontal (p=0.5p=0.5) and vertical (p=0.2p=0.2) flips, rotations up to ±15∘\\pm 15^{\\circ}, and photometric variations such as brightness/contrast adjustments and gamma correction within ±20%\\pm 20\\%."
+                },
+                {
+                  "type": "formula",
+                  "text": "p=0.5p=0.5"
+                },
+                {
+                  "type": "formula",
+                  "text": "p=0.2p=0.2"
+                },
+                {
+                  "type": "formula",
+                  "text": "±15∘\\pm 15^{\\circ}"
+                },
+                {
+                  "type": "formula",
+                  "text": "±20%\\pm 20\\%"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Grad-CAM++ [[6](https://ar5iv.labs.arxiv.org/html/2605.10181#bib.bib59 \"Grad-cam++: generalized gradient-based visual explanations for deep convolutional networks\")] was employed to visualize the discriminative image regions that contributed most to the model’s decision. The activation maps were extracted from the final convolutional block of the ResNet-18 backbone, and computed with respect to each image’s ground-truth label. The resulting heatmaps were blended with the corresponding input images to qualitatively assess the spatial correspondence between model attention and clinically relevant areas."
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "2.5 Evaluation metrics and latency measurement",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "A five-fold cross-validation was conducted for internal validation using stratified sampling to preserve class balance across folds. In each fold, the model was trained on four subsets and evaluated on the remaining test subset. After fold-wise testing, predictions from all five test subsets were concatenated to compute the overall internal validation performance. For external validation, the five models obtained from cross-validation were independently applied to an unseen external dataset, and the predicted probabilities for each image were averaged across models to obtain a single consensus prediction. A fixed decision threshold of τ=0.5\\tau=0.5 was applied uniformly across all experiments to produce binary predictions. Model performance was evaluated using the area under the receiver operating characteristic curve (AUROC) and accuracy."
+                },
+                {
+                  "type": "formula",
+                  "text": "τ=0.5\\tau=0.5"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "To assess computational efficiency, inference latency was systematically measured for both ML and DL pipelines. For the ML pipeline, latency was decomposed into model loading, feature extraction, and classification. For the DL baseline, latency was measured separately on CPU and GPU, consisting of model loading, preprocessing, and forward propagation through the encoder. End-to-end latency was defined as the total elapsed time from model loading to the generation of the final probability output. Latency measurements were performed on 1,000 randomly sampled test images with a batch size of one. The ML pipeline was tested at multiple downsampling ratios (×1\\times 1, ×1/2\\times 1/2, ×1/4\\times 1/4, and ×1/8\\times 1/8), while the DL model was evaluated at the corresponding input resolutions (5122512^{2}, 2562256^{2}, 1282128^{2}, and 64264^{2}). All experiments were executed on a workstation equipped with two Intel Xeon Gold 5218R CPUs (80 cores, 2.10 GHz), 504 GB RAM, and an NVIDIA Tesla V100 GPU (32 GB VRAM)."
+                },
+                {
+                  "type": "formula",
+                  "text": "×1\\times 1"
+                },
+                {
+                  "type": "formula",
+                  "text": "×1/2\\times 1/2"
+                },
+                {
+                  "type": "formula",
+                  "text": "×1/4\\times 1/4"
+                },
+                {
+                  "type": "formula",
+                  "text": "×1/8\\times 1/8"
+                },
+                {
+                  "type": "formula",
+                  "text": "5122512^{2}"
+                },
+                {
+                  "type": "formula",
+                  "text": "2562256^{2}"
+                },
+                {
+                  "type": "formula",
+                  "text": "1282128^{2}"
+                },
+                {
+                  "type": "formula",
+                  "text": "64264^{2}"
+                }
+              ],
+              "children": []
+            }
+          ]
+        },
+        {
+          "heading": "3 Results",
+          "level": 2,
+          "content": [],
+          "children": [
+            {
+              "heading": "3.1 Cross-validation and external validation performance",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "Table [1](https://ar5iv.labs.arxiv.org/html/2605.10181#S2.T1 \"Table 1 ‣ 2.2 Preprocessing ‣ 2 Methods ‣ A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection\") summarizes the quantitative results across image resolutions. Both the ML (ExtraTrees) and DL (ResNet-18) models achieved AUROC values of 1.000 under all conditions. Accuracy differences between the two approaches were marginal across internal (IV) and external (EV) validation sets. For the ML pipeline, accuracy ranged from 0.985 to 1.000 across resolutions, whereas the DL model ranged from 0.995 to 1.000. At the lowest resolution (64×6464{\\times}64, ×1/8\\times 1/8), the ML model achieved 1.000 on the internal set and 0.999 on the external set, effectively matching the DL baseline despite its lightweight design. Interestingly, the ML pipeline maintained robust performance even at lower resolutions, whereas the DL model showed a decrease in accuracy as image resolution decreased."
+                },
+                {
+                  "type": "formula",
+                  "text": "64×6464{\\times}64"
+                },
+                {
+                  "type": "formula",
+                  "text": "×1/8\\times 1/8"
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "3.2 Resolution and latency analysis",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "As shown in Table [1](https://ar5iv.labs.arxiv.org/html/2605.10181#S2.T1 \"Table 1 ‣ 2.2 Preprocessing ‣ 2 Methods ‣ A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection\"), the ML and DL pipelines exhibited distinct scaling behaviors with respect to image resolution. For the ML model, latency at the highest configuration (×1\\times 1) reached 396 ms on CPU, primarily due to feature extraction (378 ms). As resolution decreased, ML latency dropped sharply—from 396 ms at ×1\\times 1 to 31 ms at ×1/8\\times 1/8—while maintaining comparable accuracy (0.999 at EV). In contrast, the DL model showed consistently high latency across resolutions (183–229 ms) owing to its fixed architectural complexity and large parameter count, with runtime dominated by model loading, memory allocation, and I/O overhead rather than input-dependent computation."
+                },
+                {
+                  "type": "formula",
+                  "text": "×1\\times 1"
+                },
+                {
+                  "type": "formula",
+                  "text": "×1\\times 1"
+                },
+                {
+                  "type": "formula",
+                  "text": "×1/8\\times 1/8"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "These results demonstrate that the ML pipeline scales efficiently with image size and achieves substantial speed gains without sacrificing accuracy, exhibiting virtually no accuracy–latency trade-off. By comparison, the DL model’s latency remains largely invariant to resolution due to fixed initialization and memory transfer costs. Overall, the ML pipeline provides equivalent discrimination with up to a sixfold latency reduction, highlighting its suitability for lightweight, real-time OOD detection in clinical settings with limited computational resources."
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "3.3 Interpretability: SHAP for ML vs. CAM for DL",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "The SHAP summary plot (Figure [2](https://ar5iv.labs.arxiv.org/html/2605.10181#S3.F2 \"Figure 2 ‣ 3.2 Resolution and latency analysis ‣ 3 Results ‣ A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection\")) reveals that eccentricity, all\\_corners\\_dark\\_flag, and glcm\\_homogeneity are the three most influential features in distinguishing fundus from non-fundus images. A low eccentricity value, corresponding to a near-circular shape, contributes strongly to the “fundus” prediction, consistent with the circular geometry characteristic of retinal images. Similarly, a high all\\_corners\\_dark\\_flag value positively impacts the “fundus” class, reflecting the presence of a dark peripheral border typical of fundus photographs. In addition, high glcm\\_homogeneity values are associated with smooth and uniform textures, further reinforcing the “fundus” classification. Together, these findings indicate that the ML model primarily relies on interpretable global cues—circularity, peripheral shading, and texture uniformity—to identify fundus images."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "While the ML pipeline enables feature-level interpretation through SHAP, the DL model depends on gradient-based saliency visualization such as Grad-CAM++. However, in binary OOD detection, these visualizations offer little insight into the actual decision process. Figure [3](https://ar5iv.labs.arxiv.org/html/2605.10181#S3.F3 \"Figure 3 ‣ 3.2 Resolution and latency analysis ‣ 3 Results ‣ A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection\") shows Grad-CAM++ results from the ResNet-18 baseline for representative in-domain and OOD samples. The first two images are both retinal in origin—fundus and fluorescein angiography—yet the activation maps exhibit nearly identical patterns, concentrating around the optic disc and major vessels. Such regions are visually distinctive but unrelated to the OOD classification itself, indicating that the model attends to generic high-contrast structures rather than domain-specific cues. For the non-retinal X-ray image, activations are spatially diffuse and lack consistent anatomical meaning. Overall, gradient-based explainability methods that are effective in lesion or anomaly localization tasks provide limited interpretive value for OOD detection."
+                }
+              ],
+              "children": []
+            }
+          ]
+        },
+        {
+          "heading": "4 Discussion",
+          "level": 2,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "Out-of-distribution (OOD) detection is a critical prerequisite for the reliable deployment of AI systems in clinical practice. In retinal imaging, verifying input validity before diagnostic inference is essential, as predictions on non-fundus images can degrade accuracy and compromise user trust. Effective OOD filtering (i.e., fundus vs. non-fundus screening) ensures that downstream diagnostic models operate only on valid data, thereby improving safety, traceability, and overall system integrity."
+            },
+            {
+              "type": "paragraph",
+              "text": "The experimental results indicate that, under the studied setting, distinguishing fundus from non-fundus images forms a well-defined classification problem when trained on sufficiently diverse datasets. Both the ML and DL models achieved near-saturated performance (AUROC = 1.000, ACC ≥\\geq 0.999) on both internal and external validation sets. Under such conditions, additional architectural complexity provides no measurable performance gain in this task setting, and practical deployment factors—computation time, memory demand, and interpretability—become the dominant criteria for model selection."
+            },
+            {
+              "type": "formula",
+              "text": "≥\\geq"
+            },
+            {
+              "type": "paragraph",
+              "text": "The proposed *ExtraTrees*-based ML pipeline, built on a compact set of hand-crafted and fundus-aware descriptors, achieved sub-31 ms31\\text{\\,}\\mathrm{m}\\mathrm{s} end-to-end latency on CPU-only hardware while maintaining detection accuracy comparable to the DL baseline. SHAP analysis revealed stable and domain-consistent feature attributions—highlighting the model’s reliance on peripheral darkness, smooth color distribution, and circular image geometry—thereby enabling transparent and reproducible interpretation of its decision process. These characteristics make the ML pipeline particularly suitable for real-time OOD filtering in clinical systems, where deterministic behavior and limited computational resources are critical constraints."
+            },
+            {
+              "type": "formula",
+              "text": "31 ms31\\text{\\,}\\mathrm{m}\\mathrm{s}"
+            },
+            {
+              "type": "paragraph",
+              "text": "In contrast, the *ResNet-18* baseline required substantially greater computational and memory resources. At the lowest resolution (64×6464{\\times}64), its end-to-end inference latency was approximately 183 ms on CPU and 197 ms on GPU, compared to 31 ms for the ML pipeline under identical conditions—a roughly sixfold increase. For example, commercial software such as *VUNO Med–Fundus AI*, which performs full lesion detection and quantitative grading across twelve categories, operates in under 2 seconds on CPU-only hardware. Given that OOD detection involves only binary filtering rather than full diagnostic inference, a latency of nearly 200 ms per image represents a significant overhead. Moreover, all latency measurements in this study were obtained on a high-spec workstation. In typical clinical environments using standard desktop hardware, the runtime gap between ML and DL approaches would likely be even more pronounced. Despite the higher computational cost, the DL model offered no measurable improvement in accuracy or AUROC relative to the ML approach across all evaluation settings. These findings demonstrate that the compact ML model achieves equivalent discrimination capability while maintaining substantially higher computational efficiency and predictable latency."
+            },
+            {
+              "type": "formula",
+              "text": "64×6464{\\times}64"
+            },
+            {
+              "type": "paragraph",
+              "text": "This study has several limitations. First, although the datasets cover diverse imaging modalities, they may not capture rare acquisition scenarios such as handheld or smartphone-based fundus imaging, or extreme peripheral distortion. Second, the reported latency values may vary across systems depending on hardware and software configurations, and should therefore be interpreted as indicative rather than absolute. Finally, the current feature set is optimized for fundus imagery and would require domain-specific adaptation for other medical imaging applications."
+            },
+            {
+              "type": "paragraph",
+              "text": "In conclusion, a lightweight and interpretable ML model can deliver OOD detection performance equivalent to a fine-tuned DL model while achieving far greater computational efficiency. These results support a practical deployment architecture in which ML-based OOD filtering operates at the data-ingestion stage, ensuring input validity and reserving DL computation for downstream diagnostic analysis."
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "5 COMPLIANCE WITH ETHICAL STANDARDS",
+          "level": 2,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "This research study was conducted retrospectively using human subject data made available in open access. Ethical approval was not required as confirmed by the license attached with the open access data."
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "6 Conflict of Interest",
+          "level": 2,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "The authors are employees of VUNO Inc., but declare that they have no competing financial or non-financial interests related to this work."
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "References",
+          "level": 2,
+          "content": [
+            {
+              "type": "list",
+              "text": "* [1] A. A. Ardakani, A. Mohammadi, M. Mirza-Aghazadeh-Attari, and U. R. Acharya (2023) An open-access breast lesion ultrasound image database: applicable in artificial intelligence studies. Computers in Biology and Medicine 152, pp. 106438. Cited by: [§2.1](https://ar5iv.labs.arxiv.org/html/2605.10181#S2.SS1.p2.1 \"2.1 Datasets ‣ 2 Methods ‣ A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection\"). * [2] M. N. Bajwa, G. A. P. Singh, W. Neumeier, M. I. Malik, A. Dengel, and S. Ahmed (2020) G1020: a benchmark retinal fundus image dataset for computer-aided glaucoma detection. In 2020 International Joint Conference on Neural Networks (IJCNN), pp. 1–7. Cited by: [§2.1](https://ar5iv.labs.arxiv.org/html/2605.10181#S2.SS1.p2.1 \"2.1 Datasets ‣ 2 Methods ‣ A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection\"). * [3] J. Bernal, F. J. Sánchez, G. Fernández-Esparrach, D. Gil, C. Rodríguez, and F. Vilariño (2015) WM-dova maps for accurate polyp highlighting in colonoscopy: validation vs. saliency maps from physicians. Computerized medical imaging and graphics 43, pp. 99–111. Cited by: [§2.1](https://ar5iv.labs.arxiv.org/html/2605.10181#S2.SS1.p2.1 \"2.1 Datasets ‣ 2 Methods ‣ A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection\"), [§2.1](https://ar5iv.labs.arxiv.org/html/2605.10181#S2.SS1.p3.1 \"2.1 Datasets ‣ 2 Methods ‣ A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection\"). * [4] H. Borgli, V. Thambawita, P. H. Smedsrud, S. Hicks, D. Jha, S. L. Eskeland, K. R. Randel, K. Pogorelov, M. Lux, D. T. D. Nguyen, D. Johansen, C. Griwodz, H. K. Stensland, E. Garcia-Ceja, P. T. Schmidt, H. L. Hammer, M. A. Riegler, P. Halvorsen, and T. de Lange (2020) HyperKvasir, a comprehensive multi-class image and video dataset for gastrointestinal endoscopy. Scientific Data 7 (1), pp. 283. External Links: [Document](https://dx.doi.org/10.1038/s41597-020-00622-y), ISSN 2052-4463, [Link](https://doi.org/10.1038/s41597-020-00622-y) Cited by: [§2.1](https://ar5iv.labs.arxiv.org/html/2605.10181#S2.SS1.p2.1 \"2.1 Datasets ‣ 2 Methods ‣ A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection\"). * [5] Y. Brima, M. H. K. Tushar, U. Kabir, and T. Islam (2021) Brain mri dataset. figshare. Note: Dataset External Links: [Document](https://dx.doi.org/10.6084/m9.figshare.14778750.v2), [Link](https://doi.org/10.6084/m9.figshare.14778750.v2) Cited by: [§2.1](https://ar5iv.labs.arxiv.org/html/2605.10181#S2.SS1.p2.1 \"2.1 Datasets ‣ 2 Methods ‣ A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection\"). * [6] A. Chattopadhay, A. Sarkar, P. Howlader, and V. N. Balasubramanian (2018) Grad-cam++: generalized gradient-based visual explanations for deep convolutional networks. In 2018 IEEE winter conference on applications of computer vision (WACV), pp. 839–847. Cited by: [§2.4](https://ar5iv.labs.arxiv.org/html/2605.10181#S2.SS4.p3.1 \"2.4 Deep learning pipeline ‣ 2 Methods ‣ A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection\"). * [7] S. D. Chaudhary, P. Paygude, and P. Shah (2024) Teeth or dental image dataset. Mendeley Data. External Links: [Document](https://dx.doi.org/10.17632/6zsnhrds9t.1), [Link](https://doi.org/10.17632/6zsnhrds9t.1) Cited by: [§2.1](https://ar5iv.labs.arxiv.org/html/2605.10181#S2.SS1.p2.1 \"2.1 Datasets ‣ 2 Methods ‣ A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection\"). * [8] J. Engelmann, A. D. McTrusty, I. J. MacCormick, E. Pead, A. Storkey, and M. O. Bernabeu (2022) Detection of multiple retinal diseases in ultra-widefield fundus images using deep learning: data-driven identification of relevant regions. arXiv preprint arXiv:2203.06113. Cited by: [§2.1](https://ar5iv.labs.arxiv.org/html/2605.10181#S2.SS1.p3.1 \"2.1 Datasets ‣ 2 Methods ‣ A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection\"). * [9] H. Fu, F. Li, J. I. Orlando, H. Bogunović, X. Sun, J. Liao, Y. Xu, S. Zhang, and X. Zhang (2019) REFUGE: retinal fundus glaucoma challenge. IEEE Dataport. External Links: [Document](https://dx.doi.org/10.21227/tz6e-r977), [Link](https://dx.doi.org/10.21227/tz6e-r977) Cited by: [§2.1](https://ar5iv.labs.arxiv.org/html/2605.10181#S2.SS1.p2.1 \"2.1 Datasets ‣ 2 Methods ‣ A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection\"). * [10] H. Fu, F. Li, J. I. Orlando, H. Bogunović, X. Sun, J. Liao, Y. Xu, S. Zhang, and X. Zhang (2020) ADAM: automatic detection challenge on age-related macular degeneration. IEEE Dataport. External Links: [Document](https://dx.doi.org/10.21227/dt4f-rt59), [Link](https://dx.doi.org/10.21227/dt4f-rt59) Cited by: [§2.1](https://ar5iv.labs.arxiv.org/html/2605.10181#S2.SS1.p2.1 \"2.1 Datasets ‣ 2 Methods ‣ A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection\"). * [11] P. Geurts, D. Ernst, and L. Wehenkel (2006) Extremely randomized trees. Machine learning 63 (1), pp. 3–42. Cited by: [§2.3](https://ar5iv.labs.arxiv.org/html/2605.10181#S2.SS3.p3.1 \"2.3 Machine Learning Pipeline and Hand-crafted Features ‣ 2 Methods ‣ A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection\"). * [12] K. Jin, X. Huang, J. Zhou, Y. Li, Y. Yan, Y. Sun, Q. Zhang, Y. Wang, and J. Ye (2022) Fives: a fundus image dataset for artificial intelligence based vessel segmentation. Scientific data 9 (1), pp. 475. Cited by: [§2.1](https://ar5iv.labs.arxiv.org/html/2605.10181#S2.SS1.p2.1 \"2.1 Datasets ‣ 2 Methods ‣ A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection\"). * [13] O. Kovalyk, J. Morales-Sánchez, R. Verdú-Monedero, I. Sellés-Navarro, A. Palazón-Cabanes, and J. Sancho-Gómez (2022) PAPILA: dataset with fundus images and clinical data of both eyes of the same patient for glaucoma assessment. Scientific Data 9 (1), pp. 291. Cited by: [§2.1](https://ar5iv.labs.arxiv.org/html/2605.10181#S2.SS1.p2.1 \"2.1 Datasets ‣ 2 Methods ‣ A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection\"). * [14] K. Lee, K. Lee, H. Lee, and J. Shin (2018) A simple unified framework for detecting out-of-distribution samples and adversarial attacks. Advances in neural information processing systems 31. Cited by: [§1](https://ar5iv.labs.arxiv.org/html/2605.10181#S1.p2.1 \"1 Introduction ‣ A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection\"). * [15] W. Liu, X. Wang, J. Owens, and Y. Li (2020) Energy-based out-of-distribution detection. Advances in neural information processing systems 33, pp. 21464–21475. Cited by: [§1](https://ar5iv.labs.arxiv.org/html/2605.10181#S1.p2.1 \"1 Introduction ‣ A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection\"). * [16] S. M. Lundberg and S. Lee (2017) A unified approach to interpreting model predictions. Advances in neural information processing systems 30. Cited by: [§2.3](https://ar5iv.labs.arxiv.org/html/2605.10181#S2.SS3.p3.1 \"2.3 Machine Learning Pipeline and Hand-crafted Features ‣ 2 Methods ‣ A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection\"). * [17] M. M. H. Matin, Md. A. Khasru, Md. G. Moazzam, and M. S. Uddin (2023) Skin diseases and skin cancer recognition dataset. Mendeley Data. External Links: [Document](https://dx.doi.org/10.17632/xr8fw85n65.1), [Link](https://doi.org/10.17632/xr8fw85n65.1) Cited by: [§2.1](https://ar5iv.labs.arxiv.org/html/2605.10181#S2.SS1.p2.1 \"2.1 Datasets ‣ 2 Methods ‣ A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection\"), [§2.1](https://ar5iv.labs.arxiv.org/html/2605.10181#S2.SS1.p3.1 \"2.1 Datasets ‣ 2 Methods ‣ A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection\"). * [18] H. Q. Nguyen, K. Lam, L. T. Le, H. H. Pham, D. Q. Tran, D. B. Nguyen, D. D. Le, C. M. Pham, H. T. Tong, D. H. Dinh, et al. (2022) VinDr-cxr: an open dataset of chest x-rays with radiologist’s annotations. Scientific Data 9 (1), pp. 429. Cited by: [§2.1](https://ar5iv.labs.arxiv.org/html/2605.10181#S2.SS1.p2.1 \"2.1 Datasets ‣ 2 Methods ‣ A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection\"). * [19] S. Pachade, P. Porwal, D. Thulkar, M. Kokare, G. Deshmukh, V. Sahasrabuddhe, L. Giancardo, G. Quellec, and F. Mériaudeau (2021) Retinal fundus multi-disease image dataset (rfmid): a dataset for multi-disease detection research. Data 6 (2). External Links: [Link](https://www.mdpi.com/2306-5729/6/2/14), ISSN 2306-5729, [Document](https://dx.doi.org/10.3390/data6020014) Cited by: [§2.1](https://ar5iv.labs.arxiv.org/html/2605.10181#S2.SS1.p2.1 \"2.1 Datasets ‣ 2 Methods ‣ A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection\"). * [20] P. Porwal, S. Pachade, R. Kamble, M. Kokare, G. Deshmukh, V. Sahasrabuddhe, and F. Meriaudeau (2018) Indian diabetic retinopathy image dataset (idrid). IEEE Dataport. External Links: [Document](https://dx.doi.org/10.21227/H25W98), [Link](https://dx.doi.org/10.21227/H25W98) Cited by: [§2.1](https://ar5iv.labs.arxiv.org/html/2605.10181#S2.SS1.p3.1 \"2.1 Datasets ‣ 2 Methods ‣ A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection\"). * [21] B. Qian, H. Chen, X. Wang, Z. Guan, T. Li, Y. Jin, Y. Wu, Y. Wen, H. Che, G. Kwon, et al. (2024) DRAC 2022: a public benchmark for diabetic retinopathy analysis on ultra-wide optical coherence tomography angiography images. Patterns 5 (3). Cited by: [§2.1](https://ar5iv.labs.arxiv.org/html/2605.10181#S2.SS1.p2.1 \"2.1 Datasets ‣ 2 Methods ‣ A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection\"). * [22] Y. Ran, W. Qin, C. Qin, X. Li, Y. Liu, L. Xu, X. Mu, L. Yan, B. Wang, Y. Dai, et al. (2024) A high-quality dataset featuring classified and annotated cervical spine x-ray atlas. Scientific Data 11 (1), pp. 625. Cited by: [§2.1](https://ar5iv.labs.arxiv.org/html/2605.10181#S2.SS1.p2.1 \"2.1 Datasets ‣ 2 Methods ‣ A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection\"). * [23] J. Sun, X. Zhao, S. Chen, Y. Zhang, H. Ren, Y. Sun, and G. Zhang (2025) An ultra-wide-field fundus image dataset for intelligent diagnosis of intraocular tumors. Scientific Data 12 (1), pp. 1521. Cited by: [§2.1](https://ar5iv.labs.arxiv.org/html/2605.10181#S2.SS1.p2.1 \"2.1 Datasets ‣ 2 Methods ‣ A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection\"). * [24] J. Yang, K. Zhou, Y. Li, and Z. Liu (2024) Generalized out-of-distribution detection: a survey. International Journal of Computer Vision 132 (12), pp. 5635–5662. Cited by: [§1](https://ar5iv.labs.arxiv.org/html/2605.10181#S1.p2.1 \"1 Introduction ‣ A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection\")."
+            }
+          ],
+          "children": []
+        }
+      ]
+    }
+  ],
+  "chunks": [
+    {
+      "heading_path": [
+        "A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection"
+      ],
+      "text": "# A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection"
+    },
+    {
+      "heading_path": [
+        "A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection",
+        "Abstract"
+      ],
+      "text": "###### Abstract\n\nOut-of-distribution (OOD) detection is essential for building reliable AI systems, as models that produce outputs for invalid inputs cannot be trusted. Although deep learning (DL) is often assumed to outperform traditional machine learning (ML), medical imaging data are typically acquired under standardized protocols, leading to relatively constrained image variability in OOD detection tasks. This motivates a direct comparison between ML and DL approaches in this setting. The two approaches are evaluated on open datasets comprising over 60,000 fundus and non-fundus images across multiple resolutions. Both approaches achieved an AUROC of 1.000 and accuracies between 0.999 and 1.000 on internal and external validation sets, showing comparable detection performance. The ML approach, however, exhibited substantially lower end-to-end latency while maintaining equivalent accuracy, indicating greater computational efficiency. These results suggest that for OOD detection tasks of limited visual complexity, lightweight ML approaches can achieve DL-level performance with significantly reduced computational cost, supporting practical real-world deployment.\n\nIndex Terms— out-of-distribution detection, fundus imaging, machine learning, deep learning, latency"
+    },
+    {
+      "heading_path": [
+        "A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection",
+        "1 Introduction"
+      ],
+      "text": "## 1 Introduction\n\nReal-world computer-aided detection (CADe) and diagnosis (CADx) systems are frequently exposed to out-of-distribution (OOD) inputs that are irrelevant to their intended tasks. OOD detection mitigates this risk by filtering such inputs before downstream inference. In ophthalmology, for instance, non-fundus images—such as external-eye photographs, slit-lamp views, or even chest radiographs—can inadvertently enter fundus imaging workflows. Without proper screening, conventional CADe/CADx systems may still generate outputs for these invalid inputs, producing spurious probabilities and potentially disrupting clinical workflows. This behavior undermines system reliability and highlights the need for explicit OOD detection in safety-critical medical artificial intelligence (AI) applications. While academic benchmarks typically assume fixed in-distribution datasets, real-world deployment requires robustness to unforeseen inputs through integrated OOD detection mechanisms.\n\nThe research community has explored a wide range of OOD detection strategies, including confidence thresholds, energy scores, distance metrics in latent space, generative reconstruction errors, and ensemble-based uncertainty estimation [[15](https://ar5iv.labs.arxiv.org/html/2605.10181#bib.bib19 \"Energy-based out-of-distribution detection\"), [14](https://ar5iv.labs.arxiv.org/html/2605.10181#bib.bib26 \"A simple unified framework for detecting out-of-distribution samples and adversarial attacks\")]. Although these methods have advanced the field, most rely on high-capacity deep encoders and substantial computational resources to achieve adequate performance. Consequently, much of the OOD literature implicitly assumes that the task itself is inherently complex and requires deep learning (DL)–level representation power [[24](https://ar5iv.labs.arxiv.org/html/2605.10181#bib.bib65 \"Generalized out-of-distribution detection: a survey\")].\n\nIn medical imaging, however, data are generally acquired under standardized conditions with dedicated imaging devices, leading to limited variation in viewpoint, illumination, and anatomical context. As a result, OOD detection between fundus and non-fundus images in this domain may be relatively straightforward. In such settings, a classical machine learning (ML) approach may be both sufficient and preferable, providing comparable accuracy with significantly higher computational efficiency and interpretability.\n\nBased on these assumptions, this study investigates whether the complexity of DL is justified for OOD detection in medical imaging. Using diverse open datasets covering multiple medical imaging modalities and resolutions, we evaluate accuracy, computational efficiency, and robustness, with the aim of assessing the trade-offs between model complexity and practical deployment."
+    },
+    {
+      "heading_path": [
+        "A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection",
+        "2 Methods"
+      ],
+      "text": "## 2 Methods"
+    },
+    {
+      "heading_path": [
+        "A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection",
+        "2 Methods",
+        "2.1 Datasets"
+      ],
+      "text": "### 2.1 Datasets\n\nThe representative task in this study was to classify each image as either fundus or non-fundus. A total of 61,143 images from publicly available datasets were used for model training and evaluation, categorized into two groups: internal validation set (IV) and external validation set (EV). The IV set refers to all datasets used for model training and internal evaluation, while the EV set was strictly held out for test-only evaluation.\n\nSeven publicly available color fundus photography (CFP) datasets, namely ADAM [[10](https://ar5iv.labs.arxiv.org/html/2605.10181#bib.bib44 \"ADAM: automatic detection challenge on age-related macular degeneration\")], FIVES [[12](https://ar5iv.labs.arxiv.org/html/2605.10181#bib.bib45 \"Fives: a fundus image dataset for artificial intelligence based vessel segmentation\")], G1020 [[2](https://ar5iv.labs.arxiv.org/html/2605.10181#bib.bib46 \"G1020: a benchmark retinal fundus image dataset for computer-aided glaucoma detection\")], MESSIDOR [[1](https://ar5iv.labs.arxiv.org/html/2605.10181#bib.bib36 \"An open-access breast lesion ultrasound image database: applicable in artificial intelligence studies\")], PAPILA [[13](https://ar5iv.labs.arxiv.org/html/2605.10181#bib.bib48 \"PAPILA: dataset with fundus images and clinical data of both eyes of the same patient for glaucoma assessment\")], REFUGE [[9](https://ar5iv.labs.arxiv.org/html/2605.10181#bib.bib49 \"REFUGE: retinal fundus glaucoma challenge\")], and RFMiD [[19](https://ar5iv.labs.arxiv.org/html/2605.10181#bib.bib50 \"Retinal fundus multi-disease image dataset (rfmid): a dataset for multi-disease detection research\")], were included in the IV set. In addition to these fundus datasets, the IV set also covered non-fundus and retinal OOD modalities such as fluorescein angiography (FA) and ultra-wide-field (UWF) fundus images from the DRAC dataset [[21](https://ar5iv.labs.arxiv.org/html/2605.10181#bib.bib52 \"DRAC 2022: a public benchmark for diabetic retinopathy analysis on ultra-wide optical coherence tomography angiography images\"), [23](https://ar5iv.labs.arxiv.org/html/2605.10181#bib.bib51 \"An ultra-wide-field fundus image dataset for intelligent diagnosis of intraocular tumors\")], brain MRI [[5](https://ar5iv.labs.arxiv.org/html/2605.10181#bib.bib53 \"Brain mri dataset\")], cervical spine [[22](https://ar5iv.labs.arxiv.org/html/2605.10181#bib.bib37 \"A high-quality dataset featuring classified and annotated cervical spine x-ray atlas\")], chest X-ray [[18](https://ar5iv.labs.arxiv.org/html/2605.10181#bib.bib38 \"VinDr-cxr: an open dataset of chest x-rays with radiologist’s annotations\")], dental and oral images [[7](https://ar5iv.labs.arxiv.org/html/2605.10181#bib.bib43 \"Teeth or dental image dataset\")], skin lesion photographs [[17](https://ar5iv.labs.arxiv.org/html/2605.10181#bib.bib42 \"Skin diseases and skin cancer recognition dataset\")], and endoscopic datasets such as CVC-Clinic [[3](https://ar5iv.labs.arxiv.org/html/2605.10181#bib.bib40 \"WM-dova maps for accurate polyp highlighting in colonoscopy: validation vs. saliency maps from physicians\")] and Hyper-Kvasir [[4](https://ar5iv.labs.arxiv.org/html/2605.10181#bib.bib41 \"HyperKvasir, a comprehensive multi-class image and video dataset for gastrointestinal endoscopy\")].\n\nThe EV set was used exclusively for independent testing to assess model generalization on unseen data. Specifically, the EV set included TOP [[8](https://ar5iv.labs.arxiv.org/html/2605.10181#bib.bib61 \"Detection of multiple retinal diseases in ultra-widefield fundus images using deep learning: data-driven identification of relevant regions\")], IDRiD [[20](https://ar5iv.labs.arxiv.org/html/2605.10181#bib.bib47 \"Indian diabetic retinopathy image dataset (idrid)\")], skin lesion photographs [[17](https://ar5iv.labs.arxiv.org/html/2605.10181#bib.bib42 \"Skin diseases and skin cancer recognition dataset\")], and CVC-Clinic [[3](https://ar5iv.labs.arxiv.org/html/2605.10181#bib.bib40 \"WM-dova maps for accurate polyp highlighting in colonoscopy: validation vs. saliency maps from physicians\")], encompassing both fundus and non-fundus modalities. These datasets were not used during model training and served solely as test-only sources.\n\nFor model development and evaluation, the IV set, comprising a total of 45,909 images, was divided into training, validation, and testing subsets at a 3:1:1 ratio. The EV set consisted of 15,234 images. The IV set included 9,108 fundus and 36,801 non-fundus images, whereas the EV set contained 597 fundus and 14,637 non-fundus images."
+    },
+    {
+      "heading_path": [
+        "A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection",
+        "2 Methods",
+        "2.2 Preprocessing"
+      ],
+      "text": "### 2.2 Preprocessing\n\nFor ML models, original images were used without center cropping. Instead, images were analyzed at multiple relative resolutions (1×1{\\times}, 1/2×1/2{\\times}, 1/4×1/4{\\times}, and 1/8×1/8{\\times}) to evaluate scale-dependent feature behavior. Grayscale (Y=0.299​R+0.587​G+0.114​BY{=}0.299R{+}0.587G{+}0.114B) and HSV representations were generated when required for feature extraction. Local Binary Pattern (LBP) features were computed on YY with (P=8,R=1)(P{=}8,R{=}1) using uniform mapping. For DL models, all input images were center-cropped to the maximal square region and resized to multiple resolutions (512×512512{\\times}512, 256×256256{\\times}256, 128×128128{\\times}128, and 64×6464{\\times}64) to assess resolution-dependent performance. RGB values were normalized to [0,1][0,1], ensuring consistent input scaling for convolutional processing.\n\nY=0.299​R+0.587​G+0.114​BY{=}0.299R{+}0.587G{+}0.114B\n\nYY\n\n(P=8,R=1)(P{=}8,R{=}1)\n\n512×512512{\\times}512\n\n256×256256{\\times}256\n\n128×128128{\\times}128\n\n64×6464{\\times}64\n\n[0,1][0,1]\n\n| Resolution | | ML-CPU (ms) | | | | DL-CPU (ms) | | | | DL-GPU (ms) | | | | ML (accuracy) | | DL (accuracy) | | | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | | ML | DL | L | F | C | Overall | L | P | F | Overall | L | P | F | Overall | IV | EV | IV | EV | | 1×\\times | 512×512512{\\times}512 | 15 | 378 | 3 | 396 | 177 | 8 | 44 | 229 | 198 | 9 | 7 | 214 | 1.000 | 0.988 | 1.000 | 1.000 | | 1/2×\\times | 256×256256{\\times}256 | 15 | 101 | 3 | 119 | 175 | 6 | 16 | 197 | 187 | 5 | 4 | 196 | 1.000 | 0.985 | 1.000 | 1.000 | | 1/4×\\times | 128×128128{\\times}128 | 15 | 32 | 3 | 50 | 173 | 5 | 10 | 188 | 188 | 4 | 4 | 196 | 1.000 | 0.995 | 1.000 | 0.995 | | 1/8×\\times | 64×6464{\\times}64 | 15 | 13 | 3 | 31 | 173 | 4 | 6 | 183 | 191 | 3 | 3 | 197 | 1.000 | 0.999 | 1.000 | 0.997 |\n\n×\\times\n\n512×512512{\\times}512\n\n×\\times\n\n256×256256{\\times}256\n\n×\\times\n\n128×128128{\\times}128\n\n×\\times\n\n64×6464{\\times}64"
+    },
+    {
+      "heading_path": [
+        "A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection",
+        "2 Methods",
+        "2.3 Machine Learning Pipeline and Hand-crafted Features"
+      ],
+      "text": "### 2.3 Machine Learning Pipeline and Hand-crafted Features\n\nWe extracted 39 hand-crafted features, organized into five categories: intensity and background statistics, color and texture, spatial distribution, shape and morphology, and global structural indicators. These features were designed to capture domain-specific characteristics of CFP, including its circular field of view, dark peripheral background, and reddish–orange hue distribution. They provide transparent and clinically interpretable cues for distinguishing fundus images from non-fundus images, including both retinal and non-retinal modalities.\n\nThe feature categories are summarized as follows: (1) Intensity and background statistics: measure global brightness, contrast, and peripheral darkness (e.g., min, max, mean, variance, background flag); (2) Color and texture: capture chromatic consistency and fine-grained texture using hue/saturation statistics and local descriptors such as LBP and GLCM (e.g., hue mean, sat var, glcm contrast, lbp mean); (3) Spatial distribution: represent center–periphery intensity gradients and hemispheric brightness asymmetries (e.g., radial slope mean, center minus outer, hemisphere asymmetry); (4) Shape and morphology: capture geometric characteristics of the retinal mask that reflect the circular shape of fundus images, including measures of circularity, eccentricity, solidity, and boundary irregularity (e.g., circularity, solidity, circle residual mean, eccentricity). Most of these features are designed to quantify how closely the observed retinal region follows the typical round structure of CFP, thereby serving as strong indicators for distinguishing in-domain fundus samples from OOD or non-retinal images; and (5) Global structural indicators: summarize overall image composition, including color type and the proportion of dark regions (e.g., is rgb, black pixel ratio).\n\nAn Extremely Randomized Trees (ExtraTrees) [[11](https://ar5iv.labs.arxiv.org/html/2605.10181#bib.bib66 \"Extremely randomized trees\")] classifier was trained using 100 estimators, a maximum depth of 10, and the square-root feature subset strategy. To balance generalization and model simplicity, each internal split required at least 10 samples, and leaf nodes contained a minimum of two samples. Inference was executed on a single CPU thread to enable accurate measurement of per-image cold-start latency. The model was implemented using the scikit-learn library. For interpretability, SHapley Additive exPlanations (SHAP) [[16](https://ar5iv.labs.arxiv.org/html/2605.10181#bib.bib70 \"A unified approach to interpreting model predictions\")] values were computed to quantify feature-level contributions for each image."
+    },
+    {
+      "heading_path": [
+        "A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection",
+        "2 Methods",
+        "2.4 Deep learning pipeline"
+      ],
+      "text": "### 2.4 Deep learning pipeline\n\nA ResNet-18 backbone pretrained on ImageNet was employed as the DL baseline. The network was fine-tuned using the AdamW optimizer with a learning rate of 1×10−41\\times 10^{-4}, weight decay of 1×10−41\\times 10^{-4}, a batch size of 128, and trained for 3 epochs. The best checkpoint was selected according to the minimum validation loss, and cross-entropy loss was used as the optimization objective.\n\n1×10−41\\times 10^{-4}\n\n1×10−41\\times 10^{-4}\n\nAll images were center-cropped according to the shorter side of width or height, then resized to the target training resolution. Each image was standardized using the ImageNet mean and standard deviation. To improve model robustness and generalization, probabilistic data augmentations were applied, including horizontal (p=0.5p=0.5) and vertical (p=0.2p=0.2) flips, rotations up to ±15∘\\pm 15^{\\circ}, and photometric variations such as brightness/contrast adjustments and gamma correction within ±20%\\pm 20\\%.\n\np=0.5p=0.5\n\np=0.2p=0.2\n\n±15∘\\pm 15^{\\circ}\n\n±20%\\pm 20\\%\n\nGrad-CAM++ [[6](https://ar5iv.labs.arxiv.org/html/2605.10181#bib.bib59 \"Grad-cam++: generalized gradient-based visual explanations for deep convolutional networks\")] was employed to visualize the discriminative image regions that contributed most to the model’s decision. The activation maps were extracted from the final convolutional block of the ResNet-18 backbone, and computed with respect to each image’s ground-truth label. The resulting heatmaps were blended with the corresponding input images to qualitatively assess the spatial correspondence between model attention and clinically relevant areas."
+    },
+    {
+      "heading_path": [
+        "A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection",
+        "2 Methods",
+        "2.5 Evaluation metrics and latency measurement"
+      ],
+      "text": "### 2.5 Evaluation metrics and latency measurement\n\nA five-fold cross-validation was conducted for internal validation using stratified sampling to preserve class balance across folds. In each fold, the model was trained on four subsets and evaluated on the remaining test subset. After fold-wise testing, predictions from all five test subsets were concatenated to compute the overall internal validation performance. For external validation, the five models obtained from cross-validation were independently applied to an unseen external dataset, and the predicted probabilities for each image were averaged across models to obtain a single consensus prediction. A fixed decision threshold of τ=0.5\\tau=0.5 was applied uniformly across all experiments to produce binary predictions. Model performance was evaluated using the area under the receiver operating characteristic curve (AUROC) and accuracy.\n\nτ=0.5\\tau=0.5\n\nTo assess computational efficiency, inference latency was systematically measured for both ML and DL pipelines. For the ML pipeline, latency was decomposed into model loading, feature extraction, and classification. For the DL baseline, latency was measured separately on CPU and GPU, consisting of model loading, preprocessing, and forward propagation through the encoder. End-to-end latency was defined as the total elapsed time from model loading to the generation of the final probability output. Latency measurements were performed on 1,000 randomly sampled test images with a batch size of one. The ML pipeline was tested at multiple downsampling ratios (×1\\times 1, ×1/2\\times 1/2, ×1/4\\times 1/4, and ×1/8\\times 1/8), while the DL model was evaluated at the corresponding input resolutions (5122512^{2}, 2562256^{2}, 1282128^{2}, and 64264^{2}). All experiments were executed on a workstation equipped with two Intel Xeon Gold 5218R CPUs (80 cores, 2.10 GHz), 504 GB RAM, and an NVIDIA Tesla V100 GPU (32 GB VRAM).\n\n×1\\times 1\n\n×1/2\\times 1/2\n\n×1/4\\times 1/4\n\n×1/8\\times 1/8\n\n5122512^{2}\n\n2562256^{2}\n\n1282128^{2}\n\n64264^{2}"
+    },
+    {
+      "heading_path": [
+        "A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection",
+        "3 Results"
+      ],
+      "text": "## 3 Results"
+    },
+    {
+      "heading_path": [
+        "A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection",
+        "3 Results",
+        "3.1 Cross-validation and external validation performance"
+      ],
+      "text": "### 3.1 Cross-validation and external validation performance\n\nTable [1](https://ar5iv.labs.arxiv.org/html/2605.10181#S2.T1 \"Table 1 ‣ 2.2 Preprocessing ‣ 2 Methods ‣ A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection\") summarizes the quantitative results across image resolutions. Both the ML (ExtraTrees) and DL (ResNet-18) models achieved AUROC values of 1.000 under all conditions. Accuracy differences between the two approaches were marginal across internal (IV) and external (EV) validation sets. For the ML pipeline, accuracy ranged from 0.985 to 1.000 across resolutions, whereas the DL model ranged from 0.995 to 1.000. At the lowest resolution (64×6464{\\times}64, ×1/8\\times 1/8), the ML model achieved 1.000 on the internal set and 0.999 on the external set, effectively matching the DL baseline despite its lightweight design. Interestingly, the ML pipeline maintained robust performance even at lower resolutions, whereas the DL model showed a decrease in accuracy as image resolution decreased.\n\n64×6464{\\times}64\n\n×1/8\\times 1/8"
+    },
+    {
+      "heading_path": [
+        "A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection",
+        "3 Results",
+        "3.2 Resolution and latency analysis"
+      ],
+      "text": "### 3.2 Resolution and latency analysis\n\nAs shown in Table [1](https://ar5iv.labs.arxiv.org/html/2605.10181#S2.T1 \"Table 1 ‣ 2.2 Preprocessing ‣ 2 Methods ‣ A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection\"), the ML and DL pipelines exhibited distinct scaling behaviors with respect to image resolution. For the ML model, latency at the highest configuration (×1\\times 1) reached 396 ms on CPU, primarily due to feature extraction (378 ms). As resolution decreased, ML latency dropped sharply—from 396 ms at ×1\\times 1 to 31 ms at ×1/8\\times 1/8—while maintaining comparable accuracy (0.999 at EV). In contrast, the DL model showed consistently high latency across resolutions (183–229 ms) owing to its fixed architectural complexity and large parameter count, with runtime dominated by model loading, memory allocation, and I/O overhead rather than input-dependent computation.\n\n×1\\times 1\n\n×1\\times 1\n\n×1/8\\times 1/8\n\nThese results demonstrate that the ML pipeline scales efficiently with image size and achieves substantial speed gains without sacrificing accuracy, exhibiting virtually no accuracy–latency trade-off. By comparison, the DL model’s latency remains largely invariant to resolution due to fixed initialization and memory transfer costs. Overall, the ML pipeline provides equivalent discrimination with up to a sixfold latency reduction, highlighting its suitability for lightweight, real-time OOD detection in clinical settings with limited computational resources."
+    },
+    {
+      "heading_path": [
+        "A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection",
+        "3 Results",
+        "3.3 Interpretability: SHAP for ML vs. CAM for DL"
+      ],
+      "text": "### 3.3 Interpretability: SHAP for ML vs. CAM for DL\n\nThe SHAP summary plot (Figure [2](https://ar5iv.labs.arxiv.org/html/2605.10181#S3.F2 \"Figure 2 ‣ 3.2 Resolution and latency analysis ‣ 3 Results ‣ A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection\")) reveals that eccentricity, all\\_corners\\_dark\\_flag, and glcm\\_homogeneity are the three most influential features in distinguishing fundus from non-fundus images. A low eccentricity value, corresponding to a near-circular shape, contributes strongly to the “fundus” prediction, consistent with the circular geometry characteristic of retinal images. Similarly, a high all\\_corners\\_dark\\_flag value positively impacts the “fundus” class, reflecting the presence of a dark peripheral border typical of fundus photographs. In addition, high glcm\\_homogeneity values are associated with smooth and uniform textures, further reinforcing the “fundus” classification. Together, these findings indicate that the ML model primarily relies on interpretable global cues—circularity, peripheral shading, and texture uniformity—to identify fundus images.\n\nWhile the ML pipeline enables feature-level interpretation through SHAP, the DL model depends on gradient-based saliency visualization such as Grad-CAM++. However, in binary OOD detection, these visualizations offer little insight into the actual decision process. Figure [3](https://ar5iv.labs.arxiv.org/html/2605.10181#S3.F3 \"Figure 3 ‣ 3.2 Resolution and latency analysis ‣ 3 Results ‣ A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection\") shows Grad-CAM++ results from the ResNet-18 baseline for representative in-domain and OOD samples. The first two images are both retinal in origin—fundus and fluorescein angiography—yet the activation maps exhibit nearly identical patterns, concentrating around the optic disc and major vessels. Such regions are visually distinctive but unrelated to the OOD classification itself, indicating that the model attends to generic high-contrast structures rather than domain-specific cues. For the non-retinal X-ray image, activations are spatially diffuse and lack consistent anatomical meaning. Overall, gradient-based explainability methods that are effective in lesion or anomaly localization tasks provide limited interpretive value for OOD detection."
+    },
+    {
+      "heading_path": [
+        "A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection",
+        "4 Discussion"
+      ],
+      "text": "## 4 Discussion\n\nOut-of-distribution (OOD) detection is a critical prerequisite for the reliable deployment of AI systems in clinical practice. In retinal imaging, verifying input validity before diagnostic inference is essential, as predictions on non-fundus images can degrade accuracy and compromise user trust. Effective OOD filtering (i.e., fundus vs. non-fundus screening) ensures that downstream diagnostic models operate only on valid data, thereby improving safety, traceability, and overall system integrity.\n\nThe experimental results indicate that, under the studied setting, distinguishing fundus from non-fundus images forms a well-defined classification problem when trained on sufficiently diverse datasets. Both the ML and DL models achieved near-saturated performance (AUROC = 1.000, ACC ≥\\geq 0.999) on both internal and external validation sets. Under such conditions, additional architectural complexity provides no measurable performance gain in this task setting, and practical deployment factors—computation time, memory demand, and interpretability—become the dominant criteria for model selection.\n\n≥\\geq\n\nThe proposed *ExtraTrees*-based ML pipeline, built on a compact set of hand-crafted and fundus-aware descriptors, achieved sub-31 ms31\\text{\\,}\\mathrm{m}\\mathrm{s} end-to-end latency on CPU-only hardware while maintaining detection accuracy comparable to the DL baseline. SHAP analysis revealed stable and domain-consistent feature attributions—highlighting the model’s reliance on peripheral darkness, smooth color distribution, and circular image geometry—thereby enabling transparent and reproducible interpretation of its decision process. These characteristics make the ML pipeline particularly suitable for real-time OOD filtering in clinical systems, where deterministic behavior and limited computational resources are critical constraints.\n\n31 ms31\\text{\\,}\\mathrm{m}\\mathrm{s}\n\nIn contrast, the *ResNet-18* baseline required substantially greater computational and memory resources. At the lowest resolution (64×6464{\\times}64), its end-to-end inference latency was approximately 183 ms on CPU and 197 ms on GPU, compared to 31 ms for the ML pipeline under identical conditions—a roughly sixfold increase. For example, commercial software such as *VUNO Med–Fundus AI*, which performs full lesion detection and quantitative grading across twelve categories, operates in under 2 seconds on CPU-only hardware. Given that OOD detection involves only binary filtering rather than full diagnostic inference, a latency of nearly 200 ms per image represents a significant overhead. Moreover, all latency measurements in this study were obtained on a high-spec workstation. In typical clinical environments using standard desktop hardware, the runtime gap between ML and DL approaches would likely be even more pronounced. Despite the higher computational cost, the DL model offered no measurable improvement in accuracy or AUROC relative to the ML approach across all evaluation settings. These findings demonstrate that the compact ML model achieves equivalent discrimination capability while maintaining substantially higher computational efficiency and predictable latency.\n\n64×6464{\\times}64\n\nThis study has several limitations. First, although the datasets cover diverse imaging modalities, they may not capture rare acquisition scenarios such as handheld or smartphone-based fundus imaging, or extreme peripheral distortion. Second, the reported latency values may vary across systems depending on hardware and software configurations, and should therefore be interpreted as indicative rather than absolute. Finally, the current feature set is optimized for fundus imagery and would require domain-specific adaptation for other medical imaging applications.\n\nIn conclusion, a lightweight and interpretable ML model can deliver OOD detection performance equivalent to a fine-tuned DL model while achieving far greater computational efficiency. These results support a practical deployment architecture in which ML-based OOD filtering operates at the data-ingestion stage, ensuring input validity and reserving DL computation for downstream diagnostic analysis."
+    },
+    {
+      "heading_path": [
+        "A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection",
+        "5 COMPLIANCE WITH ETHICAL STANDARDS"
+      ],
+      "text": "## 5 COMPLIANCE WITH ETHICAL STANDARDS\n\nThis research study was conducted retrospectively using human subject data made available in open access. Ethical approval was not required as confirmed by the license attached with the open access data."
+    },
+    {
+      "heading_path": [
+        "A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection",
+        "6 Conflict of Interest"
+      ],
+      "text": "## 6 Conflict of Interest\n\nThe authors are employees of VUNO Inc., but declare that they have no competing financial or non-financial interests related to this work."
+    },
+    {
+      "heading_path": [
+        "A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection",
+        "References"
+      ],
+      "text": "## References\n\n* [1] A. A. Ardakani, A. Mohammadi, M. Mirza-Aghazadeh-Attari, and U. R. Acharya (2023) An open-access breast lesion ultrasound image database: applicable in artificial intelligence studies. Computers in Biology and Medicine 152, pp. 106438. Cited by: [§2.1](https://ar5iv.labs.arxiv.org/html/2605.10181#S2.SS1.p2.1 \"2.1 Datasets ‣ 2 Methods ‣ A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection\"). * [2] M. N. Bajwa, G. A. P. Singh, W. Neumeier, M. I. Malik, A. Dengel, and S. Ahmed (2020) G1020: a benchmark retinal fundus image dataset for computer-aided glaucoma detection. In 2020 International Joint Conference on Neural Networks (IJCNN), pp. 1–7. Cited by: [§2.1](https://ar5iv.labs.arxiv.org/html/2605.10181#S2.SS1.p2.1 \"2.1 Datasets ‣ 2 Methods ‣ A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection\"). * [3] J. Bernal, F. J. Sánchez, G. Fernández-Esparrach, D. Gil, C. Rodríguez, and F. Vilariño (2015) WM-dova maps for accurate polyp highlighting in colonoscopy: validation vs. saliency maps from physicians. Computerized medical imaging and graphics 43, pp. 99–111. Cited by: [§2.1](https://ar5iv.labs.arxiv.org/html/2605.10181#S2.SS1.p2.1 \"2.1 Datasets ‣ 2 Methods ‣ A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection\"), [§2.1](https://ar5iv.labs.arxiv.org/html/2605.10181#S2.SS1.p3.1 \"2.1 Datasets ‣ 2 Methods ‣ A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection\"). * [4] H. Borgli, V. Thambawita, P. H. Smedsrud, S. Hicks, D. Jha, S. L. Eskeland, K. R. Randel, K. Pogorelov, M. Lux, D. T. D. Nguyen, D. Johansen, C. Griwodz, H. K. Stensland, E. Garcia-Ceja, P. T. Schmidt, H. L. Hammer, M. A. Riegler, P. Halvorsen, and T. de Lange (2020) HyperKvasir, a comprehensive multi-class image and video dataset for gastrointestinal endoscopy. Scientific Data 7 (1), pp. 283. External Links: [Document](https://dx.doi.org/10.1038/s41597-020-00622-y), ISSN 2052-4463, [Link](https://doi.org/10.1038/s41597-020-00622-y) Cited by: [§2.1](https://ar5iv.labs.arxiv.org/html/2605.10181#S2.SS1.p2.1 \"2.1 Datasets ‣ 2 Methods ‣ A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection\"). * [5] Y. Brima, M. H. K. Tushar, U. Kabir, and T. Islam (2021) Brain mri dataset. figshare. Note: Dataset External Links: [Document](https://dx.doi.org/10.6084/m9.figshare.14778750.v2), [Link](https://doi.org/10.6084/m9.figshare.14778750.v2) Cited by: [§2.1](https://ar5iv.labs.arxiv.org/html/2605.10181#S2.SS1.p2.1 \"2.1 Datasets ‣ 2 Methods ‣ A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection\"). * [6] A. Chattopadhay, A. Sarkar, P. Howlader, and V. N. Balasubramanian (2018) Grad-cam++: generalized gradient-based visual explanations for deep convolutional networks. In 2018 IEEE winter conference on applications of computer vision (WACV), pp. 839–847. Cited by: [§2.4](https://ar5iv.labs.arxiv.org/html/2605.10181#S2.SS4.p3.1 \"2.4 Deep learning pipeline ‣ 2 Methods ‣ A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection\"). * [7] S. D. Chaudhary, P. Paygude, and P. Shah (2024) Teeth or dental image dataset. Mendeley Data. External Links: [Document](https://dx.doi.org/10.17632/6zsnhrds9t.1), [Link](https://doi.org/10.17632/6zsnhrds9t.1) Cited by: [§2.1](https://ar5iv.labs.arxiv.org/html/2605.10181#S2.SS1.p2.1 \"2.1 Datasets ‣ 2 Methods ‣ A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection\"). * [8] J. Engelmann, A. D. McTrusty, I. J. MacCormick, E. Pead, A. Storkey, and M. O. Bernabeu (2022) Detection of multiple retinal diseases in ultra-widefield fundus images using deep learning: data-driven identification of relevant regions. arXiv preprint arXiv:2203.06113. Cited by: [§2.1](https://ar5iv.labs.arxiv.org/html/2605.10181#S2.SS1.p3.1 \"2.1 Datasets ‣ 2 Methods ‣ A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection\"). * [9] H. Fu, F. Li, J. I. Orlando, H. Bogunović, X. Sun, J. Liao, Y. Xu, S. Zhang, and X. Zhang (2019) REFUGE: retinal fundus glaucoma challenge. IEEE Dataport. External Links: [Document](https://dx.doi.org/10.21227/tz6e-r977), [Link](https://dx.doi.org/10.21227/tz6e-r977) Cited by: [§2.1](https://ar5iv.labs.arxiv.org/html/2605.10181#S2.SS1.p2.1 \"2.1 Datasets ‣ 2 Methods ‣ A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection\"). * [10] H. Fu, F. Li, J. I. Orlando, H. Bogunović, X. Sun, J. Liao, Y. Xu, S. Zhang, and X. Zhang (2020) ADAM: automatic detection challenge on age-related macular degeneration. IEEE Dataport. External Links: [Document](https://dx.doi.org/10.21227/dt4f-rt59), [Link](https://dx.doi.org/10.21227/dt4f-rt59) Cited by: [§2.1](https://ar5iv.labs.arxiv.org/html/2605.10181#S2.SS1.p2.1 \"2.1 Datasets ‣ 2 Methods ‣ A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection\"). * [11] P. Geurts, D. Ernst, and L. Wehenkel (2006) Extremely randomized trees. Machine learning 63 (1), pp. 3–42. Cited by: [§2.3](https://ar5iv.labs.arxiv.org/html/2605.10181#S2.SS3.p3.1 \"2.3 Machine Learning Pipeline and Hand-crafted Features ‣ 2 Methods ‣ A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection\"). * [12] K. Jin, X. Huang, J. Zhou, Y. Li, Y. Yan, Y. Sun, Q. Zhang, Y. Wang, and J. Ye (2022) Fives: a fundus image dataset for artificial intelligence based vessel segmentation. Scientific data 9 (1), pp. 475. Cited by: [§2.1](https://ar5iv.labs.arxiv.org/html/2605.10181#S2.SS1.p2.1 \"2.1 Datasets ‣ 2 Methods ‣ A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection\"). * [13] O. Kovalyk, J. Morales-Sánchez, R. Verdú-Monedero, I. Sellés-Navarro, A. Palazón-Cabanes, and J. Sancho-Gómez (2022) PAPILA: dataset with fundus images and clinical data of both eyes of the same patient for glaucoma assessment. Scientific Data 9 (1), pp. 291. Cited by: [§2.1](https://ar5iv.labs.arxiv.org/html/2605.10181#S2.SS1.p2.1 \"2.1 Datasets ‣ 2 Methods ‣ A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection\"). * [14] K. Lee, K. Lee, H. Lee, and J. Shin (2018) A simple unified framework for detecting out-of-distribution samples and adversarial attacks. Advances in neural information processing systems 31. Cited by: [§1](https://ar5iv.labs.arxiv.org/html/2605.10181#S1.p2.1 \"1 Introduction ‣ A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection\"). * [15] W. Liu, X. Wang, J. Owens, and Y. Li (2020) Energy-based out-of-distribution detection. Advances in neural information processing systems 33, pp. 21464–21475. Cited by: [§1](https://ar5iv.labs.arxiv.org/html/2605.10181#S1.p2.1 \"1 Introduction ‣ A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection\"). * [16] S. M. Lundberg and S. Lee (2017) A unified approach to interpreting model predictions. Advances in neural information processing systems 30. Cited by: [§2.3](https://ar5iv.labs.arxiv.org/html/2605.10181#S2.SS3.p3.1 \"2.3 Machine Learning Pipeline and Hand-crafted Features ‣ 2 Methods ‣ A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection\"). * [17] M. M. H. Matin, Md. A. Khasru, Md. G. Moazzam, and M. S. Uddin (2023) Skin diseases and skin cancer recognition dataset. Mendeley Data. External Links: [Document](https://dx.doi.org/10.17632/xr8fw85n65.1), [Link](https://doi.org/10.17632/xr8fw85n65.1) Cited by: [§2.1](https://ar5iv.labs.arxiv.org/html/2605.10181#S2.SS1.p2.1 \"2.1 Datasets ‣ 2 Methods ‣ A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection\"), [§2.1](https://ar5iv.labs.arxiv.org/html/2605.10181#S2.SS1.p3.1 \"2.1 Datasets ‣ 2 Methods ‣ A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection\"). * [18] H. Q. Nguyen, K. Lam, L. T. Le, H. H. Pham, D. Q. Tran, D. B. Nguyen, D. D. Le, C. M. Pham, H. T. Tong, D. H. Dinh, et al. (2022) VinDr-cxr: an open dataset of chest x-rays with radiologist’s annotations. Scientific Data 9 (1), pp. 429. Cited by: [§2.1](https://ar5iv.labs.arxiv.org/html/2605.10181#S2.SS1.p2.1 \"2.1 Datasets ‣ 2 Methods ‣ A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection\"). * [19] S. Pachade, P. Porwal, D. Thulkar, M. Kokare, G. Deshmukh, V. Sahasrabuddhe, L. Giancardo, G. Quellec, and F. Mériaudeau (2021) Retinal fundus multi-disease image dataset (rfmid): a dataset for multi-disease detection research. Data 6 (2). External Links: [Link](https://www.mdpi.com/2306-5729/6/2/14), ISSN 2306-5729, [Document](https://dx.doi.org/10.3390/data6020014) Cited by: [§2.1](https://ar5iv.labs.arxiv.org/html/2605.10181#S2.SS1.p2.1 \"2.1 Datasets ‣ 2 Methods ‣ A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection\"). * [20] P. Porwal, S. Pachade, R. Kamble, M. Kokare, G. Deshmukh, V. Sahasrabuddhe, and F. Meriaudeau (2018) Indian diabetic retinopathy image dataset (idrid). IEEE Dataport. External Links: [Document](https://dx.doi.org/10.21227/H25W98), [Link](https://dx.doi.org/10.21227/H25W98) Cited by: [§2.1](https://ar5iv.labs.arxiv.org/html/2605.10181#S2.SS1.p3.1 \"2.1 Datasets ‣ 2 Methods ‣ A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection\"). * [21] B. Qian, H. Chen, X. Wang, Z. Guan, T. Li, Y. Jin, Y. Wu, Y. Wen, H. Che, G. Kwon, et al. (2024) DRAC 2022: a public benchmark for diabetic retinopathy analysis on ultra-wide optical coherence tomography angiography images. Patterns 5 (3). Cited by: [§2.1](https://ar5iv.labs.arxiv.org/html/2605.10181#S2.SS1.p2.1 \"2.1 Datasets ‣ 2 Methods ‣ A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection\"). * [22] Y. Ran, W. Qin, C. Qin, X. Li, Y. Liu, L. Xu, X. Mu, L. Yan, B. Wang, Y. Dai, et al. (2024) A high-quality dataset featuring classified and annotated cervical spine x-ray atlas. Scientific Data 11 (1), pp. 625. Cited by: [§2.1](https://ar5iv.labs.arxiv.org/html/2605.10181#S2.SS1.p2.1 \"2.1 Datasets ‣ 2 Methods ‣ A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection\"). * [23] J. Sun, X. Zhao, S. Chen, Y. Zhang, H. Ren, Y. Sun, and G. Zhang (2025) An ultra-wide-field fundus image dataset for intelligent diagnosis of intraocular tumors. Scientific Data 12 (1), pp. 1521. Cited by: [§2.1](https://ar5iv.labs.arxiv.org/html/2605.10181#S2.SS1.p2.1 \"2.1 Datasets ‣ 2 Methods ‣ A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection\"). * [24] J. Yang, K. Zhou, Y. Li, and Z. Liu (2024) Generalized out-of-distribution detection: a survey. International Journal of Computer Vision 132 (12), pp. 5635–5662. Cited by: [§1](https://ar5iv.labs.arxiv.org/html/2605.10181#S1.p2.1 \"1 Introduction ‣ A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection\")."
+    }
+  ]
+}

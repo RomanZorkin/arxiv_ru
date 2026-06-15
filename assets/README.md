@@ -2,18 +2,20 @@
 
 Утилиты для обновления индекса, подготовки дайджестов и проверки согласованности после загрузки новых статей в `articles/`.
 
-Запускать из корня репозитория:
+Запускать из корня репозитория через [uv](https://docs.astral.sh/uv/):
 
 ```bash
-python3 assets/<скрипт>.py
+uv run assets/<скрипт>.py
 ```
+
+Скрипты используют только стандартную библиотеку Python, отдельные зависимости не нужны.
 
 ---
 
 ## Единый старт (рекомендуется)
 
 ```bash
-python3 assets/run_pipeline.py
+uv run assets/run_pipeline.py
 ```
 
 Выполняет по порядку:
@@ -39,11 +41,11 @@ python3 assets/run_pipeline.py
 Пример пошагового запуска:
 
 ```bash
-python3 assets/update_knowledge_index.py
-python3 assets/generate_telegram_digest.py
-python3 assets/generate_readme_update.py
+uv run assets/update_knowledge_index.py
+uv run assets/generate_telegram_digest.py
+uv run assets/generate_readme_update.py
 # вручную вставить блоки из readme_update.txt в README.md
-python3 assets/check_articles_consistency.py
+uv run assets/check_articles_consistency.py
 ```
 
 ---

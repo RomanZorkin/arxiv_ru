@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+
+<!-- saved from url=(0044)https://ar5iv.labs.arxiv.org/html/2605.10181 -->
+<html data-theme="light" lang="en"><head><meta content="text/html; charset=utf-8" http-equiv="Content-Type"/>
+<title>[2605.10181] A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection</title><meta content="Out-of-distribution (OOD) detection is essential for building reliable AI systems, as models that produce outputs for invalid inputs cannot be trusted. Although deep learning (DL) is often assumed to outperform traditi…" property="og:description"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<meta content="summary" name="twitter:card"/>
+<meta content="A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection" name="twitter:title"/>
+<meta content="https://ar5iv.labs.arxiv.org/assets/ar5iv_card.png" name="twitter:image:src"/>
+<meta content="ar5iv logo" name="twitter:image:alt"/>
+<meta content="A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection" property="og:title"/>
+<meta content="ar5iv" property="og:site_name"/>
+<meta content="https://ar5iv.labs.arxiv.org/assets/ar5iv_card.png" property="og:image"/>
+<meta content="article" property="og:type"/>
+<meta content="https://ar5iv.labs.arxiv.org/html/2605.10181" property="og:url"/>
+<link href="https://ar5iv.labs.arxiv.org/html/2605.10181" rel="canonical" target="_blank"/>
+<!--Generated on Sat Jun  6 07:25:56 2026 by LaTeXML (version 0.8.8) http://dlmf.nist.gov/LaTeXML/.-->
+<meta content="width=device-width, initial-scale=1, shrink-to-fit=no" name="viewport"/>
+<script>
+  function detectColorScheme(){
+    var theme="light";
+    var current_theme = localStorage.getItem("ar5iv_theme");
+    if(current_theme){
+      if(current_theme == "dark"){
+        theme = "dark";
+      } }
+    else if(!window.matchMedia) { return false; }
+    else if(window.matchMedia("(prefers-color-scheme: dark)").matches) {
+      theme = "dark"; }
+    if (theme=="dark") {
+      document.documentElement.setAttribute("data-theme", "dark");
+    } else {
+      document.documentElement.setAttribute("data-theme", "light"); } }
+
+  detectColorScheme();
+
+  function toggleColorScheme(){
+    var current_theme = localStorage.getItem("ar5iv_theme");
+    if (current_theme) {
+      if (current_theme == "light") {
+        localStorage.setItem("ar5iv_theme", "dark"); }
+      else {
+        localStorage.setItem("ar5iv_theme", "light"); } }
+    else {
+        localStorage.setItem("ar5iv_theme", "dark"); }
+    detectColorScheme(); }
+</script>
+<link href="./[2605.10181] A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection_files/ar5iv-fonts.0.8.4.css" media="all" rel="stylesheet"/><link href="./[2605.10181] A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection_files/ar5iv.0.8.4.css" media="all" rel="stylesheet"/><link href="./[2605.10181] A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection_files/ar5iv-site.0.2.2.css" media="all" rel="stylesheet"/>
+<meta content="extension" property="gosuslugi.plugin.extension.content"/></head>
+<body>
+<div class="ltx_page_main">
+<div class="ltx_page_content">
+<article class="ltx_document ltx_authors_1line">
+<h1 class="ltx_title ltx_title_document" style="font-size:90%;">Сравнительное исследование машинного обучения и глубокого обучения для обнаружения выхода данных за пределы распределения</h1>
+<div class="ltx_abstract" id="abstract1">
+<h6 class="ltx_title ltx_title_abstract">Аннотация</h6>
+<p class="ltx_p">Обнаружение распределений вне обучения (OOD) необходимо для построения надежных систем искусственного интеллекта, поскольку модели, которые выдают выходные данные для недопустимых входных данных, нельзя считать надежными. Хотя в глубоком обучении (DL) часто предполагают превосходство над традиционным машинным обучением (ML), данные медицинской визуализации обычно получают по стандартизированным протоколам, что приводит к относительно ограниченной вариативности изображений в задачах обнаружения OOD. Это мотивирует провести прямое сравнение подходов ML и DL в данном контексте. Оба подхода оцениваются на открытых наборах данных, включающих более 60 000 изображений глазного дна и не глазного дна в нескольких разрешениях. Оба подхода достигли значения AUROC 1.000 и точностей в диапазоне от 0.999 до 1.000 на внутренних и внешних наборах валидации, демонстрируя сопоставимую эффективность обнаружения. Однако подход ML показал существенно более низкую сквозную задержку при сохранении эквивалентной точности, что указывает на более высокую вычислительную эффективность. Эти результаты предполагают, что для задач обнаружения OOD с ограниченной визуальной сложностью облегченные подходы ML могут обеспечивать производительность на уровне DL при существенно меньших вычислительных затратах, поддерживая практическое развертывание в реальных условиях.</p>
+</div>
+<div class="ltx_para" id="p1">
+<p class="ltx_p" id="p1.1">Индексные термины— 
+обнаружение распределений вне области применимости, фундус-изображения, машинное обучение, глубокое обучение, задержка</p>
+</div>
+<section class="ltx_section" id="S1">
+<h2 class="ltx_title ltx_title_section" style="font-size:90%;">
+<span class="ltx_tag ltx_tag_section">1 </span>Введение</h2>
+<div class="ltx_para" id="S1.p1">
+<p class="ltx_p" id="S1.p1.1">Практические системы компьютерного обнаружения (CADe) и диагностики (CADx) часто подвергаются воздействию внераспределительных (OOD) входных данных, не относящихся к их целевым задачам. Обнаружение OOD снижает этот риск, фильтруя такие входные данные перед последующим выводом. Например, в офтальмологии не-фундусные изображения — например, фотографии внешнего глаза, виды с щелевой лампы или даже рентгенограммы грудной клетки — могут непреднамеренно попадать в рабочие процессы фундусной визуализации. Без надлежащего скрининга обычные системы CADe/CADx все еще могут выдавать результаты для этих недопустимых входных данных, формируя ложные вероятности и потенциально нарушая клинические рабочие процессы. Такое поведение подрывает надежность системы и подчеркивает необходимость явного обнаружения OOD в критически важных для безопасности приложениях медицинского искусственного интеллекта (ИИ). Хотя академические бенчмарки обычно предполагают фиксированные наборы данных внутрираспределения, реальное внедрение требует устойчивости к непредвиденным входным данным за счет интегрированных механизмов обнаружения OOD.</p>
+</div>
+<div class="ltx_para" id="S1.p2">
+<p class="ltx_p" id="S1.p2.1">Исследовательское сообщество изучило широкий спектр стратегий обнаружения OOD, включая пороги уверенности, оценки энергии, метрики расстояния в латентном пространстве, ошибки генеративной реконструкции и оценки неопределенности на основе ансамблей <cite class="ltx_cite ltx_citemacro_cite"><span class="ltx_text" id="S1.p2.1.2.1" style="font-size:90%;">[</span><a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2605.10181#bib.bib19" title="Energy-based out-of-distribution detection">15</a>, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2605.10181#bib.bib26" title="A simple unified framework for detecting out-of-distribution samples and adversarial attacks">14</a><span class="ltx_text" id="S1.p2.1.3.2" style="font-size:90%;">]</span></cite>. Хотя эти методы продвинули область, большинство из них опираются на высокомощные глубокие энкодеры и существенные вычислительные ресурсы для достижения приемлемой производительности. Следовательно, значительная часть литературы по OOD неявно предполагает, что сама задача по своей природе является сложной и требует мощности представлений уровня deep learning (DL) <cite class="ltx_cite ltx_citemacro_cite"><span class="ltx_text" id="S1.p2.1.5.1" style="font-size:90%;">[</span><a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2605.10181#bib.bib65" title="Generalized out-of-distribution detection: a survey">24</a><span class="ltx_text" id="S1.p2.1.6.2" style="font-size:90%;">]</span></cite>.</p>
+</div>
+<div class="ltx_para" id="S1.p3">
+<p class="ltx_p" id="S1.p3.1">Однако в медицинской визуализации данные обычно получают в стандартизированных условиях с использованием специализированных устройств визуализации, что приводит к ограниченному разнообразию точки зрения, освещения и анатомического контекста. В результате обнаружение OOD между изображениями глазного дна и не-глазного дна в этой предметной области может быть относительно простым. В таких условиях классический подход машинного обучения (ML) может быть как достаточным, так и предпочтительным, обеспечивая сопоставимую точность при существенно более высокой вычислительной эффективности и интерпретируемости.</p>
+</div>
+<div class="ltx_para" id="S1.p4">
+<p class="ltx_p" id="S1.p4.1">На основе этих допущений данное исследование изучает, оправдана ли сложность DL для обнаружения OOD в медицинской визуализации. Используя разнообразные открытые наборы данных, охватывающие несколько модальностей медицинской визуализации и разрешений, мы оцениваем точность, вычислительную эффективность и устойчивость с целью определить компромиссы между сложностью модели и практическим развертыванием.</p>
+</div>
+<figure class="ltx_figure" id="S1.F1"><img alt="Refer to caption" class="ltx_graphics ltx_centering ltx_img_landscape" height="244" id="S1.F1.g1" src="./[2605.10181] A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection_files/OOD_figure1.png" width="699"/>
+<figcaption class="ltx_caption ltx_centering" style="font-size:90%;">⟦<span class="ltx_tag ltx_tag_figure"><span class="ltx_text ltx_font_bold" id="S1.F1.17.1.1">Fig. 1</span>: </span> Иллюстративные примеры модальностей визуализации, рассматриваемых для обнаружения выходящих за распределение (OOD).
+(a) Цветная фотография глазного дна (CFP, в пределах распределения), полученная с помощью специализированных ретинальных камер.
+(b) Другие модальности ретинальной визуализации, включая флуоресцеиновую ангиографию и визуализацию с сверхшироким полем обзора, которые в этом исследовании рассматриваются как изображения не глазного дна.
+(c) Медицинские изображения, не относящиеся к ретинальным, представляющие собой OOD-примеры.
+Наложенные масштабные коэффициенты (например, <math alttext="1\times" class="ltx_math_unparsed" display="inline" id="S1.F1.5.m1" intent=":literal"><semantics><mrow><mn>1</mn><mo lspace="0.222em">×</mo></mrow><annotation encoding="application/x-tex">1\times</annotation></semantics></math>, <math alttext="1/2\times" class="ltx_math_unparsed" display="inline" id="S1.F1.6.m2" intent=":literal"><semantics><mrow><mn>1</mn><mo>/</mo><mn>2</mn><mo lspace="0.222em">×</mo></mrow><annotation encoding="application/x-tex">1/2\times</annotation></semantics></math>, <math alttext="1/4\times" class="ltx_math_unparsed" display="inline" id="S1.F1.7.m3" intent=":literal"><semantics><mrow><mn>1</mn><mo>/</mo><mn>4</mn><mo lspace="0.222em">×</mo></mrow><annotation encoding="application/x-tex">1/4\times</annotation></semantics></math>, <math alttext="1/8\times" class="ltx_math_unparsed" display="inline" id="S1.F1.8.m4" intent=":literal"><semantics><mrow><mn>1</mn><mo>/</mo><mn>8</mn><mo lspace="0.222em">×</mo></mrow><annotation encoding="application/x-tex">1/8\times</annotation></semantics></math>) представляют относительные масштабы отображения, соответствующие фактическим разрешениям изображений.</figcaption>
+</figure>
+</section>
+<section class="ltx_section" id="S2">
+<h2 class="ltx_title ltx_title_section" style="font-size:90%;">
+<span class="ltx_tag ltx_tag_section">2 </span>Методы</h2>
+<section class="ltx_subsection" id="S2.SS1">
+<h3 class="ltx_title ltx_title_subsection" style="font-size:90%;">
+<span class="ltx_tag ltx_tag_subsection">2.1 </span>Наборы данных</h3>
+<div class="ltx_para" id="S2.SS1.p1">
+<p class="ltx_p" id="S2.SS1.p1.1">В качестве репрезентативной задачи в этом исследовании выполнялась классификация каждого изображения как либо глазного дна, либо не глазного дна. Для обучения и оценки модели было использовано в общей сложности 61 143 изображения из общедоступных наборов данных, распределённых на две группы:
+внутренняя валидационная выборка (IV) и внешняя валидационная выборка (EV).
+Набор IV относится ко всем наборам данных, использованным для обучения модели и внутренней оценки, тогда как набор EV был строго удержан для тестовой оценки только.</p>
+</div>
+<div class="ltx_para" id="S2.SS1.p2">
+<p class="ltx_p" id="S2.SS1.p2.1">В набор IV были включены семь публично доступных наборов данных цветной фундусной фотографии (CFP), а именно ADAM <cite class="ltx_cite ltx_citemacro_cite"><span class="ltx_text" id="S2.SS1.p2.1.2.1" style="font-size:90%;">[</span><a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2605.10181#bib.bib44" title="ADAM: automatic detection challenge on age-related macular degeneration">10</a><span class="ltx_text" id="S2.SS1.p2.1.3.2" style="font-size:90%;">]</span></cite>, FIVES <cite class="ltx_cite ltx_citemacro_cite"><span class="ltx_text" id="S2.SS1.p2.1.5.1" style="font-size:90%;">[</span><a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2605.10181#bib.bib45" title="Fives: a fundus image dataset for artificial intelligence based vessel segmentation">12</a><span class="ltx_text" id="S2.SS1.p2.1.6.2" style="font-size:90%;">]</span></cite>, G1020 <cite class="ltx_cite ltx_citemacro_cite"><span class="ltx_text" id="S2.SS1.p2.1.8.1" style="font-size:90%;">[</span><a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2605.10181#bib.bib46" title="G1020: a benchmark retinal fundus image dataset for computer-aided glaucoma detection">2</a><span class="ltx_text" id="S2.SS1.p2.1.9.2" style="font-size:90%;">]</span></cite>, MESSIDOR <cite class="ltx_cite ltx_citemacro_cite"><span class="ltx_text" id="S2.SS1.p2.1.11.1" style="font-size:90%;">[</span><a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2605.10181#bib.bib36" title="An open-access breast lesion ultrasound image database: applicable in artificial intelligence studies">1</a><span class="ltx_text" id="S2.SS1.p2.1.12.2" style="font-size:90%;">]</span></cite>, PAPILA <cite class="ltx_cite ltx_citemacro_cite"><span class="ltx_text" id="S2.SS1.p2.1.14.1" style="font-size:90%;">[</span><a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2605.10181#bib.bib48" title="PAPILA: dataset with fundus images and clinical data of both eyes of the same patient for glaucoma assessment">13</a><span class="ltx_text" id="S2.SS1.p2.1.15.2" style="font-size:90%;">]</span></cite>, REFUGE <cite class="ltx_cite ltx_citemacro_cite"><span class="ltx_text" id="S2.SS1.p2.1.17.1" style="font-size:90%;">[</span><a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2605.10181#bib.bib49" title="REFUGE: retinal fundus glaucoma challenge">9</a><span class="ltx_text" id="S2.SS1.p2.1.18.2" style="font-size:90%;">]</span></cite> и RFMiD <cite class="ltx_cite ltx_citemacro_cite"><span class="ltx_text" id="S2.SS1.p2.1.20.1" style="font-size:90%;">[</span><a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2605.10181#bib.bib50" title="Retinal fundus multi-disease image dataset (rfmid): a dataset for multi-disease detection research">19</a><span class="ltx_text" id="S2.SS1.p2.1.21.2" style="font-size:90%;">]</span></cite>.  
+Помимо этих фундусных наборов данных, набор IV также включал нефундусные и ретинальные модальности OOD, такие как флуоресцентная ангиография (FA) и изображения фундуса с сверхшироким полем зрения (UWF) из набора данных DRAC <cite class="ltx_cite ltx_citemacro_cite"><span class="ltx_text" id="S2.SS1.p2.1.23.1" style="font-size:90%;">[</span><a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2605.10181#bib.bib52" title="DRAC 2022: a public benchmark for diabetic retinopathy analysis on ultra-wide optical coherence tomography angiography images">21</a>, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2605.10181#bib.bib51" title="An ultra-wide-field fundus image dataset for intelligent diagnosis of intraocular tumors">23</a><span class="ltx_text" id="S2.SS1.p2.1.24.2" style="font-size:90%;">]</span></cite>, МРТ головного мозга <cite class="ltx_cite ltx_citemacro_cite"><span class="ltx_text" id="S2.SS1.p2.1.26.1" style="font-size:90%;">[</span><a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2605.10181#bib.bib53" title="Brain mri dataset">5</a><span class="ltx_text" id="S2.SS1.p2.1.27.2" style="font-size:90%;">]</span></cite>, шейного отдела позвоночника <cite class="ltx_cite ltx_citemacro_cite"><span class="ltx_text" id="S2.SS1.p2.1.29.1" style="font-size:90%;">[</span><a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2605.10181#bib.bib37" title="A high-quality dataset featuring classified and annotated cervical spine x-ray atlas">22</a><span class="ltx_text" id="S2.SS1.p2.1.30.2" style="font-size:90%;">]</span></cite>, рентгенографию грудной клетки <cite class="ltx_cite ltx_citemacro_cite"><span class="ltx_text" id="S2.SS1.p2.1.32.1" style="font-size:90%;">[</span><a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2605.10181#bib.bib38" title="VinDr-cxr: an open dataset of chest x-rays with radiologist’s annotations">18</a><span class="ltx_text" id="S2.SS1.p2.1.33.2" style="font-size:90%;">]</span></cite>, изображения зубов и полости рта <cite class="ltx_cite ltx_citemacro_cite"><span class="ltx_text" id="S2.SS1.p2.1.35.1" style="font-size:90%;">[</span><a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2605.10181#bib.bib43" title="Teeth or dental image dataset">7</a><span class="ltx_text" id="S2.SS1.p2.1.36.2" style="font-size:90%;">]</span></cite>, фотографии кожных поражений <cite class="ltx_cite ltx_citemacro_cite"><span class="ltx_text" id="S2.SS1.p2.1.38.1" style="font-size:90%;">[</span><a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2605.10181#bib.bib42" title="Skin diseases and skin cancer recognition dataset">17</a><span class="ltx_text" id="S2.SS1.p2.1.39.2" style="font-size:90%;">]</span></cite>, а также эндоскопические наборы данных, такие как CVC-Clinic <cite class="ltx_cite ltx_citemacro_cite"><span class="ltx_text" id="S2.SS1.p2.1.41.1" style="font-size:90%;">[</span><a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2605.10181#bib.bib40" title="WM-dova maps for accurate polyp highlighting in colonoscopy: validation vs. saliency maps from physicians">3</a><span class="ltx_text" id="S2.SS1.p2.1.42.2" style="font-size:90%;">]</span></cite> и Hyper-Kvasir <cite class="ltx_cite ltx_citemacro_cite"><span class="ltx_text" id="S2.SS1.p2.1.44.1" style="font-size:90%;">[</span><a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2605.10181#bib.bib41" title="HyperKvasir, a comprehensive multi-class image and video dataset for gastrointestinal endoscopy">4</a><span class="ltx_text" id="S2.SS1.p2.1.45.2" style="font-size:90%;">]</span></cite>⟧.</p>
+</div>
+<div class="ltx_para" id="S2.SS1.p3">
+<p class="ltx_p" id="S2.SS1.p3.1">Набор EV использовался исключительно для независимого тестирования с целью оценки обобщающей способности модели на неиспользованных данных.
+В частности, набор EV включал TOP <cite class="ltx_cite ltx_citemacro_cite"><span class="ltx_text" id="S2.SS1.p3.1.2.1" style="font-size:90%;">[</span><a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2605.10181#bib.bib61" title="Detection of multiple retinal diseases in ultra-widefield fundus images using deep learning: data-driven identification of relevant regions">8</a><span class="ltx_text" id="S2.SS1.p3.1.3.2" style="font-size:90%;">]</span></cite>, IDRiD <cite class="ltx_cite ltx_citemacro_cite"><span class="ltx_text" id="S2.SS1.p3.1.5.1" style="font-size:90%;">[</span><a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2605.10181#bib.bib47" title="Indian diabetic retinopathy image dataset (idrid)">20</a><span class="ltx_text" id="S2.SS1.p3.1.6.2" style="font-size:90%;">]</span></cite>, фотографии кожных поражений <cite class="ltx_cite ltx_citemacro_cite"><span class="ltx_text" id="S2.SS1.p3.1.8.1" style="font-size:90%;">[</span><a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2605.10181#bib.bib42" title="Skin diseases and skin cancer recognition dataset">17</a><span class="ltx_text" id="S2.SS1.p3.1.9.2" style="font-size:90%;">]</span></cite> и CVC-Clinic <cite class="ltx_cite ltx_citemacro_cite"><span class="ltx_text" id="S2.SS1.p3.1.11.1" style="font-size:90%;">[</span><a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2605.10181#bib.bib40" title="WM-dova maps for accurate polyp highlighting in colonoscopy: validation vs. saliency maps from physicians">3</a><span class="ltx_text" id="S2.SS1.p3.1.12.2" style="font-size:90%;">]</span></cite>, охватывая как фундус, так и нефундусные модальности.
+Эти наборы данных не применялись во время обучения модели и служили только как источники для тестирования.</p>
+</div>
+<div class="ltx_para" id="S2.SS1.p4">
+<p class="ltx_p" id="S2.SS1.p4.1">Для разработки и оценки модели множество IV, включающее в общей сложности 45,909 изображений, было разделено на обучающую, валидационную и тестовую подвыборки в соотношении 3:1:1.
+Множество EV состояло из 15,234 изображений.
+Множество IV включало 9,108 изображений с глазным дном и 36,801 изображений без глазного дна, тогда как множество EV содержало 597 изображений с глазным дном и 14,637 изображений без глазного дна.</p>
+</div>
+</section>
+<section class="ltx_subsection" id="S2.SS2">
+<h3 class="ltx_title ltx_title_subsection" style="font-size:90%;">
+<span class="ltx_tag ltx_tag_subsection">2.2 </span>Предобработка</h3>
+<div class="ltx_para" id="S2.SS2.p1">
+<p class="ltx_p" id="S2.SS2.p1.12">Для моделей машинного обучения использовались исходные изображения без центрированного обрезания. Вместо этого изображения анализировались на нескольких относительных разрешениях (<math alttext="1{\times}" class="ltx_math_unparsed" display="inline" id="S2.SS2.p1.1.m1" intent=":literal"><semantics><mrow><mn mathsize="0.900em">1</mn><mo lspace="0.222em" mathsize="0.900em">×</mo></mrow><annotation encoding="application/x-tex">1{\times}</annotation></semantics></math>, <math alttext="1/2{\times}" class="ltx_math_unparsed" display="inline" id="S2.SS2.p1.2.m2" intent=":literal"><semantics><mrow><mn mathsize="0.900em">1</mn><mo maxsize="0.900em" minsize="0.900em" stretchy="true" symmetric="true">/</mo><mn mathsize="0.900em">2</mn><mo lspace="0.222em" mathsize="0.900em">×</mo></mrow><annotation encoding="application/x-tex">1/2{\times}</annotation></semantics></math>, <math alttext="1/4{\times}" class="ltx_math_unparsed" display="inline" id="S2.SS2.p1.3.m3" intent=":literal"><semantics><mrow><mn mathsize="0.900em">1</mn><mo maxsize="0.900em" minsize="0.900em" stretchy="true" symmetric="true">/</mo><mn mathsize="0.900em">4</mn><mo lspace="0.222em" mathsize="0.900em">×</mo></mrow><annotation encoding="application/x-tex">1/4{\times}</annotation></semantics></math> и <math alttext="1/8{\times}" class="ltx_math_unparsed" display="inline" id="S2.SS2.p1.4.m4" intent=":literal"><semantics><mrow><mn mathsize="0.900em">1</mn><mo maxsize="0.900em" minsize="0.900em" stretchy="true" symmetric="true">/</mo><mn mathsize="0.900em">8</mn><mo lspace="0.222em" mathsize="0.900em">×</mo></mrow><annotation encoding="application/x-tex">1/8{\times}</annotation></semantics></math>), чтобы оценить масштабно-зависимое поведение признаков. Градации серого (<math alttext="Y{=}0.299R{+}0.587G{+}0.114B" class="ltx_Math" display="inline" id="S2.SS2.p1.5.m5" intent=":literal"><semantics><mrow><mi mathsize="0.900em">Y</mi><mo mathsize="0.900em">=</mo><mrow><mrow><mn mathsize="0.900em">0.299</mn><mo lspace="0em" rspace="0em">​</mo><mi mathsize="0.900em">R</mi></mrow><mo mathsize="0.900em">+</mo><mrow><mn mathsize="0.900em">0.587</mn><mo lspace="0em" rspace="0em">​</mo><mi mathsize="0.900em">G</mi></mrow><mo mathsize="0.900em">+</mo><mrow><mn mathsize="0.900em">0.114</mn><mo lspace="0em" rspace="0em">​</mo><mi mathsize="0.900em">B</mi></mrow></mrow></mrow><annotation encoding="application/x-tex">Y{=}0.299R{+}0.587G{+}0.114B</annotation></semantics></math>) и представления в HSV генерировались по необходимости для извлечения признаков. Признаки Local Binary Pattern (LBP) вычислялись на <math alttext="Y" class="ltx_Math" display="inline" id="S2.SS2.p1.6.m6" intent=":literal"><semantics><mi mathsize="0.900em">Y</mi><annotation encoding="application/x-tex">Y</annotation></semantics></math> с <math alttext="(P{=}8,R{=}1)" class="ltx_Math" display="inline" id="S2.SS2.p1.7.m7" intent=":literal"><semantics><mrow><mo maxsize="0.900em" minsize="0.900em">(</mo><mrow><mrow><mi mathsize="0.900em">P</mi><mo mathsize="0.900em">=</mo><mn mathsize="0.900em">8</mn></mrow><mo mathsize="0.900em">,</mo><mrow><mi mathsize="0.900em">R</mi><mo mathsize="0.900em">=</mo><mn mathsize="0.900em">1</mn></mrow></mrow><mo maxsize="0.900em" minsize="0.900em">)</mo></mrow><annotation encoding="application/x-tex">(P{=}8,R{=}1)</annotation></semantics></math> с использованием униформного отображения.
+Для моделей глубокого обучения все входные изображения подвергались центрированному обрезанию до максимальной квадратной области и изменению размера до нескольких разрешений (<math alttext="512{\times}512" class="ltx_Math" display="inline" id="S2.SS2.p1.8.m8" intent=":literal"><semantics><mrow><mn mathsize="0.900em">512</mn><mo lspace="0.222em" mathsize="0.900em" rspace="0.222em">×</mo><mn mathsize="0.900em">512</mn></mrow><annotation encoding="application/x-tex">512{\times}512</annotation></semantics></math>, <math alttext="256{\times}256" class="ltx_Math" display="inline" id="S2.SS2.p1.9.m9" intent=":literal"><semantics><mrow><mn mathsize="0.900em">256</mn><mo lspace="0.222em" mathsize="0.900em" rspace="0.222em">×</mo><mn mathsize="0.900em">256</mn></mrow><annotation encoding="application/x-tex">256{\times}256</annotation></semantics></math>, <math alttext="128{\times}128" class="ltx_Math" display="inline" id="S2.SS2.p1.10.m10" intent=":literal"><semantics><mrow><mn mathsize="0.900em">128</mn><mo lspace="0.222em" mathsize="0.900em" rspace="0.222em">×</mo><mn mathsize="0.900em">128</mn></mrow><annotation encoding="application/x-tex">128{\times}128</annotation></semantics></math> и <math alttext="64{\times}64" class="ltx_Math" display="inline" id="S2.SS2.p1.11.m11" intent=":literal"><semantics><mrow><mn mathsize="0.900em">64</mn><mo lspace="0.222em" mathsize="0.900em" rspace="0.222em">×</mo><mn mathsize="0.900em">64</mn></mrow><annotation encoding="application/x-tex">64{\times}64</annotation></semantics></math>), чтобы оценить производительность, зависящую от разрешения. Значения RGB нормализовались до <math alttext="[0,1]" class="ltx_Math" display="inline" id="S2.SS2.p1.12.m12" intent=":literal"><semantics><mrow><mo maxsize="0.900em" minsize="0.900em">[</mo><mn mathsize="0.900em">0</mn><mo mathsize="0.900em">,</mo><mn mathsize="0.900em">1</mn><mo maxsize="0.900em" minsize="0.900em">]</mo></mrow><annotation encoding="application/x-tex">[0,1]</annotation></semantics></math>, обеспечивая согласованное масштабирование входных данных для обработки сверточными слоями.</p>
+</div>
+<figure class="ltx_table" id="S2.T1">
+<figcaption class="ltx_caption ltx_centering" style="font-size:90%;">⟦<span class="ltx_tag ltx_tag_table"><span class="ltx_text ltx_font_bold" id="S2.T1.12.1.1">Table 1</span>: </span>
+Сравнение сквозной задержки и точности между различными разрешениями изображений для конвейеров ML и DL.
+Задержка разделяется на Загрузку (L), извлечение признаков (F) и классификацию (C) для ML, а также на Загрузку (L), предварительную обработку (P) и прямое распространение (F) для DL.
+Загрузка (L) включает загрузку изображения и модели.
+Все измерения выполнялись на 1 000 случайно выбранных тестовых изображениях (размер пакета = 1) при условиях инференса для одного изображения.
+Точность приводится для внутренних (IV) и внешних (EV) наборов валидации.
+Жирные числа обозначают наилучшие по результативности конфигурации и их соответствующую задержку для каждого конвейера (ML и DL).
+</figcaption>
+<table class="ltx_tabular ltx_centering ltx_guessed_headers ltx_align_middle" id="S2.T1.8">
+<thead class="ltx_thead">
+<tr class="ltx_tr" id="S2.T1.8.9.1">
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt" colspan="2" id="S2.T1.8.9.1.1" style="padding-left:5.5pt;padding-right:5.5pt;"><span class="ltx_text" id="S2.T1.8.9.1.1.1" style="font-size:90%;">Resolution</span></th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt" colspan="4" id="S2.T1.8.9.1.2" style="padding-left:5.5pt;padding-right:5.5pt;"><span class="ltx_text" id="S2.T1.8.9.1.2.1" style="font-size:90%;">ML-CPU (ms)</span></th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt" colspan="4" id="S2.T1.8.9.1.3" style="padding-left:5.5pt;padding-right:5.5pt;"><span class="ltx_text" id="S2.T1.8.9.1.3.1" style="font-size:90%;">DL-CPU (ms)</span></th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt" colspan="4" id="S2.T1.8.9.1.4" style="padding-left:5.5pt;padding-right:5.5pt;"><span class="ltx_text" id="S2.T1.8.9.1.4.1" style="font-size:90%;">DL-GPU (ms)</span></th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt" colspan="2" id="S2.T1.8.9.1.5" style="padding-left:5.5pt;padding-right:5.5pt;"><span class="ltx_text" id="S2.T1.8.9.1.5.1" style="font-size:90%;">ML (accuracy)</span></th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt" colspan="2" id="S2.T1.8.9.1.6" style="padding-left:5.5pt;padding-right:5.5pt;"><span class="ltx_text" id="S2.T1.8.9.1.6.1" style="font-size:90%;">DL (accuracy)</span></th>
+</tr>
+<tr class="ltx_tr" id="S2.T1.8.10.2">
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_t" id="S2.T1.8.10.2.1" style="padding-left:5.5pt;padding-right:5.5pt;"><span class="ltx_text" id="S2.T1.8.10.2.1.1" style="font-size:90%;">ML</span></th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_t" id="S2.T1.8.10.2.2" style="padding-left:5.5pt;padding-right:5.5pt;"><span class="ltx_text" id="S2.T1.8.10.2.2.1" style="font-size:90%;">DL</span></th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_t" id="S2.T1.8.10.2.3" style="padding-left:5.5pt;padding-right:5.5pt;"><span class="ltx_text" id="S2.T1.8.10.2.3.1" style="font-size:90%;">L</span></th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_t" id="S2.T1.8.10.2.4" style="padding-left:5.5pt;padding-right:5.5pt;"><span class="ltx_text" id="S2.T1.8.10.2.4.1" style="font-size:90%;">F</span></th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_t" id="S2.T1.8.10.2.5" style="padding-left:5.5pt;padding-right:5.5pt;"><span class="ltx_text" id="S2.T1.8.10.2.5.1" style="font-size:90%;">C</span></th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_t" id="S2.T1.8.10.2.6" style="padding-left:5.5pt;padding-right:5.5pt;"><span class="ltx_text" id="S2.T1.8.10.2.6.1" style="font-size:90%;">Overall</span></th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_t" id="S2.T1.8.10.2.7" style="padding-left:5.5pt;padding-right:5.5pt;"><span class="ltx_text" id="S2.T1.8.10.2.7.1" style="font-size:90%;">L</span></th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_t" id="S2.T1.8.10.2.8" style="padding-left:5.5pt;padding-right:5.5pt;"><span class="ltx_text" id="S2.T1.8.10.2.8.1" style="font-size:90%;">P</span></th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_t" id="S2.T1.8.10.2.9" style="padding-left:5.5pt;padding-right:5.5pt;"><span class="ltx_text" id="S2.T1.8.10.2.9.1" style="font-size:90%;">F</span></th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_t" id="S2.T1.8.10.2.10" style="padding-left:5.5pt;padding-right:5.5pt;"><span class="ltx_text" id="S2.T1.8.10.2.10.1" style="font-size:90%;">Overall</span></th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_t" id="S2.T1.8.10.2.11" style="padding-left:5.5pt;padding-right:5.5pt;"><span class="ltx_text" id="S2.T1.8.10.2.11.1" style="font-size:90%;">L</span></th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_t" id="S2.T1.8.10.2.12" style="padding-left:5.5pt;padding-right:5.5pt;"><span class="ltx_text" id="S2.T1.8.10.2.12.1" style="font-size:90%;">P</span></th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_t" id="S2.T1.8.10.2.13" style="padding-left:5.5pt;padding-right:5.5pt;"><span class="ltx_text" id="S2.T1.8.10.2.13.1" style="font-size:90%;">F</span></th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_t" id="S2.T1.8.10.2.14" style="padding-left:5.5pt;padding-right:5.5pt;"><span class="ltx_text" id="S2.T1.8.10.2.14.1" style="font-size:90%;">Overall</span></th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_t" id="S2.T1.8.10.2.15" style="padding-left:5.5pt;padding-right:5.5pt;"><span class="ltx_text" id="S2.T1.8.10.2.15.1" style="font-size:90%;">IV</span></th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_t" id="S2.T1.8.10.2.16" style="padding-left:5.5pt;padding-right:5.5pt;"><span class="ltx_text" id="S2.T1.8.10.2.16.1" style="font-size:90%;">EV</span></th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_t" id="S2.T1.8.10.2.17" style="padding-left:5.5pt;padding-right:5.5pt;"><span class="ltx_text" id="S2.T1.8.10.2.17.1" style="font-size:90%;">IV</span></th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_t" id="S2.T1.8.10.2.18" style="padding-left:5.5pt;padding-right:5.5pt;"><span class="ltx_text" id="S2.T1.8.10.2.18.1" style="font-size:90%;">EV</span></th>
+</tr>
+</thead>
+<tbody class="ltx_tbody">
+<tr class="ltx_tr" id="S2.T1.2.2">
+<td class="ltx_td ltx_align_center ltx_border_t" id="S2.T1.1.1.1" style="padding-left:5.5pt;padding-right:5.5pt;">
+<span class="ltx_text" id="S2.T1.1.1.1.1" style="font-size:90%;">1</span><math alttext="\times" class="ltx_Math" display="inline" id="S2.T1.1.1.1.m1" intent=":literal"><semantics><mo mathsize="0.900em">×</mo><annotation encoding="application/x-tex">\times</annotation></semantics></math>
+</td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S2.T1.2.2.2" style="padding-left:5.5pt;padding-right:5.5pt;"><math alttext="512{\times}512" class="ltx_Math" display="inline" id="S2.T1.2.2.2.m1" intent=":literal"><semantics><mrow><mn mathsize="0.900em">512</mn><mo lspace="0.222em" mathsize="0.900em" rspace="0.222em">×</mo><mn mathsize="0.900em">512</mn></mrow><annotation encoding="application/x-tex">512{\times}512</annotation></semantics></math></td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S2.T1.2.2.3" style="padding-left:5.5pt;padding-right:5.5pt;"><span class="ltx_text" id="S2.T1.2.2.3.1" style="font-size:90%;">15</span></td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S2.T1.2.2.4" style="padding-left:5.5pt;padding-right:5.5pt;"><span class="ltx_text" id="S2.T1.2.2.4.1" style="font-size:90%;">378</span></td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S2.T1.2.2.5" style="padding-left:5.5pt;padding-right:5.5pt;"><span class="ltx_text" id="S2.T1.2.2.5.1" style="font-size:90%;">3</span></td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S2.T1.2.2.6" style="padding-left:5.5pt;padding-right:5.5pt;"><span class="ltx_text" id="S2.T1.2.2.6.1" style="font-size:90%;">396</span></td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S2.T1.2.2.7" style="padding-left:5.5pt;padding-right:5.5pt;"><span class="ltx_text" id="S2.T1.2.2.7.1" style="font-size:90%;">177</span></td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S2.T1.2.2.8" style="padding-left:5.5pt;padding-right:5.5pt;"><span class="ltx_text" id="S2.T1.2.2.8.1" style="font-size:90%;">8</span></td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S2.T1.2.2.9" style="padding-left:5.5pt;padding-right:5.5pt;"><span class="ltx_text" id="S2.T1.2.2.9.1" style="font-size:90%;">44</span></td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S2.T1.2.2.10" style="padding-left:5.5pt;padding-right:5.5pt;"><span class="ltx_text ltx_font_bold" id="S2.T1.2.2.10.1" style="font-size:90%;">229</span></td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S2.T1.2.2.11" style="padding-left:5.5pt;padding-right:5.5pt;"><span class="ltx_text" id="S2.T1.2.2.11.1" style="font-size:90%;">198</span></td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S2.T1.2.2.12" style="padding-left:5.5pt;padding-right:5.5pt;"><span class="ltx_text" id="S2.T1.2.2.12.1" style="font-size:90%;">9</span></td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S2.T1.2.2.13" style="padding-left:5.5pt;padding-right:5.5pt;"><span class="ltx_text" id="S2.T1.2.2.13.1" style="font-size:90%;">7</span></td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S2.T1.2.2.14" style="padding-left:5.5pt;padding-right:5.5pt;"><span class="ltx_text ltx_font_bold" id="S2.T1.2.2.14.1" style="font-size:90%;">214</span></td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S2.T1.2.2.15" style="padding-left:5.5pt;padding-right:5.5pt;"><span class="ltx_text" id="S2.T1.2.2.15.1" style="font-size:90%;">1.000</span></td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S2.T1.2.2.16" style="padding-left:5.5pt;padding-right:5.5pt;"><span class="ltx_text" id="S2.T1.2.2.16.1" style="font-size:90%;">0.988</span></td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S2.T1.2.2.17" style="padding-left:5.5pt;padding-right:5.5pt;"><span class="ltx_text ltx_font_bold" id="S2.T1.2.2.17.1" style="font-size:90%;">1.000</span></td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S2.T1.2.2.18" style="padding-left:5.5pt;padding-right:5.5pt;"><span class="ltx_text ltx_font_bold" id="S2.T1.2.2.18.1" style="font-size:90%;">1.000</span></td>
+</tr>
+<tr class="ltx_tr" id="S2.T1.4.4">
+<td class="ltx_td ltx_align_center" id="S2.T1.3.3.1" style="padding-left:5.5pt;padding-right:5.5pt;">
+<span class="ltx_text" id="S2.T1.3.3.1.1" style="font-size:90%;">1/2</span><math alttext="\times" class="ltx_Math" display="inline" id="S2.T1.3.3.1.m1" intent=":literal"><semantics><mo mathsize="0.900em">×</mo><annotation encoding="application/x-tex">\times</annotation></semantics></math>
+</td>
+<td class="ltx_td ltx_align_center" id="S2.T1.4.4.2" style="padding-left:5.5pt;padding-right:5.5pt;"><math alttext="256{\times}256" class="ltx_Math" display="inline" id="S2.T1.4.4.2.m1" intent=":literal"><semantics><mrow><mn mathsize="0.900em">256</mn><mo lspace="0.222em" mathsize="0.900em" rspace="0.222em">×</mo><mn mathsize="0.900em">256</mn></mrow><annotation encoding="application/x-tex">256{\times}256</annotation></semantics></math></td>
+<td class="ltx_td ltx_align_center" id="S2.T1.4.4.3" style="padding-left:5.5pt;padding-right:5.5pt;"><span class="ltx_text" id="S2.T1.4.4.3.1" style="font-size:90%;">15</span></td>
+<td class="ltx_td ltx_align_center" id="S2.T1.4.4.4" style="padding-left:5.5pt;padding-right:5.5pt;"><span class="ltx_text" id="S2.T1.4.4.4.1" style="font-size:90%;">101</span></td>
+<td class="ltx_td ltx_align_center" id="S2.T1.4.4.5" style="padding-left:5.5pt;padding-right:5.5pt;"><span class="ltx_text" id="S2.T1.4.4.5.1" style="font-size:90%;">3</span></td>
+<td class="ltx_td ltx_align_center" id="S2.T1.4.4.6" style="padding-left:5.5pt;padding-right:5.5pt;"><span class="ltx_text" id="S2.T1.4.4.6.1" style="font-size:90%;">119</span></td>
+<td class="ltx_td ltx_align_center" id="S2.T1.4.4.7" style="padding-left:5.5pt;padding-right:5.5pt;"><span class="ltx_text" id="S2.T1.4.4.7.1" style="font-size:90%;">175</span></td>
+<td class="ltx_td ltx_align_center" id="S2.T1.4.4.8" style="padding-left:5.5pt;padding-right:5.5pt;"><span class="ltx_text" id="S2.T1.4.4.8.1" style="font-size:90%;">6</span></td>
+<td class="ltx_td ltx_align_center" id="S2.T1.4.4.9" style="padding-left:5.5pt;padding-right:5.5pt;"><span class="ltx_text" id="S2.T1.4.4.9.1" style="font-size:90%;">16</span></td>
+<td class="ltx_td ltx_align_center" id="S2.T1.4.4.10" style="padding-left:5.5pt;padding-right:5.5pt;"><span class="ltx_text ltx_font_bold" id="S2.T1.4.4.10.1" style="font-size:90%;">197</span></td>
+<td class="ltx_td ltx_align_center" id="S2.T1.4.4.11" style="padding-left:5.5pt;padding-right:5.5pt;"><span class="ltx_text" id="S2.T1.4.4.11.1" style="font-size:90%;">187</span></td>
+<td class="ltx_td ltx_align_center" id="S2.T1.4.4.12" style="padding-left:5.5pt;padding-right:5.5pt;"><span class="ltx_text" id="S2.T1.4.4.12.1" style="font-size:90%;">5</span></td>
+<td class="ltx_td ltx_align_center" id="S2.T1.4.4.13" style="padding-left:5.5pt;padding-right:5.5pt;"><span class="ltx_text" id="S2.T1.4.4.13.1" style="font-size:90%;">4</span></td>
+<td class="ltx_td ltx_align_center" id="S2.T1.4.4.14" style="padding-left:5.5pt;padding-right:5.5pt;"><span class="ltx_text ltx_font_bold" id="S2.T1.4.4.14.1" style="font-size:90%;">196</span></td>
+<td class="ltx_td ltx_align_center" id="S2.T1.4.4.15" style="padding-left:5.5pt;padding-right:5.5pt;"><span class="ltx_text" id="S2.T1.4.4.15.1" style="font-size:90%;">1.000</span></td>
+<td class="ltx_td ltx_align_center" id="S2.T1.4.4.16" style="padding-left:5.5pt;padding-right:5.5pt;"><span class="ltx_text" id="S2.T1.4.4.16.1" style="font-size:90%;">0.985</span></td>
+<td class="ltx_td ltx_align_center" id="S2.T1.4.4.17" style="padding-left:5.5pt;padding-right:5.5pt;"><span class="ltx_text ltx_font_bold" id="S2.T1.4.4.17.1" style="font-size:90%;">1.000</span></td>
+<td class="ltx_td ltx_align_center" id="S2.T1.4.4.18" style="padding-left:5.5pt;padding-right:5.5pt;"><span class="ltx_text ltx_font_bold" id="S2.T1.4.4.18.1" style="font-size:90%;">1.000</span></td>
+</tr>
+<tr class="ltx_tr" id="S2.T1.6.6">
+<td class="ltx_td ltx_align_center" id="S2.T1.5.5.1" style="padding-left:5.5pt;padding-right:5.5pt;">
+<span class="ltx_text" id="S2.T1.5.5.1.1" style="font-size:90%;">1/4</span><math alttext="\times" class="ltx_Math" display="inline" id="S2.T1.5.5.1.m1" intent=":literal"><semantics><mo mathsize="0.900em">×</mo><annotation encoding="application/x-tex">\times</annotation></semantics></math>
+</td>
+<td class="ltx_td ltx_align_center" id="S2.T1.6.6.2" style="padding-left:5.5pt;padding-right:5.5pt;"><math alttext="128{\times}128" class="ltx_Math" display="inline" id="S2.T1.6.6.2.m1" intent=":literal"><semantics><mrow><mn mathsize="0.900em">128</mn><mo lspace="0.222em" mathsize="0.900em" rspace="0.222em">×</mo><mn mathsize="0.900em">128</mn></mrow><annotation encoding="application/x-tex">128{\times}128</annotation></semantics></math></td>
+<td class="ltx_td ltx_align_center" id="S2.T1.6.6.3" style="padding-left:5.5pt;padding-right:5.5pt;"><span class="ltx_text" id="S2.T1.6.6.3.1" style="font-size:90%;">15</span></td>
+<td class="ltx_td ltx_align_center" id="S2.T1.6.6.4" style="padding-left:5.5pt;padding-right:5.5pt;"><span class="ltx_text" id="S2.T1.6.6.4.1" style="font-size:90%;">32</span></td>
+<td class="ltx_td ltx_align_center" id="S2.T1.6.6.5" style="padding-left:5.5pt;padding-right:5.5pt;"><span class="ltx_text" id="S2.T1.6.6.5.1" style="font-size:90%;">3</span></td>
+<td class="ltx_td ltx_align_center" id="S2.T1.6.6.6" style="padding-left:5.5pt;padding-right:5.5pt;"><span class="ltx_text" id="S2.T1.6.6.6.1" style="font-size:90%;">50</span></td>
+<td class="ltx_td ltx_align_center" id="S2.T1.6.6.7" style="padding-left:5.5pt;padding-right:5.5pt;"><span class="ltx_text" id="S2.T1.6.6.7.1" style="font-size:90%;">173</span></td>
+<td class="ltx_td ltx_align_center" id="S2.T1.6.6.8" style="padding-left:5.5pt;padding-right:5.5pt;"><span class="ltx_text" id="S2.T1.6.6.8.1" style="font-size:90%;">5</span></td>
+<td class="ltx_td ltx_align_center" id="S2.T1.6.6.9" style="padding-left:5.5pt;padding-right:5.5pt;"><span class="ltx_text" id="S2.T1.6.6.9.1" style="font-size:90%;">10</span></td>
+<td class="ltx_td ltx_align_center" id="S2.T1.6.6.10" style="padding-left:5.5pt;padding-right:5.5pt;"><span class="ltx_text" id="S2.T1.6.6.10.1" style="font-size:90%;">188</span></td>
+<td class="ltx_td ltx_align_center" id="S2.T1.6.6.11" style="padding-left:5.5pt;padding-right:5.5pt;"><span class="ltx_text" id="S2.T1.6.6.11.1" style="font-size:90%;">188</span></td>
+<td class="ltx_td ltx_align_center" id="S2.T1.6.6.12" style="padding-left:5.5pt;padding-right:5.5pt;"><span class="ltx_text" id="S2.T1.6.6.12.1" style="font-size:90%;">4</span></td>
+<td class="ltx_td ltx_align_center" id="S2.T1.6.6.13" style="padding-left:5.5pt;padding-right:5.5pt;"><span class="ltx_text" id="S2.T1.6.6.13.1" style="font-size:90%;">4</span></td>
+<td class="ltx_td ltx_align_center" id="S2.T1.6.6.14" style="padding-left:5.5pt;padding-right:5.5pt;"><span class="ltx_text" id="S2.T1.6.6.14.1" style="font-size:90%;">196</span></td>
+<td class="ltx_td ltx_align_center" id="S2.T1.6.6.15" style="padding-left:5.5pt;padding-right:5.5pt;"><span class="ltx_text" id="S2.T1.6.6.15.1" style="font-size:90%;">1.000</span></td>
+<td class="ltx_td ltx_align_center" id="S2.T1.6.6.16" style="padding-left:5.5pt;padding-right:5.5pt;"><span class="ltx_text" id="S2.T1.6.6.16.1" style="font-size:90%;">0.995</span></td>
+<td class="ltx_td ltx_align_center" id="S2.T1.6.6.17" style="padding-left:5.5pt;padding-right:5.5pt;"><span class="ltx_text" id="S2.T1.6.6.17.1" style="font-size:90%;">1.000</span></td>
+<td class="ltx_td ltx_align_center" id="S2.T1.6.6.18" style="padding-left:5.5pt;padding-right:5.5pt;"><span class="ltx_text" id="S2.T1.6.6.18.1" style="font-size:90%;">0.995</span></td>
+</tr>
+<tr class="ltx_tr" id="S2.T1.8.8">
+<td class="ltx_td ltx_align_center ltx_border_bb" id="S2.T1.7.7.1" style="padding-left:5.5pt;padding-right:5.5pt;">
+<span class="ltx_text" id="S2.T1.7.7.1.1" style="font-size:90%;">1/8</span><math alttext="\times" class="ltx_Math" display="inline" id="S2.T1.7.7.1.m1" intent=":literal"><semantics><mo mathsize="0.900em">×</mo><annotation encoding="application/x-tex">\times</annotation></semantics></math>
+</td>
+<td class="ltx_td ltx_align_center ltx_border_bb" id="S2.T1.8.8.2" style="padding-left:5.5pt;padding-right:5.5pt;"><math alttext="64{\times}64" class="ltx_Math" display="inline" id="S2.T1.8.8.2.m1" intent=":literal"><semantics><mrow><mn mathsize="0.900em">64</mn><mo lspace="0.222em" mathsize="0.900em" rspace="0.222em">×</mo><mn mathsize="0.900em">64</mn></mrow><annotation encoding="application/x-tex">64{\times}64</annotation></semantics></math></td>
+<td class="ltx_td ltx_align_center ltx_border_bb" id="S2.T1.8.8.3" style="padding-left:5.5pt;padding-right:5.5pt;"><span class="ltx_text" id="S2.T1.8.8.3.1" style="font-size:90%;">15</span></td>
+<td class="ltx_td ltx_align_center ltx_border_bb" id="S2.T1.8.8.4" style="padding-left:5.5pt;padding-right:5.5pt;"><span class="ltx_text" id="S2.T1.8.8.4.1" style="font-size:90%;">13</span></td>
+<td class="ltx_td ltx_align_center ltx_border_bb" id="S2.T1.8.8.5" style="padding-left:5.5pt;padding-right:5.5pt;"><span class="ltx_text" id="S2.T1.8.8.5.1" style="font-size:90%;">3</span></td>
+<td class="ltx_td ltx_align_center ltx_border_bb" id="S2.T1.8.8.6" style="padding-left:5.5pt;padding-right:5.5pt;"><span class="ltx_text ltx_font_bold" id="S2.T1.8.8.6.1" style="font-size:90%;">31</span></td>
+<td class="ltx_td ltx_align_center ltx_border_bb" id="S2.T1.8.8.7" style="padding-left:5.5pt;padding-right:5.5pt;"><span class="ltx_text" id="S2.T1.8.8.7.1" style="font-size:90%;">173</span></td>
+<td class="ltx_td ltx_align_center ltx_border_bb" id="S2.T1.8.8.8" style="padding-left:5.5pt;padding-right:5.5pt;"><span class="ltx_text" id="S2.T1.8.8.8.1" style="font-size:90%;">4</span></td>
+<td class="ltx_td ltx_align_center ltx_border_bb" id="S2.T1.8.8.9" style="padding-left:5.5pt;padding-right:5.5pt;"><span class="ltx_text" id="S2.T1.8.8.9.1" style="font-size:90%;">6</span></td>
+<td class="ltx_td ltx_align_center ltx_border_bb" id="S2.T1.8.8.10" style="padding-left:5.5pt;padding-right:5.5pt;"><span class="ltx_text" id="S2.T1.8.8.10.1" style="font-size:90%;">183</span></td>
+<td class="ltx_td ltx_align_center ltx_border_bb" id="S2.T1.8.8.11" style="padding-left:5.5pt;padding-right:5.5pt;"><span class="ltx_text" id="S2.T1.8.8.11.1" style="font-size:90%;">191</span></td>
+<td class="ltx_td ltx_align_center ltx_border_bb" id="S2.T1.8.8.12" style="padding-left:5.5pt;padding-right:5.5pt;"><span class="ltx_text" id="S2.T1.8.8.12.1" style="font-size:90%;">3</span></td>
+<td class="ltx_td ltx_align_center ltx_border_bb" id="S2.T1.8.8.13" style="padding-left:5.5pt;padding-right:5.5pt;"><span class="ltx_text" id="S2.T1.8.8.13.1" style="font-size:90%;">3</span></td>
+<td class="ltx_td ltx_align_center ltx_border_bb" id="S2.T1.8.8.14" style="padding-left:5.5pt;padding-right:5.5pt;"><span class="ltx_text" id="S2.T1.8.8.14.1" style="font-size:90%;">197</span></td>
+<td class="ltx_td ltx_align_center ltx_border_bb" id="S2.T1.8.8.15" style="padding-left:5.5pt;padding-right:5.5pt;"><span class="ltx_text ltx_font_bold" id="S2.T1.8.8.15.1" style="font-size:90%;">1.000</span></td>
+<td class="ltx_td ltx_align_center ltx_border_bb" id="S2.T1.8.8.16" style="padding-left:5.5pt;padding-right:5.5pt;"><span class="ltx_text ltx_font_bold" id="S2.T1.8.8.16.1" style="font-size:90%;">0.999</span></td>
+<td class="ltx_td ltx_align_center ltx_border_bb" id="S2.T1.8.8.17" style="padding-left:5.5pt;padding-right:5.5pt;"><span class="ltx_text" id="S2.T1.8.8.17.1" style="font-size:90%;">1.000</span></td>
+<td class="ltx_td ltx_align_center ltx_border_bb" id="S2.T1.8.8.18" style="padding-left:5.5pt;padding-right:5.5pt;"><span class="ltx_text" id="S2.T1.8.8.18.1" style="font-size:90%;">0.997</span></td>
+</tr>
+</tbody>
+</table>
+</figure>
+</section>
+<section class="ltx_subsection" id="S2.SS3">
+<h3 class="ltx_title ltx_title_subsection" style="font-size:90%;">
+<span class="ltx_tag ltx_tag_subsection">2.3 </span>Конвейер машинного обучения и ручные признаки</h3>
+<div class="ltx_para" id="S2.SS3.p1">
+<p class="ltx_p" id="S2.SS3.p1.1">Мы извлекли 39 вручную разработанных признаков, организованных в пять категорий: статистики интенсивности и фона, цвет и текстура, пространственное распределение, форма и морфология, а также глобальные структурные показатели.  
+Эти признаки были разработаны для отражения предметно-специфических характеристик CFP, включая круговую поле зрения, темный периферический фон и распределение оттенков красновато-оранжевого цвета.  
+Они дают прозрачные и клинически интерпретируемые подсказки для различения изображений глазного дна и изображений не глазного дна, включая как ретинальные, так и неретинальные модальности.</p>
+</div>
+<div class="ltx_para" id="S2.SS3.p2">
+<p class="ltx_p" id="S2.SS3.p2.1">Категории признаков обобщены следующим образом:
+(1) Интенсивность и фоновые статистики: измеряют глобальную яркость, контраст и периферическую затемненность (например, min, max, mean, variance, background flag);
+(2) Цвет и текстура: фиксируют хроматическую согласованность и мелкозернистую текстуру с помощью статистик hue/saturation и локальных дескрипторов, таких как LBP и GLCM (например, hue mean, sat var, glcm contrast, lbp mean);
+(3) Пространственное распределение: представляют градиенты интенсивности «центр–периферия» и асимметрии яркости между полушариями (например, radial slope mean, center minus outer, hemisphere asymmetry);
+(4) Форма и морфология: отражают геометрические характеристики ретинальной маски, которые соответствуют круговой форме изображений глазного дна, включая меры круговости, эксцентриситета, солидности и нерегулярности границы (например, circularity, solidity, circle residual mean, eccentricity).
+Большинство этих признаков предназначены для количественной оценки того, насколько наблюдаемая область сетчатки соответствует типичной круглой структуре CFP, тем самым выступая в качестве сильных индикаторов для различения внутридоменных образцов глазного дна от OOD или неретинальных изображений; и
+(5) Глобальные структурные индикаторы: обобщают общую композицию изображения, включая тип цвета и долю темных областей (например, is rgb, black pixel ratio).</p>
+</div>
+<div class="ltx_para" id="S2.SS3.p3">
+<p class="ltx_p" id="S2.SS3.p3.1">Классификатор ExtraTrees <cite class="ltx_cite ltx_citemacro_cite"><span class="ltx_text" id="S2.SS3.p3.1.4.1" style="font-size:90%;">[</span><a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2605.10181#bib.bib66" title="Extremely randomized trees">11</a><span class="ltx_text" id="S2.SS3.p3.1.5.2" style="font-size:90%;">]</span></cite> с крайне случайными деревьями был обучен с использованием 100 оценщиков, максимальной глубины 10 и стратегии подмножества признаков на основе квадратного корня.
+Чтобы сбалансировать обобщение и простоту модели, для каждого внутреннего разбиения требовалось минимум 10 образцов, а листовые узлы содержали минимум два образца.
+Вывод выполнялся в одном потоке CPU, чтобы обеспечить точное измерение задержки холодного старта для каждого изображения.
+Модель была реализована с использованием библиотеки scikit-learn.
+Для интерпретируемости были вычислены значения SHapley Additive exPlanations (SHAP) <cite class="ltx_cite ltx_citemacro_cite"><span class="ltx_text" id="S2.SS3.p3.1.9.1" style="font-size:90%;">[</span><a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2605.10181#bib.bib70" title="A unified approach to interpreting model predictions">16</a><span class="ltx_text" id="S2.SS3.p3.1.10.2" style="font-size:90%;">]</span></cite>, чтобы количественно оценить вклад каждого признака для каждого изображения.</p>
+</div>
+</section>
+<section class="ltx_subsection" id="S2.SS4">
+<h3 class="ltx_title ltx_title_subsection" style="font-size:90%;">
+<span class="ltx_tag ltx_tag_subsection">2.4 </span>Конвейер глубокого обучения</h3>
+<div class="ltx_para" id="S2.SS4.p1">
+<p class="ltx_p" id="S2.SS4.p1.2">Основа ResNet-18, предварительно обученная на ImageNet, была использована как базовая модель глубокого обучения.
+Сеть была дообучена с использованием оптимизатора AdamW при скорости обучения <math alttext="1\times 10^{-4}" class="ltx_Math" display="inline" id="S2.SS4.p1.1.m1" intent=":literal"><semantics><mrow><mn mathsize="0.900em">1</mn><mo lspace="0.222em" mathsize="0.900em" rspace="0.222em">×</mo><msup><mn mathsize="0.900em">10</mn><mrow><mo mathsize="0.900em">−</mo><mn mathsize="0.900em">4</mn></mrow></msup></mrow><annotation encoding="application/x-tex">1\times 10^{-4}</annotation></semantics></math>,
+коэффициенте затухания весов <math alttext="1\times 10^{-4}" class="ltx_Math" display="inline" id="S2.SS4.p1.2.m2" intent=":literal"><semantics><mrow><mn mathsize="0.900em">1</mn><mo lspace="0.222em" mathsize="0.900em" rspace="0.222em">×</mo><msup><mn mathsize="0.900em">10</mn><mrow><mo mathsize="0.900em">−</mo><mn mathsize="0.900em">4</mn></mrow></msup></mrow><annotation encoding="application/x-tex">1\times 10^{-4}</annotation></semantics></math>, размере батча 128 и обучалась в течение 3 эпох.
+Лучший контрольная точка была выбрана в соответствии с минимальной величиной потерь на валидации, и в качестве целевой функции оптимизации была использована функция потерь кросс-энтропии.</p>
+</div>
+<div class="ltx_para" id="S2.SS4.p2">
+<p class="ltx_p" id="S2.SS4.p2.4">Все изображения были центр-обрезаны в соответствии с меньшей стороной по ширине или высоте,
+затем изменены по размеру до целевого разрешения обучения.
+Каждое изображение было стандартизировано с использованием среднего значения и стандартного отклонения ImageNet.
+Чтобы повысить устойчивость модели и обобщающую способность, были применены вероятностные преобразования данных,
+включая горизонтальные (<math alttext="p=0.5" class="ltx_Math" display="inline" id="S2.SS4.p2.1.m1" intent=":literal"><semantics><mrow><mi mathsize="0.900em">p</mi><mo mathsize="0.900em">=</mo><mn mathsize="0.900em">0.5</mn></mrow><annotation encoding="application/x-tex">p=0.5</annotation></semantics></math>) и вертикальные (<math alttext="p=0.2" class="ltx_Math" display="inline" id="S2.SS4.p2.2.m2" intent=":literal"><semantics><mrow><mi mathsize="0.900em">p</mi><mo mathsize="0.900em">=</mo><mn mathsize="0.900em">0.2</mn></mrow><annotation encoding="application/x-tex">p=0.2</annotation></semantics></math>) отражения,
+повороты до <math alttext="\pm 15^{\circ}" class="ltx_Math" display="inline" id="S2.SS4.p2.3.m3" intent=":literal"><semantics><mrow><mo mathsize="0.900em">±</mo><msup><mn mathsize="0.900em">15</mn><mo mathsize="0.900em">∘</mo></msup></mrow><annotation encoding="application/x-tex">\pm 15^{\circ}</annotation></semantics></math>, а также фотометрические вариации, такие как
+корректировки яркости/контраста и гамма-коррекция в пределах <math alttext="\pm 20\%" class="ltx_Math" display="inline" id="S2.SS4.p2.4.m4" intent=":literal"><semantics><mrow><mo mathsize="0.900em">±</mo><mrow><mn mathsize="0.900em">20</mn><mo mathsize="0.900em">%</mo></mrow></mrow><annotation encoding="application/x-tex">\pm 20\%</annotation></semantics></math>.</p>
+</div>
+<div class="ltx_para" id="S2.SS4.p3">
+<p class="ltx_p" id="S2.SS4.p3.1">Grad-CAM++ <cite class="ltx_cite ltx_citemacro_cite"><span class="ltx_text" id="S2.SS4.p3.1.2.1" style="font-size:90%;">[</span><a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2605.10181#bib.bib59" title="Grad-cam++: generalized gradient-based visual explanations for deep convolutional networks">6</a><span class="ltx_text" id="S2.SS4.p3.1.3.2" style="font-size:90%;">]</span></cite> использовался для визуализации информативных областей изображения, которые в наибольшей степени способствовали решению модели.  
+Карты активации извлекались из последнего сверточного блока основы ResNet-18 и вычислялись относительно истинной метки для каждого изображения.  
+Полученные тепловые карты смешивались с соответствующими входными изображениями, чтобы качественно оценить пространственное соответствие между вниманием модели и клинически значимыми областями.</p>
+</div>
+</section>
+<section class="ltx_subsection" id="S2.SS5">
+<h3 class="ltx_title ltx_title_subsection" style="font-size:90%;">
+<span class="ltx_tag ltx_tag_subsection">2.5 </span>Метрики оценки и измерение задержки</h3>
+<div class="ltx_para" id="S2.SS5.p1">
+<p class="ltx_p" id="S2.SS5.p1.1">Была проведена пятикратная перекрёстная проверка для внутренней валидации с использованием стратифицированной выборки для сохранения баланса классов между фолдами.  
+В каждом фолде модель обучалась на четырёх подмножествах и оценивалась на оставшемся тестовом подмножестве.  
+После пофолдового тестирования предсказания со всех пяти тестовых подмножеств были объединены путём конкатенации для вычисления общей метрики внутренней валидации.  
+Для внешней валидации пять моделей, полученных в ходе перекрёстной проверки, независимо применялись к невидимому внешнему набору данных, а предсказанные вероятности для каждого изображения усреднялись по моделям для получения единого консенсусного предсказания.  
+Фиксированный порог принятия решения <math alttext="\tau=0.5" class="ltx_Math" display="inline" id="S2.SS5.p1.1.m1" intent=":literal"><semantics><mrow><mi mathsize="0.900em">τ</mi><mo mathsize="0.900em">=</mo><mn mathsize="0.900em">0.5</mn></mrow><annotation encoding="application/x-tex">\tau=0.5</annotation></semantics></math> применялся единообразно во всех экспериментах для получения бинарных предсказаний.  
+Эффективность модели оценивалась по площади под кривой рабочей характеристики приёмника (AUROC) и точности.</p>
+</div>
+<div class="ltx_para" id="S2.SS5.p2">
+<p class="ltx_p" id="S2.SS5.p2.8">Для оценки вычислительной эффективности систематически измерялась задержка инференса как для ML, так и для DL конвейеров.  
+Для ML конвейера задержка была разложена на загрузку модели, извлечение признаков и классификацию.  
+Для DL базового варианта задержка измерялась отдельно на CPU и GPU и включала загрузку модели, предварительную обработку и прямое распространение через энкодер.  
+Конец-в-конец задержка определялась как общее затраченное время от загрузки модели до генерации итогового выхода вероятностей.  
+Измерения задержки проводились на 1,000 случайно выбранных тестовых изображениях при размере батча равном одному.  
+ML конвейер испытывался при нескольких коэффициентах даунсемплинга (<math alttext="\times 1" class="ltx_Math" display="inline" id="S2.SS5.p2.1.m1" intent=":literal"><semantics><mrow><mi></mi><mo lspace="0.222em" mathsize="0.900em" rspace="0.222em">×</mo><mn mathsize="0.900em">1</mn></mrow><annotation encoding="application/x-tex">\times 1</annotation></semantics></math>, <math alttext="\times 1/2" class="ltx_Math" display="inline" id="S2.SS5.p2.2.m2" intent=":literal"><semantics><mrow><mi></mi><mo lspace="0.222em" mathsize="0.900em" rspace="0.222em">×</mo><mrow><mn mathsize="0.900em">1</mn><mo maxsize="0.900em" minsize="0.900em" stretchy="true" symmetric="true">/</mo><mn mathsize="0.900em">2</mn></mrow></mrow><annotation encoding="application/x-tex">\times 1/2</annotation></semantics></math>, <math alttext="\times 1/4" class="ltx_Math" display="inline" id="S2.SS5.p2.3.m3" intent=":literal"><semantics><mrow><mi></mi><mo lspace="0.222em" mathsize="0.900em" rspace="0.222em">×</mo><mrow><mn mathsize="0.900em">1</mn><mo maxsize="0.900em" minsize="0.900em" stretchy="true" symmetric="true">/</mo><mn mathsize="0.900em">4</mn></mrow></mrow><annotation encoding="application/x-tex">\times 1/4</annotation></semantics></math> и <math alttext="\times 1/8" class="ltx_Math" display="inline" id="S2.SS5.p2.4.m4" intent=":literal"><semantics><mrow><mi></mi><mo lspace="0.222em" mathsize="0.900em" rspace="0.222em">×</mo><mrow><mn mathsize="0.900em">1</mn><mo maxsize="0.900em" minsize="0.900em" stretchy="true" symmetric="true">/</mo><mn mathsize="0.900em">8</mn></mrow></mrow><annotation encoding="application/x-tex">\times 1/8</annotation></semantics></math>), тогда как DL модель оценивалась на соответствующих входных разрешениях (<math alttext="512^{2}" class="ltx_Math" display="inline" id="S2.SS5.p2.5.m5" intent=":literal"><semantics><msup><mn mathsize="0.900em">512</mn><mn mathsize="0.900em">2</mn></msup><annotation encoding="application/x-tex">512^{2}</annotation></semantics></math>, <math alttext="256^{2}" class="ltx_Math" display="inline" id="S2.SS5.p2.6.m6" intent=":literal"><semantics><msup><mn mathsize="0.900em">256</mn><mn mathsize="0.900em">2</mn></msup><annotation encoding="application/x-tex">256^{2}</annotation></semantics></math>, <math alttext="128^{2}" class="ltx_Math" display="inline" id="S2.SS5.p2.7.m7" intent=":literal"><semantics><msup><mn mathsize="0.900em">128</mn><mn mathsize="0.900em">2</mn></msup><annotation encoding="application/x-tex">128^{2}</annotation></semantics></math> и <math alttext="64^{2}" class="ltx_Math" display="inline" id="S2.SS5.p2.8.m8" intent=":literal"><semantics><msup><mn mathsize="0.900em">64</mn><mn mathsize="0.900em">2</mn></msup><annotation encoding="application/x-tex">64^{2}</annotation></semantics></math>).  
+Все эксперименты выполнялись на рабочей станции, оснащенной двумя процессорами Intel Xeon Gold 5218R (80 ядер, 2.10 GHz), 504 GB ОЗУ и графическим процессором NVIDIA Tesla V100 (32 GB VRAM).</p>
+</div>
+</section>
+</section>
+<section class="ltx_section" id="S3">
+<h2 class="ltx_title ltx_title_section" style="font-size:90%;">
+<span class="ltx_tag ltx_tag_section">3 </span>Результаты</h2>
+<section class="ltx_subsection" id="S3.SS1">
+<h3 class="ltx_title ltx_title_subsection" style="font-size:90%;">
+<span class="ltx_tag ltx_tag_subsection">3.1 </span>Сквозная проверка и внешняя оценка производительности</h3>
+<div class="ltx_para" id="S3.SS1.p1">
+<p class="ltx_p" id="S3.SS1.p1.2">Таблица <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2605.10181#S2.T1" style="font-size:90%;" title="Table 1 ‣ 2.2 Preprocessing ‣ 2 Methods ‣ A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection"><span class="ltx_text ltx_ref_tag">1</span></a> суммирует количественные результаты по различным разрешениям изображений.  
+Обе модели машинного обучения (ExtraTrees) и глубокого обучения (ResNet-18) достигли значений AUROC равных 1.000 при всех условиях.  
+Различия в точности между двумя подходами были незначительными на внутренних (IV) и внешних (EV) наборах валидации.  
+Для конвейера ML точность варьировалась от 0.985 до 1.000 в зависимости от разрешения, тогда как для модели DL — от 0.995 до 1.000.  
+При самом низком разрешении (<math alttext="64{\times}64" class="ltx_Math" display="inline" id="S3.SS1.p1.1.m1" intent=":literal"><semantics><mrow><mn mathsize="0.900em">64</mn><mo lspace="0.222em" mathsize="0.900em" rspace="0.222em">×</mo><mn mathsize="0.900em">64</mn></mrow><annotation encoding="application/x-tex">64{\times}64</annotation></semantics></math>, <math alttext="\times 1/8" class="ltx_Math" display="inline" id="S3.SS1.p1.2.m2" intent=":literal"><semantics><mrow><mi></mi><mo lspace="0.222em" mathsize="0.900em" rspace="0.222em">×</mo><mrow><mn mathsize="0.900em">1</mn><mo maxsize="0.900em" minsize="0.900em" stretchy="true" symmetric="true">/</mo><mn mathsize="0.900em">8</mn></mrow></mrow><annotation encoding="application/x-tex">\times 1/8</annotation></semantics></math>) модель ML достигла 1.000 на внутреннем наборе и 0.999 на внешнем наборе, фактически совпав с базовой моделью DL, несмотря на её компактный дизайн.  
+Интересно, что конвейер ML сохранял надёжную производительность даже при более низких разрешениях, тогда как у модели DL точность снижалась по мере уменьшения разрешения изображений.</p>
+</div>
+</section>
+<section class="ltx_subsection" id="S3.SS2">
+<h3 class="ltx_title ltx_title_subsection" style="font-size:90%;">
+<span class="ltx_tag ltx_tag_subsection">3.2 </span>Анализ разрешения и задержки</h3>
+<div class="ltx_para" id="S3.SS2.p1">
+<p class="ltx_p" id="S3.SS2.p1.3">Как показано в Таблице <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2605.10181#S2.T1" style="font-size:90%;" title="Table 1 ‣ 2.2 Preprocessing ‣ 2 Methods ‣ A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection"><span class="ltx_text ltx_ref_tag">1</span></a>, конвейеры ML и DL демонстрировали различное поведение масштабирования в зависимости от разрешения изображения.
+Для ML-модели задержка при наивысшей конфигурации (<math alttext="\times 1" class="ltx_Math" display="inline" id="S3.SS2.p1.1.m1" intent=":literal"><semantics><mrow><mi></mi><mo lspace="0.222em" mathsize="0.900em" rspace="0.222em">×</mo><mn mathsize="0.900em">1</mn></mrow><annotation encoding="application/x-tex">\times 1</annotation></semantics></math>) достигала 396 мс на CPU, главным образом из-за извлечения признаков (378 мс).
+По мере снижения разрешения задержка ML резко уменьшалась — с 396 мс при <math alttext="\times 1" class="ltx_Math" display="inline" id="S3.SS2.p1.2.m2" intent=":literal"><semantics><mrow><mi></mi><mo lspace="0.222em" mathsize="0.900em" rspace="0.222em">×</mo><mn mathsize="0.900em">1</mn></mrow><annotation encoding="application/x-tex">\times 1</annotation></semantics></math> до 31 мс при <math alttext="\times 1/8" class="ltx_Math" display="inline" id="S3.SS2.p1.3.m3" intent=":literal"><semantics><mrow><mi></mi><mo lspace="0.222em" mathsize="0.900em" rspace="0.222em">×</mo><mrow><mn mathsize="0.900em">1</mn><mo maxsize="0.900em" minsize="0.900em" stretchy="true" symmetric="true">/</mo><mn mathsize="0.900em">8</mn></mrow></mrow><annotation encoding="application/x-tex">\times 1/8</annotation></semantics></math> — при сохранении сопоставимой точности (0,999 на EV).
+В отличие от этого, для DL-модели наблюдалась стабильно высокая задержка в диапазоне разрешений (183–229 мс) вследствие фиксированной сложности архитектуры и большого числа параметров; при этом время выполнения было обусловлено загрузкой модели, выделением памяти и накладными расходами на I/O, а не вычислениями, зависящими от входных данных.</p>
+</div>
+<div class="ltx_para" id="S3.SS2.p2">
+<p class="ltx_p" id="S3.SS2.p2.1">Эти результаты демонстрируют, что конвейер машинного обучения эффективно масштабируется с размером изображения и обеспечивает существенные приросты скорости без потери точности, демонстрируя практически отсутствие компромисса между точностью и задержкой.
+В сравнении с этим задержка модели глубокого обучения в значительной степени не зависит от разрешения из-за фиксированной инициализации и затрат на передачу памяти.
+В целом конвейер машинного обучения обеспечивает эквивалентную дискриминацию при снижении задержки до шестикратного, что подчеркивает его пригодность для легковесного, работы в реальном времени обнаружения OOD в клинических условиях при ограниченных вычислительных ресурсах.</p>
+</div>
+<figure class="ltx_figure" id="S3.F2"><img alt="Refer to caption" class="ltx_graphics ltx_centering ltx_img_square" height="510" id="S3.F2.g1" src="./[2605.10181] A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection_files/OOD_figure2.png" width="598"/>
+<figcaption class="ltx_caption ltx_centering" style="font-size:90%;">⟦<span class="ltx_tag ltx_tag_figure"><span class="ltx_text ltx_font_bold" id="S3.F2.5.1.1">Fig. 2</span>: </span>SHAP summary plot.  
+Распределения значений SHAP, показывающие вклад каждой характеристики в выход модели.</figcaption>
+</figure>
+<figure class="ltx_figure" id="S3.F3"><img alt="Refer to caption" class="ltx_graphics ltx_centering ltx_img_landscape" height="388" id="S3.F3.g1" src="./[2605.10181] A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection_files/OOD_figure3.png" width="598"/>
+<figcaption class="ltx_caption ltx_centering" style="font-size:90%;"><span class="ltx_tag ltx_tag_figure"><span class="ltx_text ltx_font_bold" id="S3.F3.5.1.1">Fig. 3</span>: </span>Визуализации Grad-CAM++ (ResNet-18).
+Первые два изображения, оба ретинального происхождения, демонстрируют сходные активации вокруг диска зрительного нерва и сосудов, несмотря на то, что они относятся к разным доменам, что указывает на то, что эти ответы не связаны с различением OOD.
+Для рентгеновского изображения активации пространственно размыты и не имеют сколько-нибудь значимого соответствия.</figcaption>
+</figure>
+</section>
+<section class="ltx_subsection" id="S3.SS3">
+<h3 class="ltx_title ltx_title_subsection" style="font-size:90%;">
+<span class="ltx_tag ltx_tag_subsection">3.3 </span>Интерпретируемость: SHAP для ML по сравнению с CAM для DL</h3>
+<div class="ltx_para" id="S3.SS3.p1">
+<p class="ltx_p" id="S3.SS3.p1.1">Сводный график SHAP (Рисунок <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2605.10181#S3.F2" style="font-size:90%;" title="Figure 2 ‣ 3.2 Resolution and latency analysis ‣ 3 Results ‣ A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection"><span class="ltx_text ltx_ref_tag">2</span></a>) показывает, что эксцентриситет, all_corners_dark_flag и glcm_homogeneity являются тремя наиболее влиятельными признаками при различении изображений глазного дна и не-глазного дна. Низкое значение эксцентриситета, соответствующее близкой к круговой форме, в значительной степени способствует прогнозу «глазное дно», что согласуется с круговой геометрией, характерной для изображений сетчатки. Аналогично, высокое значение all_corners_dark_flag положительно влияет на класс «глазное дно», отражая наличие темной периферической каймы, типичной для фотографий глазного дна. Кроме того, высокие значения glcm_homogeneity связаны с гладкими и однородными текстурами, что дополнительно усиливает классификацию «глазное дно». В совокупности эти результаты указывают на то, что ML-модель в первую очередь опирается на интерпретируемые глобальные признаки — круговость, периферическое затемнение и однородность текстуры — чтобы идентифицировать изображения глазного дна.</p>
+</div>
+<div class="ltx_para" id="S3.SS3.p2">
+<p class="ltx_p" id="S3.SS3.p2.1">Хотя конвейер ML обеспечивает интерпретируемость на уровне признаков с помощью SHAP, модель глубокого обучения опирается на основанную на градиентах визуализацию значимости, такую как Grad-CAM++.
+Однако при двоичном обнаружении OOD эти визуализации дают мало информации о реальном процессе принятия решения. Рисунок <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2605.10181#S3.F3" style="font-size:90%;" title="Figure 3 ‣ 3.2 Resolution and latency analysis ‣ 3 Results ‣ A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection"><span class="ltx_text ltx_ref_tag">3</span></a> показывает результаты Grad-CAM++ для базовой модели ResNet-18 на представительных примерах из предметной области (in-domain) и OOD.
+Первые два изображения имеют одинаковое происхождение из области сетчатки — фундус и флюоресцентная ангиография — однако карты активации демонстрируют почти идентичные паттерны, с сосредоточением вокруг зрительного диска и крупных сосудов.
+Такие области визуально различимы, но не связаны непосредственно с классификацией OOD, что указывает на то, что модель уделяет внимание общим структурам с высокой контрастностью, а не признакам, характерным для предметной области.
+Для нетретинального рентгеновского изображения активации пространственно размыты и не несут согласованного анатомического смысла.
+В целом градиентные методы объяснимости, которые эффективны в задачах локализации поражений или аномалий, дают ограниченную интерпретируемую ценность для обнаружения OOD.</p>
+</div>
+</section>
+</section>
+<section class="ltx_section" id="S4">
+<h2 class="ltx_title ltx_title_section" style="font-size:90%;">
+<span class="ltx_tag ltx_tag_section">4 </span>Обсуждение</h2>
+<div class="ltx_para" id="S4.p1">
+<p class="ltx_p" id="S4.p1.1">Обнаружение вне-распределительных данных (OOD) является критически важным предварительным условием для надежного развертывания систем ИИ в клинической практике.  
+В ретинальной визуализации проверка корректности входных данных перед диагностическим выводом имеет важное значение, поскольку предсказания по нефундусным изображениям могут снижать точность и подрывать доверие пользователей. Эффективная фильтрация OOD (то есть скрининг фундусных и нефундусных изображений) гарантирует, что последующие диагностические модели работают только с валидными данными, тем самым повышая безопасность, прослеживаемость и общую целостность системы.</p>
+</div>
+<div class="ltx_para" id="S4.p2">
+<p class="ltx_p" id="S4.p2.1">Экспериментальные результаты указывают, что в рассматриваемых условиях различение изображений глазного дна и не-глазного дна формирует хорошо определенную задачу классификации при обучении на достаточно разнообразных наборах данных.  
+Обе модели ML и DL достигли почти насыщенной производительности (AUROC = 1.000, ACC <math alttext="\geq" class="ltx_Math" display="inline" id="S4.p2.1.m1" intent=":literal"><semantics><mo mathsize="0.900em">≥</mo><annotation encoding="application/x-tex">\geq</annotation></semantics></math> 0.999) как на внутренних, так и на внешних наборах валидации.  
+В таких условиях дополнительная архитектурная сложность не дает измеримого выигрыша в производительности в данной постановке задачи, а практические факторы развертывания — время вычислений, требования к памяти и интерпретируемость — становятся доминирующими критериями выбора модели.</p>
+</div>
+<div class="ltx_para" id="S4.p3">
+<p class="ltx_p" id="S4.p3.1">Предложенный ML-конвейер на основе ExtraTrees, построенный на компактном наборе ручных и учитывающих глазное дно дескрипторов, обеспечил сквозную задержку меньше чем <math alttext="31\text{\,}\mathrm{m}\mathrm{s}" class="ltx_Math" display="inline" id="S4.p3.1.m1" intent=":literal"><semantics><mrow><mn mathsize="0.900em">31</mn><mtext mathsize="0.900em"> </mtext><mi mathsize="0.900em">ms</mi></mrow><annotation encoding="application/x-tex">31\text{\,}\mathrm{m}\mathrm{s}</annotation></semantics></math> на аппаратном обеспечении только с CPU при сохранении точности обнаружения, сопоставимой с DL-основанием.  
+Анализ SHAP выявил стабильные и согласованные с доменом атрибуции признаков — подчеркнув опору модели на периферическую темноту, плавное распределение цветов и круговую геометрию изображения — тем самым обеспечив прозрачную и воспроизводимую интерпретацию ее процесса принятия решений.  
+Эти характеристики делают ML-конвейер особенно подходящим для обработки в реальном времени при фильтрации OOD в клинических системах, где детерминированное поведение и ограниченные вычислительные ресурсы являются критическими ограничениями.</p>
+</div>
+<div class="ltx_para" id="S4.p4">
+<p class="ltx_p" id="S4.p4.1">В отличие от этого, базовая модель ResNet-18 требовала существенно больших вычислительных и оперативно-экранных ресурсов.
+При наименьшем разрешении (<math alttext="64{\times}64" class="ltx_Math" display="inline" id="S4.p4.1.m1" intent=":literal"><semantics><mrow><mn mathsize="0.900em">64</mn><mo lspace="0.222em" mathsize="0.900em" rspace="0.222em">×</mo><mn mathsize="0.900em">64</mn></mrow><annotation encoding="application/x-tex">64{\times}64</annotation></semantics></math>) ее сквозная задержка инференса составляла приблизительно 183 мс на CPU и 197 мс на GPU, тогда как для пайплайна ML при идентичных условиях — 31 мс, то есть примерно шестикратное увеличение.
+Например, коммерческое программное обеспечение, такое как VUNO Med–Fundus AI, которое выполняет полное обнаружение поражений и количественную оценку по двенадцати категориям, работает менее чем за 2 секунды на оборудовании только с CPU.
+Учитывая, что детектирование OOD включает лишь бинарную фильтрацию, а не полный диагностический инференс, задержка почти 200 мс на изображение представляет собой существенную дополнительную нагрузку.
+Кроме того, все измерения задержек в данном исследовании были выполнены на высокопроизводительной рабочей станции. В типичных клинических условиях при использовании стандартного настольного оборудования разрыв по времени выполнения между подходами ML и DL, вероятно, был бы еще более выраженным.
+Несмотря на более высокую вычислительную стоимость, модель DL не показала измеримого улучшения точности или AUROC по сравнению с подходом ML во всех вариантах оценивания.
+Эти результаты демонстрируют, что компактная модель ML обеспечивает эквивалентную способность к различению, сохраняя при этом существенно более высокую вычислительную эффективность и предсказуемую задержку.</p>
+</div>
+<div class="ltx_para" id="S4.p5">
+<p class="ltx_p" id="S4.p5.1">У этого исследования есть несколько ограничений.
+Во-первых, хотя наборы данных охватывают различные типы изображений, они могут не отражать редкие сценарии получения данных, такие как получение изображений глазного дна с помощью ручных устройств или смартфонов, или сильные искажения на периферии.
+Во-вторых, сообщаемые значения задержки могут отличаться в зависимости от систем из-за аппаратных и программных конфигураций, поэтому их следует интерпретировать как ориентировочные, а не как абсолютные.
+Наконец, текущий набор признаков оптимизирован для изображений глазного дна и потребовал бы предметно-ориентированной адаптации для других задач медицинской визуализации.</p>
+</div>
+<div class="ltx_para" id="S4.p6">
+<p class="ltx_p" id="S4.p6.1">В заключение, легковесная и интерпретируемая модель машинного обучения может обеспечивать показатели обнаружения выхода за пределы распределения (OOD), эквивалентные модели глубокого обучения, дообученной (fine-tuned), при этом достигая значительно более высокой вычислительной эффективности. Эти результаты поддерживают практическую архитектуру развертывания, в которой ML-основанная фильтрация OOD выполняется на этапе поступления данных, обеспечивая корректность входных данных и резервируя вычисления DL для последующего диагностического анализа.</p>
+</div>
+</section>
+<section class="ltx_section" id="S5">
+<h2 class="ltx_title ltx_title_section" style="font-size:90%;">
+<span class="ltx_tag ltx_tag_section">5 </span>СОБЛЮДЕНИЕ ЭТИЧЕСКИХ СТАНДАРТОВ</h2>
+<div class="ltx_para" id="S5.p1">
+<p class="ltx_p" id="S5.p1.1">Это исследование было проведено ретроспективно с использованием данных субъектов, полученных от людей, предоставленных в открытом доступе. Этическое одобрение не требовалось, что было подтверждено лицензией, прикрепленной к данным открытого доступа.</p>
+</div>
+</section>
+<section class="ltx_section" id="S6">
+<h2 class="ltx_title ltx_title_section" style="font-size:90%;">
+<span class="ltx_tag ltx_tag_section">6 </span>Конфликт интересов</h2>
+<div class="ltx_para" id="S6.p1">
+<p class="ltx_p" id="S6.p1.1">Авторы являются сотрудниками VUNO Inc., но заявляют, что не имеют конкурирующих финансовых или нефинансовых интересов, связанных с данной работой.</p>
+</div>
+</section>
+<section class="ltx_bibliography" id="bib">
+<h2 class="ltx_title ltx_title_bibliography" style="font-size:90%;">Ссылки</h2>
+<ul class="ltx_biblist" id="bib.L1">
+<li class="ltx_bibitem ltx_bib_article" id="bib.bib36">
+⟦<span class="ltx_tag ltx_bib_key ltx_role_refnum ltx_tag_bibitem">[1]</span>
+A. A. Ardakani, A. Mohammadi, M. Mirza-Aghazadeh-Attari, and U. R. Acharya (2023)
+
+Открытая база данных изображений ультразвука поражений молочной железы, применимая в исследованиях по искусственному интеллекту.
+
+Computers in Biology and Medicine 152,  pp. 106438.
+
+Cited by: <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2605.10181#S2.SS1.p2.1" title="2.1 Datasets ‣ 2 Methods ‣ A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection"><span class="ltx_text ltx_ref_tag">§2.1</span></a>.
+
+</li>
+<li class="ltx_bibitem ltx_bib_inproceedings" id="bib.bib46">
+<span class="ltx_tag ltx_bib_key ltx_role_refnum ltx_tag_bibitem">[2]</span>
+M. N. Bajwa, G. A. P. Singh, W. Neumeier, M. I. Malik, A. Dengel и S. Ahmed (2020)
+
+G1020: набор эталонных изображений глазного дна для автоматизированного обнаружения глаукомы.
+
+На 2020 International Joint Conference on Neural Networks (IJCNN),
+
+стр. 1–7.
+
+Цитируется: <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2605.10181#S2.SS1.p2.1" title="2.1 Datasets ‣ 2 Methods ‣ A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection"><span class="ltx_text ltx_ref_tag">§2.1</span></a>.
+
+</li>
+<li class="ltx_bibitem ltx_bib_article" id="bib.bib40">
+<span class="ltx_tag ltx_bib_key ltx_role_refnum ltx_tag_bibitem">[3]</span>
+Дж. Бернал, Ф. Дж. Санчес, Дж. Фернандес-Эспаррач, Д. Гил, С. Родригес и Ф. Виларино (2015)
+
+WM-dova-карты для точного выделения полипов при колоноскопии: валидация в сравнении с картами значимости, полученными от врачей.
+
+Компьютерная медицинская визуализация и машинная графика 43, стр. 99–111.
+
+Цитируется: <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2605.10181#S2.SS1.p2.1" title="2.1 Datasets ‣ 2 Methods ‣ A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection"><span class="ltx_text ltx_ref_tag">§2.1</span></a>,
+<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2605.10181#S2.SS1.p3.1" title="2.1 Datasets ‣ 2 Methods ‣ A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection"><span class="ltx_text ltx_ref_tag">§2.1</span></a>.
+
+</li>
+<li class="ltx_bibitem ltx_bib_article" id="bib.bib41">
+<span class="ltx_tag ltx_bib_key ltx_role_refnum ltx_tag_bibitem">[4]</span>
+Г. Боргли, В. Тхамбавита, П. Х. Смедсруд, С. Хикс, Д. Джа, С. Л. Эскеланд, К. Р. Рандел, К. Погорелов, М. Люкс, Д. Т. Д. Нгуен, Д. Йохансен, К. Гриводз, Х. К. Стенсланд, Э. Гарсия-Сеха, П. Т. Шмидт, Х. Л. Хаммер, М. А. Риглер, П. Халворсен и Т. де Ланге (2020)
+
+HyperKvasir, комплексный многоклассовый набор данных изображений и видео для эндоскопии желудочно-кишечного тракта.
+
+Scientific Data 7 (1),  стр. 283.
+
+Внешние ссылки: <a class="ltx_ref doi ltx_bib_external" href="https://dx.doi.org/10.1038/s41597-020-00622-y" target="_blank" title="">Document</a>,
+ISSN 2052-4463,
+<a class="ltx_ref ltx_bib_external" href="https://doi.org/10.1038/s41597-020-00622-y" target="_blank" title="">Link</a>
+
+Цитируется: <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2605.10181#S2.SS1.p2.1" title="2.1 Datasets ‣ 2 Methods ‣ A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection"><span class="ltx_text ltx_ref_tag">§2.1</span></a>.
+
+</li>
+<li class="ltx_bibitem ltx_bib_misc" id="bib.bib53">
+⟦<span class="ltx_tag ltx_bib_key ltx_role_refnum ltx_tag_bibitem">[5]</span>
+Y. Brima, M. H. K. Tushar, U. Kabir и T. Islam (2021)
+
+Набор данных Brain mri.
+
+ figshare.
+
+Примечание: Набор данных
+
+Внешние ссылки: <a class="ltx_ref doi ltx_bib_external" href="https://dx.doi.org/10.6084/m9.figshare.14778750.v2" target="_blank" title="">Document</a>,
+<a class="ltx_ref ltx_bib_external" href="https://doi.org/10.6084/m9.figshare.14778750.v2" target="_blank" title="">Link</a>
+
+Цитируется: <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2605.10181#S2.SS1.p2.1" title="2.1 Datasets ‣ 2 Methods ‣ A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection"><span class="ltx_text ltx_ref_tag">§2.1</span></a>.
+
+</li>
+<li class="ltx_bibitem ltx_bib_inproceedings" id="bib.bib59">
+<span class="ltx_tag ltx_bib_key ltx_role_refnum ltx_tag_bibitem">[6]</span>  
+A. Чаттопадхай, А. Саркар, П. Хоулейдер и В. Н. Баласубраманиан (2018)
+
+Grad-cam++: обобщенные градиентные визуальные объяснения для глубоких сверточных сетей.
+
+На зимней конференции IEEE по прикладной компьютерной видимости (WACV) в 2018 году,
+
+стр. 839–847.
+
+Цитируется: <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2605.10181#S2.SS4.p3.1" title="2.4 Deep learning pipeline ‣ 2 Methods ‣ A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection"><span class="ltx_text ltx_ref_tag">§2.4</span></a>.
+
+</li>
+<li class="ltx_bibitem ltx_bib_misc" id="bib.bib43">
+⟦<span class="ltx_tag ltx_bib_key ltx_role_refnum ltx_tag_bibitem">[7]</span>
+С. Д. Чаудхари, П. Пайгуде и П. Шах (2024)
+
+Набор данных изображений зубов или стоматологических изображений.
+
+Mendeley Data.
+
+Внешние ссылки: <a class="ltx_ref doi ltx_bib_external" href="https://dx.doi.org/10.17632/6zsnhrds9t.1" target="_blank" title="">Document</a>,
+<a class="ltx_ref ltx_bib_external" href="https://doi.org/10.17632/6zsnhrds9t.1" target="_blank" title="">Link</a>
+
+Цитируется: <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2605.10181#S2.SS1.p2.1" title="2.1 Datasets ‣ 2 Methods ‣ A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection"><span class="ltx_text ltx_ref_tag">§2.1</span></a>⟧.
+
+</li>
+<li class="ltx_bibitem ltx_bib_article" id="bib.bib61">
+<span class="ltx_tag ltx_bib_key ltx_role_refnum ltx_tag_bibitem">[8]</span>
+Дж. Энгельманн, А. Д. МакТрастис, И. Дж. МакКормик, Э. Пиад, А. Сторки и М. О. Бернабеу (2022)
+
+Обнаружение нескольких заболеваний сетчатки на изображениях глазного дна сверхширокого поля с использованием глубокого обучения: данные, полученные для выявления релевантных областей.
+
+препринт arXiv arXiv:2203.06113.
+
+Цитируется: <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2605.10181#S2.SS1.p3.1" title="2.1 Datasets ‣ 2 Methods ‣ A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection"><span class="ltx_text ltx_ref_tag">§2.1</span></a>.
+
+</li>
+<li class="ltx_bibitem ltx_bib_misc" id="bib.bib49">
+⟦H. Fu, F. Li, J. I. Orlando, H. Bogunović, X. Sun, J. Liao, Y. Xu, S. Zhang, и X. Zhang (2019)
+
+REFUGE: задача по глаукоме по снимкам глазного дна.
+
+IEEE Dataport.
+
+Внешние ссылки: <a class="ltx_ref doi ltx_bib_external" href="https://dx.doi.org/10.21227/tz6e-r977" target="_blank" title="">Document</a>,
+<a class="ltx_ref ltx_bib_external" href="https://dx.doi.org/10.21227/tz6e-r977" target="_blank" title="">Link</a>
+
+Цитируется: <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2605.10181#S2.SS1.p2.1" title="2.1 Datasets ‣ 2 Methods ‣ A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection"><span class="ltx_text ltx_ref_tag">§2.1</span></a>.
+
+</li>
+<li class="ltx_bibitem ltx_bib_misc" id="bib.bib44">
+<span class="ltx_tag ltx_bib_key ltx_role_refnum ltx_tag_bibitem">[10]</span>
+Г. Фу, Ф. Ли, Дж. И. Орландо, Х. Богунович, С. Сан, Дж. Ляо, Ю. Сюй, С. Чжан и С. Чжан (2020)
+
+ADAM: задача автоматического выявления возрастной макулярной дегенерации.
+
+ IEEE Dataport.
+
+Внешние ссылки: <a class="ltx_ref doi ltx_bib_external" href="https://dx.doi.org/10.21227/dt4f-rt59" target="_blank" title="">Document</a>,
+<a class="ltx_ref ltx_bib_external" href="https://dx.doi.org/10.21227/dt4f-rt59" target="_blank" title="">Link</a>
+
+Цитируется: <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2605.10181#S2.SS1.p2.1" title="2.1 Datasets ‣ 2 Methods ‣ A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection"><span class="ltx_text ltx_ref_tag">§2.1</span></a>.
+
+</li>
+<li class="ltx_bibitem ltx_bib_article" id="bib.bib66">
+⟦<span class="ltx_tag ltx_bib_key ltx_role_refnum ltx_tag_bibitem">[11]</span>
+P. Geurts, D. Ernst и L. Wehenkel (2006)
+
+Чрезвычайно рандомизированные деревья.
+
+Машинное обучение 63 (1), стр. 3–42.
+
+Цитируется: <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2605.10181#S2.SS3.p3.1" title="2.3 Machine Learning Pipeline and Hand-crafted Features ‣ 2 Methods ‣ A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection"><span class="ltx_text ltx_ref_tag">§2.3</span></a>.
+
+</li>
+<li class="ltx_bibitem ltx_bib_article" id="bib.bib45">
+<span class="ltx_tag ltx_bib_key ltx_role_refnum ltx_tag_bibitem">[12]</span>
+K. Jin, X. Huang, J. Zhou, Y. Li, Y. Yan, Y. Sun, Q. Zhang, Y. Wang, and J. Ye (2022)
+
+Fives: набор данных изображений глазного дна для искусственного интеллекта на основе сегментации сосудов.
+
+Scientific data 9 (1),  стр. 475.
+
+Цитировано: <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2605.10181#S2.SS1.p2.1" title="2.1 Datasets ‣ 2 Methods ‣ A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection"><span class="ltx_text ltx_ref_tag">§2.1</span></a>.
+
+</li>
+<li class="ltx_bibitem ltx_bib_article" id="bib.bib48">
+⟦<span class="ltx_tag ltx_bib_key ltx_role_refnum ltx_tag_bibitem">[13]</span>
+О. Ковалик, Х. Моралес-Санчэс, Р. Верду-Монедеро, И. Сельес-Наварро, А. Паласон-Кабанес и Х. Санчо-Гомес (2022)
+
+PAPILA: набор данных с изображениями глазного дна и клиническими данными обоих глаз одного и того же пациента для оценки глаукомы.
+
+Scientific Data 9 (1), стр. 291.
+
+Цитировано: <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2605.10181#S2.SS1.p2.1" title="2.1 Datasets ‣ 2 Methods ‣ A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection"><span class="ltx_text ltx_ref_tag">§2.1</span></a>.
+
+</li>
+<li class="ltx_bibitem ltx_bib_article" id="bib.bib26">
+⟦<span class="ltx_tag ltx_bib_key ltx_role_refnum ltx_tag_bibitem">[14]</span>
+К. Ли, К. Ли, Х. Ли и Дж. Шин (2018)
+
+Простая унифицированная структура для обнаружения выборок вне распределения и атак с использованием противодействия.
+
+Труды по достижениям в нейронной обработке информации 31.
+
+Цитируется по: <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2605.10181#S1.p2.1" title="1 Introduction ‣ A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection"><span class="ltx_text ltx_ref_tag">§1</span></a>.
+
+</li>
+<li class="ltx_bibitem ltx_bib_article" id="bib.bib19">
+<span class="ltx_tag ltx_bib_key ltx_role_refnum ltx_tag_bibitem">[15]</span>
+W. Liu, X. Wang, J. Owens, and Y. Li (2020)
+
+Обнаружение выбросов вне распределения на основе энергетических моделей.
+
+Сборник трудов по достижениям в обработке нейронной информации 33, стр. 21464–21475.
+
+Цитируется: <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2605.10181#S1.p2.1" title="1 Introduction ‣ A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection"><span class="ltx_text ltx_ref_tag">§1</span></a>.
+
+</li>
+<li class="ltx_bibitem ltx_bib_article" id="bib.bib70">
+<span class="ltx_tag ltx_bib_key ltx_role_refnum ltx_tag_bibitem">[16]</span>
+S. M. Lundberg и S. Lee (2017)
+
+Единый подход к интерпретации предсказаний модели.
+
+Труды по нейронной обработке информации, 30.
+
+Цитируется: <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2605.10181#S2.SS3.p3.1" title="2.3 Machine Learning Pipeline and Hand-crafted Features ‣ 2 Methods ‣ A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection"><span class="ltx_text ltx_ref_tag">§2.3</span></a>.
+
+</li>
+<li class="ltx_bibitem ltx_bib_misc" id="bib.bib42">
+<span class="ltx_tag ltx_bib_key ltx_role_refnum ltx_tag_bibitem">[17]</span>
+М. М. Х. Матин, Мд. А. Хасру, Мд. Г. Моаззам и М. С. Уддин (2023)
+
+Набор данных для распознавания кожных заболеваний и рака кожи.
+
+Mendeley Data.
+
+Внешние ссылки: <a class="ltx_ref doi ltx_bib_external" href="https://dx.doi.org/10.17632/xr8fw85n65.1" target="_blank" title="">Document</a>,
+<a class="ltx_ref ltx_bib_external" href="https://doi.org/10.17632/xr8fw85n65.1" target="_blank" title="">Link</a>
+
+Цитируется: <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2605.10181#S2.SS1.p2.1" title="2.1 Datasets ‣ 2 Methods ‣ A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection"><span class="ltx_text ltx_ref_tag">§2.1</span></a>,
+<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2605.10181#S2.SS1.p3.1" title="2.1 Datasets ‣ 2 Methods ‣ A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection"><span class="ltx_text ltx_ref_tag">§2.1</span></a>.
+
+</li>
+<li class="ltx_bibitem ltx_bib_article" id="bib.bib38">
+⟦H. Q. Nguyen, K. Lam, L. T. Le, H. H. Pham, D. Q. Tran, D. B. Nguyen, D. D. Le, C. M. Pham, H. T. Tong, D. H. Dinh, et al. (2022)
+
+VinDr-cxr: открытый набор данных рентгенограмм грудной клетки с аннотациями радиолога.
+
+Scientific Data 9 (1),  стр. 429.
+
+Cited by: <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2605.10181#S2.SS1.p2.1" title="2.1 Datasets ‣ 2 Methods ‣ A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection"><span class="ltx_text ltx_ref_tag">§2.1</span></a>.
+
+</li>
+<li class="ltx_bibitem ltx_bib_article" id="bib.bib50">
+<span class="ltx_tag ltx_bib_key ltx_role_refnum ltx_tag_bibitem">[19]</span>
+С. Пачаде, П. Порвал, Д. Тулкар, М. Кокаре, Г. Дешмукх, В. Сахасрабуддхе, Л. Джанкарда, Г. Квеллек и Ф. Мериядо (2021)
+
+Набор данных многоуровневых изображений глазного дна при множественных заболеваниях (rfmid): набор данных для исследований обнаружения множественных заболеваний.
+
+Данные 6 (2).
+
+Внешние ссылки: <a class="ltx_ref ltx_bib_external" href="https://www.mdpi.com/2306-5729/6/2/14" target="_blank" title="">Link</a>,
+ISSN 2306-5729,
+<a class="ltx_ref doi ltx_bib_external" href="https://dx.doi.org/10.3390/data6020014" target="_blank" title="">Document</a>
+
+Цитируется: <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2605.10181#S2.SS1.p2.1" title="2.1 Datasets ‣ 2 Methods ‣ A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection"><span class="ltx_text ltx_ref_tag">§2.1</span></a>.
+
+</li>
+<li class="ltx_bibitem ltx_bib_misc" id="bib.bib47">
+<span class="ltx_tag ltx_bib_key ltx_role_refnum ltx_tag_bibitem">[20]</span>
+П. Порвал, С. Пачейд, Р. Камбле, М. Кокаре, Г. Дешмукх, В. Сахасрабуддхе и Ф. Мериоде (2018)
+
+Индийский набор изображений для диабетической ретинопатии (idrid).
+
+IEEE Dataport.
+
+Внешние ссылки: <a class="ltx_ref doi ltx_bib_external" href="https://dx.doi.org/10.21227/H25W98" target="_blank" title="">Document</a>,
+<a class="ltx_ref ltx_bib_external" href="https://dx.doi.org/10.21227/H25W98" target="_blank" title="">Link</a>
+
+Цитируется: <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2605.10181#S2.SS1.p3.1" title="2.1 Datasets ‣ 2 Methods ‣ A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection"><span class="ltx_text ltx_ref_tag">§2.1</span></a>.
+
+</li>
+<li class="ltx_bibitem ltx_bib_article" id="bib.bib52">
+⟦<span class="ltx_tag ltx_bib_key ltx_role_refnum ltx_tag_bibitem">[21]</span>
+B. Qian, H. Chen, X. Wang, Z. Guan, T. Li, Y. Jin, Y. Wu, Y. Wen, H. Che, G. Kwon, et al. (2024)
+
+DRAC 2022: публичный набор для оценки (benchmark) анализа диабетической ретинопатии по изображениям ультраширокой оптической когерентной томографии ангиографии.
+
+Patterns 5 (3).
+
+Cited by: <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2605.10181#S2.SS1.p2.1" title="2.1 Datasets ‣ 2 Methods ‣ A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection"><span class="ltx_text ltx_ref_tag">§2.1</span></a>.
+
+</li>
+<li class="ltx_bibitem ltx_bib_article" id="bib.bib37">
+⟦<span class="ltx_tag ltx_bib_key ltx_role_refnum ltx_tag_bibitem">[22]</span>
+Y. Ran, W. Qin, C. Qin, X. Li, Y. Liu, L. Xu, X. Mu, L. Yan, B. Wang, Y. Dai, et al. (2024)
+
+Набор данных высокого качества с классифицированными и аннотированными атласами рентгенограмм шейного отдела позвоночника.
+
+Scientific Data 11 (1),  стр. 625.
+
+Цитируется: <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2605.10181#S2.SS1.p2.1" title="2.1 Datasets ‣ 2 Methods ‣ A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection"><span class="ltx_text ltx_ref_tag">§2.1</span></a>.
+
+</li>
+<li class="ltx_bibitem ltx_bib_article" id="bib.bib51">
+<span class="ltx_tag ltx_bib_key ltx_role_refnum ltx_tag_bibitem">[23]</span>
+Дж. Сан, С. Чжао, С. Чэнь, Ю. Чжан, Х. Жэнь, Ю. Сан и Г. Чжан (2025)
+
+Набор данных изображений глазного дна сверхширокого поля для интеллектуальной диагностики внутриглазных опухолей.
+
+Scientific Data 12 (1), стр. 1521.
+
+Цитируется: <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2605.10181#S2.SS1.p2.1" title="2.1 Datasets ‣ 2 Methods ‣ A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection"><span class="ltx_text ltx_ref_tag">§2.1</span></a>.
+
+</li>
+<li class="ltx_bibitem ltx_bib_article" id="bib.bib65">
+<span class="ltx_tag ltx_bib_key ltx_role_refnum ltx_tag_bibitem">[24]</span>
+Дж. Ян, К. Чжоу, Ю. Ли и Ц. Лю (2024)
+
+Обнаружение обобщённого выхода за пределы распределения: обзор.
+
+Международный журнал компьютерного зрения 132 (12), стр. 5635–5662.
+
+Цитируется: <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2605.10181#S1.p2.1" title="1 Introduction ‣ A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection"><span class="ltx_text ltx_ref_tag">§1</span></a>.
+
+</li>
+</ul>
+</section>
+</article>
+</div>
+<div class="ar5iv-footer"><a class="ar5iv-nav-button ar5iv-nav-button-prev" href="https://ar5iv.labs.arxiv.org/html/2605.10180">◄</a>
+<a class="ar5iv-home-button" href="https://ar5iv.labs.arxiv.org/"><img alt="ar5iv homepage" height="40" src="./[2605.10181] A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection_files/ar5iv.png"/></a>
+<a class="ar5iv-text-button" href="https://ar5iv.labs.arxiv.org/feeling_lucky">Чувство<br/>lucky?</a>
+<a aria-hidden="true" href="https://ar5iv.labs.arxiv.org/land_of_honey_and_milk" rel="nofollow" tabindex="-1"></a>
+<a class="ar5iv-text-button ar5iv-severity-warning" href="https://ar5iv.labs.arxiv.org/log/2605.10181">Преобразование<br/>report</a>
+<a class="ar5iv-text-button" href="https://github.com/dginev/ar5iv/issues/new?template=improve-article--arxiv-id-.md&amp;title=Improve+article+2605.10181" target="_blank">Отчет<br/>проблема</a>
+<a class="ar5iv-text-button arxiv-ui-theme" href="https://arxiv.org/abs/2605.10181">Просмотреть оригинал<br/>на arXiv</a><a class="ar5iv-nav-button ar5iv-nav-button-next" href="https://ar5iv.labs.arxiv.org/html/2605.10183">►</a>
+</div><footer class="ltx_page_footer">
+<a class="ar5iv-toggle-color-scheme" href="javascript:toggleColorScheme()" title="Toggle ar5iv color scheme"><span class="color-scheme-icon"></span></a>
+<a class="ar5iv-footer-button" href="https://arxiv.org/help/license" target="_blank">Copyright</a>
+<a class="ar5iv-footer-button" href="https://arxiv.org/help/policies/privacy_policy" target="_blank">Политика конфиденциальности</a>
+<div class="ltx_page_logo">Сгенерировано  в сб 6 июня 2026 07:25:56 пользователем <a class="ltx_LaTeXML_logo" href="http://dlmf.nist.gov/LaTeXML/" target="_blank"><span style="letter-spacing:-0.2em; margin-right:0.1em;">L<span class="ltx_font_smallcaps" style="position:relative; bottom:2.2pt;">a</span>T<span class="ltx_font_smallcaps" style="font-size:120%;position:relative; bottom:-0.2ex;">e</span></span><span style="font-size:90%; position:relative; bottom:-0.2ex;">XML</span><img alt="Mascot Sammy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAAOCAYAAAD5YeaVAAAAAXNSR0IArs4c6QAAAAZiS0dEAP8A/wD/oL2nkwAAAAlwSFlzAAALEwAACxMBAJqcGAAAAAd0SU1FB9wKExQZLWTEaOUAAAAddEVYdENvbW1lbnQAQ3JlYXRlZCB3aXRoIFRoZSBHSU1Q72QlbgAAAdpJREFUKM9tkL+L2nAARz9fPZNCKFapUn8kyI0e4iRHSR1Kb8ng0lJw6FYHFwv2LwhOpcWxTjeUunYqOmqd6hEoRDhtDWdA8ApRYsSUCDHNt5ul13vz4w0vWCgUnnEc975arX6ORqN3VqtVZbfbTQC4uEHANM3jSqXymFI6yWazP2KxWAXAL9zCUa1Wy2tXVxheKA9YNoR8Pt+aTqe4FVVVvz05O6MBhqUIBGk8Hn8HAOVy+T+XLJfLS4ZhTiRJgqIoVBRFIoric47jPnmeB1mW/9rr9ZpSSn3Lsmir1fJZlqWlUonKsvwWwD8ymc/nXwVBeLjf7xEKhdBut9Hr9WgmkyGEkJwsy5eHG5vN5g0AKIoCAEgkEkin0wQAfN9/cXPdheu6P33fBwB4ngcAcByHJpPJl+fn54mD3Gg0NrquXxeLRQAAwzAYj8cwTZPwPH9/sVg8PXweDAauqqr2cDjEer1GJBLBZDJBs9mE4zjwfZ85lAGg2+06hmGgXq+j3+/DsixYlgVN03a9Xu8jgCNCyIegIAgx13Vfd7vdu+FweG8YRkjXdWy329+dTgeSJD3ieZ7RNO0VAXAPwDEAO5VKndi2fWrb9jWl9Esul6PZbDY9Go1OZ7PZ9z/lyuD3OozU2wAAAABJRU5ErkJggg=="/></a>
+</div></footer>
+</div>
+<script>
+      var canMathML = typeof(MathMLElement) == "function";
+      if (!canMathML) {
+        var body = document.querySelector("body");
+        body.firstElementChild.setAttribute('style', 'opacity: 0;');
+        var loading = document.createElement("div");
+        loading.setAttribute("id", "mathjax-loading-spinner");
+        var message = document.createElement("div");
+        message.setAttribute("id", "mathjax-loading-message");
+        message.innerText = "Typesetting Equations...";
+        body.prepend(loading);
+        body.prepend(message);
+
+        var el = document.createElement("script");
+        el.src = "https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js";
+        document.querySelector("head").appendChild(el);
+
+        window.MathJax = {
+          startup: {
+            pageReady: () => {
+              return MathJax.startup.defaultPageReady().then(() => {
+                body.removeChild(loading);
+                body.removeChild(message);
+                body.firstElementChild.removeAttribute('style');
+              }); } } };
+      }
+    </script>
+<script>
+    // Auxiliary function, building the preview feature when
+    // an inline citation is clicked
+    function clicked_cite(e) {
+      e.preventDefault();
+      let cite = this.closest('.ltx_cite');
+      let next = cite.nextSibling;
+      if (next && next.nodeType == Node.ELEMENT_NODE && next.getAttribute('class') == "ar5iv-bibitem-preview") {
+        next.remove();
+        return; }
+      // Before adding a preview modal,
+      // cleanup older previews, in case they're still open
+      document.querySelectorAll('span.ar5iv-bibitem-preview').forEach(function(node) {
+        node.remove();
+      })
+
+      // Create the preview
+      preview = document.createElement('span');
+      preview.setAttribute('class','ar5iv-bibitem-preview');
+      let target = document.getElementById(this.getAttribute('href').slice(1));
+      target.childNodes.forEach(function (child) {
+        preview.append(child.cloneNode(true));
+      });
+      let close_x = document.createElement('button');
+      close_x.setAttribute("aria-label","Close modal for bibliography item preview");
+      close_x.textContent = "×";
+      close_x.setAttribute('class', 'ar5iv-button-close-preview');
+      close_x.setAttribute('onclick','this.parentNode.remove()');
+      preview.append(close_x);
+      preview.querySelectorAll('.ltx_tag_bibitem').forEach(function(node) {
+        node.remove();
+      });
+      cite.parentNode.insertBefore(preview, cite.nextSibling);
+      return;
+    }
+    // Global Document initialization:
+    // - assign the preview feature to all inline citation links
+    document.querySelectorAll(".ltx_cite .ltx_ref").forEach(function (link) {
+      link.addEventListener("click", clicked_cite);
+    });
+    </script>
+</body></html>

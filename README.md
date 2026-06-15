@@ -80,101 +80,101 @@ LLM должна начинать работу с этих файлов, а не
 > Новые переводы и разборы arXiv-статей
 ---
 
-### Переосмысление ранней остановки: уточните, затем откалибруйте
-[2501.19195] дата публикации в arXiv - 01.2025  
-📅 дата перевода 06.06.2026  
-🏷 `calibration error` `refinement error` `early stopping` `temperature scaling` `probabilistic classification` `logistic regression` `model calibration`
+### Глубокое обучение для облаков точек LiDAR в автономном вождении: обзор
+[2005.09830] дата публикации в arXiv - 05.2020  
+📅 дата перевода 07.06.2026  
+🏷 `LiDAR point clouds` `deep learning` `3D segmentation` `3D object detection` `3D classification` `autonomous driving` `data representation`
 
-Авторы показывают, что минимизация функции потерь при обучении классификаторов не приводит к одновременному снижению ошибок калибровки и уточнения. Предлагается новый критерий ранней остановки, основанный на минимизации ошибки уточнения, а калибровка проводится постфактум с помощью temperature scaling, что улучшает качество вероятностных предсказаний.
+Обзор современных глубоких архитектур для анализа LiDAR точечных облаков в автономном вождении, охватывающий задачи сегментации, детекции и классификации объектов с анализом датасетов, метрик и вызовов.
 
-- [📖 Русская HTML версия](https://romanzorkin.github.io/arxiv_ru/articles/2501.19195/2501.19195_ru.html)
-- [📄 Оригинальная статья](https://arxiv.org/abs/2501.19195)
-- [🧠 Summary / README](articles/2501.19195/README.md)
-- [⚙ Metadata](articles/2501.19195/metadata.json)
-
----
-
-### SeGuE: Семантически управляемое исследование для мобильных роботов
-[2504.03629] дата публикации в arXiv - 04.2025  
-📅 дата перевода 01.06.2026  
-🏷 `semantic mapping` `next-best-view` `mobile robots` `semantic features` `importance sampling` `autonomous exploration` `embodied AI`
-
-Предложен метод SeGuE для автономного исследования мобильным роботом, который строит карту с семантическими признаками, используя оценку энтропии видимых семантических признаков для выбора следующей точки обзора. Метод проверен в симуляции и на реальном роботе, показывая улучшение качества семантических карт по сравнению с базовыми подходами.
-
-- [📖 Русская HTML версия](https://romanzorkin.github.io/arxiv_ru/articles/2504.03629/2504.03629_ru.html)
-- [📄 Оригинальная статья](https://arxiv.org/abs/2504.03629)
-- [🧠 Summary / README](articles/2504.03629/README.md)
-- [⚙ Metadata](articles/2504.03629/metadata.json)
+- [📖 Русская HTML версия](https://romanzorkin.github.io/arxiv_ru/articles/2005.09830/2005.09830_ru.html)
+- [📄 Оригинальная статья](https://arxiv.org/abs/2005.09830)
+- [🧠 Summary / README](articles/2005.09830/README.md)
+- [⚙ Metadata](articles/2005.09830/metadata.json)
 
 ---
 
-### BLASST: динамическое блочное разрежение механизма внимания с использованием порогового отсечения Softmax
-[2512.12087] дата публикации в arXiv - 12.2025  
-📅 дата перевода 31.05.2026  
-🏷 `sparse attention` `FlashAttention` `CUDA kernels` `long-context inference` `threshold pruning` `sparsity-aware training` `Llama-3.1-8B`
+### Иерархическое глубокое исследование с локальным–веб RAG: к автоматизированному системному поиску материалов
+[2511.18303] дата публикации в arXiv - 11.2025  
+📅 дата перевода 07.06.2026  
+🏷 `materials discovery` `hierarchical reasoning` `retrieval-augmented generation` `large language models` `autonomous agents` `computational materials science` `deep research orchestration`
 
-BLASST — метод динамического разрежения внимания, который без предвычислений и прокси-оценок пропускает незначимые блоки внимания, достигая до 1.62× ускорения при 74.7% разреженности с минимальной потерей точности на современных GPU.
+Предложена локально развёртываемая система глубокого исследования (DR) с иерархической организацией (DToR), объединяющая локальный и веб-поиск с LLM-рассуждениями для решения сложных задач открытия материалов на системном уровне. Система превосходит коммерческие аналоги по качеству отчётов и проверена на 27 темах с последующей верификацией экспертами.
 
-- [📖 Русская HTML версия](https://romanzorkin.github.io/arxiv_ru/articles/2512.12087/2512.12087_ru.html)
-- [📄 Оригинальная статья](https://arxiv.org/abs/2512.12087)
-- [🧠 Summary / README](articles/2512.12087/README.md)
-- [⚙ Metadata](articles/2512.12087/metadata.json)
-
----
-
-### Finch: Бенчмаркинг финансов и бухгалтерии в корпоративных рабочих процессах, основанных на таблицах
-[2512.13168] дата публикации в arXiv - 12.2025  
-📅 дата перевода 01.06.2026  
-🏷 `finance workflows` `spreadsheet reasoning` `large language models` `multimodal data` `workflow benchmarking` `enterprise AI` `long-horizon tasks`
-
-Finch — это новый комплексный бенчмарк для оценки ИИ-агентов на реальных финансово-бухгалтерских рабочих процессах, основанных на сложных, разнородных и многомодальных данных из электронных таблиц и сопутствующих документов. Даже передовые модели проходят менее 40% задач, демонстрируя значительные вызовы.
-
-- [📖 Русская HTML версия](https://romanzorkin.github.io/arxiv_ru/articles/2512.13168/2512.13168_ru.html)
-- [📄 Оригинальная статья](https://arxiv.org/abs/2512.13168)
-- [🧠 Summary / README](articles/2512.13168/README.md)
-- [⚙ Metadata](articles/2512.13168/metadata.json)
+- [📖 Русская HTML версия](https://romanzorkin.github.io/arxiv_ru/articles/2511.18303/2511.18303_ru.html)
+- [📄 Оригинальная статья](https://arxiv.org/abs/2511.18303)
+- [🧠 Summary / README](articles/2511.18303/README.md)
+- [⚙ Metadata](articles/2511.18303/metadata.json)
 
 ---
 
-### К парадигме «Зрение–Звук–Язык–Действие»: фреймворк HEAR для манипулирования, ориентированного на звук
-[2603.16086] дата публикации в arXiv - 03.2026  
-📅 дата перевода 01.06.2026  
-🏷 `robotic manipulation` `audio perception` `vision-language-action` `streaming audio` `causal memory` `flow-matching policy` `multi-sensory integration`
+### Искусственный интеллект и экономика США: бухгалтерский взгляд на инвестиции и производство
+[2601.11196] дата публикации в arXiv - 01.2026  
+📅 дата перевода 07.06.2026  
+🏷 `artificial intelligence` `macroeconomics` `data centers` `capital expenditure` `cloud infrastructure` `AI services` `national accounts`
 
-Предложена парадигма VSLA и архитектура HEAR для звукоцентричного управления роботами, решающая проблему потери кратковременных аудиосигналов из-за задержек и пакетной обработки действий. HEAR достигает 81% успеха в симуляции и 54% на реальном роботе, существенно превосходя существующие методы.
+Статья анализирует влияние текущей волны искусственного интеллекта на ВВП США через призму национальных счетов, выделяя ключевую роль дата-центров и показывая, что инвестиции в AI стимулируют спрос, но вклад в рост ВВП ограничен из-за высокого импорта оборудования.
 
-- [📖 Русская HTML версия](https://romanzorkin.github.io/arxiv_ru/articles/2603.16086/2603.16086_ru.html)
-- [📄 Оригинальная статья](https://arxiv.org/abs/2603.16086)
-- [🧠 Summary / README](articles/2603.16086/README.md)
-- [⚙ Metadata](articles/2603.16086/metadata.json)
-
----
-
-### Агентное использование инструментов в больших языковых моделях
-[2604.00835] дата публикации в arXiv - 04.2026  
-📅 дата перевода 01.06.2026  
-🏷 `large language models` `tool use` `reinforcement learning` `supervised fine-tuning` `prompt engineering` `autonomous agents` `evaluation benchmarks`
-
-Статья систематизирует методы использования инструментов большими языковыми моделями (LLM) в трёх парадигмах: plug-and-play prompting, supervised tool learning и reward-driven policy learning, анализирует их эволюцию, сильные и слабые стороны, а также обзор существующих бенчмарков и вызовов.
-
-- [📖 Русская HTML версия](https://romanzorkin.github.io/arxiv_ru/articles/2604.00835/2604.00835_ru.html)
-- [📄 Оригинальная статья](https://arxiv.org/abs/2604.00835)
-- [🧠 Summary / README](articles/2604.00835/README.md)
-- [⚙ Metadata](articles/2604.00835/metadata.json)
+- [📖 Русская HTML версия](https://romanzorkin.github.io/arxiv_ru/articles/2601.11196/2601.11196_ru.html)
+- [📄 Оригинальная статья](https://arxiv.org/abs/2601.11196)
+- [🧠 Summary / README](articles/2601.11196/README.md)
+- [⚙ Metadata](articles/2601.11196/metadata.json)
 
 ---
 
-### Реализуемая Байесовская согласованность для общих функций потерь метрик
-[2605.03823] дата публикации в arXiv - 05.2026  
-📅 дата перевода 06.06.2026  
-🏷 `metric learning` `Bayes consistency` `Littlestone tree` `universal learning` `unbounded loss` `realizable setting` `combinatorial characterization`
+### Учетная тождественность для алгоритмической справедливости
+[2601.20217] дата публикации в arXiv - 01.2026  
+📅 дата перевода 07.06.2026  
+🏷 `algorithmic fairness` `calibration` `binary classification` `regression` `fairness metrics` `predictive accuracy` `fairness tradeoffs`
 
-Статья даёт необходимое и достаточное условие для сильной универсальной байесовской сходимости в реализуемой постановке при общих метрических потерях. Ключевой критерий — отсутствие бесконечного неубывающего Littlestone-дерева с растущими разрывами.
+Статья выводит точную формулу, связывающую точность предсказаний и распространённые метрики справедливости для глобально откалиброванных моделей. Для бинарных исходов сумма взвешенных нарушений справедливости равна «бюджету несправедливости», пропорциональному среднеквадратичной ошибке и разнице в распространённости групп.
 
-- [📖 Русская HTML версия](https://romanzorkin.github.io/arxiv_ru/articles/2605.03823/2605.03823_ru.html)
-- [📄 Оригинальная статья](https://arxiv.org/abs/2605.03823)
-- [🧠 Summary / README](articles/2605.03823/README.md)
-- [⚙ Metadata](articles/2605.03823/metadata.json)
+- [📖 Русская HTML версия](https://romanzorkin.github.io/arxiv_ru/articles/2601.20217/2601.20217_ru.html)
+- [📄 Оригинальная статья](https://arxiv.org/abs/2601.20217)
+- [🧠 Summary / README](articles/2601.20217/README.md)
+- [⚙ Metadata](articles/2601.20217/metadata.json)
+
+---
+
+### Агентный ИИ в здравоохранении и медицине: семимерное таксономическое описание для эмпирической оценки агентов на основе LLM
+[2602.04813] дата публикации в arXiv - 02.2026  
+📅 дата перевода 07.06.2026  
+🏷 `healthcare AI` `large language models` `agentic AI` `multi-agent systems` `knowledge integration` `clinical decision support` `adaptation mechanisms`
+
+Обзор 49 исследований LLM-агентов в медицине с семимерной таксономией, выявляющей сильные стороны в интеграции внешних знаний и слабые — в адаптации, безопасности и оркестрации. Современные агенты хорошо справляются с информационно-консультационными задачами, но требуют улучшений для надежного клинического применения.
+
+- [📖 Русская HTML версия](https://romanzorkin.github.io/arxiv_ru/articles/2602.04813/2602.04813_ru.html)
+- [📄 Оригинальная статья](https://arxiv.org/abs/2602.04813)
+- [🧠 Summary / README](articles/2602.04813/README.md)
+- [⚙ Metadata](articles/2602.04813/metadata.json)
+
+---
+
+### Сравнительное исследование машинного обучения и глубокого обучения для обнаружения выхода данных за пределы распределения
+[2605.10181] дата публикации в arXiv - 05.2026  
+📅 дата перевода 07.06.2026  
+🏷 `out-of-distribution detection` `fundus imaging` `machine learning` `deep learning` `ExtraTrees` `ResNet-18` `latency analysis`
+
+Для задачи обнаружения выходящих за распределение (OOD) медицинских изображений глазного дна ML-модель ExtraTrees с набором интерпретируемых признаков достигает точности и AUROC, сопоставимых с DL-моделью ResNet-18, при значительно меньшей вычислительной задержке.
+
+- [📖 Русская HTML версия](https://romanzorkin.github.io/arxiv_ru/articles/2605.10181/2605.10181_ru.html)
+- [📄 Оригинальная статья](https://arxiv.org/abs/2605.10181)
+- [🧠 Summary / README](articles/2605.10181/README.md)
+- [⚙ Metadata](articles/2605.10181/metadata.json)
+
+---
+
+### Сравнительная оценка подходов машинного обучения для прогнозирования финансового неблагополучия меньшинственного класса при ограничениях дисбаланса классов
+[2605.14067] дата публикации в arXiv - 05.2026  
+📅 дата перевода 07.06.2026  
+🏷 `financial distress prediction` `class imbalance` `ensemble learning` `SMOTE` `SHAP explainability` `gradient boosting` `minority-class sensitivity`
+
+Статья сравнивает классические статистические, ансамблевые и нейронные модели для предсказания финансовых затруднений при сильном дисбалансе классов, используя SMOTE для балансировки и SHAP для объяснимости. Лучшие результаты показали градиентные бустинговые модели, особенно XGBoost, с акцентом на чувствительность к редким событиям.
+
+- [📖 Русская HTML версия](https://romanzorkin.github.io/arxiv_ru/articles/2605.14067/2605.14067_ru.html)
+- [📄 Оригинальная статья](https://arxiv.org/abs/2605.14067)
+- [🧠 Summary / README](articles/2605.14067/README.md)
+- [⚙ Metadata](articles/2605.14067/metadata.json)
 
 ---
 
@@ -188,6 +188,14 @@ Finch — это новый комплексный бенчмарк для оц�
 
 |id статьи|Месяц публикации|Дата перевода| Тема статьи | Ручной контроль|
 |---|---|---|---|---|
+
+| [2005.09830](articles/2005.09830/README.md) | 05.2020 | 07.06.2026 | Глубокое обучение для облаков точек LiDAR в автономном вождении: обзор (`Deep Learning for LiDAR Point Clouds in Autonomous Driving: A Review`) |✅|
+| [2511.18303](articles/2511.18303/README.md) | 11.2025 | 07.06.2026 | Иерархическое глубокое исследование с локальным–веб RAG: к автоматизированному системному поиску материалов (`Hierarchical Deep Research with Local–Web RAG: Toward Automated System-Level Materials Discovery`) ||
+| [2601.11196](articles/2601.11196/README.md) | 01.2026 | 07.06.2026 | Искусственный интеллект и экономика США: бухгалтерский взгляд на инвестиции и производство (`Artificial Intelligence and the US Economy: An Accounting Perspective on Investment and Production`) |✅|
+| [2601.20217](articles/2601.20217/README.md) | 01.2026 | 07.06.2026 | Учетная тождественность для алгоритмической справедливости (`An Accounting Identity for Algorithmic Fairness`) ||
+| [2602.04813](articles/2602.04813/README.md) | 02.2026 | 07.06.2026 | Агентный ИИ в здравоохранении и медицине: семимерное таксономическое описание для эмпирической оценки агентов на основе LLM (`Agentic AI in Healthcare & Medicine: A Seven-Dimensional Taxonomy for Empirical Evaluation of LLM-based Agents`) ||
+| [2605.10181](articles/2605.10181/README.md) | 05.2026 | 07.06.2026 | Сравнительное исследование машинного обучения и глубокого обучения для обнаружения выхода данных за пределы распределения (`A Comparative Study of Machine Learning and Deep Learning for Out-of-Distribution Detection`) ||
+| [2605.14067](articles/2605.14067/README.md) | 05.2026 | 07.06.2026 | Сравнительная оценка подходов машинного обучения для прогнозирования финансового неблагополучия меньшинственного класса при ограничениях дисбаланса классов (`Comparative Evaluation of Machine Learning Approaches for Minority-Class Financial Distress Prediction Under Class Imbalance Constraints`) ||
 | [2501.19195](articles/2501.19195/README.md) | 01.2025 | 06.06.2026 | Переосмысление ранней остановки: уточните, затем откалибруйте (`Rethinking Early Stopping: Refine, Then Calibrate`) |✅|
 | [2504.03629](articles/2504.03629/README.md) | 04.2025 | 01.06.2026 | SeGuE: Семантически управляемое исследование для мобильных роботов (`SeGuE: Semantic Guided Exploration for Mobile Robots`) |✅|
 | [2512.12087](articles/2512.12087/README.md) | 12.2025 | 31.05.2026 | BLASST: динамическое блочное разрежение механизма внимания с использованием порогового отсечения Softmax (`BLASST: Dynamic BLocked Attention Sparsity via Softmax Thresholding`) |✅|
