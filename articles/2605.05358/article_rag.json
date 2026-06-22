@@ -1,0 +1,1002 @@
+{
+  "title": "[2605.05358] Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks",
+  "sections": [
+    {
+      "heading": "Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks",
+      "level": 1,
+      "content": [],
+      "children": [
+        {
+          "heading": "Abstract",
+          "level": 6,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "Early-exiting neural networks enable adaptive inference by allowing inputs to exit at intermediate classifiers, reducing computation for easy samples while maintaining high accuracy. In practice, exits can be trained sequentially by incrementally adding them to a shared backbone; however, this sequential training can cause newly introduced exits to interfere with previously learned ones, degrading the performance of earlier classifiers. We address this problem by retaining the knowledge embedded in existing exits while allowing new ones to specialize. We propose two alternative approaches that operate at different levels of the model. The first constrains learning by protecting parameters that are important for previously trained exits, while the second preserves the output distributions of earlier exits as the network adapts. These alternatives directly reflect the stability-plasticity trade-off studied in continual learning. Accordingly, we leverage Elastic Weight Consolidation to constrain critical weights and Learning without Forgetting to preserve output distributions. Experiments on standard benchmarks show that our approaches consistently improve early-exit performance, achieving higher accuracy over existing sequential training methods and significant performance speedups at low computational budgets."
+            },
+            {
+              "type": "paragraph",
+              "text": "Index Terms— Early-exiting neural networks, Sequential training, Catastrophic Forgetting, Continual learning"
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "1 Introduction",
+          "level": 2,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "The increasing deployment of deep learning models under strict latency, energy, and memory constraints has motivated the development of resource-efficient dynamic architectures. Rather than executing a fixed computation graph for all inputs, such architectures adapt their computational cost to input difficulty, enabling efficient inference while maintaining high accuracy [[5](https://ar5iv.labs.arxiv.org/html/2605.05358#bib.bib5 \"Dynamic Neural Networks: A Survey\")]. Early-exiting neural networks (EENNs) are a representative instance of this paradigm. EENNs augment a backbone network with multiple internal classifiers (ICs) placed at increasing depths, allowing inference to terminate early once sufficient confidence is reached. Easy samples can be classified using shallow representations, while more challenging inputs propagate deeper into the network. This exit-based adaptivity significantly reduces average inference cost and makes EENNs well-suited for resource-constrained applications [[2](https://ar5iv.labs.arxiv.org/html/2605.05358#bib.bib15 \"Resource-constrained edge ai with early exit prediction\")]."
+            },
+            {
+              "type": "paragraph",
+              "text": "To realize these benefits in practice, a critical design choice concerns how to train the multiple exits within an EENN. Most prior work has focused on joint training strategies, which optimize the backbone along with all exits simultaneously in an end-to-end manner. Joint training has shown to deliver strong empirical performance and has therefore become the predominant approach [[17](https://ar5iv.labs.arxiv.org/html/2605.05358#bib.bib26 \"BranchyNet: fast inference via early exiting from deep neural networks\"), [4](https://ar5iv.labs.arxiv.org/html/2605.05358#bib.bib14 \"Improving low-latency predictions in multi-exit neural networks via block-dependent losses\"), [3](https://ar5iv.labs.arxiv.org/html/2605.05358#bib.bib4 \"Deep feature surgery: towards accurate and efficient multi-exit networks\"), [11](https://ar5iv.labs.arxiv.org/html/2605.05358#bib.bib1 \"How to train your multi-exit model? analyzing the impact of training strategies\")]. In contrast, sequential training performs the training incrementally as exits are added to an existing backbone. Sequential training naturally aligns with pretrained backbones by enabling a more rapid design time and an efficient analysis of where meaningful predictions emerge within the network – a useful property for large models where the computational cost of full joint training can be prohibitive or even undesirable [[24](https://ar5iv.labs.arxiv.org/html/2605.05358#bib.bib16 \"GAML-BERT: improving BERT early exiting by gradient aligned mutual learning\"), [22](https://ar5iv.labs.arxiv.org/html/2605.05358#bib.bib17 \"BERxiT: early exiting for BERT with better fine-tuning and extension to regression\")]."
+            },
+            {
+              "type": "paragraph",
+              "text": "Sequential training approaches for EENNs are categorized into three main groups based on the specific training methodology employed for each successive exit [[11](https://ar5iv.labs.arxiv.org/html/2605.05358#bib.bib1 \"How to train your multi-exit model? analyzing the impact of training strategies\")]. Disjoint training (also referred to as two-stage training) first trains the backbone independently and then freezes it while learning ICs [[20](https://ar5iv.labs.arxiv.org/html/2605.05358#bib.bib13 \"Zero time waste in pre-trained early exit neural networks\"), [23](https://ar5iv.labs.arxiv.org/html/2605.05358#bib.bib19 \"LGViT: dynamic early exiting for accelerating vision transformer\")]. This approach is particularly effective for retrofitting pretrained models with early exits at the cost of limited adaptability; new exits cannot refine earlier representations to better support their specific objectives. Branch-wise training introduces exits sequentially while unfreezing only the backbone segment associated with the current exit, offering moderate flexibility and helping to alleviate vanishing or exploding gradients in deep architectures [[7](https://ar5iv.labs.arxiv.org/html/2605.05358#bib.bib24 \"Multi-scale dense networks for resource efficient image classification\")]. However, this forward-thinking approach suffers from premature freezing: once an exit is trained and the training process moves deeper, that exit’s parameters become fixed, preventing further refinement even as later exits reveal useful representational structures. Separate training further relaxes these constraints by unfreezing the full network [[11](https://ar5iv.labs.arxiv.org/html/2605.05358#bib.bib1 \"How to train your multi-exit model? analyzing the impact of training strategies\")]. The exits are also introduced sequentially, however the training of each exit is done jointly with previous exits, allowing each branch to capture features at different abstraction levels through potentially distinct objectives. Although this approach provides greater flexibility, it applies uniform updates to all backbone parameters during each iteration, without identifying which parameters are essential for earlier exits and which can be modified for new ones."
+            },
+            {
+              "type": "paragraph",
+              "text": "A key challenge unifies these methods: introducing new exits disrupts previously learned representations through gradient interference, with degradation intensifying as more exits are added [[14](https://ar5iv.labs.arxiv.org/html/2605.05358#bib.bib25 \"Early-exit deep neural network - a comprehensive survey\")]. This results from current approaches disregarding the heterogeneous importance of parameters, particularly those that have already been tuned for earlier exits. Indeed, some weights encode critical features that earlier exits depend on, while others are less consequential and could be freely adapted. Therefore, distinguishing between these parameter types is essential as it enables selective protection of critical knowledge while maintaining the plasticity needed for new exits to specialize effectively. Importantly, this challenge is not unique to early-exit networks. In continual learning (CL), models face a similar dilemma when learning sequential tasks; they must acquire new capabilities (plasticity) while preserving previously learned knowledge (stability) to mitigate catastrophic forgetting [[19](https://ar5iv.labs.arxiv.org/html/2605.05358#bib.bib27 \"A comprehensive survey of continual learning: theory, method and application\")]. We thus recognize that sequential early-exit training exhibits this same stability-plasticity trade-off. This conceptual alignment suggests that CL techniques can be adapted to protect salient features of earlier exits from being forgotten during sequential training. It is worth noting that the goal here is not to implement CL on EENN (e.g., Szatkowski et al. [[16](https://ar5iv.labs.arxiv.org/html/2605.05358#bib.bib8 \"Accelerated inference and reduced forgetting: the dual benefits of early-exit networks in continual learning\")]), but to benefit from some of the regularization techniques of CL to mitigate representation degradation in sequential training of EENN."
+            },
+            {
+              "type": "paragraph",
+              "text": "Building on this perspective, we propose a novel two-stage sequential training approach. In the first stage, we pretrain the backbone using only the final exit in order for deep layers to develop rich abstract representations before early exits are introduced [[21](https://ar5iv.labs.arxiv.org/html/2605.05358#bib.bib18 \"DeeBERT: dynamic early exiting for accelerating BERT inference\"), [13](https://ar5iv.labs.arxiv.org/html/2605.05358#bib.bib12 \"FastBERT: a self-distilling BERT with adaptive inference time\")]. In the second stage, we perform sequential training by explicitly preserving the knowledge acquired by earlier exits as new exits are introduced. Consistent with the CL perspective, our goal is to counteract the forgetting induced by gradient interference. Without protection mechanisms, optimizing a new exit inevitably overwrites representations that previous exits depend on, leading to progressive degradation. Therefore, we aim to regularize sequential training from two alternative standpoints, namely at the parameter and output distribution levels, each addressing forgetting from a different aspect. At the parameter level, forgetting occurs because optimization updates treat all weights equally, although some are critical for the performance of existing exits. By identifying which parameters are essential, we can selectively protect them, allowing the network to adapt safely while preserving knowledge that earlier exits rely on. This motivates the use of Elastic Weight Consolidation (EWC) [[9](https://ar5iv.labs.arxiv.org/html/2605.05358#bib.bib7 \"Overcoming catastrophic forgetting in neural networks\"), [15](https://ar5iv.labs.arxiv.org/html/2605.05358#bib.bib6 \"Progress & compress: a scalable framework for continual learning\")], which estimates parameter importance via Fisher information and constrains updates on crucial weights, thus weighting the learning process to balance stability and plasticity. At the output distribution level, however, what ultimately matters is that the predictive behavior of the earlier exits remains stable as new exits are trained. To achieve this, we adopt Learning without Forgetting (LwF) [[12](https://ar5iv.labs.arxiv.org/html/2605.05358#bib.bib3 \"Learning without forgetting\")], which regularizes the outputs of earlier exits to match their original predictions, maintaining functional consistency as new exits are trained. Both EWC and LwF are governed by tunable hyperparameters, giving explicit control over the trade-off between preserving early-exit performance and enabling adaptation for new exits."
+            },
+            {
+              "type": "paragraph",
+              "text": "The main contributions of this work are threefold:"
+            },
+            {
+              "type": "list",
+              "text": "* • We propose a novel technique to mitigate the degradation of previously learnt representation in order to address the stability-plasticity trade-off faced during sequential training of EENN. * • We adapt two CL regularization strategies, EWC for parameter-level protection and LwF for output distribution-level consistency, to enable principled sequential training that balances exit specialization with knowledge preservation. * • We demonstrate consistent improvements over existing sequential training methods across benchmark architectures, validating the effectiveness of the CL approach for EENNs."
+            },
+            {
+              "type": "paragraph",
+              "text": "We propose a novel technique to mitigate the degradation of previously learnt representation in order to address the stability-plasticity trade-off faced during sequential training of EENN."
+            },
+            {
+              "type": "paragraph",
+              "text": "We adapt two CL regularization strategies, EWC for parameter-level protection and LwF for output distribution-level consistency, to enable principled sequential training that balances exit specialization with knowledge preservation."
+            },
+            {
+              "type": "paragraph",
+              "text": "We demonstrate consistent improvements over existing sequential training methods across benchmark architectures, validating the effectiveness of the CL approach for EENNs."
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "2 Proposed Methodology",
+          "level": 2,
+          "content": [
+            {
+              "type": "formula",
+              "text": "Θμ\\Theta_{\\mu}"
+            },
+            {
+              "type": "formula",
+              "text": "I​CμIC_{\\mu}"
+            },
+            {
+              "type": "formula",
+              "text": "μ\\mu"
+            },
+            {
+              "type": "formula",
+              "text": "𝐲^μ\\mathbf{\\hat{y}}_{\\mu}"
+            },
+            {
+              "type": "paragraph",
+              "text": "We consider an EENN consisting of MM ICs, where each backbone subnetwork μ\\mu is parameterized by {Θ1,…,Θμ}\\{\\Theta\\_{1},\\dots,\\Theta\\_{\\mu}\\} and produces class probability vector 𝐲^μ\\mathbf{\\hat{y}}\\_{\\mu} (see [Figure 1](https://ar5iv.labs.arxiv.org/html/2605.05358#S2.F1 \"In 2 Proposed Methodology ‣ Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks\")), with y^μ​(c)\\hat{y}\\_{\\mu}(c) (for c∈{1,…,C}c\\in\\{1,\\dots,C\\}) being the probability associated with class cc. We frame the sequential training of ICs as a sequence of learning tasks indexed by μ∈{1,2,…,M}\\mu\\in\\{1,2,\\ldots,M\\}, where task μ\\mu corresponds to training IC μ\\mu while preserving the predictive capabilities of all previously trained ICs {1,…,μ−1}\\{1,\\ldots,{\\mu-1}\\}. The shared backbone parameters must accommodate the objectives of all trained ICs, balancing plasticity (i.e., the ability to refine representations for the current task) against stability (i.e., maintaining performance on earlier tasks)."
+            },
+            {
+              "type": "formula",
+              "text": "MM"
+            },
+            {
+              "type": "formula",
+              "text": "μ\\mu"
+            },
+            {
+              "type": "formula",
+              "text": "{Θ1,…,Θμ}\\{\\Theta_{1},\\dots,\\Theta_{\\mu}\\}"
+            },
+            {
+              "type": "formula",
+              "text": "𝐲^μ\\mathbf{\\hat{y}}_{\\mu}"
+            },
+            {
+              "type": "formula",
+              "text": "y^μ​(c)\\hat{y}_{\\mu}(c)"
+            },
+            {
+              "type": "formula",
+              "text": "c∈{1,…,C}c\\in\\{1,\\dots,C\\}"
+            },
+            {
+              "type": "formula",
+              "text": "cc"
+            },
+            {
+              "type": "formula",
+              "text": "μ∈{1,2,…,M}\\mu\\in\\{1,2,\\ldots,M\\}"
+            },
+            {
+              "type": "formula",
+              "text": "μ\\mu"
+            },
+            {
+              "type": "formula",
+              "text": "μ\\mu"
+            },
+            {
+              "type": "formula",
+              "text": "{1,…,μ−1}\\{1,\\ldots,{\\mu-1}\\}"
+            },
+            {
+              "type": "paragraph",
+              "text": "To address this stability-plasticity trade-off, we augment the standard classification loss with a regularization term that protects previously acquired knowledge. The loss function for training exit μ\\mu takes the general form:"
+            },
+            {
+              "type": "formula",
+              "text": "μ\\mu"
+            },
+            {
+              "type": "table",
+              "text": "| | | | | | --- | --- | --- | --- | | | ℒtotal(μ)=ℒCE(μ)+s​λ​ℛEWC(μ)+(1−s)​ρ​ℛLwF(μ)\\mathcal{L}\\_{\\mathrm{total}}^{(\\mu)}=\\mathcal{L}\\_{\\mathrm{CE}}^{(\\mu)}+s\\,\\lambda\\mathcal{R}\\_{\\mathrm{EWC}}^{(\\mu)}+(1-s)\\,\\rho\\mathcal{R}\\_{\\mathrm{LwF}}^{(\\mu)} | | (1) |"
+            },
+            {
+              "type": "formula",
+              "text": "ℒtotal(μ)=ℒCE(μ)+s​λ​ℛEWC(μ)+(1−s)​ρ​ℛLwF(μ)\\mathcal{L}_{\\mathrm{total}}^{(\\mu)}=\\mathcal{L}_{\\mathrm{CE}}^{(\\mu)}+s\\,\\lambda\\mathcal{R}_{\\mathrm{EWC}}^{(\\mu)}+(1-s)\\,\\rho\\mathcal{R}_{\\mathrm{LwF}}^{(\\mu)}"
+            },
+            {
+              "type": "paragraph",
+              "text": "where ℒCE(μ)\\mathcal{L}\\_{\\mathrm{CE}}^{(\\mu)} denotes the cross-entropy loss for exit μ\\mu which depends on {Θ1,…,Θμ}\\{\\Theta\\_{1},\\dots,\\Theta\\_{\\mu}\\} and the parameters of IC μ\\mu; ℛEWC(μ)\\mathcal{R}\\_{\\mathrm{EWC}}^{(\\mu)} and ℛLwF(μ)\\mathcal{R}\\_{\\mathrm{LwF}}^{(\\mu)} are regularization terms that mitigate the degradation of earlier exits, corresponding to EWC (parameter-level) and LwF (output-distribution-level), respectively. Their relative strengths are controlled by the hyperparameters λ\\lambda and ρ\\rho. The binary variable s∈{0,1}s\\in\\{0,1\\} indicates which regularization strategy is active."
+            },
+            {
+              "type": "formula",
+              "text": "ℒCE(μ)\\mathcal{L}_{\\mathrm{CE}}^{(\\mu)}"
+            },
+            {
+              "type": "formula",
+              "text": "μ\\mu"
+            },
+            {
+              "type": "formula",
+              "text": "{Θ1,…,Θμ}\\{\\Theta_{1},\\dots,\\Theta_{\\mu}\\}"
+            },
+            {
+              "type": "formula",
+              "text": "μ\\mu"
+            },
+            {
+              "type": "formula",
+              "text": "ℛEWC(μ)\\mathcal{R}_{\\mathrm{EWC}}^{(\\mu)}"
+            },
+            {
+              "type": "formula",
+              "text": "ℛLwF(μ)\\mathcal{R}_{\\mathrm{LwF}}^{(\\mu)}"
+            },
+            {
+              "type": "formula",
+              "text": "λ\\lambda"
+            },
+            {
+              "type": "formula",
+              "text": "ρ\\rho"
+            },
+            {
+              "type": "formula",
+              "text": "s∈{0,1}s\\in\\{0,1\\}"
+            },
+            {
+              "type": "paragraph",
+              "text": "To illustrate the training procedure, [Figure 1](https://ar5iv.labs.arxiv.org/html/2605.05358#S2.F1 \"In 2 Proposed Methodology ‣ Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks\") shows the status of each subnetwork when training exit 3. At this stage, the first two blocks (parameterized by Θ1\\Theta\\_{1} and Θ2\\Theta\\_{2}) and their respective classifiers (producing predictions 𝐲^1\\mathbf{\\hat{y}}\\_{1} and 𝐲^2\\mathbf{\\hat{y}}\\_{2}) have already been trained. We now add IC 3 and therefore, we need to train the full network up to exit 3. We minimize the cross-entropy loss ℒCE(3)\\mathcal{L}^{(3)}\\_{\\text{CE}} augmented with regularization ℛ(3)\\mathcal{R}^{(3)} applied to the previously trained blocks, either constraining their parameters (EWC) or preserving their predictions (LwF). The final block (Θ4\\Theta\\_{4}) and its corresponding classifier remain frozen throughout this stage."
+            },
+            {
+              "type": "formula",
+              "text": "Θ1\\Theta_{1}"
+            },
+            {
+              "type": "formula",
+              "text": "Θ2\\Theta_{2}"
+            },
+            {
+              "type": "formula",
+              "text": "𝐲^1\\mathbf{\\hat{y}}_{1}"
+            },
+            {
+              "type": "formula",
+              "text": "𝐲^2\\mathbf{\\hat{y}}_{2}"
+            },
+            {
+              "type": "formula",
+              "text": "ℒCE(3)\\mathcal{L}^{(3)}_{\\text{CE}}"
+            },
+            {
+              "type": "formula",
+              "text": "ℛ(3)\\mathcal{R}^{(3)}"
+            },
+            {
+              "type": "formula",
+              "text": "Θ4\\Theta_{4}"
+            }
+          ],
+          "children": [
+            {
+              "heading": "2.1 Parameter-level Regularization",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "The first approach employs parameter-level regularization through EWC, which protects parameters that are critical for previously trained exits by penalizing changes to important weights. This importance score is computed using Fisher Information [[1](https://ar5iv.labs.arxiv.org/html/2605.05358#bib.bib10 \"Natural gradient works efficiently in learning\")]. Parameters with large Fisher values correspond to directions in parameter space where small perturbations would strongly increase the cross-entropy loss ℒCE(ν)\\mathcal{L}\\_{\\mathrm{CE}}^{(\\nu)} on previous exits and are therefore prioritized for protection."
+                },
+                {
+                  "type": "formula",
+                  "text": "ℒCE(ν)\\mathcal{L}_{\\mathrm{CE}}^{(\\nu)}"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Following the online EWC framework [[15](https://ar5iv.labs.arxiv.org/html/2605.05358#bib.bib6 \"Progress & compress: a scalable framework for continual learning\")], the parameter-level regularization is defined as"
+                },
+                {
+                  "type": "table",
+                  "text": "| | | | | | --- | --- | --- | --- | | | ℛEWC(μ)=∑θk∈∪i=1μ−1Θi(∑ν=1μ−1Fk(ν))​(θk−θk∗)2\\mathcal{R}\\_{\\mathrm{EWC}}^{(\\mu)}=\\sum\\_{\\theta\\_{k}\\in\\cup\\_{i=1}^{\\mu-1}\\Theta\\_{i}}\\left(\\sum\\_{\\nu=1}^{\\mu-1}F\\_{k}^{(\\nu)}\\right)\\left(\\theta\\_{k}-\\theta\\_{k}^{\\*}\\right)^{2} | | (2) |"
+                },
+                {
+                  "type": "formula",
+                  "text": "ℛEWC(μ)=∑θk∈∪i=1μ−1Θi(∑ν=1μ−1Fk(ν))​(θk−θk∗)2\\mathcal{R}_{\\mathrm{EWC}}^{(\\mu)}=\\sum_{\\theta_{k}\\in\\cup_{i=1}^{\\mu-1}\\Theta_{i}}\\left(\\sum_{\\nu=1}^{\\mu-1}F_{k}^{(\\nu)}\\right)\\left(\\theta_{k}-\\theta_{k}^{*}\\right)^{2}"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Here, θk∗∈ℝ\\theta\\_{k}^{\\*}\\in\\mathbb{R} denotes the value of parameter θk∈∪i=1μ−1Θi\\theta\\_{k}\\in\\cup\\_{i=1}^{\\mu-1}\\Theta\\_{i} after training up to exit μ−1\\mu-1. The term Fk(ν)∈ℝF\\_{k}^{(\\nu)}\\in\\mathbb{R} represents the Fisher information measuring the importance of parameter θk\\theta\\_{k} for exit ν\\nu. In practice, we use the empirical Fisher information [[18](https://ar5iv.labs.arxiv.org/html/2605.05358#bib.bib20 \"On the computation of the fisher information in continual learning\")], which is computed as:"
+                },
+                {
+                  "type": "formula",
+                  "text": "θk∗∈ℝ\\theta_{k}^{*}\\in\\mathbb{R}"
+                },
+                {
+                  "type": "formula",
+                  "text": "θk∈∪i=1μ−1Θi\\theta_{k}\\in\\cup_{i=1}^{\\mu-1}\\Theta_{i}"
+                },
+                {
+                  "type": "formula",
+                  "text": "μ−1\\mu-1"
+                },
+                {
+                  "type": "formula",
+                  "text": "Fk(ν)∈ℝF_{k}^{(\\nu)}\\in\\mathbb{R}"
+                },
+                {
+                  "type": "formula",
+                  "text": "θk\\theta_{k}"
+                },
+                {
+                  "type": "formula",
+                  "text": "ν\\nu"
+                },
+                {
+                  "type": "table",
+                  "text": "| | | | | | --- | --- | --- | --- | | | Fk(ν)=1N​∑𝐱∈𝒟(∂∂θk​log⁡y^ν​(𝒞​(𝐱))|θk=θk∗)2F\\_{k}^{(\\nu)}=\\frac{1}{N}\\sum\\_{\\mathbf{x}\\in\\mathcal{D}}\\left(\\left.\\frac{\\partial}{\\partial\\theta\\_{k}}\\log\\hat{y}\\_{\\nu}(\\mathcal{C}(\\mathbf{x}))\\right|\\_{\\theta\\_{k}=\\theta\\_{k}^{\\*}}\\right)^{2} | | (3) |"
+                },
+                {
+                  "type": "formula",
+                  "text": "Fk(ν)=1N​∑𝐱∈𝒟(∂∂θk​log⁡y^ν​(𝒞​(𝐱))|θk=θk∗)2F_{k}^{(\\nu)}=\\frac{1}{N}\\sum_{\\mathbf{x}\\in\\mathcal{D}}\\left(\\left.\\frac{\\partial}{\\partial\\theta_{k}}\\log\\hat{y}_{\\nu}(\\mathcal{C}(\\mathbf{x}))\\right|_{\\theta_{k}=\\theta_{k}^{*}}\\right)^{2}"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "where 𝒟\\mathcal{D} denotes the training dataset, NN is the total number of training samples, and y^ν​(𝒞​(𝐱))\\hat{y}\\_{\\nu}(\\mathcal{C}(\\mathbf{x})) is the probability associated with the true label 𝒞​(𝐱)∈{1,…,C}\\mathcal{C}(\\mathbf{x})\\in\\{1,\\dots,C\\} for input 𝐱\\mathbf{x} at exit ν\\nu."
+                },
+                {
+                  "type": "formula",
+                  "text": "𝒟\\mathcal{D}"
+                },
+                {
+                  "type": "formula",
+                  "text": "NN"
+                },
+                {
+                  "type": "formula",
+                  "text": "y^ν​(𝒞​(𝐱))\\hat{y}_{\\nu}(\\mathcal{C}(\\mathbf{x}))"
+                },
+                {
+                  "type": "formula",
+                  "text": "𝒞​(𝐱)∈{1,…,C}\\mathcal{C}(\\mathbf{x})\\in\\{1,\\dots,C\\}"
+                },
+                {
+                  "type": "formula",
+                  "text": "𝐱\\mathbf{x}"
+                },
+                {
+                  "type": "formula",
+                  "text": "ν\\nu"
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "2.2 Output distribution-level Regularization",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "The second proposed approach takes a fundamentally different perspective by operating at the output distribution level. Rather than protecting individual parameters, LwF preserves knowledge by enforcing that the current model maintains the input-output mappings learned by previously trained exits. In contrast to EWC, LwF imposes a functional constraint that is agnostic to specific parameter values and instead focuses on preserving decision boundaries. Under LwF, parameters are free to change substantially as long as the output distributions of previous exits is minimally shifted by the training of this new exit, allowing the network to adapt its internal representations while maintaining stable behavior. Importantly, the LwF loss enables gradient flow through both the shared backbone and the classifier heads of earlier exits; this added flexibility allows earlier classifiers to compensate for moderate backbone drift, potentially mitigating performance degradation. The output distribution-level regularization is thus defined as:"
+                },
+                {
+                  "type": "table",
+                  "text": "| | | | | | --- | --- | --- | --- | | | ℛLwF(μ)=∑ν=1μ−1𝕂​𝕃​(𝐲^ν∥𝐲^ν∗)\\mathcal{R}\\_{\\mathrm{LwF}}^{(\\mu)}=\\sum\\_{\\nu=1}^{\\mu-1}\\mathbb{KL}\\left(\\mathbf{\\hat{y}}\\_{\\nu}\\;\\|\\;\\mathbf{\\hat{y}}^{\\*}\\_{\\nu}\\right) | | (4) |"
+                },
+                {
+                  "type": "formula",
+                  "text": "ℛLwF(μ)=∑ν=1μ−1𝕂​𝕃​(𝐲^ν∥𝐲^ν∗)\\mathcal{R}_{\\mathrm{LwF}}^{(\\mu)}=\\sum_{\\nu=1}^{\\mu-1}\\mathbb{KL}\\left(\\mathbf{\\hat{y}}_{\\nu}\\;\\|\\;\\mathbf{\\hat{y}}^{*}_{\\nu}\\right)"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "where 𝐲^ν\\mathbf{\\hat{y}}\\_{\\nu} denotes the output distribution of IC ν\\nu when training exit μ\\mu, 𝐲^ν∗\\mathbf{\\hat{y}}^{\\*}\\_{\\nu} denotes the output distribution obtained with the training of IC ν\\nu, and 𝕂𝕃(⋅∥⋅)\\mathbb{KL}(\\cdot\\|\\cdot) is the Kullback-Leibler divergence."
+                },
+                {
+                  "type": "formula",
+                  "text": "𝐲^ν\\mathbf{\\hat{y}}_{\\nu}"
+                },
+                {
+                  "type": "formula",
+                  "text": "ν\\nu"
+                },
+                {
+                  "type": "formula",
+                  "text": "μ\\mu"
+                },
+                {
+                  "type": "formula",
+                  "text": "𝐲^ν∗\\mathbf{\\hat{y}}^{*}_{\\nu}"
+                },
+                {
+                  "type": "formula",
+                  "text": "ν\\nu"
+                }
+              ],
+              "children": []
+            }
+          ]
+        },
+        {
+          "heading": "3 Experiments",
+          "level": 2,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "We evaluate our approach on standard early-exit benchmarks following the experimental setup proposed in [[11](https://ar5iv.labs.arxiv.org/html/2605.05358#bib.bib1 \"How to train your multi-exit model? analyzing the impact of training strategies\")]. Our evaluation focuses on comparing the proposed EWC and LwF regularization strategies against existing sequential training methods across different architectures and computational budgets."
+            },
+            {
+              "type": "table",
+              "text": "| | | | | | | | --- | --- | --- | --- | --- | --- | | Model | Method | 25%25\\% | 50%50\\% | 75%75\\% | 100%100\\% | | ResNet34 | Disjoint | 52.5752.57 | 67.5667.56 | 73.4973.49 | 73.7973.79 | | Branch-wise | 64.1964.19 | 67.0367.03 | 66.8866.88 | 66.7566.75 | | Separate | 66.2566.25 | 72.5772.57 | 72.8772.87 | 72.8272.82 | | Joint | 62.8462.84 | 72.8072.80 | 74.32 | 74.17 | | EWC | 70.5070.50 | 74.07 | 73.9073.90 | 73.8473.84 | | LwF | 70.71 | 73.8473.84 | 73.6173.61 | 73.5573.55 | | MSDNet | Disjoint | 56.7456.74 | 63.9663.96 | 68.5968.59 | 70.3670.36 | | Branch-wise | 58.2458.24 | 59.7359.73 | 60.1660.16 | 59.9759.97 | | Separate | 64.9064.90 | 67.8467.84 | 69.0269.02 | 69.2169.21 | | Joint | 65.9365.93 | 72.0272.02 | 74.73 | 75.86 | | EWC | 65.1065.10 | 71.0371.03 | 71.9871.98 | 71.8971.89 | | LwF | 66.50 | 73.04 | 73.3373.33 | 73.2073.20 |"
+            },
+            {
+              "type": "formula",
+              "text": "25%25\\%"
+            },
+            {
+              "type": "formula",
+              "text": "50%50\\%"
+            },
+            {
+              "type": "formula",
+              "text": "75%75\\%"
+            },
+            {
+              "type": "formula",
+              "text": "100%100\\%"
+            },
+            {
+              "type": "formula",
+              "text": "52.5752.57"
+            },
+            {
+              "type": "formula",
+              "text": "67.5667.56"
+            },
+            {
+              "type": "formula",
+              "text": "73.4973.49"
+            },
+            {
+              "type": "formula",
+              "text": "73.7973.79"
+            },
+            {
+              "type": "formula",
+              "text": "64.1964.19"
+            },
+            {
+              "type": "formula",
+              "text": "67.0367.03"
+            },
+            {
+              "type": "formula",
+              "text": "66.8866.88"
+            },
+            {
+              "type": "formula",
+              "text": "66.7566.75"
+            },
+            {
+              "type": "formula",
+              "text": "66.2566.25"
+            },
+            {
+              "type": "formula",
+              "text": "72.5772.57"
+            },
+            {
+              "type": "formula",
+              "text": "72.8772.87"
+            },
+            {
+              "type": "formula",
+              "text": "72.8272.82"
+            },
+            {
+              "type": "formula",
+              "text": "62.8462.84"
+            },
+            {
+              "type": "formula",
+              "text": "72.8072.80"
+            },
+            {
+              "type": "formula",
+              "text": "70.5070.50"
+            },
+            {
+              "type": "formula",
+              "text": "73.9073.90"
+            },
+            {
+              "type": "formula",
+              "text": "73.8473.84"
+            },
+            {
+              "type": "formula",
+              "text": "73.8473.84"
+            },
+            {
+              "type": "formula",
+              "text": "73.6173.61"
+            },
+            {
+              "type": "formula",
+              "text": "73.5573.55"
+            },
+            {
+              "type": "formula",
+              "text": "56.7456.74"
+            },
+            {
+              "type": "formula",
+              "text": "63.9663.96"
+            },
+            {
+              "type": "formula",
+              "text": "68.5968.59"
+            },
+            {
+              "type": "formula",
+              "text": "70.3670.36"
+            },
+            {
+              "type": "formula",
+              "text": "58.2458.24"
+            },
+            {
+              "type": "formula",
+              "text": "59.7359.73"
+            },
+            {
+              "type": "formula",
+              "text": "60.1660.16"
+            },
+            {
+              "type": "formula",
+              "text": "59.9759.97"
+            },
+            {
+              "type": "formula",
+              "text": "64.9064.90"
+            },
+            {
+              "type": "formula",
+              "text": "67.8467.84"
+            },
+            {
+              "type": "formula",
+              "text": "69.0269.02"
+            },
+            {
+              "type": "formula",
+              "text": "69.2169.21"
+            },
+            {
+              "type": "formula",
+              "text": "65.9365.93"
+            },
+            {
+              "type": "formula",
+              "text": "72.0272.02"
+            },
+            {
+              "type": "formula",
+              "text": "65.1065.10"
+            },
+            {
+              "type": "formula",
+              "text": "71.0371.03"
+            },
+            {
+              "type": "formula",
+              "text": "71.9871.98"
+            },
+            {
+              "type": "formula",
+              "text": "71.8971.89"
+            },
+            {
+              "type": "formula",
+              "text": "73.3373.33"
+            },
+            {
+              "type": "formula",
+              "text": "73.2073.20"
+            }
+          ],
+          "children": [
+            {
+              "heading": "3.1 Experimental Setup",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "Dataset. We conduct experiments on CIFAR-100 [[10](https://ar5iv.labs.arxiv.org/html/2605.05358#bib.bib21 \"Learning multiple layers of features from tiny images\")], a widely-used image classification benchmark consisting of 60,000 32×32 RGB images across 100 fine-grained classes. The dataset is split into 50,000 training images and 10,000 test images. Architectures. We adopt the same architectures as in [[11](https://ar5iv.labs.arxiv.org/html/2605.05358#bib.bib1 \"How to train your multi-exit model? analyzing the impact of training strategies\")]. We evaluate two complementary architectures: ResNet-34 [[6](https://ar5iv.labs.arxiv.org/html/2605.05358#bib.bib22 \"Deep residual learning for image recognition\")] and MSDNet [[7](https://ar5iv.labs.arxiv.org/html/2605.05358#bib.bib24 \"Multi-scale dense networks for resource efficient image classification\")]. For ResNet-34, we augment the standard architecture with 8 internal classifiers positioned at layers {2,4,⋯,16}\\{2,4,\\cdots,16\\}, where each exit consists of an SDN-type pooling [[8](https://ar5iv.labs.arxiv.org/html/2605.05358#bib.bib23 \"Shallow-deep networks: understanding and mitigating network overthinking\")], except for the last classifier, which uses an adaptive average pooling, followed by a linear classifier. For MSDNet, we employ the CIFAR variant with 7 blocks. Baselines: All baseline accuracy scores are taken from [[11](https://ar5iv.labs.arxiv.org/html/2605.05358#bib.bib1 \"How to train your multi-exit model? analyzing the impact of training strategies\")]. We primarily compare our method against three sequential training baselines: disjoint, branch-wise, and separate training, and include joint training for completeness. For our proposed approach, we set λ=100\\lambda=100 and ρ=0.7\\rho=0.7 for ResNet34, and λ=1000\\lambda=1000 and ρ=0.2\\rho=0.2 for MSDNet, unless stated otherwise. Training Details. We first pretrain each backbone network with only the final exit using conventional supervised training. Then, following [[11](https://ar5iv.labs.arxiv.org/html/2605.05358#bib.bib1 \"How to train your multi-exit model? analyzing the impact of training strategies\")], for ResNet-34, we use a batch size of 128, a learning rate of 5⋅10−45\\cdot 10^{-4}, and no weight decay. For MSDNet, we use a batch size of 512 and a learning rate of 10−310^{-3} with no weight decay. Both models employ CutMix and Mixup augmentation strategies and early stopping with a patience of 50 epochs. After pretraining the backbones, we add ICs sequentially from shallow to deep, applying our proposed regularization at each stage."
+                },
+                {
+                  "type": "formula",
+                  "text": "{2,4,⋯,16}\\{2,4,\\cdots,16\\}"
+                },
+                {
+                  "type": "formula",
+                  "text": "λ=100\\lambda=100"
+                },
+                {
+                  "type": "formula",
+                  "text": "ρ=0.7\\rho=0.7"
+                },
+                {
+                  "type": "formula",
+                  "text": "λ=1000\\lambda=1000"
+                },
+                {
+                  "type": "formula",
+                  "text": "ρ=0.2\\rho=0.2"
+                },
+                {
+                  "type": "formula",
+                  "text": "5⋅10−45\\cdot 10^{-4}"
+                },
+                {
+                  "type": "formula",
+                  "text": "10−310^{-3}"
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "3.2 Results and Discussion",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "Table [1](https://ar5iv.labs.arxiv.org/html/2605.05358#S3.T1 \"Table 1 ‣ 3 Experiments ‣ Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks\") presents top-1 accuracy across exits corresponding to different computational budgets (25%25\\%, 50%50\\%, 75%75\\%, and 100%100\\% FLOPs) for our two EENN models on CIFAR-100. Our proposed method consistently outperforms all baseline sequential training approaches. Compared to the strongest sequential baseline (separate training), both EWC and LwF achieve substantial improvements, particularly at low budgets: +4.25%+4.25\\% and +4.46%+4.46\\% at 25%25\\% budget, respectively. This demonstrates that our approach effectively balances early exit specialization with deep representation learning."
+                },
+                {
+                  "type": "formula",
+                  "text": "25%25\\%"
+                },
+                {
+                  "type": "formula",
+                  "text": "50%50\\%"
+                },
+                {
+                  "type": "formula",
+                  "text": "75%75\\%"
+                },
+                {
+                  "type": "formula",
+                  "text": "100%100\\%"
+                },
+                {
+                  "type": "formula",
+                  "text": "+4.25%+4.25\\%"
+                },
+                {
+                  "type": "formula",
+                  "text": "+4.46%+4.46\\%"
+                },
+                {
+                  "type": "formula",
+                  "text": "25%25\\%"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "The comparison across architectures highlights the interplay between regularization type and backbone topology. In ResNet34, both EWC and LwF improve early-exit performance, with EWC slightly outperforming LwF at the deepest exit, suggesting that parameter-level stabilization is sufficient in sequential residual blocks. The skip connections facilitate feature reuse, so anchoring parameters preserves shallow-exit performance without constraining deeper layers. In contrast, MSDNet’s densely connected, multi-scale structure links many layers to multiple exits. Here, LwF consistently outperforms EWC across both early and late exits, indicating that output-distribution regularization better accommodates functional dependencies among exits. By constraining predictions rather than parameters, LwF maintains early-exit accuracy while allowing the backbone to adapt flexibly for later classifiers, effectively balancing stability and plasticity in a highly entangled multi-exit architecture."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Furthermore, we consistently observe improvements over joint training at earlier exits while maintaining comparable performance at later exits. This difference stems from the distinct optimization dynamics of the two approaches. Joint training drives all exits toward a shared compromise solution, whereas our method progressively increases regularization as new exits are added, limiting deeper layers’ ability to modify earlier representations. Although this can slightly constrain later adaptation, it yields substantially stronger early exits, aligning with the core goal of EENNs. Further gains may be possible by dynamically scheduling the regularization strength to better balance early and late exits."
+                },
+                {
+                  "type": "table",
+                  "text": "| | | | | | | | | | --- | --- | --- | --- | --- | --- | --- | --- | | Reg. | λ\\lambda | ρ\\rho | W.U | 25%25\\% | 50%50\\% | 75%75\\% | 100%100\\% | | EWC | 1010 | – | True | 58.3358.33 | 69.2769.27 | 73.1573.15 | 73.3973.39 | | 10210^{2} | – | True | 62.5462.54 | 71.0571.05 | 72.5972.59 | 72.4372.43 | | 10310^{3} | – | True | 65.1065.10 | 71.0371.03 | 71.9871.98 | 71.8971.89 | | 10310^{3} | – | False | 66.1166.11 | 68.9168.91 | 67.2567.25 | 66.9366.93 | | LwF | – | 0.20.2 | True | 66.5066.50 | 73.0473.04 | 73.3373.33 | 73.2073.20 | | – | 0.50.5 | True | 68.5768.57 | 72.6372.63 | 72.5672.56 | 72.4472.44 | | – | 0.70.7 | True | 67.5167.51 | 72.7472.74 | 73.0773.07 | 72.8572.85 | | – | 0.70.7 | False | 67.4967.49 | 70.0470.04 | 68.9968.99 | 68.6768.67 |"
+                },
+                {
+                  "type": "formula",
+                  "text": "λ\\lambda"
+                },
+                {
+                  "type": "formula",
+                  "text": "ρ\\rho"
+                },
+                {
+                  "type": "formula",
+                  "text": "25%25\\%"
+                },
+                {
+                  "type": "formula",
+                  "text": "50%50\\%"
+                },
+                {
+                  "type": "formula",
+                  "text": "75%75\\%"
+                },
+                {
+                  "type": "formula",
+                  "text": "100%100\\%"
+                },
+                {
+                  "type": "formula",
+                  "text": "1010"
+                },
+                {
+                  "type": "formula",
+                  "text": "58.3358.33"
+                },
+                {
+                  "type": "formula",
+                  "text": "69.2769.27"
+                },
+                {
+                  "type": "formula",
+                  "text": "73.1573.15"
+                },
+                {
+                  "type": "formula",
+                  "text": "73.3973.39"
+                },
+                {
+                  "type": "formula",
+                  "text": "10210^{2}"
+                },
+                {
+                  "type": "formula",
+                  "text": "62.5462.54"
+                },
+                {
+                  "type": "formula",
+                  "text": "71.0571.05"
+                },
+                {
+                  "type": "formula",
+                  "text": "72.5972.59"
+                },
+                {
+                  "type": "formula",
+                  "text": "72.4372.43"
+                },
+                {
+                  "type": "formula",
+                  "text": "10310^{3}"
+                },
+                {
+                  "type": "formula",
+                  "text": "65.1065.10"
+                },
+                {
+                  "type": "formula",
+                  "text": "71.0371.03"
+                },
+                {
+                  "type": "formula",
+                  "text": "71.9871.98"
+                },
+                {
+                  "type": "formula",
+                  "text": "71.8971.89"
+                },
+                {
+                  "type": "formula",
+                  "text": "10310^{3}"
+                },
+                {
+                  "type": "formula",
+                  "text": "66.1166.11"
+                },
+                {
+                  "type": "formula",
+                  "text": "68.9168.91"
+                },
+                {
+                  "type": "formula",
+                  "text": "67.2567.25"
+                },
+                {
+                  "type": "formula",
+                  "text": "66.9366.93"
+                },
+                {
+                  "type": "formula",
+                  "text": "0.20.2"
+                },
+                {
+                  "type": "formula",
+                  "text": "66.5066.50"
+                },
+                {
+                  "type": "formula",
+                  "text": "73.0473.04"
+                },
+                {
+                  "type": "formula",
+                  "text": "73.3373.33"
+                },
+                {
+                  "type": "formula",
+                  "text": "73.2073.20"
+                },
+                {
+                  "type": "formula",
+                  "text": "0.50.5"
+                },
+                {
+                  "type": "formula",
+                  "text": "68.5768.57"
+                },
+                {
+                  "type": "formula",
+                  "text": "72.6372.63"
+                },
+                {
+                  "type": "formula",
+                  "text": "72.5672.56"
+                },
+                {
+                  "type": "formula",
+                  "text": "72.4472.44"
+                },
+                {
+                  "type": "formula",
+                  "text": "0.70.7"
+                },
+                {
+                  "type": "formula",
+                  "text": "67.5167.51"
+                },
+                {
+                  "type": "formula",
+                  "text": "72.7472.74"
+                },
+                {
+                  "type": "formula",
+                  "text": "73.0773.07"
+                },
+                {
+                  "type": "formula",
+                  "text": "72.8572.85"
+                },
+                {
+                  "type": "formula",
+                  "text": "0.70.7"
+                },
+                {
+                  "type": "formula",
+                  "text": "67.4967.49"
+                },
+                {
+                  "type": "formula",
+                  "text": "70.0470.04"
+                },
+                {
+                  "type": "formula",
+                  "text": "68.9968.99"
+                },
+                {
+                  "type": "formula",
+                  "text": "68.6768.67"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "To better understand the impact of our design choices, we conduct an ablation study on MSDNet (see [Table 2](https://ar5iv.labs.arxiv.org/html/2605.05358#S3.T2 \"In 3.2 Results and Discussion ‣ 3 Experiments ‣ Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks\")). Our ablation explores two main dimensions: (i) the regularization strengths, namely λ\\lambda and ρ\\rho, and (ii) the impact of an initial pretraining, or warm-up, phase where the full model is trained while optimizing only the final classifier. Across both methods, the strength of the regularization plays a central role in controlling the stability–plasticity trade-off: stronger regularization protects early exits but reduces the backbone’s flexibility for deeper layers, while weaker regularization allows adaptation at the cost of shallow-exit performance. The key difference lies in how this constraint is applied. EWC rigidly anchors parameters important for earlier exits, stabilizing low-level features but limiting the backbone’s ability to reorganize representations for deeper classifiers. This explains why early-exit performance improves steadily with larger λ\\lambda, while high-budget exits are slightly constrained. In contrast, LwF constrains the outputs of earlier exits rather than the parameters themselves, allowing internal representations to adjust as long as the output distribution is preserved. Moderate ρ\\rho achieves a balance, maintaining early-exit accuracy while enabling deep exits to benefit from flexible feature adaptation, whereas high ρ\\rho overemphasizes shallow classifiers and reduces high-budget performance. Furthermore, backbone warm-up further interacts with both methods by providing an initial alignment of features across layers before regularization is applied. Without a warm-up, both methods struggle: EWC may freeze suboptimal parameters, and LwF may over-constrain features that are not yet meaningfully structured, leading to lower accuracy across all exits. Overall, this ablation study validates the effectiveness of our proposed two-stage strategy: pretraining the final exit establishes rich hierarchical features, and selective regularization allows each exit to adapt effectively without compromising the network’s full representational capacity."
+                },
+                {
+                  "type": "formula",
+                  "text": "λ\\lambda"
+                },
+                {
+                  "type": "formula",
+                  "text": "ρ\\rho"
+                },
+                {
+                  "type": "formula",
+                  "text": "λ\\lambda"
+                },
+                {
+                  "type": "formula",
+                  "text": "ρ\\rho"
+                },
+                {
+                  "type": "formula",
+                  "text": "ρ\\rho"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Figure [2](https://ar5iv.labs.arxiv.org/html/2605.05358#S3.F2 \"Figure 2 ‣ 3.2 Results and Discussion ‣ 3 Experiments ‣ Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks\") follows the budgeted classification approach (e.g., [[3](https://ar5iv.labs.arxiv.org/html/2605.05358#bib.bib4 \"Deep feature surgery: towards accurate and efficient multi-exit networks\"), [11](https://ar5iv.labs.arxiv.org/html/2605.05358#bib.bib1 \"How to train your multi-exit model? analyzing the impact of training strategies\")]) by evaluating the top-1 accuracy of a subset of configurations on MSDNet within a given computational budget. EWC with λ=10\\lambda=10 (blue curve) exhibits delayed accuracy growth, starting at only 55%55\\% and requiring approximately 40M FLOPs to reach 70%70\\% accuracy, nearly double the computation needed by well-regularized methods. This indicates that weak regularization fails to protect early-layer representations and forces reliance on deeper layers, thus heavier computational load. In contrast, stronger regularization enables substantially faster convergence: LwF variants and well-tuned EWC configurations reach 70%70\\% accuracy at roughly 20-25M FLOPs, yielding about a 2x computational speedup."
+                },
+                {
+                  "type": "formula",
+                  "text": "λ=10\\lambda=10"
+                },
+                {
+                  "type": "formula",
+                  "text": "55%55\\%"
+                },
+                {
+                  "type": "formula",
+                  "text": "70%70\\%"
+                },
+                {
+                  "type": "formula",
+                  "text": "70%70\\%"
+                },
+                {
+                  "type": "formula",
+                  "text": "λ=1000\\lambda=1000"
+                },
+                {
+                  "type": "formula",
+                  "text": "ρ=0.5\\rho=0.5"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Finally, Figure [3](https://ar5iv.labs.arxiv.org/html/2605.05358#S3.F3 \"Figure 3 ‣ 3.2 Results and Discussion ‣ 3 Experiments ‣ Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks\") further analyzes how confidence thresholds control the dynamic behavior of MSDNet by reporting exit ratios across all intermediate classifiers. As the threshold increases, predictions are progressively shifted toward deeper exits, indicating that harder samples are routed to later classifiers with richer representations. Comparing EWC (λ=1000\\lambda=1000) and LwF (ρ=0.5\\rho=0.5) reveals a systematic difference: LwF exits fewer samples at early classifiers under the same thresholds, while EWC commits earlier. Interpreted together with [Figure 2](https://ar5iv.labs.arxiv.org/html/2605.05358#S3.F2 \"In 3.2 Results and Discussion ‣ 3 Experiments ‣ Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks\"), where LwF achieves higher accuracy at substantially lower FLOPs, this shows that LwF provides a higher effective speedup despite exiting later on average. This behavior suggests that LwF learns more accurate but less confident early classifiers, deferring decisions more often, whereas EWC produces earlier but less accurate exits."
+                },
+                {
+                  "type": "formula",
+                  "text": "λ=1000\\lambda=1000"
+                },
+                {
+                  "type": "formula",
+                  "text": "ρ=0.5\\rho=0.5"
+                }
+              ],
+              "children": []
+            }
+          ]
+        },
+        {
+          "heading": "4 Conclusion",
+          "level": 2,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "In this work, we propose a novel strategy for training EENNs to mitigate the degradation of previously learned representations caused by incremental exit addition. By incorporating parameter-level protection via EWC and output-distribution consistency via LwF, we establish a principled sequential training framework that balances exit specialization with knowledge preservation. Our experimental study demonstrates that the proposed approach consistently outperforms existing sequential training methods and achieves better early exit accuracy than joint training. Future work will investigate adaptive regularization scheduling and more structured protection mechanisms, e.g., at the level of convolutional kernels or attention heads."
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "References",
+          "level": 2,
+          "content": [
+            {
+              "type": "list",
+              "text": "* [1] S. Amari (1998) Natural gradient works efficiently in learning. Neural Computation 10 (2), pp. 251–276. External Links: [Document](https://dx.doi.org/10.1162/089976698300017746) Cited by: [§2.1](https://ar5iv.labs.arxiv.org/html/2605.05358#S2.SS1.p1.1 \"2.1 Parameter-level Regularization ‣ 2 Proposed Methodology ‣ Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks\"). * [2] R. Dong, Y. Mao, and J. Zhang (2022) Resource-constrained edge ai with early exit prediction. Journal of Communications and Information Networks 7 (2), pp. 122–134. External Links: [Document](https://dx.doi.org/10.23919/JCIN.2022.9815196) Cited by: [§1](https://ar5iv.labs.arxiv.org/html/2605.05358#S1.p1.1 \"1 Introduction ‣ Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks\"). * [3] C. Gong, Y. Chen, Q. Luo, Y. Lu, T. Li, Y. Zhang, Y. Sun, and L. Zhang (2025) Deep feature surgery: towards accurate and efficient multi-exit networks. In Computer Vision – ECCV 2024, Cham, pp. 435–451. External Links: ISBN 978-3-031-72967-6 Cited by: [§1](https://ar5iv.labs.arxiv.org/html/2605.05358#S1.p2.1 \"1 Introduction ‣ Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks\"), [§3.2](https://ar5iv.labs.arxiv.org/html/2605.05358#S3.SS2.p5.4 \"3.2 Results and Discussion ‣ 3 Experiments ‣ Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks\"). * [4] D. Han, J. Park, S. Ham, N. Lee, and J. Moon (2024) Improving low-latency predictions in multi-exit neural networks via block-dependent losses. IEEE Transactions on Neural Networks and Learning Systems 35 (11), pp. 16927–16935. External Links: [Document](https://dx.doi.org/10.1109/TNNLS.2023.3282249) Cited by: [§1](https://ar5iv.labs.arxiv.org/html/2605.05358#S1.p2.1 \"1 Introduction ‣ Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks\"). * [5] Y. Han, G. Huang, S. Song, L. Yang, H. Wang, and Y. Wang (2022-11) Dynamic Neural Networks: A Survey. IEEE Transactions on Pattern Analysis & Machine Intelligence 44 (11), pp. 7436–7456. External Links: ISSN 1939-3539, [Document](https://dx.doi.org/10.1109/TPAMI.2021.3117837), [Link](https://doi.ieeecomputersociety.org/10.1109/TPAMI.2021.3117837) Cited by: [§1](https://ar5iv.labs.arxiv.org/html/2605.05358#S1.p1.1 \"1 Introduction ‣ Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks\"). * [6] K. He, X. Zhang, S. Ren, and J. Sun (2016) Deep residual learning for image recognition. In Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition (CVPR), pp. 770–778. Cited by: [§3.1](https://ar5iv.labs.arxiv.org/html/2605.05358#S3.SS1.p1.7 \"3.1 Experimental Setup ‣ 3 Experiments ‣ Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks\"). * [7] G. Huang, D. Chen, T. Li, F. Wu, L. van der Maaten, and K. Q. Weinberger (2018) Multi-scale dense networks for resource efficient image classification. In Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition (CVPR), pp. 284–293. Cited by: [§1](https://ar5iv.labs.arxiv.org/html/2605.05358#S1.p3.1 \"1 Introduction ‣ Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks\"), [§3.1](https://ar5iv.labs.arxiv.org/html/2605.05358#S3.SS1.p1.7 \"3.1 Experimental Setup ‣ 3 Experiments ‣ Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks\"). * [8] Y. Kaya, S. Hong, and T. Dumitras (2019-09–15 Jun) Shallow-deep networks: understanding and mitigating network overthinking. In Proceedings of the 36th International Conference on Machine Learning, Proceedings of Machine Learning Research, Vol. 97, pp. 3301–3310. External Links: [Link](https://proceedings.mlr.press/v97/kaya19a.html) Cited by: [§3.1](https://ar5iv.labs.arxiv.org/html/2605.05358#S3.SS1.p1.7 \"3.1 Experimental Setup ‣ 3 Experiments ‣ Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks\"). * [9] J. Kirkpatrick, R. Pascanu, N. Rabinowitz, J. Veness, G. Desjardins, A. A. Rusu, K. Milan, J. Quan, T. Ramalho, A. Grabska-Barwinska, D. Hassabis, C. Clopath, D. Kumaran, and R. Hadsell (2017) Overcoming catastrophic forgetting in neural networks. Proceedings of the National Academy of Sciences 114 (13), pp. 3521–3526. External Links: [Document](https://dx.doi.org/10.1073/pnas.1611835114), [Link](https://www.pnas.org/doi/abs/10.1073/pnas.1611835114), https://www.pnas.org/doi/pdf/10.1073/pnas.1611835114 Cited by: [§1](https://ar5iv.labs.arxiv.org/html/2605.05358#S1.p5.1 \"1 Introduction ‣ Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks\"). * [10] A. Krizhevsky (2009) Learning multiple layers of features from tiny images. Technical report University of Toronto. Cited by: [§3.1](https://ar5iv.labs.arxiv.org/html/2605.05358#S3.SS1.p1.7 \"3.1 Experimental Setup ‣ 3 Experiments ‣ Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks\"). * [11] P. Kubaty, B. Wójcik, B. T. Krzepkowski, M. Michaluk, T. Trzcinski, J. Pomponi, and K. Adamczewski (2025) How to train your multi-exit model? analyzing the impact of training strategies. In Forty-second International Conference on Machine Learning, External Links: [Link](https://openreview.net/forum?id=vhTPfOdwyQ) Cited by: [§1](https://ar5iv.labs.arxiv.org/html/2605.05358#S1.p2.1 \"1 Introduction ‣ Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks\"), [§1](https://ar5iv.labs.arxiv.org/html/2605.05358#S1.p3.1 \"1 Introduction ‣ Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks\"), [§3.1](https://ar5iv.labs.arxiv.org/html/2605.05358#S3.SS1.p1.7 \"3.1 Experimental Setup ‣ 3 Experiments ‣ Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks\"), [§3.2](https://ar5iv.labs.arxiv.org/html/2605.05358#S3.SS2.p5.4 \"3.2 Results and Discussion ‣ 3 Experiments ‣ Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks\"), [§3](https://ar5iv.labs.arxiv.org/html/2605.05358#S3.p1.1 \"3 Experiments ‣ Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks\"). * [12] Z. Li and D. Hoiem (2018-12) Learning without forgetting. IEEE Trans. Pattern Anal. Mach. Intell. 40 (12), pp. 2935–2947. External Links: ISSN 0162-8828, [Link](https://doi.org/10.1109/TPAMI.2017.2773081), [Document](https://dx.doi.org/10.1109/TPAMI.2017.2773081) Cited by: [§1](https://ar5iv.labs.arxiv.org/html/2605.05358#S1.p5.1 \"1 Introduction ‣ Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks\"). * [13] W. Liu, P. Zhou, Z. Wang, Z. Zhao, H. Deng, and Q. Ju (2020-07) FastBERT: a self-distilling BERT with adaptive inference time. In Proceedings of the 58th Annual Meeting of the Association for Computational Linguistics, Online, pp. 6035–6044. External Links: [Link](https://aclanthology.org/2020.acl-main.537/), [Document](https://dx.doi.org/10.18653/v1/2020.acl-main.537) Cited by: [§1](https://ar5iv.labs.arxiv.org/html/2605.05358#S1.p5.1 \"1 Introduction ‣ Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks\"). * [14] H. Rahmath P, V. Srivastava, K. Chaurasia, R. G. Pacheco, and R. S. Couto (2024-11) Early-exit deep neural network - a comprehensive survey. ACM Comput. Surv. 57 (3). External Links: ISSN 0360-0300, [Link](https://doi.org/10.1145/3698767), [Document](https://dx.doi.org/10.1145/3698767) Cited by: [§1](https://ar5iv.labs.arxiv.org/html/2605.05358#S1.p4.1 \"1 Introduction ‣ Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks\"). * [15] J. Schwarz, W. Czarnecki, J. Luketina, A. Grabska-Barwinska, Y. W. Teh, R. Pascanu, and R. Hadsell (2018-10–15 Jul) Progress & compress: a scalable framework for continual learning. In Proceedings of the 35th International Conference on Machine Learning, Proceedings of Machine Learning Research, Vol. 80, pp. 4528–4537. External Links: [Link](https://proceedings.mlr.press/v80/schwarz18a.html) Cited by: [§1](https://ar5iv.labs.arxiv.org/html/2605.05358#S1.p5.1 \"1 Introduction ‣ Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks\"), [§2.1](https://ar5iv.labs.arxiv.org/html/2605.05358#S2.SS1.p2.13 \"2.1 Parameter-level Regularization ‣ 2 Proposed Methodology ‣ Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks\"). * [16] F. Szatkowski, F. Yang, B. Twardowski, T. Trzcinski, and J. van de Weijer (2024-06) Accelerated inference and reduced forgetting: the dual benefits of early-exit networks in continual learning. In 5th Workshop on Continual Learning in Computer Vision, CVPR, Seattle, USA. Note: External Links: [Link](https://sites.google.com/view/clvision2024/call-for-papers/accepted-papers#272) Cited by: [§1](https://ar5iv.labs.arxiv.org/html/2605.05358#S1.p4.1 \"1 Introduction ‣ Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks\"). * [17] S. Teerapittayanon, B. McDanel, and H.T. Kung (2016) BranchyNet: fast inference via early exiting from deep neural networks. In 2016 23rd International Conference on Pattern Recognition (ICPR), Vol. , pp. 2464–2469. External Links: [Document](https://dx.doi.org/10.1109/ICPR.2016.7900006) Cited by: [§1](https://ar5iv.labs.arxiv.org/html/2605.05358#S1.p2.1 \"1 Introduction ‣ Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks\"). * [18] G. M. v. d. Ven (April 28, 2025) On the computation of the fisher information in continual learning. In ICLR Blogposts 2025, Note: https://iclr-blogposts.github.io/2025/blog/fisher/ External Links: [Link](https://iclr-blogposts.github.io/2025/blog/fisher/) Cited by: [§2.1](https://ar5iv.labs.arxiv.org/html/2605.05358#S2.SS1.p2.6 \"2.1 Parameter-level Regularization ‣ 2 Proposed Methodology ‣ Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks\"). * [19] L. Wang, X. Zhang, H. Su, and J. Zhu (2024) A comprehensive survey of continual learning: theory, method and application. IEEE Transactions on Pattern Analysis and Machine Intelligence 46 (8), pp. 5362–5383. External Links: [Document](https://dx.doi.org/10.1109/TPAMI.2024.3367329) Cited by: [§1](https://ar5iv.labs.arxiv.org/html/2605.05358#S1.p4.1 \"1 Introduction ‣ Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks\"). * [20] B. Wojcik, M. Przewiezlikowski, F. Szatkowski, M. Wolczyk, K. Balazy, B. Krzepkowski, I. Podolak, J. Tabor, M. Smieja, and T. Trzcinski (2023) Zero time waste in pre-trained early exit neural networks. Neural Networks 168, pp. 580–601. External Links: ISSN 0893-6080, [Document](https://dx.doi.org/https%3A//doi.org/10.1016/j.neunet.2023.10.003), [Link](https://www.sciencedirect.com/science/article/pii/S0893608023005555) Cited by: [§1](https://ar5iv.labs.arxiv.org/html/2605.05358#S1.p3.1 \"1 Introduction ‣ Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks\"). * [21] J. Xin, R. Tang, J. Lee, Y. Yu, and J. Lin (2020-07) DeeBERT: dynamic early exiting for accelerating BERT inference. In Proceedings of the 58th Annual Meeting of the Association for Computational Linguistics, Online, pp. 2246–2251. External Links: [Link](https://aclanthology.org/2020.acl-main.204/), [Document](https://dx.doi.org/10.18653/v1/2020.acl-main.204) Cited by: [§1](https://ar5iv.labs.arxiv.org/html/2605.05358#S1.p5.1 \"1 Introduction ‣ Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks\"). * [22] J. Xin, R. Tang, Y. Yu, and J. Lin (2021-04) BERxiT: early exiting for BERT with better fine-tuning and extension to regression. In Proceedings of the 16th Conference of the European Chapter of the Association for Computational Linguistics: Main Volume, Online, pp. 91–104. External Links: [Link](https://aclanthology.org/2021.eacl-main.8/), [Document](https://dx.doi.org/10.18653/v1/2021.eacl-main.8) Cited by: [§1](https://ar5iv.labs.arxiv.org/html/2605.05358#S1.p2.1 \"1 Introduction ‣ Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks\"). * [23] G. Xu, J. Hao, L. Shen, H. Hu, Y. Luo, H. Lin, and J. Shen (2023) LGViT: dynamic early exiting for accelerating vision transformer. In Proceedings of the 31st ACM International Conference on Multimedia, MM ’23, New York, NY, USA, pp. 9103–9114. External Links: ISBN 9798400701085, [Link](https://doi.org/10.1145/3581783.3611762), [Document](https://dx.doi.org/10.1145/3581783.3611762) Cited by: [§1](https://ar5iv.labs.arxiv.org/html/2605.05358#S1.p3.1 \"1 Introduction ‣ Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks\"). * [24] W. Zhu, X. Wang, Y. Ni, and G. Xie (2021-11) GAML-BERT: improving BERT early exiting by gradient aligned mutual learning. In Proceedings of the 2021 Conference on Empirical Methods in Natural Language Processing, Online and Punta Cana, Dominican Republic, pp. 3033–3044. External Links: [Link](https://aclanthology.org/2021.emnlp-main.242/), [Document](https://dx.doi.org/10.18653/v1/2021.emnlp-main.242) Cited by: [§1](https://ar5iv.labs.arxiv.org/html/2605.05358#S1.p2.1 \"1 Introduction ‣ Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks\")."
+            }
+          ],
+          "children": []
+        }
+      ]
+    }
+  ],
+  "chunks": [
+    {
+      "heading_path": [
+        "Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks"
+      ],
+      "text": "# Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks"
+    },
+    {
+      "heading_path": [
+        "Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks",
+        "Abstract"
+      ],
+      "text": "###### Abstract\n\nEarly-exiting neural networks enable adaptive inference by allowing inputs to exit at intermediate classifiers, reducing computation for easy samples while maintaining high accuracy. In practice, exits can be trained sequentially by incrementally adding them to a shared backbone; however, this sequential training can cause newly introduced exits to interfere with previously learned ones, degrading the performance of earlier classifiers. We address this problem by retaining the knowledge embedded in existing exits while allowing new ones to specialize. We propose two alternative approaches that operate at different levels of the model. The first constrains learning by protecting parameters that are important for previously trained exits, while the second preserves the output distributions of earlier exits as the network adapts. These alternatives directly reflect the stability-plasticity trade-off studied in continual learning. Accordingly, we leverage Elastic Weight Consolidation to constrain critical weights and Learning without Forgetting to preserve output distributions. Experiments on standard benchmarks show that our approaches consistently improve early-exit performance, achieving higher accuracy over existing sequential training methods and significant performance speedups at low computational budgets.\n\nIndex Terms— Early-exiting neural networks, Sequential training, Catastrophic Forgetting, Continual learning"
+    },
+    {
+      "heading_path": [
+        "Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks",
+        "1 Introduction"
+      ],
+      "text": "## 1 Introduction\n\nThe increasing deployment of deep learning models under strict latency, energy, and memory constraints has motivated the development of resource-efficient dynamic architectures. Rather than executing a fixed computation graph for all inputs, such architectures adapt their computational cost to input difficulty, enabling efficient inference while maintaining high accuracy [[5](https://ar5iv.labs.arxiv.org/html/2605.05358#bib.bib5 \"Dynamic Neural Networks: A Survey\")]. Early-exiting neural networks (EENNs) are a representative instance of this paradigm. EENNs augment a backbone network with multiple internal classifiers (ICs) placed at increasing depths, allowing inference to terminate early once sufficient confidence is reached. Easy samples can be classified using shallow representations, while more challenging inputs propagate deeper into the network. This exit-based adaptivity significantly reduces average inference cost and makes EENNs well-suited for resource-constrained applications [[2](https://ar5iv.labs.arxiv.org/html/2605.05358#bib.bib15 \"Resource-constrained edge ai with early exit prediction\")].\n\nTo realize these benefits in practice, a critical design choice concerns how to train the multiple exits within an EENN. Most prior work has focused on joint training strategies, which optimize the backbone along with all exits simultaneously in an end-to-end manner. Joint training has shown to deliver strong empirical performance and has therefore become the predominant approach [[17](https://ar5iv.labs.arxiv.org/html/2605.05358#bib.bib26 \"BranchyNet: fast inference via early exiting from deep neural networks\"), [4](https://ar5iv.labs.arxiv.org/html/2605.05358#bib.bib14 \"Improving low-latency predictions in multi-exit neural networks via block-dependent losses\"), [3](https://ar5iv.labs.arxiv.org/html/2605.05358#bib.bib4 \"Deep feature surgery: towards accurate and efficient multi-exit networks\"), [11](https://ar5iv.labs.arxiv.org/html/2605.05358#bib.bib1 \"How to train your multi-exit model? analyzing the impact of training strategies\")]. In contrast, sequential training performs the training incrementally as exits are added to an existing backbone. Sequential training naturally aligns with pretrained backbones by enabling a more rapid design time and an efficient analysis of where meaningful predictions emerge within the network – a useful property for large models where the computational cost of full joint training can be prohibitive or even undesirable [[24](https://ar5iv.labs.arxiv.org/html/2605.05358#bib.bib16 \"GAML-BERT: improving BERT early exiting by gradient aligned mutual learning\"), [22](https://ar5iv.labs.arxiv.org/html/2605.05358#bib.bib17 \"BERxiT: early exiting for BERT with better fine-tuning and extension to regression\")].\n\nSequential training approaches for EENNs are categorized into three main groups based on the specific training methodology employed for each successive exit [[11](https://ar5iv.labs.arxiv.org/html/2605.05358#bib.bib1 \"How to train your multi-exit model? analyzing the impact of training strategies\")]. Disjoint training (also referred to as two-stage training) first trains the backbone independently and then freezes it while learning ICs [[20](https://ar5iv.labs.arxiv.org/html/2605.05358#bib.bib13 \"Zero time waste in pre-trained early exit neural networks\"), [23](https://ar5iv.labs.arxiv.org/html/2605.05358#bib.bib19 \"LGViT: dynamic early exiting for accelerating vision transformer\")]. This approach is particularly effective for retrofitting pretrained models with early exits at the cost of limited adaptability; new exits cannot refine earlier representations to better support their specific objectives. Branch-wise training introduces exits sequentially while unfreezing only the backbone segment associated with the current exit, offering moderate flexibility and helping to alleviate vanishing or exploding gradients in deep architectures [[7](https://ar5iv.labs.arxiv.org/html/2605.05358#bib.bib24 \"Multi-scale dense networks for resource efficient image classification\")]. However, this forward-thinking approach suffers from premature freezing: once an exit is trained and the training process moves deeper, that exit’s parameters become fixed, preventing further refinement even as later exits reveal useful representational structures. Separate training further relaxes these constraints by unfreezing the full network [[11](https://ar5iv.labs.arxiv.org/html/2605.05358#bib.bib1 \"How to train your multi-exit model? analyzing the impact of training strategies\")]. The exits are also introduced sequentially, however the training of each exit is done jointly with previous exits, allowing each branch to capture features at different abstraction levels through potentially distinct objectives. Although this approach provides greater flexibility, it applies uniform updates to all backbone parameters during each iteration, without identifying which parameters are essential for earlier exits and which can be modified for new ones.\n\nA key challenge unifies these methods: introducing new exits disrupts previously learned representations through gradient interference, with degradation intensifying as more exits are added [[14](https://ar5iv.labs.arxiv.org/html/2605.05358#bib.bib25 \"Early-exit deep neural network - a comprehensive survey\")]. This results from current approaches disregarding the heterogeneous importance of parameters, particularly those that have already been tuned for earlier exits. Indeed, some weights encode critical features that earlier exits depend on, while others are less consequential and could be freely adapted. Therefore, distinguishing between these parameter types is essential as it enables selective protection of critical knowledge while maintaining the plasticity needed for new exits to specialize effectively. Importantly, this challenge is not unique to early-exit networks. In continual learning (CL), models face a similar dilemma when learning sequential tasks; they must acquire new capabilities (plasticity) while preserving previously learned knowledge (stability) to mitigate catastrophic forgetting [[19](https://ar5iv.labs.arxiv.org/html/2605.05358#bib.bib27 \"A comprehensive survey of continual learning: theory, method and application\")]. We thus recognize that sequential early-exit training exhibits this same stability-plasticity trade-off. This conceptual alignment suggests that CL techniques can be adapted to protect salient features of earlier exits from being forgotten during sequential training. It is worth noting that the goal here is not to implement CL on EENN (e.g., Szatkowski et al. [[16](https://ar5iv.labs.arxiv.org/html/2605.05358#bib.bib8 \"Accelerated inference and reduced forgetting: the dual benefits of early-exit networks in continual learning\")]), but to benefit from some of the regularization techniques of CL to mitigate representation degradation in sequential training of EENN.\n\nBuilding on this perspective, we propose a novel two-stage sequential training approach. In the first stage, we pretrain the backbone using only the final exit in order for deep layers to develop rich abstract representations before early exits are introduced [[21](https://ar5iv.labs.arxiv.org/html/2605.05358#bib.bib18 \"DeeBERT: dynamic early exiting for accelerating BERT inference\"), [13](https://ar5iv.labs.arxiv.org/html/2605.05358#bib.bib12 \"FastBERT: a self-distilling BERT with adaptive inference time\")]. In the second stage, we perform sequential training by explicitly preserving the knowledge acquired by earlier exits as new exits are introduced. Consistent with the CL perspective, our goal is to counteract the forgetting induced by gradient interference. Without protection mechanisms, optimizing a new exit inevitably overwrites representations that previous exits depend on, leading to progressive degradation. Therefore, we aim to regularize sequential training from two alternative standpoints, namely at the parameter and output distribution levels, each addressing forgetting from a different aspect. At the parameter level, forgetting occurs because optimization updates treat all weights equally, although some are critical for the performance of existing exits. By identifying which parameters are essential, we can selectively protect them, allowing the network to adapt safely while preserving knowledge that earlier exits rely on. This motivates the use of Elastic Weight Consolidation (EWC) [[9](https://ar5iv.labs.arxiv.org/html/2605.05358#bib.bib7 \"Overcoming catastrophic forgetting in neural networks\"), [15](https://ar5iv.labs.arxiv.org/html/2605.05358#bib.bib6 \"Progress & compress: a scalable framework for continual learning\")], which estimates parameter importance via Fisher information and constrains updates on crucial weights, thus weighting the learning process to balance stability and plasticity. At the output distribution level, however, what ultimately matters is that the predictive behavior of the earlier exits remains stable as new exits are trained. To achieve this, we adopt Learning without Forgetting (LwF) [[12](https://ar5iv.labs.arxiv.org/html/2605.05358#bib.bib3 \"Learning without forgetting\")], which regularizes the outputs of earlier exits to match their original predictions, maintaining functional consistency as new exits are trained. Both EWC and LwF are governed by tunable hyperparameters, giving explicit control over the trade-off between preserving early-exit performance and enabling adaptation for new exits.\n\nThe main contributions of this work are threefold:\n\n* • We propose a novel technique to mitigate the degradation of previously learnt representation in order to address the stability-plasticity trade-off faced during sequential training of EENN. * • We adapt two CL regularization strategies, EWC for parameter-level protection and LwF for output distribution-level consistency, to enable principled sequential training that balances exit specialization with knowledge preservation. * • We demonstrate consistent improvements over existing sequential training methods across benchmark architectures, validating the effectiveness of the CL approach for EENNs.\n\nWe propose a novel technique to mitigate the degradation of previously learnt representation in order to address the stability-plasticity trade-off faced during sequential training of EENN.\n\nWe adapt two CL regularization strategies, EWC for parameter-level protection and LwF for output distribution-level consistency, to enable principled sequential training that balances exit specialization with knowledge preservation.\n\nWe demonstrate consistent improvements over existing sequential training methods across benchmark architectures, validating the effectiveness of the CL approach for EENNs."
+    },
+    {
+      "heading_path": [
+        "Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks",
+        "2 Proposed Methodology"
+      ],
+      "text": "## 2 Proposed Methodology\n\nΘμ\\Theta_{\\mu}\n\nI​CμIC_{\\mu}\n\nμ\\mu\n\n𝐲^μ\\mathbf{\\hat{y}}_{\\mu}\n\nWe consider an EENN consisting of MM ICs, where each backbone subnetwork μ\\mu is parameterized by {Θ1,…,Θμ}\\{\\Theta\\_{1},\\dots,\\Theta\\_{\\mu}\\} and produces class probability vector 𝐲^μ\\mathbf{\\hat{y}}\\_{\\mu} (see [Figure 1](https://ar5iv.labs.arxiv.org/html/2605.05358#S2.F1 \"In 2 Proposed Methodology ‣ Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks\")), with y^μ​(c)\\hat{y}\\_{\\mu}(c) (for c∈{1,…,C}c\\in\\{1,\\dots,C\\}) being the probability associated with class cc. We frame the sequential training of ICs as a sequence of learning tasks indexed by μ∈{1,2,…,M}\\mu\\in\\{1,2,\\ldots,M\\}, where task μ\\mu corresponds to training IC μ\\mu while preserving the predictive capabilities of all previously trained ICs {1,…,μ−1}\\{1,\\ldots,{\\mu-1}\\}. The shared backbone parameters must accommodate the objectives of all trained ICs, balancing plasticity (i.e., the ability to refine representations for the current task) against stability (i.e., maintaining performance on earlier tasks).\n\nMM\n\nμ\\mu\n\n{Θ1,…,Θμ}\\{\\Theta_{1},\\dots,\\Theta_{\\mu}\\}\n\n𝐲^μ\\mathbf{\\hat{y}}_{\\mu}\n\ny^μ​(c)\\hat{y}_{\\mu}(c)\n\nc∈{1,…,C}c\\in\\{1,\\dots,C\\}\n\ncc\n\nμ∈{1,2,…,M}\\mu\\in\\{1,2,\\ldots,M\\}\n\nμ\\mu\n\nμ\\mu\n\n{1,…,μ−1}\\{1,\\ldots,{\\mu-1}\\}\n\nTo address this stability-plasticity trade-off, we augment the standard classification loss with a regularization term that protects previously acquired knowledge. The loss function for training exit μ\\mu takes the general form:\n\nμ\\mu\n\n| | | | | | --- | --- | --- | --- | | | ℒtotal(μ)=ℒCE(μ)+s​λ​ℛEWC(μ)+(1−s)​ρ​ℛLwF(μ)\\mathcal{L}\\_{\\mathrm{total}}^{(\\mu)}=\\mathcal{L}\\_{\\mathrm{CE}}^{(\\mu)}+s\\,\\lambda\\mathcal{R}\\_{\\mathrm{EWC}}^{(\\mu)}+(1-s)\\,\\rho\\mathcal{R}\\_{\\mathrm{LwF}}^{(\\mu)} | | (1) |\n\nℒtotal(μ)=ℒCE(μ)+s​λ​ℛEWC(μ)+(1−s)​ρ​ℛLwF(μ)\\mathcal{L}_{\\mathrm{total}}^{(\\mu)}=\\mathcal{L}_{\\mathrm{CE}}^{(\\mu)}+s\\,\\lambda\\mathcal{R}_{\\mathrm{EWC}}^{(\\mu)}+(1-s)\\,\\rho\\mathcal{R}_{\\mathrm{LwF}}^{(\\mu)}\n\nwhere ℒCE(μ)\\mathcal{L}\\_{\\mathrm{CE}}^{(\\mu)} denotes the cross-entropy loss for exit μ\\mu which depends on {Θ1,…,Θμ}\\{\\Theta\\_{1},\\dots,\\Theta\\_{\\mu}\\} and the parameters of IC μ\\mu; ℛEWC(μ)\\mathcal{R}\\_{\\mathrm{EWC}}^{(\\mu)} and ℛLwF(μ)\\mathcal{R}\\_{\\mathrm{LwF}}^{(\\mu)} are regularization terms that mitigate the degradation of earlier exits, corresponding to EWC (parameter-level) and LwF (output-distribution-level), respectively. Their relative strengths are controlled by the hyperparameters λ\\lambda and ρ\\rho. The binary variable s∈{0,1}s\\in\\{0,1\\} indicates which regularization strategy is active.\n\nℒCE(μ)\\mathcal{L}_{\\mathrm{CE}}^{(\\mu)}\n\nμ\\mu\n\n{Θ1,…,Θμ}\\{\\Theta_{1},\\dots,\\Theta_{\\mu}\\}\n\nμ\\mu\n\nℛEWC(μ)\\mathcal{R}_{\\mathrm{EWC}}^{(\\mu)}\n\nℛLwF(μ)\\mathcal{R}_{\\mathrm{LwF}}^{(\\mu)}\n\nλ\\lambda\n\nρ\\rho\n\ns∈{0,1}s\\in\\{0,1\\}\n\nTo illustrate the training procedure, [Figure 1](https://ar5iv.labs.arxiv.org/html/2605.05358#S2.F1 \"In 2 Proposed Methodology ‣ Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks\") shows the status of each subnetwork when training exit 3. At this stage, the first two blocks (parameterized by Θ1\\Theta\\_{1} and Θ2\\Theta\\_{2}) and their respective classifiers (producing predictions 𝐲^1\\mathbf{\\hat{y}}\\_{1} and 𝐲^2\\mathbf{\\hat{y}}\\_{2}) have already been trained. We now add IC 3 and therefore, we need to train the full network up to exit 3. We minimize the cross-entropy loss ℒCE(3)\\mathcal{L}^{(3)}\\_{\\text{CE}} augmented with regularization ℛ(3)\\mathcal{R}^{(3)} applied to the previously trained blocks, either constraining their parameters (EWC) or preserving their predictions (LwF). The final block (Θ4\\Theta\\_{4}) and its corresponding classifier remain frozen throughout this stage.\n\nΘ1\\Theta_{1}\n\nΘ2\\Theta_{2}\n\n𝐲^1\\mathbf{\\hat{y}}_{1}\n\n𝐲^2\\mathbf{\\hat{y}}_{2}\n\nℒCE(3)\\mathcal{L}^{(3)}_{\\text{CE}}\n\nℛ(3)\\mathcal{R}^{(3)}\n\nΘ4\\Theta_{4}"
+    },
+    {
+      "heading_path": [
+        "Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks",
+        "2 Proposed Methodology",
+        "2.1 Parameter-level Regularization"
+      ],
+      "text": "### 2.1 Parameter-level Regularization\n\nThe first approach employs parameter-level regularization through EWC, which protects parameters that are critical for previously trained exits by penalizing changes to important weights. This importance score is computed using Fisher Information [[1](https://ar5iv.labs.arxiv.org/html/2605.05358#bib.bib10 \"Natural gradient works efficiently in learning\")]. Parameters with large Fisher values correspond to directions in parameter space where small perturbations would strongly increase the cross-entropy loss ℒCE(ν)\\mathcal{L}\\_{\\mathrm{CE}}^{(\\nu)} on previous exits and are therefore prioritized for protection.\n\nℒCE(ν)\\mathcal{L}_{\\mathrm{CE}}^{(\\nu)}\n\nFollowing the online EWC framework [[15](https://ar5iv.labs.arxiv.org/html/2605.05358#bib.bib6 \"Progress & compress: a scalable framework for continual learning\")], the parameter-level regularization is defined as\n\n| | | | | | --- | --- | --- | --- | | | ℛEWC(μ)=∑θk∈∪i=1μ−1Θi(∑ν=1μ−1Fk(ν))​(θk−θk∗)2\\mathcal{R}\\_{\\mathrm{EWC}}^{(\\mu)}=\\sum\\_{\\theta\\_{k}\\in\\cup\\_{i=1}^{\\mu-1}\\Theta\\_{i}}\\left(\\sum\\_{\\nu=1}^{\\mu-1}F\\_{k}^{(\\nu)}\\right)\\left(\\theta\\_{k}-\\theta\\_{k}^{\\*}\\right)^{2} | | (2) |\n\nℛEWC(μ)=∑θk∈∪i=1μ−1Θi(∑ν=1μ−1Fk(ν))​(θk−θk∗)2\\mathcal{R}_{\\mathrm{EWC}}^{(\\mu)}=\\sum_{\\theta_{k}\\in\\cup_{i=1}^{\\mu-1}\\Theta_{i}}\\left(\\sum_{\\nu=1}^{\\mu-1}F_{k}^{(\\nu)}\\right)\\left(\\theta_{k}-\\theta_{k}^{*}\\right)^{2}\n\nHere, θk∗∈ℝ\\theta\\_{k}^{\\*}\\in\\mathbb{R} denotes the value of parameter θk∈∪i=1μ−1Θi\\theta\\_{k}\\in\\cup\\_{i=1}^{\\mu-1}\\Theta\\_{i} after training up to exit μ−1\\mu-1. The term Fk(ν)∈ℝF\\_{k}^{(\\nu)}\\in\\mathbb{R} represents the Fisher information measuring the importance of parameter θk\\theta\\_{k} for exit ν\\nu. In practice, we use the empirical Fisher information [[18](https://ar5iv.labs.arxiv.org/html/2605.05358#bib.bib20 \"On the computation of the fisher information in continual learning\")], which is computed as:\n\nθk∗∈ℝ\\theta_{k}^{*}\\in\\mathbb{R}\n\nθk∈∪i=1μ−1Θi\\theta_{k}\\in\\cup_{i=1}^{\\mu-1}\\Theta_{i}\n\nμ−1\\mu-1\n\nFk(ν)∈ℝF_{k}^{(\\nu)}\\in\\mathbb{R}\n\nθk\\theta_{k}\n\nν\\nu\n\n| | | | | | --- | --- | --- | --- | | | Fk(ν)=1N​∑𝐱∈𝒟(∂∂θk​log⁡y^ν​(𝒞​(𝐱))|θk=θk∗)2F\\_{k}^{(\\nu)}=\\frac{1}{N}\\sum\\_{\\mathbf{x}\\in\\mathcal{D}}\\left(\\left.\\frac{\\partial}{\\partial\\theta\\_{k}}\\log\\hat{y}\\_{\\nu}(\\mathcal{C}(\\mathbf{x}))\\right|\\_{\\theta\\_{k}=\\theta\\_{k}^{\\*}}\\right)^{2} | | (3) |\n\nFk(ν)=1N​∑𝐱∈𝒟(∂∂θk​log⁡y^ν​(𝒞​(𝐱))|θk=θk∗)2F_{k}^{(\\nu)}=\\frac{1}{N}\\sum_{\\mathbf{x}\\in\\mathcal{D}}\\left(\\left.\\frac{\\partial}{\\partial\\theta_{k}}\\log\\hat{y}_{\\nu}(\\mathcal{C}(\\mathbf{x}))\\right|_{\\theta_{k}=\\theta_{k}^{*}}\\right)^{2}\n\nwhere 𝒟\\mathcal{D} denotes the training dataset, NN is the total number of training samples, and y^ν​(𝒞​(𝐱))\\hat{y}\\_{\\nu}(\\mathcal{C}(\\mathbf{x})) is the probability associated with the true label 𝒞​(𝐱)∈{1,…,C}\\mathcal{C}(\\mathbf{x})\\in\\{1,\\dots,C\\} for input 𝐱\\mathbf{x} at exit ν\\nu.\n\n𝒟\\mathcal{D}\n\nNN\n\ny^ν​(𝒞​(𝐱))\\hat{y}_{\\nu}(\\mathcal{C}(\\mathbf{x}))\n\n𝒞​(𝐱)∈{1,…,C}\\mathcal{C}(\\mathbf{x})\\in\\{1,\\dots,C\\}\n\n𝐱\\mathbf{x}\n\nν\\nu"
+    },
+    {
+      "heading_path": [
+        "Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks",
+        "2 Proposed Methodology",
+        "2.2 Output distribution-level Regularization"
+      ],
+      "text": "### 2.2 Output distribution-level Regularization\n\nThe second proposed approach takes a fundamentally different perspective by operating at the output distribution level. Rather than protecting individual parameters, LwF preserves knowledge by enforcing that the current model maintains the input-output mappings learned by previously trained exits. In contrast to EWC, LwF imposes a functional constraint that is agnostic to specific parameter values and instead focuses on preserving decision boundaries. Under LwF, parameters are free to change substantially as long as the output distributions of previous exits is minimally shifted by the training of this new exit, allowing the network to adapt its internal representations while maintaining stable behavior. Importantly, the LwF loss enables gradient flow through both the shared backbone and the classifier heads of earlier exits; this added flexibility allows earlier classifiers to compensate for moderate backbone drift, potentially mitigating performance degradation. The output distribution-level regularization is thus defined as:\n\n| | | | | | --- | --- | --- | --- | | | ℛLwF(μ)=∑ν=1μ−1𝕂​𝕃​(𝐲^ν∥𝐲^ν∗)\\mathcal{R}\\_{\\mathrm{LwF}}^{(\\mu)}=\\sum\\_{\\nu=1}^{\\mu-1}\\mathbb{KL}\\left(\\mathbf{\\hat{y}}\\_{\\nu}\\;\\|\\;\\mathbf{\\hat{y}}^{\\*}\\_{\\nu}\\right) | | (4) |\n\nℛLwF(μ)=∑ν=1μ−1𝕂​𝕃​(𝐲^ν∥𝐲^ν∗)\\mathcal{R}_{\\mathrm{LwF}}^{(\\mu)}=\\sum_{\\nu=1}^{\\mu-1}\\mathbb{KL}\\left(\\mathbf{\\hat{y}}_{\\nu}\\;\\|\\;\\mathbf{\\hat{y}}^{*}_{\\nu}\\right)\n\nwhere 𝐲^ν\\mathbf{\\hat{y}}\\_{\\nu} denotes the output distribution of IC ν\\nu when training exit μ\\mu, 𝐲^ν∗\\mathbf{\\hat{y}}^{\\*}\\_{\\nu} denotes the output distribution obtained with the training of IC ν\\nu, and 𝕂𝕃(⋅∥⋅)\\mathbb{KL}(\\cdot\\|\\cdot) is the Kullback-Leibler divergence.\n\n𝐲^ν\\mathbf{\\hat{y}}_{\\nu}\n\nν\\nu\n\nμ\\mu\n\n𝐲^ν∗\\mathbf{\\hat{y}}^{*}_{\\nu}\n\nν\\nu"
+    },
+    {
+      "heading_path": [
+        "Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks",
+        "3 Experiments"
+      ],
+      "text": "## 3 Experiments\n\nWe evaluate our approach on standard early-exit benchmarks following the experimental setup proposed in [[11](https://ar5iv.labs.arxiv.org/html/2605.05358#bib.bib1 \"How to train your multi-exit model? analyzing the impact of training strategies\")]. Our evaluation focuses on comparing the proposed EWC and LwF regularization strategies against existing sequential training methods across different architectures and computational budgets.\n\n| | | | | | | | --- | --- | --- | --- | --- | --- | | Model | Method | 25%25\\% | 50%50\\% | 75%75\\% | 100%100\\% | | ResNet34 | Disjoint | 52.5752.57 | 67.5667.56 | 73.4973.49 | 73.7973.79 | | Branch-wise | 64.1964.19 | 67.0367.03 | 66.8866.88 | 66.7566.75 | | Separate | 66.2566.25 | 72.5772.57 | 72.8772.87 | 72.8272.82 | | Joint | 62.8462.84 | 72.8072.80 | 74.32 | 74.17 | | EWC | 70.5070.50 | 74.07 | 73.9073.90 | 73.8473.84 | | LwF | 70.71 | 73.8473.84 | 73.6173.61 | 73.5573.55 | | MSDNet | Disjoint | 56.7456.74 | 63.9663.96 | 68.5968.59 | 70.3670.36 | | Branch-wise | 58.2458.24 | 59.7359.73 | 60.1660.16 | 59.9759.97 | | Separate | 64.9064.90 | 67.8467.84 | 69.0269.02 | 69.2169.21 | | Joint | 65.9365.93 | 72.0272.02 | 74.73 | 75.86 | | EWC | 65.1065.10 | 71.0371.03 | 71.9871.98 | 71.8971.89 | | LwF | 66.50 | 73.04 | 73.3373.33 | 73.2073.20 |\n\n25%25\\%\n\n50%50\\%\n\n75%75\\%\n\n100%100\\%\n\n52.5752.57\n\n67.5667.56\n\n73.4973.49\n\n73.7973.79\n\n64.1964.19\n\n67.0367.03\n\n66.8866.88\n\n66.7566.75\n\n66.2566.25\n\n72.5772.57\n\n72.8772.87\n\n72.8272.82\n\n62.8462.84\n\n72.8072.80\n\n70.5070.50\n\n73.9073.90\n\n73.8473.84\n\n73.8473.84\n\n73.6173.61\n\n73.5573.55\n\n56.7456.74\n\n63.9663.96\n\n68.5968.59\n\n70.3670.36\n\n58.2458.24\n\n59.7359.73\n\n60.1660.16\n\n59.9759.97\n\n64.9064.90\n\n67.8467.84\n\n69.0269.02\n\n69.2169.21\n\n65.9365.93\n\n72.0272.02\n\n65.1065.10\n\n71.0371.03\n\n71.9871.98\n\n71.8971.89\n\n73.3373.33\n\n73.2073.20"
+    },
+    {
+      "heading_path": [
+        "Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks",
+        "3 Experiments",
+        "3.1 Experimental Setup"
+      ],
+      "text": "### 3.1 Experimental Setup\n\nDataset. We conduct experiments on CIFAR-100 [[10](https://ar5iv.labs.arxiv.org/html/2605.05358#bib.bib21 \"Learning multiple layers of features from tiny images\")], a widely-used image classification benchmark consisting of 60,000 32×32 RGB images across 100 fine-grained classes. The dataset is split into 50,000 training images and 10,000 test images. Architectures. We adopt the same architectures as in [[11](https://ar5iv.labs.arxiv.org/html/2605.05358#bib.bib1 \"How to train your multi-exit model? analyzing the impact of training strategies\")]. We evaluate two complementary architectures: ResNet-34 [[6](https://ar5iv.labs.arxiv.org/html/2605.05358#bib.bib22 \"Deep residual learning for image recognition\")] and MSDNet [[7](https://ar5iv.labs.arxiv.org/html/2605.05358#bib.bib24 \"Multi-scale dense networks for resource efficient image classification\")]. For ResNet-34, we augment the standard architecture with 8 internal classifiers positioned at layers {2,4,⋯,16}\\{2,4,\\cdots,16\\}, where each exit consists of an SDN-type pooling [[8](https://ar5iv.labs.arxiv.org/html/2605.05358#bib.bib23 \"Shallow-deep networks: understanding and mitigating network overthinking\")], except for the last classifier, which uses an adaptive average pooling, followed by a linear classifier. For MSDNet, we employ the CIFAR variant with 7 blocks. Baselines: All baseline accuracy scores are taken from [[11](https://ar5iv.labs.arxiv.org/html/2605.05358#bib.bib1 \"How to train your multi-exit model? analyzing the impact of training strategies\")]. We primarily compare our method against three sequential training baselines: disjoint, branch-wise, and separate training, and include joint training for completeness. For our proposed approach, we set λ=100\\lambda=100 and ρ=0.7\\rho=0.7 for ResNet34, and λ=1000\\lambda=1000 and ρ=0.2\\rho=0.2 for MSDNet, unless stated otherwise. Training Details. We first pretrain each backbone network with only the final exit using conventional supervised training. Then, following [[11](https://ar5iv.labs.arxiv.org/html/2605.05358#bib.bib1 \"How to train your multi-exit model? analyzing the impact of training strategies\")], for ResNet-34, we use a batch size of 128, a learning rate of 5⋅10−45\\cdot 10^{-4}, and no weight decay. For MSDNet, we use a batch size of 512 and a learning rate of 10−310^{-3} with no weight decay. Both models employ CutMix and Mixup augmentation strategies and early stopping with a patience of 50 epochs. After pretraining the backbones, we add ICs sequentially from shallow to deep, applying our proposed regularization at each stage.\n\n{2,4,⋯,16}\\{2,4,\\cdots,16\\}\n\nλ=100\\lambda=100\n\nρ=0.7\\rho=0.7\n\nλ=1000\\lambda=1000\n\nρ=0.2\\rho=0.2\n\n5⋅10−45\\cdot 10^{-4}\n\n10−310^{-3}"
+    },
+    {
+      "heading_path": [
+        "Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks",
+        "3 Experiments",
+        "3.2 Results and Discussion"
+      ],
+      "text": "### 3.2 Results and Discussion\n\nTable [1](https://ar5iv.labs.arxiv.org/html/2605.05358#S3.T1 \"Table 1 ‣ 3 Experiments ‣ Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks\") presents top-1 accuracy across exits corresponding to different computational budgets (25%25\\%, 50%50\\%, 75%75\\%, and 100%100\\% FLOPs) for our two EENN models on CIFAR-100. Our proposed method consistently outperforms all baseline sequential training approaches. Compared to the strongest sequential baseline (separate training), both EWC and LwF achieve substantial improvements, particularly at low budgets: +4.25%+4.25\\% and +4.46%+4.46\\% at 25%25\\% budget, respectively. This demonstrates that our approach effectively balances early exit specialization with deep representation learning.\n\n25%25\\%\n\n50%50\\%\n\n75%75\\%\n\n100%100\\%\n\n+4.25%+4.25\\%\n\n+4.46%+4.46\\%\n\n25%25\\%\n\nThe comparison across architectures highlights the interplay between regularization type and backbone topology. In ResNet34, both EWC and LwF improve early-exit performance, with EWC slightly outperforming LwF at the deepest exit, suggesting that parameter-level stabilization is sufficient in sequential residual blocks. The skip connections facilitate feature reuse, so anchoring parameters preserves shallow-exit performance without constraining deeper layers. In contrast, MSDNet’s densely connected, multi-scale structure links many layers to multiple exits. Here, LwF consistently outperforms EWC across both early and late exits, indicating that output-distribution regularization better accommodates functional dependencies among exits. By constraining predictions rather than parameters, LwF maintains early-exit accuracy while allowing the backbone to adapt flexibly for later classifiers, effectively balancing stability and plasticity in a highly entangled multi-exit architecture.\n\nFurthermore, we consistently observe improvements over joint training at earlier exits while maintaining comparable performance at later exits. This difference stems from the distinct optimization dynamics of the two approaches. Joint training drives all exits toward a shared compromise solution, whereas our method progressively increases regularization as new exits are added, limiting deeper layers’ ability to modify earlier representations. Although this can slightly constrain later adaptation, it yields substantially stronger early exits, aligning with the core goal of EENNs. Further gains may be possible by dynamically scheduling the regularization strength to better balance early and late exits.\n\n| | | | | | | | | | --- | --- | --- | --- | --- | --- | --- | --- | | Reg. | λ\\lambda | ρ\\rho | W.U | 25%25\\% | 50%50\\% | 75%75\\% | 100%100\\% | | EWC | 1010 | – | True | 58.3358.33 | 69.2769.27 | 73.1573.15 | 73.3973.39 | | 10210^{2} | – | True | 62.5462.54 | 71.0571.05 | 72.5972.59 | 72.4372.43 | | 10310^{3} | – | True | 65.1065.10 | 71.0371.03 | 71.9871.98 | 71.8971.89 | | 10310^{3} | – | False | 66.1166.11 | 68.9168.91 | 67.2567.25 | 66.9366.93 | | LwF | – | 0.20.2 | True | 66.5066.50 | 73.0473.04 | 73.3373.33 | 73.2073.20 | | – | 0.50.5 | True | 68.5768.57 | 72.6372.63 | 72.5672.56 | 72.4472.44 | | – | 0.70.7 | True | 67.5167.51 | 72.7472.74 | 73.0773.07 | 72.8572.85 | | – | 0.70.7 | False | 67.4967.49 | 70.0470.04 | 68.9968.99 | 68.6768.67 |\n\nλ\\lambda\n\nρ\\rho\n\n25%25\\%\n\n50%50\\%\n\n75%75\\%\n\n100%100\\%\n\n1010\n\n58.3358.33\n\n69.2769.27\n\n73.1573.15\n\n73.3973.39\n\n10210^{2}\n\n62.5462.54\n\n71.0571.05\n\n72.5972.59\n\n72.4372.43\n\n10310^{3}\n\n65.1065.10\n\n71.0371.03\n\n71.9871.98\n\n71.8971.89\n\n10310^{3}\n\n66.1166.11\n\n68.9168.91\n\n67.2567.25\n\n66.9366.93\n\n0.20.2\n\n66.5066.50\n\n73.0473.04\n\n73.3373.33\n\n73.2073.20\n\n0.50.5\n\n68.5768.57\n\n72.6372.63\n\n72.5672.56\n\n72.4472.44\n\n0.70.7\n\n67.5167.51\n\n72.7472.74\n\n73.0773.07\n\n72.8572.85\n\n0.70.7\n\n67.4967.49\n\n70.0470.04\n\n68.9968.99\n\n68.6768.67\n\nTo better understand the impact of our design choices, we conduct an ablation study on MSDNet (see [Table 2](https://ar5iv.labs.arxiv.org/html/2605.05358#S3.T2 \"In 3.2 Results and Discussion ‣ 3 Experiments ‣ Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks\")). Our ablation explores two main dimensions: (i) the regularization strengths, namely λ\\lambda and ρ\\rho, and (ii) the impact of an initial pretraining, or warm-up, phase where the full model is trained while optimizing only the final classifier. Across both methods, the strength of the regularization plays a central role in controlling the stability–plasticity trade-off: stronger regularization protects early exits but reduces the backbone’s flexibility for deeper layers, while weaker regularization allows adaptation at the cost of shallow-exit performance. The key difference lies in how this constraint is applied. EWC rigidly anchors parameters important for earlier exits, stabilizing low-level features but limiting the backbone’s ability to reorganize representations for deeper classifiers. This explains why early-exit performance improves steadily with larger λ\\lambda, while high-budget exits are slightly constrained. In contrast, LwF constrains the outputs of earlier exits rather than the parameters themselves, allowing internal representations to adjust as long as the output distribution is preserved. Moderate ρ\\rho achieves a balance, maintaining early-exit accuracy while enabling deep exits to benefit from flexible feature adaptation, whereas high ρ\\rho overemphasizes shallow classifiers and reduces high-budget performance. Furthermore, backbone warm-up further interacts with both methods by providing an initial alignment of features across layers before regularization is applied. Without a warm-up, both methods struggle: EWC may freeze suboptimal parameters, and LwF may over-constrain features that are not yet meaningfully structured, leading to lower accuracy across all exits. Overall, this ablation study validates the effectiveness of our proposed two-stage strategy: pretraining the final exit establishes rich hierarchical features, and selective regularization allows each exit to adapt effectively without compromising the network’s full representational capacity.\n\nλ\\lambda\n\nρ\\rho\n\nλ\\lambda\n\nρ\\rho\n\nρ\\rho\n\nFigure [2](https://ar5iv.labs.arxiv.org/html/2605.05358#S3.F2 \"Figure 2 ‣ 3.2 Results and Discussion ‣ 3 Experiments ‣ Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks\") follows the budgeted classification approach (e.g., [[3](https://ar5iv.labs.arxiv.org/html/2605.05358#bib.bib4 \"Deep feature surgery: towards accurate and efficient multi-exit networks\"), [11](https://ar5iv.labs.arxiv.org/html/2605.05358#bib.bib1 \"How to train your multi-exit model? analyzing the impact of training strategies\")]) by evaluating the top-1 accuracy of a subset of configurations on MSDNet within a given computational budget. EWC with λ=10\\lambda=10 (blue curve) exhibits delayed accuracy growth, starting at only 55%55\\% and requiring approximately 40M FLOPs to reach 70%70\\% accuracy, nearly double the computation needed by well-regularized methods. This indicates that weak regularization fails to protect early-layer representations and forces reliance on deeper layers, thus heavier computational load. In contrast, stronger regularization enables substantially faster convergence: LwF variants and well-tuned EWC configurations reach 70%70\\% accuracy at roughly 20-25M FLOPs, yielding about a 2x computational speedup.\n\nλ=10\\lambda=10\n\n55%55\\%\n\n70%70\\%\n\n70%70\\%\n\nλ=1000\\lambda=1000\n\nρ=0.5\\rho=0.5\n\nFinally, Figure [3](https://ar5iv.labs.arxiv.org/html/2605.05358#S3.F3 \"Figure 3 ‣ 3.2 Results and Discussion ‣ 3 Experiments ‣ Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks\") further analyzes how confidence thresholds control the dynamic behavior of MSDNet by reporting exit ratios across all intermediate classifiers. As the threshold increases, predictions are progressively shifted toward deeper exits, indicating that harder samples are routed to later classifiers with richer representations. Comparing EWC (λ=1000\\lambda=1000) and LwF (ρ=0.5\\rho=0.5) reveals a systematic difference: LwF exits fewer samples at early classifiers under the same thresholds, while EWC commits earlier. Interpreted together with [Figure 2](https://ar5iv.labs.arxiv.org/html/2605.05358#S3.F2 \"In 3.2 Results and Discussion ‣ 3 Experiments ‣ Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks\"), where LwF achieves higher accuracy at substantially lower FLOPs, this shows that LwF provides a higher effective speedup despite exiting later on average. This behavior suggests that LwF learns more accurate but less confident early classifiers, deferring decisions more often, whereas EWC produces earlier but less accurate exits.\n\nλ=1000\\lambda=1000\n\nρ=0.5\\rho=0.5"
+    },
+    {
+      "heading_path": [
+        "Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks",
+        "4 Conclusion"
+      ],
+      "text": "## 4 Conclusion\n\nIn this work, we propose a novel strategy for training EENNs to mitigate the degradation of previously learned representations caused by incremental exit addition. By incorporating parameter-level protection via EWC and output-distribution consistency via LwF, we establish a principled sequential training framework that balances exit specialization with knowledge preservation. Our experimental study demonstrates that the proposed approach consistently outperforms existing sequential training methods and achieves better early exit accuracy than joint training. Future work will investigate adaptive regularization scheduling and more structured protection mechanisms, e.g., at the level of convolutional kernels or attention heads."
+    },
+    {
+      "heading_path": [
+        "Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks",
+        "References"
+      ],
+      "text": "## References\n\n* [1] S. Amari (1998) Natural gradient works efficiently in learning. Neural Computation 10 (2), pp. 251–276. External Links: [Document](https://dx.doi.org/10.1162/089976698300017746) Cited by: [§2.1](https://ar5iv.labs.arxiv.org/html/2605.05358#S2.SS1.p1.1 \"2.1 Parameter-level Regularization ‣ 2 Proposed Methodology ‣ Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks\"). * [2] R. Dong, Y. Mao, and J. Zhang (2022) Resource-constrained edge ai with early exit prediction. Journal of Communications and Information Networks 7 (2), pp. 122–134. External Links: [Document](https://dx.doi.org/10.23919/JCIN.2022.9815196) Cited by: [§1](https://ar5iv.labs.arxiv.org/html/2605.05358#S1.p1.1 \"1 Introduction ‣ Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks\"). * [3] C. Gong, Y. Chen, Q. Luo, Y. Lu, T. Li, Y. Zhang, Y. Sun, and L. Zhang (2025) Deep feature surgery: towards accurate and efficient multi-exit networks. In Computer Vision – ECCV 2024, Cham, pp. 435–451. External Links: ISBN 978-3-031-72967-6 Cited by: [§1](https://ar5iv.labs.arxiv.org/html/2605.05358#S1.p2.1 \"1 Introduction ‣ Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks\"), [§3.2](https://ar5iv.labs.arxiv.org/html/2605.05358#S3.SS2.p5.4 \"3.2 Results and Discussion ‣ 3 Experiments ‣ Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks\"). * [4] D. Han, J. Park, S. Ham, N. Lee, and J. Moon (2024) Improving low-latency predictions in multi-exit neural networks via block-dependent losses. IEEE Transactions on Neural Networks and Learning Systems 35 (11), pp. 16927–16935. External Links: [Document](https://dx.doi.org/10.1109/TNNLS.2023.3282249) Cited by: [§1](https://ar5iv.labs.arxiv.org/html/2605.05358#S1.p2.1 \"1 Introduction ‣ Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks\"). * [5] Y. Han, G. Huang, S. Song, L. Yang, H. Wang, and Y. Wang (2022-11) Dynamic Neural Networks: A Survey. IEEE Transactions on Pattern Analysis & Machine Intelligence 44 (11), pp. 7436–7456. External Links: ISSN 1939-3539, [Document](https://dx.doi.org/10.1109/TPAMI.2021.3117837), [Link](https://doi.ieeecomputersociety.org/10.1109/TPAMI.2021.3117837) Cited by: [§1](https://ar5iv.labs.arxiv.org/html/2605.05358#S1.p1.1 \"1 Introduction ‣ Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks\"). * [6] K. He, X. Zhang, S. Ren, and J. Sun (2016) Deep residual learning for image recognition. In Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition (CVPR), pp. 770–778. Cited by: [§3.1](https://ar5iv.labs.arxiv.org/html/2605.05358#S3.SS1.p1.7 \"3.1 Experimental Setup ‣ 3 Experiments ‣ Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks\"). * [7] G. Huang, D. Chen, T. Li, F. Wu, L. van der Maaten, and K. Q. Weinberger (2018) Multi-scale dense networks for resource efficient image classification. In Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition (CVPR), pp. 284–293. Cited by: [§1](https://ar5iv.labs.arxiv.org/html/2605.05358#S1.p3.1 \"1 Introduction ‣ Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks\"), [§3.1](https://ar5iv.labs.arxiv.org/html/2605.05358#S3.SS1.p1.7 \"3.1 Experimental Setup ‣ 3 Experiments ‣ Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks\"). * [8] Y. Kaya, S. Hong, and T. Dumitras (2019-09–15 Jun) Shallow-deep networks: understanding and mitigating network overthinking. In Proceedings of the 36th International Conference on Machine Learning, Proceedings of Machine Learning Research, Vol. 97, pp. 3301–3310. External Links: [Link](https://proceedings.mlr.press/v97/kaya19a.html) Cited by: [§3.1](https://ar5iv.labs.arxiv.org/html/2605.05358#S3.SS1.p1.7 \"3.1 Experimental Setup ‣ 3 Experiments ‣ Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks\"). * [9] J. Kirkpatrick, R. Pascanu, N. Rabinowitz, J. Veness, G. Desjardins, A. A. Rusu, K. Milan, J. Quan, T. Ramalho, A. Grabska-Barwinska, D. Hassabis, C. Clopath, D. Kumaran, and R. Hadsell (2017) Overcoming catastrophic forgetting in neural networks. Proceedings of the National Academy of Sciences 114 (13), pp. 3521–3526. External Links: [Document](https://dx.doi.org/10.1073/pnas.1611835114), [Link](https://www.pnas.org/doi/abs/10.1073/pnas.1611835114), https://www.pnas.org/doi/pdf/10.1073/pnas.1611835114 Cited by: [§1](https://ar5iv.labs.arxiv.org/html/2605.05358#S1.p5.1 \"1 Introduction ‣ Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks\"). * [10] A. Krizhevsky (2009) Learning multiple layers of features from tiny images. Technical report University of Toronto. Cited by: [§3.1](https://ar5iv.labs.arxiv.org/html/2605.05358#S3.SS1.p1.7 \"3.1 Experimental Setup ‣ 3 Experiments ‣ Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks\"). * [11] P. Kubaty, B. Wójcik, B. T. Krzepkowski, M. Michaluk, T. Trzcinski, J. Pomponi, and K. Adamczewski (2025) How to train your multi-exit model? analyzing the impact of training strategies. In Forty-second International Conference on Machine Learning, External Links: [Link](https://openreview.net/forum?id=vhTPfOdwyQ) Cited by: [§1](https://ar5iv.labs.arxiv.org/html/2605.05358#S1.p2.1 \"1 Introduction ‣ Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks\"), [§1](https://ar5iv.labs.arxiv.org/html/2605.05358#S1.p3.1 \"1 Introduction ‣ Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks\"), [§3.1](https://ar5iv.labs.arxiv.org/html/2605.05358#S3.SS1.p1.7 \"3.1 Experimental Setup ‣ 3 Experiments ‣ Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks\"), [§3.2](https://ar5iv.labs.arxiv.org/html/2605.05358#S3.SS2.p5.4 \"3.2 Results and Discussion ‣ 3 Experiments ‣ Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks\"), [§3](https://ar5iv.labs.arxiv.org/html/2605.05358#S3.p1.1 \"3 Experiments ‣ Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks\"). * [12] Z. Li and D. Hoiem (2018-12) Learning without forgetting. IEEE Trans. Pattern Anal. Mach. Intell. 40 (12), pp. 2935–2947. External Links: ISSN 0162-8828, [Link](https://doi.org/10.1109/TPAMI.2017.2773081), [Document](https://dx.doi.org/10.1109/TPAMI.2017.2773081) Cited by: [§1](https://ar5iv.labs.arxiv.org/html/2605.05358#S1.p5.1 \"1 Introduction ‣ Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks\"). * [13] W. Liu, P. Zhou, Z. Wang, Z. Zhao, H. Deng, and Q. Ju (2020-07) FastBERT: a self-distilling BERT with adaptive inference time. In Proceedings of the 58th Annual Meeting of the Association for Computational Linguistics, Online, pp. 6035–6044. External Links: [Link](https://aclanthology.org/2020.acl-main.537/), [Document](https://dx.doi.org/10.18653/v1/2020.acl-main.537) Cited by: [§1](https://ar5iv.labs.arxiv.org/html/2605.05358#S1.p5.1 \"1 Introduction ‣ Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks\"). * [14] H. Rahmath P, V. Srivastava, K. Chaurasia, R. G. Pacheco, and R. S. Couto (2024-11) Early-exit deep neural network - a comprehensive survey. ACM Comput. Surv. 57 (3). External Links: ISSN 0360-0300, [Link](https://doi.org/10.1145/3698767), [Document](https://dx.doi.org/10.1145/3698767) Cited by: [§1](https://ar5iv.labs.arxiv.org/html/2605.05358#S1.p4.1 \"1 Introduction ‣ Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks\"). * [15] J. Schwarz, W. Czarnecki, J. Luketina, A. Grabska-Barwinska, Y. W. Teh, R. Pascanu, and R. Hadsell (2018-10–15 Jul) Progress & compress: a scalable framework for continual learning. In Proceedings of the 35th International Conference on Machine Learning, Proceedings of Machine Learning Research, Vol. 80, pp. 4528–4537. External Links: [Link](https://proceedings.mlr.press/v80/schwarz18a.html) Cited by: [§1](https://ar5iv.labs.arxiv.org/html/2605.05358#S1.p5.1 \"1 Introduction ‣ Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks\"), [§2.1](https://ar5iv.labs.arxiv.org/html/2605.05358#S2.SS1.p2.13 \"2.1 Parameter-level Regularization ‣ 2 Proposed Methodology ‣ Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks\"). * [16] F. Szatkowski, F. Yang, B. Twardowski, T. Trzcinski, and J. van de Weijer (2024-06) Accelerated inference and reduced forgetting: the dual benefits of early-exit networks in continual learning. In 5th Workshop on Continual Learning in Computer Vision, CVPR, Seattle, USA. Note: External Links: [Link](https://sites.google.com/view/clvision2024/call-for-papers/accepted-papers#272) Cited by: [§1](https://ar5iv.labs.arxiv.org/html/2605.05358#S1.p4.1 \"1 Introduction ‣ Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks\"). * [17] S. Teerapittayanon, B. McDanel, and H.T. Kung (2016) BranchyNet: fast inference via early exiting from deep neural networks. In 2016 23rd International Conference on Pattern Recognition (ICPR), Vol. , pp. 2464–2469. External Links: [Document](https://dx.doi.org/10.1109/ICPR.2016.7900006) Cited by: [§1](https://ar5iv.labs.arxiv.org/html/2605.05358#S1.p2.1 \"1 Introduction ‣ Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks\"). * [18] G. M. v. d. Ven (April 28, 2025) On the computation of the fisher information in continual learning. In ICLR Blogposts 2025, Note: https://iclr-blogposts.github.io/2025/blog/fisher/ External Links: [Link](https://iclr-blogposts.github.io/2025/blog/fisher/) Cited by: [§2.1](https://ar5iv.labs.arxiv.org/html/2605.05358#S2.SS1.p2.6 \"2.1 Parameter-level Regularization ‣ 2 Proposed Methodology ‣ Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks\"). * [19] L. Wang, X. Zhang, H. Su, and J. Zhu (2024) A comprehensive survey of continual learning: theory, method and application. IEEE Transactions on Pattern Analysis and Machine Intelligence 46 (8), pp. 5362–5383. External Links: [Document](https://dx.doi.org/10.1109/TPAMI.2024.3367329) Cited by: [§1](https://ar5iv.labs.arxiv.org/html/2605.05358#S1.p4.1 \"1 Introduction ‣ Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks\"). * [20] B. Wojcik, M. Przewiezlikowski, F. Szatkowski, M. Wolczyk, K. Balazy, B. Krzepkowski, I. Podolak, J. Tabor, M. Smieja, and T. Trzcinski (2023) Zero time waste in pre-trained early exit neural networks. Neural Networks 168, pp. 580–601. External Links: ISSN 0893-6080, [Document](https://dx.doi.org/https%3A//doi.org/10.1016/j.neunet.2023.10.003), [Link](https://www.sciencedirect.com/science/article/pii/S0893608023005555) Cited by: [§1](https://ar5iv.labs.arxiv.org/html/2605.05358#S1.p3.1 \"1 Introduction ‣ Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks\"). * [21] J. Xin, R. Tang, J. Lee, Y. Yu, and J. Lin (2020-07) DeeBERT: dynamic early exiting for accelerating BERT inference. In Proceedings of the 58th Annual Meeting of the Association for Computational Linguistics, Online, pp. 2246–2251. External Links: [Link](https://aclanthology.org/2020.acl-main.204/), [Document](https://dx.doi.org/10.18653/v1/2020.acl-main.204) Cited by: [§1](https://ar5iv.labs.arxiv.org/html/2605.05358#S1.p5.1 \"1 Introduction ‣ Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks\"). * [22] J. Xin, R. Tang, Y. Yu, and J. Lin (2021-04) BERxiT: early exiting for BERT with better fine-tuning and extension to regression. In Proceedings of the 16th Conference of the European Chapter of the Association for Computational Linguistics: Main Volume, Online, pp. 91–104. External Links: [Link](https://aclanthology.org/2021.eacl-main.8/), [Document](https://dx.doi.org/10.18653/v1/2021.eacl-main.8) Cited by: [§1](https://ar5iv.labs.arxiv.org/html/2605.05358#S1.p2.1 \"1 Introduction ‣ Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks\"). * [23] G. Xu, J. Hao, L. Shen, H. Hu, Y. Luo, H. Lin, and J. Shen (2023) LGViT: dynamic early exiting for accelerating vision transformer. In Proceedings of the 31st ACM International Conference on Multimedia, MM ’23, New York, NY, USA, pp. 9103–9114. External Links: ISBN 9798400701085, [Link](https://doi.org/10.1145/3581783.3611762), [Document](https://dx.doi.org/10.1145/3581783.3611762) Cited by: [§1](https://ar5iv.labs.arxiv.org/html/2605.05358#S1.p3.1 \"1 Introduction ‣ Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks\"). * [24] W. Zhu, X. Wang, Y. Ni, and G. Xie (2021-11) GAML-BERT: improving BERT early exiting by gradient aligned mutual learning. In Proceedings of the 2021 Conference on Empirical Methods in Natural Language Processing, Online and Punta Cana, Dominican Republic, pp. 3033–3044. External Links: [Link](https://aclanthology.org/2021.emnlp-main.242/), [Document](https://dx.doi.org/10.18653/v1/2021.emnlp-main.242) Cited by: [§1](https://ar5iv.labs.arxiv.org/html/2605.05358#S1.p2.1 \"1 Introduction ‣ Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks\")."
+    }
+  ]
+}

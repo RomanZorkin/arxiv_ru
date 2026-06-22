@@ -1,0 +1,614 @@
+{
+  "title": "[2510.07645] Banking Done Right: Redefining Retail Banking with Language-Centric AI",
+  "sections": [
+    {
+      "heading": "Banking Done Right: Redefining Retail Banking with Language-Centric AI",
+      "level": 1,
+      "content": [],
+      "children": [
+        {
+          "heading": "Abstract",
+          "level": 6,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "This paper presents Ryt AI, an LLM-native agentic framework that powers Ryt Bank111Ryt Bank is the world’s first AI-powered bank, fully licensed by Bank Negara Malaysia (the Central Bank of Malaysia) and the Ministry of Finance, Malaysia. Visit <https://www.rytbank.my/> for more details. to enable customers to execute core financial transactions through natural language conversation. This represents the first global regulator-approved deployment worldwide where conversational AI functions as the primary banking interface, in contrast to prior assistants that have been limited to advisory or support roles. Built entirely in-house, Ryt AI is powered by ILMU, a closed-source LLM developed internally, and replaces rigid multi-screen workflows with a single dialogue orchestrated by four LLM-powered agents (Guardrails, Intent, Payment, and FAQ). Each agent attaches a task-specific LoRA adapter to ILMU, which is hosted within the bank’s infrastructure to ensure consistent behavior with minimal overhead. Deterministic guardrails, human-in-the-loop confirmation, and a stateless audit architecture provide defense-in-depth for security and compliance. The result is Banking Done Right: demonstrating that regulator-approved natural-language interfaces can reliably support core financial operations under strict governance."
+            },
+            {
+              "type": "paragraph",
+              "text": "Banking Done Right: Redefining Retail Banking with Language-Centric AI"
+            },
+            {
+              "type": "paragraph",
+              "text": "Xin Jie Chua1, Jeraelyn Ming Li Tan2, Jia Xuan Tan2, Soon Chang Poh1,2, Yi Xian Goh1, Debbie Hui Tian Choong1, Chee Mun Foong2,3, Sze Jue Yang1,2, Chee Seng Chan1† 1Universiti Malaya, 2YTL AI Labs, 3Ryt Bank †Correspondence: [cs.chan@um.edu.my](mailto:cs.chan@um.edu.my)"
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "1 Introduction",
+          "level": 2,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "Natural Language Processing (NLP) has progressed rapidly, driven by the emergence of Large Language Models (LLMs) such as ChatGPT OpenAI et al. ([2024](https://ar5iv.labs.arxiv.org/html/2510.07645#bib.bib24)). These models are now being deployed across sectors, including healthcare Thirunavukarasu et al. ([2023](https://ar5iv.labs.arxiv.org/html/2510.07645#bib.bib34)), telecommunications Zhou et al. ([2025](https://ar5iv.labs.arxiv.org/html/2510.07645#bib.bib41)), and e-commerce Palen-Michel et al. ([2024](https://ar5iv.labs.arxiv.org/html/2510.07645#bib.bib25)), where they automate complex tasks with minimal human intervention."
+            },
+            {
+              "type": "paragraph",
+              "text": "Beyond simple text generation, LLMs have evolved into interactive systems capable of memorizing, using tools, and reasoning, enabling a new generation of autonomous applications commonly referred to as “agents”. These agents redefine enterprise workflows by taking over functions traditionally dependent on human coordination and logic."
+            },
+            {
+              "type": "paragraph",
+              "text": "While early agent-based frameworks have shown promise in research prototypes Wang et al. ([2024](https://ar5iv.labs.arxiv.org/html/2510.07645#bib.bib35)); Xi et al. ([2023](https://ar5iv.labs.arxiv.org/html/2510.07645#bib.bib36)); Huang et al. ([2024](https://ar5iv.labs.arxiv.org/html/2510.07645#bib.bib14)), their translation into industry-grade deployments remains limited. Adoption is hindered by challenges such as system complexity, limited generalizability, and the absence of robust real-world evaluations, particularly in high-risk domains. The financial sector embodies this paradox. Despite a strong appetite for innovation through LLMs for customer support, analytics, and personalization, banks have hesitated to integrate them into mission-critical workflows. This reluctance stems from concerns about hallucination Huang et al. ([2025](https://ar5iv.labs.arxiv.org/html/2510.07645#bib.bib13)); Xu et al. ([2025](https://ar5iv.labs.arxiv.org/html/2510.07645#bib.bib38)), bias Gallegos et al. ([2024](https://ar5iv.labs.arxiv.org/html/2510.07645#bib.bib8)), and the need to maintain strict regulatory and security standards."
+            },
+            {
+              "type": "paragraph",
+              "text": "As a result, most financial institutions confine LLM usage to peripheral and low-stakes tasks. For example, Erica (Bank of America), Eno (Capital One) operate as supplementary assistants on legacy systems, mainly handling support, information retrieval, or simple inquiry tasks (e.g., checking balances, answering FAQs). They do not initiate or execute critical operations such as payment instructions or funds transfers. This cautious positioning, while understandable in finance, has contributed to stagnation in core banking innovation."
+            }
+          ],
+          "children": [
+            {
+              "heading": "1.1 Motivation and Problem Statement",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "This gap is most visible in digital banking workflows, which remain tied to legacy, multi-step designs with limited intelligence. Funds transfer illustrates this clearly (see Fig. [2](https://ar5iv.labs.arxiv.org/html/2510.07645#S1.F2 \"Figure 2 ‣ 1 Introduction ‣ Banking Done Right: Redefining Retail Banking with Language-Centric AI\")): users typically navigate through 5 to 8 screens, selecting accounts, entering recipient details, specifying amounts, reviewing summaries, and authenticating via token or push notification, a process that can take 30-45s. Despite its ubiquity, this flow offers only narrow conveniences (e.g., saved payees or frequent recipient lists), lacks predictive assistance, and does not support free-form natural language intent."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Such workflows create friction. Prior studies Krol et al. ([2015](https://ar5iv.labs.arxiv.org/html/2510.07645#bib.bib17)); Jin and Fan ([2022](https://ar5iv.labs.arxiv.org/html/2510.07645#bib.bib15)) show that repetitive flows, especially around authentication, are among the most common usability pain points in digital banking. Yet the prevailing industry view remains conservative: “don’t fix what isn’t broken.”"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "This paper presents an alternative as illustrated in Fig. [1](https://ar5iv.labs.arxiv.org/html/2510.07645#S1.F1 \"Figure 1 ‣ 1 Introduction ‣ Banking Done Right: Redefining Retail Banking with Language-Centric AI\"). It is an LLM-native system in which core functions, such as fund transfers, bill payments, compliance checks, and insight generation, are orchestrated by specialized LLM-powered agents under strict safety, compliance, and human oversight controls. We demonstrate that such agents can coordinate full-stack banking operations in production under regulatory approval, replacing multi-screen navigation with conversational interaction."
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "1.2 Our Approach",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "Ryt Bank, launched in Malaysia, is the world’s first licensed bank with an AI-native architecture. At its core is Ryt AI, an LLM-native agentic system (see Fig. [1](https://ar5iv.labs.arxiv.org/html/2510.07645#S1.F1 \"Figure 1 ‣ 1 Introduction ‣ Banking Done Right: Redefining Retail Banking with Language-Centric AI\")) that restructures digital banking workflows. Instead of multiple screens, users express their intention in natural language, and the system assembles, validates, and executes the operation upon the user’s confirmation."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Regulator-approved deployment. Ryt AI is the first global, regulator-approved, sovereign, in-house LLM serving as the primary interface of a licensed digital bank, enabling direct execution of core transactions (e.g., “Transfer RM10 to Mike”)."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Design implications. Deploying ILMU, our in-house LLM that powers Ryt AI, as the entry point introduces three implications: (a) Unified interface. Consolidates common financial inquiries and transactional functions into a single point of entry. (b) Conversational flows. Transforms sequential screen-based steps into dialogue-driven exchanges. (c) Localized adaptation. Tailors the system for multilingual use in Malaysia, aligned with linguistic and regulatory requirements."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Technical realization. To implement these design principles, Ryt AI employs a modular, multi-agent architecture in which specialized LLM-powered agents handle intent parsing, transaction assembly, compliance enforcement, and semantic validation. To meet auditability, compliance, and accuracy requirements, agents exchange structured messages, maintain shared context, and incorporate human-in-the-loop authorizations."
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "1.3 Contributions",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "Our contributions are threefold:"
+                },
+                {
+                  "type": "list",
+                  "text": "* • First AI deployed in core banking systems. We present Ryt AI, the first worldwide deployment of an LLM-based agentic system at Ryt Bank, the world’s first licensed AI-native bank, executing real fund transfers under regulatory approval. * • Interaction model. We introduce a language-centric framework where natural language replaces multi-screen workflows, making conversational interactions the primary interface for both common financial inquiries and transactional tasks. * • System architecture. We design a modular, multi-agent architecture that supports this interaction paradigm, where specialized LLM agents collaborate via structured messaging and a shared context space. The OCR component extends the system’s capability to process bill and receipt images, while guardrails and human oversight ensure regulatory compliance and full auditability."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "First AI deployed in core banking systems. We present Ryt AI, the first worldwide deployment of an LLM-based agentic system at Ryt Bank, the world’s first licensed AI-native bank, executing real fund transfers under regulatory approval."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Interaction model. We introduce a language-centric framework where natural language replaces multi-screen workflows, making conversational interactions the primary interface for both common financial inquiries and transactional tasks."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "System architecture. We design a modular, multi-agent architecture that supports this interaction paradigm, where specialized LLM agents collaborate via structured messaging and a shared context space. The OCR component extends the system’s capability to process bill and receipt images, while guardrails and human oversight ensure regulatory compliance and full auditability."
+                }
+              ],
+              "children": []
+            }
+          ]
+        },
+        {
+          "heading": "2 Related Works",
+          "level": 2,
+          "content": [],
+          "children": [
+            {
+              "heading": "LLMs in Finance.",
+              "level": 4,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "LLMs are increasingly being adopted in the financial industry Staegemann et al. ([2025](https://ar5iv.labs.arxiv.org/html/2510.07645#bib.bib31)); Saha et al. ([2025](https://ar5iv.labs.arxiv.org/html/2510.07645#bib.bib26)); Li et al. ([2024](https://ar5iv.labs.arxiv.org/html/2510.07645#bib.bib21)); Desai et al. ([2024](https://ar5iv.labs.arxiv.org/html/2510.07645#bib.bib3)), supporting diverse applications such as fraud detection Singh et al. ([2025](https://ar5iv.labs.arxiv.org/html/2510.07645#bib.bib29)); Korkanti ([2024](https://ar5iv.labs.arxiv.org/html/2510.07645#bib.bib16)), credit scoring Feng et al. ([2024](https://ar5iv.labs.arxiv.org/html/2510.07645#bib.bib7)); Zhao et al. ([2024](https://ar5iv.labs.arxiv.org/html/2510.07645#bib.bib40)), and financial trading Xiao et al. ([2025](https://ar5iv.labs.arxiv.org/html/2510.07645#bib.bib37)); Ding et al. ([2024](https://ar5iv.labs.arxiv.org/html/2510.07645#bib.bib4)). Much of the prior research focuses on applying LLMs to low-risk, customer-facing deployments, such as chatbots and virtual assistants Gopalakrishnan ([2024](https://ar5iv.labs.arxiv.org/html/2510.07645#bib.bib9)); Landolsi et al. ([2025](https://ar5iv.labs.arxiv.org/html/2510.07645#bib.bib19)); Kulkarni et al. ([2024](https://ar5iv.labs.arxiv.org/html/2510.07645#bib.bib18)), primarily aimed at automating support and improving user engagement. However, these implementations remain peripheral to the core of financial operations. Their adoption is hindered by persistent concerns about safety, reliability, explainability, and compliance with regulatory requirements Fan ([2024](https://ar5iv.labs.arxiv.org/html/2510.07645#bib.bib6)); Bhattacharyya et al. ([2025](https://ar5iv.labs.arxiv.org/html/2510.07645#bib.bib1)); Tavasoli et al. ([2025](https://ar5iv.labs.arxiv.org/html/2510.07645#bib.bib32)). Therefore, most existing deployments avoid integration with high-stakes, compliance-critical workflows such as funds transfer, bill payment, or risk analysis pipelines."
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "Multi-Agent Framework.",
+              "level": 4,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "Recent efforts have explored multi-agent frameworks Guo et al. ([2024](https://ar5iv.labs.arxiv.org/html/2510.07645#bib.bib10)); Han et al. ([2025](https://ar5iv.labs.arxiv.org/html/2510.07645#bib.bib11)); Hong et al. ([2024](https://ar5iv.labs.arxiv.org/html/2510.07645#bib.bib12)) to enhance LLM capabilities through role specialization, coordination, and task delegation. However, the adoption of these frameworks in financial industries remains limited. For example, Srivastava ([2025](https://ar5iv.labs.arxiv.org/html/2510.07645#bib.bib30)) introduces a multi-agent system for personalized financial planning and recommendations. Easin et al. ([2024](https://ar5iv.labs.arxiv.org/html/2510.07645#bib.bib5)) proposes a multi-agent assistant for digital banking, but it remains a prototype and lacks security mechanisms for real-world deployment. These limitations underscore a critical gap: the absence of *secure*, *compliant*, and *operationally robust* multi-agent frameworks capable of supporting real-world financial applications."
+                }
+              ],
+              "children": []
+            }
+          ]
+        },
+        {
+          "heading": "3 Agentic Framework Design",
+          "level": 2,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "Ryt AI is designed as a modular, LLM-based multi-agent system (see Fig. [3](https://ar5iv.labs.arxiv.org/html/2510.07645#S2.F3 \"Figure 3 ‣ Multi-Agent Framework. ‣ 2 Related Works ‣ Banking Done Right: Redefining Retail Banking with Language-Centric AI\")). The architecture comprises (i) Guardrails, (ii) Intent Classifier, and (iii) Action Agents that are detailed next."
+            }
+          ],
+          "children": [
+            {
+              "heading": "3.1 Guardrails",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "For any financial system, safeguarding sensitive data is crucial for reliability and compliance with regulatory standards. The Guardrails component serves as the first line of defense, intercepting inputs such as jailbreak attempts Yi et al. ([2024](https://ar5iv.labs.arxiv.org/html/2510.07645#bib.bib39)); Shen et al. ([2024](https://ar5iv.labs.arxiv.org/html/2510.07645#bib.bib28)), adversarial prompts Shayegani et al. ([2023](https://ar5iv.labs.arxiv.org/html/2510.07645#bib.bib27)); Chowdhury et al. ([2024](https://ar5iv.labs.arxiv.org/html/2510.07645#bib.bib2)), or unsupported requests deemed harmful or non-compliant. We employ ILMU, our in-house LLM, instruction-tuned on a broad corpus and further fine-tuned on guardrail-labeled data, to classify inputs into violation categories such as code interpreter abuse, harmful language, privacy breaches, and politically sensitive content. For non-text inputs, image-based content is screened by a visual moderation component that blocks inappropriate or non-compliant material (e.g., nudity, graphic imagery). This prevents unsafe inputs from propagating to downstream agents, thereby preserving system integrity and regulatory compliance (see Fig. [4(a)](https://ar5iv.labs.arxiv.org/html/2510.07645#S3.F4.sf1 \"In Figure 4 ‣ 3 Agentic Framework Design ‣ Banking Done Right: Redefining Retail Banking with Language-Centric AI\"))."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "To operationalize these defenses, the guardrails agent outputs a structured JSON response with fields such as isSafe, guardrailViolation, and message, allowing user-facing components to respond in a compliant manner (see Appendix [A.1](https://ar5iv.labs.arxiv.org/html/2510.07645#A1.SS1 \"A.1 Prompts ‣ Appendix A Appendix ‣ Banking Done Right: Redefining Retail Banking with Language-Centric AI\")). Unlike conventional rule-based systems, LLM-based guardrails leverage semantic reasoning and multi-turn context, enabling a more nuanced interpretation of user inputs that goes beyond rigid keyword or pattern matching. This approach enhances the accuracy of policy violation detection, reduces false positives, and maintains compliance more effectively in dynamic real-world interactions."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "To keep pace with evolving threats, guardrail policies are defined by internal governance and external mandates, and are updated as requirements change. The guardrails are modular, supporting updates at multiple levels. For instance, when a new jailbreak pattern is reported, it will be neutralized within hours through a prompt update (e.g., adding a blocklist phrase) and later consolidated into a LoRA-based adapter attached to ILMU for long-term robustness."
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "3.2 Intent Classifier",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "As user inputs are natively dynamic, classifying user intent is crucial for identifying the appropriate downstream operations to be executed. Inputs that pass the Guardrails are forwarded to the Intent Classifier, which acts as a high-level dispatcher. It infers user intent by leveraging the current message and, when available, prior conversation history, enabling deeper contextual understanding beyond isolated inputs, and then routes the message to the appropriate agents for downstream processing. The classifier covers a few intents across the core banking functions, e.g. Payment, Inquiry, and Faq."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Unlike traditional intent recognition systems that rely on surface-level keyword matching (e.g., detecting “pay” or “transfer” in any context and triggering a hard-coded response), our classifier uses semantic reasoning to map input to predefined ontological categories. For example, in Fig. [4(b)](https://ar5iv.labs.arxiv.org/html/2510.07645#S3.F4.sf2 \"In Figure 4 ‣ 3 Agentic Framework Design ‣ Banking Done Right: Redefining Retail Banking with Language-Centric AI\"), given an informal request such as “pay people I owe”, the Intent Classifier identifies the request as Payment and routes it to the Payment agent, which is responsible for fund transfer operations. The Payment agent then prompts the user for follow-up questions to gather necessary details before initiating the transaction under banking compliance rules."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "This context-aware design aligns with real-world usage patterns, which is particularly important in financial applications where queries are often vague, code-mixed, or grammatically inconsistent. To support this robustness, the classifier was fine-tuned on a corpus of approximately 10510^{5} anonymized, supervised instruction-style examples reflecting noisy linguistic patterns common in Malaysia’s banking conversations. The following examples are outlined below, which include typos, informal phrasing, and mixed language constructs, enabling the model to handle high linguistic variability in production deployments. Within Ryt AI, the Intent Classifier serves as a central dispatcher in the AI-native agentic framework, coordinating with specialized downstream agents (e.g., Payment, FAQ) to enable end-to-end banking operations."
+                },
+                {
+                  "type": "formula",
+                  "text": "10510^{5}"
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "3.3 Action Agents",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "Action agents denote a category of LLM-powered agents that execute specific financial operations, according to the services that a digital bank provides."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Payment Agent is responsible for executing user intents related to financial fund transfer. When a PAYMENT intent is detected by the Intent Classifier, it activates a modular transaction pipeline powered by ILMU that handles field extraction, validation, clarification, and secure backend execution. The process begins with structured field extraction. From natural language to multi-modal input, the payment agent extracts five core fields: (i) *recipient name*, (ii) *bank name*, (iii) *account number, phone number, personal identification number, or business IDs*, (iv) *amount*, and (v) *reference or purpose*. A schema validator checks these fields for syntactic and semantic consistency based on local banking rules (e.g., non-zero transfer amounts, valid bank name). If fields are missing or ambiguous, the agent generates follow-up prompts to request clarification within the same session."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "The Payment agent also supports image-based transactions (e.g., snapshot bills, invoices, and screenshots) by leveraging integrated OCR, which semantically extracts fields such as amount and account details from documents like bills, payment slips, or invoices, going beyond raw OCR. For example, a chat screenshot with some transaction details is sufficient to infer the full transaction and generate a structured preview (see Fig. [4(c)](https://ar5iv.labs.arxiv.org/html/2510.07645#S3.F4.sf3 \"In Figure 4 ‣ 3 Agentic Framework Design ‣ Banking Done Right: Redefining Retail Banking with Language-Centric AI\"))."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Once the data is validated, the transaction request is submitted to the backend gateway, where balance checks, transaction limits, and Anti-Money Laundering (AML) screening are applied. The final user confirmation is enforced through a dedicated review and approval step in operational safeguards. To ensure privacy and compliance, the Payment Agent adheres to a stateless, session-bound memory policy (see Sec. [4](https://ar5iv.labs.arxiv.org/html/2510.07645#S4 \"4 Operational Risk Mitigation ‣ Banking Done Right: Redefining Retail Banking with Language-Centric AI\") for details)."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "FAQ Agent leverages a Retrieval-Augmented Generation (RAG) pipeline Lewis et al. ([2021](https://ar5iv.labs.arxiv.org/html/2510.07645#bib.bib20)) to deliver accurate and contextual responses to user queries, even when input is vague or incomplete. Unlike rigid keyword matching systems, it performs multi-stage semantic reasoning over a curated vector-based knowledge repository."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "The pipeline begins with query reformulation, in which informal or ambiguous input is rewritten to include sufficient information and linked to the previous conversational history. As shown in Fig. [4(d)](https://ar5iv.labs.arxiv.org/html/2510.07645#S3.F4.sf4 \"In Figure 4 ‣ 3 Agentic Framework Design ‣ Banking Done Right: Redefining Retail Banking with Language-Centric AI\"), the user first asks about adding favorite transferees, followed by the question “How many can I save?”. To preserve contextual coherence, the LLM leverages the conversation history to reformulate this follow-up into a fully specified query: “How many favorite transferees can I save?” This reformulated query is then encoded into a dense vector using a pretrained embedding model, enabling semantic retrieval independent of exact phrasing. The resulting vector is used to perform a similarity search against a domain-specific vector store containing banking FAQs, feature descriptions, and user support guidance. Retrieved contexts are reranked using a scoring model that considers semantic similarity and contextual relevance. Finally, the most relevant contexts and user queries are passed to the LLM, which generates a factually grounded, context-aware response to answer the user’s query."
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "3.4 Implementation & Operational",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "Model. Ryt AI is powered by ILMU, a closed-source foundation model developed entirely in-house. For banking deployment, we trained a smaller, domain-specialized variant of ILMU (under 10B parameters) to meet compliance, efficiency, and latency requirements. This variant is an autoregressive, decoder-based model with an 8K token context window and equipped with rotary positional embeddings (RoPE). The decision to develop and specialize the LLM internally is not a design preference but a regulatory requirement. In financial services, regulatory frameworks require verifiable control over training data, inference processes, and update cadences to ensure compliance, auditability, and effective risk management. While in principle open-source models could be hosted on-premise, unresolved challenges such as opaque training data provenance, ambiguous legal responsibility, and vendor update cycles misaligned with jurisdictional compliance limit their suitability in banking contexts. By contrast, an internally developed ILMU variant ensures full governance, controlled fine-tuning, and traceable data lineage."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "LoRA Specialization. Each agent (i.e., Guardrails, Intent, Payment, FAQ) loads the same ILMU backbone plus a task-specific LoRA adapter and tailored instruction prompt. This modular design enables safety enforcement, intent classification, payment information extraction, and FAQ handling without requiring retraining of the entire model."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Runtime. Requests flow sequentially: Guardrails → Intent → Action → Confirmation, with a shared JSON context passed between agents to preserve consistency, enforce compliance, and maintain traceability across the pipeline."
+                }
+              ],
+              "children": []
+            }
+          ]
+        },
+        {
+          "heading": "4 Operational Risk Mitigation",
+          "level": 2,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "Operational risk is one of the most critical challenges in deploying AI within financial services Ogundimu ([2025](https://ar5iv.labs.arxiv.org/html/2510.07645#bib.bib23)); Moharrak and Mogaji ([2025](https://ar5iv.labs.arxiv.org/html/2510.07645#bib.bib22)), particularly when automated systems participate in high-stakes tasks such as payments, compliance interpretation, etc. With Ryt AI, we treat operational risk not as an afterthought but as a core design principle. Every layer of the system, from semantic parsing to execution, is architected to support traceability, auditability, and human oversight. These safeguards are not merely regulatory checkboxes; they are foundational for building AI systems that are trusted, deployable, and accountable in production banking environments."
+            }
+          ],
+          "children": [
+            {
+              "heading": "Human-in-the-Loop.",
+              "level": 4,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "Under Malaysian financial regulations, all fund transfers require explicit user action. For Person-to-Person (P2P) transfers, two-factor authentication (2FA) (e.g., biometric, password) is required when the transaction or cumulative daily amount exceeds RM250; below this threshold, a single confirmation is sufficient. For Person-to-Merchant (P2M) payments, 2FA is required only when the transaction amount exceeds RM250; otherwise, a single confirmation is accepted. These thresholds are regulatory requirements, not design choices."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "To comply with these rules, Ryt AI enforces a human-in-the-loop safeguard for critical flows such as fund transfers and payment approvals. That is, once user input is parsed into structured operational data, the system generates a transaction summary. Before execution, the user must explicitly choose to Approve, Decline, or Edit the request (see Fig. [4(c)](https://ar5iv.labs.arxiv.org/html/2510.07645#S3.F4.sf3 \"In Figure 4 ‣ 3 Agentic Framework Design ‣ Banking Done Right: Redefining Retail Banking with Language-Centric AI\"), bottom). This mechanism ensures that users retain full control over financial decisions, while the ordered pipeline described in Sec. [3](https://ar5iv.labs.arxiv.org/html/2510.07645#S3 \"3 Agentic Framework Design ‣ Banking Done Right: Redefining Retail Banking with Language-Centric AI\") provides traceability and a verifiable audit trail."
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "Stateless Memory Architecture.",
+              "level": 4,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "Complementing this control framework is a stateless, session-bound memory design that ensures that sensitive user data is never persistently stored. Once a session concludes, all contextual information, e.g., user prompts, model inferences, extracted fields, and decisions, is discarded. This not only minimizes the attack surface for potential breaches but also aligns with data minimization principles embedded in the National Bank Responsible AI guidelines and other global regulatory frameworks."
+                }
+              ],
+              "children": []
+            }
+          ]
+        },
+        {
+          "heading": "5 Experiments",
+          "level": 2,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "Dataset. To evaluate the performance of the Ryt AI framework in realistic banking scenarios, we construct a comprehensive test suite comprising 2,000 conversational cases, including single-turn and multi-turn dialogues. Multi-turn cases simulate naturalistic digital banking interactions by incorporating up to 10 preceding turns of dialogue context. The dataset is created through a hybrid workflow in which initial test cases are synthesized using LLM, followed by manual review and refinement by domain experts to ensure contextual validity, factual correctness, and regulatory compliance. Examples of the dataset can be found in Appx. [A.2](https://ar5iv.labs.arxiv.org/html/2510.07645#A1.SS2 \"A.2 Evaluation Dataset ‣ Appendix A Appendix ‣ Banking Done Right: Redefining Retail Banking with Language-Centric AI\")."
+            },
+            {
+              "type": "paragraph",
+              "text": "Models. We compare the performance of five LLMs, including the GPT family of models OpenAI et al. ([2024](https://ar5iv.labs.arxiv.org/html/2510.07645#bib.bib24)), specifically GPT-4o and GPT-4o mini, the Gemini family Team et al. ([2025](https://ar5iv.labs.arxiv.org/html/2510.07645#bib.bib33)), which are Gemini 2.0 Flash and Gemini 2.0 Flash-Lite, and our in-house LLM - ILMU."
+            },
+            {
+              "type": "paragraph",
+              "text": "Metrics. We evaluate performance in five key dimensions, capturing technical quality and operational feasibility in a production banking environment. (i) Accuracy: The proportion of test cases in which the system correctly identifies the user’s intent and generates a relevant and accurate response for each agent’s scope. Example test cases for single and multi-turn conversations are depicted in Appendix [A.2](https://ar5iv.labs.arxiv.org/html/2510.07645#A1.SS2 \"A.2 Evaluation Dataset ‣ Appendix A Appendix ‣ Banking Done Right: Redefining Retail Banking with Language-Centric AI\"). (ii) Speed: The responsiveness of the system, measured as the inverse of the average end-to-end latency per interaction. Lower latency corresponds to higher speed scores. (iii) Cost Effectiveness: The estimated average compute cost per interaction, calculated based on token usage and model pricing (for public LLM). Internal inference cost estimates are used for ILMU. (iv) Risk Tolerance: The safety, compliance, and alignment of the model with local rules and regulations, rated by risk and compliance experts. (v) Language Proficiency: Human-rated evaluation of response fluency, coherence, and multilingual capabilities."
+            }
+          ],
+          "children": [
+            {
+              "heading": "5.1 Results and Discussion",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "As shown in Fig. [5](https://ar5iv.labs.arxiv.org/html/2510.07645#S5.F5 \"Figure 5 ‣ 5.1 Results and Discussion ‣ 5 Experiments ‣ Banking Done Right: Redefining Retail Banking with Language-Centric AI\"), Ryt AI stands out not merely as a high-performing model, but as a production-proven foundation for conversational banking at scale. Already serving more than 50K users and processing approximately 80K transactions monthly, it powers real-world interactions that demand fluency, accuracy, and trust. Its language proficiency enables it to grasp user intent with clarity, even with multilingual, informal, or culturally nuanced inputs, which is critical for the reliable execution of everyday banking tasks."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "The Risk Tolerance metric in Fig. [5](https://ar5iv.labs.arxiv.org/html/2510.07645#S5.F5 \"Figure 5 ‣ 5.1 Results and Discussion ‣ 5 Experiments ‣ Banking Done Right: Redefining Retail Banking with Language-Centric AI\"), as evaluated by compliance experts, covers both guardrail effectiveness and hallucination mitigation. In production logs, hallucinations were observed in fewer than 1.5% of cases, occurring mainly in the FAQ agent, where insufficient context occasionally led to incorrect answers. In transactional flows, such cases are rare and do not affect execution due to three safeguards: (i) strict schema validation, (ii) LLM-based guardrails, and (iii) a mandatory human-in-the-loop confirmation step. From the bank’s perspective, explicit thresholds are enforced: ≤\\leq0.5% tolerance for hallucinations in high-stakes flows (e.g., fund transfers, bill payments) and ≤\\leq2% tolerance for benign hallucinations in non-transactional contexts such as FAQs. Adversarial robustness is also assessed, including jailbreak attempts and prompt-reveal probes."
+                },
+                {
+                  "type": "formula",
+                  "text": "≤\\leq"
+                },
+                {
+                  "type": "formula",
+                  "text": "≤\\leq"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Beyond accuracy and safety, Ryt AI demonstrates efficiency and practicality. Its strong performance in speed and cost-effectiveness ensures low latency and sustainable infrastructure usage, which are essential for large-scale deployments across payments, transfers, and inquiries. Together, these qualities represent not only technical performance but also compliance-grade reliability, establishing Ryt AI as a deployed system that redefines the user experience in banking."
+                }
+              ],
+              "children": []
+            }
+          ]
+        },
+        {
+          "heading": "6 Conclusion",
+          "level": 2,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "Ryt AI redefines how users engage with financial systems, turning complexity into clarity through intent-aware, AI-powered experiences. As the first of its kind in finance, it combines modular agents with enterprise-grade safeguards to deliver natural, compliant, and controllable automation. Built with a deep understanding of institutional risk and user experience, Ryt AI strikes a balance between speed, safety, and transparency through traceable workflows and human-in-the-loop design."
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "Limitations",
+          "level": 2,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "In-House Model Development. The requirement to build ILMU, our in-house closed-source LLM, from scratch is a regulatory requirement, not a design preference. In financial services, regulatory compliance requires full control over training data provenance, update cadence, and auditability. These guarantees cannot be met by deploying open-source LLMs on-premise (e.g., DeepSeek), where data lineage and vendor update cycles remain opaque. While this approach ensures verifiable governance, it also demands significant infrastructure investment and reduces portability compared to adapting existing open-source models."
+            },
+            {
+              "type": "paragraph",
+              "text": "Regional and Linguistic Biases. Although Ryt AI performs well on multilingual prompts, its training and fine-tuning have been primarily oriented toward Bahasa Melayu, English, Chinese, and the regulatory framework of Bank Negara Malaysia (BNM)222BNM is the Central Bank of Malaysia. As such, its robustness in other jurisdictions, particularly under different legal or cultural requirements, may be limited without further localization."
+            },
+            {
+              "type": "paragraph",
+              "text": "Model Update Cadence. In regulated industries, timely updates are essential to reflect policy changes, fraud patterns, or financial product variations. However, large-scale model fine-tuning and re-deployment remain resource-intensive. Balancing update frequency with system stability is an ongoing operational concern."
+            },
+            {
+              "type": "paragraph",
+              "text": "Trust and Adoption. While the conversational interface has proven effective among early adopters, some user segments may still prefer traditional form-based interactions. Managing trust, onboarding, and accessibility, especially for less tech-savvy users, remains a sociotechnical challenge."
+            },
+            {
+              "type": "paragraph",
+              "text": "We view these limitations not as blockers, but as opportunities for iterative improvement toward a safer, more inclusive, and globally deployable financial AI system."
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "References",
+          "level": 2,
+          "content": [
+            {
+              "type": "list",
+              "text": "* Bhattacharyya et al. (2025) Anwesha Bhattacharyya, Ye Yu, Hanyu Yang, Rahul Singh, Tarun Joshi, Jie Chen, and Kiran Yalavarthy. 2025. [Model risk management for generative ai in financial institutions](https://arxiv.org/abs/2503.15668). *Preprint*, arXiv:2503.15668. * Chowdhury et al. (2024) Arijit Ghosh Chowdhury, Md Mofijul Islam, Vaibhav Kumar, Faysal Hossain Shezan, Vaibhav Kumar, Vinija Jain, and Aman Chadha. 2024. [Breaking down the defenses: A comparative survey of attacks on large language models](https://arxiv.org/abs/2403.04786). *Preprint*, arXiv:2403.04786. * Desai et al. (2024) Akshar Prabhu Desai, Tejasvi Ravi, Mohammad Luqman, Ganesh Mallya, Nithya Kota, and Pranjul Yadav. 2024. [Opportunities and challenges of generative-ai in finance](https://doi.org/10.1109/bigdata62323.2024.10825658). In *2024 IEEE International Conference on Big Data (BigData)*, page 4913–4920. IEEE. * Ding et al. (2024) Han Ding, Yinheng Li, Junhao Wang, and Hang Chen. 2024. [Large language model agent in financial trading: A survey](https://arxiv.org/abs/2408.06361). *Preprint*, arXiv:2408.06361. * Easin et al. (2024) Arafat Md Easin, Saha Sourav, and Orosz Tamás. 2024. [An intelligent llm-powered personalized assistant for digital banking using langgraph and chain of thoughts](https://doi.org/10.1109/SISY62279.2024.10737601). In *2024 IEEE 22nd Jubilee International Symposium on Intelligent Systems and Informatics (SISY)*, pages 625–630. * Fan (2024) Minghong Fan. 2024. [Llms in banking: Applications, challenges, and approaches](https://doi.org/10.1145/3700058.3700107). In *Proceedings of the International Conference on Digital Economy, Blockchain and Artificial Intelligence*, DEBAI ’24, page 314–321, New York, NY, USA. Association for Computing Machinery. * Feng et al. (2024) Duanyu Feng, Yongfu Dai, Jimin Huang, Yifang Zhang, Qianqian Xie, Weiguang Han, Zhengyu Chen, Alejandro Lopez-Lira, and Hao Wang. 2024. [Empowering many, biasing a few: Generalist credit scoring through large language models](https://arxiv.org/abs/2310.00566). *Preprint*, arXiv:2310.00566. * Gallegos et al. (2024) Isabel O. Gallegos, Ryan A. Rossi, Joe Barrow, Md Mehrab Tanjim, Sungchul Kim, Franck Dernoncourt, Tong Yu, Ruiyi Zhang, and Nesreen K. Ahmed. 2024. [Bias and fairness in large language models: A survey](https://arxiv.org/abs/2309.00770). *Preprint*, arXiv:2309.00770. * Gopalakrishnan (2024) Karthika Gopalakrishnan. 2024. [Leveraging generative ai chatbots in the banking industry: A comprehensive analysis](https://lib-index.com/index.php/IJAIML/article/view/IJAIML_03_01_012). *International Journal of Artificial Intelligence & Machine Learning (IJAIML)*, 3(01):124–131. * Guo et al. (2024) Taicheng Guo, Xiuying Chen, Yaqi Wang, Ruidi Chang, Shichao Pei, Nitesh V. Chawla, Olaf Wiest, and Xiangliang Zhang. 2024. [Large language model based multi-agents: A survey of progress and challenges](https://arxiv.org/abs/2402.01680). *Preprint*, arXiv:2402.01680. * Han et al. (2025) Shanshan Han, Qifan Zhang, Yuhang Yao, Weizhao Jin, and Zhaozhuo Xu. 2025. [Llm multi-agent systems: Challenges and open problems](https://arxiv.org/abs/2402.03578). *Preprint*, arXiv:2402.03578. * Hong et al. (2024) Sirui Hong, Mingchen Zhuge, Jiaqi Chen, Xiawu Zheng, Yuheng Cheng, Ceyao Zhang, Jinlin Wang, Zili Wang, Steven Ka Shing Yau, Zijuan Lin, Liyang Zhou, Chenyu Ran, Lingfeng Xiao, Chenglin Wu, and Jürgen Schmidhuber. 2024. [Metagpt: Meta programming for a multi-agent collaborative framework](https://arxiv.org/abs/2308.00352). *Preprint*, arXiv:2308.00352. * Huang et al. (2025) Lei Huang, Weijiang Yu, Weitao Ma, Weihong Zhong, Zhangyin Feng, Haotian Wang, Qianglong Chen, Weihua Peng, Xiaocheng Feng, Bing Qin, and Ting Liu. 2025. [A survey on hallucination in large language models: Principles, taxonomy, challenges, and open questions](https://doi.org/10.1145/3703155). *ACM Transactions on Information Systems*, 43(2):1–55. * Huang et al. (2024) Xu Huang, Weiwen Liu, Xiaolong Chen, Xingmei Wang, Hao Wang, Defu Lian, Yasheng Wang, Ruiming Tang, and Enhong Chen. 2024. [Understanding the planning of llm agents: A survey](https://arxiv.org/abs/2402.02716). *Preprint*, arXiv:2402.02716. * Jin and Fan (2022) Xiaofu Jin and Mingming Fan. 2022. [“i used to carry a wallet, now i just need to carry my phone”: Understanding current banking practices and challenges among older adults in china](https://doi.org/10.1145/3517428.3544820). In *Proceedings of the 24th International ACM SIGACCESS Conference on Computers and Accessibility*, ASSETS ’22, page 1–16. ACM. * Korkanti (2024) Sukanth Korkanti. 2024. [Enhancing financial fraud detection using llms and advanced data analytics](https://doi.org/10.1109/ICSSAS64001.2024.10760895). In *2024 2nd International Conference on Self Sustainable Artificial Intelligence Systems (ICSSAS)*, pages 1328–1334. * Krol et al. (2015) Kat Krol, Eleni Philippou, Emiliano De Cristofaro, and M. Angela Sasse. 2015. [\"‘they brought in the horrible key ring thing!\" analysing the usability of two-factor authentication in uk online banking](https://arxiv.org/abs/1501.04434). *Preprint*, arXiv:1501.04434. * Kulkarni et al. (2024) Radhika V Kulkarni, Ameya Paldewar, Sanket Paliwal, Amol Palwe, and Soham Panchal. 2024. [Bankbot: Streamlined banking support through centralized faqs](https://doi.org/10.1109/ICPIDS65698.2024.00030). In *2024 International Conference on Progressive Innovations in Intelligent Systems and Data Science (ICPIDS)*, pages 138–143. IEEE. * Landolsi et al. (2025) Hamza Landolsi, Kais Letaief, Nizar Taghouti, and Ines Abdeljaoued-Tej. 2025. [Caprag: A large language model solution for customer service and automatic reporting using vector and graph retrieval-augmented generation](https://arxiv.org/abs/2501.13993). *Preprint*, arXiv:2501.13993. * Lewis et al. (2021) Patrick Lewis, Ethan Perez, Aleksandra Piktus, Fabio Petroni, Vladimir Karpukhin, Naman Goyal, Heinrich Küttler, Mike Lewis, Wen tau Yih, Tim Rocktäschel, Sebastian Riedel, and Douwe Kiela. 2021. [Retrieval-augmented generation for knowledge-intensive nlp tasks](https://arxiv.org/abs/2005.11401). *Preprint*, arXiv:2005.11401. * Li et al. (2024) Yinheng Li, Shaofei Wang, Han Ding, and Hang Chen. 2024. [Large language models in finance: A survey](https://arxiv.org/abs/2311.10723). *Preprint*, arXiv:2311.10723. * Moharrak and Mogaji (2025) Moayad Moharrak and Emmanuel Mogaji. 2025. [Generative ai in banking: empirical insights on integration, challenges and opportunities in a regulated industry](https://doi.org/10.1108/IJBM-08-2024-0490). *International Journal of Bank Marketing*, 43(4):871–896. * Ogundimu (2025) Olukunle Ogundimu. 2025. [Artificial intelligence in financial and operational risk management: A critical analysis](https://doi.org/10.47760/cognizance.2025.v05i03.035). *Cognizance Journal of Multidisciplinary Studies*, 5:484–506. * OpenAI et al. (2024) OpenAI, Josh Achiam, Steven Adler, Sandhini Agarwal, Lama Ahmad, Ilge Akkaya, Florencia Leoni Aleman, Diogo Almeida, Janko Altenschmidt, Sam Altman, Shyamal Anadkat, Red Avila, Igor Babuschkin, Suchir Balaji, Valerie Balcom, Paul Baltescu, Haiming Bao, Mohammad Bavarian, Jeff Belgum, and 262 others. 2024. [Gpt-4 technical report](https://arxiv.org/abs/2303.08774). *Preprint*, arXiv:2303.08774. * Palen-Michel et al. (2024) Chester Palen-Michel, Ruixiang Wang, Yipeng Zhang, David Yu, Canran Xu, and Zhe Wu. 2024. [Investigating llm applications in e-commerce](https://arxiv.org/abs/2408.12779). *Preprint*, arXiv:2408.12779. * Saha et al. (2025) Bikash Saha, Nanda Rani, and Sandeep Kumar Shukla. 2025. [Generative ai in financial institution: A global survey of opportunities, threats, and regulation](https://arxiv.org/abs/2504.21574). *Preprint*, arXiv:2504.21574. * Shayegani et al. (2023) Erfan Shayegani, Md Abdullah Al Mamun, Yu Fu, Pedram Zaree, Yue Dong, and Nael Abu-Ghazaleh. 2023. [Survey of vulnerabilities in large language models revealed by adversarial attacks](https://arxiv.org/abs/2310.10844). *Preprint*, arXiv:2310.10844. * Shen et al. (2024) Xinyue Shen, Zeyuan Chen, Michael Backes, Yun Shen, and Yang Zhang. 2024. [\"do anything now\": Characterizing and evaluating in-the-wild jailbreak prompts on large language models](https://arxiv.org/abs/2308.03825). *Preprint*, arXiv:2308.03825. * Singh et al. (2025) Gurjot Singh, Prabhjot Singh, and Maninder Singh. 2025. [Advanced real-time fraud detection using rag-based llms](https://arxiv.org/abs/2501.15290). *Preprint*, arXiv:2501.15290. * Srivastava (2025) Varad Srivastava. 2025. [Eagle: A multi-agent generative ai system for personalized banking recommendation and risk-aware financial planning](https://doi.org/10.31219/osf.io/dwspv_v1). * Staegemann et al. (2025) Daniel Staegemann, Christian Haertel, Christian Daase, Matthias Pohl, Mohammad Abdallah, and Klaus Turowski. 2025. [A review on large language models and generative ai in banking](https://doi.org/10.5220/0013472600003956). * Tavasoli et al. (2025) Ahmadreza Tavasoli, Maedeh Sharbaf, and Seyed Mohamad Madani. 2025. [Responsible innovation: A strategic framework for financial llm integration](https://arxiv.org/abs/2504.02165). *Preprint*, arXiv:2504.02165. * Team et al. (2025) Gemini Team, Rohan Anil, Sebastian Borgeaud, Jean-Baptiste Alayrac, Jiahui Yu, Radu Soricut, Johan Schalkwyk, Andrew M. Dai, Anja Hauth, Katie Millican, David Silver, Melvin Johnson, Ioannis Antonoglou, Julian Schrittwieser, Amelia Glaese, Jilin Chen, Emily Pitler, Timothy Lillicrap, Angeliki Lazaridou, and 1332 others. 2025. [Gemini: A family of highly capable multimodal models](https://arxiv.org/abs/2312.11805). *Preprint*, arXiv:2312.11805. * Thirunavukarasu et al. (2023) Arun James Thirunavukarasu, Darren Shu Jeng Ting, Kabilan Elangovan, Laura Gutierrez, Ting Fang Tan, and Daniel Shu Wei Ting. 2023. [Large language models in medicine](https://doi.org/10.1038/s41591-023-02448-8). *Nature medicine*, 29(8):1930–1940. * Wang et al. (2024) Lei Wang, Chen Ma, Xueyang Feng, Zeyu Zhang, Hao Yang, Jingsen Zhang, Zhiyuan Chen, Jiakai Tang, Xu Chen, Yankai Lin, Wayne Xin Zhao, Zhewei Wei, and Jirong Wen. 2024. [A survey on large language model based autonomous agents](https://doi.org/10.1007/s11704-024-40231-1). *Frontiers of Computer Science*, 18(6). * Xi et al. (2023) Zhiheng Xi, Wenxiang Chen, Xin Guo, Wei He, Yiwen Ding, Boyang Hong, Ming Zhang, Junzhe Wang, Senjie Jin, Enyu Zhou, Rui Zheng, Xiaoran Fan, Xiao Wang, Limao Xiong, Yuhao Zhou, Weiran Wang, Changhao Jiang, Yicheng Zou, Xiangyang Liu, and 10 others. 2023. [The rise and potential of large language model based agents: A survey](https://arxiv.org/abs/2309.07864). *Preprint*, arXiv:2309.07864. * Xiao et al. (2025) Yijia Xiao, Edward Sun, Di Luo, and Wei Wang. 2025. [Tradingagents: Multi-agents llm financial trading framework](https://arxiv.org/abs/2412.20138). *Preprint*, arXiv:2412.20138. * Xu et al. (2025) Ziwei Xu, Sanjay Jain, and Mohan Kankanhalli. 2025. [Hallucination is inevitable: An innate limitation of large language models](https://arxiv.org/abs/2401.11817). *Preprint*, arXiv:2401.11817. * Yi et al. (2024) Sibo Yi, Yule Liu, Zhen Sun, Tianshuo Cong, Xinlei He, Jiaxing Song, Ke Xu, and Qi Li. 2024. [Jailbreak attacks and defenses against large language models: A survey](https://arxiv.org/abs/2407.04295). *Preprint*, arXiv:2407.04295. * Zhao et al. (2024) Huaqin Zhao, Zhengliang Liu, Zihao Wu, Yiwei Li, Tianze Yang, Peng Shu, Shaochen Xu, Haixing Dai, Lin Zhao, Hanqi Jiang, Yi Pan, Junhao Chen, Yifan Zhou, Gengchen Mai, Ninghao Liu, and Tianming Liu. 2024. [Revolutionizing finance with llms: An overview of applications and insights](https://arxiv.org/abs/2401.11641). *Preprint*, arXiv:2401.11641. * Zhou et al. (2025) Hao Zhou, Chengming Hu, Ye Yuan, Yufei Cui, Yili Jin, Can Chen, Haolun Wu, Dun Yuan, Li Jiang, Di Wu, Xue Liu, Jianzhong Zhang, Xianbin Wang, and Jiangchuan Liu. 2025. [Large language model (llm) for telecommunications: A comprehensive survey on principles, key techniques, and opportunities](https://doi.org/10.1109/COMST.2024.3465447). *IEEE Communications Surveys & Tutorials*, 27(3):1955–2005."
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "Appendix A Appendix",
+          "level": 2,
+          "content": [],
+          "children": [
+            {
+              "heading": "A.1 Prompts",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "We present the prompt templates used for each core component, including Guardrails (Table [1](https://ar5iv.labs.arxiv.org/html/2510.07645#A1.T1 \"Table 1 ‣ A.1 Prompts ‣ Appendix A Appendix ‣ Banking Done Right: Redefining Retail Banking with Language-Centric AI\")), Intent Classifier (Table [2](https://ar5iv.labs.arxiv.org/html/2510.07645#A1.T2 \"Table 2 ‣ A.1 Prompts ‣ Appendix A Appendix ‣ Banking Done Right: Redefining Retail Banking with Language-Centric AI\")), Payment Agent (Table [3](https://ar5iv.labs.arxiv.org/html/2510.07645#A1.T3 \"Table 3 ‣ A.1 Prompts ‣ Appendix A Appendix ‣ Banking Done Right: Redefining Retail Banking with Language-Centric AI\")), and FAQ Agent (Table [4](https://ar5iv.labs.arxiv.org/html/2510.07645#A1.T4 \"Table 4 ‣ A.1 Prompts ‣ Appendix A Appendix ‣ Banking Done Right: Redefining Retail Banking with Language-Centric AI\"))."
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "A.2 Evaluation Dataset",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "We present examples of conversational cases used to evaluate the performance of the Ryt AI framework in banking scenarios, including single-turn and multi-turn dialogues. Sample Single-Turn Test Case:"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Sample Multi-Turn Test Case:"
+                }
+              ],
+              "children": []
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "chunks": [
+    {
+      "heading_path": [
+        "Banking Done Right: Redefining Retail Banking with Language-Centric AI"
+      ],
+      "text": "# Banking Done Right: Redefining Retail Banking with Language-Centric AI"
+    },
+    {
+      "heading_path": [
+        "Banking Done Right: Redefining Retail Banking with Language-Centric AI",
+        "Abstract"
+      ],
+      "text": "###### Abstract\n\nThis paper presents Ryt AI, an LLM-native agentic framework that powers Ryt Bank111Ryt Bank is the world’s first AI-powered bank, fully licensed by Bank Negara Malaysia (the Central Bank of Malaysia) and the Ministry of Finance, Malaysia. Visit <https://www.rytbank.my/> for more details. to enable customers to execute core financial transactions through natural language conversation. This represents the first global regulator-approved deployment worldwide where conversational AI functions as the primary banking interface, in contrast to prior assistants that have been limited to advisory or support roles. Built entirely in-house, Ryt AI is powered by ILMU, a closed-source LLM developed internally, and replaces rigid multi-screen workflows with a single dialogue orchestrated by four LLM-powered agents (Guardrails, Intent, Payment, and FAQ). Each agent attaches a task-specific LoRA adapter to ILMU, which is hosted within the bank’s infrastructure to ensure consistent behavior with minimal overhead. Deterministic guardrails, human-in-the-loop confirmation, and a stateless audit architecture provide defense-in-depth for security and compliance. The result is Banking Done Right: demonstrating that regulator-approved natural-language interfaces can reliably support core financial operations under strict governance.\n\nBanking Done Right: Redefining Retail Banking with Language-Centric AI\n\nXin Jie Chua1, Jeraelyn Ming Li Tan2, Jia Xuan Tan2, Soon Chang Poh1,2, Yi Xian Goh1, Debbie Hui Tian Choong1, Chee Mun Foong2,3, Sze Jue Yang1,2, Chee Seng Chan1† 1Universiti Malaya, 2YTL AI Labs, 3Ryt Bank †Correspondence: [cs.chan@um.edu.my](mailto:cs.chan@um.edu.my)"
+    },
+    {
+      "heading_path": [
+        "Banking Done Right: Redefining Retail Banking with Language-Centric AI",
+        "1 Introduction"
+      ],
+      "text": "## 1 Introduction\n\nNatural Language Processing (NLP) has progressed rapidly, driven by the emergence of Large Language Models (LLMs) such as ChatGPT OpenAI et al. ([2024](https://ar5iv.labs.arxiv.org/html/2510.07645#bib.bib24)). These models are now being deployed across sectors, including healthcare Thirunavukarasu et al. ([2023](https://ar5iv.labs.arxiv.org/html/2510.07645#bib.bib34)), telecommunications Zhou et al. ([2025](https://ar5iv.labs.arxiv.org/html/2510.07645#bib.bib41)), and e-commerce Palen-Michel et al. ([2024](https://ar5iv.labs.arxiv.org/html/2510.07645#bib.bib25)), where they automate complex tasks with minimal human intervention.\n\nBeyond simple text generation, LLMs have evolved into interactive systems capable of memorizing, using tools, and reasoning, enabling a new generation of autonomous applications commonly referred to as “agents”. These agents redefine enterprise workflows by taking over functions traditionally dependent on human coordination and logic.\n\nWhile early agent-based frameworks have shown promise in research prototypes Wang et al. ([2024](https://ar5iv.labs.arxiv.org/html/2510.07645#bib.bib35)); Xi et al. ([2023](https://ar5iv.labs.arxiv.org/html/2510.07645#bib.bib36)); Huang et al. ([2024](https://ar5iv.labs.arxiv.org/html/2510.07645#bib.bib14)), their translation into industry-grade deployments remains limited. Adoption is hindered by challenges such as system complexity, limited generalizability, and the absence of robust real-world evaluations, particularly in high-risk domains. The financial sector embodies this paradox. Despite a strong appetite for innovation through LLMs for customer support, analytics, and personalization, banks have hesitated to integrate them into mission-critical workflows. This reluctance stems from concerns about hallucination Huang et al. ([2025](https://ar5iv.labs.arxiv.org/html/2510.07645#bib.bib13)); Xu et al. ([2025](https://ar5iv.labs.arxiv.org/html/2510.07645#bib.bib38)), bias Gallegos et al. ([2024](https://ar5iv.labs.arxiv.org/html/2510.07645#bib.bib8)), and the need to maintain strict regulatory and security standards.\n\nAs a result, most financial institutions confine LLM usage to peripheral and low-stakes tasks. For example, Erica (Bank of America), Eno (Capital One) operate as supplementary assistants on legacy systems, mainly handling support, information retrieval, or simple inquiry tasks (e.g., checking balances, answering FAQs). They do not initiate or execute critical operations such as payment instructions or funds transfers. This cautious positioning, while understandable in finance, has contributed to stagnation in core banking innovation."
+    },
+    {
+      "heading_path": [
+        "Banking Done Right: Redefining Retail Banking with Language-Centric AI",
+        "1 Introduction",
+        "1.1 Motivation and Problem Statement"
+      ],
+      "text": "### 1.1 Motivation and Problem Statement\n\nThis gap is most visible in digital banking workflows, which remain tied to legacy, multi-step designs with limited intelligence. Funds transfer illustrates this clearly (see Fig. [2](https://ar5iv.labs.arxiv.org/html/2510.07645#S1.F2 \"Figure 2 ‣ 1 Introduction ‣ Banking Done Right: Redefining Retail Banking with Language-Centric AI\")): users typically navigate through 5 to 8 screens, selecting accounts, entering recipient details, specifying amounts, reviewing summaries, and authenticating via token or push notification, a process that can take 30-45s. Despite its ubiquity, this flow offers only narrow conveniences (e.g., saved payees or frequent recipient lists), lacks predictive assistance, and does not support free-form natural language intent.\n\nSuch workflows create friction. Prior studies Krol et al. ([2015](https://ar5iv.labs.arxiv.org/html/2510.07645#bib.bib17)); Jin and Fan ([2022](https://ar5iv.labs.arxiv.org/html/2510.07645#bib.bib15)) show that repetitive flows, especially around authentication, are among the most common usability pain points in digital banking. Yet the prevailing industry view remains conservative: “don’t fix what isn’t broken.”\n\nThis paper presents an alternative as illustrated in Fig. [1](https://ar5iv.labs.arxiv.org/html/2510.07645#S1.F1 \"Figure 1 ‣ 1 Introduction ‣ Banking Done Right: Redefining Retail Banking with Language-Centric AI\"). It is an LLM-native system in which core functions, such as fund transfers, bill payments, compliance checks, and insight generation, are orchestrated by specialized LLM-powered agents under strict safety, compliance, and human oversight controls. We demonstrate that such agents can coordinate full-stack banking operations in production under regulatory approval, replacing multi-screen navigation with conversational interaction."
+    },
+    {
+      "heading_path": [
+        "Banking Done Right: Redefining Retail Banking with Language-Centric AI",
+        "1 Introduction",
+        "1.2 Our Approach"
+      ],
+      "text": "### 1.2 Our Approach\n\nRyt Bank, launched in Malaysia, is the world’s first licensed bank with an AI-native architecture. At its core is Ryt AI, an LLM-native agentic system (see Fig. [1](https://ar5iv.labs.arxiv.org/html/2510.07645#S1.F1 \"Figure 1 ‣ 1 Introduction ‣ Banking Done Right: Redefining Retail Banking with Language-Centric AI\")) that restructures digital banking workflows. Instead of multiple screens, users express their intention in natural language, and the system assembles, validates, and executes the operation upon the user’s confirmation.\n\nRegulator-approved deployment. Ryt AI is the first global, regulator-approved, sovereign, in-house LLM serving as the primary interface of a licensed digital bank, enabling direct execution of core transactions (e.g., “Transfer RM10 to Mike”).\n\nDesign implications. Deploying ILMU, our in-house LLM that powers Ryt AI, as the entry point introduces three implications: (a) Unified interface. Consolidates common financial inquiries and transactional functions into a single point of entry. (b) Conversational flows. Transforms sequential screen-based steps into dialogue-driven exchanges. (c) Localized adaptation. Tailors the system for multilingual use in Malaysia, aligned with linguistic and regulatory requirements.\n\nTechnical realization. To implement these design principles, Ryt AI employs a modular, multi-agent architecture in which specialized LLM-powered agents handle intent parsing, transaction assembly, compliance enforcement, and semantic validation. To meet auditability, compliance, and accuracy requirements, agents exchange structured messages, maintain shared context, and incorporate human-in-the-loop authorizations."
+    },
+    {
+      "heading_path": [
+        "Banking Done Right: Redefining Retail Banking with Language-Centric AI",
+        "1 Introduction",
+        "1.3 Contributions"
+      ],
+      "text": "### 1.3 Contributions\n\nOur contributions are threefold:\n\n* • First AI deployed in core banking systems. We present Ryt AI, the first worldwide deployment of an LLM-based agentic system at Ryt Bank, the world’s first licensed AI-native bank, executing real fund transfers under regulatory approval. * • Interaction model. We introduce a language-centric framework where natural language replaces multi-screen workflows, making conversational interactions the primary interface for both common financial inquiries and transactional tasks. * • System architecture. We design a modular, multi-agent architecture that supports this interaction paradigm, where specialized LLM agents collaborate via structured messaging and a shared context space. The OCR component extends the system’s capability to process bill and receipt images, while guardrails and human oversight ensure regulatory compliance and full auditability.\n\nFirst AI deployed in core banking systems. We present Ryt AI, the first worldwide deployment of an LLM-based agentic system at Ryt Bank, the world’s first licensed AI-native bank, executing real fund transfers under regulatory approval.\n\nInteraction model. We introduce a language-centric framework where natural language replaces multi-screen workflows, making conversational interactions the primary interface for both common financial inquiries and transactional tasks.\n\nSystem architecture. We design a modular, multi-agent architecture that supports this interaction paradigm, where specialized LLM agents collaborate via structured messaging and a shared context space. The OCR component extends the system’s capability to process bill and receipt images, while guardrails and human oversight ensure regulatory compliance and full auditability."
+    },
+    {
+      "heading_path": [
+        "Banking Done Right: Redefining Retail Banking with Language-Centric AI",
+        "2 Related Works"
+      ],
+      "text": "## 2 Related Works"
+    },
+    {
+      "heading_path": [
+        "Banking Done Right: Redefining Retail Banking with Language-Centric AI",
+        "2 Related Works",
+        "LLMs in Finance."
+      ],
+      "text": "#### LLMs in Finance.\n\nLLMs are increasingly being adopted in the financial industry Staegemann et al. ([2025](https://ar5iv.labs.arxiv.org/html/2510.07645#bib.bib31)); Saha et al. ([2025](https://ar5iv.labs.arxiv.org/html/2510.07645#bib.bib26)); Li et al. ([2024](https://ar5iv.labs.arxiv.org/html/2510.07645#bib.bib21)); Desai et al. ([2024](https://ar5iv.labs.arxiv.org/html/2510.07645#bib.bib3)), supporting diverse applications such as fraud detection Singh et al. ([2025](https://ar5iv.labs.arxiv.org/html/2510.07645#bib.bib29)); Korkanti ([2024](https://ar5iv.labs.arxiv.org/html/2510.07645#bib.bib16)), credit scoring Feng et al. ([2024](https://ar5iv.labs.arxiv.org/html/2510.07645#bib.bib7)); Zhao et al. ([2024](https://ar5iv.labs.arxiv.org/html/2510.07645#bib.bib40)), and financial trading Xiao et al. ([2025](https://ar5iv.labs.arxiv.org/html/2510.07645#bib.bib37)); Ding et al. ([2024](https://ar5iv.labs.arxiv.org/html/2510.07645#bib.bib4)). Much of the prior research focuses on applying LLMs to low-risk, customer-facing deployments, such as chatbots and virtual assistants Gopalakrishnan ([2024](https://ar5iv.labs.arxiv.org/html/2510.07645#bib.bib9)); Landolsi et al. ([2025](https://ar5iv.labs.arxiv.org/html/2510.07645#bib.bib19)); Kulkarni et al. ([2024](https://ar5iv.labs.arxiv.org/html/2510.07645#bib.bib18)), primarily aimed at automating support and improving user engagement. However, these implementations remain peripheral to the core of financial operations. Their adoption is hindered by persistent concerns about safety, reliability, explainability, and compliance with regulatory requirements Fan ([2024](https://ar5iv.labs.arxiv.org/html/2510.07645#bib.bib6)); Bhattacharyya et al. ([2025](https://ar5iv.labs.arxiv.org/html/2510.07645#bib.bib1)); Tavasoli et al. ([2025](https://ar5iv.labs.arxiv.org/html/2510.07645#bib.bib32)). Therefore, most existing deployments avoid integration with high-stakes, compliance-critical workflows such as funds transfer, bill payment, or risk analysis pipelines."
+    },
+    {
+      "heading_path": [
+        "Banking Done Right: Redefining Retail Banking with Language-Centric AI",
+        "2 Related Works",
+        "Multi-Agent Framework."
+      ],
+      "text": "#### Multi-Agent Framework.\n\nRecent efforts have explored multi-agent frameworks Guo et al. ([2024](https://ar5iv.labs.arxiv.org/html/2510.07645#bib.bib10)); Han et al. ([2025](https://ar5iv.labs.arxiv.org/html/2510.07645#bib.bib11)); Hong et al. ([2024](https://ar5iv.labs.arxiv.org/html/2510.07645#bib.bib12)) to enhance LLM capabilities through role specialization, coordination, and task delegation. However, the adoption of these frameworks in financial industries remains limited. For example, Srivastava ([2025](https://ar5iv.labs.arxiv.org/html/2510.07645#bib.bib30)) introduces a multi-agent system for personalized financial planning and recommendations. Easin et al. ([2024](https://ar5iv.labs.arxiv.org/html/2510.07645#bib.bib5)) proposes a multi-agent assistant for digital banking, but it remains a prototype and lacks security mechanisms for real-world deployment. These limitations underscore a critical gap: the absence of *secure*, *compliant*, and *operationally robust* multi-agent frameworks capable of supporting real-world financial applications."
+    },
+    {
+      "heading_path": [
+        "Banking Done Right: Redefining Retail Banking with Language-Centric AI",
+        "3 Agentic Framework Design"
+      ],
+      "text": "## 3 Agentic Framework Design\n\nRyt AI is designed as a modular, LLM-based multi-agent system (see Fig. [3](https://ar5iv.labs.arxiv.org/html/2510.07645#S2.F3 \"Figure 3 ‣ Multi-Agent Framework. ‣ 2 Related Works ‣ Banking Done Right: Redefining Retail Banking with Language-Centric AI\")). The architecture comprises (i) Guardrails, (ii) Intent Classifier, and (iii) Action Agents that are detailed next."
+    },
+    {
+      "heading_path": [
+        "Banking Done Right: Redefining Retail Banking with Language-Centric AI",
+        "3 Agentic Framework Design",
+        "3.1 Guardrails"
+      ],
+      "text": "### 3.1 Guardrails\n\nFor any financial system, safeguarding sensitive data is crucial for reliability and compliance with regulatory standards. The Guardrails component serves as the first line of defense, intercepting inputs such as jailbreak attempts Yi et al. ([2024](https://ar5iv.labs.arxiv.org/html/2510.07645#bib.bib39)); Shen et al. ([2024](https://ar5iv.labs.arxiv.org/html/2510.07645#bib.bib28)), adversarial prompts Shayegani et al. ([2023](https://ar5iv.labs.arxiv.org/html/2510.07645#bib.bib27)); Chowdhury et al. ([2024](https://ar5iv.labs.arxiv.org/html/2510.07645#bib.bib2)), or unsupported requests deemed harmful or non-compliant. We employ ILMU, our in-house LLM, instruction-tuned on a broad corpus and further fine-tuned on guardrail-labeled data, to classify inputs into violation categories such as code interpreter abuse, harmful language, privacy breaches, and politically sensitive content. For non-text inputs, image-based content is screened by a visual moderation component that blocks inappropriate or non-compliant material (e.g., nudity, graphic imagery). This prevents unsafe inputs from propagating to downstream agents, thereby preserving system integrity and regulatory compliance (see Fig. [4(a)](https://ar5iv.labs.arxiv.org/html/2510.07645#S3.F4.sf1 \"In Figure 4 ‣ 3 Agentic Framework Design ‣ Banking Done Right: Redefining Retail Banking with Language-Centric AI\")).\n\nTo operationalize these defenses, the guardrails agent outputs a structured JSON response with fields such as isSafe, guardrailViolation, and message, allowing user-facing components to respond in a compliant manner (see Appendix [A.1](https://ar5iv.labs.arxiv.org/html/2510.07645#A1.SS1 \"A.1 Prompts ‣ Appendix A Appendix ‣ Banking Done Right: Redefining Retail Banking with Language-Centric AI\")). Unlike conventional rule-based systems, LLM-based guardrails leverage semantic reasoning and multi-turn context, enabling a more nuanced interpretation of user inputs that goes beyond rigid keyword or pattern matching. This approach enhances the accuracy of policy violation detection, reduces false positives, and maintains compliance more effectively in dynamic real-world interactions.\n\nTo keep pace with evolving threats, guardrail policies are defined by internal governance and external mandates, and are updated as requirements change. The guardrails are modular, supporting updates at multiple levels. For instance, when a new jailbreak pattern is reported, it will be neutralized within hours through a prompt update (e.g., adding a blocklist phrase) and later consolidated into a LoRA-based adapter attached to ILMU for long-term robustness."
+    },
+    {
+      "heading_path": [
+        "Banking Done Right: Redefining Retail Banking with Language-Centric AI",
+        "3 Agentic Framework Design",
+        "3.2 Intent Classifier"
+      ],
+      "text": "### 3.2 Intent Classifier\n\nAs user inputs are natively dynamic, classifying user intent is crucial for identifying the appropriate downstream operations to be executed. Inputs that pass the Guardrails are forwarded to the Intent Classifier, which acts as a high-level dispatcher. It infers user intent by leveraging the current message and, when available, prior conversation history, enabling deeper contextual understanding beyond isolated inputs, and then routes the message to the appropriate agents for downstream processing. The classifier covers a few intents across the core banking functions, e.g. Payment, Inquiry, and Faq.\n\nUnlike traditional intent recognition systems that rely on surface-level keyword matching (e.g., detecting “pay” or “transfer” in any context and triggering a hard-coded response), our classifier uses semantic reasoning to map input to predefined ontological categories. For example, in Fig. [4(b)](https://ar5iv.labs.arxiv.org/html/2510.07645#S3.F4.sf2 \"In Figure 4 ‣ 3 Agentic Framework Design ‣ Banking Done Right: Redefining Retail Banking with Language-Centric AI\"), given an informal request such as “pay people I owe”, the Intent Classifier identifies the request as Payment and routes it to the Payment agent, which is responsible for fund transfer operations. The Payment agent then prompts the user for follow-up questions to gather necessary details before initiating the transaction under banking compliance rules.\n\nThis context-aware design aligns with real-world usage patterns, which is particularly important in financial applications where queries are often vague, code-mixed, or grammatically inconsistent. To support this robustness, the classifier was fine-tuned on a corpus of approximately 10510^{5} anonymized, supervised instruction-style examples reflecting noisy linguistic patterns common in Malaysia’s banking conversations. The following examples are outlined below, which include typos, informal phrasing, and mixed language constructs, enabling the model to handle high linguistic variability in production deployments. Within Ryt AI, the Intent Classifier serves as a central dispatcher in the AI-native agentic framework, coordinating with specialized downstream agents (e.g., Payment, FAQ) to enable end-to-end banking operations.\n\n10510^{5}"
+    },
+    {
+      "heading_path": [
+        "Banking Done Right: Redefining Retail Banking with Language-Centric AI",
+        "3 Agentic Framework Design",
+        "3.3 Action Agents"
+      ],
+      "text": "### 3.3 Action Agents\n\nAction agents denote a category of LLM-powered agents that execute specific financial operations, according to the services that a digital bank provides.\n\nPayment Agent is responsible for executing user intents related to financial fund transfer. When a PAYMENT intent is detected by the Intent Classifier, it activates a modular transaction pipeline powered by ILMU that handles field extraction, validation, clarification, and secure backend execution. The process begins with structured field extraction. From natural language to multi-modal input, the payment agent extracts five core fields: (i) *recipient name*, (ii) *bank name*, (iii) *account number, phone number, personal identification number, or business IDs*, (iv) *amount*, and (v) *reference or purpose*. A schema validator checks these fields for syntactic and semantic consistency based on local banking rules (e.g., non-zero transfer amounts, valid bank name). If fields are missing or ambiguous, the agent generates follow-up prompts to request clarification within the same session.\n\nThe Payment agent also supports image-based transactions (e.g., snapshot bills, invoices, and screenshots) by leveraging integrated OCR, which semantically extracts fields such as amount and account details from documents like bills, payment slips, or invoices, going beyond raw OCR. For example, a chat screenshot with some transaction details is sufficient to infer the full transaction and generate a structured preview (see Fig. [4(c)](https://ar5iv.labs.arxiv.org/html/2510.07645#S3.F4.sf3 \"In Figure 4 ‣ 3 Agentic Framework Design ‣ Banking Done Right: Redefining Retail Banking with Language-Centric AI\")).\n\nOnce the data is validated, the transaction request is submitted to the backend gateway, where balance checks, transaction limits, and Anti-Money Laundering (AML) screening are applied. The final user confirmation is enforced through a dedicated review and approval step in operational safeguards. To ensure privacy and compliance, the Payment Agent adheres to a stateless, session-bound memory policy (see Sec. [4](https://ar5iv.labs.arxiv.org/html/2510.07645#S4 \"4 Operational Risk Mitigation ‣ Banking Done Right: Redefining Retail Banking with Language-Centric AI\") for details).\n\nFAQ Agent leverages a Retrieval-Augmented Generation (RAG) pipeline Lewis et al. ([2021](https://ar5iv.labs.arxiv.org/html/2510.07645#bib.bib20)) to deliver accurate and contextual responses to user queries, even when input is vague or incomplete. Unlike rigid keyword matching systems, it performs multi-stage semantic reasoning over a curated vector-based knowledge repository.\n\nThe pipeline begins with query reformulation, in which informal or ambiguous input is rewritten to include sufficient information and linked to the previous conversational history. As shown in Fig. [4(d)](https://ar5iv.labs.arxiv.org/html/2510.07645#S3.F4.sf4 \"In Figure 4 ‣ 3 Agentic Framework Design ‣ Banking Done Right: Redefining Retail Banking with Language-Centric AI\"), the user first asks about adding favorite transferees, followed by the question “How many can I save?”. To preserve contextual coherence, the LLM leverages the conversation history to reformulate this follow-up into a fully specified query: “How many favorite transferees can I save?” This reformulated query is then encoded into a dense vector using a pretrained embedding model, enabling semantic retrieval independent of exact phrasing. The resulting vector is used to perform a similarity search against a domain-specific vector store containing banking FAQs, feature descriptions, and user support guidance. Retrieved contexts are reranked using a scoring model that considers semantic similarity and contextual relevance. Finally, the most relevant contexts and user queries are passed to the LLM, which generates a factually grounded, context-aware response to answer the user’s query."
+    },
+    {
+      "heading_path": [
+        "Banking Done Right: Redefining Retail Banking with Language-Centric AI",
+        "3 Agentic Framework Design",
+        "3.4 Implementation & Operational"
+      ],
+      "text": "### 3.4 Implementation & Operational\n\nModel. Ryt AI is powered by ILMU, a closed-source foundation model developed entirely in-house. For banking deployment, we trained a smaller, domain-specialized variant of ILMU (under 10B parameters) to meet compliance, efficiency, and latency requirements. This variant is an autoregressive, decoder-based model with an 8K token context window and equipped with rotary positional embeddings (RoPE). The decision to develop and specialize the LLM internally is not a design preference but a regulatory requirement. In financial services, regulatory frameworks require verifiable control over training data, inference processes, and update cadences to ensure compliance, auditability, and effective risk management. While in principle open-source models could be hosted on-premise, unresolved challenges such as opaque training data provenance, ambiguous legal responsibility, and vendor update cycles misaligned with jurisdictional compliance limit their suitability in banking contexts. By contrast, an internally developed ILMU variant ensures full governance, controlled fine-tuning, and traceable data lineage.\n\nLoRA Specialization. Each agent (i.e., Guardrails, Intent, Payment, FAQ) loads the same ILMU backbone plus a task-specific LoRA adapter and tailored instruction prompt. This modular design enables safety enforcement, intent classification, payment information extraction, and FAQ handling without requiring retraining of the entire model.\n\nRuntime. Requests flow sequentially: Guardrails → Intent → Action → Confirmation, with a shared JSON context passed between agents to preserve consistency, enforce compliance, and maintain traceability across the pipeline."
+    },
+    {
+      "heading_path": [
+        "Banking Done Right: Redefining Retail Banking with Language-Centric AI",
+        "4 Operational Risk Mitigation"
+      ],
+      "text": "## 4 Operational Risk Mitigation\n\nOperational risk is one of the most critical challenges in deploying AI within financial services Ogundimu ([2025](https://ar5iv.labs.arxiv.org/html/2510.07645#bib.bib23)); Moharrak and Mogaji ([2025](https://ar5iv.labs.arxiv.org/html/2510.07645#bib.bib22)), particularly when automated systems participate in high-stakes tasks such as payments, compliance interpretation, etc. With Ryt AI, we treat operational risk not as an afterthought but as a core design principle. Every layer of the system, from semantic parsing to execution, is architected to support traceability, auditability, and human oversight. These safeguards are not merely regulatory checkboxes; they are foundational for building AI systems that are trusted, deployable, and accountable in production banking environments."
+    },
+    {
+      "heading_path": [
+        "Banking Done Right: Redefining Retail Banking with Language-Centric AI",
+        "4 Operational Risk Mitigation",
+        "Human-in-the-Loop."
+      ],
+      "text": "#### Human-in-the-Loop.\n\nUnder Malaysian financial regulations, all fund transfers require explicit user action. For Person-to-Person (P2P) transfers, two-factor authentication (2FA) (e.g., biometric, password) is required when the transaction or cumulative daily amount exceeds RM250; below this threshold, a single confirmation is sufficient. For Person-to-Merchant (P2M) payments, 2FA is required only when the transaction amount exceeds RM250; otherwise, a single confirmation is accepted. These thresholds are regulatory requirements, not design choices.\n\nTo comply with these rules, Ryt AI enforces a human-in-the-loop safeguard for critical flows such as fund transfers and payment approvals. That is, once user input is parsed into structured operational data, the system generates a transaction summary. Before execution, the user must explicitly choose to Approve, Decline, or Edit the request (see Fig. [4(c)](https://ar5iv.labs.arxiv.org/html/2510.07645#S3.F4.sf3 \"In Figure 4 ‣ 3 Agentic Framework Design ‣ Banking Done Right: Redefining Retail Banking with Language-Centric AI\"), bottom). This mechanism ensures that users retain full control over financial decisions, while the ordered pipeline described in Sec. [3](https://ar5iv.labs.arxiv.org/html/2510.07645#S3 \"3 Agentic Framework Design ‣ Banking Done Right: Redefining Retail Banking with Language-Centric AI\") provides traceability and a verifiable audit trail."
+    },
+    {
+      "heading_path": [
+        "Banking Done Right: Redefining Retail Banking with Language-Centric AI",
+        "4 Operational Risk Mitigation",
+        "Stateless Memory Architecture."
+      ],
+      "text": "#### Stateless Memory Architecture.\n\nComplementing this control framework is a stateless, session-bound memory design that ensures that sensitive user data is never persistently stored. Once a session concludes, all contextual information, e.g., user prompts, model inferences, extracted fields, and decisions, is discarded. This not only minimizes the attack surface for potential breaches but also aligns with data minimization principles embedded in the National Bank Responsible AI guidelines and other global regulatory frameworks."
+    },
+    {
+      "heading_path": [
+        "Banking Done Right: Redefining Retail Banking with Language-Centric AI",
+        "5 Experiments"
+      ],
+      "text": "## 5 Experiments\n\nDataset. To evaluate the performance of the Ryt AI framework in realistic banking scenarios, we construct a comprehensive test suite comprising 2,000 conversational cases, including single-turn and multi-turn dialogues. Multi-turn cases simulate naturalistic digital banking interactions by incorporating up to 10 preceding turns of dialogue context. The dataset is created through a hybrid workflow in which initial test cases are synthesized using LLM, followed by manual review and refinement by domain experts to ensure contextual validity, factual correctness, and regulatory compliance. Examples of the dataset can be found in Appx. [A.2](https://ar5iv.labs.arxiv.org/html/2510.07645#A1.SS2 \"A.2 Evaluation Dataset ‣ Appendix A Appendix ‣ Banking Done Right: Redefining Retail Banking with Language-Centric AI\").\n\nModels. We compare the performance of five LLMs, including the GPT family of models OpenAI et al. ([2024](https://ar5iv.labs.arxiv.org/html/2510.07645#bib.bib24)), specifically GPT-4o and GPT-4o mini, the Gemini family Team et al. ([2025](https://ar5iv.labs.arxiv.org/html/2510.07645#bib.bib33)), which are Gemini 2.0 Flash and Gemini 2.0 Flash-Lite, and our in-house LLM - ILMU.\n\nMetrics. We evaluate performance in five key dimensions, capturing technical quality and operational feasibility in a production banking environment. (i) Accuracy: The proportion of test cases in which the system correctly identifies the user’s intent and generates a relevant and accurate response for each agent’s scope. Example test cases for single and multi-turn conversations are depicted in Appendix [A.2](https://ar5iv.labs.arxiv.org/html/2510.07645#A1.SS2 \"A.2 Evaluation Dataset ‣ Appendix A Appendix ‣ Banking Done Right: Redefining Retail Banking with Language-Centric AI\"). (ii) Speed: The responsiveness of the system, measured as the inverse of the average end-to-end latency per interaction. Lower latency corresponds to higher speed scores. (iii) Cost Effectiveness: The estimated average compute cost per interaction, calculated based on token usage and model pricing (for public LLM). Internal inference cost estimates are used for ILMU. (iv) Risk Tolerance: The safety, compliance, and alignment of the model with local rules and regulations, rated by risk and compliance experts. (v) Language Proficiency: Human-rated evaluation of response fluency, coherence, and multilingual capabilities."
+    },
+    {
+      "heading_path": [
+        "Banking Done Right: Redefining Retail Banking with Language-Centric AI",
+        "5 Experiments",
+        "5.1 Results and Discussion"
+      ],
+      "text": "### 5.1 Results and Discussion\n\nAs shown in Fig. [5](https://ar5iv.labs.arxiv.org/html/2510.07645#S5.F5 \"Figure 5 ‣ 5.1 Results and Discussion ‣ 5 Experiments ‣ Banking Done Right: Redefining Retail Banking with Language-Centric AI\"), Ryt AI stands out not merely as a high-performing model, but as a production-proven foundation for conversational banking at scale. Already serving more than 50K users and processing approximately 80K transactions monthly, it powers real-world interactions that demand fluency, accuracy, and trust. Its language proficiency enables it to grasp user intent with clarity, even with multilingual, informal, or culturally nuanced inputs, which is critical for the reliable execution of everyday banking tasks.\n\nThe Risk Tolerance metric in Fig. [5](https://ar5iv.labs.arxiv.org/html/2510.07645#S5.F5 \"Figure 5 ‣ 5.1 Results and Discussion ‣ 5 Experiments ‣ Banking Done Right: Redefining Retail Banking with Language-Centric AI\"), as evaluated by compliance experts, covers both guardrail effectiveness and hallucination mitigation. In production logs, hallucinations were observed in fewer than 1.5% of cases, occurring mainly in the FAQ agent, where insufficient context occasionally led to incorrect answers. In transactional flows, such cases are rare and do not affect execution due to three safeguards: (i) strict schema validation, (ii) LLM-based guardrails, and (iii) a mandatory human-in-the-loop confirmation step. From the bank’s perspective, explicit thresholds are enforced: ≤\\leq0.5% tolerance for hallucinations in high-stakes flows (e.g., fund transfers, bill payments) and ≤\\leq2% tolerance for benign hallucinations in non-transactional contexts such as FAQs. Adversarial robustness is also assessed, including jailbreak attempts and prompt-reveal probes.\n\n≤\\leq\n\n≤\\leq\n\nBeyond accuracy and safety, Ryt AI demonstrates efficiency and practicality. Its strong performance in speed and cost-effectiveness ensures low latency and sustainable infrastructure usage, which are essential for large-scale deployments across payments, transfers, and inquiries. Together, these qualities represent not only technical performance but also compliance-grade reliability, establishing Ryt AI as a deployed system that redefines the user experience in banking."
+    },
+    {
+      "heading_path": [
+        "Banking Done Right: Redefining Retail Banking with Language-Centric AI",
+        "6 Conclusion"
+      ],
+      "text": "## 6 Conclusion\n\nRyt AI redefines how users engage with financial systems, turning complexity into clarity through intent-aware, AI-powered experiences. As the first of its kind in finance, it combines modular agents with enterprise-grade safeguards to deliver natural, compliant, and controllable automation. Built with a deep understanding of institutional risk and user experience, Ryt AI strikes a balance between speed, safety, and transparency through traceable workflows and human-in-the-loop design."
+    },
+    {
+      "heading_path": [
+        "Banking Done Right: Redefining Retail Banking with Language-Centric AI",
+        "Limitations"
+      ],
+      "text": "## Limitations\n\nIn-House Model Development. The requirement to build ILMU, our in-house closed-source LLM, from scratch is a regulatory requirement, not a design preference. In financial services, regulatory compliance requires full control over training data provenance, update cadence, and auditability. These guarantees cannot be met by deploying open-source LLMs on-premise (e.g., DeepSeek), where data lineage and vendor update cycles remain opaque. While this approach ensures verifiable governance, it also demands significant infrastructure investment and reduces portability compared to adapting existing open-source models.\n\nRegional and Linguistic Biases. Although Ryt AI performs well on multilingual prompts, its training and fine-tuning have been primarily oriented toward Bahasa Melayu, English, Chinese, and the regulatory framework of Bank Negara Malaysia (BNM)222BNM is the Central Bank of Malaysia. As such, its robustness in other jurisdictions, particularly under different legal or cultural requirements, may be limited without further localization.\n\nModel Update Cadence. In regulated industries, timely updates are essential to reflect policy changes, fraud patterns, or financial product variations. However, large-scale model fine-tuning and re-deployment remain resource-intensive. Balancing update frequency with system stability is an ongoing operational concern.\n\nTrust and Adoption. While the conversational interface has proven effective among early adopters, some user segments may still prefer traditional form-based interactions. Managing trust, onboarding, and accessibility, especially for less tech-savvy users, remains a sociotechnical challenge.\n\nWe view these limitations not as blockers, but as opportunities for iterative improvement toward a safer, more inclusive, and globally deployable financial AI system."
+    },
+    {
+      "heading_path": [
+        "Banking Done Right: Redefining Retail Banking with Language-Centric AI",
+        "References"
+      ],
+      "text": "## References\n\n* Bhattacharyya et al. (2025) Anwesha Bhattacharyya, Ye Yu, Hanyu Yang, Rahul Singh, Tarun Joshi, Jie Chen, and Kiran Yalavarthy. 2025. [Model risk management for generative ai in financial institutions](https://arxiv.org/abs/2503.15668). *Preprint*, arXiv:2503.15668. * Chowdhury et al. (2024) Arijit Ghosh Chowdhury, Md Mofijul Islam, Vaibhav Kumar, Faysal Hossain Shezan, Vaibhav Kumar, Vinija Jain, and Aman Chadha. 2024. [Breaking down the defenses: A comparative survey of attacks on large language models](https://arxiv.org/abs/2403.04786). *Preprint*, arXiv:2403.04786. * Desai et al. (2024) Akshar Prabhu Desai, Tejasvi Ravi, Mohammad Luqman, Ganesh Mallya, Nithya Kota, and Pranjul Yadav. 2024. [Opportunities and challenges of generative-ai in finance](https://doi.org/10.1109/bigdata62323.2024.10825658). In *2024 IEEE International Conference on Big Data (BigData)*, page 4913–4920. IEEE. * Ding et al. (2024) Han Ding, Yinheng Li, Junhao Wang, and Hang Chen. 2024. [Large language model agent in financial trading: A survey](https://arxiv.org/abs/2408.06361). *Preprint*, arXiv:2408.06361. * Easin et al. (2024) Arafat Md Easin, Saha Sourav, and Orosz Tamás. 2024. [An intelligent llm-powered personalized assistant for digital banking using langgraph and chain of thoughts](https://doi.org/10.1109/SISY62279.2024.10737601). In *2024 IEEE 22nd Jubilee International Symposium on Intelligent Systems and Informatics (SISY)*, pages 625–630. * Fan (2024) Minghong Fan. 2024. [Llms in banking: Applications, challenges, and approaches](https://doi.org/10.1145/3700058.3700107). In *Proceedings of the International Conference on Digital Economy, Blockchain and Artificial Intelligence*, DEBAI ’24, page 314–321, New York, NY, USA. Association for Computing Machinery. * Feng et al. (2024) Duanyu Feng, Yongfu Dai, Jimin Huang, Yifang Zhang, Qianqian Xie, Weiguang Han, Zhengyu Chen, Alejandro Lopez-Lira, and Hao Wang. 2024. [Empowering many, biasing a few: Generalist credit scoring through large language models](https://arxiv.org/abs/2310.00566). *Preprint*, arXiv:2310.00566. * Gallegos et al. (2024) Isabel O. Gallegos, Ryan A. Rossi, Joe Barrow, Md Mehrab Tanjim, Sungchul Kim, Franck Dernoncourt, Tong Yu, Ruiyi Zhang, and Nesreen K. Ahmed. 2024. [Bias and fairness in large language models: A survey](https://arxiv.org/abs/2309.00770). *Preprint*, arXiv:2309.00770. * Gopalakrishnan (2024) Karthika Gopalakrishnan. 2024. [Leveraging generative ai chatbots in the banking industry: A comprehensive analysis](https://lib-index.com/index.php/IJAIML/article/view/IJAIML_03_01_012). *International Journal of Artificial Intelligence & Machine Learning (IJAIML)*, 3(01):124–131. * Guo et al. (2024) Taicheng Guo, Xiuying Chen, Yaqi Wang, Ruidi Chang, Shichao Pei, Nitesh V. Chawla, Olaf Wiest, and Xiangliang Zhang. 2024. [Large language model based multi-agents: A survey of progress and challenges](https://arxiv.org/abs/2402.01680). *Preprint*, arXiv:2402.01680. * Han et al. (2025) Shanshan Han, Qifan Zhang, Yuhang Yao, Weizhao Jin, and Zhaozhuo Xu. 2025. [Llm multi-agent systems: Challenges and open problems](https://arxiv.org/abs/2402.03578). *Preprint*, arXiv:2402.03578. * Hong et al. (2024) Sirui Hong, Mingchen Zhuge, Jiaqi Chen, Xiawu Zheng, Yuheng Cheng, Ceyao Zhang, Jinlin Wang, Zili Wang, Steven Ka Shing Yau, Zijuan Lin, Liyang Zhou, Chenyu Ran, Lingfeng Xiao, Chenglin Wu, and Jürgen Schmidhuber. 2024. [Metagpt: Meta programming for a multi-agent collaborative framework](https://arxiv.org/abs/2308.00352). *Preprint*, arXiv:2308.00352. * Huang et al. (2025) Lei Huang, Weijiang Yu, Weitao Ma, Weihong Zhong, Zhangyin Feng, Haotian Wang, Qianglong Chen, Weihua Peng, Xiaocheng Feng, Bing Qin, and Ting Liu. 2025. [A survey on hallucination in large language models: Principles, taxonomy, challenges, and open questions](https://doi.org/10.1145/3703155). *ACM Transactions on Information Systems*, 43(2):1–55. * Huang et al. (2024) Xu Huang, Weiwen Liu, Xiaolong Chen, Xingmei Wang, Hao Wang, Defu Lian, Yasheng Wang, Ruiming Tang, and Enhong Chen. 2024. [Understanding the planning of llm agents: A survey](https://arxiv.org/abs/2402.02716). *Preprint*, arXiv:2402.02716. * Jin and Fan (2022) Xiaofu Jin and Mingming Fan. 2022. [“i used to carry a wallet, now i just need to carry my phone”: Understanding current banking practices and challenges among older adults in china](https://doi.org/10.1145/3517428.3544820). In *Proceedings of the 24th International ACM SIGACCESS Conference on Computers and Accessibility*, ASSETS ’22, page 1–16. ACM. * Korkanti (2024) Sukanth Korkanti. 2024. [Enhancing financial fraud detection using llms and advanced data analytics](https://doi.org/10.1109/ICSSAS64001.2024.10760895). In *2024 2nd International Conference on Self Sustainable Artificial Intelligence Systems (ICSSAS)*, pages 1328–1334. * Krol et al. (2015) Kat Krol, Eleni Philippou, Emiliano De Cristofaro, and M. Angela Sasse. 2015. [\"‘they brought in the horrible key ring thing!\" analysing the usability of two-factor authentication in uk online banking](https://arxiv.org/abs/1501.04434). *Preprint*, arXiv:1501.04434. * Kulkarni et al. (2024) Radhika V Kulkarni, Ameya Paldewar, Sanket Paliwal, Amol Palwe, and Soham Panchal. 2024. [Bankbot: Streamlined banking support through centralized faqs](https://doi.org/10.1109/ICPIDS65698.2024.00030). In *2024 International Conference on Progressive Innovations in Intelligent Systems and Data Science (ICPIDS)*, pages 138–143. IEEE. * Landolsi et al. (2025) Hamza Landolsi, Kais Letaief, Nizar Taghouti, and Ines Abdeljaoued-Tej. 2025. [Caprag: A large language model solution for customer service and automatic reporting using vector and graph retrieval-augmented generation](https://arxiv.org/abs/2501.13993). *Preprint*, arXiv:2501.13993. * Lewis et al. (2021) Patrick Lewis, Ethan Perez, Aleksandra Piktus, Fabio Petroni, Vladimir Karpukhin, Naman Goyal, Heinrich Küttler, Mike Lewis, Wen tau Yih, Tim Rocktäschel, Sebastian Riedel, and Douwe Kiela. 2021. [Retrieval-augmented generation for knowledge-intensive nlp tasks](https://arxiv.org/abs/2005.11401). *Preprint*, arXiv:2005.11401. * Li et al. (2024) Yinheng Li, Shaofei Wang, Han Ding, and Hang Chen. 2024. [Large language models in finance: A survey](https://arxiv.org/abs/2311.10723). *Preprint*, arXiv:2311.10723. * Moharrak and Mogaji (2025) Moayad Moharrak and Emmanuel Mogaji. 2025. [Generative ai in banking: empirical insights on integration, challenges and opportunities in a regulated industry](https://doi.org/10.1108/IJBM-08-2024-0490). *International Journal of Bank Marketing*, 43(4):871–896. * Ogundimu (2025) Olukunle Ogundimu. 2025. [Artificial intelligence in financial and operational risk management: A critical analysis](https://doi.org/10.47760/cognizance.2025.v05i03.035). *Cognizance Journal of Multidisciplinary Studies*, 5:484–506. * OpenAI et al. (2024) OpenAI, Josh Achiam, Steven Adler, Sandhini Agarwal, Lama Ahmad, Ilge Akkaya, Florencia Leoni Aleman, Diogo Almeida, Janko Altenschmidt, Sam Altman, Shyamal Anadkat, Red Avila, Igor Babuschkin, Suchir Balaji, Valerie Balcom, Paul Baltescu, Haiming Bao, Mohammad Bavarian, Jeff Belgum, and 262 others. 2024. [Gpt-4 technical report](https://arxiv.org/abs/2303.08774). *Preprint*, arXiv:2303.08774. * Palen-Michel et al. (2024) Chester Palen-Michel, Ruixiang Wang, Yipeng Zhang, David Yu, Canran Xu, and Zhe Wu. 2024. [Investigating llm applications in e-commerce](https://arxiv.org/abs/2408.12779). *Preprint*, arXiv:2408.12779. * Saha et al. (2025) Bikash Saha, Nanda Rani, and Sandeep Kumar Shukla. 2025. [Generative ai in financial institution: A global survey of opportunities, threats, and regulation](https://arxiv.org/abs/2504.21574). *Preprint*, arXiv:2504.21574. * Shayegani et al. (2023) Erfan Shayegani, Md Abdullah Al Mamun, Yu Fu, Pedram Zaree, Yue Dong, and Nael Abu-Ghazaleh. 2023. [Survey of vulnerabilities in large language models revealed by adversarial attacks](https://arxiv.org/abs/2310.10844). *Preprint*, arXiv:2310.10844. * Shen et al. (2024) Xinyue Shen, Zeyuan Chen, Michael Backes, Yun Shen, and Yang Zhang. 2024. [\"do anything now\": Characterizing and evaluating in-the-wild jailbreak prompts on large language models](https://arxiv.org/abs/2308.03825). *Preprint*, arXiv:2308.03825. * Singh et al. (2025) Gurjot Singh, Prabhjot Singh, and Maninder Singh. 2025. [Advanced real-time fraud detection using rag-based llms](https://arxiv.org/abs/2501.15290). *Preprint*, arXiv:2501.15290. * Srivastava (2025) Varad Srivastava. 2025. [Eagle: A multi-agent generative ai system for personalized banking recommendation and risk-aware financial planning](https://doi.org/10.31219/osf.io/dwspv_v1). * Staegemann et al. (2025) Daniel Staegemann, Christian Haertel, Christian Daase, Matthias Pohl, Mohammad Abdallah, and Klaus Turowski. 2025. [A review on large language models and generative ai in banking](https://doi.org/10.5220/0013472600003956). * Tavasoli et al. (2025) Ahmadreza Tavasoli, Maedeh Sharbaf, and Seyed Mohamad Madani. 2025. [Responsible innovation: A strategic framework for financial llm integration](https://arxiv.org/abs/2504.02165). *Preprint*, arXiv:2504.02165. * Team et al. (2025) Gemini Team, Rohan Anil, Sebastian Borgeaud, Jean-Baptiste Alayrac, Jiahui Yu, Radu Soricut, Johan Schalkwyk, Andrew M. Dai, Anja Hauth, Katie Millican, David Silver, Melvin Johnson, Ioannis Antonoglou, Julian Schrittwieser, Amelia Glaese, Jilin Chen, Emily Pitler, Timothy Lillicrap, Angeliki Lazaridou, and 1332 others. 2025. [Gemini: A family of highly capable multimodal models](https://arxiv.org/abs/2312.11805). *Preprint*, arXiv:2312.11805. * Thirunavukarasu et al. (2023) Arun James Thirunavukarasu, Darren Shu Jeng Ting, Kabilan Elangovan, Laura Gutierrez, Ting Fang Tan, and Daniel Shu Wei Ting. 2023. [Large language models in medicine](https://doi.org/10.1038/s41591-023-02448-8). *Nature medicine*, 29(8):1930–1940. * Wang et al. (2024) Lei Wang, Chen Ma, Xueyang Feng, Zeyu Zhang, Hao Yang, Jingsen Zhang, Zhiyuan Chen, Jiakai Tang, Xu Chen, Yankai Lin, Wayne Xin Zhao, Zhewei Wei, and Jirong Wen. 2024. [A survey on large language model based autonomous agents](https://doi.org/10.1007/s11704-024-40231-1). *Frontiers of Computer Science*, 18(6). * Xi et al. (2023) Zhiheng Xi, Wenxiang Chen, Xin Guo, Wei He, Yiwen Ding, Boyang Hong, Ming Zhang, Junzhe Wang, Senjie Jin, Enyu Zhou, Rui Zheng, Xiaoran Fan, Xiao Wang, Limao Xiong, Yuhao Zhou, Weiran Wang, Changhao Jiang, Yicheng Zou, Xiangyang Liu, and 10 others. 2023. [The rise and potential of large language model based agents: A survey](https://arxiv.org/abs/2309.07864). *Preprint*, arXiv:2309.07864. * Xiao et al. (2025) Yijia Xiao, Edward Sun, Di Luo, and Wei Wang. 2025. [Tradingagents: Multi-agents llm financial trading framework](https://arxiv.org/abs/2412.20138). *Preprint*, arXiv:2412.20138. * Xu et al. (2025) Ziwei Xu, Sanjay Jain, and Mohan Kankanhalli. 2025. [Hallucination is inevitable: An innate limitation of large language models](https://arxiv.org/abs/2401.11817). *Preprint*, arXiv:2401.11817. * Yi et al. (2024) Sibo Yi, Yule Liu, Zhen Sun, Tianshuo Cong, Xinlei He, Jiaxing Song, Ke Xu, and Qi Li. 2024. [Jailbreak attacks and defenses against large language models: A survey](https://arxiv.org/abs/2407.04295). *Preprint*, arXiv:2407.04295. * Zhao et al. (2024) Huaqin Zhao, Zhengliang Liu, Zihao Wu, Yiwei Li, Tianze Yang, Peng Shu, Shaochen Xu, Haixing Dai, Lin Zhao, Hanqi Jiang, Yi Pan, Junhao Chen, Yifan Zhou, Gengchen Mai, Ninghao Liu, and Tianming Liu. 2024. [Revolutionizing finance with llms: An overview of applications and insights](https://arxiv.org/abs/2401.11641). *Preprint*, arXiv:2401.11641. * Zhou et al. (2025) Hao Zhou, Chengming Hu, Ye Yuan, Yufei Cui, Yili Jin, Can Chen, Haolun Wu, Dun Yuan, Li Jiang, Di Wu, Xue Liu, Jianzhong Zhang, Xianbin Wang, and Jiangchuan Liu. 2025. [Large language model (llm) for telecommunications: A comprehensive survey on principles, key techniques, and opportunities](https://doi.org/10.1109/COMST.2024.3465447). *IEEE Communications Surveys & Tutorials*, 27(3):1955–2005."
+    },
+    {
+      "heading_path": [
+        "Banking Done Right: Redefining Retail Banking with Language-Centric AI",
+        "Appendix A Appendix"
+      ],
+      "text": "## Appendix A Appendix"
+    },
+    {
+      "heading_path": [
+        "Banking Done Right: Redefining Retail Banking with Language-Centric AI",
+        "Appendix A Appendix",
+        "A.1 Prompts"
+      ],
+      "text": "### A.1 Prompts\n\nWe present the prompt templates used for each core component, including Guardrails (Table [1](https://ar5iv.labs.arxiv.org/html/2510.07645#A1.T1 \"Table 1 ‣ A.1 Prompts ‣ Appendix A Appendix ‣ Banking Done Right: Redefining Retail Banking with Language-Centric AI\")), Intent Classifier (Table [2](https://ar5iv.labs.arxiv.org/html/2510.07645#A1.T2 \"Table 2 ‣ A.1 Prompts ‣ Appendix A Appendix ‣ Banking Done Right: Redefining Retail Banking with Language-Centric AI\")), Payment Agent (Table [3](https://ar5iv.labs.arxiv.org/html/2510.07645#A1.T3 \"Table 3 ‣ A.1 Prompts ‣ Appendix A Appendix ‣ Banking Done Right: Redefining Retail Banking with Language-Centric AI\")), and FAQ Agent (Table [4](https://ar5iv.labs.arxiv.org/html/2510.07645#A1.T4 \"Table 4 ‣ A.1 Prompts ‣ Appendix A Appendix ‣ Banking Done Right: Redefining Retail Banking with Language-Centric AI\"))."
+    },
+    {
+      "heading_path": [
+        "Banking Done Right: Redefining Retail Banking with Language-Centric AI",
+        "Appendix A Appendix",
+        "A.2 Evaluation Dataset"
+      ],
+      "text": "### A.2 Evaluation Dataset\n\nWe present examples of conversational cases used to evaluate the performance of the Ryt AI framework in banking scenarios, including single-turn and multi-turn dialogues. Sample Single-Turn Test Case:\n\nSample Multi-Turn Test Case:"
+    }
+  ]
+}

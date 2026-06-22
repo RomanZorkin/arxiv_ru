@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<!-- saved from url=(0044)https://ar5iv.labs.arxiv.org/html/2605.05358 -->
+<html lang="en" data-theme="light"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<title>[2605.05358] Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks</title><meta property="og:description" content="Early-exiting neural networks enable adaptive inference by allowing inputs to exit at intermediate classifiers, reducing computation for easy samples while maintaining high accuracy. In practice, exits can be trained s…">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks">
+<meta name="twitter:image:src" content="https://ar5iv.labs.arxiv.org/assets/ar5iv_card.png">
+<meta name="twitter:image:alt" content="ar5iv logo">
+<meta property="og:title" content="Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks">
+<meta property="og:site_name" content="ar5iv">
+<meta property="og:image" content="https://ar5iv.labs.arxiv.org/assets/ar5iv_card.png">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://ar5iv.labs.arxiv.org/html/2605.05358">
+<link rel="canonical" target="_blank" href="https://ar5iv.labs.arxiv.org/html/2605.05358">
+
+<!--Generated on Sat Jun  6 08:11:31 2026 by LaTeXML (version 0.8.8) http://dlmf.nist.gov/LaTeXML/.-->
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+<script>
+  function detectColorScheme(){
+    var theme="light";
+    var current_theme = localStorage.getItem("ar5iv_theme");
+    if(current_theme){
+      if(current_theme == "dark"){
+        theme = "dark";
+      } }
+    else if(!window.matchMedia) { return false; }
+    else if(window.matchMedia("(prefers-color-scheme: dark)").matches) {
+      theme = "dark"; }
+    if (theme=="dark") {
+      document.documentElement.setAttribute("data-theme", "dark");
+    } else {
+      document.documentElement.setAttribute("data-theme", "light"); } }
+
+  detectColorScheme();
+
+  function toggleColorScheme(){
+    var current_theme = localStorage.getItem("ar5iv_theme");
+    if (current_theme) {
+      if (current_theme == "light") {
+        localStorage.setItem("ar5iv_theme", "dark"); }
+      else {
+        localStorage.setItem("ar5iv_theme", "light"); } }
+    else {
+        localStorage.setItem("ar5iv_theme", "dark"); }
+    detectColorScheme(); }
+</script>
+<link media="all" rel="stylesheet" href="./[2605.05358] Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks_files/ar5iv-fonts.0.8.4.css"><link media="all" rel="stylesheet" href="./[2605.05358] Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks_files/ar5iv.0.8.4.css"><link media="all" rel="stylesheet" href="./[2605.05358] Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks_files/ar5iv-site.0.2.2.css">
+<meta content="extension" property="gosuslugi.plugin.extension.content"></head>
+<body>
+<div class="ltx_page_main">
+<div class="ltx_page_content">
+<article class="ltx_document ltx_authors_1line">
+<h1 class="ltx_title ltx_title_document">Balancing Stability and Plasticity in Sequentially Trained 
+<br class="ltx_break">Early-Exiting Neural Networks</h1>
+
+<div id="abstract1" class="ltx_abstract">
+<h6 class="ltx_title ltx_title_abstract">Abstract</h6>
+<p class="ltx_p">Early-exiting neural networks enable adaptive inference by allowing inputs to exit at intermediate classifiers, reducing computation for easy samples while maintaining high accuracy. In practice, exits can be trained sequentially by incrementally adding them to a shared backbone; however, this sequential training can cause newly introduced exits to interfere with previously learned ones, degrading the performance of earlier classifiers. We address this problem by retaining the knowledge embedded in existing exits while allowing new ones to specialize. We propose two alternative approaches that operate at different levels of the model. The first constrains learning by protecting parameters that are important for previously trained exits, while the second preserves the output distributions of earlier exits as the network adapts. These alternatives directly reflect the stability-plasticity trade-off studied in continual learning. Accordingly, we leverage <span class="ltx_text ltx_font_italic">Elastic Weight Consolidation</span> to constrain critical weights and <span class="ltx_text ltx_font_italic">Learning without Forgetting</span> to preserve output distributions. Experiments on standard benchmarks show that our approaches consistently improve early-exit performance, achieving higher accuracy over existing sequential training methods and significant performance speedups at low computational budgets.</p>
+</div>
+<div id="p1" class="ltx_para">
+<p id="p1.1" class="ltx_p"><span id="p1.1.1" class="ltx_text ltx_font_bold ltx_font_italic">Index Terms<span id="p1.1.1.1" class="ltx_text ltx_font_upright">— </span></span>
+Early-exiting neural networks, Sequential training, Catastrophic Forgetting, Continual learning</p>
+</div>
+<section id="S1" class="ltx_section">
+<h2 class="ltx_title ltx_title_section">
+<span class="ltx_tag ltx_tag_section">1 </span>Introduction</h2>
+
+<div id="S1.p1" class="ltx_para">
+<p id="S1.p1.1" class="ltx_p">The increasing deployment of deep learning models under strict latency, energy, and memory constraints has motivated the development of resource-efficient dynamic architectures. Rather than executing a fixed computation graph for all inputs, such architectures adapt their computational cost to input difficulty, enabling efficient inference while maintaining high accuracy <cite class="ltx_cite ltx_citemacro_cite">[<a href="https://ar5iv.labs.arxiv.org/html/2605.05358#bib.bib5" title="Dynamic Neural Networks: A Survey" class="ltx_ref">5</a>]</cite>. Early-exiting neural networks (EENNs) are a representative instance of this paradigm. EENNs augment a backbone network with multiple internal classifiers (ICs) placed at increasing depths, allowing inference to terminate early once sufficient confidence is reached. Easy samples can be classified using shallow representations, while more challenging inputs propagate deeper into the network. This exit-based adaptivity significantly reduces average inference cost and makes EENNs well-suited for resource-constrained applications <cite class="ltx_cite ltx_citemacro_cite">[<a href="https://ar5iv.labs.arxiv.org/html/2605.05358#bib.bib15" title="Resource-constrained edge ai with early exit prediction" class="ltx_ref">2</a>]</cite>.</p>
+</div>
+<div id="S1.p2" class="ltx_para">
+<p id="S1.p2.1" class="ltx_p">To realize these benefits in practice, a critical design choice concerns how to train the multiple exits within an EENN. Most prior work has focused on joint training strategies, which optimize the backbone along with all exits simultaneously in an end-to-end manner. Joint training has shown to deliver strong empirical performance and has therefore become the predominant approach <cite class="ltx_cite ltx_citemacro_cite">[<a href="https://ar5iv.labs.arxiv.org/html/2605.05358#bib.bib26" title="BranchyNet: fast inference via early exiting from deep neural networks" class="ltx_ref">17</a>, <a href="https://ar5iv.labs.arxiv.org/html/2605.05358#bib.bib14" title="Improving low-latency predictions in multi-exit neural networks via block-dependent losses" class="ltx_ref">4</a>, <a href="https://ar5iv.labs.arxiv.org/html/2605.05358#bib.bib4" title="Deep feature surgery: towards accurate and efficient multi-exit networks" class="ltx_ref">3</a>, <a href="https://ar5iv.labs.arxiv.org/html/2605.05358#bib.bib1" title="How to train your multi-exit model? analyzing the impact of training strategies" class="ltx_ref">11</a>]</cite>. In contrast, sequential training performs the training incrementally as exits are added to an existing backbone. Sequential training naturally aligns with pretrained backbones by enabling a more rapid design time and an efficient analysis of where meaningful predictions emerge within the network – a useful property for large models where the computational cost of full joint training can be prohibitive or even undesirable <cite class="ltx_cite ltx_citemacro_cite">[<a href="https://ar5iv.labs.arxiv.org/html/2605.05358#bib.bib16" title="GAML-BERT: improving BERT early exiting by gradient aligned mutual learning" class="ltx_ref">24</a>, <a href="https://ar5iv.labs.arxiv.org/html/2605.05358#bib.bib17" title="BERxiT: early exiting for BERT with better fine-tuning and extension to regression" class="ltx_ref">22</a>]</cite>.</p>
+</div>
+<div id="S1.p3" class="ltx_para">
+<p id="S1.p3.1" class="ltx_p">Sequential training approaches for EENNs are categorized into three main groups based on the specific training methodology employed for each successive exit <cite class="ltx_cite ltx_citemacro_cite">[<a href="https://ar5iv.labs.arxiv.org/html/2605.05358#bib.bib1" title="How to train your multi-exit model? analyzing the impact of training strategies" class="ltx_ref">11</a>]</cite>. <span id="S1.p3.1.1" class="ltx_text ltx_font_bold">Disjoint training</span> (also referred to as two-stage training) first trains the backbone independently and then freezes it while learning ICs <cite class="ltx_cite ltx_citemacro_cite">[<a href="https://ar5iv.labs.arxiv.org/html/2605.05358#bib.bib13" title="Zero time waste in pre-trained early exit neural networks" class="ltx_ref">20</a>, <a href="https://ar5iv.labs.arxiv.org/html/2605.05358#bib.bib19" title="LGViT: dynamic early exiting for accelerating vision transformer" class="ltx_ref">23</a>]</cite>. This approach is particularly effective for retrofitting pretrained models with early exits at the cost of limited adaptability; new exits cannot refine earlier representations to better support their specific objectives. <span id="S1.p3.1.2" class="ltx_text ltx_font_bold">Branch-wise training</span> introduces exits sequentially while unfreezing only the backbone segment associated with the current exit, offering moderate flexibility and helping to alleviate vanishing or exploding gradients in deep architectures <cite class="ltx_cite ltx_citemacro_cite">[<a href="https://ar5iv.labs.arxiv.org/html/2605.05358#bib.bib24" title="Multi-scale dense networks for resource efficient image classification" class="ltx_ref">7</a>]</cite>. However, this forward-thinking approach suffers from premature freezing: once an exit is trained and the training process moves deeper, that exit’s parameters become fixed, preventing further refinement even as later exits reveal useful representational structures. <span id="S1.p3.1.3" class="ltx_text ltx_font_bold">Separate training</span> further relaxes these constraints by unfreezing the full network <cite class="ltx_cite ltx_citemacro_cite">[<a href="https://ar5iv.labs.arxiv.org/html/2605.05358#bib.bib1" title="How to train your multi-exit model? analyzing the impact of training strategies" class="ltx_ref">11</a>]</cite>. The exits are also introduced sequentially, however the training of each exit is done jointly with previous exits, allowing each branch to capture features at different abstraction levels through potentially distinct objectives. Although this approach provides greater flexibility, it applies uniform updates to all backbone parameters during each iteration, without identifying which parameters are essential for earlier exits and which can be modified for new ones.</p>
+</div>
+<div id="S1.p4" class="ltx_para">
+<p id="S1.p4.1" class="ltx_p">A key challenge unifies these methods: introducing new exits disrupts previously learned representations through gradient interference, with degradation intensifying as more exits are added <cite class="ltx_cite ltx_citemacro_cite">[<a href="https://ar5iv.labs.arxiv.org/html/2605.05358#bib.bib25" title="Early-exit deep neural network - a comprehensive survey" class="ltx_ref">14</a>]</cite>. This results from current approaches disregarding the heterogeneous importance of parameters, particularly those that have already been tuned for earlier exits. Indeed, some weights encode critical features that earlier exits depend on, while others are less consequential and could be freely adapted. Therefore, distinguishing between these parameter types is essential as it enables selective protection of critical knowledge while maintaining the plasticity needed for new exits to specialize effectively. Importantly, this challenge is not unique to early-exit networks. In continual learning (CL), models face a similar dilemma when learning sequential tasks; they must acquire new capabilities (plasticity) while preserving previously learned knowledge (stability) to mitigate catastrophic forgetting <cite class="ltx_cite ltx_citemacro_cite">[<a href="https://ar5iv.labs.arxiv.org/html/2605.05358#bib.bib27" title="A comprehensive survey of continual learning: theory, method and application" class="ltx_ref">19</a>]</cite>. We thus recognize that sequential early-exit training exhibits this same stability-plasticity trade-off. This conceptual alignment suggests that CL techniques can be adapted to protect salient features of earlier exits from being forgotten during sequential training. It is worth noting that the goal here is not to implement CL on EENN (e.g., Szatkowski et al. <cite class="ltx_cite ltx_citemacro_cite">[<a href="https://ar5iv.labs.arxiv.org/html/2605.05358#bib.bib8" title="Accelerated inference and reduced forgetting: the dual benefits of early-exit networks in continual learning" class="ltx_ref">16</a>]</cite>), but to benefit from some of the regularization techniques of CL to mitigate representation degradation in sequential training of EENN.</p>
+</div>
+<div id="S1.p5" class="ltx_para">
+<p id="S1.p5.1" class="ltx_p">Building on this perspective, we propose a novel two-stage sequential training approach. In the first stage, we pretrain the backbone using only the final exit in order for deep layers to develop rich abstract representations before early exits are introduced <cite class="ltx_cite ltx_citemacro_cite">[<a href="https://ar5iv.labs.arxiv.org/html/2605.05358#bib.bib18" title="DeeBERT: dynamic early exiting for accelerating BERT inference" class="ltx_ref">21</a>, <a href="https://ar5iv.labs.arxiv.org/html/2605.05358#bib.bib12" title="FastBERT: a self-distilling BERT with adaptive inference time" class="ltx_ref">13</a>]</cite>. In the second stage, we perform sequential training by explicitly preserving the knowledge acquired by earlier exits as new exits are introduced. Consistent with the CL perspective, our goal is to counteract the forgetting induced by gradient interference. Without protection mechanisms, optimizing a new exit inevitably overwrites representations that previous exits depend on, leading to progressive degradation. Therefore, we aim to regularize sequential training from two alternative standpoints, namely at the parameter and output distribution levels, each addressing forgetting from a different aspect. At the parameter level, forgetting occurs because optimization updates treat all weights equally, although some are critical for the performance of existing exits. By identifying which parameters are essential, we can selectively protect them, allowing the network to adapt safely while preserving knowledge that earlier exits rely on. This motivates the use of Elastic Weight Consolidation (EWC) <cite class="ltx_cite ltx_citemacro_cite">[<a href="https://ar5iv.labs.arxiv.org/html/2605.05358#bib.bib7" title="Overcoming catastrophic forgetting in neural networks" class="ltx_ref">9</a>, <a href="https://ar5iv.labs.arxiv.org/html/2605.05358#bib.bib6" title="Progress &amp; compress: a scalable framework for continual learning" class="ltx_ref">15</a>]</cite>, which estimates parameter importance via Fisher information and constrains updates on crucial weights, thus weighting the learning process to balance stability and plasticity. At the output distribution level, however, what ultimately matters is that the predictive behavior of the earlier exits remains stable as new exits are trained. To achieve this, we adopt Learning without Forgetting (LwF) <cite class="ltx_cite ltx_citemacro_cite">[<a href="https://ar5iv.labs.arxiv.org/html/2605.05358#bib.bib3" title="Learning without forgetting" class="ltx_ref">12</a>]</cite>, which regularizes the outputs of earlier exits to match their original predictions, maintaining functional consistency as new exits are trained. Both EWC and LwF are governed by tunable hyperparameters, giving explicit control over the trade-off between preserving early-exit performance and enabling adaptation for new exits.</p>
+</div>
+<div id="S1.p6" class="ltx_para">
+<p id="S1.p6.1" class="ltx_p">The main contributions of this work are threefold:</p>
+</div>
+<div id="S1.p7" class="ltx_para">
+<ul id="S1.I1" class="ltx_itemize">
+<li id="S1.I1.i1" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">•</span> 
+<div id="S1.I1.i1.p1" class="ltx_para">
+<p id="S1.I1.i1.p1.1" class="ltx_p">We propose a novel technique to mitigate the degradation of previously learnt representation in order to address the stability-plasticity trade-off faced during sequential training of EENN.</p>
+</div>
+</li>
+<li id="S1.I1.i2" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">•</span> 
+<div id="S1.I1.i2.p1" class="ltx_para">
+<p id="S1.I1.i2.p1.1" class="ltx_p">We adapt two CL regularization strategies, EWC for parameter-level protection and LwF for output distribution-level consistency, to enable principled sequential training that balances exit specialization with knowledge preservation.</p>
+</div>
+</li>
+<li id="S1.I1.i3" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">•</span> 
+<div id="S1.I1.i3.p1" class="ltx_para">
+<p id="S1.I1.i3.p1.1" class="ltx_p">We demonstrate consistent improvements over existing sequential training methods across benchmark architectures, validating the effectiveness of the CL approach for EENNs.</p>
+</div>
+</li>
+</ul>
+</div>
+</section>
+<section id="S2" class="ltx_section">
+<h2 class="ltx_title ltx_title_section">
+<span class="ltx_tag ltx_tag_section">2 </span>Proposed Methodology</h2>
+
+<figure id="S2.F1" class="ltx_figure">
+<p id="S2.F1.1.1" class="ltx_p ltx_minipage ltx_align_center ltx_align_bottom" style="width:433.6pt;"><span id="S2.F1.1.1.1" class="ltx_text"><span class="ltx_inline-block"><svg id="S2.F1.1.1.1.pic1" class="ltx_picture" height="138.28" overflow="visible" version="1.1" viewBox="0 0 311.93 138.28" width="311.93"><g style="--ltx-stroke-color:#000000;--ltx-fill-color:#000000;" transform="translate(0,138.28) matrix(1 0 0 -1 0 0) translate(8.5,0) translate(0,114.38)" fill="#000000" stroke="#000000"><g stroke-width="0.4pt"><g style="--ltx-stroke-color:#000000;--ltx-fill-color:#000000;" transform="matrix(1.0 0.0 0.0 1.0 -3.89 -2.77)" fill="#000000" stroke="#000000"><foreignobject style="--ltx-fo-width:0.61em;--ltx-fo-height:0.43em;--ltx-fo-depth:0em;" width="7.78" height="5.53" transform="matrix(1 0 0 -1 0 5.53)" overflow="visible"><span class="ltx_foreignobject_container"><span class="ltx_foreignobject_content"><math id="S2.F1.1.1.1.pic1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.m1" class="ltx_Math" alttext="\mathbf{x}" display="inline" intent=":literal"><semantics><mi mathsize="0.900em">𝐱</mi><annotation encoding="application/x-tex">\mathbf{x}</annotation></semantics></math></span></span></foreignobject></g><g style="--ltx-stroke-color:#000000;--ltx-fill-color:#E6E6E6;" stroke="#000000" fill="#E6E6E6"><path d="M 78.74 -23.62 L 78.74 23.62 L 47.24 23.62 L 47.24 -23.62 Z M 47.24 23.62"></path></g><g style="--ltx-stroke-color:#000000;--ltx-fill-color:#000000;" transform="matrix(0.0 -1.0 1.0 0.0 59.9 7.56)" fill="#000000" stroke="#000000"><foreignobject style="--ltx-fo-width:1.28em;--ltx-fo-height:0.64em;--ltx-fo-depth:0.12em;" width="15.11" height="8.95" transform="matrix(1 0 0 -1 0 7.56)" overflow="visible"><span class="ltx_foreignobject_container"><span class="ltx_foreignobject_content"><math id="S2.F1.1.1.1.pic1.2.2.2.2.2.2.2.2.2.2.2.2.1.1.1.1.1.1.1.1.1.1.1.m1" class="ltx_Math" alttext="\Theta_{1}" display="inline" intent=":literal"><semantics><msub><mi mathsize="0.800em" mathvariant="normal">Θ</mi><mn mathsize="0.800em">1</mn></msub><annotation encoding="application/x-tex">\Theta_{1}</annotation></semantics></math></span></span></foreignobject></g><g style="--ltx-stroke-color:#000000;--ltx-fill-color:#E6E6E6;" stroke="#000000" fill="#E6E6E6"><path d="M 141.73 -23.62 L 141.73 23.62 L 110.24 23.62 L 110.24 -23.62 Z M 110.24 23.62"></path></g><g style="--ltx-stroke-color:#000000;--ltx-fill-color:#000000;" transform="matrix(0.0 -1.0 1.0 0.0 122.89 7.56)" fill="#000000" stroke="#000000"><foreignobject style="--ltx-fo-width:1.28em;--ltx-fo-height:0.64em;--ltx-fo-depth:0.12em;" width="15.11" height="8.95" transform="matrix(1 0 0 -1 0 7.56)" overflow="visible"><span class="ltx_foreignobject_container"><span class="ltx_foreignobject_content"><math id="S2.F1.1.1.1.pic1.3.3.3.3.3.3.3.3.3.3.3.3.1.1.1.1.1.1.1.1.1.1.1.m1" class="ltx_Math" alttext="\Theta_{2}" display="inline" intent=":literal"><semantics><msub><mi mathsize="0.800em" mathvariant="normal">Θ</mi><mn mathsize="0.800em">2</mn></msub><annotation encoding="application/x-tex">\Theta_{2}</annotation></semantics></math></span></span></foreignobject></g><g style="--ltx-stroke-color:#000000;" stroke="#000000"><path style="fill:none" d="M 204.72 -23.62 L 204.72 23.62 L 173.23 23.62 L 173.23 -23.62 Z M 173.23 23.62"></path></g><g style="--ltx-stroke-color:#000000;--ltx-fill-color:#000000;" transform="matrix(0.0 -1.0 1.0 0.0 185.89 7.56)" fill="#000000" stroke="#000000"><foreignobject style="--ltx-fo-width:1.28em;--ltx-fo-height:0.64em;--ltx-fo-depth:0.12em;" width="15.11" height="8.95" transform="matrix(1 0 0 -1 0 7.56)" overflow="visible"><span class="ltx_foreignobject_container"><span class="ltx_foreignobject_content"><math id="S2.F1.1.1.1.pic1.4.4.4.4.4.4.4.4.4.4.4.4.1.1.1.1.1.1.1.1.1.1.m1" class="ltx_Math" alttext="\Theta_{3}" display="inline" intent=":literal"><semantics><msub><mi mathsize="0.800em" mathvariant="normal">Θ</mi><mn mathsize="0.800em">3</mn></msub><annotation encoding="application/x-tex">\Theta_{3}</annotation></semantics></math></span></span></foreignobject></g><g style="--ltx-stroke-color:#000000;" stroke="#000000" stroke-dasharray="3.0pt,3.0pt" stroke-dashoffset="0.0pt"><path style="fill:none" d="M 267.72 -23.62 L 267.72 23.62 L 236.22 23.62 L 236.22 -23.62 Z M 236.22 23.62"></path></g><g style="--ltx-stroke-color:#000000;--ltx-fill-color:#000000;" stroke-dasharray="3.0pt,3.0pt" stroke-dashoffset="0.0pt" fill="#000000" stroke="#000000" transform="matrix(0.0 -1.0 1.0 0.0 248.88 7.56)"><foreignobject style="--ltx-fo-width:1.28em;--ltx-fo-height:0.64em;--ltx-fo-depth:0.12em;" width="15.11" height="8.95" transform="matrix(1 0 0 -1 0 7.56)" overflow="visible"><span class="ltx_foreignobject_container"><span class="ltx_foreignobject_content"><math id="S2.F1.1.1.1.pic1.5.5.5.5.5.5.5.5.5.5.5.5.1.1.1.1.1.1.1.1.1.1.1.m1" class="ltx_Math" alttext="\Theta_{4}" display="inline" intent=":literal"><semantics><msub><mi mathsize="0.800em" mathvariant="normal">Θ</mi><mn mathsize="0.800em">4</mn></msub><annotation encoding="application/x-tex">\Theta_{4}</annotation></semantics></math></span></span></foreignobject></g><g style="--ltx-stroke-color:#000000;--ltx-fill-color:#E6E6E6;" stroke="#000000" fill="#E6E6E6"><path d="M 74.8 -70.87 h 39.37 v 23.62 h -39.37 Z"></path></g><g style="--ltx-stroke-color:#000000;--ltx-fill-color:#000000;" transform="matrix(1.0 0.0 0.0 1.0 83.94 -62.15)" fill="#000000" stroke="#000000"><foreignobject style="--ltx-fo-width:1.79em;--ltx-fo-height:0.64em;--ltx-fo-depth:0.12em;" width="21.09" height="8.95" transform="matrix(1 0 0 -1 0 7.56)" overflow="visible"><span class="ltx_foreignobject_container"><span class="ltx_foreignobject_content"><math id="S2.F1.1.1.1.pic1.6.6.6.6.6.6.6.6.6.6.6.6.1.1.1.1.1.1.1.1.1.1.1.m1" class="ltx_Math" alttext="IC_{1}" display="inline" intent=":literal"><semantics><mrow><mi mathsize="0.800em">I</mi><mo lspace="0em" rspace="0em">​</mo><msub><mi mathsize="0.800em">C</mi><mn mathsize="0.800em">1</mn></msub></mrow><annotation encoding="application/x-tex">IC_{1}</annotation></semantics></math></span></span></foreignobject></g><g style="--ltx-stroke-color:#000000;--ltx-fill-color:#E6E6E6;" stroke="#000000" fill="#E6E6E6"><path d="M 137.8 -70.87 h 39.37 v 23.62 h -39.37 Z"></path></g><g style="--ltx-stroke-color:#000000;--ltx-fill-color:#000000;" transform="matrix(1.0 0.0 0.0 1.0 146.93 -62.15)" fill="#000000" stroke="#000000"><foreignobject style="--ltx-fo-width:1.79em;--ltx-fo-height:0.64em;--ltx-fo-depth:0.12em;" width="21.09" height="8.95" transform="matrix(1 0 0 -1 0 7.56)" overflow="visible"><span class="ltx_foreignobject_container"><span class="ltx_foreignobject_content"><math id="S2.F1.1.1.1.pic1.7.7.7.7.7.7.7.7.7.7.7.7.1.1.1.1.1.1.1.1.1.1.1.m1" class="ltx_Math" alttext="IC_{2}" display="inline" intent=":literal"><semantics><mrow><mi mathsize="0.800em">I</mi><mo lspace="0em" rspace="0em">​</mo><msub><mi mathsize="0.800em">C</mi><mn mathsize="0.800em">2</mn></msub></mrow><annotation encoding="application/x-tex">IC_{2}</annotation></semantics></math></span></span></foreignobject></g><g style="--ltx-stroke-color:#000000;" stroke="#000000"><path style="fill:none" d="M 200.79 -70.87 h 39.37 v 23.62 h -39.37 Z"></path></g><g style="--ltx-stroke-color:#000000;--ltx-fill-color:#000000;" transform="matrix(1.0 0.0 0.0 1.0 209.93 -62.15)" fill="#000000" stroke="#000000"><foreignobject style="--ltx-fo-width:1.79em;--ltx-fo-height:0.64em;--ltx-fo-depth:0.12em;" width="21.09" height="8.95" transform="matrix(1 0 0 -1 0 7.56)" overflow="visible"><span class="ltx_foreignobject_container"><span class="ltx_foreignobject_content"><math id="S2.F1.1.1.1.pic1.8.8.8.8.8.8.8.8.8.8.8.8.1.1.1.1.1.1.1.1.1.1.m1" class="ltx_Math" alttext="IC_{3}" display="inline" intent=":literal"><semantics><mrow><mi mathsize="0.800em">I</mi><mo lspace="0em" rspace="0em">​</mo><msub><mi mathsize="0.800em">C</mi><mn mathsize="0.800em">3</mn></msub></mrow><annotation encoding="application/x-tex">IC_{3}</annotation></semantics></math></span></span></foreignobject></g><g style="--ltx-stroke-color:#000000;" stroke="#000000" stroke-dasharray="3.0pt,3.0pt" stroke-dashoffset="0.0pt"><path style="fill:none" d="M 263.78 -70.87 h 39.37 v 23.62 h -39.37 Z"></path></g><g style="--ltx-stroke-color:#000000;--ltx-fill-color:#000000;" stroke-dasharray="3.0pt,3.0pt" stroke-dashoffset="0.0pt" fill="#000000" stroke="#000000" transform="matrix(1.0 0.0 0.0 1.0 272.92 -62.15)"><foreignobject style="--ltx-fo-width:1.79em;--ltx-fo-height:0.64em;--ltx-fo-depth:0.12em;" width="21.09" height="8.95" transform="matrix(1 0 0 -1 0 7.56)" overflow="visible"><span class="ltx_foreignobject_container"><span class="ltx_foreignobject_content"><math id="S2.F1.1.1.1.pic1.9.9.9.9.9.9.9.9.9.9.9.9.1.1.1.1.1.1.1.1.1.1.1.m1" class="ltx_Math" alttext="IC_{4}" display="inline" intent=":literal"><semantics><mrow><mi mathsize="0.800em">I</mi><mo lspace="0em" rspace="0em">​</mo><msub><mi mathsize="0.800em">C</mi><mn mathsize="0.800em">4</mn></msub></mrow><annotation encoding="application/x-tex">IC_{4}</annotation></semantics></math></span></span></foreignobject></g><g style="--ltx-stroke-color:#000000;--ltx-fill-color:#000000;" transform="matrix(1.0 0.0 0.0 1.0 87.64 -106.67)" fill="#000000" stroke="#000000"><foreignobject style="--ltx-fo-width:1.07em;--ltx-fo-height:0.78em;--ltx-fo-depth:0.11em;" width="13.71" height="11.38" transform="matrix(1 0 0 -1 0 9.99)" overflow="visible"><span class="ltx_foreignobject_container"><span class="ltx_foreignobject_content"><math id="S2.F1.1.1.1.pic1.10.10.10.10.10.10.10.10.10.10.10.10.1.1.1.1.1.1.1.1.1.m1" class="ltx_Math" alttext="\mathbf{\hat{y}}_{1}" display="inline" intent=":literal"><semantics><msub><mover accent="true"><mi mathsize="0.900em">𝐲</mi><mo mathsize="0.900em">^</mo></mover><mn mathsize="0.900em">1</mn></msub><annotation encoding="application/x-tex">\mathbf{\hat{y}}_{1}</annotation></semantics></math></span></span></foreignobject></g><g style="--ltx-stroke-color:#000000;--ltx-fill-color:#000000;" transform="matrix(1.0 0.0 0.0 1.0 150.63 -106.67)" fill="#000000" stroke="#000000"><foreignobject style="--ltx-fo-width:1.07em;--ltx-fo-height:0.78em;--ltx-fo-depth:0.11em;" width="13.71" height="11.38" transform="matrix(1 0 0 -1 0 9.99)" overflow="visible"><span class="ltx_foreignobject_container"><span class="ltx_foreignobject_content"><math id="S2.F1.1.1.1.pic1.11.11.11.11.11.11.11.11.11.11.11.11.1.1.1.1.1.1.1.1.1.m1" class="ltx_Math" alttext="\mathbf{\hat{y}}_{2}" display="inline" intent=":literal"><semantics><msub><mover accent="true"><mi mathsize="0.900em">𝐲</mi><mo mathsize="0.900em">^</mo></mover><mn mathsize="0.900em">2</mn></msub><annotation encoding="application/x-tex">\mathbf{\hat{y}}_{2}</annotation></semantics></math></span></span></foreignobject></g><g style="--ltx-stroke-color:#000000;--ltx-fill-color:#000000;" transform="matrix(1.0 0.0 0.0 1.0 213.62 -106.67)" fill="#000000" stroke="#000000"><foreignobject style="--ltx-fo-width:1.07em;--ltx-fo-height:0.78em;--ltx-fo-depth:0.11em;" width="13.71" height="11.38" transform="matrix(1 0 0 -1 0 9.99)" overflow="visible"><span class="ltx_foreignobject_container"><span class="ltx_foreignobject_content"><math id="S2.F1.1.1.1.pic1.12.12.12.12.12.12.12.12.12.12.12.12.1.1.1.1.1.1.1.1.1.m1" class="ltx_Math" alttext="\mathbf{\hat{y}}_{3}" display="inline" intent=":literal"><semantics><msub><mover accent="true"><mi mathsize="0.900em">𝐲</mi><mo mathsize="0.900em">^</mo></mover><mn mathsize="0.900em">3</mn></msub><annotation encoding="application/x-tex">\mathbf{\hat{y}}_{3}</annotation></semantics></math></span></span></foreignobject></g><g style="--ltx-stroke-color:#000000;--ltx-fill-color:#000000;" transform="matrix(1.0 0.0 0.0 1.0 276.61 -106.67)" fill="#000000" stroke="#000000"><foreignobject style="--ltx-fo-width:1.07em;--ltx-fo-height:0.78em;--ltx-fo-depth:0.11em;" width="13.71" height="11.38" transform="matrix(1 0 0 -1 0 9.99)" overflow="visible"><span class="ltx_foreignobject_container"><span class="ltx_foreignobject_content"><math id="S2.F1.1.1.1.pic1.13.13.13.13.13.13.13.13.13.13.13.13.1.1.1.1.1.1.1.1.1.m1" class="ltx_Math" alttext="\mathbf{\hat{y}}_{4}" display="inline" intent=":literal"><semantics><msub><mover accent="true"><mi mathsize="0.900em">𝐲</mi><mo mathsize="0.900em">^</mo></mover><mn mathsize="0.900em">4</mn></msub><annotation encoding="application/x-tex">\mathbf{\hat{y}}_{4}</annotation></semantics></math></span></span></foreignobject></g><g style="--ltx-fill-color:#E6E6E6;" fill="#E6E6E6"><path d="M 106.23 -102.36 C 106.23 -95.88 100.97 -90.62 94.49 -90.62 C 88 -90.62 82.75 -95.88 82.75 -102.36 C 82.75 -108.85 88 -114.1 94.49 -114.1 C 100.97 -114.1 106.23 -108.85 106.23 -102.36 Z M 94.49 -102.36"></path></g><g style="--ltx-stroke-color:#000000;--ltx-fill-color:#000000;" transform="matrix(1.0 0.0 0.0 1.0 87.54 -106.32)" fill="#000000" stroke="#000000"><foreignobject style="--ltx-fo-width:1em;--ltx-fo-height:0.72em;--ltx-fo-depth:0.15em;" width="13.89" height="12.07" transform="matrix(1 0 0 -1 0 9.99)" overflow="visible"><span class="ltx_foreignobject_container"><span class="ltx_foreignobject_content"><math id="S2.F1.1.1.1.pic1.14.14.14.14.14.14.14.14.14.14.14.14.1.1.1.1.1.1.1.1.1.m1" class="ltx_Math" alttext="\mathbf{\hat{y}}_{1}" display="inline" intent=":literal"><semantics><msub><mover accent="true"><mi>𝐲</mi><mo>^</mo></mover><mn>1</mn></msub><annotation encoding="application/x-tex">\mathbf{\hat{y}}_{1}</annotation></semantics></math></span></span></foreignobject></g><g style="--ltx-fill-color:#E6E6E6;" fill="#E6E6E6"><path d="M 169.22 -102.36 C 169.22 -95.88 163.97 -90.62 157.48 -90.62 C 151 -90.62 145.74 -95.88 145.74 -102.36 C 145.74 -108.85 151 -114.1 157.48 -114.1 C 163.97 -114.1 169.22 -108.85 169.22 -102.36 Z M 157.48 -102.36"></path></g><g style="--ltx-stroke-color:#000000;--ltx-fill-color:#000000;" transform="matrix(1.0 0.0 0.0 1.0 150.53 -106.32)" fill="#000000" stroke="#000000"><foreignobject style="--ltx-fo-width:1em;--ltx-fo-height:0.72em;--ltx-fo-depth:0.15em;" width="13.89" height="12.07" transform="matrix(1 0 0 -1 0 9.99)" overflow="visible"><span class="ltx_foreignobject_container"><span class="ltx_foreignobject_content"><math id="S2.F1.1.1.1.pic1.15.15.15.15.15.15.15.15.15.15.15.15.1.1.1.1.1.1.1.1.1.m1" class="ltx_Math" alttext="\mathbf{\hat{y}}_{2}" display="inline" intent=":literal"><semantics><msub><mover accent="true"><mi>𝐲</mi><mo>^</mo></mover><mn>2</mn></msub><annotation encoding="application/x-tex">\mathbf{\hat{y}}_{2}</annotation></semantics></math></span></span></foreignobject></g><path style="fill:none" d="M 232.21 -102.36 C 232.21 -95.88 226.96 -90.62 220.47 -90.62 C 213.99 -90.62 208.73 -95.88 208.73 -102.36 C 208.73 -108.85 213.99 -114.1 220.47 -114.1 C 226.96 -114.1 232.21 -108.85 232.21 -102.36 Z M 220.47 -102.36"></path><g stroke-dasharray="3.0pt,3.0pt" stroke-dashoffset="0.0pt"><path style="fill:none" d="M 295.21 -102.36 C 295.21 -95.88 289.95 -90.62 283.46 -90.62 C 276.98 -90.62 271.72 -95.88 271.72 -102.36 C 271.72 -108.85 276.98 -114.1 283.46 -114.1 C 289.95 -114.1 295.21 -108.85 295.21 -102.36 Z M 283.46 -102.36"></path></g></g><g stroke-width="0.6pt"><path style="fill:none" d="M 8.78 0 L 43.78 0"></path><g transform="matrix(1.0 0.0 0.0 1.0 43.78 0)"><path style="stroke:none" d="M 3.18 0 L -1.91 2.55 L 0 0 L -1.91 -2.55"></path></g></g><g stroke-width="0.6pt"><path style="fill:none" d="M 79.02 0 L 106.78 0"></path><g transform="matrix(1.0 0.0 0.0 1.0 106.78 0)"><path style="stroke:none" d="M 3.18 0 L -1.91 2.55 L 0 0 L -1.91 -2.55"></path></g></g><g stroke-width="0.6pt"><path style="fill:none" d="M 142.01 0 L 169.77 0"></path><g transform="matrix(1.0 0.0 0.0 1.0 169.77 0)"><path style="stroke:none" d="M 3.18 0 L -1.91 2.55 L 0 0 L -1.91 -2.55"></path></g></g><g stroke-width="0.6pt"><path style="fill:none" d="M 205 0 L 232.76 0"></path><g transform="matrix(1.0 0.0 0.0 1.0 232.76 0)"><path style="stroke:none" d="M 3.18 0 L -1.91 2.55 L 0 0 L -1.91 -2.55"></path></g></g><g stroke-width="0.6pt"><path style="fill:none" d="M 79.02 0 L 94.49 0 L 94.49 -43.78"></path><g transform="matrix(0.0 -1.0 1.0 0.0 94.49 -43.78)"><path style="stroke:none" d="M 3.18 0 L -1.91 2.55 L 0 0 L -1.91 -2.55"></path></g></g><g stroke-width="0.6pt"><path style="fill:none" d="M 142.01 0 L 157.48 0 L 157.48 -43.78"></path><g transform="matrix(0.0 -1.0 1.0 0.0 157.48 -43.78)"><path style="stroke:none" d="M 3.18 0 L -1.91 2.55 L 0 0 L -1.91 -2.55"></path></g></g><g stroke-width="0.6pt"><path style="fill:none" d="M 205 0 L 220.47 0 L 220.47 -43.78"></path><g transform="matrix(0.0 -1.0 1.0 0.0 220.47 -43.78)"><path style="stroke:none" d="M 3.18 0 L -1.91 2.55 L 0 0 L -1.91 -2.55"></path></g></g><g stroke-width="0.6pt"><path style="fill:none" d="M 267.99 0 L 283.46 0 L 283.46 -43.78"></path><g transform="matrix(0.0 -1.0 1.0 0.0 283.46 -43.78)"><path style="stroke:none" d="M 3.18 0 L -1.91 2.55 L 0 0 L -1.91 -2.55"></path></g></g><g stroke-width="0.6pt"><path style="fill:none" d="M 94.49 -71.14 L 94.49 -88.6"></path><g transform="matrix(0.0 -1.0 1.0 0.0 94.49 -88.6)"><path style="stroke:none" d="M 3.18 0 L -1.91 2.55 L 0 0 L -1.91 -2.55"></path></g></g><g stroke-width="0.6pt"><path style="fill:none" d="M 157.48 -71.14 L 157.48 -88.6"></path><g transform="matrix(0.0 -1.0 1.0 0.0 157.48 -88.6)"><path style="stroke:none" d="M 3.18 0 L -1.91 2.55 L 0 0 L -1.91 -2.55"></path></g></g><g stroke-width="0.6pt"><path style="fill:none" d="M 220.47 -71.14 L 220.47 -88.6"></path><g transform="matrix(0.0 -1.0 1.0 0.0 220.47 -88.6)"><path style="stroke:none" d="M 3.18 0 L -1.91 2.55 L 0 0 L -1.91 -2.55"></path></g></g><g stroke-width="0.6pt"><path style="fill:none" d="M 283.46 -71.14 L 283.46 -88.6"></path><g transform="matrix(0.0 -1.0 1.0 0.0 283.46 -88.6)"><path style="stroke:none" d="M 3.18 0 L -1.91 2.55 L 0 0 L -1.91 -2.55"></path></g></g></g></svg></span></span></p>
+<figcaption class="ltx_caption"><span class="ltx_tag ltx_tag_figure"><span id="S2.F1.11.1.1" class="ltx_text ltx_font_bold">Fig. 1</span>: </span>Flow of the proposed sequential training scheme. Grey refers to regularized parameters or output distributions; dashed lines refer to frozen segments. The backbone is represented by rotated blocks <math id="S2.F1.6.m1" class="ltx_Math" alttext="\Theta_{\mu}" display="inline" intent=":literal"><semantics><msub><mi mathvariant="normal">Θ</mi><mi>μ</mi></msub><annotation encoding="application/x-tex">\Theta_{\mu}</annotation></semantics></math>’s and intermediate classifiers by horizontal blocks <math id="S2.F1.7.m2" class="ltx_Math" alttext="IC_{\mu}" display="inline" intent=":literal"><semantics><mrow><mi>I</mi><mo lspace="0em" rspace="0em">​</mo><msub><mi>C</mi><mi>μ</mi></msub></mrow><annotation encoding="application/x-tex">IC_{\mu}</annotation></semantics></math>’s. Each IC <math id="S2.F1.8.m3" class="ltx_Math" alttext="\mu" display="inline" intent=":literal"><semantics><mi>μ</mi><annotation encoding="application/x-tex">\mu</annotation></semantics></math> outputs a distribution <math id="S2.F1.9.m4" class="ltx_Math" alttext="\mathbf{\hat{y}}_{\mu}" display="inline" intent=":literal"><semantics><msub><mover accent="true"><mi>𝐲</mi><mo>^</mo></mover><mi>μ</mi></msub><annotation encoding="application/x-tex">\mathbf{\hat{y}}_{\mu}</annotation></semantics></math>.</figcaption>
+</figure>
+<div id="S2.p1" class="ltx_para">
+<p id="S2.p1.11" class="ltx_p">We consider an EENN consisting of <math id="S2.p1.1.m1" class="ltx_Math" alttext="M" display="inline" intent=":literal"><semantics><mi>M</mi><annotation encoding="application/x-tex">M</annotation></semantics></math> ICs, where each backbone subnetwork <math id="S2.p1.2.m2" class="ltx_Math" alttext="\mu" display="inline" intent=":literal"><semantics><mi>μ</mi><annotation encoding="application/x-tex">\mu</annotation></semantics></math> is parameterized by <math id="S2.p1.3.m3" class="ltx_Math" alttext="\{\Theta_{1},\dots,\Theta_{\mu}\}" display="inline" intent=":literal"><semantics><mrow><mo stretchy="false">{</mo><msub><mi mathvariant="normal">Θ</mi><mn>1</mn></msub><mo>,</mo><mi mathvariant="normal">…</mi><mo>,</mo><msub><mi mathvariant="normal">Θ</mi><mi>μ</mi></msub><mo stretchy="false">}</mo></mrow><annotation encoding="application/x-tex">\{\Theta_{1},\dots,\Theta_{\mu}\}</annotation></semantics></math> and produces class probability vector <math id="S2.p1.4.m4" class="ltx_Math" alttext="\mathbf{\hat{y}}_{\mu}" display="inline" intent=":literal"><semantics><msub><mover accent="true"><mi>𝐲</mi><mo>^</mo></mover><mi>μ</mi></msub><annotation encoding="application/x-tex">\mathbf{\hat{y}}_{\mu}</annotation></semantics></math> (see <a href="https://ar5iv.labs.arxiv.org/html/2605.05358#S2.F1" title="In 2 Proposed Methodology ‣ Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks" class="ltx_ref"><span class="ltx_text ltx_ref_tag">Figure</span>&nbsp;<span class="ltx_text ltx_ref_tag">1</span></a>), with <math id="S2.p1.5.m5" class="ltx_Math" alttext="\hat{y}_{\mu}(c)" display="inline" intent=":literal"><semantics><mrow><msub><mover accent="true"><mi>y</mi><mo>^</mo></mover><mi>μ</mi></msub><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><mi>c</mi><mo stretchy="false">)</mo></mrow></mrow><annotation encoding="application/x-tex">\hat{y}_{\mu}(c)</annotation></semantics></math> (for <math id="S2.p1.6.m6" class="ltx_Math" alttext="c\in\{1,\dots,C\}" display="inline" intent=":literal"><semantics><mrow><mi>c</mi><mo>∈</mo><mrow><mo stretchy="false">{</mo><mn>1</mn><mo>,</mo><mi mathvariant="normal">…</mi><mo>,</mo><mi>C</mi><mo stretchy="false">}</mo></mrow></mrow><annotation encoding="application/x-tex">c\in\{1,\dots,C\}</annotation></semantics></math>) being the probability associated with class <math id="S2.p1.7.m7" class="ltx_Math" alttext="c" display="inline" intent=":literal"><semantics><mi>c</mi><annotation encoding="application/x-tex">c</annotation></semantics></math>. We frame the sequential training of ICs as a sequence of learning tasks indexed by <math id="S2.p1.8.m8" class="ltx_Math" alttext="\mu\in\{1,2,\ldots,M\}" display="inline" intent=":literal"><semantics><mrow><mi>μ</mi><mo>∈</mo><mrow><mo stretchy="false">{</mo><mn>1</mn><mo>,</mo><mn>2</mn><mo>,</mo><mi mathvariant="normal">…</mi><mo>,</mo><mi>M</mi><mo stretchy="false">}</mo></mrow></mrow><annotation encoding="application/x-tex">\mu\in\{1,2,\ldots,M\}</annotation></semantics></math>, where task <math id="S2.p1.9.m9" class="ltx_Math" alttext="\mu" display="inline" intent=":literal"><semantics><mi>μ</mi><annotation encoding="application/x-tex">\mu</annotation></semantics></math> corresponds to training IC <math id="S2.p1.10.m10" class="ltx_Math" alttext="\mu" display="inline" intent=":literal"><semantics><mi>μ</mi><annotation encoding="application/x-tex">\mu</annotation></semantics></math> while preserving the predictive capabilities of all previously trained ICs <math id="S2.p1.11.m11" class="ltx_Math" alttext="\{1,\ldots,{\mu-1}\}" display="inline" intent=":literal"><semantics><mrow><mo stretchy="false">{</mo><mn>1</mn><mo>,</mo><mi mathvariant="normal">…</mi><mo>,</mo><mrow><mi>μ</mi><mo>−</mo><mn>1</mn></mrow><mo stretchy="false">}</mo></mrow><annotation encoding="application/x-tex">\{1,\ldots,{\mu-1}\}</annotation></semantics></math>. The shared backbone parameters must accommodate the objectives of all trained ICs, balancing plasticity (i.e., the ability to refine representations for the current task) against stability (i.e., maintaining performance on earlier tasks).</p>
+</div>
+<div id="S2.p2" class="ltx_para">
+<p id="S2.p2.1" class="ltx_p">To address this stability-plasticity trade-off, we augment the standard classification loss with a regularization term that protects previously acquired knowledge. The loss function for training exit <math id="S2.p2.1.m1" class="ltx_Math" alttext="\mu" display="inline" intent=":literal"><semantics><mi>μ</mi><annotation encoding="application/x-tex">\mu</annotation></semantics></math> takes the general form:</p>
+<table id="S2.E1" class="ltx_equation ltx_eqn_table">
+
+<tbody><tr class="ltx_equation ltx_eqn_row ltx_align_baseline">
+<td class="ltx_eqn_cell ltx_eqn_center_padleft"></td>
+<td class="ltx_eqn_cell ltx_align_center"><math id="S2.E1.m1" class="ltx_Math" alttext="\mathcal{L}_{\mathrm{total}}^{(\mu)}=\mathcal{L}_{\mathrm{CE}}^{(\mu)}+s\,\lambda\mathcal{R}_{\mathrm{EWC}}^{(\mu)}+(1-s)\,\rho\mathcal{R}_{\mathrm{LwF}}^{(\mu)}" display="block" intent=":literal"><semantics><mrow><msubsup><mi class="ltx_font_mathcaligraphic">ℒ</mi><mi>total</mi><mrow><mo stretchy="false">(</mo><mi>μ</mi><mo stretchy="false">)</mo></mrow></msubsup><mo>=</mo><mrow><msubsup><mi class="ltx_font_mathcaligraphic">ℒ</mi><mi>CE</mi><mrow><mo stretchy="false">(</mo><mi>μ</mi><mo stretchy="false">)</mo></mrow></msubsup><mo>+</mo><mrow><mi>s</mi><mo lspace="0.170em" rspace="0em">​</mo><mi>λ</mi><mo lspace="0em" rspace="0em">​</mo><msubsup><mi class="ltx_font_mathcaligraphic">ℛ</mi><mi>EWC</mi><mrow><mo stretchy="false">(</mo><mi>μ</mi><mo stretchy="false">)</mo></mrow></msubsup></mrow><mo>+</mo><mrow><mrow><mo stretchy="false">(</mo><mrow><mn>1</mn><mo>−</mo><mi>s</mi></mrow><mo stretchy="false">)</mo></mrow><mo lspace="0.170em" rspace="0em">​</mo><mi>ρ</mi><mo lspace="0em" rspace="0em">​</mo><msubsup><mi class="ltx_font_mathcaligraphic">ℛ</mi><mi>LwF</mi><mrow><mo stretchy="false">(</mo><mi>μ</mi><mo stretchy="false">)</mo></mrow></msubsup></mrow></mrow></mrow><annotation encoding="application/x-tex">\mathcal{L}_{\mathrm{total}}^{(\mu)}=\mathcal{L}_{\mathrm{CE}}^{(\mu)}+s\,\lambda\mathcal{R}_{\mathrm{EWC}}^{(\mu)}+(1-s)\,\rho\mathcal{R}_{\mathrm{LwF}}^{(\mu)}</annotation></semantics></math></td>
+<td class="ltx_eqn_cell ltx_eqn_center_padright"></td>
+<td rowspan="1" class="ltx_eqn_cell ltx_eqn_eqno ltx_align_middle ltx_align_right"><span class="ltx_tag ltx_tag_equation ltx_align_right">(1)</span></td>
+</tr></tbody>
+</table>
+</div>
+<div id="S2.p3" class="ltx_para ltx_noindent">
+<p id="S2.p3.9" class="ltx_p">where <math id="S2.p3.1.m1" class="ltx_Math" alttext="\mathcal{L}_{\mathrm{CE}}^{(\mu)}" display="inline" intent=":literal"><semantics><msubsup><mi class="ltx_font_mathcaligraphic">ℒ</mi><mi>CE</mi><mrow><mo stretchy="false">(</mo><mi>μ</mi><mo stretchy="false">)</mo></mrow></msubsup><annotation encoding="application/x-tex">\mathcal{L}_{\mathrm{CE}}^{(\mu)}</annotation></semantics></math> denotes the cross-entropy loss for exit <math id="S2.p3.2.m2" class="ltx_Math" alttext="\mu" display="inline" intent=":literal"><semantics><mi>μ</mi><annotation encoding="application/x-tex">\mu</annotation></semantics></math> which depends on <math id="S2.p3.3.m3" class="ltx_Math" alttext="\{\Theta_{1},\dots,\Theta_{\mu}\}" display="inline" intent=":literal"><semantics><mrow><mo stretchy="false">{</mo><msub><mi mathvariant="normal">Θ</mi><mn>1</mn></msub><mo>,</mo><mi mathvariant="normal">…</mi><mo>,</mo><msub><mi mathvariant="normal">Θ</mi><mi>μ</mi></msub><mo stretchy="false">}</mo></mrow><annotation encoding="application/x-tex">\{\Theta_{1},\dots,\Theta_{\mu}\}</annotation></semantics></math> and the parameters of IC <math id="S2.p3.4.m4" class="ltx_Math" alttext="\mu" display="inline" intent=":literal"><semantics><mi>μ</mi><annotation encoding="application/x-tex">\mu</annotation></semantics></math>; <math id="S2.p3.5.m5" class="ltx_Math" alttext="\mathcal{R}_{\mathrm{EWC}}^{(\mu)}" display="inline" intent=":literal"><semantics><msubsup><mi class="ltx_font_mathcaligraphic">ℛ</mi><mi>EWC</mi><mrow><mo stretchy="false">(</mo><mi>μ</mi><mo stretchy="false">)</mo></mrow></msubsup><annotation encoding="application/x-tex">\mathcal{R}_{\mathrm{EWC}}^{(\mu)}</annotation></semantics></math> and <math id="S2.p3.6.m6" class="ltx_Math" alttext="\mathcal{R}_{\mathrm{LwF}}^{(\mu)}" display="inline" intent=":literal"><semantics><msubsup><mi class="ltx_font_mathcaligraphic">ℛ</mi><mi>LwF</mi><mrow><mo stretchy="false">(</mo><mi>μ</mi><mo stretchy="false">)</mo></mrow></msubsup><annotation encoding="application/x-tex">\mathcal{R}_{\mathrm{LwF}}^{(\mu)}</annotation></semantics></math> are regularization terms that mitigate the degradation of earlier exits, corresponding to EWC (parameter-level) and LwF (output-distribution-level), respectively. Their relative strengths are controlled by the hyperparameters <math id="S2.p3.7.m7" class="ltx_Math" alttext="\lambda" display="inline" intent=":literal"><semantics><mi>λ</mi><annotation encoding="application/x-tex">\lambda</annotation></semantics></math> and <math id="S2.p3.8.m8" class="ltx_Math" alttext="\rho" display="inline" intent=":literal"><semantics><mi>ρ</mi><annotation encoding="application/x-tex">\rho</annotation></semantics></math>. The binary variable <math id="S2.p3.9.m9" class="ltx_Math" alttext="s\in\{0,1\}" display="inline" intent=":literal"><semantics><mrow><mi>s</mi><mo>∈</mo><mrow><mo stretchy="false">{</mo><mn>0</mn><mo>,</mo><mn>1</mn><mo stretchy="false">}</mo></mrow></mrow><annotation encoding="application/x-tex">s\in\{0,1\}</annotation></semantics></math> indicates which regularization strategy is active.</p>
+</div>
+<div id="S2.p4" class="ltx_para">
+<p id="S2.p4.7" class="ltx_p">To illustrate the training procedure, <a href="https://ar5iv.labs.arxiv.org/html/2605.05358#S2.F1" title="In 2 Proposed Methodology ‣ Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks" class="ltx_ref"><span class="ltx_text ltx_ref_tag">Figure</span>&nbsp;<span class="ltx_text ltx_ref_tag">1</span></a> shows the status of each subnetwork when training exit 3. At this stage, the first two blocks (parameterized by <math id="S2.p4.1.m1" class="ltx_Math" alttext="\Theta_{1}" display="inline" intent=":literal"><semantics><msub><mi mathvariant="normal">Θ</mi><mn>1</mn></msub><annotation encoding="application/x-tex">\Theta_{1}</annotation></semantics></math> and <math id="S2.p4.2.m2" class="ltx_Math" alttext="\Theta_{2}" display="inline" intent=":literal"><semantics><msub><mi mathvariant="normal">Θ</mi><mn>2</mn></msub><annotation encoding="application/x-tex">\Theta_{2}</annotation></semantics></math>) and their respective classifiers (producing predictions <math id="S2.p4.3.m3" class="ltx_Math" alttext="\mathbf{\hat{y}}_{1}" display="inline" intent=":literal"><semantics><msub><mover accent="true"><mi>𝐲</mi><mo>^</mo></mover><mn>1</mn></msub><annotation encoding="application/x-tex">\mathbf{\hat{y}}_{1}</annotation></semantics></math> and <math id="S2.p4.4.m4" class="ltx_Math" alttext="\mathbf{\hat{y}}_{2}" display="inline" intent=":literal"><semantics><msub><mover accent="true"><mi>𝐲</mi><mo>^</mo></mover><mn>2</mn></msub><annotation encoding="application/x-tex">\mathbf{\hat{y}}_{2}</annotation></semantics></math>) have already been trained. We now add IC 3 and therefore, we need to train the full network up to exit 3. We minimize the cross-entropy loss <math id="S2.p4.5.m5" class="ltx_Math" alttext="\mathcal{L}^{(3)}_{\text{CE}}" display="inline" intent=":literal"><semantics><msubsup><mi class="ltx_font_mathcaligraphic">ℒ</mi><mtext>CE</mtext><mrow><mo stretchy="false">(</mo><mn>3</mn><mo stretchy="false">)</mo></mrow></msubsup><annotation encoding="application/x-tex">\mathcal{L}^{(3)}_{\text{CE}}</annotation></semantics></math> augmented with regularization <math id="S2.p4.6.m6" class="ltx_Math" alttext="\mathcal{R}^{(3)}" display="inline" intent=":literal"><semantics><msup><mi class="ltx_font_mathcaligraphic">ℛ</mi><mrow><mo stretchy="false">(</mo><mn>3</mn><mo stretchy="false">)</mo></mrow></msup><annotation encoding="application/x-tex">\mathcal{R}^{(3)}</annotation></semantics></math> applied to the previously trained blocks, either constraining their parameters (EWC) or preserving their predictions (LwF). The final block (<math id="S2.p4.7.m7" class="ltx_Math" alttext="\Theta_{4}" display="inline" intent=":literal"><semantics><msub><mi mathvariant="normal">Θ</mi><mn>4</mn></msub><annotation encoding="application/x-tex">\Theta_{4}</annotation></semantics></math>) and its corresponding classifier remain frozen throughout this stage.</p>
+</div>
+<section id="S2.SS1" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">2.1 </span>Parameter-level Regularization</h3>
+
+<div id="S2.SS1.p1" class="ltx_para">
+<p id="S2.SS1.p1.1" class="ltx_p">The first approach employs parameter-level regularization through EWC, which protects parameters that are critical for previously trained exits by penalizing changes to important weights. This importance score is computed using Fisher Information <cite class="ltx_cite ltx_citemacro_cite">[<a href="https://ar5iv.labs.arxiv.org/html/2605.05358#bib.bib10" title="Natural gradient works efficiently in learning" class="ltx_ref">1</a>]</cite>. Parameters with large Fisher values correspond to directions in parameter space where small perturbations would strongly increase the cross-entropy loss <math id="S2.SS1.p1.1.m1" class="ltx_Math" alttext="\mathcal{L}_{\mathrm{CE}}^{(\nu)}" display="inline" intent=":literal"><semantics><msubsup><mi class="ltx_font_mathcaligraphic">ℒ</mi><mi>CE</mi><mrow><mo stretchy="false">(</mo><mi>ν</mi><mo stretchy="false">)</mo></mrow></msubsup><annotation encoding="application/x-tex">\mathcal{L}_{\mathrm{CE}}^{(\nu)}</annotation></semantics></math> on previous exits and are therefore prioritized for protection.</p>
+</div>
+<div id="S2.SS1.p2" class="ltx_para">
+<p id="S2.SS1.p2.13" class="ltx_p">Following the online EWC framework <cite class="ltx_cite ltx_citemacro_cite">[<a href="https://ar5iv.labs.arxiv.org/html/2605.05358#bib.bib6" title="Progress &amp; compress: a scalable framework for continual learning" class="ltx_ref">15</a>]</cite>, the parameter-level regularization is defined as</p>
+<table id="S2.E2" class="ltx_equation ltx_eqn_table">
+
+<tbody><tr class="ltx_equation ltx_eqn_row ltx_align_baseline">
+<td class="ltx_eqn_cell ltx_eqn_center_padleft"></td>
+<td class="ltx_eqn_cell ltx_align_center"><math id="S2.E2.m1" class="ltx_Math" alttext="\mathcal{R}_{\mathrm{EWC}}^{(\mu)}=\sum_{\theta_{k}\in\cup_{i=1}^{\mu-1}\Theta_{i}}\left(\sum_{\nu=1}^{\mu-1}F_{k}^{(\nu)}\right)\left(\theta_{k}-\theta_{k}^{*}\right)^{2}" display="block" intent=":literal"><semantics><mrow><msubsup><mi class="ltx_font_mathcaligraphic">ℛ</mi><mi>EWC</mi><mrow><mo stretchy="false">(</mo><mi>μ</mi><mo stretchy="false">)</mo></mrow></msubsup><mo rspace="0.111em">=</mo><mrow><munder><mo movablelimits="false" rspace="0em">∑</mo><mrow><msub><mi>θ</mi><mi>k</mi></msub><mo rspace="0em">∈</mo><mrow><msubsup><mo lspace="0em">∪</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mrow><mi>μ</mi><mo>−</mo><mn>1</mn></mrow></msubsup><msub><mi mathvariant="normal">Θ</mi><mi>i</mi></msub></mrow></mrow></munder><mrow><mrow><mo>(</mo><mrow><munderover><mo lspace="0em" movablelimits="false">∑</mo><mrow><mi>ν</mi><mo>=</mo><mn>1</mn></mrow><mrow><mi>μ</mi><mo>−</mo><mn>1</mn></mrow></munderover><msubsup><mi>F</mi><mi>k</mi><mrow><mo stretchy="false">(</mo><mi>ν</mi><mo stretchy="false">)</mo></mrow></msubsup></mrow><mo>)</mo></mrow><mo lspace="0em" rspace="0em">​</mo><msup><mrow><mo>(</mo><mrow><msub><mi>θ</mi><mi>k</mi></msub><mo>−</mo><msubsup><mi>θ</mi><mi>k</mi><mo>∗</mo></msubsup></mrow><mo>)</mo></mrow><mn>2</mn></msup></mrow></mrow></mrow><annotation encoding="application/x-tex">\mathcal{R}_{\mathrm{EWC}}^{(\mu)}=\sum_{\theta_{k}\in\cup_{i=1}^{\mu-1}\Theta_{i}}\left(\sum_{\nu=1}^{\mu-1}F_{k}^{(\nu)}\right)\left(\theta_{k}-\theta_{k}^{*}\right)^{2}</annotation></semantics></math></td>
+<td class="ltx_eqn_cell ltx_eqn_center_padright"></td>
+<td rowspan="1" class="ltx_eqn_cell ltx_eqn_eqno ltx_align_middle ltx_align_right"><span class="ltx_tag ltx_tag_equation ltx_align_right">(2)</span></td>
+</tr></tbody>
+</table>
+<p id="S2.SS1.p2.6" class="ltx_p">Here, <math id="S2.SS1.p2.1.m1" class="ltx_Math" alttext="\theta_{k}^{*}\in\mathbb{R}" display="inline" intent=":literal"><semantics><mrow><msubsup><mi>θ</mi><mi>k</mi><mo>∗</mo></msubsup><mo>∈</mo><mi>ℝ</mi></mrow><annotation encoding="application/x-tex">\theta_{k}^{*}\in\mathbb{R}</annotation></semantics></math> denotes the value of parameter <math id="S2.SS1.p2.2.m2" class="ltx_Math" alttext="\theta_{k}\in\cup_{i=1}^{\mu-1}\Theta_{i}" display="inline" intent=":literal"><semantics><mrow><msub><mi>θ</mi><mi>k</mi></msub><mo rspace="0em">∈</mo><mrow><msubsup><mo lspace="0em">∪</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mrow><mi>μ</mi><mo>−</mo><mn>1</mn></mrow></msubsup><msub><mi mathvariant="normal">Θ</mi><mi>i</mi></msub></mrow></mrow><annotation encoding="application/x-tex">\theta_{k}\in\cup_{i=1}^{\mu-1}\Theta_{i}</annotation></semantics></math> after training up to exit <math id="S2.SS1.p2.3.m3" class="ltx_Math" alttext="\mu-1" display="inline" intent=":literal"><semantics><mrow><mi>μ</mi><mo>−</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">\mu-1</annotation></semantics></math>.
+The term <math id="S2.SS1.p2.4.m4" class="ltx_Math" alttext="F_{k}^{(\nu)}\in\mathbb{R}" display="inline" intent=":literal"><semantics><mrow><msubsup><mi>F</mi><mi>k</mi><mrow><mo stretchy="false">(</mo><mi>ν</mi><mo stretchy="false">)</mo></mrow></msubsup><mo>∈</mo><mi>ℝ</mi></mrow><annotation encoding="application/x-tex">F_{k}^{(\nu)}\in\mathbb{R}</annotation></semantics></math> represents the Fisher information measuring the importance of parameter <math id="S2.SS1.p2.5.m5" class="ltx_Math" alttext="\theta_{k}" display="inline" intent=":literal"><semantics><msub><mi>θ</mi><mi>k</mi></msub><annotation encoding="application/x-tex">\theta_{k}</annotation></semantics></math> for exit <math id="S2.SS1.p2.6.m6" class="ltx_Math" alttext="\nu" display="inline" intent=":literal"><semantics><mi>ν</mi><annotation encoding="application/x-tex">\nu</annotation></semantics></math>. In practice, we use the empirical Fisher information <cite class="ltx_cite ltx_citemacro_cite">[<a href="https://ar5iv.labs.arxiv.org/html/2605.05358#bib.bib20" title="On the computation of the fisher information in continual learning" class="ltx_ref">18</a>]</cite>, which is computed as:</p>
+<table id="S2.E3" class="ltx_equation ltx_eqn_table">
+
+<tbody><tr class="ltx_equation ltx_eqn_row ltx_align_baseline">
+<td class="ltx_eqn_cell ltx_eqn_center_padleft"></td>
+<td class="ltx_eqn_cell ltx_align_center"><math id="S2.E3.m1" class="ltx_Math" alttext="F_{k}^{(\nu)}=\frac{1}{N}\sum_{\mathbf{x}\in\mathcal{D}}\left(\left.\frac{\partial}{\partial\theta_{k}}\log\hat{y}_{\nu}(\mathcal{C}(\mathbf{x}))\right|_{\theta_{k}=\theta_{k}^{*}}\right)^{2}" display="block" intent=":literal"><semantics><mrow><msubsup><mi>F</mi><mi>k</mi><mrow><mo stretchy="false">(</mo><mi>ν</mi><mo stretchy="false">)</mo></mrow></msubsup><mo>=</mo><mrow><mfrac><mn>1</mn><mi>N</mi></mfrac><mo lspace="0em" rspace="0em">​</mo><mrow><munder><mo movablelimits="false" rspace="0em">∑</mo><mrow><mi>𝐱</mi><mo>∈</mo><mi class="ltx_font_mathcaligraphic">𝒟</mi></mrow></munder><msup><mrow><mo>(</mo><msub><mrow><mrow><mfrac><mo>∂</mo><mrow><mo rspace="0em">∂</mo><msub><mi>θ</mi><mi>k</mi></msub></mrow></mfrac><mo lspace="0.167em" rspace="0em">​</mo><mrow><mi>log</mi><mo lspace="0.167em">⁡</mo><msub><mover accent="true"><mi>y</mi><mo>^</mo></mover><mi>ν</mi></msub></mrow><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><mrow><mi class="ltx_font_mathcaligraphic">𝒞</mi><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><mi>𝐱</mi><mo stretchy="false">)</mo></mrow></mrow><mo stretchy="false">)</mo></mrow></mrow><mo>|</mo></mrow><mrow><msub><mi>θ</mi><mi>k</mi></msub><mo>=</mo><msubsup><mi>θ</mi><mi>k</mi><mo>∗</mo></msubsup></mrow></msub><mo>)</mo></mrow><mn>2</mn></msup></mrow></mrow></mrow><annotation encoding="application/x-tex">F_{k}^{(\nu)}=\frac{1}{N}\sum_{\mathbf{x}\in\mathcal{D}}\left(\left.\frac{\partial}{\partial\theta_{k}}\log\hat{y}_{\nu}(\mathcal{C}(\mathbf{x}))\right|_{\theta_{k}=\theta_{k}^{*}}\right)^{2}</annotation></semantics></math></td>
+<td class="ltx_eqn_cell ltx_eqn_center_padright"></td>
+<td rowspan="1" class="ltx_eqn_cell ltx_eqn_eqno ltx_align_middle ltx_align_right"><span class="ltx_tag ltx_tag_equation ltx_align_right">(3)</span></td>
+</tr></tbody>
+</table>
+<p id="S2.SS1.p2.12" class="ltx_p">where <math id="S2.SS1.p2.7.m1" class="ltx_Math" alttext="\mathcal{D}" display="inline" intent=":literal"><semantics><mi class="ltx_font_mathcaligraphic">𝒟</mi><annotation encoding="application/x-tex">\mathcal{D}</annotation></semantics></math> denotes the training dataset,
+<math id="S2.SS1.p2.8.m2" class="ltx_Math" alttext="N" display="inline" intent=":literal"><semantics><mi>N</mi><annotation encoding="application/x-tex">N</annotation></semantics></math> is the total number of training samples, and <math id="S2.SS1.p2.9.m3" class="ltx_Math" alttext="\hat{y}_{\nu}(\mathcal{C}(\mathbf{x}))" display="inline" intent=":literal"><semantics><mrow><msub><mover accent="true"><mi>y</mi><mo>^</mo></mover><mi>ν</mi></msub><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><mrow><mi class="ltx_font_mathcaligraphic">𝒞</mi><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><mi>𝐱</mi><mo stretchy="false">)</mo></mrow></mrow><mo stretchy="false">)</mo></mrow></mrow><annotation encoding="application/x-tex">\hat{y}_{\nu}(\mathcal{C}(\mathbf{x}))</annotation></semantics></math> is the probability associated with the true label <math id="S2.SS1.p2.10.m4" class="ltx_Math" alttext="\mathcal{C}(\mathbf{x})\in\{1,\dots,C\}" display="inline" intent=":literal"><semantics><mrow><mrow><mi class="ltx_font_mathcaligraphic">𝒞</mi><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><mi>𝐱</mi><mo stretchy="false">)</mo></mrow></mrow><mo>∈</mo><mrow><mo stretchy="false">{</mo><mn>1</mn><mo>,</mo><mi mathvariant="normal">…</mi><mo>,</mo><mi>C</mi><mo stretchy="false">}</mo></mrow></mrow><annotation encoding="application/x-tex">\mathcal{C}(\mathbf{x})\in\{1,\dots,C\}</annotation></semantics></math> for input <math id="S2.SS1.p2.11.m5" class="ltx_Math" alttext="\mathbf{x}" display="inline" intent=":literal"><semantics><mi>𝐱</mi><annotation encoding="application/x-tex">\mathbf{x}</annotation></semantics></math> at exit <math id="S2.SS1.p2.12.m6" class="ltx_Math" alttext="\nu" display="inline" intent=":literal"><semantics><mi>ν</mi><annotation encoding="application/x-tex">\nu</annotation></semantics></math>.</p>
+</div>
+</section>
+<section id="S2.SS2" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">2.2 </span>Output distribution-level Regularization</h3>
+
+<div id="S2.SS2.p1" class="ltx_para">
+<p id="S2.SS2.p1.7" class="ltx_p">The second proposed approach takes a fundamentally different perspective by operating at the output distribution level. Rather than protecting individual parameters, LwF preserves knowledge by enforcing that the current model maintains the input-output mappings learned by previously trained exits. In contrast to EWC, LwF imposes a functional constraint that is agnostic to specific parameter values and instead focuses on preserving decision boundaries. Under LwF, parameters are free to change substantially as long as the output distributions of previous exits is minimally shifted by the training of this new exit, allowing the network to adapt its internal representations while maintaining stable behavior. Importantly, the LwF loss enables gradient flow through both the shared backbone and the classifier heads of earlier exits; this added flexibility allows earlier classifiers to compensate for moderate backbone drift, potentially mitigating performance degradation. The output distribution-level regularization is thus defined as:</p>
+<table id="S2.E4" class="ltx_equation ltx_eqn_table">
+
+<tbody><tr class="ltx_equation ltx_eqn_row ltx_align_baseline">
+<td class="ltx_eqn_cell ltx_eqn_center_padleft"></td>
+<td class="ltx_eqn_cell ltx_align_center"><math id="S2.E4.m1" class="ltx_Math" alttext="\mathcal{R}_{\mathrm{LwF}}^{(\mu)}=\sum_{\nu=1}^{\mu-1}\mathbb{KL}\left(\mathbf{\hat{y}}_{\nu}\;\|\;\mathbf{\hat{y}}^{*}_{\nu}\right)" display="block" intent=":literal"><semantics><mrow><msubsup><mi class="ltx_font_mathcaligraphic">ℛ</mi><mi>LwF</mi><mrow><mo stretchy="false">(</mo><mi>μ</mi><mo stretchy="false">)</mo></mrow></msubsup><mo rspace="0.111em">=</mo><mrow><munderover><mo movablelimits="false">∑</mo><mrow><mi>ν</mi><mo>=</mo><mn>1</mn></mrow><mrow><mi>μ</mi><mo>−</mo><mn>1</mn></mrow></munderover><mrow><mi>𝕂</mi><mo lspace="0em" rspace="0em">​</mo><mi>𝕃</mi><mo lspace="0em" rspace="0em">​</mo><mrow><mo>(</mo><mrow><msub><mover accent="true"><mi>𝐲</mi><mo>^</mo></mover><mi>ν</mi></msub><mo rspace="0.558em">∥</mo><msubsup><mover accent="true"><mi>𝐲</mi><mo>^</mo></mover><mi>ν</mi><mo>∗</mo></msubsup></mrow><mo>)</mo></mrow></mrow></mrow></mrow><annotation encoding="application/x-tex">\mathcal{R}_{\mathrm{LwF}}^{(\mu)}=\sum_{\nu=1}^{\mu-1}\mathbb{KL}\left(\mathbf{\hat{y}}_{\nu}\;\|\;\mathbf{\hat{y}}^{*}_{\nu}\right)</annotation></semantics></math></td>
+<td class="ltx_eqn_cell ltx_eqn_center_padright"></td>
+<td rowspan="1" class="ltx_eqn_cell ltx_eqn_eqno ltx_align_middle ltx_align_right"><span class="ltx_tag ltx_tag_equation ltx_align_right">(4)</span></td>
+</tr></tbody>
+</table>
+<p id="S2.SS2.p1.6" class="ltx_p">where <math id="S2.SS2.p1.1.m1" class="ltx_Math" alttext="\mathbf{\hat{y}}_{\nu}" display="inline" intent=":literal"><semantics><msub><mover accent="true"><mi>𝐲</mi><mo>^</mo></mover><mi>ν</mi></msub><annotation encoding="application/x-tex">\mathbf{\hat{y}}_{\nu}</annotation></semantics></math> denotes the output distribution of IC <math id="S2.SS2.p1.2.m2" class="ltx_Math" alttext="\nu" display="inline" intent=":literal"><semantics><mi>ν</mi><annotation encoding="application/x-tex">\nu</annotation></semantics></math> when training exit <math id="S2.SS2.p1.3.m3" class="ltx_Math" alttext="\mu" display="inline" intent=":literal"><semantics><mi>μ</mi><annotation encoding="application/x-tex">\mu</annotation></semantics></math>, <math id="S2.SS2.p1.4.m4" class="ltx_Math" alttext="\mathbf{\hat{y}}^{*}_{\nu}" display="inline" intent=":literal"><semantics><msubsup><mover accent="true"><mi>𝐲</mi><mo>^</mo></mover><mi>ν</mi><mo>∗</mo></msubsup><annotation encoding="application/x-tex">\mathbf{\hat{y}}^{*}_{\nu}</annotation></semantics></math> denotes the output distribution obtained with the training of IC <math id="S2.SS2.p1.5.m5" class="ltx_Math" alttext="\nu" display="inline" intent=":literal"><semantics><mi>ν</mi><annotation encoding="application/x-tex">\nu</annotation></semantics></math>, and <math id="S2.SS2.p1.6.m6" class="ltx_math_unparsed" alttext="\mathbb{KL}(\cdot\|\cdot)" display="inline" intent=":literal"><semantics><mrow><mi>𝕂</mi><mi>𝕃</mi><mrow><mo stretchy="false">(</mo><mo lspace="0em" rspace="0em">⋅</mo><mo lspace="0em" rspace="0em">∥</mo><mo lspace="0em" rspace="0em">⋅</mo><mo stretchy="false">)</mo></mrow></mrow><annotation encoding="application/x-tex">\mathbb{KL}(\cdot\|\cdot)</annotation></semantics></math> is the Kullback-Leibler divergence.</p>
+</div>
+</section>
+</section>
+<section id="S3" class="ltx_section">
+<h2 class="ltx_title ltx_title_section">
+<span class="ltx_tag ltx_tag_section">3 </span>Experiments</h2>
+
+<div id="S3.p1" class="ltx_para">
+<p id="S3.p1.1" class="ltx_p">We evaluate our approach on standard early-exit benchmarks following the experimental setup proposed in <cite class="ltx_cite ltx_citemacro_cite">[<a href="https://ar5iv.labs.arxiv.org/html/2605.05358#bib.bib1" title="How to train your multi-exit model? analyzing the impact of training strategies" class="ltx_ref">11</a>]</cite>. Our evaluation focuses on comparing the proposed EWC and LwF regularization strategies against existing sequential training methods across different architectures and computational budgets.</p>
+</div>
+<figure id="S3.T1" class="ltx_table">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_table"><span id="S3.T1.54.1.1" class="ltx_text ltx_font_bold">Table 1</span>: </span>Top-1 accuracy for ResNet-34 and MSDNet on CIFAR-100 compared to baselines.</figcaption>
+<table id="S3.T1.52" class="ltx_tabular ltx_centering ltx_guessed_headers ltx_align_middle">
+<tbody class="ltx_tbody">
+<tr id="S3.T1.4.4" class="ltx_tr">
+<th id="S3.T1.4.4.5" class="ltx_td ltx_align_center ltx_th ltx_th_row ltx_border_r ltx_border_t"><span id="S3.T1.4.4.5.1" class="ltx_text" style="font-size:90%;">Model</span></th>
+<th id="S3.T1.4.4.6" class="ltx_td ltx_align_center ltx_th ltx_th_row ltx_border_r ltx_border_t"><span id="S3.T1.4.4.6.1" class="ltx_text" style="font-size:90%;">Method</span></th>
+<td id="S3.T1.1.1.1" class="ltx_td ltx_align_center ltx_border_r ltx_border_t"><math id="S3.T1.1.1.1.m1" class="ltx_Math" alttext="25\%" display="inline" intent=":literal"><semantics><mrow><mn mathsize="0.900em">25</mn><mo mathsize="0.900em">%</mo></mrow><annotation encoding="application/x-tex">25\%</annotation></semantics></math></td>
+<td id="S3.T1.2.2.2" class="ltx_td ltx_align_center ltx_border_r ltx_border_t"><math id="S3.T1.2.2.2.m1" class="ltx_Math" alttext="50\%" display="inline" intent=":literal"><semantics><mrow><mn mathsize="0.900em">50</mn><mo mathsize="0.900em">%</mo></mrow><annotation encoding="application/x-tex">50\%</annotation></semantics></math></td>
+<td id="S3.T1.3.3.3" class="ltx_td ltx_align_center ltx_border_r ltx_border_t"><math id="S3.T1.3.3.3.m1" class="ltx_Math" alttext="75\%" display="inline" intent=":literal"><semantics><mrow><mn mathsize="0.900em">75</mn><mo mathsize="0.900em">%</mo></mrow><annotation encoding="application/x-tex">75\%</annotation></semantics></math></td>
+<td id="S3.T1.4.4.4" class="ltx_td ltx_align_center ltx_border_t"><math id="S3.T1.4.4.4.m1" class="ltx_Math" alttext="100\%" display="inline" intent=":literal"><semantics><mrow><mn mathsize="0.900em">100</mn><mo mathsize="0.900em">%</mo></mrow><annotation encoding="application/x-tex">100\%</annotation></semantics></math></td>
+</tr>
+<tr id="S3.T1.8.8" class="ltx_tr">
+<th id="S3.T1.8.8.5" class="ltx_td ltx_align_center ltx_th ltx_th_row ltx_border_r ltx_border_t" rowspan="6"><span id="S3.T1.8.8.5.1" class="ltx_text" style="font-size:90%;">ResNet34</span></th>
+<th id="S3.T1.8.8.6" class="ltx_td ltx_align_center ltx_th ltx_th_row ltx_border_r ltx_border_t"><span id="S3.T1.8.8.6.1" class="ltx_text" style="font-size:90%;">Disjoint</span></th>
+<td id="S3.T1.5.5.1" class="ltx_td ltx_align_center ltx_border_r ltx_border_t"><math id="S3.T1.5.5.1.m1" class="ltx_Math" alttext="52.57" display="inline" intent=":literal"><semantics><mn mathsize="0.900em">52.57</mn><annotation encoding="application/x-tex">52.57</annotation></semantics></math></td>
+<td id="S3.T1.6.6.2" class="ltx_td ltx_align_center ltx_border_r ltx_border_t"><math id="S3.T1.6.6.2.m1" class="ltx_Math" alttext="67.56" display="inline" intent=":literal"><semantics><mn mathsize="0.900em">67.56</mn><annotation encoding="application/x-tex">67.56</annotation></semantics></math></td>
+<td id="S3.T1.7.7.3" class="ltx_td ltx_align_center ltx_border_r ltx_border_t"><math id="S3.T1.7.7.3.m1" class="ltx_Math" alttext="73.49" display="inline" intent=":literal"><semantics><mn mathsize="0.900em">73.49</mn><annotation encoding="application/x-tex">73.49</annotation></semantics></math></td>
+<td id="S3.T1.8.8.4" class="ltx_td ltx_align_center ltx_border_t"><math id="S3.T1.8.8.4.m1" class="ltx_Math" alttext="73.79" display="inline" intent=":literal"><semantics><mn mathsize="0.900em">73.79</mn><annotation encoding="application/x-tex">73.79</annotation></semantics></math></td>
+</tr>
+<tr id="S3.T1.12.12" class="ltx_tr">
+<th id="S3.T1.12.12.5" class="ltx_td ltx_align_center ltx_th ltx_th_row ltx_border_r"><span id="S3.T1.12.12.5.1" class="ltx_text" style="font-size:90%;">Branch-wise</span></th>
+<td id="S3.T1.9.9.1" class="ltx_td ltx_align_center ltx_border_r"><math id="S3.T1.9.9.1.m1" class="ltx_Math" alttext="64.19" display="inline" intent=":literal"><semantics><mn mathsize="0.900em">64.19</mn><annotation encoding="application/x-tex">64.19</annotation></semantics></math></td>
+<td id="S3.T1.10.10.2" class="ltx_td ltx_align_center ltx_border_r"><math id="S3.T1.10.10.2.m1" class="ltx_Math" alttext="67.03" display="inline" intent=":literal"><semantics><mn mathsize="0.900em">67.03</mn><annotation encoding="application/x-tex">67.03</annotation></semantics></math></td>
+<td id="S3.T1.11.11.3" class="ltx_td ltx_align_center ltx_border_r"><math id="S3.T1.11.11.3.m1" class="ltx_Math" alttext="66.88" display="inline" intent=":literal"><semantics><mn mathsize="0.900em">66.88</mn><annotation encoding="application/x-tex">66.88</annotation></semantics></math></td>
+<td id="S3.T1.12.12.4" class="ltx_td ltx_align_center"><math id="S3.T1.12.12.4.m1" class="ltx_Math" alttext="66.75" display="inline" intent=":literal"><semantics><mn mathsize="0.900em">66.75</mn><annotation encoding="application/x-tex">66.75</annotation></semantics></math></td>
+</tr>
+<tr id="S3.T1.16.16" class="ltx_tr">
+<th id="S3.T1.16.16.5" class="ltx_td ltx_align_center ltx_th ltx_th_row ltx_border_r"><span id="S3.T1.16.16.5.1" class="ltx_text" style="font-size:90%;">Separate</span></th>
+<td id="S3.T1.13.13.1" class="ltx_td ltx_align_center ltx_border_r"><math id="S3.T1.13.13.1.m1" class="ltx_Math" alttext="66.25" display="inline" intent=":literal"><semantics><mn mathsize="0.900em">66.25</mn><annotation encoding="application/x-tex">66.25</annotation></semantics></math></td>
+<td id="S3.T1.14.14.2" class="ltx_td ltx_align_center ltx_border_r"><math id="S3.T1.14.14.2.m1" class="ltx_Math" alttext="72.57" display="inline" intent=":literal"><semantics><mn mathsize="0.900em">72.57</mn><annotation encoding="application/x-tex">72.57</annotation></semantics></math></td>
+<td id="S3.T1.15.15.3" class="ltx_td ltx_align_center ltx_border_r"><math id="S3.T1.15.15.3.m1" class="ltx_Math" alttext="72.87" display="inline" intent=":literal"><semantics><mn mathsize="0.900em">72.87</mn><annotation encoding="application/x-tex">72.87</annotation></semantics></math></td>
+<td id="S3.T1.16.16.4" class="ltx_td ltx_align_center"><math id="S3.T1.16.16.4.m1" class="ltx_Math" alttext="72.82" display="inline" intent=":literal"><semantics><mn mathsize="0.900em">72.82</mn><annotation encoding="application/x-tex">72.82</annotation></semantics></math></td>
+</tr>
+<tr id="S3.T1.20.20" class="ltx_tr">
+<th id="S3.T1.20.20.5" class="ltx_td ltx_align_center ltx_th ltx_th_row ltx_border_r"><span id="S3.T1.20.20.5.1" class="ltx_text" style="font-size:90%;">Joint</span></th>
+<td id="S3.T1.17.17.1" class="ltx_td ltx_align_center ltx_border_r"><math id="S3.T1.17.17.1.m1" class="ltx_Math" alttext="62.84" display="inline" intent=":literal"><semantics><mn mathsize="0.900em">62.84</mn><annotation encoding="application/x-tex">62.84</annotation></semantics></math></td>
+<td id="S3.T1.18.18.2" class="ltx_td ltx_align_center ltx_border_r"><math id="S3.T1.18.18.2.m1" class="ltx_Math" alttext="72.80" display="inline" intent=":literal"><semantics><mn mathsize="0.900em">72.80</mn><annotation encoding="application/x-tex">72.80</annotation></semantics></math></td>
+<td id="S3.T1.19.19.3" class="ltx_td ltx_align_center ltx_border_r"><span id="S3.T1.19.19.3.1" class="ltx_text ltx_markedasmath ltx_font_bold" style="font-size:90%;">74.32</span></td>
+<td id="S3.T1.20.20.4" class="ltx_td ltx_align_center"><span id="S3.T1.20.20.4.1" class="ltx_text ltx_markedasmath ltx_font_bold" style="font-size:90%;">74.17</span></td>
+</tr>
+<tr id="S3.T1.24.24" class="ltx_tr">
+<th id="S3.T1.24.24.5" class="ltx_td ltx_align_center ltx_th ltx_th_row ltx_border_r ltx_border_t"><span id="S3.T1.24.24.5.1" class="ltx_text" style="font-size:90%;">EWC</span></th>
+<td id="S3.T1.21.21.1" class="ltx_td ltx_align_center ltx_border_r ltx_border_t"><math id="S3.T1.21.21.1.m1" class="ltx_Math" alttext="70.50" display="inline" intent=":literal"><semantics><mn mathsize="0.900em">70.50</mn><annotation encoding="application/x-tex">70.50</annotation></semantics></math></td>
+<td id="S3.T1.22.22.2" class="ltx_td ltx_align_center ltx_border_r ltx_border_t"><span id="S3.T1.22.22.2.1" class="ltx_text ltx_markedasmath ltx_font_bold" style="font-size:90%;">74.07</span></td>
+<td id="S3.T1.23.23.3" class="ltx_td ltx_align_center ltx_border_r ltx_border_t"><math id="S3.T1.23.23.3.m1" class="ltx_Math" alttext="73.90" display="inline" intent=":literal"><semantics><mn mathsize="0.900em">73.90</mn><annotation encoding="application/x-tex">73.90</annotation></semantics></math></td>
+<td id="S3.T1.24.24.4" class="ltx_td ltx_align_center ltx_border_t"><math id="S3.T1.24.24.4.m1" class="ltx_Math" alttext="73.84" display="inline" intent=":literal"><semantics><mn mathsize="0.900em">73.84</mn><annotation encoding="application/x-tex">73.84</annotation></semantics></math></td>
+</tr>
+<tr id="S3.T1.28.28" class="ltx_tr">
+<th id="S3.T1.28.28.5" class="ltx_td ltx_align_center ltx_th ltx_th_row ltx_border_r ltx_border_t"><span id="S3.T1.28.28.5.1" class="ltx_text" style="font-size:90%;">LwF</span></th>
+<td id="S3.T1.25.25.1" class="ltx_td ltx_align_center ltx_border_r ltx_border_t"><span id="S3.T1.25.25.1.1" class="ltx_text ltx_markedasmath ltx_font_bold" style="font-size:90%;">70.71</span></td>
+<td id="S3.T1.26.26.2" class="ltx_td ltx_align_center ltx_border_r ltx_border_t"><math id="S3.T1.26.26.2.m1" class="ltx_Math" alttext="73.84" display="inline" intent=":literal"><semantics><mn mathsize="0.900em">73.84</mn><annotation encoding="application/x-tex">73.84</annotation></semantics></math></td>
+<td id="S3.T1.27.27.3" class="ltx_td ltx_align_center ltx_border_r ltx_border_t"><math id="S3.T1.27.27.3.m1" class="ltx_Math" alttext="73.61" display="inline" intent=":literal"><semantics><mn mathsize="0.900em">73.61</mn><annotation encoding="application/x-tex">73.61</annotation></semantics></math></td>
+<td id="S3.T1.28.28.4" class="ltx_td ltx_align_center ltx_border_t"><math id="S3.T1.28.28.4.m1" class="ltx_Math" alttext="73.55" display="inline" intent=":literal"><semantics><mn mathsize="0.900em">73.55</mn><annotation encoding="application/x-tex">73.55</annotation></semantics></math></td>
+</tr>
+<tr id="S3.T1.32.32" class="ltx_tr">
+<th id="S3.T1.32.32.5" class="ltx_td ltx_align_center ltx_th ltx_th_row ltx_border_b ltx_border_r ltx_border_tt" rowspan="6"><span id="S3.T1.32.32.5.1" class="ltx_text" style="font-size:90%;">MSDNet</span></th>
+<th id="S3.T1.32.32.6" class="ltx_td ltx_align_center ltx_th ltx_th_row ltx_border_r ltx_border_tt"><span id="S3.T1.32.32.6.1" class="ltx_text" style="font-size:90%;">Disjoint</span></th>
+<td id="S3.T1.29.29.1" class="ltx_td ltx_align_center ltx_border_r ltx_border_tt"><math id="S3.T1.29.29.1.m1" class="ltx_Math" alttext="56.74" display="inline" intent=":literal"><semantics><mn mathsize="0.900em">56.74</mn><annotation encoding="application/x-tex">56.74</annotation></semantics></math></td>
+<td id="S3.T1.30.30.2" class="ltx_td ltx_align_center ltx_border_r ltx_border_tt"><math id="S3.T1.30.30.2.m1" class="ltx_Math" alttext="63.96" display="inline" intent=":literal"><semantics><mn mathsize="0.900em">63.96</mn><annotation encoding="application/x-tex">63.96</annotation></semantics></math></td>
+<td id="S3.T1.31.31.3" class="ltx_td ltx_align_center ltx_border_r ltx_border_tt"><math id="S3.T1.31.31.3.m1" class="ltx_Math" alttext="68.59" display="inline" intent=":literal"><semantics><mn mathsize="0.900em">68.59</mn><annotation encoding="application/x-tex">68.59</annotation></semantics></math></td>
+<td id="S3.T1.32.32.4" class="ltx_td ltx_align_center ltx_border_tt"><math id="S3.T1.32.32.4.m1" class="ltx_Math" alttext="70.36" display="inline" intent=":literal"><semantics><mn mathsize="0.900em">70.36</mn><annotation encoding="application/x-tex">70.36</annotation></semantics></math></td>
+</tr>
+<tr id="S3.T1.36.36" class="ltx_tr">
+<th id="S3.T1.36.36.5" class="ltx_td ltx_align_center ltx_th ltx_th_row ltx_border_r"><span id="S3.T1.36.36.5.1" class="ltx_text" style="font-size:90%;">Branch-wise</span></th>
+<td id="S3.T1.33.33.1" class="ltx_td ltx_align_center ltx_border_r"><math id="S3.T1.33.33.1.m1" class="ltx_Math" alttext="58.24" display="inline" intent=":literal"><semantics><mn mathsize="0.900em">58.24</mn><annotation encoding="application/x-tex">58.24</annotation></semantics></math></td>
+<td id="S3.T1.34.34.2" class="ltx_td ltx_align_center ltx_border_r"><math id="S3.T1.34.34.2.m1" class="ltx_Math" alttext="59.73" display="inline" intent=":literal"><semantics><mn mathsize="0.900em">59.73</mn><annotation encoding="application/x-tex">59.73</annotation></semantics></math></td>
+<td id="S3.T1.35.35.3" class="ltx_td ltx_align_center ltx_border_r"><math id="S3.T1.35.35.3.m1" class="ltx_Math" alttext="60.16" display="inline" intent=":literal"><semantics><mn mathsize="0.900em">60.16</mn><annotation encoding="application/x-tex">60.16</annotation></semantics></math></td>
+<td id="S3.T1.36.36.4" class="ltx_td ltx_align_center"><math id="S3.T1.36.36.4.m1" class="ltx_Math" alttext="59.97" display="inline" intent=":literal"><semantics><mn mathsize="0.900em">59.97</mn><annotation encoding="application/x-tex">59.97</annotation></semantics></math></td>
+</tr>
+<tr id="S3.T1.40.40" class="ltx_tr">
+<th id="S3.T1.40.40.5" class="ltx_td ltx_align_center ltx_th ltx_th_row ltx_border_r"><span id="S3.T1.40.40.5.1" class="ltx_text" style="font-size:90%;">Separate</span></th>
+<td id="S3.T1.37.37.1" class="ltx_td ltx_align_center ltx_border_r"><math id="S3.T1.37.37.1.m1" class="ltx_Math" alttext="64.90" display="inline" intent=":literal"><semantics><mn mathsize="0.900em">64.90</mn><annotation encoding="application/x-tex">64.90</annotation></semantics></math></td>
+<td id="S3.T1.38.38.2" class="ltx_td ltx_align_center ltx_border_r"><math id="S3.T1.38.38.2.m1" class="ltx_Math" alttext="67.84" display="inline" intent=":literal"><semantics><mn mathsize="0.900em">67.84</mn><annotation encoding="application/x-tex">67.84</annotation></semantics></math></td>
+<td id="S3.T1.39.39.3" class="ltx_td ltx_align_center ltx_border_r"><math id="S3.T1.39.39.3.m1" class="ltx_Math" alttext="69.02" display="inline" intent=":literal"><semantics><mn mathsize="0.900em">69.02</mn><annotation encoding="application/x-tex">69.02</annotation></semantics></math></td>
+<td id="S3.T1.40.40.4" class="ltx_td ltx_align_center"><math id="S3.T1.40.40.4.m1" class="ltx_Math" alttext="69.21" display="inline" intent=":literal"><semantics><mn mathsize="0.900em">69.21</mn><annotation encoding="application/x-tex">69.21</annotation></semantics></math></td>
+</tr>
+<tr id="S3.T1.44.44" class="ltx_tr">
+<th id="S3.T1.44.44.5" class="ltx_td ltx_align_center ltx_th ltx_th_row ltx_border_r"><span id="S3.T1.44.44.5.1" class="ltx_text" style="font-size:90%;">Joint</span></th>
+<td id="S3.T1.41.41.1" class="ltx_td ltx_align_center ltx_border_r"><math id="S3.T1.41.41.1.m1" class="ltx_Math" alttext="65.93" display="inline" intent=":literal"><semantics><mn mathsize="0.900em">65.93</mn><annotation encoding="application/x-tex">65.93</annotation></semantics></math></td>
+<td id="S3.T1.42.42.2" class="ltx_td ltx_align_center ltx_border_r"><math id="S3.T1.42.42.2.m1" class="ltx_Math" alttext="72.02" display="inline" intent=":literal"><semantics><mn mathsize="0.900em">72.02</mn><annotation encoding="application/x-tex">72.02</annotation></semantics></math></td>
+<td id="S3.T1.43.43.3" class="ltx_td ltx_align_center ltx_border_r"><span id="S3.T1.43.43.3.1" class="ltx_text ltx_markedasmath ltx_font_bold" style="font-size:90%;">74.73</span></td>
+<td id="S3.T1.44.44.4" class="ltx_td ltx_align_center"><span id="S3.T1.44.44.4.1" class="ltx_text ltx_markedasmath ltx_font_bold" style="font-size:90%;">75.86</span></td>
+</tr>
+<tr id="S3.T1.48.48" class="ltx_tr">
+<th id="S3.T1.48.48.5" class="ltx_td ltx_align_center ltx_th ltx_th_row ltx_border_r ltx_border_t"><span id="S3.T1.48.48.5.1" class="ltx_text" style="font-size:90%;">EWC</span></th>
+<td id="S3.T1.45.45.1" class="ltx_td ltx_align_center ltx_border_r ltx_border_t"><math id="S3.T1.45.45.1.m1" class="ltx_Math" alttext="65.10" display="inline" intent=":literal"><semantics><mn mathsize="0.900em">65.10</mn><annotation encoding="application/x-tex">65.10</annotation></semantics></math></td>
+<td id="S3.T1.46.46.2" class="ltx_td ltx_align_center ltx_border_r ltx_border_t"><math id="S3.T1.46.46.2.m1" class="ltx_Math" alttext="71.03" display="inline" intent=":literal"><semantics><mn mathsize="0.900em">71.03</mn><annotation encoding="application/x-tex">71.03</annotation></semantics></math></td>
+<td id="S3.T1.47.47.3" class="ltx_td ltx_align_center ltx_border_r ltx_border_t"><math id="S3.T1.47.47.3.m1" class="ltx_Math" alttext="71.98" display="inline" intent=":literal"><semantics><mn mathsize="0.900em">71.98</mn><annotation encoding="application/x-tex">71.98</annotation></semantics></math></td>
+<td id="S3.T1.48.48.4" class="ltx_td ltx_align_center ltx_border_t"><math id="S3.T1.48.48.4.m1" class="ltx_Math" alttext="71.89" display="inline" intent=":literal"><semantics><mn mathsize="0.900em">71.89</mn><annotation encoding="application/x-tex">71.89</annotation></semantics></math></td>
+</tr>
+<tr id="S3.T1.52.52" class="ltx_tr">
+<th id="S3.T1.52.52.5" class="ltx_td ltx_align_center ltx_th ltx_th_row ltx_border_b ltx_border_r ltx_border_t"><span id="S3.T1.52.52.5.1" class="ltx_text" style="font-size:90%;">LwF</span></th>
+<td id="S3.T1.49.49.1" class="ltx_td ltx_align_center ltx_border_b ltx_border_r ltx_border_t"><span id="S3.T1.49.49.1.1" class="ltx_text ltx_markedasmath ltx_font_bold" style="font-size:90%;">66.50</span></td>
+<td id="S3.T1.50.50.2" class="ltx_td ltx_align_center ltx_border_b ltx_border_r ltx_border_t"><span id="S3.T1.50.50.2.1" class="ltx_text ltx_markedasmath ltx_font_bold" style="font-size:90%;">73.04</span></td>
+<td id="S3.T1.51.51.3" class="ltx_td ltx_align_center ltx_border_b ltx_border_r ltx_border_t"><math id="S3.T1.51.51.3.m1" class="ltx_Math" alttext="73.33" display="inline" intent=":literal"><semantics><mn mathsize="0.900em">73.33</mn><annotation encoding="application/x-tex">73.33</annotation></semantics></math></td>
+<td id="S3.T1.52.52.4" class="ltx_td ltx_align_center ltx_border_b ltx_border_t"><math id="S3.T1.52.52.4.m1" class="ltx_Math" alttext="73.20" display="inline" intent=":literal"><semantics><mn mathsize="0.900em">73.20</mn><annotation encoding="application/x-tex">73.20</annotation></semantics></math></td>
+</tr>
+</tbody>
+</table>
+</figure>
+<section id="S3.SS1" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">3.1 </span>Experimental Setup</h3>
+
+<div id="S3.SS1.p1" class="ltx_para">
+<p id="S3.SS1.p1.7" class="ltx_p"><span id="S3.SS1.p1.7.1" class="ltx_text ltx_font_bold">Dataset.</span> We conduct experiments on CIFAR-100 <cite class="ltx_cite ltx_citemacro_cite">[<a href="https://ar5iv.labs.arxiv.org/html/2605.05358#bib.bib21" title="Learning multiple layers of features from tiny images" class="ltx_ref">10</a>]</cite>, a widely-used image classification benchmark consisting of 60,000 32×32 RGB images across 100 fine-grained classes. The dataset is split into 50,000 training images and 10,000 test images.
+<br class="ltx_break"><span id="S3.SS1.p1.7.2" class="ltx_text ltx_font_bold">Architectures.</span> We adopt the same architectures as in <cite class="ltx_cite ltx_citemacro_cite">[<a href="https://ar5iv.labs.arxiv.org/html/2605.05358#bib.bib1" title="How to train your multi-exit model? analyzing the impact of training strategies" class="ltx_ref">11</a>]</cite>. We evaluate two complementary architectures: ResNet-34 <cite class="ltx_cite ltx_citemacro_cite">[<a href="https://ar5iv.labs.arxiv.org/html/2605.05358#bib.bib22" title="Deep residual learning for image recognition" class="ltx_ref">6</a>]</cite> and MSDNet <cite class="ltx_cite ltx_citemacro_cite">[<a href="https://ar5iv.labs.arxiv.org/html/2605.05358#bib.bib24" title="Multi-scale dense networks for resource efficient image classification" class="ltx_ref">7</a>]</cite>. For ResNet-34, we augment the standard architecture with 8 internal classifiers positioned at layers <math id="S3.SS1.p1.1.m1" class="ltx_Math" alttext="\{2,4,\cdots,16\}" display="inline" intent=":literal"><semantics><mrow><mo stretchy="false">{</mo><mn>2</mn><mo>,</mo><mn>4</mn><mo>,</mo><mi mathvariant="normal">⋯</mi><mo>,</mo><mn>16</mn><mo stretchy="false">}</mo></mrow><annotation encoding="application/x-tex">\{2,4,\cdots,16\}</annotation></semantics></math>, where each exit consists of an SDN-type pooling <cite class="ltx_cite ltx_citemacro_cite">[<a href="https://ar5iv.labs.arxiv.org/html/2605.05358#bib.bib23" title="Shallow-deep networks: understanding and mitigating network overthinking" class="ltx_ref">8</a>]</cite>, except for the last classifier, which uses an adaptive average pooling, followed by a linear classifier. For MSDNet, we employ the CIFAR variant with 7 blocks.
+<br class="ltx_break"><span id="S3.SS1.p1.7.3" class="ltx_text ltx_font_bold">Baselines:</span> All baseline accuracy scores are taken from <cite class="ltx_cite ltx_citemacro_cite">[<a href="https://ar5iv.labs.arxiv.org/html/2605.05358#bib.bib1" title="How to train your multi-exit model? analyzing the impact of training strategies" class="ltx_ref">11</a>]</cite>. We primarily compare our method against three sequential training baselines: disjoint, branch-wise, and separate training, and include joint training for completeness. For our proposed approach, we set <math id="S3.SS1.p1.2.m2" class="ltx_Math" alttext="\lambda=100" display="inline" intent=":literal"><semantics><mrow><mi>λ</mi><mo>=</mo><mn>100</mn></mrow><annotation encoding="application/x-tex">\lambda=100</annotation></semantics></math> and <math id="S3.SS1.p1.3.m3" class="ltx_Math" alttext="\rho=0.7" display="inline" intent=":literal"><semantics><mrow><mi>ρ</mi><mo>=</mo><mn>0.7</mn></mrow><annotation encoding="application/x-tex">\rho=0.7</annotation></semantics></math> for ResNet34, and <math id="S3.SS1.p1.4.m4" class="ltx_Math" alttext="\lambda=1000" display="inline" intent=":literal"><semantics><mrow><mi>λ</mi><mo>=</mo><mn>1000</mn></mrow><annotation encoding="application/x-tex">\lambda=1000</annotation></semantics></math> and <math id="S3.SS1.p1.5.m5" class="ltx_Math" alttext="\rho=0.2" display="inline" intent=":literal"><semantics><mrow><mi>ρ</mi><mo>=</mo><mn>0.2</mn></mrow><annotation encoding="application/x-tex">\rho=0.2</annotation></semantics></math> for MSDNet, unless stated otherwise. 
+<br class="ltx_break"><span id="S3.SS1.p1.7.4" class="ltx_text ltx_font_bold">Training Details.</span> We first pretrain each backbone network with only the final exit using conventional supervised training. Then, following <cite class="ltx_cite ltx_citemacro_cite">[<a href="https://ar5iv.labs.arxiv.org/html/2605.05358#bib.bib1" title="How to train your multi-exit model? analyzing the impact of training strategies" class="ltx_ref">11</a>]</cite>, for ResNet-34, we use a batch size of 128, a learning rate of <math id="S3.SS1.p1.6.m6" class="ltx_Math" alttext="5\cdot 10^{-4}" display="inline" intent=":literal"><semantics><mrow><mn>5</mn><mo lspace="0.222em" rspace="0.222em">⋅</mo><msup><mn>10</mn><mrow><mo>−</mo><mn>4</mn></mrow></msup></mrow><annotation encoding="application/x-tex">5\cdot 10^{-4}</annotation></semantics></math>, and no weight decay. For MSDNet, we use a batch size of 512 and a learning rate of <math id="S3.SS1.p1.7.m7" class="ltx_Math" alttext="10^{-3}" display="inline" intent=":literal"><semantics><msup><mn>10</mn><mrow><mo>−</mo><mn>3</mn></mrow></msup><annotation encoding="application/x-tex">10^{-3}</annotation></semantics></math> with no weight decay. Both models employ CutMix and Mixup augmentation strategies and early stopping with a patience of 50 epochs. After pretraining the backbones, we add ICs sequentially from shallow to deep, applying our proposed regularization at each stage.</p>
+</div>
+</section>
+<section id="S3.SS2" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">3.2 </span>Results and Discussion</h3>
+
+<div id="S3.SS2.p1" class="ltx_para">
+<p id="S3.SS2.p1.7" class="ltx_p">Table&nbsp;<a href="https://ar5iv.labs.arxiv.org/html/2605.05358#S3.T1" title="Table 1 ‣ 3 Experiments ‣ Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks" class="ltx_ref"><span class="ltx_text ltx_ref_tag">1</span></a> presents top-1 accuracy across exits corresponding to different computational budgets (<math id="S3.SS2.p1.1.m1" class="ltx_Math" alttext="25\%" display="inline" intent=":literal"><semantics><mrow><mn>25</mn><mo>%</mo></mrow><annotation encoding="application/x-tex">25\%</annotation></semantics></math>, <math id="S3.SS2.p1.2.m2" class="ltx_Math" alttext="50\%" display="inline" intent=":literal"><semantics><mrow><mn>50</mn><mo>%</mo></mrow><annotation encoding="application/x-tex">50\%</annotation></semantics></math>, <math id="S3.SS2.p1.3.m3" class="ltx_Math" alttext="75\%" display="inline" intent=":literal"><semantics><mrow><mn>75</mn><mo>%</mo></mrow><annotation encoding="application/x-tex">75\%</annotation></semantics></math>, and <math id="S3.SS2.p1.4.m4" class="ltx_Math" alttext="100\%" display="inline" intent=":literal"><semantics><mrow><mn>100</mn><mo>%</mo></mrow><annotation encoding="application/x-tex">100\%</annotation></semantics></math> FLOPs) for our two EENN models on CIFAR-100. Our proposed method consistently outperforms all baseline sequential training approaches. Compared to the strongest sequential baseline (separate training), both EWC and LwF achieve substantial improvements, particularly at low budgets: <math id="S3.SS2.p1.5.m5" class="ltx_Math" alttext="+4.25\%" display="inline" intent=":literal"><semantics><mrow><mo>+</mo><mrow><mn>4.25</mn><mo>%</mo></mrow></mrow><annotation encoding="application/x-tex">+4.25\%</annotation></semantics></math> and <math id="S3.SS2.p1.6.m6" class="ltx_Math" alttext="+4.46\%" display="inline" intent=":literal"><semantics><mrow><mo>+</mo><mrow><mn>4.46</mn><mo>%</mo></mrow></mrow><annotation encoding="application/x-tex">+4.46\%</annotation></semantics></math> at <math id="S3.SS2.p1.7.m7" class="ltx_Math" alttext="25\%" display="inline" intent=":literal"><semantics><mrow><mn>25</mn><mo>%</mo></mrow><annotation encoding="application/x-tex">25\%</annotation></semantics></math> budget, respectively. This demonstrates that our approach effectively balances early exit specialization with deep representation learning.</p>
+</div>
+<div id="S3.SS2.p2" class="ltx_para">
+<p id="S3.SS2.p2.1" class="ltx_p">The comparison across architectures highlights the interplay between regularization type and backbone topology. In ResNet34, both EWC and LwF improve early-exit performance, with EWC slightly outperforming LwF at the deepest exit, suggesting that parameter-level stabilization is sufficient in sequential residual blocks. The skip connections facilitate feature reuse, so anchoring parameters preserves shallow-exit performance without constraining deeper layers. In contrast, MSDNet’s densely connected, multi-scale structure links many layers to multiple exits. Here, LwF consistently outperforms EWC across both early and late exits, indicating that output-distribution regularization better accommodates functional dependencies among exits. By constraining predictions rather than parameters, LwF maintains early-exit accuracy while allowing the backbone to adapt flexibly for later classifiers, effectively balancing stability and plasticity in a highly entangled multi-exit architecture.</p>
+</div>
+<div id="S3.SS2.p3" class="ltx_para">
+<p id="S3.SS2.p3.1" class="ltx_p">Furthermore, we consistently observe improvements over joint training at earlier exits while maintaining comparable performance at later exits. This difference stems from the distinct optimization dynamics of the two approaches. Joint training drives all exits toward a shared compromise solution, whereas our method progressively increases regularization as new exits are added, limiting deeper layers’ ability to modify earlier representations. Although this can slightly constrain later adaptation, it yields substantially stronger early exits, aligning with the core goal of EENNs. Further gains may be possible by dynamically scheduling the regularization strength to better balance early and late exits.</p>
+</div>
+<figure id="S3.T2" class="ltx_table">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_table"><span id="S3.T2.50.1.1" class="ltx_text ltx_font_bold">Table 2</span>: </span>Ablation study on MSDNet for different hyperparameters. <span id="S3.T2.51.2" class="ltx_text ltx_font_bold">Reg.</span> stands for Regularization and defines which type of regularization is used. <span id="S3.T2.52.3" class="ltx_text ltx_font_bold">W.U</span> stands for Warm-up and defines whether the backbone is pretrained.</figcaption>
+<table id="S3.T2.46" class="ltx_tabular ltx_centering ltx_guessed_headers ltx_align_middle">
+<tbody class="ltx_tbody">
+<tr id="S3.T2.6.6" class="ltx_tr">
+<th id="S3.T2.6.6.7" class="ltx_td ltx_align_center ltx_th ltx_th_row ltx_border_r ltx_border_t"><span id="S3.T2.6.6.7.1" class="ltx_text" style="font-size:90%;">Reg.</span></th>
+<th id="S3.T2.1.1.1" class="ltx_td ltx_align_center ltx_th ltx_th_row ltx_border_r ltx_border_t"><math id="S3.T2.1.1.1.m1" class="ltx_Math" alttext="\lambda" display="inline" intent=":literal"><semantics><mi mathsize="0.900em">λ</mi><annotation encoding="application/x-tex">\lambda</annotation></semantics></math></th>
+<th id="S3.T2.2.2.2" class="ltx_td ltx_align_center ltx_th ltx_th_row ltx_border_r ltx_border_t"><math id="S3.T2.2.2.2.m1" class="ltx_Math" alttext="\rho" display="inline" intent=":literal"><semantics><mi mathsize="0.900em">ρ</mi><annotation encoding="application/x-tex">\rho</annotation></semantics></math></th>
+<th id="S3.T2.6.6.8" class="ltx_td ltx_align_center ltx_th ltx_th_row ltx_border_r ltx_border_t"><span id="S3.T2.6.6.8.1" class="ltx_text" style="font-size:90%;">W.U</span></th>
+<td id="S3.T2.3.3.3" class="ltx_td ltx_align_center ltx_border_r ltx_border_t"><math id="S3.T2.3.3.3.m1" class="ltx_Math" alttext="25\%" display="inline" intent=":literal"><semantics><mrow><mn mathsize="0.900em">25</mn><mo mathsize="0.900em">%</mo></mrow><annotation encoding="application/x-tex">25\%</annotation></semantics></math></td>
+<td id="S3.T2.4.4.4" class="ltx_td ltx_align_center ltx_border_r ltx_border_t"><math id="S3.T2.4.4.4.m1" class="ltx_Math" alttext="50\%" display="inline" intent=":literal"><semantics><mrow><mn mathsize="0.900em">50</mn><mo mathsize="0.900em">%</mo></mrow><annotation encoding="application/x-tex">50\%</annotation></semantics></math></td>
+<td id="S3.T2.5.5.5" class="ltx_td ltx_align_center ltx_border_r ltx_border_t"><math id="S3.T2.5.5.5.m1" class="ltx_Math" alttext="75\%" display="inline" intent=":literal"><semantics><mrow><mn mathsize="0.900em">75</mn><mo mathsize="0.900em">%</mo></mrow><annotation encoding="application/x-tex">75\%</annotation></semantics></math></td>
+<td id="S3.T2.6.6.6" class="ltx_td ltx_align_center ltx_border_t"><math id="S3.T2.6.6.6.m1" class="ltx_Math" alttext="100\%" display="inline" intent=":literal"><semantics><mrow><mn mathsize="0.900em">100</mn><mo mathsize="0.900em">%</mo></mrow><annotation encoding="application/x-tex">100\%</annotation></semantics></math></td>
+</tr>
+<tr id="S3.T2.11.11" class="ltx_tr">
+<th id="S3.T2.11.11.6" class="ltx_td ltx_align_center ltx_th ltx_th_row ltx_border_r ltx_border_t" rowspan="4"><span id="S3.T2.11.11.6.1" class="ltx_text" style="font-size:90%;">EWC</span></th>
+<th id="S3.T2.7.7.1" class="ltx_td ltx_align_center ltx_th ltx_th_row ltx_border_r ltx_border_t"><math id="S3.T2.7.7.1.m1" class="ltx_Math" alttext="10" display="inline" intent=":literal"><semantics><mn mathsize="0.900em">10</mn><annotation encoding="application/x-tex">10</annotation></semantics></math></th>
+<th id="S3.T2.11.11.7" class="ltx_td ltx_align_center ltx_th ltx_th_row ltx_border_r ltx_border_t"><span id="S3.T2.11.11.7.1" class="ltx_text" style="font-size:90%;">–</span></th>
+<th id="S3.T2.11.11.8" class="ltx_td ltx_align_center ltx_th ltx_th_row ltx_border_r ltx_border_t"><span id="S3.T2.11.11.8.1" class="ltx_text" style="font-size:90%;">True</span></th>
+<td id="S3.T2.8.8.2" class="ltx_td ltx_align_center ltx_border_r ltx_border_t"><math id="S3.T2.8.8.2.m1" class="ltx_Math" alttext="58.33" display="inline" intent=":literal"><semantics><mn mathsize="0.900em">58.33</mn><annotation encoding="application/x-tex">58.33</annotation></semantics></math></td>
+<td id="S3.T2.9.9.3" class="ltx_td ltx_align_center ltx_border_r ltx_border_t"><math id="S3.T2.9.9.3.m1" class="ltx_Math" alttext="69.27" display="inline" intent=":literal"><semantics><mn mathsize="0.900em">69.27</mn><annotation encoding="application/x-tex">69.27</annotation></semantics></math></td>
+<td id="S3.T2.10.10.4" class="ltx_td ltx_align_center ltx_border_r ltx_border_t"><math id="S3.T2.10.10.4.m1" class="ltx_Math" alttext="73.15" display="inline" intent=":literal"><semantics><mn mathsize="0.900em">73.15</mn><annotation encoding="application/x-tex">73.15</annotation></semantics></math></td>
+<td id="S3.T2.11.11.5" class="ltx_td ltx_align_center ltx_border_t"><math id="S3.T2.11.11.5.m1" class="ltx_Math" alttext="73.39" display="inline" intent=":literal"><semantics><mn mathsize="0.900em">73.39</mn><annotation encoding="application/x-tex">73.39</annotation></semantics></math></td>
+</tr>
+<tr id="S3.T2.16.16" class="ltx_tr">
+<th id="S3.T2.12.12.1" class="ltx_td ltx_align_center ltx_th ltx_th_row ltx_border_r"><math id="S3.T2.12.12.1.m1" class="ltx_Math" alttext="10^{2}" display="inline" intent=":literal"><semantics><msup><mn mathsize="0.900em">10</mn><mn mathsize="0.900em">2</mn></msup><annotation encoding="application/x-tex">10^{2}</annotation></semantics></math></th>
+<th id="S3.T2.16.16.6" class="ltx_td ltx_align_center ltx_th ltx_th_row ltx_border_r"><span id="S3.T2.16.16.6.1" class="ltx_text" style="font-size:90%;">–</span></th>
+<th id="S3.T2.16.16.7" class="ltx_td ltx_align_center ltx_th ltx_th_row ltx_border_r"><span id="S3.T2.16.16.7.1" class="ltx_text" style="font-size:90%;">True</span></th>
+<td id="S3.T2.13.13.2" class="ltx_td ltx_align_center ltx_border_r"><math id="S3.T2.13.13.2.m1" class="ltx_Math" alttext="62.54" display="inline" intent=":literal"><semantics><mn mathsize="0.900em">62.54</mn><annotation encoding="application/x-tex">62.54</annotation></semantics></math></td>
+<td id="S3.T2.14.14.3" class="ltx_td ltx_align_center ltx_border_r"><math id="S3.T2.14.14.3.m1" class="ltx_Math" alttext="71.05" display="inline" intent=":literal"><semantics><mn mathsize="0.900em">71.05</mn><annotation encoding="application/x-tex">71.05</annotation></semantics></math></td>
+<td id="S3.T2.15.15.4" class="ltx_td ltx_align_center ltx_border_r"><math id="S3.T2.15.15.4.m1" class="ltx_Math" alttext="72.59" display="inline" intent=":literal"><semantics><mn mathsize="0.900em">72.59</mn><annotation encoding="application/x-tex">72.59</annotation></semantics></math></td>
+<td id="S3.T2.16.16.5" class="ltx_td ltx_align_center"><math id="S3.T2.16.16.5.m1" class="ltx_Math" alttext="72.43" display="inline" intent=":literal"><semantics><mn mathsize="0.900em">72.43</mn><annotation encoding="application/x-tex">72.43</annotation></semantics></math></td>
+</tr>
+<tr id="S3.T2.21.21" class="ltx_tr">
+<th id="S3.T2.17.17.1" class="ltx_td ltx_align_center ltx_th ltx_th_row ltx_border_r"><math id="S3.T2.17.17.1.m1" class="ltx_Math" alttext="10^{3}" display="inline" intent=":literal"><semantics><msup><mn mathsize="0.900em">10</mn><mn mathsize="0.900em">3</mn></msup><annotation encoding="application/x-tex">10^{3}</annotation></semantics></math></th>
+<th id="S3.T2.21.21.6" class="ltx_td ltx_align_center ltx_th ltx_th_row ltx_border_r"><span id="S3.T2.21.21.6.1" class="ltx_text" style="font-size:90%;">–</span></th>
+<th id="S3.T2.21.21.7" class="ltx_td ltx_align_center ltx_th ltx_th_row ltx_border_r"><span id="S3.T2.21.21.7.1" class="ltx_text" style="font-size:90%;">True</span></th>
+<td id="S3.T2.18.18.2" class="ltx_td ltx_align_center ltx_border_r"><math id="S3.T2.18.18.2.m1" class="ltx_Math" alttext="65.10" display="inline" intent=":literal"><semantics><mn mathsize="0.900em">65.10</mn><annotation encoding="application/x-tex">65.10</annotation></semantics></math></td>
+<td id="S3.T2.19.19.3" class="ltx_td ltx_align_center ltx_border_r"><math id="S3.T2.19.19.3.m1" class="ltx_Math" alttext="71.03" display="inline" intent=":literal"><semantics><mn mathsize="0.900em">71.03</mn><annotation encoding="application/x-tex">71.03</annotation></semantics></math></td>
+<td id="S3.T2.20.20.4" class="ltx_td ltx_align_center ltx_border_r"><math id="S3.T2.20.20.4.m1" class="ltx_Math" alttext="71.98" display="inline" intent=":literal"><semantics><mn mathsize="0.900em">71.98</mn><annotation encoding="application/x-tex">71.98</annotation></semantics></math></td>
+<td id="S3.T2.21.21.5" class="ltx_td ltx_align_center"><math id="S3.T2.21.21.5.m1" class="ltx_Math" alttext="71.89" display="inline" intent=":literal"><semantics><mn mathsize="0.900em">71.89</mn><annotation encoding="application/x-tex">71.89</annotation></semantics></math></td>
+</tr>
+<tr id="S3.T2.26.26" class="ltx_tr">
+<th id="S3.T2.22.22.1" class="ltx_td ltx_align_center ltx_th ltx_th_row ltx_border_r"><math id="S3.T2.22.22.1.m1" class="ltx_Math" alttext="10^{3}" display="inline" intent=":literal"><semantics><msup><mn mathsize="0.900em">10</mn><mn mathsize="0.900em">3</mn></msup><annotation encoding="application/x-tex">10^{3}</annotation></semantics></math></th>
+<th id="S3.T2.26.26.6" class="ltx_td ltx_align_center ltx_th ltx_th_row ltx_border_r"><span id="S3.T2.26.26.6.1" class="ltx_text" style="font-size:90%;">–</span></th>
+<th id="S3.T2.26.26.7" class="ltx_td ltx_align_center ltx_th ltx_th_row ltx_border_r"><span id="S3.T2.26.26.7.1" class="ltx_text" style="font-size:90%;">False</span></th>
+<td id="S3.T2.23.23.2" class="ltx_td ltx_align_center ltx_border_r"><math id="S3.T2.23.23.2.m1" class="ltx_Math" alttext="66.11" display="inline" intent=":literal"><semantics><mn mathsize="0.900em">66.11</mn><annotation encoding="application/x-tex">66.11</annotation></semantics></math></td>
+<td id="S3.T2.24.24.3" class="ltx_td ltx_align_center ltx_border_r"><math id="S3.T2.24.24.3.m1" class="ltx_Math" alttext="68.91" display="inline" intent=":literal"><semantics><mn mathsize="0.900em">68.91</mn><annotation encoding="application/x-tex">68.91</annotation></semantics></math></td>
+<td id="S3.T2.25.25.4" class="ltx_td ltx_align_center ltx_border_r"><math id="S3.T2.25.25.4.m1" class="ltx_Math" alttext="67.25" display="inline" intent=":literal"><semantics><mn mathsize="0.900em">67.25</mn><annotation encoding="application/x-tex">67.25</annotation></semantics></math></td>
+<td id="S3.T2.26.26.5" class="ltx_td ltx_align_center"><math id="S3.T2.26.26.5.m1" class="ltx_Math" alttext="66.93" display="inline" intent=":literal"><semantics><mn mathsize="0.900em">66.93</mn><annotation encoding="application/x-tex">66.93</annotation></semantics></math></td>
+</tr>
+<tr id="S3.T2.31.31" class="ltx_tr">
+<th id="S3.T2.31.31.6" class="ltx_td ltx_align_center ltx_th ltx_th_row ltx_border_b ltx_border_r ltx_border_t" rowspan="4"><span id="S3.T2.31.31.6.1" class="ltx_text" style="font-size:90%;">LwF</span></th>
+<th id="S3.T2.31.31.7" class="ltx_td ltx_align_center ltx_th ltx_th_row ltx_border_r ltx_border_t"><span id="S3.T2.31.31.7.1" class="ltx_text" style="font-size:90%;">–</span></th>
+<th id="S3.T2.27.27.1" class="ltx_td ltx_align_center ltx_th ltx_th_row ltx_border_r ltx_border_t"><math id="S3.T2.27.27.1.m1" class="ltx_Math" alttext="0.2" display="inline" intent=":literal"><semantics><mn mathsize="0.900em">0.2</mn><annotation encoding="application/x-tex">0.2</annotation></semantics></math></th>
+<th id="S3.T2.31.31.8" class="ltx_td ltx_align_center ltx_th ltx_th_row ltx_border_r ltx_border_t"><span id="S3.T2.31.31.8.1" class="ltx_text" style="font-size:90%;">True</span></th>
+<td id="S3.T2.28.28.2" class="ltx_td ltx_align_center ltx_border_r ltx_border_t"><math id="S3.T2.28.28.2.m1" class="ltx_Math" alttext="66.50" display="inline" intent=":literal"><semantics><mn mathsize="0.900em">66.50</mn><annotation encoding="application/x-tex">66.50</annotation></semantics></math></td>
+<td id="S3.T2.29.29.3" class="ltx_td ltx_align_center ltx_border_r ltx_border_t"><math id="S3.T2.29.29.3.m1" class="ltx_Math" alttext="73.04" display="inline" intent=":literal"><semantics><mn mathsize="0.900em">73.04</mn><annotation encoding="application/x-tex">73.04</annotation></semantics></math></td>
+<td id="S3.T2.30.30.4" class="ltx_td ltx_align_center ltx_border_r ltx_border_t"><math id="S3.T2.30.30.4.m1" class="ltx_Math" alttext="73.33" display="inline" intent=":literal"><semantics><mn mathsize="0.900em">73.33</mn><annotation encoding="application/x-tex">73.33</annotation></semantics></math></td>
+<td id="S3.T2.31.31.5" class="ltx_td ltx_align_center ltx_border_t"><math id="S3.T2.31.31.5.m1" class="ltx_Math" alttext="73.20" display="inline" intent=":literal"><semantics><mn mathsize="0.900em">73.20</mn><annotation encoding="application/x-tex">73.20</annotation></semantics></math></td>
+</tr>
+<tr id="S3.T2.36.36" class="ltx_tr">
+<th id="S3.T2.36.36.6" class="ltx_td ltx_align_center ltx_th ltx_th_row ltx_border_r"><span id="S3.T2.36.36.6.1" class="ltx_text" style="font-size:90%;">–</span></th>
+<th id="S3.T2.32.32.1" class="ltx_td ltx_align_center ltx_th ltx_th_row ltx_border_r"><math id="S3.T2.32.32.1.m1" class="ltx_Math" alttext="0.5" display="inline" intent=":literal"><semantics><mn mathsize="0.900em">0.5</mn><annotation encoding="application/x-tex">0.5</annotation></semantics></math></th>
+<th id="S3.T2.36.36.7" class="ltx_td ltx_align_center ltx_th ltx_th_row ltx_border_r"><span id="S3.T2.36.36.7.1" class="ltx_text" style="font-size:90%;">True</span></th>
+<td id="S3.T2.33.33.2" class="ltx_td ltx_align_center ltx_border_r"><math id="S3.T2.33.33.2.m1" class="ltx_Math" alttext="68.57" display="inline" intent=":literal"><semantics><mn mathsize="0.900em">68.57</mn><annotation encoding="application/x-tex">68.57</annotation></semantics></math></td>
+<td id="S3.T2.34.34.3" class="ltx_td ltx_align_center ltx_border_r"><math id="S3.T2.34.34.3.m1" class="ltx_Math" alttext="72.63" display="inline" intent=":literal"><semantics><mn mathsize="0.900em">72.63</mn><annotation encoding="application/x-tex">72.63</annotation></semantics></math></td>
+<td id="S3.T2.35.35.4" class="ltx_td ltx_align_center ltx_border_r"><math id="S3.T2.35.35.4.m1" class="ltx_Math" alttext="72.56" display="inline" intent=":literal"><semantics><mn mathsize="0.900em">72.56</mn><annotation encoding="application/x-tex">72.56</annotation></semantics></math></td>
+<td id="S3.T2.36.36.5" class="ltx_td ltx_align_center"><math id="S3.T2.36.36.5.m1" class="ltx_Math" alttext="72.44" display="inline" intent=":literal"><semantics><mn mathsize="0.900em">72.44</mn><annotation encoding="application/x-tex">72.44</annotation></semantics></math></td>
+</tr>
+<tr id="S3.T2.41.41" class="ltx_tr">
+<th id="S3.T2.41.41.6" class="ltx_td ltx_align_center ltx_th ltx_th_row ltx_border_r"><span id="S3.T2.41.41.6.1" class="ltx_text" style="font-size:90%;">–</span></th>
+<th id="S3.T2.37.37.1" class="ltx_td ltx_align_center ltx_th ltx_th_row ltx_border_r"><math id="S3.T2.37.37.1.m1" class="ltx_Math" alttext="0.7" display="inline" intent=":literal"><semantics><mn mathsize="0.900em">0.7</mn><annotation encoding="application/x-tex">0.7</annotation></semantics></math></th>
+<th id="S3.T2.41.41.7" class="ltx_td ltx_align_center ltx_th ltx_th_row ltx_border_r"><span id="S3.T2.41.41.7.1" class="ltx_text" style="font-size:90%;">True</span></th>
+<td id="S3.T2.38.38.2" class="ltx_td ltx_align_center ltx_border_r"><math id="S3.T2.38.38.2.m1" class="ltx_Math" alttext="67.51" display="inline" intent=":literal"><semantics><mn mathsize="0.900em">67.51</mn><annotation encoding="application/x-tex">67.51</annotation></semantics></math></td>
+<td id="S3.T2.39.39.3" class="ltx_td ltx_align_center ltx_border_r"><math id="S3.T2.39.39.3.m1" class="ltx_Math" alttext="72.74" display="inline" intent=":literal"><semantics><mn mathsize="0.900em">72.74</mn><annotation encoding="application/x-tex">72.74</annotation></semantics></math></td>
+<td id="S3.T2.40.40.4" class="ltx_td ltx_align_center ltx_border_r"><math id="S3.T2.40.40.4.m1" class="ltx_Math" alttext="73.07" display="inline" intent=":literal"><semantics><mn mathsize="0.900em">73.07</mn><annotation encoding="application/x-tex">73.07</annotation></semantics></math></td>
+<td id="S3.T2.41.41.5" class="ltx_td ltx_align_center"><math id="S3.T2.41.41.5.m1" class="ltx_Math" alttext="72.85" display="inline" intent=":literal"><semantics><mn mathsize="0.900em">72.85</mn><annotation encoding="application/x-tex">72.85</annotation></semantics></math></td>
+</tr>
+<tr id="S3.T2.46.46" class="ltx_tr">
+<th id="S3.T2.46.46.6" class="ltx_td ltx_align_center ltx_th ltx_th_row ltx_border_b ltx_border_r"><span id="S3.T2.46.46.6.1" class="ltx_text" style="font-size:90%;">–</span></th>
+<th id="S3.T2.42.42.1" class="ltx_td ltx_align_center ltx_th ltx_th_row ltx_border_b ltx_border_r"><math id="S3.T2.42.42.1.m1" class="ltx_Math" alttext="0.7" display="inline" intent=":literal"><semantics><mn mathsize="0.900em">0.7</mn><annotation encoding="application/x-tex">0.7</annotation></semantics></math></th>
+<th id="S3.T2.46.46.7" class="ltx_td ltx_align_center ltx_th ltx_th_row ltx_border_b ltx_border_r"><span id="S3.T2.46.46.7.1" class="ltx_text" style="font-size:90%;">False</span></th>
+<td id="S3.T2.43.43.2" class="ltx_td ltx_align_center ltx_border_b ltx_border_r"><math id="S3.T2.43.43.2.m1" class="ltx_Math" alttext="67.49" display="inline" intent=":literal"><semantics><mn mathsize="0.900em">67.49</mn><annotation encoding="application/x-tex">67.49</annotation></semantics></math></td>
+<td id="S3.T2.44.44.3" class="ltx_td ltx_align_center ltx_border_b ltx_border_r"><math id="S3.T2.44.44.3.m1" class="ltx_Math" alttext="70.04" display="inline" intent=":literal"><semantics><mn mathsize="0.900em">70.04</mn><annotation encoding="application/x-tex">70.04</annotation></semantics></math></td>
+<td id="S3.T2.45.45.4" class="ltx_td ltx_align_center ltx_border_b ltx_border_r"><math id="S3.T2.45.45.4.m1" class="ltx_Math" alttext="68.99" display="inline" intent=":literal"><semantics><mn mathsize="0.900em">68.99</mn><annotation encoding="application/x-tex">68.99</annotation></semantics></math></td>
+<td id="S3.T2.46.46.5" class="ltx_td ltx_align_center ltx_border_b"><math id="S3.T2.46.46.5.m1" class="ltx_Math" alttext="68.67" display="inline" intent=":literal"><semantics><mn mathsize="0.900em">68.67</mn><annotation encoding="application/x-tex">68.67</annotation></semantics></math></td>
+</tr>
+</tbody>
+</table>
+</figure>
+<div id="S3.SS2.p4" class="ltx_para">
+<p id="S3.SS2.p4.5" class="ltx_p">To better understand the impact of our design choices, we conduct an ablation study on MSDNet (see <a href="https://ar5iv.labs.arxiv.org/html/2605.05358#S3.T2" title="In 3.2 Results and Discussion ‣ 3 Experiments ‣ Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks" class="ltx_ref"><span class="ltx_text ltx_ref_tag">Table</span>&nbsp;<span class="ltx_text ltx_ref_tag">2</span></a>). Our ablation explores two main dimensions: (i) the regularization strengths, namely <math id="S3.SS2.p4.1.m1" class="ltx_Math" alttext="\lambda" display="inline" intent=":literal"><semantics><mi>λ</mi><annotation encoding="application/x-tex">\lambda</annotation></semantics></math> and <math id="S3.SS2.p4.2.m2" class="ltx_Math" alttext="\rho" display="inline" intent=":literal"><semantics><mi>ρ</mi><annotation encoding="application/x-tex">\rho</annotation></semantics></math>, and (ii) the impact of an initial pretraining, or warm-up, phase where the full model is trained while optimizing only the final classifier. Across both methods, the strength of the regularization plays a central role in controlling the stability–plasticity trade-off: stronger regularization protects early exits but reduces the backbone’s flexibility for deeper layers, while weaker regularization allows adaptation at the cost of shallow-exit performance. The key difference lies in how this constraint is applied. EWC rigidly anchors parameters important for earlier exits, stabilizing low-level features but limiting the backbone’s ability to reorganize representations for deeper classifiers. This explains why early-exit performance improves steadily with larger <math id="S3.SS2.p4.3.m3" class="ltx_Math" alttext="\lambda" display="inline" intent=":literal"><semantics><mi>λ</mi><annotation encoding="application/x-tex">\lambda</annotation></semantics></math>, while high-budget exits are slightly constrained. In contrast, LwF constrains the outputs of earlier exits rather than the parameters themselves, allowing internal representations to adjust as long as the output distribution is preserved. Moderate <math id="S3.SS2.p4.4.m4" class="ltx_Math" alttext="\rho" display="inline" intent=":literal"><semantics><mi>ρ</mi><annotation encoding="application/x-tex">\rho</annotation></semantics></math> achieves a balance, maintaining early-exit accuracy while enabling deep exits to benefit from flexible feature adaptation, whereas high <math id="S3.SS2.p4.5.m5" class="ltx_Math" alttext="\rho" display="inline" intent=":literal"><semantics><mi>ρ</mi><annotation encoding="application/x-tex">\rho</annotation></semantics></math> overemphasizes shallow classifiers and reduces high-budget performance. Furthermore, backbone warm-up further interacts with both methods by providing an initial alignment of features across layers before regularization is applied. Without a warm-up, both methods struggle: EWC may freeze suboptimal parameters, and LwF may over-constrain features that are not yet meaningfully structured, leading to lower accuracy across all exits. Overall, this ablation study validates the effectiveness of our proposed two-stage strategy: pretraining the final exit establishes rich hierarchical features, and selective regularization allows each exit to adapt effectively without compromising the network’s full representational capacity.</p>
+</div>
+<figure id="S3.F2" class="ltx_figure"><img src="./[2605.05358] Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks_files/x1.png" id="S3.F2.g1" class="ltx_graphics ltx_centering ltx_img_landscape" width="830" height="515" alt="Refer to caption">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure"><span id="S3.F2.2.1.1" class="ltx_text ltx_font_bold">Fig. 2</span>: </span>Top-1 accuracy given different FLOPs budgets for MSDNet.</figcaption>
+</figure>
+<div id="S3.SS2.p5" class="ltx_para">
+<p id="S3.SS2.p5.4" class="ltx_p">Figure&nbsp;<a href="https://ar5iv.labs.arxiv.org/html/2605.05358#S3.F2" title="Figure 2 ‣ 3.2 Results and Discussion ‣ 3 Experiments ‣ Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks" class="ltx_ref"><span class="ltx_text ltx_ref_tag">2</span></a> follows the budgeted classification approach (e.g., <cite class="ltx_cite ltx_citemacro_cite">[<a href="https://ar5iv.labs.arxiv.org/html/2605.05358#bib.bib4" title="Deep feature surgery: towards accurate and efficient multi-exit networks" class="ltx_ref">3</a>, <a href="https://ar5iv.labs.arxiv.org/html/2605.05358#bib.bib1" title="How to train your multi-exit model? analyzing the impact of training strategies" class="ltx_ref">11</a>]</cite>) by evaluating the top-1 accuracy of a subset of configurations on MSDNet within a given computational budget. EWC with <math id="S3.SS2.p5.1.m1" class="ltx_Math" alttext="\lambda=10" display="inline" intent=":literal"><semantics><mrow><mi>λ</mi><mo>=</mo><mn>10</mn></mrow><annotation encoding="application/x-tex">\lambda=10</annotation></semantics></math> (blue curve) exhibits delayed accuracy growth, starting at only <math id="S3.SS2.p5.2.m2" class="ltx_Math" alttext="55\%" display="inline" intent=":literal"><semantics><mrow><mn>55</mn><mo>%</mo></mrow><annotation encoding="application/x-tex">55\%</annotation></semantics></math> and requiring approximately 40M FLOPs to reach <math id="S3.SS2.p5.3.m3" class="ltx_Math" alttext="70\%" display="inline" intent=":literal"><semantics><mrow><mn>70</mn><mo>%</mo></mrow><annotation encoding="application/x-tex">70\%</annotation></semantics></math> accuracy, nearly double the computation needed by well-regularized methods. This indicates that weak regularization fails to protect early-layer representations and forces reliance on deeper layers, thus heavier computational load. In contrast, stronger regularization enables substantially faster convergence: LwF variants and well-tuned EWC configurations reach <math id="S3.SS2.p5.4.m4" class="ltx_Math" alttext="70\%" display="inline" intent=":literal"><semantics><mrow><mn>70</mn><mo>%</mo></mrow><annotation encoding="application/x-tex">70\%</annotation></semantics></math> accuracy at roughly 20-25M FLOPs, yielding about a 2x computational speedup.</p>
+</div>
+<figure id="S3.F3" class="ltx_figure"><img src="./[2605.05358] Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks_files/x2.png" id="S3.F3.g1" class="ltx_graphics ltx_centering ltx_img_landscape" width="830" height="440" alt="Refer to caption">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure"><span id="S3.F3.6.1.1" class="ltx_text ltx_font_bold">Fig. 3</span>: </span>Exit ratios of MSDNet on the CIFAR-100 test set for different thresholds for EWC (<math id="S3.F3.3.m1" class="ltx_Math" alttext="\lambda=1000" display="inline" intent=":literal"><semantics><mrow><mi>λ</mi><mo>=</mo><mn>1000</mn></mrow><annotation encoding="application/x-tex">\lambda=1000</annotation></semantics></math>) and LwF (<math id="S3.F3.4.m2" class="ltx_Math" alttext="\rho=0.5" display="inline" intent=":literal"><semantics><mrow><mi>ρ</mi><mo>=</mo><mn>0.5</mn></mrow><annotation encoding="application/x-tex">\rho=0.5</annotation></semantics></math>) models. For each threshold, exits 1 through 7 are shown from left to right.</figcaption>
+</figure>
+<div id="S3.SS2.p6" class="ltx_para">
+<p id="S3.SS2.p6.2" class="ltx_p">Finally, Figure&nbsp;<a href="https://ar5iv.labs.arxiv.org/html/2605.05358#S3.F3" title="Figure 3 ‣ 3.2 Results and Discussion ‣ 3 Experiments ‣ Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks" class="ltx_ref"><span class="ltx_text ltx_ref_tag">3</span></a> further analyzes how confidence thresholds control the dynamic behavior of MSDNet by reporting exit ratios across all intermediate classifiers. As the threshold increases, predictions are progressively shifted toward deeper exits, indicating that harder samples are routed to later classifiers with richer representations. Comparing EWC (<math id="S3.SS2.p6.1.m1" class="ltx_Math" alttext="\lambda=1000" display="inline" intent=":literal"><semantics><mrow><mi>λ</mi><mo>=</mo><mn>1000</mn></mrow><annotation encoding="application/x-tex">\lambda=1000</annotation></semantics></math>) and LwF (<math id="S3.SS2.p6.2.m2" class="ltx_Math" alttext="\rho=0.5" display="inline" intent=":literal"><semantics><mrow><mi>ρ</mi><mo>=</mo><mn>0.5</mn></mrow><annotation encoding="application/x-tex">\rho=0.5</annotation></semantics></math>) reveals a systematic difference: LwF exits fewer samples at early classifiers under the same thresholds, while EWC commits earlier. Interpreted together with <a href="https://ar5iv.labs.arxiv.org/html/2605.05358#S3.F2" title="In 3.2 Results and Discussion ‣ 3 Experiments ‣ Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks" class="ltx_ref"><span class="ltx_text ltx_ref_tag">Figure</span>&nbsp;<span class="ltx_text ltx_ref_tag">2</span></a>, where LwF achieves higher accuracy at substantially lower FLOPs, this shows that LwF provides a higher effective speedup despite exiting later on average. This behavior suggests that LwF learns more accurate but less confident early classifiers, deferring decisions more often, whereas EWC produces earlier but less accurate exits.</p>
+</div>
+</section>
+</section>
+<section id="S4" class="ltx_section">
+<h2 class="ltx_title ltx_title_section">
+<span class="ltx_tag ltx_tag_section">4 </span>Conclusion</h2>
+
+<div id="S4.p1" class="ltx_para">
+<p id="S4.p1.1" class="ltx_p">In this work, we propose a novel strategy for training EENNs to mitigate the degradation of previously learned representations caused by incremental exit addition. By incorporating parameter-level protection via EWC and output-distribution consistency via LwF, we establish a principled sequential training framework that balances exit specialization with knowledge preservation. Our experimental study demonstrates that the proposed approach consistently outperforms existing sequential training methods and achieves better early exit accuracy than joint training. Future work will investigate adaptive regularization scheduling and more structured protection mechanisms, e.g., at the level of convolutional kernels or attention heads.</p>
+</div>
+<div class="ltx_pagination ltx_role_newpage"></div>
+</section>
+<section id="bib" class="ltx_bibliography">
+<h2 class="ltx_title ltx_title_bibliography">References</h2>
+
+<ul id="bib.L1" class="ltx_biblist">
+<li id="bib.bib10" class="ltx_bibitem ltx_bib_article">
+<span class="ltx_tag ltx_bib_key ltx_role_refnum ltx_tag_bibitem">[1]</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">S. Amari</span><span class="ltx_text ltx_bib_year"> (1998)</span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">Natural gradient works efficiently in learning</span>.
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_journal">Neural Computation</span> <span class="ltx_text ltx_bib_volume">10</span> (<span class="ltx_text ltx_bib_number">2</span>), <span class="ltx_text ltx_bib_pages"> pp.&nbsp;251–276</span>.
+</span>
+<span class="ltx_bibblock">External Links: <span class="ltx_text ltx_bib_links"><a target="_blank" href="https://dx.doi.org/10.1162/089976698300017746" title="" class="ltx_ref doi ltx_bib_external">Document</a></span>
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="https://ar5iv.labs.arxiv.org/html/2605.05358#S2.SS1.p1.1" title="2.1 Parameter-level Regularization ‣ 2 Proposed Methodology ‣ Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§2.1</span></a>.
+</span>
+</li>
+<li id="bib.bib15" class="ltx_bibitem ltx_bib_article">
+<span class="ltx_tag ltx_bib_key ltx_role_refnum ltx_tag_bibitem">[2]</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">R. Dong, Y. Mao, and J. Zhang</span><span class="ltx_text ltx_bib_year"> (2022)</span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">Resource-constrained edge ai with early exit prediction</span>.
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_journal">Journal of Communications and Information Networks</span> <span class="ltx_text ltx_bib_volume">7</span> (<span class="ltx_text ltx_bib_number">2</span>), <span class="ltx_text ltx_bib_pages"> pp.&nbsp;122–134</span>.
+</span>
+<span class="ltx_bibblock">External Links: <span class="ltx_text ltx_bib_links"><a target="_blank" href="https://dx.doi.org/10.23919/JCIN.2022.9815196" title="" class="ltx_ref doi ltx_bib_external">Document</a></span>
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="https://ar5iv.labs.arxiv.org/html/2605.05358#S1.p1.1" title="1 Introduction ‣ Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§1</span></a>.
+</span>
+</li>
+<li id="bib.bib4" class="ltx_bibitem ltx_bib_inproceedings">
+<span class="ltx_tag ltx_bib_key ltx_role_refnum ltx_tag_bibitem">[3]</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">C. Gong, Y. Chen, Q. Luo, Y. Lu, T. Li, Y. Zhang, Y. Sun, and L. Zhang</span><span class="ltx_text ltx_bib_year"> (2025)</span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">Deep feature surgery: towards accurate and&nbsp;efficient multi-exit networks</span>.
+</span>
+<span class="ltx_bibblock">In <span class="ltx_text ltx_bib_inbook">Computer Vision – ECCV 2024</span>,
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_place">Cham</span>, <span class="ltx_text ltx_bib_pages"> pp.&nbsp;435–451</span>.
+</span>
+<span class="ltx_bibblock">External Links: <span class="ltx_text ltx_bib_links"><span class="ltx_text isbn ltx_bib_external">ISBN 978-3-031-72967-6</span></span>
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="https://ar5iv.labs.arxiv.org/html/2605.05358#S1.p2.1" title="1 Introduction ‣ Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§1</span></a>,
+<a href="https://ar5iv.labs.arxiv.org/html/2605.05358#S3.SS2.p5.4" title="3.2 Results and Discussion ‣ 3 Experiments ‣ Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§3.2</span></a>.
+</span>
+</li>
+<li id="bib.bib14" class="ltx_bibitem ltx_bib_article">
+<span class="ltx_tag ltx_bib_key ltx_role_refnum ltx_tag_bibitem">[4]</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">D. Han, J. Park, S. Ham, N. Lee, and J. Moon</span><span class="ltx_text ltx_bib_year"> (2024)</span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">Improving low-latency predictions in multi-exit neural networks via block-dependent losses</span>.
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_journal">IEEE Transactions on Neural Networks and Learning Systems</span> <span class="ltx_text ltx_bib_volume">35</span> (<span class="ltx_text ltx_bib_number">11</span>), <span class="ltx_text ltx_bib_pages"> pp.&nbsp;16927–16935</span>.
+</span>
+<span class="ltx_bibblock">External Links: <span class="ltx_text ltx_bib_links"><a target="_blank" href="https://dx.doi.org/10.1109/TNNLS.2023.3282249" title="" class="ltx_ref doi ltx_bib_external">Document</a></span>
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="https://ar5iv.labs.arxiv.org/html/2605.05358#S1.p2.1" title="1 Introduction ‣ Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§1</span></a>.
+</span>
+</li>
+<li id="bib.bib5" class="ltx_bibitem ltx_bib_article">
+<span class="ltx_tag ltx_bib_key ltx_role_refnum ltx_tag_bibitem">[5]</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">Y. Han, G. Huang, S. Song, L. Yang, H. Wang, and Y. Wang</span><span class="ltx_text ltx_bib_year"> (2022-11)</span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">Dynamic Neural Networks: A Survey</span>.
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_journal">IEEE Transactions on Pattern Analysis &amp; Machine Intelligence</span> <span class="ltx_text ltx_bib_volume">44</span> (<span class="ltx_text ltx_bib_number">11</span>), <span class="ltx_text ltx_bib_pages"> pp.&nbsp;7436–7456</span>.
+</span>
+<span class="ltx_bibblock">External Links: <span class="ltx_text ltx_bib_links"><span class="ltx_text issn ltx_bib_external">ISSN 1939-3539</span>,
+<a target="_blank" href="https://dx.doi.org/10.1109/TPAMI.2021.3117837" title="" class="ltx_ref doi ltx_bib_external">Document</a>,
+<a target="_blank" href="https://doi.ieeecomputersociety.org/10.1109/TPAMI.2021.3117837" title="" class="ltx_ref ltx_bib_external">Link</a></span>
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="https://ar5iv.labs.arxiv.org/html/2605.05358#S1.p1.1" title="1 Introduction ‣ Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§1</span></a>.
+</span>
+</li>
+<li id="bib.bib22" class="ltx_bibitem ltx_bib_inproceedings">
+<span class="ltx_tag ltx_bib_key ltx_role_refnum ltx_tag_bibitem">[6]</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">K. He, X. Zhang, S. Ren, and J. Sun</span><span class="ltx_text ltx_bib_year"> (2016)</span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">Deep residual learning for image recognition</span>.
+</span>
+<span class="ltx_bibblock">In <span class="ltx_text ltx_bib_inbook">Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition (CVPR)</span>,
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_pages"> pp.&nbsp;770–778</span>.
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="https://ar5iv.labs.arxiv.org/html/2605.05358#S3.SS1.p1.7" title="3.1 Experimental Setup ‣ 3 Experiments ‣ Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§3.1</span></a>.
+</span>
+</li>
+<li id="bib.bib24" class="ltx_bibitem ltx_bib_inproceedings">
+<span class="ltx_tag ltx_bib_key ltx_role_refnum ltx_tag_bibitem">[7]</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">G. Huang, D. Chen, T. Li, F. Wu, L. van der Maaten, and K. Q. Weinberger</span><span class="ltx_text ltx_bib_year"> (2018)</span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">Multi-scale dense networks for resource efficient image classification</span>.
+</span>
+<span class="ltx_bibblock">In <span class="ltx_text ltx_bib_inbook">Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition (CVPR)</span>,
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_pages"> pp.&nbsp;284–293</span>.
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="https://ar5iv.labs.arxiv.org/html/2605.05358#S1.p3.1" title="1 Introduction ‣ Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§1</span></a>,
+<a href="https://ar5iv.labs.arxiv.org/html/2605.05358#S3.SS1.p1.7" title="3.1 Experimental Setup ‣ 3 Experiments ‣ Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§3.1</span></a>.
+</span>
+</li>
+<li id="bib.bib23" class="ltx_bibitem ltx_bib_inproceedings">
+<span class="ltx_tag ltx_bib_key ltx_role_refnum ltx_tag_bibitem">[8]</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">Y. Kaya, S. Hong, and T. Dumitras</span><span class="ltx_text ltx_bib_year"> (2019-09–15 Jun)</span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">Shallow-deep networks: understanding and mitigating network overthinking</span>.
+</span>
+<span class="ltx_bibblock">In <span class="ltx_text ltx_bib_inbook">Proceedings of the 36th International Conference on Machine Learning</span>,
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_series">Proceedings of Machine Learning Research</span>, Vol. <span class="ltx_text ltx_bib_volume">97</span>, <span class="ltx_text ltx_bib_pages"> pp.&nbsp;3301–3310</span>.
+</span>
+<span class="ltx_bibblock">External Links: <span class="ltx_text ltx_bib_links"><a target="_blank" href="https://proceedings.mlr.press/v97/kaya19a.html" title="" class="ltx_ref ltx_bib_external">Link</a></span>
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="https://ar5iv.labs.arxiv.org/html/2605.05358#S3.SS1.p1.7" title="3.1 Experimental Setup ‣ 3 Experiments ‣ Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§3.1</span></a>.
+</span>
+</li>
+<li id="bib.bib7" class="ltx_bibitem ltx_bib_article">
+<span class="ltx_tag ltx_bib_key ltx_role_refnum ltx_tag_bibitem">[9]</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">J. Kirkpatrick, R. Pascanu, N. Rabinowitz, J. Veness, G. Desjardins, A. A. Rusu, K. Milan, J. Quan, T. Ramalho, A. Grabska-Barwinska, D. Hassabis, C. Clopath, D. Kumaran, and R. Hadsell</span><span class="ltx_text ltx_bib_year"> (2017)</span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">Overcoming catastrophic forgetting in neural networks</span>.
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_journal">Proceedings of the National Academy of Sciences</span> <span class="ltx_text ltx_bib_volume">114</span> (<span class="ltx_text ltx_bib_number">13</span>), <span class="ltx_text ltx_bib_pages"> pp.&nbsp;3521–3526</span>.
+</span>
+<span class="ltx_bibblock">External Links: <span class="ltx_text ltx_bib_links"><a target="_blank" href="https://dx.doi.org/10.1073/pnas.1611835114" title="" class="ltx_ref doi ltx_bib_external">Document</a>,
+<a target="_blank" href="https://www.pnas.org/doi/abs/10.1073/pnas.1611835114" title="" class="ltx_ref ltx_bib_external">Link</a>,
+<span class="ltx_text ltx_bib_external">https://www.pnas.org/doi/pdf/10.1073/pnas.1611835114</span></span>
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="https://ar5iv.labs.arxiv.org/html/2605.05358#S1.p5.1" title="1 Introduction ‣ Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§1</span></a>.
+</span>
+</li>
+<li id="bib.bib21" class="ltx_bibitem ltx_bib_report">
+<span class="ltx_tag ltx_bib_key ltx_role_refnum ltx_tag_bibitem">[10]</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">A. Krizhevsky</span><span class="ltx_text ltx_bib_year"> (2009)</span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">Learning multiple layers of features from tiny images</span>.
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_type">Technical report</span>
+</span>
+<span class="ltx_bibblock"> <span class="ltx_text ltx_bib_publisher">University of Toronto</span>.
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="https://ar5iv.labs.arxiv.org/html/2605.05358#S3.SS1.p1.7" title="3.1 Experimental Setup ‣ 3 Experiments ‣ Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§3.1</span></a>.
+</span>
+</li>
+<li id="bib.bib1" class="ltx_bibitem ltx_bib_inproceedings">
+<span class="ltx_tag ltx_bib_key ltx_role_refnum ltx_tag_bibitem">[11]</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">P. Kubaty, B. Wójcik, B. T. Krzepkowski, M. Michaluk, T. Trzcinski, J. Pomponi, and K. Adamczewski</span><span class="ltx_text ltx_bib_year"> (2025)</span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">How to train your multi-exit model? analyzing the impact of training strategies</span>.
+</span>
+<span class="ltx_bibblock">In <span class="ltx_text ltx_bib_inbook">Forty-second International Conference on Machine Learning</span>,
+</span>
+<span class="ltx_bibblock">External Links: <span class="ltx_text ltx_bib_links"><a target="_blank" href="https://openreview.net/forum?id=vhTPfOdwyQ" title="" class="ltx_ref ltx_bib_external">Link</a></span>
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="https://ar5iv.labs.arxiv.org/html/2605.05358#S1.p2.1" title="1 Introduction ‣ Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§1</span></a>,
+<a href="https://ar5iv.labs.arxiv.org/html/2605.05358#S1.p3.1" title="1 Introduction ‣ Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§1</span></a>,
+<a href="https://ar5iv.labs.arxiv.org/html/2605.05358#S3.SS1.p1.7" title="3.1 Experimental Setup ‣ 3 Experiments ‣ Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§3.1</span></a>,
+<a href="https://ar5iv.labs.arxiv.org/html/2605.05358#S3.SS2.p5.4" title="3.2 Results and Discussion ‣ 3 Experiments ‣ Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§3.2</span></a>,
+<a href="https://ar5iv.labs.arxiv.org/html/2605.05358#S3.p1.1" title="3 Experiments ‣ Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§3</span></a>.
+</span>
+</li>
+<li id="bib.bib3" class="ltx_bibitem ltx_bib_article">
+<span class="ltx_tag ltx_bib_key ltx_role_refnum ltx_tag_bibitem">[12]</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">Z. Li and D. Hoiem</span><span class="ltx_text ltx_bib_year"> (2018-12)</span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">Learning without forgetting</span>.
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_journal">IEEE Trans. Pattern Anal. Mach. Intell.</span> <span class="ltx_text ltx_bib_volume">40</span> (<span class="ltx_text ltx_bib_number">12</span>), <span class="ltx_text ltx_bib_pages"> pp.&nbsp;2935–2947</span>.
+</span>
+<span class="ltx_bibblock">External Links: <span class="ltx_text ltx_bib_links"><span class="ltx_text issn ltx_bib_external">ISSN 0162-8828</span>,
+<a target="_blank" href="https://doi.org/10.1109/TPAMI.2017.2773081" title="" class="ltx_ref ltx_bib_external">Link</a>,
+<a target="_blank" href="https://dx.doi.org/10.1109/TPAMI.2017.2773081" title="" class="ltx_ref doi ltx_bib_external">Document</a></span>
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="https://ar5iv.labs.arxiv.org/html/2605.05358#S1.p5.1" title="1 Introduction ‣ Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§1</span></a>.
+</span>
+</li>
+<li id="bib.bib12" class="ltx_bibitem ltx_bib_inproceedings">
+<span class="ltx_tag ltx_bib_key ltx_role_refnum ltx_tag_bibitem">[13]</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">W. Liu, P. Zhou, Z. Wang, Z. Zhao, H. Deng, and Q. Ju</span><span class="ltx_text ltx_bib_year"> (2020-07)</span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">FastBERT: a self-distilling BERT with adaptive inference time</span>.
+</span>
+<span class="ltx_bibblock">In <span class="ltx_text ltx_bib_inbook">Proceedings of the 58th Annual Meeting of the Association for Computational Linguistics</span>,
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_place">Online</span>, <span class="ltx_text ltx_bib_pages"> pp.&nbsp;6035–6044</span>.
+</span>
+<span class="ltx_bibblock">External Links: <span class="ltx_text ltx_bib_links"><a target="_blank" href="https://aclanthology.org/2020.acl-main.537/" title="" class="ltx_ref ltx_bib_external">Link</a>,
+<a target="_blank" href="https://dx.doi.org/10.18653/v1/2020.acl-main.537" title="" class="ltx_ref doi ltx_bib_external">Document</a></span>
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="https://ar5iv.labs.arxiv.org/html/2605.05358#S1.p5.1" title="1 Introduction ‣ Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§1</span></a>.
+</span>
+</li>
+<li id="bib.bib25" class="ltx_bibitem ltx_bib_article">
+<span class="ltx_tag ltx_bib_key ltx_role_refnum ltx_tag_bibitem">[14]</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">H. Rahmath P, V. Srivastava, K. Chaurasia, R. G. Pacheco, and R. S. Couto</span><span class="ltx_text ltx_bib_year"> (2024-11)</span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">Early-exit deep neural network - a comprehensive survey</span>.
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_journal">ACM Comput. Surv.</span> <span class="ltx_text ltx_bib_volume">57</span> (<span class="ltx_text ltx_bib_number">3</span>).
+</span>
+<span class="ltx_bibblock">External Links: <span class="ltx_text ltx_bib_links"><span class="ltx_text issn ltx_bib_external">ISSN 0360-0300</span>,
+<a target="_blank" href="https://doi.org/10.1145/3698767" title="" class="ltx_ref ltx_bib_external">Link</a>,
+<a target="_blank" href="https://dx.doi.org/10.1145/3698767" title="" class="ltx_ref doi ltx_bib_external">Document</a></span>
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="https://ar5iv.labs.arxiv.org/html/2605.05358#S1.p4.1" title="1 Introduction ‣ Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§1</span></a>.
+</span>
+</li>
+<li id="bib.bib6" class="ltx_bibitem ltx_bib_inproceedings">
+<span class="ltx_tag ltx_bib_key ltx_role_refnum ltx_tag_bibitem">[15]</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">J. Schwarz, W. Czarnecki, J. Luketina, A. Grabska-Barwinska, Y. W. Teh, R. Pascanu, and R. Hadsell</span><span class="ltx_text ltx_bib_year"> (2018-10–15 Jul)</span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">Progress &amp; compress: a scalable framework for continual learning</span>.
+</span>
+<span class="ltx_bibblock">In <span class="ltx_text ltx_bib_inbook">Proceedings of the 35th International Conference on Machine Learning</span>,
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_series">Proceedings of Machine Learning Research</span>, Vol. <span class="ltx_text ltx_bib_volume">80</span>, <span class="ltx_text ltx_bib_pages"> pp.&nbsp;4528–4537</span>.
+</span>
+<span class="ltx_bibblock">External Links: <span class="ltx_text ltx_bib_links"><a target="_blank" href="https://proceedings.mlr.press/v80/schwarz18a.html" title="" class="ltx_ref ltx_bib_external">Link</a></span>
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="https://ar5iv.labs.arxiv.org/html/2605.05358#S1.p5.1" title="1 Introduction ‣ Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§1</span></a>,
+<a href="https://ar5iv.labs.arxiv.org/html/2605.05358#S2.SS1.p2.13" title="2.1 Parameter-level Regularization ‣ 2 Proposed Methodology ‣ Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§2.1</span></a>.
+</span>
+</li>
+<li id="bib.bib8" class="ltx_bibitem ltx_bib_inproceedings">
+<span class="ltx_tag ltx_bib_key ltx_role_refnum ltx_tag_bibitem">[16]</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">F. Szatkowski, F. Yang, B. Twardowski, T. Trzcinski, and J. van de Weijer</span><span class="ltx_text ltx_bib_year"> (2024-06)</span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">Accelerated inference and reduced forgetting: the dual benefits of early-exit networks in continual learning</span>.
+</span>
+<span class="ltx_bibblock">In <span class="ltx_text ltx_bib_inbook">5th Workshop on Continual Learning in Computer Vision, CVPR</span>,
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_place">Seattle, USA</span>.
+</span>
+<span class="ltx_bibblock">Note: <span class="ltx_text ltx_bib_note"></span>
+</span>
+<span class="ltx_bibblock">External Links: <span class="ltx_text ltx_bib_links"><a target="_blank" href="https://sites.google.com/view/clvision2024/call-for-papers/accepted-papers#272" title="" class="ltx_ref ltx_bib_external">Link</a></span>
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="https://ar5iv.labs.arxiv.org/html/2605.05358#S1.p4.1" title="1 Introduction ‣ Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§1</span></a>.
+</span>
+</li>
+<li id="bib.bib26" class="ltx_bibitem ltx_bib_inproceedings">
+<span class="ltx_tag ltx_bib_key ltx_role_refnum ltx_tag_bibitem">[17]</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">S. Teerapittayanon, B. McDanel, and H.T. Kung</span><span class="ltx_text ltx_bib_year"> (2016)</span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">BranchyNet: fast inference via early exiting from deep neural networks</span>.
+</span>
+<span class="ltx_bibblock">In <span class="ltx_text ltx_bib_inbook">2016 23rd International Conference on Pattern Recognition (ICPR)</span>,
+</span>
+<span class="ltx_bibblock">Vol. <span class="ltx_text ltx_bib_volume"></span>, <span class="ltx_text ltx_bib_pages"> pp.&nbsp;2464–2469</span>.
+</span>
+<span class="ltx_bibblock">External Links: <span class="ltx_text ltx_bib_links"><a target="_blank" href="https://dx.doi.org/10.1109/ICPR.2016.7900006" title="" class="ltx_ref doi ltx_bib_external">Document</a></span>
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="https://ar5iv.labs.arxiv.org/html/2605.05358#S1.p2.1" title="1 Introduction ‣ Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§1</span></a>.
+</span>
+</li>
+<li id="bib.bib20" class="ltx_bibitem ltx_bib_inproceedings">
+<span class="ltx_tag ltx_bib_key ltx_role_refnum ltx_tag_bibitem">[18]</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">G. M. v. d. Ven</span><span class="ltx_text ltx_bib_year"> (April 28, 2025)</span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">On the computation of the fisher information in continual learning</span>.
+</span>
+<span class="ltx_bibblock">In <span class="ltx_text ltx_bib_inbook">ICLR Blogposts 2025</span>,
+</span>
+<span class="ltx_bibblock">Note: <span class="ltx_text ltx_bib_note">https://iclr-blogposts.github.io/2025/blog/fisher/</span>
+</span>
+<span class="ltx_bibblock">External Links: <span class="ltx_text ltx_bib_links"><a target="_blank" href="https://iclr-blogposts.github.io/2025/blog/fisher/" title="" class="ltx_ref ltx_bib_external">Link</a></span>
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="https://ar5iv.labs.arxiv.org/html/2605.05358#S2.SS1.p2.6" title="2.1 Parameter-level Regularization ‣ 2 Proposed Methodology ‣ Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§2.1</span></a>.
+</span>
+</li>
+<li id="bib.bib27" class="ltx_bibitem ltx_bib_article">
+<span class="ltx_tag ltx_bib_key ltx_role_refnum ltx_tag_bibitem">[19]</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">L. Wang, X. Zhang, H. Su, and J. Zhu</span><span class="ltx_text ltx_bib_year"> (2024)</span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">A comprehensive survey of continual learning: theory, method and application</span>.
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_journal">IEEE Transactions on Pattern Analysis and Machine Intelligence</span> <span class="ltx_text ltx_bib_volume">46</span> (<span class="ltx_text ltx_bib_number">8</span>), <span class="ltx_text ltx_bib_pages"> pp.&nbsp;5362–5383</span>.
+</span>
+<span class="ltx_bibblock">External Links: <span class="ltx_text ltx_bib_links"><a target="_blank" href="https://dx.doi.org/10.1109/TPAMI.2024.3367329" title="" class="ltx_ref doi ltx_bib_external">Document</a></span>
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="https://ar5iv.labs.arxiv.org/html/2605.05358#S1.p4.1" title="1 Introduction ‣ Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§1</span></a>.
+</span>
+</li>
+<li id="bib.bib13" class="ltx_bibitem ltx_bib_article">
+<span class="ltx_tag ltx_bib_key ltx_role_refnum ltx_tag_bibitem">[20]</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">B. Wojcik, M. Przewiezlikowski, F. Szatkowski, M. Wolczyk, K. Balazy, B. Krzepkowski, I. Podolak, J. Tabor, M. Smieja, and T. Trzcinski</span><span class="ltx_text ltx_bib_year"> (2023)</span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">Zero time waste in pre-trained early exit neural networks</span>.
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_journal">Neural Networks</span> <span class="ltx_text ltx_bib_volume">168</span>, <span class="ltx_text ltx_bib_pages"> pp.&nbsp;580–601</span>.
+</span>
+<span class="ltx_bibblock">External Links: <span class="ltx_text ltx_bib_links"><span class="ltx_text issn ltx_bib_external">ISSN 0893-6080</span>,
+<a target="_blank" href="https://dx.doi.org/https%3A//doi.org/10.1016/j.neunet.2023.10.003" title="" class="ltx_ref doi ltx_bib_external">Document</a>,
+<a target="_blank" href="https://www.sciencedirect.com/science/article/pii/S0893608023005555" title="" class="ltx_ref ltx_bib_external">Link</a></span>
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="https://ar5iv.labs.arxiv.org/html/2605.05358#S1.p3.1" title="1 Introduction ‣ Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§1</span></a>.
+</span>
+</li>
+<li id="bib.bib18" class="ltx_bibitem ltx_bib_inproceedings">
+<span class="ltx_tag ltx_bib_key ltx_role_refnum ltx_tag_bibitem">[21]</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">J. Xin, R. Tang, J. Lee, Y. Yu, and J. Lin</span><span class="ltx_text ltx_bib_year"> (2020-07)</span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">DeeBERT: dynamic early exiting for accelerating BERT inference</span>.
+</span>
+<span class="ltx_bibblock">In <span class="ltx_text ltx_bib_inbook">Proceedings of the 58th Annual Meeting of the Association for Computational Linguistics</span>,
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_place">Online</span>, <span class="ltx_text ltx_bib_pages"> pp.&nbsp;2246–2251</span>.
+</span>
+<span class="ltx_bibblock">External Links: <span class="ltx_text ltx_bib_links"><a target="_blank" href="https://aclanthology.org/2020.acl-main.204/" title="" class="ltx_ref ltx_bib_external">Link</a>,
+<a target="_blank" href="https://dx.doi.org/10.18653/v1/2020.acl-main.204" title="" class="ltx_ref doi ltx_bib_external">Document</a></span>
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="https://ar5iv.labs.arxiv.org/html/2605.05358#S1.p5.1" title="1 Introduction ‣ Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§1</span></a>.
+</span>
+</li>
+<li id="bib.bib17" class="ltx_bibitem ltx_bib_inproceedings">
+<span class="ltx_tag ltx_bib_key ltx_role_refnum ltx_tag_bibitem">[22]</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">J. Xin, R. Tang, Y. Yu, and J. Lin</span><span class="ltx_text ltx_bib_year"> (2021-04)</span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">BERxiT: early exiting for BERT with better fine-tuning and extension to regression</span>.
+</span>
+<span class="ltx_bibblock">In <span class="ltx_text ltx_bib_inbook">Proceedings of the 16th Conference of the European Chapter of the Association for Computational Linguistics: Main Volume</span>,
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_place">Online</span>, <span class="ltx_text ltx_bib_pages"> pp.&nbsp;91–104</span>.
+</span>
+<span class="ltx_bibblock">External Links: <span class="ltx_text ltx_bib_links"><a target="_blank" href="https://aclanthology.org/2021.eacl-main.8/" title="" class="ltx_ref ltx_bib_external">Link</a>,
+<a target="_blank" href="https://dx.doi.org/10.18653/v1/2021.eacl-main.8" title="" class="ltx_ref doi ltx_bib_external">Document</a></span>
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="https://ar5iv.labs.arxiv.org/html/2605.05358#S1.p2.1" title="1 Introduction ‣ Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§1</span></a>.
+</span>
+</li>
+<li id="bib.bib19" class="ltx_bibitem ltx_bib_inproceedings">
+<span class="ltx_tag ltx_bib_key ltx_role_refnum ltx_tag_bibitem">[23]</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">G. Xu, J. Hao, L. Shen, H. Hu, Y. Luo, H. Lin, and J. Shen</span><span class="ltx_text ltx_bib_year"> (2023)</span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">LGViT: dynamic early exiting for accelerating vision transformer</span>.
+</span>
+<span class="ltx_bibblock">In <span class="ltx_text ltx_bib_inbook">Proceedings of the 31st ACM International Conference on Multimedia</span>,
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_series">MM ’23</span>, <span class="ltx_text ltx_bib_place">New York, NY, USA</span>, <span class="ltx_text ltx_bib_pages"> pp.&nbsp;9103–9114</span>.
+</span>
+<span class="ltx_bibblock">External Links: <span class="ltx_text ltx_bib_links"><span class="ltx_text isbn ltx_bib_external">ISBN 9798400701085</span>,
+<a target="_blank" href="https://doi.org/10.1145/3581783.3611762" title="" class="ltx_ref ltx_bib_external">Link</a>,
+<a target="_blank" href="https://dx.doi.org/10.1145/3581783.3611762" title="" class="ltx_ref doi ltx_bib_external">Document</a></span>
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="https://ar5iv.labs.arxiv.org/html/2605.05358#S1.p3.1" title="1 Introduction ‣ Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§1</span></a>.
+</span>
+</li>
+<li id="bib.bib16" class="ltx_bibitem ltx_bib_inproceedings">
+<span class="ltx_tag ltx_bib_key ltx_role_refnum ltx_tag_bibitem">[24]</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">W. Zhu, X. Wang, Y. Ni, and G. Xie</span><span class="ltx_text ltx_bib_year"> (2021-11)</span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">GAML-BERT: improving BERT early exiting by gradient aligned mutual learning</span>.
+</span>
+<span class="ltx_bibblock">In <span class="ltx_text ltx_bib_inbook">Proceedings of the 2021 Conference on Empirical Methods in Natural Language Processing</span>,
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_place">Online and Punta Cana, Dominican Republic</span>, <span class="ltx_text ltx_bib_pages"> pp.&nbsp;3033–3044</span>.
+</span>
+<span class="ltx_bibblock">External Links: <span class="ltx_text ltx_bib_links"><a target="_blank" href="https://aclanthology.org/2021.emnlp-main.242/" title="" class="ltx_ref ltx_bib_external">Link</a>,
+<a target="_blank" href="https://dx.doi.org/10.18653/v1/2021.emnlp-main.242" title="" class="ltx_ref doi ltx_bib_external">Document</a></span>
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="https://ar5iv.labs.arxiv.org/html/2605.05358#S1.p2.1" title="1 Introduction ‣ Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§1</span></a>.
+</span>
+</li>
+</ul>
+</section>
+</article>
+</div>
+<div class="ar5iv-footer"><a href="https://ar5iv.labs.arxiv.org/html/2605.05357" class="ar5iv-nav-button ar5iv-nav-button-prev">◄</a>
+    <a class="ar5iv-home-button" href="https://ar5iv.labs.arxiv.org/"><img height="40" alt="ar5iv homepage" src="./[2605.05358] Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks_files/ar5iv.png"></a>
+    <a href="https://ar5iv.labs.arxiv.org/feeling_lucky" class="ar5iv-text-button">Feeling<br>lucky?</a>
+    <a href="https://ar5iv.labs.arxiv.org/land_of_honey_and_milk" rel="nofollow" aria-hidden="true" tabindex="-1"></a>
+    <a href="https://ar5iv.labs.arxiv.org/log/2605.05358" class="ar5iv-text-button ar5iv-severity-error">Conversion<br>report</a>
+    <a class="ar5iv-text-button" target="_blank" href="https://github.com/dginev/ar5iv/issues/new?template=improve-article--arxiv-id-.md&amp;title=Improve+article+2605.05358">Report<br>an issue</a>
+    <a href="https://arxiv.org/abs/2605.05358" class="ar5iv-text-button arxiv-ui-theme">View&nbsp;original<br>on&nbsp;arXiv</a><a href="https://ar5iv.labs.arxiv.org/html/2605.05359" class="ar5iv-nav-button ar5iv-nav-button-next">►</a>
+</div><footer class="ltx_page_footer">
+<a class="ar5iv-toggle-color-scheme" href="javascript:toggleColorScheme()" title="Toggle ar5iv color scheme"><span class="color-scheme-icon"></span></a>
+<a class="ar5iv-footer-button" href="https://arxiv.org/help/license" target="_blank">Copyright</a>
+<a class="ar5iv-footer-button" href="https://arxiv.org/help/policies/privacy_policy" target="_blank">Privacy Policy</a>
+
+<div class="ltx_page_logo">Generated  on Sat Jun  6 08:11:31 2026 by <a target="_blank" href="http://dlmf.nist.gov/LaTeXML/" class="ltx_LaTeXML_logo"><span style="letter-spacing:-0.2em; margin-right:0.1em;">L<span class="ltx_font_smallcaps" style="position:relative; bottom:2.2pt;">a</span>T<span class="ltx_font_smallcaps" style="font-size:120%;position:relative; bottom:-0.2ex;">e</span></span><span style="font-size:90%; position:relative; bottom:-0.2ex;">XML</span><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAAOCAYAAAD5YeaVAAAAAXNSR0IArs4c6QAAAAZiS0dEAP8A/wD/oL2nkwAAAAlwSFlzAAALEwAACxMBAJqcGAAAAAd0SU1FB9wKExQZLWTEaOUAAAAddEVYdENvbW1lbnQAQ3JlYXRlZCB3aXRoIFRoZSBHSU1Q72QlbgAAAdpJREFUKM9tkL+L2nAARz9fPZNCKFapUn8kyI0e4iRHSR1Kb8ng0lJw6FYHFwv2LwhOpcWxTjeUunYqOmqd6hEoRDhtDWdA8ApRYsSUCDHNt5ul13vz4w0vWCgUnnEc975arX6ORqN3VqtVZbfbTQC4uEHANM3jSqXymFI6yWazP2KxWAXAL9zCUa1Wy2tXVxheKA9YNoR8Pt+aTqe4FVVVvz05O6MBhqUIBGk8Hn8HAOVy+T+XLJfLS4ZhTiRJgqIoVBRFIoric47jPnmeB1mW/9rr9ZpSSn3Lsmir1fJZlqWlUonKsvwWwD8ymc/nXwVBeLjf7xEKhdBut9Hr9WgmkyGEkJwsy5eHG5vN5g0AKIoCAEgkEkin0wQAfN9/cXPdheu6P33fBwB4ngcAcByHJpPJl+fn54mD3Gg0NrquXxeLRQAAwzAYj8cwTZPwPH9/sVg8PXweDAauqqr2cDjEer1GJBLBZDJBs9mE4zjwfZ85lAGg2+06hmGgXq+j3+/DsixYlgVN03a9Xu8jgCNCyIegIAgx13Vfd7vdu+FweG8YRkjXdWy329+dTgeSJD3ieZ7RNO0VAXAPwDEAO5VKndi2fWrb9jWl9Esul6PZbDY9Go1OZ7PZ9z/lyuD3OozU2wAAAABJRU5ErkJggg==" alt="Mascot Sammy"></a>
+</div></footer>
+</div>
+
+    <script>
+      var canMathML = typeof(MathMLElement) == "function";
+      if (!canMathML) {
+        var body = document.querySelector("body");
+        body.firstElementChild.setAttribute('style', 'opacity: 0;');
+        var loading = document.createElement("div");
+        loading.setAttribute("id", "mathjax-loading-spinner");
+        var message = document.createElement("div");
+        message.setAttribute("id", "mathjax-loading-message");
+        message.innerText = "Typesetting Equations...";
+        body.prepend(loading);
+        body.prepend(message);
+
+        var el = document.createElement("script");
+        el.src = "https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js";
+        document.querySelector("head").appendChild(el);
+
+        window.MathJax = {
+          startup: {
+            pageReady: () => {
+              return MathJax.startup.defaultPageReady().then(() => {
+                body.removeChild(loading);
+                body.removeChild(message);
+                body.firstElementChild.removeAttribute('style');
+              }); } } };
+      }
+    </script>
+    <script>
+    // Auxiliary function, building the preview feature when
+    // an inline citation is clicked
+    function clicked_cite(e) {
+      e.preventDefault();
+      let cite = this.closest('.ltx_cite');
+      let next = cite.nextSibling;
+      if (next && next.nodeType == Node.ELEMENT_NODE && next.getAttribute('class') == "ar5iv-bibitem-preview") {
+        next.remove();
+        return; }
+      // Before adding a preview modal,
+      // cleanup older previews, in case they're still open
+      document.querySelectorAll('span.ar5iv-bibitem-preview').forEach(function(node) {
+        node.remove();
+      })
+
+      // Create the preview
+      preview = document.createElement('span');
+      preview.setAttribute('class','ar5iv-bibitem-preview');
+      let target = document.getElementById(this.getAttribute('href').slice(1));
+      target.childNodes.forEach(function (child) {
+        preview.append(child.cloneNode(true));
+      });
+      let close_x = document.createElement('button');
+      close_x.setAttribute("aria-label","Close modal for bibliography item preview");
+      close_x.textContent = "×";
+      close_x.setAttribute('class', 'ar5iv-button-close-preview');
+      close_x.setAttribute('onclick','this.parentNode.remove()');
+      preview.append(close_x);
+      preview.querySelectorAll('.ltx_tag_bibitem').forEach(function(node) {
+        node.remove();
+      });
+      cite.parentNode.insertBefore(preview, cite.nextSibling);
+      return;
+    }
+    // Global Document initialization:
+    // - assign the preview feature to all inline citation links
+    document.querySelectorAll(".ltx_cite .ltx_ref").forEach(function (link) {
+      link.addEventListener("click", clicked_cite);
+    });
+    </script>
+    
+
+</body></html>
