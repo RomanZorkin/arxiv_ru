@@ -80,101 +80,132 @@ LLM должна начинать работу с этих файлов, а не
 > Новые переводы и разборы arXiv-статей
 ---
 
-### Глубокое обучение для облаков точек LiDAR в автономном вождении: обзор
-[2005.09830] дата публикации в arXiv - 05.2020  
-📅 дата перевода 07.06.2026  
-🏷 `LiDAR point clouds` `deep learning` `3D segmentation` `3D object detection` `3D classification` `autonomous driving` `data representation`
+# Блок «Последние статьи»
+# Вставить в README.md после заголовка «# 🔥 Последние статьи»
 
-Обзор современных глубоких архитектур для анализа LiDAR точечных облаков в автономном вождении, охватывающий задачи сегментации, детекции и классификации объектов с анализом датасетов, метрик и вызовов.
+### Готовы ли LLM к реальному открытию материалов?
+[2402.05200] дата публикации в arXiv - 02.2024  
+📅 дата перевода 18.06.2026  
+🏷 `materials science` `large language models` `domain-specific LLM` `multi-modal datasets` `hypothesis generation` `automated materials design` `self-driving labs`
 
-- [📖 Русская HTML версия](https://romanzorkin.github.io/arxiv_ru/articles/2005.09830/2005.09830_ru.html)
-- [📄 Оригинальная статья](https://arxiv.org/abs/2005.09830)
-- [🧠 Summary / README](articles/2005.09830/README.md)
-- [⚙ Metadata](articles/2005.09830/metadata.json)
+LLMs обладают потенциалом ускорить открытие материалов, но пока не справляются с глубоким пониманием и рассуждениями в материаловедении. Для прогресса нужны специализированные модели MatSci-LLMs, обученные на больших мульти-модальных датасетах и интегрированные с экспериментальными и симуляционными инструментами.
 
----
-
-### Иерархическое глубокое исследование с локальным–веб RAG: к автоматизированному системному поиску материалов
-[2511.18303] дата публикации в arXiv - 11.2025  
-📅 дата перевода 07.06.2026  
-🏷 `materials discovery` `hierarchical reasoning` `retrieval-augmented generation` `large language models` `autonomous agents` `computational materials science` `deep research orchestration`
-
-Предложена локально развёртываемая система глубокого исследования (DR) с иерархической организацией (DToR), объединяющая локальный и веб-поиск с LLM-рассуждениями для решения сложных задач открытия материалов на системном уровне. Система превосходит коммерческие аналоги по качеству отчётов и проверена на 27 темах с последующей верификацией экспертами.
-
-- [📖 Русская HTML версия](https://romanzorkin.github.io/arxiv_ru/articles/2511.18303/2511.18303_ru.html)
-- [📄 Оригинальная статья](https://arxiv.org/abs/2511.18303)
-- [🧠 Summary / README](articles/2511.18303/README.md)
-- [⚙ Metadata](articles/2511.18303/metadata.json)
+- [📖 Русская HTML версия](https://romanzorkin.github.io/arxiv_ru/articles/2402.05200/2402.05200_ru.html)
+- [📄 Оригинальная статья](https://arxiv.org/abs/2402.05200)
+- [🧠 Summary / README](articles/2402.05200/README.md)
+- [⚙ Metadata](articles/2402.05200/metadata.json)
 
 ---
 
-### Искусственный интеллект и экономика США: бухгалтерский взгляд на инвестиции и производство
-[2601.11196] дата публикации в arXiv - 01.2026  
-📅 дата перевода 07.06.2026  
-🏷 `artificial intelligence` `macroeconomics` `data centers` `capital expenditure` `cloud infrastructure` `AI services` `national accounts`
+### Банкинг, сделанный правильно: переосмысление розничного банкинга с помощью языко-ориентированного ИИ
+[2510.07645] дата публикации в arXiv - 10.2025  
+📅 дата перевода 21.06.2026  
+🏷 `retail banking` `large language models` `multi-agent system` `conversational AI` `financial transactions` `regulatory compliance` `intent classification`
 
-Статья анализирует влияние текущей волны искусственного интеллекта на ВВП США через призму национальных счетов, выделяя ключевую роль дата-центров и показывая, что инвестиции в AI стимулируют спрос, но вклад в рост ВВП ограничен из-за высокого импорта оборудования.
+Представлена Ryt AI — первая в мире лицензированная банковская система, где крупная языковая модель (LLM) служит основным интерфейсом для выполнения финансовых операций через естественный язык. Система обеспечивает безопасность, соответствие регуляциям и заменяет многократные экраны диалогом с несколькими специализированными агентами.
 
-- [📖 Русская HTML версия](https://romanzorkin.github.io/arxiv_ru/articles/2601.11196/2601.11196_ru.html)
-- [📄 Оригинальная статья](https://arxiv.org/abs/2601.11196)
-- [🧠 Summary / README](articles/2601.11196/README.md)
-- [⚙ Metadata](articles/2601.11196/metadata.json)
-
----
-
-### Учетная тождественность для алгоритмической справедливости
-[2601.20217] дата публикации в arXiv - 01.2026  
-📅 дата перевода 07.06.2026  
-🏷 `algorithmic fairness` `calibration` `binary classification` `regression` `fairness metrics` `predictive accuracy` `fairness tradeoffs`
-
-Статья выводит точную формулу, связывающую точность предсказаний и распространённые метрики справедливости для глобально откалиброванных моделей. Для бинарных исходов сумма взвешенных нарушений справедливости равна «бюджету несправедливости», пропорциональному среднеквадратичной ошибке и разнице в распространённости групп.
-
-- [📖 Русская HTML версия](https://romanzorkin.github.io/arxiv_ru/articles/2601.20217/2601.20217_ru.html)
-- [📄 Оригинальная статья](https://arxiv.org/abs/2601.20217)
-- [🧠 Summary / README](articles/2601.20217/README.md)
-- [⚙ Metadata](articles/2601.20217/metadata.json)
+- [📖 Русская HTML версия](https://romanzorkin.github.io/arxiv_ru/articles/2510.07645/2510.07645_ru.html)
+- [📄 Оригинальная статья](https://arxiv.org/abs/2510.07645)
+- [🧠 Summary / README](articles/2510.07645/README.md)
+- [⚙ Metadata](articles/2510.07645/metadata.json)
 
 ---
 
-### Агентный ИИ в здравоохранении и медицине: семимерное таксономическое описание для эмпирической оценки агентов на основе LLM
-[2602.04813] дата публикации в arXiv - 02.2026  
-📅 дата перевода 07.06.2026  
-🏷 `healthcare AI` `large language models` `agentic AI` `multi-agent systems` `knowledge integration` `clinical decision support` `adaptation mechanisms`
+### Цифровой двойник ИИ: возможности и вызовы от больших языковых моделей к моделям мира
+[2601.01321] дата публикации в arXiv - 01.2026  
+📅 дата перевода 17.06.2026  
+🏷 `digital twins` `physics-informed AI` `large language models` `generative AI` `predictive maintenance` `autonomous management` `multimodal perception`
 
-Обзор 49 исследований LLM-агентов в медицине с семимерной таксономией, выявляющей сильные стороны в интеграции внешних знаний и слабые — в адаптации, безопасности и оркестрации. Современные агенты хорошо справляются с информационно-консультационными задачами, но требуют улучшений для надежного клинического применения.
+Статья предлагает унифицированную четырехэтапную структуру интеграции ИИ в жизненный цикл цифровых двойников, охватывающую моделирование, зеркалирование, вмешательство и автономное управление, с акцентом на синергию физического моделирования и генеративного ИИ, а также анализирует вызовы и применения в 11 областях.
 
-- [📖 Русская HTML версия](https://romanzorkin.github.io/arxiv_ru/articles/2602.04813/2602.04813_ru.html)
-- [📄 Оригинальная статья](https://arxiv.org/abs/2602.04813)
-- [🧠 Summary / README](articles/2602.04813/README.md)
-- [⚙ Metadata](articles/2602.04813/metadata.json)
-
----
-
-### Сравнительное исследование машинного обучения и глубокого обучения для обнаружения выхода данных за пределы распределения
-[2605.10181] дата публикации в arXiv - 05.2026  
-📅 дата перевода 07.06.2026  
-🏷 `out-of-distribution detection` `fundus imaging` `machine learning` `deep learning` `ExtraTrees` `ResNet-18` `latency analysis`
-
-Для задачи обнаружения выходящих за распределение (OOD) медицинских изображений глазного дна ML-модель ExtraTrees с набором интерпретируемых признаков достигает точности и AUROC, сопоставимых с DL-моделью ResNet-18, при значительно меньшей вычислительной задержке.
-
-- [📖 Русская HTML версия](https://romanzorkin.github.io/arxiv_ru/articles/2605.10181/2605.10181_ru.html)
-- [📄 Оригинальная статья](https://arxiv.org/abs/2605.10181)
-- [🧠 Summary / README](articles/2605.10181/README.md)
-- [⚙ Metadata](articles/2605.10181/metadata.json)
+- [📖 Русская HTML версия](https://romanzorkin.github.io/arxiv_ru/articles/2601.01321/2601.01321_ru.html)
+- [📄 Оригинальная статья](https://arxiv.org/abs/2601.01321)
+- [🧠 Summary / README](articles/2601.01321/README.md)
+- [⚙ Metadata](articles/2601.01321/metadata.json)
 
 ---
 
-### Сравнительная оценка подходов машинного обучения для прогнозирования финансового неблагополучия меньшинственного класса при ограничениях дисбаланса классов
-[2605.14067] дата публикации в arXiv - 05.2026  
-📅 дата перевода 07.06.2026  
-🏷 `financial distress prediction` `class imbalance` `ensemble learning` `SMOTE` `SHAP explainability` `gradient boosting` `minority-class sensitivity`
+### Масштабирование верификации медицинских рассуждений с помощью инструментально-интегрированного обучения с подкреплением
+[2601.20221] дата публикации в arXiv - 01.2026  
+📅 дата перевода 17.06.2026  
+🏷 `medical reasoning` `reinforcement learning` `tool-augmented verification` `large language models` `retrieval-augmented generation` `medical question answering` `curriculum learning`
 
-Статья сравнивает классические статистические, ансамблевые и нейронные модели для предсказания финансовых затруднений при сильном дисбалансе классов, используя SMOTE для балансировки и SHAP для объяснимости. Лучшие результаты показали градиентные бустинговые модели, особенно XGBoost, с акцентом на чувствительность к редким событиям.
+Предложена Med-TIV — агентная система верификации медицинских рассуждений, использующая итеративный поиск по медицинским корпусам и обучение с подкреплением с адаптивным курсом. Med-TIV значительно улучшает точность и эффективность по сравнению с существующими методами на четырёх медицинских бенчмарках.
 
-- [📖 Русская HTML версия](https://romanzorkin.github.io/arxiv_ru/articles/2605.14067/2605.14067_ru.html)
-- [📄 Оригинальная статья](https://arxiv.org/abs/2605.14067)
-- [🧠 Summary / README](articles/2605.14067/README.md)
-- [⚙ Metadata](articles/2605.14067/metadata.json)
+- [📖 Русская HTML версия](https://romanzorkin.github.io/arxiv_ru/articles/2601.20221/2601.20221_ru.html)
+- [📄 Оригинальная статья](https://arxiv.org/abs/2601.20221)
+- [🧠 Summary / README](articles/2601.20221/README.md)
+- [⚙ Metadata](articles/2601.20221/metadata.json)
+
+---
+
+### Автономные агенты, координирующие распределённый поиск посредством возникающего обмена артефактами
+[2603.14312] дата публикации в arXiv - 03.2026  
+📅 дата перевода 20.06.2026  
+🏷 `autonomous scientific agents` `artifact provenance` `multi-agent coordination` `emergent collaboration` `scientific skill chaining` `distributed discovery` `cross-domain synthesis`
+
+Представлен фреймворк ScienceClaw + Infinite для автономного научного исследования с независимыми агентами, которые координируются через обмен неизменяемыми артефактами и открытыми запросами, обеспечивая трассируемость, синтез и коллективное открытие без центрального планировщика.
+
+- [📖 Русская HTML версия](https://romanzorkin.github.io/arxiv_ru/articles/2603.14312/2603.14312_ru.html)
+- [📄 Оригинальная статья](https://arxiv.org/abs/2603.14312)
+- [🧠 Summary / README](articles/2603.14312/README.md)
+- [⚙ Metadata](articles/2603.14312/metadata.json)
+
+---
+
+### Баланс устойчивости и пластичности при последовательном обучении Раннее прекращение нейронных сетей
+[2605.05358] дата публикации в arXiv - 05.2026  
+📅 дата перевода 17.06.2026  
+🏷 `early-exiting neural networks` `sequential training` `elastic weight consolidation` `learning without forgetting` `stability-plasticity trade-off` `CIFAR-100 benchmark` `resource-efficient inference`
+
+Предложены два метода регуляризации для последовательного обучения нейросетей с ранним выходом, позволяющие сохранить производительность ранее обученных выходов при добавлении новых, что улучшает точность и снижает вычислительные затраты на стандартных бенчмарках.
+
+- [📖 Русская HTML версия](https://romanzorkin.github.io/arxiv_ru/articles/2605.05358/2605.05358_ru.html)
+- [📄 Оригинальная статья](https://arxiv.org/abs/2605.05358)
+- [🧠 Summary / README](articles/2605.05358/README.md)
+- [⚙ Metadata](articles/2605.05358/metadata.json)
+
+---
+
+### Прогнозирование кривой доходности с использованием машинного обучения и эконометрики: сравнительный анализ
+[2605.09842] дата публикации в arXiv - 05.2026  
+📅 дата перевода 17.06.2026  
+🏷 `yield curve forecasting` `ARIMA` `TimeGPT` `deep learning` `econometrics` `transformers` `financial time series`
+
+Сравнительный анализ методов прогнозирования кривой доходности казначейских облигаций США за 47 лет показал, что традиционные эконометрические модели ARIMA и наивные методы превосходят современные методы машинного обучения и глубокого обучения, за исключением одного временного блока, где лучше проявились трансформеры PatchTST и TFT.
+
+- [📖 Русская HTML версия](https://romanzorkin.github.io/arxiv_ru/articles/2605.09842/2605.09842_ru.html)
+- [📄 Оригинальная статья](https://arxiv.org/abs/2605.09842)
+- [🧠 Summary / README](articles/2605.09842/README.md)
+- [⚙ Metadata](articles/2605.09842/metadata.json)
+
+---
+
+### Динамическое управление жизненным циклом навыков в агентном обучении с подкреплением
+[2605.10923] дата публикации в arXiv - 05.2026  
+📅 дата перевода 21.06.2026  
+🏷 `agentic reinforcement learning` `skill lifecycle management` `large language models` `hierarchical skill retrieval` `marginal external contribution` `leave-one-skill-out validation` `dynamic skill expansion`
+
+Предложена SLIM — метод динамического управления активным набором внешних навыков в агентном обучении с подкреплением, который оценивает маргинальный вклад навыков и применяет операции сохранения, удаления и расширения навыков. SLIM превосходит существующие методы на ALFWorld и SearchQA, обеспечивая адаптивный, не монотонный жизненный цикл навыков.
+
+- [📖 Русская HTML версия](https://romanzorkin.github.io/arxiv_ru/articles/2605.10923/2605.10923_ru.html)
+- [📄 Оригинальная статья](https://arxiv.org/abs/2605.10923)
+- [🧠 Summary / README](articles/2605.10923/README.md)
+- [⚙ Metadata](articles/2605.10923/metadata.json)
+
+---
+
+### VideoMLA: Кэш KV скрытых признаков с низким рангом для авторегрессионной видеодиффузии с минутным масштабом
+[2605.30351] дата публикации в arXiv - 05.2026  
+📅 дата перевода 17.06.2026  
+🏷 `video diffusion` `latent attention` `autoregressive model` `KV cache compression` `3D rotary embeddings` `long-horizon generation` `memory efficiency`
+
+VideoMLA внедряет Multi-Head Latent Attention (MLA) в видео-диффузию, заменяя плотный per-head KV-кэш общим низкоранговым латентом и разделённым 3D-RoPE позиционным ключом, снижая память на 92.7% и сохраняя качество генерации минутных видео с улучшенной производительностью.
+
+- [📖 Русская HTML версия](https://romanzorkin.github.io/arxiv_ru/articles/2605.30351/2605.30351_ru.html)
+- [📄 Оригинальная статья](https://arxiv.org/abs/2605.30351)
+- [🧠 Summary / README](articles/2605.30351/README.md)
+- [⚙ Metadata](articles/2605.30351/metadata.json)
 
 ---
 
@@ -188,6 +219,15 @@ LLM должна начинать работу с этих файлов, а не
 
 |id статьи|Месяц публикации|Дата перевода| Тема статьи | Ручной контроль|
 |---|---|---|---|---|
+| [2402.05200](articles/2402.05200/README.md) | 02.2024 | 18.06.2026 | Готовы ли LLM к реальному открытию материалов? (`Are LLMs Ready for Real-World Materials Discovery?`) ||
+| [2510.07645](articles/2510.07645/README.md) | 10.2025 | 21.06.2026 | Банкинг, сделанный правильно: переосмысление розничного банкинга с помощью языко-ориентированного ИИ (`Banking Done Right: Redefining Retail Banking with Language-Centric AI`) ||
+| [2601.01321](articles/2601.01321/README.md) | 01.2026 | 17.06.2026 | Цифровой двойник ИИ: возможности и вызовы от больших языковых моделей к моделям мира (`Digital Twin AI: Opportunities and Challenges from Large Language Models to World Models`) ||
+| [2601.20221](articles/2601.20221/README.md) | 01.2026 | 17.06.2026 | Масштабирование верификации медицинских рассуждений с помощью инструментально-интегрированного обучения с подкреплением (`Scaling Medical Reasoning Verification via Tool-Integrated Reinforcement Learning`) ||
+| [2603.14312](articles/2603.14312/README.md) | 03.2026 | 20.06.2026 | Автономные агенты, координирующие распределённый поиск посредством возникающего обмена артефактами (`Autonomous Agents Coordinating Distributed Discovery Through Emergent Artifact Exchange`) ||
+| [2605.05358](articles/2605.05358/README.md) | 05.2026 | 17.06.2026 | Баланс устойчивости и пластичности при последовательном обучении Раннее прекращение нейронных сетей (`Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks`) ||
+| [2605.09842](articles/2605.09842/README.md) | 05.2026 | 17.06.2026 | Прогнозирование кривой доходности с использованием машинного обучения и эконометрики: сравнительный анализ (`Yield Curve Forecasting using Machine Learning and Econometrics: A Comparative Analysis`) ||
+| [2605.10923](articles/2605.10923/README.md) | 05.2026 | 21.06.2026 | Динамическое управление жизненным циклом навыков в агентном обучении с подкреплением (`Dynamic Skill Lifecycle Management for Agentic Reinforcement Learning`) ||
+| [2605.30351](articles/2605.30351/README.md) | 05.2026 | 17.06.2026 | VideoMLA: Кэш KV скрытых признаков с низким рангом для авторегрессионной видеодиффузии с минутным масштабом (`VideoMLA: Low-Rank Latent KV Cache for Minute-Scale Autoregressive Video Diffusion`) ||
 | [2005.09830](articles/2005.09830/README.md) | 05.2020 | 07.06.2026 | Глубокое обучение для облаков точек LiDAR в автономном вождении: обзор (`Deep Learning for LiDAR Point Clouds in Autonomous Driving: A Review`) |✅|
 | [2511.18303](articles/2511.18303/README.md) | 11.2025 | 07.06.2026 | Иерархическое глубокое исследование с локальным–веб RAG: к автоматизированному системному поиску материалов (`Hierarchical Deep Research with Local–Web RAG: Toward Automated System-Level Materials Discovery`) |✅|
 | [2601.11196](articles/2601.11196/README.md) | 01.2026 | 07.06.2026 | Искусственный интеллект и экономика США: бухгалтерский взгляд на инвестиции и производство (`Artificial Intelligence and the US Economy: An Accounting Perspective on Investment and Production`) |✅|
