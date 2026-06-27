@@ -1,0 +1,930 @@
+{
+  "title": "[2601.13268] Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops",
+  "sections": [
+    {
+      "heading": "Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops",
+      "level": 1,
+      "content": [],
+      "children": [
+        {
+          "heading": "Abstract",
+          "level": 6,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "Large Language Models (LLMs) are increasingly applied in healthcare, yet ensuring their ethical integrity and safety compliance remains a major barrier to clinical deployment. This work introduces a multi-agent refinement framework designed to enhance the safety and reliability of medical LLMs through structured, iterative alignment. Our system combines two generative models—DeepSeek R1 and Med-PaLM—with two evaluation agents, LLaMA 3.1 and Phi-4, which assess responses using the American Medical Association’s (AMA) Principles of Medical Ethics and a five-tier Safety Risk Assessment (SRA-5) protocol. We evaluate performance across 900 clinically diverse queries spanning nine ethical domains, measuring convergence efficiency, ethical violation reduction, and domain-specific risk behavior. Results demonstrate that DeepSeek R1 achieves faster convergence (mean 2.34 vs. 2.67 iterations), while Med-PaLM shows superior handling of privacy-sensitive scenarios. The iterative multi-agent loop achieved an 89% reduction in ethical violations and a 92% risk downgrade rate, underscoring the effectiveness of our approach. This study presents a scalable, regulator-aligned, and cost-efficient paradigm for governing medical AI safety."
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "I Introduction",
+          "level": 2,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "Large Language Models (LLMs) are now being tested in a wide range of biomedical and clinical settings. They are used to draft clinical notes, support triage decision making, and produce patient facing explanations [[27](https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib7 \"Augmenting black-box LLMs with medical textbooks for biomedical question answering\"), [12](https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib8 \"MedCare: advancing medical LLMs through decoupling clinical alignment and knowledge aggregation\"), [13](https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib36 \"A survey on medical large language models\")]. A growing body of work suggests that these systems can be useful when the task is mainly linguistic, such as patient education or tailoring explanations to different health literacy levels. However, their performance becomes more fragile as the stakes rise and the output begins to resemble medical advice [[2](https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib38 \"Large language models in patient education: a scoping review\"), [28](https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib37 \"Evaluating large language models for clinical recommendations from emergency department notes\")]. Domain specialized models such as Med-PaLM [[26](https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib17 \"Large language models encode clinical knowledge\")], BioGPT [[17](https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib16 \"BioGPT: generative pre-trained transformer for biomedical text generation and mining\")], and PubMedBERT [[9](https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib19 \"Domain-specific language model pretraining for biomedical natural language processing\")] remain promising for medical applications, but specialized training does not eliminate the need for careful safety controls [[31](https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib9 \"CoSafe: evaluating large language model safety in multi-turn dialogue coreference\")]."
+            },
+            {
+              "type": "paragraph",
+              "text": "A practical concern is that benchmark accuracy does not reliably predict real-world safety. Medical LLMs can generate plausible but incorrect statements, omit key steps in time-critical guidance, or produce responses that conflict with professional norms [[19](https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib21 \"Medical ai safety: what happens when prediction fails?\"), [32](https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib5 \"Can LLMs replace clinical doctors? exploring bias in disease diagnosis by large language models\")]. Empirical studies report failures in first aid and emergency contexts, where omissions or misleading phrasing can be harmful even when the model sounds confident [[5](https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib39 \"Large language model-based chatbot as a source of advice on first aid in heart attack\"), [4](https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib40 \"Large language model (llm)-powered chatbots fail to reliably guide cardiopulmonary resuscitation\")]. These systems can also be pushed to repeat or spread misinformation, especially when the prompt includes false claims or is written to mislead the model. [[10](https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib29 \"MedSafetyBench: evaluating and improving the medical safety of large language models\")]. Prompts may unintentionally include sensitive details, outputs may disclose protected health information (PHI), and prompt injection attacks can lead to unsafe or non compliant behavior in applications that integrate LLMs [[14](https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib43 \"Prompt injection attacks against llm-integrated applications\"), [24](https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib44 \"OWASP top 10 for large language model applications\")]."
+            },
+            {
+              "type": "paragraph",
+              "text": "Existing mitigation strategies help, but they are not a complete answer. Fine tuning, constrained decoding, and instruction tuning with human feedback can reduce harmful generations on average [[10](https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib29 \"MedSafetyBench: evaluating and improving the medical safety of large language models\"), [23](https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib41 \"Training language models to follow instructions with human feedback\")]. Related alignment approaches such as Constitutional AI show how principle guided supervision can improve safety behavior without requiring direct human labeling of every harmful case [[3](https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib42 \"Constitutional ai: harmlessness from ai feedback\")]. Still, in medical use cases the requirements are often context dependent. The same advice can be acceptable in a low-risk educational setting but inappropriate when it resembles diagnosis or treatment guidance. This makes static guardrails difficult to maintain over time, and repeated retraining cycles are not always realistic once systems are deployed."
+            },
+            {
+              "type": "paragraph",
+              "text": "Han et al. [[10](https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib29 \"MedSafetyBench: evaluating and improving the medical safety of large language models\")] introduced MedSafetyBench and showed that safety fine tuning can reduce harmful outputs. At the same time, this approach typically requires computationally expensive retraining for each model. It also produces safety constraints that are hard to update after deployment, it does not naturally support iterative revision, and it often reduces nuanced safety judgments to coarse labels. These limitations matter in borderline situations where risk depends on context."
+            },
+            {
+              "type": "paragraph",
+              "text": "Multi-agent methods offer another direction. One model generates an answer, while other agents critique and score it, then provide feedback so the response can be revised through repeated rounds [[30](https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib24 \"Tree of thoughts: deliberate problem solving with large language models\"), [8](https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib25 \"Improving factual correctness in llms through multi-agent debate\"), [15](https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib6 \"Multi-expert prompting improves reliability, safety and usefulness of large language models\")]. This approach moves safety verification to inference time and it allows the evaluation policy to change without retraining the generator. However, systematic evidence is still limited on how different medical LLMs behave when they are repeatedly pushed to revise for safety. For example, it is not yet clear whether reasoning-optimized models revise more consistently than domain-trained models or whether some ethical domains, such as privacy, remain harder to stabilize [[6](https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib1 \"Mdteamgpt: a self-evolving llm-based multi-agent framework for multi-disciplinary team medical consultation\"), [20](https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib3 \"Polaris: a safety-focused llm constellation architecture for healthcare\"), [22](https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib18 \"Emotion detection in speech using lightweight and transformer-based models: a comparative and ablation study\")]."
+            },
+            {
+              "type": "paragraph",
+              "text": "In this work, we implement an inference time multi-agent evaluation loop that refines medical LLM outputs using structured feedback rather than additional training. Two generators, DeepSeek R1 and Med-PaLM, are paired with two evaluator agents that judge responses against the American Medical Association’s (AMA) Principles of Medical Ethics [[1](https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib30 \"Principles of medical ethics\")] and a five-level Safety Risk Assessment (SRA-5). We focus on three questions:"
+            },
+            {
+              "type": "paragraph",
+              "text": "RQ1: Can an agent based refinement loop reduce unsafe or ethically problematic outputs without expensive fine tuning?"
+            },
+            {
+              "type": "paragraph",
+              "text": "RQ2: Can AMA ethical standards be operationalized in a practical evaluation and revision pipeline?"
+            },
+            {
+              "type": "paragraph",
+              "text": "RQ3: How do reasoning-optimized and domain-trained generators differ in convergence behavior under iterative safety feedback?"
+            },
+            {
+              "type": "paragraph",
+              "text": "We evaluate the approach on 900 adversarial queries from MedSafetyBench, comparing DeepSeek R1 and Med-PaLM in terms of convergence, iteration efficiency, ethical violation reduction, and risk downgrading behavior [[10](https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib29 \"MedSafetyBench: evaluating and improving the medical safety of large language models\")]."
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "II Related Work",
+          "level": 2,
+          "content": [],
+          "children": [
+            {
+              "heading": "II-A Medical Language Models",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "Many studies adapts Transformer architectures to biomedical and clinical text by pretraining on domain corpora and then fine tuning for downstream tasks. Early work such as BioBERT showed that continuing BERT style pretraining on PubMed and PMC improves biomedical text mining performance [[11](https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib45 \"BioBERT: a pre-trained biomedical language representation model for biomedical text mining\")]. Similar efforts have explored training and scaling models on clinical notes and electronic health record narratives, where access and privacy constraints shape data and release practices. For example, GatorTron trained from scratch on a very large corpus that includes de-identified clinical notes and demonstrated gains across multiple clinical NLP tasks [[29](https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib46 \"A large language model for electronic health records\")]. In parallel, generative clinical models have been developed to support text-to-text tasks such as summarization and note generation, including ClinicalT5 [[16](https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib47 \"ClinicalT5: a generative language model for clinical text\")]."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Recent medical LLMs extend these ideas to instruction following and question answering. Med-PaLM demonstrated strong performance on medical question answering and clinical reasoning style benchmarks, supporting the view that scale plus medical supervision can yield useful behavior [[26](https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib17 \"Large language models encode clinical knowledge\")]. Open weight medical models such as Meditron also aim to broaden access by continuing pretraining on curated medical corpora and then applying instruction tuning for medical tasks [[7](https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib49 \"MEDITRON-70b: scaling medical pretraining for large language models\")]. Surveys summarize how these models are evaluated and where their performance tends to break down, especially when the setting shifts from benchmark-style questions to interactive or safety-sensitive use [[21](https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib15 \"Recent advances in large language models for healthcare\"), [19](https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib21 \"Medical ai safety: what happens when prediction fails?\")]."
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "II-B LLM Safety and Alignment",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "Safety research for LLMs has developed a set of alignment techniques that can reduce harmful generations, but medical settings introduce additional constraints because errors can lead to real harm and because professional norms matter. MedSafetyBench proposed an evaluation framing grounded in medical safety principles and showed that safety fine tuning can lower harmful outputs [[10](https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib29 \"MedSafetyBench: evaluating and improving the medical safety of large language models\")]. More broadly, instruction tuning and reinforcement learning from human feedback have been widely used to steer general-purpose LLMs toward safer and more helpful behavior [[23](https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib41 \"Training language models to follow instructions with human feedback\")]. Constitutional AI provides an alternative that uses explicit principles to guide critique and revision, which is conceptually attractive for domains where the rules can be written down, including medicine [[3](https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib42 \"Constitutional ai: harmlessness from ai feedback\")]."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Medical deployment also raises security and privacy risks beyond classic toxicity. Prompt injection attacks can manipulate model behavior inside larger systems, and this becomes especially relevant when LLMs are integrated with tools, memory, or clinical workflows [[14](https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib43 \"Prompt injection attacks against llm-integrated applications\")]. Practitioner-oriented threat summaries, such as the OWASP Top 10 for LLM Applications, catalog common failure modes and mitigations that overlap with healthcare settings, including prompt injection and insecure output handling [[24](https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib44 \"OWASP top 10 for large language model applications\")]. These strands motivate safety mechanisms that can adapt after deployment and that can express graded, context-dependent judgments rather than only binary safe or unsafe labels."
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "II-C Multi Agent Systems",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "Multi-agent methods use multiple roles to generate, critique, and revise outputs. Tree of Thoughts and related approaches show that structured search plus intermediate evaluation can improve reasoning quality and reduce obvious errors [[30](https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib24 \"Tree of thoughts: deliberate problem solving with large language models\")]. Other work demonstrates that iterative critique can improve outputs even without additional training, either by using separate critic roles or by having a model produce feedback for its own revisions [[8](https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib25 \"Improving factual correctness in llms through multi-agent debate\"), [18](https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib50 \"Self-refine: iterative refinement with self-feedback\")]. Reflexion is another example that improves behavior by storing and reusing textual feedback rather than updating weights [[25](https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib51 \"Reflexion: language agents with verbal reinforcement learning\")]. In general, these approaches suggest that safety and quality checks can be moved to inference time, where the evaluation policy can be updated without retraining the generator."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Within medicine, early multi agent or team based frameworks have been proposed, but there is still limited systematic evidence on how different medical generators respond to repeated safety pressure across diverse adversarial prompts [[6](https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib1 \"Mdteamgpt: a self-evolving llm-based multi-agent framework for multi-disciplinary team medical consultation\"), [20](https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib3 \"Polaris: a safety-focused llm constellation architecture for healthcare\")]. Our work builds on these ideas by focusing specifically on iterative safety refinement against explicit medical ethics criteria and a graded risk scale, while comparing how a reasoning-optimized model and a domain-trained model converge under the same evaluation loop."
+                }
+              ],
+              "children": []
+            }
+          ]
+        },
+        {
+          "heading": "III Methodology",
+          "level": 2,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "This section describes our inference time safety pipeline, including the agent roles, scoring criteria, and the iterative revision loop used to obtain a final response. Figure [1](https://ar5iv.labs.arxiv.org/html/2601.13268v1#S3.F1 \"Figure 1 ‣ III-A System Overview and Agent Roles ‣ III Methodology ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops\") summarizes the overall flow."
+            }
+          ],
+          "children": [
+            {
+              "heading": "III-A System Overview and Agent Roles",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "We implement a deterministic multi agent evaluation loop that combines one generative model with two evaluator agents. We run the pipeline twice, once with DeepSeek R1 as the generator and once with Med PaLM as the generator, while keeping the evaluator agents fixed. Across all runs, we use the same inference settings for every agent to ensure a controlled comparison (temperature =0.7=0.7, top p =0.9=0.9, max tokens =512=512). All models are accessed through API based inference."
+                },
+                {
+                  "type": "formula",
+                  "text": "=0.7=0.7"
+                },
+                {
+                  "type": "formula",
+                  "text": "=0.9=0.9"
+                },
+                {
+                  "type": "formula",
+                  "text": "=512=512"
+                }
+              ],
+              "children": [
+                {
+                  "heading": "Generative models.",
+                  "level": 5,
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "text": "We compare two generators under identical conditions. DeepSeek R1 is treated as a reasoning oriented generator, while Med PaLM is treated as a domain trained medical generator."
+                    }
+                  ],
+                  "children": []
+                },
+                {
+                  "heading": "Evaluator agents.",
+                  "level": 5,
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "text": "We use two evaluators with distinct responsibilities. LLaMA 3.1 performs ethics evaluation against the AMA principles. Phi 4 focuses on safety risk detection and assigns an SRA 5 risk level."
+                    }
+                  ],
+                  "children": []
+                }
+              ]
+            },
+            {
+              "heading": "III-B Safety Evaluation Criteria",
+              "level": 3,
+              "content": [],
+              "children": [
+                {
+                  "heading": "III-B1 AMA 9 Ethics Scoring",
+                  "level": 4,
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "text": "To assess ethical compliance, the evaluators reference the nine AMA Principles of Medical Ethics [[1](https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib30 \"Principles of medical ethics\")]. We group prompts and results by the following principles: (I) Competence and Compassion, (II) Professionalism and Honesty, (III) Legal and Social Responsibility, (IV) Patient Rights and Confidentiality, (V) Continued Study and Education, (VI) Physician Autonomy, (VII) Community and Public Health, (VIII) Patient Welfare, (IX) Healthcare Access Equity."
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "Each response receives an ethics violation score from 0 to 9, where smaller values indicate fewer violations. A score of 0 means no violations identified, while 9 indicates the maximum number of violations. If a response receives a score of at least 6, refinement is mandatory. For a response to be considered deployable in our setting, it must achieve an AMA score of at most 2."
+                    }
+                  ],
+                  "children": []
+                },
+                {
+                  "heading": "III-B2 SRA 5 Risk Levels",
+                  "level": 4,
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "text": "We also assign a five level Safety Risk Assessment score, which is adapted from ISO 14971 style thinking and common clinical decision support risk groupings. The levels are defined as follows."
+                    },
+                    {
+                      "type": "list",
+                      "text": "* • Level 1 (Minimal). The response is informational and does not provide actionable medical guidance. * • Level 2 (Low). The response provides general wellness guidance with limited safety risk. * • Level 3 (Moderate). The response includes recommendations that require consultation with a clinician. * • Level 4 (High). The response makes diagnostic or treatment suggestions that can cause harm if followed. * • Level 5 (Critical). The response addresses an emergency scenario with potentially life threatening consequences."
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "Level 1 (Minimal). The response is informational and does not provide actionable medical guidance."
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "Level 2 (Low). The response provides general wellness guidance with limited safety risk."
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "Level 3 (Moderate). The response includes recommendations that require consultation with a clinician."
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "Level 4 (High). The response makes diagnostic or treatment suggestions that can cause harm if followed."
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "Level 5 (Critical). The response addresses an emergency scenario with potentially life threatening consequences."
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "A response is considered deployable only if its SRA level is at most 2. We define a risk downgrade as movement from Level 3, Level 4, or Level 5 down to Level 1 or Level 2 after refinement."
+                    }
+                  ],
+                  "children": []
+                }
+              ]
+            },
+            {
+              "heading": "III-C Iterative Refinement Loop",
+              "level": 3,
+              "content": [],
+              "children": [
+                {
+                  "heading": "III-C1 Stopping Rule and Iteration Budget",
+                  "level": 4,
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "text": "The loop terminates when the response satisfies both thresholds at the same time. The AMA score must be at most 2 and the SRA level must be at most 2. If the thresholds are not met, the system generates structured feedback and the generator revises the response. We cap the process at five iterations to bound latency and cost."
+                    }
+                  ],
+                  "children": []
+                },
+                {
+                  "heading": "III-C2 Consensus and Feedback Construction",
+                  "level": 4,
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "text": "Each iteration produces two evaluator outputs, one from LLaMA 3.1 and one from Phi 4. We merge these outputs into a consensus record that contains the current AMA score, the current SRA level, and the main reasons for any violations or risks. From this consensus record, we create a short revision plan that tells the generator what must change to pass the thresholds. The plan emphasizes removing unsafe instructions, avoiding diagnosis and treatment claims, and rewriting the response in a way that is consistent with professional ethics and privacy expectations."
+                    },
+                    {
+                      "type": "formula",
+                      "text": "qq"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "GG"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "E1E_{1}"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "E2E_{2}"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "τAMA=2\\tau_{\\text{AMA}}=2"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "τSRA=2\\tau_{\\text{SRA}}=2"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "=5=5"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "rfinalr_{\\text{final}}"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "r←G.generate​(q)r\\leftarrow G.\\text{generate}(q)"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "i←1i\\leftarrow 1"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "55"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "e​v​a​l1←E1.assess​(r,q)eval_{1}\\leftarrow E_{1}.\\text{assess}(r,q)"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "e​v​a​l2←E2.assess​(r,q)eval_{2}\\leftarrow E_{2}.\\text{assess}(r,q)"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "c​o​n​s​e​n​s​u​s←merge​(e​v​a​l1,e​v​a​l2)consensus\\leftarrow\\text{merge}(eval_{1},eval_{2})"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "c​o​n​s​e​n​s​u​s.AMA≤τAMAconsensus.\\text{AMA}\\leq\\tau_{\\text{AMA}}"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "c​o​n​s​e​n​s​u​s.SRA≤τSRAconsensus.\\text{SRA}\\leq\\tau_{\\text{SRA}}"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "(r,i,converged)(r,i,\\text{converged})"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "f​e​e​d​b​a​c​k←create_plan​(c​o​n​s​e​n​s​u​s)feedback\\leftarrow\\text{create\\_plan}(consensus)"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "r←G.refine​(r,f​e​e​d​b​a​c​k,q)r\\leftarrow G.\\text{refine}(r,feedback,q)"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "(r,5,non convergent)(r,5,\\text{non convergent})"
+                    }
+                  ],
+                  "children": []
+                }
+              ]
+            },
+            {
+              "heading": "III-D Dataset and Metrics",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "We evaluate on 900 adversarial prompts from MedSafetyBench [[10](https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib29 \"MedSafetyBench: evaluating and improving the medical safety of large language models\")]. The dataset is balanced across the nine AMA principle categories, with 100 queries per category."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "We report the following metrics."
+                },
+                {
+                  "type": "list",
+                  "text": "* • Convergence rate. The fraction of prompts that meet both thresholds within five iterations. * • Iteration efficiency. The mean number of iterations required among converged prompts. * • Ethics violation reduction. The percent decrease in AMA violation score from the initial response to the final response. * • Risk downgrade rate. The fraction of prompts that move from SRA Level 3 or higher down to Level 2 or lower."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Convergence rate. The fraction of prompts that meet both thresholds within five iterations."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Iteration efficiency. The mean number of iterations required among converged prompts."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Ethics violation reduction. The percent decrease in AMA violation score from the initial response to the final response."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Risk downgrade rate. The fraction of prompts that move from SRA Level 3 or higher down to Level 2 or lower."
+                }
+              ],
+              "children": []
+            }
+          ]
+        },
+        {
+          "heading": "IV Results",
+          "level": 2,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "This section summarizes how often the refinement loop converged, how many rounds it typically needed, and how safety outcomes changed from the initial response to the final response. We report results for DeepSeek R1 and Med PaLM under the same evaluation settings."
+            }
+          ],
+          "children": [
+            {
+              "heading": "IV-A Overall Performance",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "Table [I](https://ar5iv.labs.arxiv.org/html/2601.13268v1#S4.T1 \"TABLE I ‣ IV-A Overall Performance ‣ IV Results ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops\") provides a high level comparison. In most cases, both generators reached the joint stopping criteria within the five iteration budget. DeepSeek R1 converged on 94.2% of prompts and required 2.34 iterations on average, while Med PaLM converged on 91.8% and required 2.67 iterations. Beyond convergence, both models showed large improvements in ethical compliance and risk level after refinement. DeepSeek R1 achieved an 89.1% reduction in the AMA violation score and a 92.1% rate of risk downgrades. Med PaLM achieved an 85.4% violation reduction and a 90.6% risk downgrade rate."
+                },
+                {
+                  "type": "table",
+                  "text": "| Metric | DeepSeek R1 | Med PaLM | | --- | --- | --- | | Convergence Rate | 94.2% | 91.8% | | Mean Iterations | 2.34 | 2.67 | | Std Dev | 1.12 | 1.28 | | Violation Reduction | 89.1% | 85.4% | | Risk Downgrade | 92.1% | 90.6% |"
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "IV-B Iteration Requirements and Failure Cases",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "Table [II](https://ar5iv.labs.arxiv.org/html/2601.13268v1#S4.T2 \"TABLE II ‣ IV-B Iteration Requirements and Failure Cases ‣ IV Results ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops\") breaks down how quickly prompts converged. A notable fraction of prompts met the thresholds after the first response, meaning that the initial answer was already judged acceptable. This occurred for 28% of prompts with DeepSeek R1 and 23% with Med PaLM. Most prompts converged after two or three iterations. If we combine those two cases, 66% of prompts converged within that range for both generators. The remaining cases required four or five iterations and represent prompts where the initial output either had clearer safety problems or needed multiple rewrites to remove risky content."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Non convergence was uncommon but not negligible. DeepSeek R1 failed to meet the thresholds on 5.8% of prompts, compared to 8.2% for Med PaLM. These failures generally correspond to prompts that are difficult to rewrite safely without becoming overly vague or refusing the request, especially when the prompt encourages diagnostic or treatment guidance."
+                },
+                {
+                  "type": "table",
+                  "text": "| | | | | | --- | --- | --- | --- | | Iterations | DR1 | MP | Interpretation | | 1 | 252 (28%) | 207 (23%) | Converged immediately | | 2 | 378 (42%) | 342 (38%) | Converged after one revision | | 3 | 216 (24%) | 252 (28%) | Converged after standard refinement | | 4 | 36 (4%) | 72 (8%) | Required multiple corrections | | 5 | 18 (2%) | 27 (3%) | Converged at the iteration limit | | Converged | 848 (94%) | 826 (92%) | Met thresholds | | Failed | 52 (6%) | 74 (8%) | Did not meet thresholds |"
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "IV-C Differences Across AMA Principle Categories",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "Table [III](https://ar5iv.labs.arxiv.org/html/2601.13268v1#S4.T3 \"TABLE III ‣ IV-C Differences Across AMA Principle Categories ‣ IV Results ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops\") reports the mean number of iterations by AMA principle category. Some categories converged quickly for both generators. In particular, Principle V and Principle VII tended to require fewer than two iterations on average, which suggests that the initial responses in those areas were easier to rewrite into low risk and ethically acceptable language."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Other categories were more challenging. Principle VIII required the largest number of iterations for both models, with means of 3.2 for DeepSeek R1 and 3.5 for Med PaLM. Principle III was also challenging, requiring 2.8 and 3.1 iterations respectively. These categories often involve either strong welfare implications or legal and social responsibility issues, where the evaluators appear to penalize responses that provide overly confident guidance."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "DeepSeek R1 required fewer iterations in seven of the nine categories. Med PaLM showed comparable performance in Principle IV and Principle VII, which is consistent with stronger baseline behavior in privacy related and public health prompts."
+                },
+                {
+                  "type": "table",
+                  "text": "| Principle | DR1 | MP | | --- | --- | --- | | I. Competence | 2.3±\\pm1.0 | 2.5±\\pm1.1 | | II. Professionalism | 2.1±\\pm0.9 | 2.2±\\pm0.9 | | III. Legal | 2.8±\\pm1.3 | 3.1±\\pm1.4 | | IV. Privacy | 2.6±\\pm1.2 | 2.9±\\pm1.3 | | V. Education | 1.9±\\pm0.8 | 1.8±\\pm0.8 | | VI. Autonomy | 2.4±\\pm1.1 | 2.6±\\pm1.2 | | VII. Public Health | 1.8±\\pm0.8 | 1.7±\\pm0.8 | | VIII. Patient Welfare | 3.2±\\pm1.4 | 3.5±\\pm1.5 | | IX. Access Equity | 2.7±\\pm1.2 | 2.9±\\pm1.3 | | Overall | 2.34±\\pm1.12 | 2.67±\\pm1.28 |"
+                },
+                {
+                  "type": "formula",
+                  "text": "±\\pm"
+                },
+                {
+                  "type": "formula",
+                  "text": "±\\pm"
+                },
+                {
+                  "type": "formula",
+                  "text": "±\\pm"
+                },
+                {
+                  "type": "formula",
+                  "text": "±\\pm"
+                },
+                {
+                  "type": "formula",
+                  "text": "±\\pm"
+                },
+                {
+                  "type": "formula",
+                  "text": "±\\pm"
+                },
+                {
+                  "type": "formula",
+                  "text": "±\\pm"
+                },
+                {
+                  "type": "formula",
+                  "text": "±\\pm"
+                },
+                {
+                  "type": "formula",
+                  "text": "±\\pm"
+                },
+                {
+                  "type": "formula",
+                  "text": "±\\pm"
+                },
+                {
+                  "type": "formula",
+                  "text": "±\\pm"
+                },
+                {
+                  "type": "formula",
+                  "text": "±\\pm"
+                },
+                {
+                  "type": "formula",
+                  "text": "±\\pm"
+                },
+                {
+                  "type": "formula",
+                  "text": "±\\pm"
+                },
+                {
+                  "type": "formula",
+                  "text": "±\\pm"
+                },
+                {
+                  "type": "formula",
+                  "text": "±\\pm"
+                },
+                {
+                  "type": "formula",
+                  "text": "±\\pm"
+                },
+                {
+                  "type": "formula",
+                  "text": "±\\pm"
+                },
+                {
+                  "type": "formula",
+                  "text": "±\\pm"
+                },
+                {
+                  "type": "formula",
+                  "text": "±\\pm"
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "IV-D Ethics Violation Reduction and Risk Downgrading",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "We next examine how safety outcomes changed from the initial response to the final refined response. Table [IV](https://ar5iv.labs.arxiv.org/html/2601.13268v1#S4.T4 \"TABLE IV ‣ IV-D Ethics Violation Reduction and Risk Downgrading ‣ IV Results ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops\") summarizes the change in ethics violations across prompt risk categories. The largest improvements appear in emergency prompts. For DeepSeek R1, the mean AMA violation score dropped from 4.8 to 0.6. For Med PaLM, it dropped from 5.1 to 0.8. These are large shifts because emergency prompts often encourage direct instructions, and the refinement loop repeatedly pushes the generator toward safer language such as triage guidance, warnings, and referral to professional care."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Diagnostic and therapeutic prompts also show substantial improvements, with both generators reducing violations from roughly three violations per prompt down to well below one on average. Preventive prompts begin with lower violations, and therefore the absolute change is smaller, although the refined responses still approach near zero violations."
+                },
+                {
+                  "type": "table",
+                  "text": "| Category | DR1 | MP | Velocity | | --- | --- | --- | --- | | | Before and after | Before and after | | | Emergency | 4.8 to 0.6 | 5.1 to 0.8 | 1.70 | | Diagnostic | 3.2 to 0.4 | 3.4 to 0.5 | 1.15 | | Therapeutic | 2.9 to 0.3 | 3.1 to 0.4 | 1.06 | | Preventive | 1.8 to 0.1 | 1.6 to 0.1 | 0.65 |"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Finally, Table [V](https://ar5iv.labs.arxiv.org/html/2601.13268v1#S4.T5 \"TABLE V ‣ IV-D Ethics Violation Reduction and Risk Downgrading ‣ IV Results ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops\") shows how the SRA 5 distribution shifts from the initial responses to the refined responses. Both generators eliminate Level 4 and Level 5 outputs after refinement. DeepSeek R1 shifts most prompts into Level 1 and Level 2, with 67% ending in Level 1 and 28% ending in Level 2. Med PaLM shows a similar pattern, with 64% at Level 1 and 30% at Level 2. Only a small fraction remains at Level 3 after refinement, which indicates that the loop generally succeeds in removing higher risk content and rewriting the response to be informational or low risk."
+                },
+                {
+                  "type": "table",
+                  "text": "| Level | DR1 | | MP | | | --- | --- | --- | --- | --- | | | Initial | Final | Initial | Final | | 1 (Minimal) | 12% | 67% | 10% | 64% | | 2 (Low) | 18% | 28% | 20% | 30% | | 3 (Moderate) | 35% | 5% | 38% | 6% | | 4 (High) | 28% | 0% | 25% | 0% | | 5 (Critical) | 7% | 0% | 7% | 0% |"
+                }
+              ],
+              "children": []
+            }
+          ]
+        },
+        {
+          "heading": "V Discussion",
+          "level": 2,
+          "content": [],
+          "children": [
+            {
+              "heading": "V-A Key Findings",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "Across 900 adversarial prompts, the evaluation loop usually reached the stopping criteria within the five iteration budget, and the final responses showed large reductions in both ethics violations and risk level. DeepSeek R1 converged more often and with fewer rounds than Med PaLM, and it also showed slightly more stable iteration results (its standard deviation was 1.12 compared with 1.28). At the same time, Med PaLM tended to behave better in categories related to privacy and public health, where domain training may help the model avoid obvious confidentiality issues and use more conservative language."
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "V-B Comparison With Fine Tuning Based Alignment",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "A key practical motivation for this work is to reduce unsafe output without retraining the generator. In MedSafetyBench, fine tuning on safety demonstrations can lower harmful outputs, but it typically requires model specific retraining and repeated updates when policies evolve [[10](https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib29 \"MedSafetyBench: evaluating and improving the medical safety of large language models\")]. In contrast, our approach operates at inference time. The generator can be left unchanged, while the evaluation policy and the feedback style can be adjusted by changing the evaluator prompts or swapping evaluator models. This is useful in settings where safety criteria evolve over time, or where different institutions need slightly different policies. Our risk scale also supports a graded interpretation of safety rather than only safe versus unsafe, which helps when the prompt sits near the boundary between general information and actionable medical advice."
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "V-C Differences Between the Two Generators",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "DeepSeek R1 generally required fewer revision rounds. One plausible explanation is that it responds more consistently to explicit feedback and is more willing to restructure an answer when asked to remove unsafe elements. Med PaLM, in contrast, often starts from a more medically grounded response, but it can require extra rounds to remove borderline diagnostic or treatment suggestions when the prompt strongly invites them. The difference in mean iterations is 0.33. If the same pattern holds at larger scale, then processing 10,000 prompts would require about 3,300 fewer refinement rounds for DeepSeek R1, which translates into lower compute cost and lower latency."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Med PaLM shows relatively stronger behavior in the privacy related principle and performs similarly in public health prompts. This supports the view that medical pretraining can help the model internalize some norms around confidentiality and public communication, even before the refinement loop begins. A practical implication is that hybrid strategies may be promising, where a domain trained generator is combined with a strong feedback mechanism that enforces clear safety thresholds."
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "V-D Scalability and Practical Use",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "In our setup, the pipeline processed about 150 queries per hour using four A100 GPUs, with a mean latency of 8.5 seconds per converged query. This is faster than manual review by a clinician, which often takes minutes per response, but it is still slow compared with a single model call. In practice, this suggests a specific use case. The loop is most suitable as a screening or refinement stage for higher risk interactions, such as user facing medical advice, triage style questions, or prompts that involve sensitive information. Lower risk tasks can still use lighter safeguards, while the full loop can be reserved for cases where the risk is higher."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "The modular design also supports operational updates. If the guidance changes, the evaluation instructions can be updated without retraining the generator. This is one of the main practical advantages over approaches that rely on repeated fine tuning cycles."
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "V-E Regulatory and Governance Considerations",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "We do not claim that this study, by itself, satisfies regulatory requirements. However, the design is compatible with common governance expectations because it makes the evaluation criteria explicit and produces a record of why a response was revised. The AMA principles provide an externally defined ethics reference point [[1](https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib30 \"Principles of medical ethics\")], and the risk scale is aligned with the general structure of medical risk management thinking, including ISO 14971 style hazard reasoning. In practice, these artifacts can support documentation for internal review, auditing, and quality assurance, especially when combined with expert oversight and validation."
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "V-F Limitations and Future Work",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "This study has several limitations. First, we only evaluate two generators and two evaluators, so the conclusions may not generalize to other model families. Second, the evaluators are themselves language models, which means their judgments are not ground truth. Validation against clinician annotations is necessary to understand where the evaluators are reliable and where they may miss subtle harms. Third, we evaluate single turn prompts, while many real deployments involve multi turn conversations where earlier context can change risk. Fourth, we do not fully characterize adversarial robustness against targeted prompt injection and tool use scenarios, which is important when LLMs are embedded in larger applications."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Future work can extend the evaluation to additional generators and evaluators, include clinician labeled safety judgments for calibration, test multi turn settings, and explore ways to reduce latency while keeping the same safety thresholds. Subspecialty specific criteria, such as oncology or pediatrics, are also an important next step because risk and acceptable guidance differ by clinical context."
+                }
+              ],
+              "children": []
+            }
+          ]
+        },
+        {
+          "heading": "VI Conclusion",
+          "level": 2,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "This paper examined an inference time multi agent evaluation loop for improving the safety of medical LLM outputs through repeated assessment and revision. Using 900 adversarial prompts from MedSafetyBench, the refinement process reduced AMA ethics violations by 89% and downgraded risk in 92% of cases, with convergence in 94.2% of prompts within five iterations. DeepSeek R1 typically converged in fewer rounds and showed slightly more stable iteration behavior, while Med PaLM performed comparatively well in privacy related prompts."
+            },
+            {
+              "type": "paragraph",
+              "text": "A practical contribution of this work is that it does not rely on retraining the generator. Instead, the generator is refined through structured feedback produced at inference time, which makes it easier to update evaluation criteria when policies change. At the same time, this study should be viewed as an initial step rather than a deployment ready validation. The evaluators are language models, and their judgments need calibration against clinician annotations and real clinical workflows."
+            },
+            {
+              "type": "paragraph",
+              "text": "Future work can broaden the set of generators and evaluators, validate safety judgments with medical experts, and extend the evaluation to multi turn settings where risk depends on longer context. It will also be important to test robustness against prompt injection and other adversarial strategies that arise in tool integrated applications. More specialized evaluation criteria for clinical subdomains, such as pediatrics or oncology, are another clear direction."
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "References",
+          "level": 2,
+          "content": [
+            {
+              "type": "list",
+              "text": "* [1] American Medical Association (2001) Principles of medical ethics. Note: Accessed: 2024-07-08 External Links: [Link](https://code-medical-ethics.ama-assn.org/principles) Cited by: [§I](https://ar5iv.labs.arxiv.org/html/2601.13268v1#S1.p6.1 \"I Introduction ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops\"), [§III-B1](https://ar5iv.labs.arxiv.org/html/2601.13268v1#S3.SS2.SSS1.p1.1 \"III-B1 AMA 9 Ethics Scoring ‣ III-B Safety Evaluation Criteria ‣ III Methodology ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops\"), [§V-E](https://ar5iv.labs.arxiv.org/html/2601.13268v1#S5.SS5.p1.1 \"V-E Regulatory and Governance Considerations ‣ V Discussion ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops\"). * [2] S. Aydin et al. (2024) Large language models in patient education: a scoping review. Frontiers in Medicine. External Links: [Document](https://dx.doi.org/10.3389/fmed.2024.1477898) Cited by: [§I](https://ar5iv.labs.arxiv.org/html/2601.13268v1#S1.p1.1 \"I Introduction ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops\"). * [3] Y. Bai, S. Kadavath, S. Kundu, A. Askell, J. Kernion, A. Jones, et al. (2022) Constitutional ai: harmlessness from ai feedback. arXiv preprint arXiv:2212.08073. Cited by: [§I](https://ar5iv.labs.arxiv.org/html/2601.13268v1#S1.p3.1 \"I Introduction ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops\"), [§II-B](https://ar5iv.labs.arxiv.org/html/2601.13268v1#S2.SS2.p1.1 \"II-B LLM Safety and Alignment ‣ II Related Work ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops\"). * [4] A. A. Birkun et al. (2023) Large language model (llm)-powered chatbots fail to reliably guide cardiopulmonary resuscitation. Resuscitation. Cited by: [§I](https://ar5iv.labs.arxiv.org/html/2601.13268v1#S1.p2.1 \"I Introduction ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops\"). * [5] A. A. Birkun et al. (2024) Large language model-based chatbot as a source of advice on first aid in heart attack. American Journal of Emergency Medicine. Cited by: [§I](https://ar5iv.labs.arxiv.org/html/2601.13268v1#S1.p2.1 \"I Introduction ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops\"). * [6] K. Chen, X. Li, T. Yang, H. Wang, W. Dong, and Y. Gao (2025) Mdteamgpt: a self-evolving llm-based multi-agent framework for multi-disciplinary team medical consultation. arXiv preprint arXiv:2503.13856. Cited by: [§I](https://ar5iv.labs.arxiv.org/html/2601.13268v1#S1.p5.1 \"I Introduction ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops\"), [§II-C](https://ar5iv.labs.arxiv.org/html/2601.13268v1#S2.SS3.p2.1 \"II-C Multi Agent Systems ‣ II Related Work ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops\"). * [7] Z. Chen, A. Hernández Cano, A. Romanou, A. Bonnet, K. Matoba, F. Salvi, M. Pagliardini, S. Fan, A. Köpf, A. Mohtashami, et al. (2023) MEDITRON-70b: scaling medical pretraining for large language models. arXiv preprint arXiv:2311.16079. Cited by: [§II-A](https://ar5iv.labs.arxiv.org/html/2601.13268v1#S2.SS1.p2.1 \"II-A Medical Language Models ‣ II Related Work ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops\"). * [8] Y. Du, Z. Wang, X. Li, T. Gao, X. Zhang, and Z. Liu (2023) Improving factual correctness in llms through multi-agent debate. arXiv preprint arXiv:2305.14325. Cited by: [§I](https://ar5iv.labs.arxiv.org/html/2601.13268v1#S1.p5.1 \"I Introduction ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops\"), [§II-C](https://ar5iv.labs.arxiv.org/html/2601.13268v1#S2.SS3.p1.1 \"II-C Multi Agent Systems ‣ II Related Work ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops\"). * [9] Y. Gu, R. Tinn, H. Cheng, M. Lucas, N. Usuyama, X. Liu, T. Naumann, J. Gao, and H. Poon (2021) Domain-specific language model pretraining for biomedical natural language processing. ACM Transactions on Computing for Healthcare (HEALTH) 3 (1), pp. 1–23. Cited by: [§I](https://ar5iv.labs.arxiv.org/html/2601.13268v1#S1.p1.1 \"I Introduction ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops\"). * [10] T. Han, A. Kumar, C. Agarwal, and H. Lakkaraju (2024) MedSafetyBench: evaluating and improving the medical safety of large language models. arXiv preprint arXiv:2406.12345. Cited by: [§I](https://ar5iv.labs.arxiv.org/html/2601.13268v1#S1.p10.1 \"I Introduction ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops\"), [§I](https://ar5iv.labs.arxiv.org/html/2601.13268v1#S1.p2.1 \"I Introduction ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops\"), [§I](https://ar5iv.labs.arxiv.org/html/2601.13268v1#S1.p3.1 \"I Introduction ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops\"), [§I](https://ar5iv.labs.arxiv.org/html/2601.13268v1#S1.p4.1 \"I Introduction ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops\"), [§II-B](https://ar5iv.labs.arxiv.org/html/2601.13268v1#S2.SS2.p1.1 \"II-B LLM Safety and Alignment ‣ II Related Work ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops\"), [§III-D](https://ar5iv.labs.arxiv.org/html/2601.13268v1#S3.SS4.p1.1 \"III-D Dataset and Metrics ‣ III Methodology ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops\"), [§V-B](https://ar5iv.labs.arxiv.org/html/2601.13268v1#S5.SS2.p1.1 \"V-B Comparison With Fine Tuning Based Alignment ‣ V Discussion ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops\"). * [11] J. Lee, W. Yoon, S. Kim, D. Kim, S. Kim, C. H. So, and J. Kang (2020) BioBERT: a pre-trained biomedical language representation model for biomedical text mining. Bioinformatics 36 (4), pp. 1234–1240. External Links: [Document](https://dx.doi.org/10.1093/bioinformatics/btz682) Cited by: [§II-A](https://ar5iv.labs.arxiv.org/html/2601.13268v1#S2.SS1.p1.1 \"II-A Medical Language Models ‣ II Related Work ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops\"). * [12] Y. Liao, S. Jiang, Z. Chen, Y. Wang, and Y. Wang (2024-11) MedCare: advancing medical LLMs through decoupling clinical alignment and knowledge aggregation. In Findings of the Association for Computational Linguistics: EMNLP 2024, Y. Al-Onaizan, M. Bansal, and Y. Chen (Eds.), Miami, Florida, USA, pp. 10562–10581. External Links: [Link](https://aclanthology.org/2024.findings-emnlp.619/), [Document](https://dx.doi.org/10.18653/v1/2024.findings-emnlp.619) Cited by: [§I](https://ar5iv.labs.arxiv.org/html/2601.13268v1#S1.p1.1 \"I Introduction ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops\"). * [13] L. Liu et al. (2024) A survey on medical large language models. arXiv preprint arXiv:2406.03712. Cited by: [§I](https://ar5iv.labs.arxiv.org/html/2601.13268v1#S1.p1.1 \"I Introduction ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops\"). * [14] Y. Liu et al. (2023) Prompt injection attacks against llm-integrated applications. arXiv preprint arXiv:2306.05499. Cited by: [§I](https://ar5iv.labs.arxiv.org/html/2601.13268v1#S1.p2.1 \"I Introduction ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops\"), [§II-B](https://ar5iv.labs.arxiv.org/html/2601.13268v1#S2.SS2.p2.1 \"II-B LLM Safety and Alignment ‣ II Related Work ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops\"). * [15] D. X. Long, D. N. Yen, A. T. Luu, K. Kawaguchi, M. Kan, and N. F. Chen (2024-11) Multi-expert prompting improves reliability, safety and usefulness of large language models. In Proceedings of the 2024 Conference on Empirical Methods in Natural Language Processing, Y. Al-Onaizan, M. Bansal, and Y. Chen (Eds.), Miami, Florida, USA, pp. 20370–20401. External Links: [Link](https://aclanthology.org/2024.emnlp-main.1135/), [Document](https://dx.doi.org/10.18653/v1/2024.emnlp-main.1135) Cited by: [§I](https://ar5iv.labs.arxiv.org/html/2601.13268v1#S1.p5.1 \"I Introduction ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops\"). * [16] Q. Lu, D. Dou, and T. Nguyen (2022) ClinicalT5: a generative language model for clinical text. In Findings of the Association for Computational Linguistics: EMNLP 2022, pp. 5436–5443. External Links: [Document](https://dx.doi.org/10.18653/v1/2022.findings-emnlp.398) Cited by: [§II-A](https://ar5iv.labs.arxiv.org/html/2601.13268v1#S2.SS1.p1.1 \"II-A Medical Language Models ‣ II Related Work ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops\"). * [17] R. Luo, L. Sun, Y. Xia, T. Qin, S. Zhang, H. Poon, and T. Liu (2022) BioGPT: generative pre-trained transformer for biomedical text generation and mining. Briefings in bioinformatics 23 (6), pp. bbac409. Cited by: [§I](https://ar5iv.labs.arxiv.org/html/2601.13268v1#S1.p1.1 \"I Introduction ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops\"). * [18] A. Madaan, N. Tandon, P. Gupta, S. Hallinan, L. Gao, S. Wiegreffe, U. Alon, N. Dziri, S. Prabhumoye, Y. Yang, et al. (2023) Self-refine: iterative refinement with self-feedback. arXiv preprint arXiv:2303.17651. Cited by: [§II-C](https://ar5iv.labs.arxiv.org/html/2601.13268v1#S2.SS3.p1.1 \"II-C Multi Agent Systems ‣ II Related Work ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops\"). * [19] R. Miotto, F. Wang, and X. Jiang (2023) Medical ai safety: what happens when prediction fails?. NPJ Digital Medicine 6 (1), pp. 1–4. Cited by: [§I](https://ar5iv.labs.arxiv.org/html/2601.13268v1#S1.p2.1 \"I Introduction ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops\"), [§II-A](https://ar5iv.labs.arxiv.org/html/2601.13268v1#S2.SS1.p2.1 \"II-A Medical Language Models ‣ II Related Work ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops\"). * [20] S. Mukherjee, P. Gamble, M. S. Ausin, N. Kant, K. Aggarwal, N. Manjunath, D. Datta, Z. Liu, J. Ding, S. Busacca, et al. (2024) Polaris: a safety-focused llm constellation architecture for healthcare. arXiv preprint arXiv:2403.13313. Cited by: [§I](https://ar5iv.labs.arxiv.org/html/2601.13268v1#S1.p5.1 \"I Introduction ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops\"), [§II-C](https://ar5iv.labs.arxiv.org/html/2601.13268v1#S2.SS3.p2.1 \"II-C Multi Agent Systems ‣ II Related Work ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops\"). * [21] K. Nassiri and M. A. Akhloufi (2024) Recent advances in large language models for healthcare. BioMedInformatics 4 (2), pp. 1097–1143. Cited by: [§II-A](https://ar5iv.labs.arxiv.org/html/2601.13268v1#S2.SS1.p2.1 \"II-A Medical Language Models ‣ II Related Work ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops\"). * [22] L. Onyekwelu-Udoka, M. S. Islam, and M. S. Hasan (2025) Emotion detection in speech using lightweight and transformer-based models: a comparative and ablation study. arXiv preprint arXiv:2511.00402. External Links: [Link](https://arxiv.org/abs/2511.00402) Cited by: [§I](https://ar5iv.labs.arxiv.org/html/2601.13268v1#S1.p5.1 \"I Introduction ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops\"). * [23] L. Ouyang, J. Wu, X. Jiang, D. Almeida, C. Wainwright, P. Mishkin, et al. (2022) Training language models to follow instructions with human feedback. Advances in Neural Information Processing Systems. Note: arXiv:2203.02155 Cited by: [§I](https://ar5iv.labs.arxiv.org/html/2601.13268v1#S1.p3.1 \"I Introduction ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops\"), [§II-B](https://ar5iv.labs.arxiv.org/html/2601.13268v1#S2.SS2.p1.1 \"II-B LLM Safety and Alignment ‣ II Related Work ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops\"). * [24] OWASP Foundation (2024) OWASP top 10 for large language model applications. Note: <https://owasp.org/www-project-top-10-for-large-language-model-applications/>Accessed: 2025-12-25 Cited by: [§I](https://ar5iv.labs.arxiv.org/html/2601.13268v1#S1.p2.1 \"I Introduction ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops\"), [§II-B](https://ar5iv.labs.arxiv.org/html/2601.13268v1#S2.SS2.p2.1 \"II-B LLM Safety and Alignment ‣ II Related Work ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops\"). * [25] N. Shinn, F. Cassano, E. Berman, A. Gopinath, K. Narasimhan, and S. Yao (2023) Reflexion: language agents with verbal reinforcement learning. arXiv preprint arXiv:2303.11366. Cited by: [§II-C](https://ar5iv.labs.arxiv.org/html/2601.13268v1#S2.SS3.p1.1 \"II-C Multi Agent Systems ‣ II Related Work ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops\"). * [26] K. Singhal, S. Azizi, T. Tu, S. S. Mahdavi, J. Wei, H. W. Chung, N. Scales, A. Tanwani, A. Cole, J. Lee, et al. (2023) Large language models encode clinical knowledge. Nature 620 (7972), pp. 172–180. Cited by: [§I](https://ar5iv.labs.arxiv.org/html/2601.13268v1#S1.p1.1 \"I Introduction ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops\"), [§II-A](https://ar5iv.labs.arxiv.org/html/2601.13268v1#S2.SS1.p2.1 \"II-A Medical Language Models ‣ II Related Work ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops\"). * [27] Y. Wang, X. Ma, and W. Chen (2024-11) Augmenting black-box LLMs with medical textbooks for biomedical question answering. In Findings of the Association for Computational Linguistics: EMNLP 2024, Y. Al-Onaizan, M. Bansal, and Y. Chen (Eds.), Miami, Florida, USA, pp. 1754–1770. External Links: [Link](https://aclanthology.org/2024.findings-emnlp.95/), [Document](https://dx.doi.org/10.18653/v1/2024.findings-emnlp.95) Cited by: [§I](https://ar5iv.labs.arxiv.org/html/2601.13268v1#S1.p1.1 \"I Introduction ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops\"). * [28] C. Y. K. Williams et al. (2024) Evaluating large language models for clinical recommendations from emergency department notes. Nature Communications. Note: Article: s41467-024-52415-1 Cited by: [§I](https://ar5iv.labs.arxiv.org/html/2601.13268v1#S1.p1.1 \"I Introduction ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops\"). * [29] X. Yang, A. Chen, N. PourNejatian, H. C. Shin, K. E. Smith, C. Parisien, C. Compas, C. Martin, A. B. Costa, M. G. Flores, et al. (2022) A large language model for electronic health records. npj Digital Medicine 5, pp. 194. External Links: [Document](https://dx.doi.org/10.1038/s41746-022-00742-2) Cited by: [§II-A](https://ar5iv.labs.arxiv.org/html/2601.13268v1#S2.SS1.p1.1 \"II-A Medical Language Models ‣ II Related Work ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops\"). * [30] S. Yao, J. Zhao, D. Yu, I. Zhao, T. Khot, A. Sabharwal, A. Bosselut, and Y. Choi (2023) Tree of thoughts: deliberate problem solving with large language models. arXiv preprint arXiv:2305.10601. Cited by: [§I](https://ar5iv.labs.arxiv.org/html/2601.13268v1#S1.p5.1 \"I Introduction ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops\"), [§II-C](https://ar5iv.labs.arxiv.org/html/2601.13268v1#S2.SS3.p1.1 \"II-C Multi Agent Systems ‣ II Related Work ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops\"). * [31] E. Yu, J. Li, M. Liao, S. Wang, G. Zuchen, F. Mi, and L. Hong (2024-11) CoSafe: evaluating large language model safety in multi-turn dialogue coreference. In Proceedings of the 2024 Conference on Empirical Methods in Natural Language Processing, Y. Al-Onaizan, M. Bansal, and Y. Chen (Eds.), Miami, Florida, USA, pp. 17494–17508. External Links: [Link](https://aclanthology.org/2024.emnlp-main.968/), [Document](https://dx.doi.org/10.18653/v1/2024.emnlp-main.968) Cited by: [§I](https://ar5iv.labs.arxiv.org/html/2601.13268v1#S1.p1.1 \"I Introduction ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops\"). * [32] Y. Zhao, H. Wang, Y. Liu, W. Suhuang, X. Wu, and Y. Zheng (2024-11) Can LLMs replace clinical doctors? exploring bias in disease diagnosis by large language models. In Findings of the Association for Computational Linguistics: EMNLP 2024, Y. Al-Onaizan, M. Bansal, and Y. Chen (Eds.), Miami, Florida, USA, pp. 13914–13935. External Links: [Link](https://aclanthology.org/2024.findings-emnlp.814/), [Document](https://dx.doi.org/10.18653/v1/2024.findings-emnlp.814) Cited by: [§I](https://ar5iv.labs.arxiv.org/html/2601.13268v1#S1.p2.1 \"I Introduction ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops\")."
+            }
+          ],
+          "children": []
+        }
+      ]
+    }
+  ],
+  "chunks": [
+    {
+      "heading_path": [
+        "Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops"
+      ],
+      "text": "# Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops"
+    },
+    {
+      "heading_path": [
+        "Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops",
+        "Abstract"
+      ],
+      "text": "###### Abstract\n\nLarge Language Models (LLMs) are increasingly applied in healthcare, yet ensuring their ethical integrity and safety compliance remains a major barrier to clinical deployment. This work introduces a multi-agent refinement framework designed to enhance the safety and reliability of medical LLMs through structured, iterative alignment. Our system combines two generative models—DeepSeek R1 and Med-PaLM—with two evaluation agents, LLaMA 3.1 and Phi-4, which assess responses using the American Medical Association’s (AMA) Principles of Medical Ethics and a five-tier Safety Risk Assessment (SRA-5) protocol. We evaluate performance across 900 clinically diverse queries spanning nine ethical domains, measuring convergence efficiency, ethical violation reduction, and domain-specific risk behavior. Results demonstrate that DeepSeek R1 achieves faster convergence (mean 2.34 vs. 2.67 iterations), while Med-PaLM shows superior handling of privacy-sensitive scenarios. The iterative multi-agent loop achieved an 89% reduction in ethical violations and a 92% risk downgrade rate, underscoring the effectiveness of our approach. This study presents a scalable, regulator-aligned, and cost-efficient paradigm for governing medical AI safety."
+    },
+    {
+      "heading_path": [
+        "Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops",
+        "I Introduction"
+      ],
+      "text": "## I Introduction\n\nLarge Language Models (LLMs) are now being tested in a wide range of biomedical and clinical settings. They are used to draft clinical notes, support triage decision making, and produce patient facing explanations [[27](https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib7 \"Augmenting black-box LLMs with medical textbooks for biomedical question answering\"), [12](https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib8 \"MedCare: advancing medical LLMs through decoupling clinical alignment and knowledge aggregation\"), [13](https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib36 \"A survey on medical large language models\")]. A growing body of work suggests that these systems can be useful when the task is mainly linguistic, such as patient education or tailoring explanations to different health literacy levels. However, their performance becomes more fragile as the stakes rise and the output begins to resemble medical advice [[2](https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib38 \"Large language models in patient education: a scoping review\"), [28](https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib37 \"Evaluating large language models for clinical recommendations from emergency department notes\")]. Domain specialized models such as Med-PaLM [[26](https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib17 \"Large language models encode clinical knowledge\")], BioGPT [[17](https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib16 \"BioGPT: generative pre-trained transformer for biomedical text generation and mining\")], and PubMedBERT [[9](https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib19 \"Domain-specific language model pretraining for biomedical natural language processing\")] remain promising for medical applications, but specialized training does not eliminate the need for careful safety controls [[31](https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib9 \"CoSafe: evaluating large language model safety in multi-turn dialogue coreference\")].\n\nA practical concern is that benchmark accuracy does not reliably predict real-world safety. Medical LLMs can generate plausible but incorrect statements, omit key steps in time-critical guidance, or produce responses that conflict with professional norms [[19](https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib21 \"Medical ai safety: what happens when prediction fails?\"), [32](https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib5 \"Can LLMs replace clinical doctors? exploring bias in disease diagnosis by large language models\")]. Empirical studies report failures in first aid and emergency contexts, where omissions or misleading phrasing can be harmful even when the model sounds confident [[5](https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib39 \"Large language model-based chatbot as a source of advice on first aid in heart attack\"), [4](https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib40 \"Large language model (llm)-powered chatbots fail to reliably guide cardiopulmonary resuscitation\")]. These systems can also be pushed to repeat or spread misinformation, especially when the prompt includes false claims or is written to mislead the model. [[10](https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib29 \"MedSafetyBench: evaluating and improving the medical safety of large language models\")]. Prompts may unintentionally include sensitive details, outputs may disclose protected health information (PHI), and prompt injection attacks can lead to unsafe or non compliant behavior in applications that integrate LLMs [[14](https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib43 \"Prompt injection attacks against llm-integrated applications\"), [24](https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib44 \"OWASP top 10 for large language model applications\")].\n\nExisting mitigation strategies help, but they are not a complete answer. Fine tuning, constrained decoding, and instruction tuning with human feedback can reduce harmful generations on average [[10](https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib29 \"MedSafetyBench: evaluating and improving the medical safety of large language models\"), [23](https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib41 \"Training language models to follow instructions with human feedback\")]. Related alignment approaches such as Constitutional AI show how principle guided supervision can improve safety behavior without requiring direct human labeling of every harmful case [[3](https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib42 \"Constitutional ai: harmlessness from ai feedback\")]. Still, in medical use cases the requirements are often context dependent. The same advice can be acceptable in a low-risk educational setting but inappropriate when it resembles diagnosis or treatment guidance. This makes static guardrails difficult to maintain over time, and repeated retraining cycles are not always realistic once systems are deployed.\n\nHan et al. [[10](https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib29 \"MedSafetyBench: evaluating and improving the medical safety of large language models\")] introduced MedSafetyBench and showed that safety fine tuning can reduce harmful outputs. At the same time, this approach typically requires computationally expensive retraining for each model. It also produces safety constraints that are hard to update after deployment, it does not naturally support iterative revision, and it often reduces nuanced safety judgments to coarse labels. These limitations matter in borderline situations where risk depends on context.\n\nMulti-agent methods offer another direction. One model generates an answer, while other agents critique and score it, then provide feedback so the response can be revised through repeated rounds [[30](https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib24 \"Tree of thoughts: deliberate problem solving with large language models\"), [8](https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib25 \"Improving factual correctness in llms through multi-agent debate\"), [15](https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib6 \"Multi-expert prompting improves reliability, safety and usefulness of large language models\")]. This approach moves safety verification to inference time and it allows the evaluation policy to change without retraining the generator. However, systematic evidence is still limited on how different medical LLMs behave when they are repeatedly pushed to revise for safety. For example, it is not yet clear whether reasoning-optimized models revise more consistently than domain-trained models or whether some ethical domains, such as privacy, remain harder to stabilize [[6](https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib1 \"Mdteamgpt: a self-evolving llm-based multi-agent framework for multi-disciplinary team medical consultation\"), [20](https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib3 \"Polaris: a safety-focused llm constellation architecture for healthcare\"), [22](https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib18 \"Emotion detection in speech using lightweight and transformer-based models: a comparative and ablation study\")].\n\nIn this work, we implement an inference time multi-agent evaluation loop that refines medical LLM outputs using structured feedback rather than additional training. Two generators, DeepSeek R1 and Med-PaLM, are paired with two evaluator agents that judge responses against the American Medical Association’s (AMA) Principles of Medical Ethics [[1](https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib30 \"Principles of medical ethics\")] and a five-level Safety Risk Assessment (SRA-5). We focus on three questions:\n\nRQ1: Can an agent based refinement loop reduce unsafe or ethically problematic outputs without expensive fine tuning?\n\nRQ2: Can AMA ethical standards be operationalized in a practical evaluation and revision pipeline?\n\nRQ3: How do reasoning-optimized and domain-trained generators differ in convergence behavior under iterative safety feedback?\n\nWe evaluate the approach on 900 adversarial queries from MedSafetyBench, comparing DeepSeek R1 and Med-PaLM in terms of convergence, iteration efficiency, ethical violation reduction, and risk downgrading behavior [[10](https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib29 \"MedSafetyBench: evaluating and improving the medical safety of large language models\")]."
+    },
+    {
+      "heading_path": [
+        "Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops",
+        "II Related Work"
+      ],
+      "text": "## II Related Work"
+    },
+    {
+      "heading_path": [
+        "Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops",
+        "II Related Work",
+        "II-A Medical Language Models"
+      ],
+      "text": "### II-A Medical Language Models\n\nMany studies adapts Transformer architectures to biomedical and clinical text by pretraining on domain corpora and then fine tuning for downstream tasks. Early work such as BioBERT showed that continuing BERT style pretraining on PubMed and PMC improves biomedical text mining performance [[11](https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib45 \"BioBERT: a pre-trained biomedical language representation model for biomedical text mining\")]. Similar efforts have explored training and scaling models on clinical notes and electronic health record narratives, where access and privacy constraints shape data and release practices. For example, GatorTron trained from scratch on a very large corpus that includes de-identified clinical notes and demonstrated gains across multiple clinical NLP tasks [[29](https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib46 \"A large language model for electronic health records\")]. In parallel, generative clinical models have been developed to support text-to-text tasks such as summarization and note generation, including ClinicalT5 [[16](https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib47 \"ClinicalT5: a generative language model for clinical text\")].\n\nRecent medical LLMs extend these ideas to instruction following and question answering. Med-PaLM demonstrated strong performance on medical question answering and clinical reasoning style benchmarks, supporting the view that scale plus medical supervision can yield useful behavior [[26](https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib17 \"Large language models encode clinical knowledge\")]. Open weight medical models such as Meditron also aim to broaden access by continuing pretraining on curated medical corpora and then applying instruction tuning for medical tasks [[7](https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib49 \"MEDITRON-70b: scaling medical pretraining for large language models\")]. Surveys summarize how these models are evaluated and where their performance tends to break down, especially when the setting shifts from benchmark-style questions to interactive or safety-sensitive use [[21](https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib15 \"Recent advances in large language models for healthcare\"), [19](https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib21 \"Medical ai safety: what happens when prediction fails?\")]."
+    },
+    {
+      "heading_path": [
+        "Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops",
+        "II Related Work",
+        "II-B LLM Safety and Alignment"
+      ],
+      "text": "### II-B LLM Safety and Alignment\n\nSafety research for LLMs has developed a set of alignment techniques that can reduce harmful generations, but medical settings introduce additional constraints because errors can lead to real harm and because professional norms matter. MedSafetyBench proposed an evaluation framing grounded in medical safety principles and showed that safety fine tuning can lower harmful outputs [[10](https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib29 \"MedSafetyBench: evaluating and improving the medical safety of large language models\")]. More broadly, instruction tuning and reinforcement learning from human feedback have been widely used to steer general-purpose LLMs toward safer and more helpful behavior [[23](https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib41 \"Training language models to follow instructions with human feedback\")]. Constitutional AI provides an alternative that uses explicit principles to guide critique and revision, which is conceptually attractive for domains where the rules can be written down, including medicine [[3](https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib42 \"Constitutional ai: harmlessness from ai feedback\")].\n\nMedical deployment also raises security and privacy risks beyond classic toxicity. Prompt injection attacks can manipulate model behavior inside larger systems, and this becomes especially relevant when LLMs are integrated with tools, memory, or clinical workflows [[14](https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib43 \"Prompt injection attacks against llm-integrated applications\")]. Practitioner-oriented threat summaries, such as the OWASP Top 10 for LLM Applications, catalog common failure modes and mitigations that overlap with healthcare settings, including prompt injection and insecure output handling [[24](https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib44 \"OWASP top 10 for large language model applications\")]. These strands motivate safety mechanisms that can adapt after deployment and that can express graded, context-dependent judgments rather than only binary safe or unsafe labels."
+    },
+    {
+      "heading_path": [
+        "Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops",
+        "II Related Work",
+        "II-C Multi Agent Systems"
+      ],
+      "text": "### II-C Multi Agent Systems\n\nMulti-agent methods use multiple roles to generate, critique, and revise outputs. Tree of Thoughts and related approaches show that structured search plus intermediate evaluation can improve reasoning quality and reduce obvious errors [[30](https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib24 \"Tree of thoughts: deliberate problem solving with large language models\")]. Other work demonstrates that iterative critique can improve outputs even without additional training, either by using separate critic roles or by having a model produce feedback for its own revisions [[8](https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib25 \"Improving factual correctness in llms through multi-agent debate\"), [18](https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib50 \"Self-refine: iterative refinement with self-feedback\")]. Reflexion is another example that improves behavior by storing and reusing textual feedback rather than updating weights [[25](https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib51 \"Reflexion: language agents with verbal reinforcement learning\")]. In general, these approaches suggest that safety and quality checks can be moved to inference time, where the evaluation policy can be updated without retraining the generator.\n\nWithin medicine, early multi agent or team based frameworks have been proposed, but there is still limited systematic evidence on how different medical generators respond to repeated safety pressure across diverse adversarial prompts [[6](https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib1 \"Mdteamgpt: a self-evolving llm-based multi-agent framework for multi-disciplinary team medical consultation\"), [20](https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib3 \"Polaris: a safety-focused llm constellation architecture for healthcare\")]. Our work builds on these ideas by focusing specifically on iterative safety refinement against explicit medical ethics criteria and a graded risk scale, while comparing how a reasoning-optimized model and a domain-trained model converge under the same evaluation loop."
+    },
+    {
+      "heading_path": [
+        "Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops",
+        "III Methodology"
+      ],
+      "text": "## III Methodology\n\nThis section describes our inference time safety pipeline, including the agent roles, scoring criteria, and the iterative revision loop used to obtain a final response. Figure [1](https://ar5iv.labs.arxiv.org/html/2601.13268v1#S3.F1 \"Figure 1 ‣ III-A System Overview and Agent Roles ‣ III Methodology ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops\") summarizes the overall flow."
+    },
+    {
+      "heading_path": [
+        "Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops",
+        "III Methodology",
+        "III-A System Overview and Agent Roles"
+      ],
+      "text": "### III-A System Overview and Agent Roles\n\nWe implement a deterministic multi agent evaluation loop that combines one generative model with two evaluator agents. We run the pipeline twice, once with DeepSeek R1 as the generator and once with Med PaLM as the generator, while keeping the evaluator agents fixed. Across all runs, we use the same inference settings for every agent to ensure a controlled comparison (temperature =0.7=0.7, top p =0.9=0.9, max tokens =512=512). All models are accessed through API based inference.\n\n=0.7=0.7\n\n=0.9=0.9\n\n=512=512"
+    },
+    {
+      "heading_path": [
+        "Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops",
+        "III Methodology",
+        "III-A System Overview and Agent Roles",
+        "Generative models."
+      ],
+      "text": "##### Generative models.\n\nWe compare two generators under identical conditions. DeepSeek R1 is treated as a reasoning oriented generator, while Med PaLM is treated as a domain trained medical generator."
+    },
+    {
+      "heading_path": [
+        "Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops",
+        "III Methodology",
+        "III-A System Overview and Agent Roles",
+        "Evaluator agents."
+      ],
+      "text": "##### Evaluator agents.\n\nWe use two evaluators with distinct responsibilities. LLaMA 3.1 performs ethics evaluation against the AMA principles. Phi 4 focuses on safety risk detection and assigns an SRA 5 risk level."
+    },
+    {
+      "heading_path": [
+        "Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops",
+        "III Methodology",
+        "III-B Safety Evaluation Criteria"
+      ],
+      "text": "### III-B Safety Evaluation Criteria"
+    },
+    {
+      "heading_path": [
+        "Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops",
+        "III Methodology",
+        "III-B Safety Evaluation Criteria",
+        "III-B1 AMA 9 Ethics Scoring"
+      ],
+      "text": "#### III-B1 AMA 9 Ethics Scoring\n\nTo assess ethical compliance, the evaluators reference the nine AMA Principles of Medical Ethics [[1](https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib30 \"Principles of medical ethics\")]. We group prompts and results by the following principles: (I) Competence and Compassion, (II) Professionalism and Honesty, (III) Legal and Social Responsibility, (IV) Patient Rights and Confidentiality, (V) Continued Study and Education, (VI) Physician Autonomy, (VII) Community and Public Health, (VIII) Patient Welfare, (IX) Healthcare Access Equity.\n\nEach response receives an ethics violation score from 0 to 9, where smaller values indicate fewer violations. A score of 0 means no violations identified, while 9 indicates the maximum number of violations. If a response receives a score of at least 6, refinement is mandatory. For a response to be considered deployable in our setting, it must achieve an AMA score of at most 2."
+    },
+    {
+      "heading_path": [
+        "Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops",
+        "III Methodology",
+        "III-B Safety Evaluation Criteria",
+        "III-B2 SRA 5 Risk Levels"
+      ],
+      "text": "#### III-B2 SRA 5 Risk Levels\n\nWe also assign a five level Safety Risk Assessment score, which is adapted from ISO 14971 style thinking and common clinical decision support risk groupings. The levels are defined as follows.\n\n* • Level 1 (Minimal). The response is informational and does not provide actionable medical guidance. * • Level 2 (Low). The response provides general wellness guidance with limited safety risk. * • Level 3 (Moderate). The response includes recommendations that require consultation with a clinician. * • Level 4 (High). The response makes diagnostic or treatment suggestions that can cause harm if followed. * • Level 5 (Critical). The response addresses an emergency scenario with potentially life threatening consequences.\n\nLevel 1 (Minimal). The response is informational and does not provide actionable medical guidance.\n\nLevel 2 (Low). The response provides general wellness guidance with limited safety risk.\n\nLevel 3 (Moderate). The response includes recommendations that require consultation with a clinician.\n\nLevel 4 (High). The response makes diagnostic or treatment suggestions that can cause harm if followed.\n\nLevel 5 (Critical). The response addresses an emergency scenario with potentially life threatening consequences.\n\nA response is considered deployable only if its SRA level is at most 2. We define a risk downgrade as movement from Level 3, Level 4, or Level 5 down to Level 1 or Level 2 after refinement."
+    },
+    {
+      "heading_path": [
+        "Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops",
+        "III Methodology",
+        "III-C Iterative Refinement Loop"
+      ],
+      "text": "### III-C Iterative Refinement Loop"
+    },
+    {
+      "heading_path": [
+        "Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops",
+        "III Methodology",
+        "III-C Iterative Refinement Loop",
+        "III-C1 Stopping Rule and Iteration Budget"
+      ],
+      "text": "#### III-C1 Stopping Rule and Iteration Budget\n\nThe loop terminates when the response satisfies both thresholds at the same time. The AMA score must be at most 2 and the SRA level must be at most 2. If the thresholds are not met, the system generates structured feedback and the generator revises the response. We cap the process at five iterations to bound latency and cost."
+    },
+    {
+      "heading_path": [
+        "Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops",
+        "III Methodology",
+        "III-C Iterative Refinement Loop",
+        "III-C2 Consensus and Feedback Construction"
+      ],
+      "text": "#### III-C2 Consensus and Feedback Construction\n\nEach iteration produces two evaluator outputs, one from LLaMA 3.1 and one from Phi 4. We merge these outputs into a consensus record that contains the current AMA score, the current SRA level, and the main reasons for any violations or risks. From this consensus record, we create a short revision plan that tells the generator what must change to pass the thresholds. The plan emphasizes removing unsafe instructions, avoiding diagnosis and treatment claims, and rewriting the response in a way that is consistent with professional ethics and privacy expectations.\n\nqq\n\nGG\n\nE1E_{1}\n\nE2E_{2}\n\nτAMA=2\\tau_{\\text{AMA}}=2\n\nτSRA=2\\tau_{\\text{SRA}}=2\n\n=5=5\n\nrfinalr_{\\text{final}}\n\nr←G.generate​(q)r\\leftarrow G.\\text{generate}(q)\n\ni←1i\\leftarrow 1\n\n55\n\ne​v​a​l1←E1.assess​(r,q)eval_{1}\\leftarrow E_{1}.\\text{assess}(r,q)\n\ne​v​a​l2←E2.assess​(r,q)eval_{2}\\leftarrow E_{2}.\\text{assess}(r,q)\n\nc​o​n​s​e​n​s​u​s←merge​(e​v​a​l1,e​v​a​l2)consensus\\leftarrow\\text{merge}(eval_{1},eval_{2})\n\nc​o​n​s​e​n​s​u​s.AMA≤τAMAconsensus.\\text{AMA}\\leq\\tau_{\\text{AMA}}\n\nc​o​n​s​e​n​s​u​s.SRA≤τSRAconsensus.\\text{SRA}\\leq\\tau_{\\text{SRA}}\n\n(r,i,converged)(r,i,\\text{converged})\n\nf​e​e​d​b​a​c​k←create_plan​(c​o​n​s​e​n​s​u​s)feedback\\leftarrow\\text{create\\_plan}(consensus)\n\nr←G.refine​(r,f​e​e​d​b​a​c​k,q)r\\leftarrow G.\\text{refine}(r,feedback,q)\n\n(r,5,non convergent)(r,5,\\text{non convergent})"
+    },
+    {
+      "heading_path": [
+        "Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops",
+        "III Methodology",
+        "III-D Dataset and Metrics"
+      ],
+      "text": "### III-D Dataset and Metrics\n\nWe evaluate on 900 adversarial prompts from MedSafetyBench [[10](https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib29 \"MedSafetyBench: evaluating and improving the medical safety of large language models\")]. The dataset is balanced across the nine AMA principle categories, with 100 queries per category.\n\nWe report the following metrics.\n\n* • Convergence rate. The fraction of prompts that meet both thresholds within five iterations. * • Iteration efficiency. The mean number of iterations required among converged prompts. * • Ethics violation reduction. The percent decrease in AMA violation score from the initial response to the final response. * • Risk downgrade rate. The fraction of prompts that move from SRA Level 3 or higher down to Level 2 or lower.\n\nConvergence rate. The fraction of prompts that meet both thresholds within five iterations.\n\nIteration efficiency. The mean number of iterations required among converged prompts.\n\nEthics violation reduction. The percent decrease in AMA violation score from the initial response to the final response.\n\nRisk downgrade rate. The fraction of prompts that move from SRA Level 3 or higher down to Level 2 or lower."
+    },
+    {
+      "heading_path": [
+        "Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops",
+        "IV Results"
+      ],
+      "text": "## IV Results\n\nThis section summarizes how often the refinement loop converged, how many rounds it typically needed, and how safety outcomes changed from the initial response to the final response. We report results for DeepSeek R1 and Med PaLM under the same evaluation settings."
+    },
+    {
+      "heading_path": [
+        "Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops",
+        "IV Results",
+        "IV-A Overall Performance"
+      ],
+      "text": "### IV-A Overall Performance\n\nTable [I](https://ar5iv.labs.arxiv.org/html/2601.13268v1#S4.T1 \"TABLE I ‣ IV-A Overall Performance ‣ IV Results ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops\") provides a high level comparison. In most cases, both generators reached the joint stopping criteria within the five iteration budget. DeepSeek R1 converged on 94.2% of prompts and required 2.34 iterations on average, while Med PaLM converged on 91.8% and required 2.67 iterations. Beyond convergence, both models showed large improvements in ethical compliance and risk level after refinement. DeepSeek R1 achieved an 89.1% reduction in the AMA violation score and a 92.1% rate of risk downgrades. Med PaLM achieved an 85.4% violation reduction and a 90.6% risk downgrade rate.\n\n| Metric | DeepSeek R1 | Med PaLM | | --- | --- | --- | | Convergence Rate | 94.2% | 91.8% | | Mean Iterations | 2.34 | 2.67 | | Std Dev | 1.12 | 1.28 | | Violation Reduction | 89.1% | 85.4% | | Risk Downgrade | 92.1% | 90.6% |"
+    },
+    {
+      "heading_path": [
+        "Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops",
+        "IV Results",
+        "IV-B Iteration Requirements and Failure Cases"
+      ],
+      "text": "### IV-B Iteration Requirements and Failure Cases\n\nTable [II](https://ar5iv.labs.arxiv.org/html/2601.13268v1#S4.T2 \"TABLE II ‣ IV-B Iteration Requirements and Failure Cases ‣ IV Results ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops\") breaks down how quickly prompts converged. A notable fraction of prompts met the thresholds after the first response, meaning that the initial answer was already judged acceptable. This occurred for 28% of prompts with DeepSeek R1 and 23% with Med PaLM. Most prompts converged after two or three iterations. If we combine those two cases, 66% of prompts converged within that range for both generators. The remaining cases required four or five iterations and represent prompts where the initial output either had clearer safety problems or needed multiple rewrites to remove risky content.\n\nNon convergence was uncommon but not negligible. DeepSeek R1 failed to meet the thresholds on 5.8% of prompts, compared to 8.2% for Med PaLM. These failures generally correspond to prompts that are difficult to rewrite safely without becoming overly vague or refusing the request, especially when the prompt encourages diagnostic or treatment guidance.\n\n| | | | | | --- | --- | --- | --- | | Iterations | DR1 | MP | Interpretation | | 1 | 252 (28%) | 207 (23%) | Converged immediately | | 2 | 378 (42%) | 342 (38%) | Converged after one revision | | 3 | 216 (24%) | 252 (28%) | Converged after standard refinement | | 4 | 36 (4%) | 72 (8%) | Required multiple corrections | | 5 | 18 (2%) | 27 (3%) | Converged at the iteration limit | | Converged | 848 (94%) | 826 (92%) | Met thresholds | | Failed | 52 (6%) | 74 (8%) | Did not meet thresholds |"
+    },
+    {
+      "heading_path": [
+        "Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops",
+        "IV Results",
+        "IV-C Differences Across AMA Principle Categories"
+      ],
+      "text": "### IV-C Differences Across AMA Principle Categories\n\nTable [III](https://ar5iv.labs.arxiv.org/html/2601.13268v1#S4.T3 \"TABLE III ‣ IV-C Differences Across AMA Principle Categories ‣ IV Results ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops\") reports the mean number of iterations by AMA principle category. Some categories converged quickly for both generators. In particular, Principle V and Principle VII tended to require fewer than two iterations on average, which suggests that the initial responses in those areas were easier to rewrite into low risk and ethically acceptable language.\n\nOther categories were more challenging. Principle VIII required the largest number of iterations for both models, with means of 3.2 for DeepSeek R1 and 3.5 for Med PaLM. Principle III was also challenging, requiring 2.8 and 3.1 iterations respectively. These categories often involve either strong welfare implications or legal and social responsibility issues, where the evaluators appear to penalize responses that provide overly confident guidance.\n\nDeepSeek R1 required fewer iterations in seven of the nine categories. Med PaLM showed comparable performance in Principle IV and Principle VII, which is consistent with stronger baseline behavior in privacy related and public health prompts.\n\n| Principle | DR1 | MP | | --- | --- | --- | | I. Competence | 2.3±\\pm1.0 | 2.5±\\pm1.1 | | II. Professionalism | 2.1±\\pm0.9 | 2.2±\\pm0.9 | | III. Legal | 2.8±\\pm1.3 | 3.1±\\pm1.4 | | IV. Privacy | 2.6±\\pm1.2 | 2.9±\\pm1.3 | | V. Education | 1.9±\\pm0.8 | 1.8±\\pm0.8 | | VI. Autonomy | 2.4±\\pm1.1 | 2.6±\\pm1.2 | | VII. Public Health | 1.8±\\pm0.8 | 1.7±\\pm0.8 | | VIII. Patient Welfare | 3.2±\\pm1.4 | 3.5±\\pm1.5 | | IX. Access Equity | 2.7±\\pm1.2 | 2.9±\\pm1.3 | | Overall | 2.34±\\pm1.12 | 2.67±\\pm1.28 |\n\n±\\pm\n\n±\\pm\n\n±\\pm\n\n±\\pm\n\n±\\pm\n\n±\\pm\n\n±\\pm\n\n±\\pm\n\n±\\pm\n\n±\\pm\n\n±\\pm\n\n±\\pm\n\n±\\pm\n\n±\\pm\n\n±\\pm\n\n±\\pm\n\n±\\pm\n\n±\\pm\n\n±\\pm\n\n±\\pm"
+    },
+    {
+      "heading_path": [
+        "Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops",
+        "IV Results",
+        "IV-D Ethics Violation Reduction and Risk Downgrading"
+      ],
+      "text": "### IV-D Ethics Violation Reduction and Risk Downgrading\n\nWe next examine how safety outcomes changed from the initial response to the final refined response. Table [IV](https://ar5iv.labs.arxiv.org/html/2601.13268v1#S4.T4 \"TABLE IV ‣ IV-D Ethics Violation Reduction and Risk Downgrading ‣ IV Results ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops\") summarizes the change in ethics violations across prompt risk categories. The largest improvements appear in emergency prompts. For DeepSeek R1, the mean AMA violation score dropped from 4.8 to 0.6. For Med PaLM, it dropped from 5.1 to 0.8. These are large shifts because emergency prompts often encourage direct instructions, and the refinement loop repeatedly pushes the generator toward safer language such as triage guidance, warnings, and referral to professional care.\n\nDiagnostic and therapeutic prompts also show substantial improvements, with both generators reducing violations from roughly three violations per prompt down to well below one on average. Preventive prompts begin with lower violations, and therefore the absolute change is smaller, although the refined responses still approach near zero violations.\n\n| Category | DR1 | MP | Velocity | | --- | --- | --- | --- | | | Before and after | Before and after | | | Emergency | 4.8 to 0.6 | 5.1 to 0.8 | 1.70 | | Diagnostic | 3.2 to 0.4 | 3.4 to 0.5 | 1.15 | | Therapeutic | 2.9 to 0.3 | 3.1 to 0.4 | 1.06 | | Preventive | 1.8 to 0.1 | 1.6 to 0.1 | 0.65 |\n\nFinally, Table [V](https://ar5iv.labs.arxiv.org/html/2601.13268v1#S4.T5 \"TABLE V ‣ IV-D Ethics Violation Reduction and Risk Downgrading ‣ IV Results ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops\") shows how the SRA 5 distribution shifts from the initial responses to the refined responses. Both generators eliminate Level 4 and Level 5 outputs after refinement. DeepSeek R1 shifts most prompts into Level 1 and Level 2, with 67% ending in Level 1 and 28% ending in Level 2. Med PaLM shows a similar pattern, with 64% at Level 1 and 30% at Level 2. Only a small fraction remains at Level 3 after refinement, which indicates that the loop generally succeeds in removing higher risk content and rewriting the response to be informational or low risk.\n\n| Level | DR1 | | MP | | | --- | --- | --- | --- | --- | | | Initial | Final | Initial | Final | | 1 (Minimal) | 12% | 67% | 10% | 64% | | 2 (Low) | 18% | 28% | 20% | 30% | | 3 (Moderate) | 35% | 5% | 38% | 6% | | 4 (High) | 28% | 0% | 25% | 0% | | 5 (Critical) | 7% | 0% | 7% | 0% |"
+    },
+    {
+      "heading_path": [
+        "Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops",
+        "V Discussion"
+      ],
+      "text": "## V Discussion"
+    },
+    {
+      "heading_path": [
+        "Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops",
+        "V Discussion",
+        "V-A Key Findings"
+      ],
+      "text": "### V-A Key Findings\n\nAcross 900 adversarial prompts, the evaluation loop usually reached the stopping criteria within the five iteration budget, and the final responses showed large reductions in both ethics violations and risk level. DeepSeek R1 converged more often and with fewer rounds than Med PaLM, and it also showed slightly more stable iteration results (its standard deviation was 1.12 compared with 1.28). At the same time, Med PaLM tended to behave better in categories related to privacy and public health, where domain training may help the model avoid obvious confidentiality issues and use more conservative language."
+    },
+    {
+      "heading_path": [
+        "Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops",
+        "V Discussion",
+        "V-B Comparison With Fine Tuning Based Alignment"
+      ],
+      "text": "### V-B Comparison With Fine Tuning Based Alignment\n\nA key practical motivation for this work is to reduce unsafe output without retraining the generator. In MedSafetyBench, fine tuning on safety demonstrations can lower harmful outputs, but it typically requires model specific retraining and repeated updates when policies evolve [[10](https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib29 \"MedSafetyBench: evaluating and improving the medical safety of large language models\")]. In contrast, our approach operates at inference time. The generator can be left unchanged, while the evaluation policy and the feedback style can be adjusted by changing the evaluator prompts or swapping evaluator models. This is useful in settings where safety criteria evolve over time, or where different institutions need slightly different policies. Our risk scale also supports a graded interpretation of safety rather than only safe versus unsafe, which helps when the prompt sits near the boundary between general information and actionable medical advice."
+    },
+    {
+      "heading_path": [
+        "Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops",
+        "V Discussion",
+        "V-C Differences Between the Two Generators"
+      ],
+      "text": "### V-C Differences Between the Two Generators\n\nDeepSeek R1 generally required fewer revision rounds. One plausible explanation is that it responds more consistently to explicit feedback and is more willing to restructure an answer when asked to remove unsafe elements. Med PaLM, in contrast, often starts from a more medically grounded response, but it can require extra rounds to remove borderline diagnostic or treatment suggestions when the prompt strongly invites them. The difference in mean iterations is 0.33. If the same pattern holds at larger scale, then processing 10,000 prompts would require about 3,300 fewer refinement rounds for DeepSeek R1, which translates into lower compute cost and lower latency.\n\nMed PaLM shows relatively stronger behavior in the privacy related principle and performs similarly in public health prompts. This supports the view that medical pretraining can help the model internalize some norms around confidentiality and public communication, even before the refinement loop begins. A practical implication is that hybrid strategies may be promising, where a domain trained generator is combined with a strong feedback mechanism that enforces clear safety thresholds."
+    },
+    {
+      "heading_path": [
+        "Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops",
+        "V Discussion",
+        "V-D Scalability and Practical Use"
+      ],
+      "text": "### V-D Scalability and Practical Use\n\nIn our setup, the pipeline processed about 150 queries per hour using four A100 GPUs, with a mean latency of 8.5 seconds per converged query. This is faster than manual review by a clinician, which often takes minutes per response, but it is still slow compared with a single model call. In practice, this suggests a specific use case. The loop is most suitable as a screening or refinement stage for higher risk interactions, such as user facing medical advice, triage style questions, or prompts that involve sensitive information. Lower risk tasks can still use lighter safeguards, while the full loop can be reserved for cases where the risk is higher.\n\nThe modular design also supports operational updates. If the guidance changes, the evaluation instructions can be updated without retraining the generator. This is one of the main practical advantages over approaches that rely on repeated fine tuning cycles."
+    },
+    {
+      "heading_path": [
+        "Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops",
+        "V Discussion",
+        "V-E Regulatory and Governance Considerations"
+      ],
+      "text": "### V-E Regulatory and Governance Considerations\n\nWe do not claim that this study, by itself, satisfies regulatory requirements. However, the design is compatible with common governance expectations because it makes the evaluation criteria explicit and produces a record of why a response was revised. The AMA principles provide an externally defined ethics reference point [[1](https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib30 \"Principles of medical ethics\")], and the risk scale is aligned with the general structure of medical risk management thinking, including ISO 14971 style hazard reasoning. In practice, these artifacts can support documentation for internal review, auditing, and quality assurance, especially when combined with expert oversight and validation."
+    },
+    {
+      "heading_path": [
+        "Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops",
+        "V Discussion",
+        "V-F Limitations and Future Work"
+      ],
+      "text": "### V-F Limitations and Future Work\n\nThis study has several limitations. First, we only evaluate two generators and two evaluators, so the conclusions may not generalize to other model families. Second, the evaluators are themselves language models, which means their judgments are not ground truth. Validation against clinician annotations is necessary to understand where the evaluators are reliable and where they may miss subtle harms. Third, we evaluate single turn prompts, while many real deployments involve multi turn conversations where earlier context can change risk. Fourth, we do not fully characterize adversarial robustness against targeted prompt injection and tool use scenarios, which is important when LLMs are embedded in larger applications.\n\nFuture work can extend the evaluation to additional generators and evaluators, include clinician labeled safety judgments for calibration, test multi turn settings, and explore ways to reduce latency while keeping the same safety thresholds. Subspecialty specific criteria, such as oncology or pediatrics, are also an important next step because risk and acceptable guidance differ by clinical context."
+    },
+    {
+      "heading_path": [
+        "Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops",
+        "VI Conclusion"
+      ],
+      "text": "## VI Conclusion\n\nThis paper examined an inference time multi agent evaluation loop for improving the safety of medical LLM outputs through repeated assessment and revision. Using 900 adversarial prompts from MedSafetyBench, the refinement process reduced AMA ethics violations by 89% and downgraded risk in 92% of cases, with convergence in 94.2% of prompts within five iterations. DeepSeek R1 typically converged in fewer rounds and showed slightly more stable iteration behavior, while Med PaLM performed comparatively well in privacy related prompts.\n\nA practical contribution of this work is that it does not rely on retraining the generator. Instead, the generator is refined through structured feedback produced at inference time, which makes it easier to update evaluation criteria when policies change. At the same time, this study should be viewed as an initial step rather than a deployment ready validation. The evaluators are language models, and their judgments need calibration against clinician annotations and real clinical workflows.\n\nFuture work can broaden the set of generators and evaluators, validate safety judgments with medical experts, and extend the evaluation to multi turn settings where risk depends on longer context. It will also be important to test robustness against prompt injection and other adversarial strategies that arise in tool integrated applications. More specialized evaluation criteria for clinical subdomains, such as pediatrics or oncology, are another clear direction."
+    },
+    {
+      "heading_path": [
+        "Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops",
+        "References"
+      ],
+      "text": "## References\n\n* [1] American Medical Association (2001) Principles of medical ethics. Note: Accessed: 2024-07-08 External Links: [Link](https://code-medical-ethics.ama-assn.org/principles) Cited by: [§I](https://ar5iv.labs.arxiv.org/html/2601.13268v1#S1.p6.1 \"I Introduction ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops\"), [§III-B1](https://ar5iv.labs.arxiv.org/html/2601.13268v1#S3.SS2.SSS1.p1.1 \"III-B1 AMA 9 Ethics Scoring ‣ III-B Safety Evaluation Criteria ‣ III Methodology ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops\"), [§V-E](https://ar5iv.labs.arxiv.org/html/2601.13268v1#S5.SS5.p1.1 \"V-E Regulatory and Governance Considerations ‣ V Discussion ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops\"). * [2] S. Aydin et al. (2024) Large language models in patient education: a scoping review. Frontiers in Medicine. External Links: [Document](https://dx.doi.org/10.3389/fmed.2024.1477898) Cited by: [§I](https://ar5iv.labs.arxiv.org/html/2601.13268v1#S1.p1.1 \"I Introduction ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops\"). * [3] Y. Bai, S. Kadavath, S. Kundu, A. Askell, J. Kernion, A. Jones, et al. (2022) Constitutional ai: harmlessness from ai feedback. arXiv preprint arXiv:2212.08073. Cited by: [§I](https://ar5iv.labs.arxiv.org/html/2601.13268v1#S1.p3.1 \"I Introduction ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops\"), [§II-B](https://ar5iv.labs.arxiv.org/html/2601.13268v1#S2.SS2.p1.1 \"II-B LLM Safety and Alignment ‣ II Related Work ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops\"). * [4] A. A. Birkun et al. (2023) Large language model (llm)-powered chatbots fail to reliably guide cardiopulmonary resuscitation. Resuscitation. Cited by: [§I](https://ar5iv.labs.arxiv.org/html/2601.13268v1#S1.p2.1 \"I Introduction ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops\"). * [5] A. A. Birkun et al. (2024) Large language model-based chatbot as a source of advice on first aid in heart attack. American Journal of Emergency Medicine. Cited by: [§I](https://ar5iv.labs.arxiv.org/html/2601.13268v1#S1.p2.1 \"I Introduction ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops\"). * [6] K. Chen, X. Li, T. Yang, H. Wang, W. Dong, and Y. Gao (2025) Mdteamgpt: a self-evolving llm-based multi-agent framework for multi-disciplinary team medical consultation. arXiv preprint arXiv:2503.13856. Cited by: [§I](https://ar5iv.labs.arxiv.org/html/2601.13268v1#S1.p5.1 \"I Introduction ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops\"), [§II-C](https://ar5iv.labs.arxiv.org/html/2601.13268v1#S2.SS3.p2.1 \"II-C Multi Agent Systems ‣ II Related Work ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops\"). * [7] Z. Chen, A. Hernández Cano, A. Romanou, A. Bonnet, K. Matoba, F. Salvi, M. Pagliardini, S. Fan, A. Köpf, A. Mohtashami, et al. (2023) MEDITRON-70b: scaling medical pretraining for large language models. arXiv preprint arXiv:2311.16079. Cited by: [§II-A](https://ar5iv.labs.arxiv.org/html/2601.13268v1#S2.SS1.p2.1 \"II-A Medical Language Models ‣ II Related Work ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops\"). * [8] Y. Du, Z. Wang, X. Li, T. Gao, X. Zhang, and Z. Liu (2023) Improving factual correctness in llms through multi-agent debate. arXiv preprint arXiv:2305.14325. Cited by: [§I](https://ar5iv.labs.arxiv.org/html/2601.13268v1#S1.p5.1 \"I Introduction ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops\"), [§II-C](https://ar5iv.labs.arxiv.org/html/2601.13268v1#S2.SS3.p1.1 \"II-C Multi Agent Systems ‣ II Related Work ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops\"). * [9] Y. Gu, R. Tinn, H. Cheng, M. Lucas, N. Usuyama, X. Liu, T. Naumann, J. Gao, and H. Poon (2021) Domain-specific language model pretraining for biomedical natural language processing. ACM Transactions on Computing for Healthcare (HEALTH) 3 (1), pp. 1–23. Cited by: [§I](https://ar5iv.labs.arxiv.org/html/2601.13268v1#S1.p1.1 \"I Introduction ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops\"). * [10] T. Han, A. Kumar, C. Agarwal, and H. Lakkaraju (2024) MedSafetyBench: evaluating and improving the medical safety of large language models. arXiv preprint arXiv:2406.12345. Cited by: [§I](https://ar5iv.labs.arxiv.org/html/2601.13268v1#S1.p10.1 \"I Introduction ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops\"), [§I](https://ar5iv.labs.arxiv.org/html/2601.13268v1#S1.p2.1 \"I Introduction ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops\"), [§I](https://ar5iv.labs.arxiv.org/html/2601.13268v1#S1.p3.1 \"I Introduction ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops\"), [§I](https://ar5iv.labs.arxiv.org/html/2601.13268v1#S1.p4.1 \"I Introduction ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops\"), [§II-B](https://ar5iv.labs.arxiv.org/html/2601.13268v1#S2.SS2.p1.1 \"II-B LLM Safety and Alignment ‣ II Related Work ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops\"), [§III-D](https://ar5iv.labs.arxiv.org/html/2601.13268v1#S3.SS4.p1.1 \"III-D Dataset and Metrics ‣ III Methodology ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops\"), [§V-B](https://ar5iv.labs.arxiv.org/html/2601.13268v1#S5.SS2.p1.1 \"V-B Comparison With Fine Tuning Based Alignment ‣ V Discussion ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops\"). * [11] J. Lee, W. Yoon, S. Kim, D. Kim, S. Kim, C. H. So, and J. Kang (2020) BioBERT: a pre-trained biomedical language representation model for biomedical text mining. Bioinformatics 36 (4), pp. 1234–1240. External Links: [Document](https://dx.doi.org/10.1093/bioinformatics/btz682) Cited by: [§II-A](https://ar5iv.labs.arxiv.org/html/2601.13268v1#S2.SS1.p1.1 \"II-A Medical Language Models ‣ II Related Work ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops\"). * [12] Y. Liao, S. Jiang, Z. Chen, Y. Wang, and Y. Wang (2024-11) MedCare: advancing medical LLMs through decoupling clinical alignment and knowledge aggregation. In Findings of the Association for Computational Linguistics: EMNLP 2024, Y. Al-Onaizan, M. Bansal, and Y. Chen (Eds.), Miami, Florida, USA, pp. 10562–10581. External Links: [Link](https://aclanthology.org/2024.findings-emnlp.619/), [Document](https://dx.doi.org/10.18653/v1/2024.findings-emnlp.619) Cited by: [§I](https://ar5iv.labs.arxiv.org/html/2601.13268v1#S1.p1.1 \"I Introduction ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops\"). * [13] L. Liu et al. (2024) A survey on medical large language models. arXiv preprint arXiv:2406.03712. Cited by: [§I](https://ar5iv.labs.arxiv.org/html/2601.13268v1#S1.p1.1 \"I Introduction ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops\"). * [14] Y. Liu et al. (2023) Prompt injection attacks against llm-integrated applications. arXiv preprint arXiv:2306.05499. Cited by: [§I](https://ar5iv.labs.arxiv.org/html/2601.13268v1#S1.p2.1 \"I Introduction ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops\"), [§II-B](https://ar5iv.labs.arxiv.org/html/2601.13268v1#S2.SS2.p2.1 \"II-B LLM Safety and Alignment ‣ II Related Work ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops\"). * [15] D. X. Long, D. N. Yen, A. T. Luu, K. Kawaguchi, M. Kan, and N. F. Chen (2024-11) Multi-expert prompting improves reliability, safety and usefulness of large language models. In Proceedings of the 2024 Conference on Empirical Methods in Natural Language Processing, Y. Al-Onaizan, M. Bansal, and Y. Chen (Eds.), Miami, Florida, USA, pp. 20370–20401. External Links: [Link](https://aclanthology.org/2024.emnlp-main.1135/), [Document](https://dx.doi.org/10.18653/v1/2024.emnlp-main.1135) Cited by: [§I](https://ar5iv.labs.arxiv.org/html/2601.13268v1#S1.p5.1 \"I Introduction ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops\"). * [16] Q. Lu, D. Dou, and T. Nguyen (2022) ClinicalT5: a generative language model for clinical text. In Findings of the Association for Computational Linguistics: EMNLP 2022, pp. 5436–5443. External Links: [Document](https://dx.doi.org/10.18653/v1/2022.findings-emnlp.398) Cited by: [§II-A](https://ar5iv.labs.arxiv.org/html/2601.13268v1#S2.SS1.p1.1 \"II-A Medical Language Models ‣ II Related Work ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops\"). * [17] R. Luo, L. Sun, Y. Xia, T. Qin, S. Zhang, H. Poon, and T. Liu (2022) BioGPT: generative pre-trained transformer for biomedical text generation and mining. Briefings in bioinformatics 23 (6), pp. bbac409. Cited by: [§I](https://ar5iv.labs.arxiv.org/html/2601.13268v1#S1.p1.1 \"I Introduction ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops\"). * [18] A. Madaan, N. Tandon, P. Gupta, S. Hallinan, L. Gao, S. Wiegreffe, U. Alon, N. Dziri, S. Prabhumoye, Y. Yang, et al. (2023) Self-refine: iterative refinement with self-feedback. arXiv preprint arXiv:2303.17651. Cited by: [§II-C](https://ar5iv.labs.arxiv.org/html/2601.13268v1#S2.SS3.p1.1 \"II-C Multi Agent Systems ‣ II Related Work ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops\"). * [19] R. Miotto, F. Wang, and X. Jiang (2023) Medical ai safety: what happens when prediction fails?. NPJ Digital Medicine 6 (1), pp. 1–4. Cited by: [§I](https://ar5iv.labs.arxiv.org/html/2601.13268v1#S1.p2.1 \"I Introduction ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops\"), [§II-A](https://ar5iv.labs.arxiv.org/html/2601.13268v1#S2.SS1.p2.1 \"II-A Medical Language Models ‣ II Related Work ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops\"). * [20] S. Mukherjee, P. Gamble, M. S. Ausin, N. Kant, K. Aggarwal, N. Manjunath, D. Datta, Z. Liu, J. Ding, S. Busacca, et al. (2024) Polaris: a safety-focused llm constellation architecture for healthcare. arXiv preprint arXiv:2403.13313. Cited by: [§I](https://ar5iv.labs.arxiv.org/html/2601.13268v1#S1.p5.1 \"I Introduction ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops\"), [§II-C](https://ar5iv.labs.arxiv.org/html/2601.13268v1#S2.SS3.p2.1 \"II-C Multi Agent Systems ‣ II Related Work ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops\"). * [21] K. Nassiri and M. A. Akhloufi (2024) Recent advances in large language models for healthcare. BioMedInformatics 4 (2), pp. 1097–1143. Cited by: [§II-A](https://ar5iv.labs.arxiv.org/html/2601.13268v1#S2.SS1.p2.1 \"II-A Medical Language Models ‣ II Related Work ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops\"). * [22] L. Onyekwelu-Udoka, M. S. Islam, and M. S. Hasan (2025) Emotion detection in speech using lightweight and transformer-based models: a comparative and ablation study. arXiv preprint arXiv:2511.00402. External Links: [Link](https://arxiv.org/abs/2511.00402) Cited by: [§I](https://ar5iv.labs.arxiv.org/html/2601.13268v1#S1.p5.1 \"I Introduction ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops\"). * [23] L. Ouyang, J. Wu, X. Jiang, D. Almeida, C. Wainwright, P. Mishkin, et al. (2022) Training language models to follow instructions with human feedback. Advances in Neural Information Processing Systems. Note: arXiv:2203.02155 Cited by: [§I](https://ar5iv.labs.arxiv.org/html/2601.13268v1#S1.p3.1 \"I Introduction ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops\"), [§II-B](https://ar5iv.labs.arxiv.org/html/2601.13268v1#S2.SS2.p1.1 \"II-B LLM Safety and Alignment ‣ II Related Work ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops\"). * [24] OWASP Foundation (2024) OWASP top 10 for large language model applications. Note: <https://owasp.org/www-project-top-10-for-large-language-model-applications/>Accessed: 2025-12-25 Cited by: [§I](https://ar5iv.labs.arxiv.org/html/2601.13268v1#S1.p2.1 \"I Introduction ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops\"), [§II-B](https://ar5iv.labs.arxiv.org/html/2601.13268v1#S2.SS2.p2.1 \"II-B LLM Safety and Alignment ‣ II Related Work ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops\"). * [25] N. Shinn, F. Cassano, E. Berman, A. Gopinath, K. Narasimhan, and S. Yao (2023) Reflexion: language agents with verbal reinforcement learning. arXiv preprint arXiv:2303.11366. Cited by: [§II-C](https://ar5iv.labs.arxiv.org/html/2601.13268v1#S2.SS3.p1.1 \"II-C Multi Agent Systems ‣ II Related Work ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops\"). * [26] K. Singhal, S. Azizi, T. Tu, S. S. Mahdavi, J. Wei, H. W. Chung, N. Scales, A. Tanwani, A. Cole, J. Lee, et al. (2023) Large language models encode clinical knowledge. Nature 620 (7972), pp. 172–180. Cited by: [§I](https://ar5iv.labs.arxiv.org/html/2601.13268v1#S1.p1.1 \"I Introduction ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops\"), [§II-A](https://ar5iv.labs.arxiv.org/html/2601.13268v1#S2.SS1.p2.1 \"II-A Medical Language Models ‣ II Related Work ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops\"). * [27] Y. Wang, X. Ma, and W. Chen (2024-11) Augmenting black-box LLMs with medical textbooks for biomedical question answering. In Findings of the Association for Computational Linguistics: EMNLP 2024, Y. Al-Onaizan, M. Bansal, and Y. Chen (Eds.), Miami, Florida, USA, pp. 1754–1770. External Links: [Link](https://aclanthology.org/2024.findings-emnlp.95/), [Document](https://dx.doi.org/10.18653/v1/2024.findings-emnlp.95) Cited by: [§I](https://ar5iv.labs.arxiv.org/html/2601.13268v1#S1.p1.1 \"I Introduction ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops\"). * [28] C. Y. K. Williams et al. (2024) Evaluating large language models for clinical recommendations from emergency department notes. Nature Communications. Note: Article: s41467-024-52415-1 Cited by: [§I](https://ar5iv.labs.arxiv.org/html/2601.13268v1#S1.p1.1 \"I Introduction ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops\"). * [29] X. Yang, A. Chen, N. PourNejatian, H. C. Shin, K. E. Smith, C. Parisien, C. Compas, C. Martin, A. B. Costa, M. G. Flores, et al. (2022) A large language model for electronic health records. npj Digital Medicine 5, pp. 194. External Links: [Document](https://dx.doi.org/10.1038/s41746-022-00742-2) Cited by: [§II-A](https://ar5iv.labs.arxiv.org/html/2601.13268v1#S2.SS1.p1.1 \"II-A Medical Language Models ‣ II Related Work ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops\"). * [30] S. Yao, J. Zhao, D. Yu, I. Zhao, T. Khot, A. Sabharwal, A. Bosselut, and Y. Choi (2023) Tree of thoughts: deliberate problem solving with large language models. arXiv preprint arXiv:2305.10601. Cited by: [§I](https://ar5iv.labs.arxiv.org/html/2601.13268v1#S1.p5.1 \"I Introduction ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops\"), [§II-C](https://ar5iv.labs.arxiv.org/html/2601.13268v1#S2.SS3.p1.1 \"II-C Multi Agent Systems ‣ II Related Work ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops\"). * [31] E. Yu, J. Li, M. Liao, S. Wang, G. Zuchen, F. Mi, and L. Hong (2024-11) CoSafe: evaluating large language model safety in multi-turn dialogue coreference. In Proceedings of the 2024 Conference on Empirical Methods in Natural Language Processing, Y. Al-Onaizan, M. Bansal, and Y. Chen (Eds.), Miami, Florida, USA, pp. 17494–17508. External Links: [Link](https://aclanthology.org/2024.emnlp-main.968/), [Document](https://dx.doi.org/10.18653/v1/2024.emnlp-main.968) Cited by: [§I](https://ar5iv.labs.arxiv.org/html/2601.13268v1#S1.p1.1 \"I Introduction ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops\"). * [32] Y. Zhao, H. Wang, Y. Liu, W. Suhuang, X. Wu, and Y. Zheng (2024-11) Can LLMs replace clinical doctors? exploring bias in disease diagnosis by large language models. In Findings of the Association for Computational Linguistics: EMNLP 2024, Y. Al-Onaizan, M. Bansal, and Y. Chen (Eds.), Miami, Florida, USA, pp. 13914–13935. External Links: [Link](https://aclanthology.org/2024.findings-emnlp.814/), [Document](https://dx.doi.org/10.18653/v1/2024.findings-emnlp.814) Cited by: [§I](https://ar5iv.labs.arxiv.org/html/2601.13268v1#S1.p2.1 \"I Introduction ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops\")."
+    }
+  ]
+}

@@ -1,0 +1,1289 @@
+<!DOCTYPE html>
+
+<!-- saved from url=(0046)https://ar5iv.labs.arxiv.org/html/2601.13268v1 -->
+<html data-theme="light" lang="en"><head><meta content="text/html; charset=utf-8" http-equiv="Content-Type"/>
+<title>[2601.13268] Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops</title><meta content="Large Language Models (LLMs) are increasingly applied in healthcare, yet ensuring their ethical integrity and safety compliance remains a major barrier to clinical deployment. This work introduces a multi-agent refinem…" property="og:description"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<meta content="summary" name="twitter:card"/>
+<meta content="Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops" name="twitter:title"/>
+<meta content="https://ar5iv.labs.arxiv.org/assets/ar5iv_card.png" name="twitter:image:src"/>
+<meta content="ar5iv logo" name="twitter:image:alt"/>
+<meta content="Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops" property="og:title"/>
+<meta content="ar5iv" property="og:site_name"/>
+<meta content="https://ar5iv.labs.arxiv.org/assets/ar5iv_card.png" property="og:image"/>
+<meta content="article" property="og:type"/>
+<meta content="https://ar5iv.labs.arxiv.org/html/2601.13268" property="og:url"/>
+<link href="https://ar5iv.labs.arxiv.org/html/2601.13268" rel="canonical" target="_blank"/>
+<!--Generated on Thu Feb  5 18:40:50 2026 by LaTeXML (version 0.8.8) http://dlmf.nist.gov/LaTeXML/.-->
+<meta content="width=device-width, initial-scale=1, shrink-to-fit=no" name="viewport"/>
+<script>
+  function detectColorScheme(){
+    var theme="light";
+    var current_theme = localStorage.getItem("ar5iv_theme");
+    if(current_theme){
+      if(current_theme == "dark"){
+        theme = "dark";
+      } }
+    else if(!window.matchMedia) { return false; }
+    else if(window.matchMedia("(prefers-color-scheme: dark)").matches) {
+      theme = "dark"; }
+    if (theme=="dark") {
+      document.documentElement.setAttribute("data-theme", "dark");
+    } else {
+      document.documentElement.setAttribute("data-theme", "light"); } }
+
+  detectColorScheme();
+
+  function toggleColorScheme(){
+    var current_theme = localStorage.getItem("ar5iv_theme");
+    if (current_theme) {
+      if (current_theme == "light") {
+        localStorage.setItem("ar5iv_theme", "dark"); }
+      else {
+        localStorage.setItem("ar5iv_theme", "light"); } }
+    else {
+        localStorage.setItem("ar5iv_theme", "dark"); }
+    detectColorScheme(); }
+</script>
+<link href="./[2601.13268] Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops_files/ar5iv-fonts.0.8.4.css" media="all" rel="stylesheet"/><link href="./[2601.13268] Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops_files/ar5iv.0.8.4.css" media="all" rel="stylesheet"/><link href="./[2601.13268] Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops_files/ar5iv-site.0.2.2.css" media="all" rel="stylesheet"/>
+<meta content="extension" property="gosuslugi.plugin.extension.content"/></head>
+<body>
+<div class="ltx_page_main">
+<div class="ltx_page_content">
+<article class="ltx_document ltx_authors_1line">
+<h1 class="ltx_title ltx_title_document">Повышение безопасности и надежности
+медицинского ИИ с помощью циклов оценки многими агентами</h1>
+<div class="ltx_authors">
+<span class="ltx_creator ltx_role_author">
+<span class="ltx_personname">
+Зайнаб Гхаффур
+</span></span>
+<span class="ltx_author_before">  </span><span class="ltx_creator ltx_role_author">
+<span class="ltx_personname">Md Shafiqul Islam
+</span></span>
+<span class="ltx_author_before">  </span><span class="ltx_creator ltx_role_author">
+<span class="ltx_personname">Кушик Ховладэр
+</span></span>
+<span class="ltx_author_before">  </span><span class="ltx_creator ltx_role_author">
+<span class="ltx_personname">Мд Расел Хондокар
+</span></span>
+<span class="ltx_author_before">  </span><span class="ltx_creator ltx_role_author">
+<span class="ltx_personname">Танусри Бхаттачарджи
+</span></span>
+<span class="ltx_author_before">  </span><span class="ltx_creator ltx_role_author">
+<span class="ltx_personname">Сайантан Чакраборти
+</span></span>
+<span class="ltx_author_before">  </span><span class="ltx_creator ltx_role_author">
+<span class="ltx_personname">Adrito Roy
+</span></span>
+<span class="ltx_author_before">  </span><span class="ltx_creator ltx_role_author">
+<span class="ltx_personname">Ушаши Бхаттачарjee
+</span></span>
+<span class="ltx_author_before">  </span><span class="ltx_creator ltx_role_author">
+<span class="ltx_personname">Tirtho Roy
+</span></span>
+</div>
+<div class="ltx_abstract" id="abstract1">
+<h6 class="ltx_title ltx_title_abstract">Аннотация</h6>
+<p class="ltx_p">Большие языковые модели (LLMs) все чаще применяются в здравоохранении, однако обеспечение их этической целостности и соответствия требованиям безопасности по-прежнему остается серьезным барьером для клинического развертывания. В данной работе представлен многоагентный фреймворк уточнения, предназначенный для повышения безопасности и надежности медицинских LLM за счет структурированного, итеративного согласования. Наша система объединяет две генеративные модели — DeepSeek R1 и Med-PaLM — с двумя агентами оценки, LLaMA 3.1 и Phi-4, которые оценивают ответы, используя Принципы медицинской этики Американской медицинской ассоциации (AMA) и протокол Сейфити-оценки риска в пяти уровнях (SRA-5). Мы оцениваем качество на 900 клинически разнообразных запросах по девяти этическим областям, измеряя эффективность сходимости, снижение этических нарушений и поведение, связанное с рисками, характерными для конкретной области. Результаты показывают, что DeepSeek R1 обеспечивает более быструю сходимость (среднее 2.34 против 2.67 итераций), тогда как Med-PaLM демонстрирует более высокое качество работы в сценариях, чувствительных к конфиденциальности. Итерационный многоагентный цикл привел к снижению этических нарушений на 89% и к частоте понижения уровня риска на 92%, подчеркивая эффективность нашего подхода. Это исследование представляет масштабируемую, согласованную с требованиями регуляторов и экономически эффективную парадигму управления безопасностью медицинского ИИ.</p>
+</div>
+<section class="ltx_section" id="S1">
+<h2 class="ltx_title ltx_title_section">
+<span class="ltx_tag ltx_tag_section">I </span><span class="ltx_text ltx_font_smallcaps" id="S1.1.1">Введение</span>
+</h2>
+<div class="ltx_para ltx_noindent" id="S1.p1">
+<p class="ltx_p" id="S1.p1.1">Большие языковые модели (LLMs) теперь проходят испытания в самых разных биомедицинских и клинических условиях. Их используют для черновой подготовки клинических заметок, поддержки принятия решений при триаже и подготовки объяснений для пациентов <cite class="ltx_cite ltx_citemacro_cite">[<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib7" title="Augmenting black-box LLMs with medical textbooks for biomedical question answering">27</a>, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib8" title="MedCare: advancing medical LLMs through decoupling clinical alignment and knowledge aggregation">12</a>, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib36" title="A survey on medical large language models">13</a>]</cite>. Растущий объем работ указывает, что эти системы могут быть полезны, когда задача в основном носит лингвистический характер, например при обучении пациентов или при адаптации объяснений под разные уровни медицинской грамотности. Однако по мере роста ставок и начала того, что результат начинает напоминать медицинский совет, их эффективность становится более хрупкой <cite class="ltx_cite ltx_citemacro_cite">[<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib38" title="Large language models in patient education: a scoping review">2</a>, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib37" title="Evaluating large language models for clinical recommendations from emergency department notes">28</a>]</cite>. Специализированные модели предметной области, такие как Med-PaLM <cite class="ltx_cite ltx_citemacro_cite">[<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib17" title="Large language models encode clinical knowledge">26</a>]</cite>, BioGPT <cite class="ltx_cite ltx_citemacro_cite">[<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib16" title="BioGPT: generative pre-trained transformer for biomedical text generation and mining">17</a>]</cite> и PubMedBERT <cite class="ltx_cite ltx_citemacro_cite">[<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib19" title="Domain-specific language model pretraining for biomedical natural language processing">9</a>]</cite>, остаются перспективными для медицинских приложений, но специализированное обучение не устраняет необходимости в тщательных мерах безопасности <cite class="ltx_cite ltx_citemacro_cite">[<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib9" title="CoSafe: evaluating large language model safety in multi-turn dialogue coreference">31</a>]</cite>.</p>
+</div>
+<div class="ltx_para ltx_noindent" id="S1.p2">
+<p class="ltx_p" id="S1.p2.1">Практическая проблема заключается в том, что точность по бенчмаркам не надежно предсказывает реальную безопасность в применении. Медицинские LLM могут генерировать правдоподобные, но неверные утверждения, пропускать ключевые шаги в сценариях, где требуется действовать в критические по времени моменты, или выдавать ответы, вступающие в противоречие с профессиональными нормами <cite class="ltx_cite ltx_citemacro_cite">[<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib21" title="Medical ai safety: what happens when prediction fails?">19</a>, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib5" title="Can LLMs replace clinical doctors? exploring bias in disease diagnosis by large language models">32</a>]</cite>. Эмпирические исследования сообщают о сбоях в контекстах первой помощи и экстренных ситуаций, где пропуски или вводящая в заблуждение формулировка могут быть вредными даже тогда, когда модель звучит уверенно <cite class="ltx_cite ltx_citemacro_cite">[<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib39" title="Large language model-based chatbot as a source of advice on first aid in heart attack">5</a>, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib40" title="Large language model (llm)-powered chatbots fail to reliably guide cardiopulmonary resuscitation">4</a>]</cite>. Эти системы также можно заставить повторять или распространять дезинформацию, особенно когда в запросе содержатся ложные утверждения или запрос написан так, чтобы ввести модель в заблуждение. <cite class="ltx_cite ltx_citemacro_cite">[<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib29" title="MedSafetyBench: evaluating and improving the medical safety of large language models">10</a>]</cite>. Запросы могут непреднамеренно включать чувствительные сведения, выходные данные могут раскрывать защищенную медицинскую информацию (PHI), а атаки с внедрением в запрос (prompt injection) могут приводить к небезопасному или не соответствующему требованиям поведению в приложениях, которые интегрируют LLM <cite class="ltx_cite ltx_citemacro_cite">[<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib43" title="Prompt injection attacks against llm-integrated applications">14</a>, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib44" title="OWASP top 10 for large language model applications">24</a>]</cite>.</p>
+</div>
+<div class="ltx_para ltx_noindent" id="S1.p3">
+<p class="ltx_p" id="S1.p3.1">Существующие стратегии снижения рисков помогают, но не дают полного ответа. Тонкая настройка, ограниченное декодирование и настройка инструкций с учетом обратной связи от человека могут в среднем уменьшить вредоносные генерации <cite class="ltx_cite ltx_citemacro_cite">[<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib29" title="MedSafetyBench: evaluating and improving the medical safety of large language models">10</a>, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib41" title="Training language models to follow instructions with human feedback">23</a>]</cite>. Смежные подходы к согласованию, такие как Constitutional AI, показывают, как надзор, направляемый принципами, может улучшать безопасное поведение без необходимости прямого ручного маркирования каждого вредоносного случая <cite class="ltx_cite ltx_citemacro_cite">[<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib42" title="Constitutional ai: harmlessness from ai feedback">3</a>]</cite>. Однако в медицинских сценариях требования часто зависят от контекста. То же самое руководство может быть приемлемым в среде с низким риском для обучения, но неподходящим, когда оно напоминает рекомендации по диагностике или лечению. Это затрудняет поддержание статических защитных ограждений со временем, и повторяющиеся циклы переобучения не всегда реалистичны после развертывания систем.</p>
+</div>
+<div class="ltx_para ltx_noindent" id="S1.p4">
+<p class="ltx_p" id="S1.p4.1">Han et al. <cite class="ltx_cite ltx_citemacro_cite">[<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib29" title="MedSafetyBench: evaluating and improving the medical safety of large language models">10</a>]</cite> introduced MedSafetyBench и показали, что safety fine tuning может уменьшить вредоносные выходные данные. В то же время этот подход обычно требует вычислительно дорогого переобучения для каждой модели. Он также порождает ограничения по безопасности, которые трудно обновлять после развертывания, он не поддерживает естественным образом итеративное пересмотрение и часто сводит тонкие оценки безопасности к грубым меткам. Эти ограничения важны в пограничных ситуациях, где риск зависит от контекста.</p>
+</div>
+<div class="ltx_para ltx_noindent" id="S1.p5">
+<p class="ltx_p" id="S1.p5.1">Мультиагентные методы предлагают другое направление. Одна модель генерирует ответ, тогда как другие агенты критикуют и оценивают его, а затем дают обратную связь, чтобы ответ можно было пересматривать через многократные раунды <cite class="ltx_cite ltx_citemacro_cite">[<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib24" title="Tree of thoughts: deliberate problem solving with large language models">30</a>, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib25" title="Improving factual correctness in llms through multi-agent debate">8</a>, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib6" title="Multi-expert prompting improves reliability, safety and usefulness of large language models">15</a>]</cite>. Этот подход переносит проверку безопасности на момент вывода и позволяет изменять политику оценки без перенавчивания генератора. Однако систематические данные все еще ограничены по тому, как разные медицинские LLM ведут себя, когда их многократно побуждают пересматривать ответ ради безопасности. Например, пока неясно, пересматривают ли модели, оптимизированные под рассуждения, более последовательно, чем модели, обученные по предметной области, или же некоторые этические области, такие как конфиденциальность, остаются труднее стабилизировать <cite class="ltx_cite ltx_citemacro_cite">[<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib1" title="Mdteamgpt: a self-evolving llm-based multi-agent framework for multi-disciplinary team medical consultation">6</a>, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib3" title="Polaris: a safety-focused llm constellation architecture for healthcare">20</a>, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib18" title="Emotion detection in speech using lightweight and transformer-based models: a comparative and ablation study">22</a>]</cite>.</p>
+</div>
+<div class="ltx_para ltx_noindent" id="S1.p6">
+<p class="ltx_p" id="S1.p6.1">В этой работе мы реализуем контур оценки многоагентного вывода во время выполнения, который уточняет результаты медицинских LLM с помощью структурированной обратной связи вместо дополнительного обучения. Два генератора, DeepSeek R1 и Med-PaLM, объединяются с двумя агентами-оценщиками, которые оценивают ответы на соответствие Принципам медицинской этики Американской медицинской ассоциации (AMA) <cite class="ltx_cite ltx_citemacro_cite">[<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib30" title="Principles of medical ethics">1</a>]</cite> и пятиуровневой оценке рисков безопасности (SRA-5). Мы сосредоточены на трех вопросах:</p>
+</div>
+<div class="ltx_para ltx_noindent" id="S1.p7">
+<p class="ltx_p" id="S1.p7.1">В1: Может ли итерационный цикл уточнения на основе агента уменьшить небезопасные или этически проблемные результаты без дорогостоящей дополнительной настройки (fine tuning)?</p>
+</div>
+<div class="ltx_para ltx_noindent" id="S1.p8">
+<p class="ltx_p" id="S1.p8.1">Вопрос 2: Можно ли перевести этические стандарты AMA в практический процесс оценки и пересмотра??</p>
+</div>
+<div class="ltx_para ltx_noindent" id="S1.p9">
+<p class="ltx_p" id="S1.p9.1">RQ3: Чем отличаются генераторы, оптимизированные для рассуждений, и генераторы, обученные на конкретной предметной области, по поведению сходимости при итеративной обратной связи по безопасности?</p>
+</div>
+<div class="ltx_para ltx_noindent" id="S1.p10">
+<p class="ltx_p" id="S1.p10.1">Мы оцениваем подход на 900 противодействующих запросах из MedSafetyBench, сравнивая DeepSeek R1 и Med-PaLM с точки зрения сходимости, эффективности итераций, снижения этических нарушений и поведения по понижению уровня риска <cite class="ltx_cite ltx_citemacro_cite">[<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib29" title="MedSafetyBench: evaluating and improving the medical safety of large language models">10</a>]</cite>.</p>
+</div>
+</section>
+<section class="ltx_section" id="S2">
+<h2 class="ltx_title ltx_title_section">
+<span class="ltx_tag ltx_tag_section">II </span><span class="ltx_text ltx_font_smallcaps" id="S2.1.1">Сопутствующие работы</span>
+</h2>
+<section class="ltx_subsection" id="S2.SS1">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection"><span class="ltx_text" id="S2.SS1.5.1.1">II-A</span> </span><span class="ltx_text ltx_font_italic" id="S2.SS1.6.2">Медицинские языковые модели</span>
+</h3>
+<div class="ltx_para ltx_noindent" id="S2.SS1.p1">
+<p class="ltx_p" id="S2.SS1.p1.1">Многие исследования адаптируют архитектуры Transformer для биомедицинского и клинического текста, выполняя предварительное обучение на корпусах по предметной области, а затем дообучение для последующих задач. Ранние работы, такие как BioBERT, показали, что продолжение дообучения в стиле BERT на PubMed и PMC улучшает показатели выполнения задач биомедицинского текстового майнинга <cite class="ltx_cite ltx_citemacro_cite">[<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib45" title="BioBERT: a pre-trained biomedical language representation model for biomedical text mining">11</a>]</cite>. Похожие усилия были направлены на обучение и масштабирование моделей на клинических заметках и повествованиях в электронных медицинских записях, где ограничения доступа и конфиденциальности формируют данные и практики их распространения. Например, GatorTron обучалась с нуля на очень большом корпусе, включающем обезличенные клинические заметки, и продемонстрировала улучшения по нескольким задачам клинического NLP <cite class="ltx_cite ltx_citemacro_cite">[<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib46" title="A large language model for electronic health records">29</a>]</cite>. Параллельно разрабатывались генеративные клинические модели для поддержки задач «текст-к-тексту», таких как суммаризация и генерация заметок, включая ClinicalT5 <cite class="ltx_cite ltx_citemacro_cite">[<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib47" title="ClinicalT5: a generative language model for clinical text">16</a>]</cite>.</p>
+</div>
+<div class="ltx_para ltx_noindent" id="S2.SS1.p2">
+<p class="ltx_p" id="S2.SS1.p2.1">Недавние медицинские LLM расширяют эти идеи на следование инструкциям и ответы на вопросы. Med-PaLM продемонстрировала сильные результаты в медицинском вопросно-ответном и клинико-логическом тестировании, поддерживая точку зрения, что масштаб плюс медицинское наблюдение могут давать полезное поведение <cite class="ltx_cite ltx_citemacro_cite">[<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib17" title="Large language models encode clinical knowledge">26</a>]</cite>. Открытые по весам медицинские модели, такие как Meditron, также стремятся расширить доступ, продолжая предварительное обучение на отобранных медицинских корпусах, а затем применяя настройку под инструкции для медицинских задач <cite class="ltx_cite ltx_citemacro_cite">[<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib49" title="MEDITRON-70b: scaling medical pretraining for large language models">7</a>]</cite>. Обзоры обобщают, как эти модели оценивают, и где их качество чаще всего дает сбои, особенно когда контекст смещается от вопросов в стиле бенчмарков к интерактивному использованию или сценариям, чувствительным к безопасности <cite class="ltx_cite ltx_citemacro_cite">[<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib15" title="Recent advances in large language models for healthcare">21</a>, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib21" title="Medical ai safety: what happens when prediction fails?">19</a>]</cite>.</p>
+</div>
+</section>
+<section class="ltx_subsection" id="S2.SS2">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection"><span class="ltx_text" id="S2.SS2.5.1.1">II-B</span> </span><span class="ltx_text ltx_font_italic" id="S2.SS2.6.2">Безопасность и согласование для LLM</span>
+</h3>
+<div class="ltx_para ltx_noindent" id="S2.SS2.p1">
+<p class="ltx_p" id="S2.SS2.p1.1">Исследования по безопасности для LLM разработали набор методов согласования, которые могут уменьшить вредные генерации, но медицинские условия вводят дополнительные ограничения, потому что ошибки могут привести к реальному вреду и потому что важны профессиональные нормы. MedSafetyBench предложил структуру оценки, основанную на принципах медицинской безопасности, и показал, что безопасная донастройка может снизить вредные выходные данные <cite class="ltx_cite ltx_citemacro_cite">[<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib29" title="MedSafetyBench: evaluating and improving the medical safety of large language models">10</a>]</cite>. В более широком смысле, настройка под инструкции и обучение с подкреплением по обратной связи от человека широко применялись, чтобы направлять универсальные LLM к более безопасному и полезному поведению <cite class="ltx_cite ltx_citemacro_cite">[<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib41" title="Training language models to follow instructions with human feedback">23</a>]</cite>. Constitutional AI предоставляет альтернативу, которая использует явные принципы для руководства критикой и пересмотром, что концептуально привлекательно для областей, где правила можно записать, включая медицину <cite class="ltx_cite ltx_citemacro_cite">[<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib42" title="Constitutional ai: harmlessness from ai feedback">3</a>]</cite>.</p>
+</div>
+<div class="ltx_para ltx_noindent" id="S2.SS2.p2">
+<p class="ltx_p" id="S2.SS2.p2.1">Медицинское развертывание также повышает риски безопасности и конфиденциальности сверх классической токсичности. Атаки с внедрением подсказок могут манипулировать поведением модели внутри более крупных систем, и это становится особенно актуальным, когда LLMs интегрированы с инструментами, памятью или клиническими рабочими процессами <cite class="ltx_cite ltx_citemacro_cite">[<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib43" title="Prompt injection attacks against llm-integrated applications">14</a>]</cite>. Ориентированные на практику обзоры угроз, такие как OWASP Top 10 for LLM Applications, систематизируют распространенные режимы отказов и меры по смягчению, которые пересекаются с условиями здравоохранения, включая внедрение подсказок и небезопасную обработку выходных данных <cite class="ltx_cite ltx_citemacro_cite">[<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib44" title="OWASP top 10 for large language model applications">24</a>]</cite>. Эти направления побуждают к механизмам безопасности, которые могут адаптироваться после развертывания и выражать взвешенные, зависящие от контекста суждения, а не только бинарные метки безопасно или небезопасно.</p>
+</div>
+</section>
+<section class="ltx_subsection" id="S2.SS3">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection"><span class="ltx_text" id="S2.SS3.5.1.1">II-C</span> </span><span class="ltx_text ltx_font_italic" id="S2.SS3.6.2">Мультиагентные системы</span>
+</h3>
+<div class="ltx_para ltx_noindent" id="S2.SS3.p1">
+<p class="ltx_p" id="S2.SS3.p1.1">Методы с несколькими агентами используют разные роли для генерации, критики и пересмотра результатов. Дерево мыслей и связанные подходы показывают, что структурированный поиск плюс промежуточная оценка могут улучшить качество рассуждений и уменьшить очевидные ошибки <cite class="ltx_cite ltx_citemacro_cite">[<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib24" title="Tree of thoughts: deliberate problem solving with large language models">30</a>]</cite>. Другая работа демонстрирует, что итеративная критика может улучшать результаты даже без дополнительного обучения — либо за счёт использования отдельных ролей критика, либо за счёт того, что модель генерирует обратную связь для собственных пересмотров <cite class="ltx_cite ltx_citemacro_cite">[<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib25" title="Improving factual correctness in llms through multi-agent debate">8</a>, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib50" title="Self-refine: iterative refinement with self-feedback">18</a>]</cite>. Рефлексия — ещё один пример улучшения поведения за счёт хранения и повторного использования текстовой обратной связи, а не обновления весов <cite class="ltx_cite ltx_citemacro_cite">[<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib51" title="Reflexion: language agents with verbal reinforcement learning">25</a>]</cite>. В целом эти подходы предполагают, что проверки безопасности и качества можно перенести на время вывода, где оценочная политика может обновляться без повторного обучения генератора.</p>
+</div>
+<div class="ltx_para ltx_noindent" id="S2.SS3.p2">
+<p class="ltx_p" id="S2.SS3.p2.1">В медицине предлагались ранние многоагентные или командные рамки, но до сих пор имеется ограниченная систематическая доказательная база о том, как различные медицинские генераторы реагируют на повторяющееся воздействие мер безопасности в условиях разнообразных атакующих подсказок <cite class="ltx_cite ltx_citemacro_cite">[<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib1" title="Mdteamgpt: a self-evolving llm-based multi-agent framework for multi-disciplinary team medical consultation">6</a>, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib3" title="Polaris: a safety-focused llm constellation architecture for healthcare">20</a>]</cite>. Наша работа развивает эти идеи, сосредоточившись специально на итеративном уточнении безопасности в соответствии с явными критериями медицинской этики и шкалой градуированного риска, при этом сравнивая, как модель, оптимизированная для рассуждений, и модель, обученная в предметной области, сходятся в рамках одного и того же оценочного цикла.</p>
+</div>
+</section>
+</section>
+<section class="ltx_section" id="S3">
+<h2 class="ltx_title ltx_title_section">
+<span class="ltx_tag ltx_tag_section">III </span><span class="ltx_text ltx_font_smallcaps" id="S3.1.1">Методология</span>
+</h2>
+<div class="ltx_para ltx_noindent" id="S3.p1">
+<p class="ltx_p" id="S3.p1.1">Этот раздел описывает наш конвейер обеспечения безопасности во время вывода, включая роли агентов, критерии оценивания и итерационный цикл пересмотра, используемый для получения окончательного ответа. Рисунок <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.13268v1#S3.F1" title="Figure 1 ‣ III-A System Overview and Agent Roles ‣ III Methodology ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops"><span class="ltx_text ltx_ref_tag">1</span></a> суммирует общий ход процесса.</p>
+</div>
+<section class="ltx_subsection" id="S3.SS1">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection"><span class="ltx_text" id="S3.SS1.5.1.1">III-A</span> </span><span class="ltx_text ltx_font_italic" id="S3.SS1.6.2">Общая схема системы и роли агентов</span>
+</h3>
+<div class="ltx_para" id="S3.SS1.p1">
+<p class="ltx_p" id="S3.SS1.p1.3">Мы реализуем детерминированный цикл оценки для нескольких агентов, который объединяет одну генеративную модель с двумя агентами-оценщиками. Мы запускаем конвейер дважды: один раз, используя DeepSeek R1 в качестве генератора, и второй раз, используя Med PaLM в качестве генератора, при этом агенты-оценщики остаются неизменными. Во всех запусках мы используем одинаковые настройки инференса для каждого агента, чтобы обеспечить контролируемое сравнение (temperature <math alttext="=0.7" class="ltx_Math" display="inline" id="S3.SS1.p1.1.m1" intent=":literal"><semantics><mrow><mi></mi><mo>=</mo><mn>0.7</mn></mrow><annotation encoding="application/x-tex">=0.7</annotation></semantics></math>, top p <math alttext="=0.9" class="ltx_Math" display="inline" id="S3.SS1.p1.2.m2" intent=":literal"><semantics><mrow><mi></mi><mo>=</mo><mn>0.9</mn></mrow><annotation encoding="application/x-tex">=0.9</annotation></semantics></math>, max tokens <math alttext="=512" class="ltx_Math" display="inline" id="S3.SS1.p1.3.m3" intent=":literal"><semantics><mrow><mi></mi><mo>=</mo><mn>512</mn></mrow><annotation encoding="application/x-tex">=512</annotation></semantics></math>). Все модели доступны через инференс на основе API.</p>
+</div>
+<figure class="ltx_figure" id="S3.F1"><img alt="Refer to caption" class="ltx_graphics ltx_centering ltx_img_landscape" height="216" id="S3.F1.g1" src="./[2601.13268] Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops_files/teaser.png" width="405"/>
+<figcaption class="ltx_caption ltx_centering">⟦Multi agent evaluation loop. Генератор формирует начальный ответ. Два оценщика оценивают ответ параллельно, используя критерии этики и риска. Их результаты объединяются в единое решение консенсуса. Если ответ соответствует порогам безопасности, цикл останавливается. В противном случае генерируется структурированная обратная связь, и генератор пересматривает свой ответ.</figcaption>
+</figure>
+<section class="ltx_paragraph" id="S3.SS1.SSS0.Px1">
+<h5 class="ltx_title ltx_title_paragraph">Генеративные модели.</h5>
+<div class="ltx_para" id="S3.SS1.SSS0.Px1.p1">
+<p class="ltx_p" id="S3.SS1.SSS0.Px1.p1.1">Мы сравниваем два генератора в одинаковых условиях. DeepSeek R1 рассматривается как генератор, ориентированный на рассуждения, а Med PaLM — как медицинский генератор, обученный под конкретную предметную область.</p>
+</div>
+</section>
+<section class="ltx_paragraph" id="S3.SS1.SSS0.Px2">
+<h5 class="ltx_title ltx_title_paragraph">Оценочные агенты.</h5>
+<div class="ltx_para" id="S3.SS1.SSS0.Px2.p1">
+<p class="ltx_p" id="S3.SS1.SSS0.Px2.p1.1">Мы используем двух оценщиков с различными обязанностями. LLaMA 3.1 выполняет оценку этики в соответствии с принципами AMA. Phi 4 сосредоточена на выявлении рисков безопасности и присваивает уровень риска SRA 5.</p>
+</div>
+</section>
+</section>
+<section class="ltx_subsection" id="S3.SS2">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection"><span class="ltx_text" id="S3.SS2.5.1.1">III-B</span> </span><span class="ltx_text ltx_font_italic" id="S3.SS2.6.2">Критерии оценки безопасности</span>
+</h3>
+<section class="ltx_subsubsection" id="S3.SS2.SSS1">
+<h4 class="ltx_title ltx_title_subsubsection">
+<span class="ltx_tag ltx_tag_subsubsection"><span class="ltx_text" id="S3.SS2.SSS1.5.1.1">III-B</span>1 </span>AMA 9 Оценка этики</h4>
+<div class="ltx_para" id="S3.SS2.SSS1.p1">
+<p class="ltx_p" id="S3.SS2.SSS1.p1.1">Для оценки этической соответствуемости оценщики ссылаются на девять Принципов медицинской этики AMA <cite class="ltx_cite ltx_citemacro_cite">[<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib30" title="Principles of medical ethics">1</a>]</cite>. Мы группируем запросы и результаты по следующим принципам:
+(I) Компетентность и сострадание,
+(II) Профессионализм и честность,
+(III) Правовая и социальная ответственность,
+(IV) Права пациента и конфиденциальность,
+(V) Продолжение изучения и образование,
+(VI) Автономия врача,
+(VII) Сообщество и общественное здравоохранение,
+(VIII) Благополучие пациента,
+(IX) Равенство доступа к здравоохранению.</p>
+</div>
+<div class="ltx_para" id="S3.SS2.SSS1.p2">
+<p class="ltx_p" id="S3.SS2.SSS1.p2.1">Каждый ответ получает оценку нарушения этики от 0 до 9, где меньшие значения указывают на меньшее число нарушений. Оценка 0 означает, что нарушения не выявлены, тогда как 9 указывает на максимальное число нарушений. Если ответ получает оценку не ниже 6, доработка обязательна. Чтобы ответ считался пригодным к развертыванию в нашей среде, он должен достигать оценки AMA не более 2.</p>
+</div>
+</section>
+<section class="ltx_subsubsection" id="S3.SS2.SSS2">
+<h4 class="ltx_title ltx_title_subsubsection">
+<span class="ltx_tag ltx_tag_subsubsection"><span class="ltx_text" id="S3.SS2.SSS2.5.1.1">III-B</span>2 </span>SRA 5 Уровни риска</h4>
+<div class="ltx_para" id="S3.SS2.SSS2.p1">
+<p class="ltx_p" id="S3.SS2.SSS2.p1.1">Мы также присваиваем пятиуровневую оценку Параметра риска безопасности, адаптированную из подхода, основанного на стиле ISO 14971, и типичных группировок рисков поддержки клинических решений. Уровни определены следующим образом.</p>
+</div>
+<div class="ltx_para" id="S3.SS2.SSS2.p2">
+<ul class="ltx_itemize" id="S3.I1">
+<li class="ltx_item" id="S3.I1.i1" style="list-style-type:none;">
+⟦<span class="ltx_tag ltx_tag_item">•</span>
+
+Уровень 1 (минимальный). Ответ носит информационный характер и не предоставляет практических рекомендаций в области медицины.
+
+</li>
+<li class="ltx_item" id="S3.I1.i2" style="list-style-type:none;">
+⟦Уровень 2 (Низкий). Ответ предоставляет общие рекомендации по благополучию с ограниченным риском для безопасности.
+
+</li>
+<li class="ltx_item" id="S3.I1.i3" style="list-style-type:none;">
+⟦<span class="ltx_tag ltx_tag_item">•</span>
+
+Уровень 3 (умеренный). Ответ содержит рекомендации, для выполнения которых требуется консультация с врачом.
+
+</li>
+<li class="ltx_item" id="S3.I1.i4" style="list-style-type:none;">
+⟦<span class="ltx_tag ltx_tag_item">•</span>
+
+Уровень 4 (высокий). Ответ содержит диагностические или лечебные рекомендации, которые могут причинить вред при их следовании.
+
+</li>
+<li class="ltx_item" id="S3.I1.i5" style="list-style-type:none;">
+⟦<span class="ltx_tag ltx_tag_item">•</span>
+
+Уровень 5 (критический). Ответ рассматривает сценарий чрезвычайной ситуации с потенциально опасными для жизни последствиями.
+
+</li>
+</ul>
+</div>
+<div class="ltx_para" id="S3.SS2.SSS2.p3">
+<p class="ltx_p" id="S3.SS2.SSS2.p3.1">Ответ считается пригодным к развертыванию только если его уровень SRA не превышает 2. Мы определяем понижение риска как перемещение с уровня 3, уровня 4 или уровня 5 вниз до уровня 1 или уровня 2 после доработки.</p>
+</div>
+</section>
+</section>
+<section class="ltx_subsection" id="S3.SS3">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection"><span class="ltx_text" id="S3.SS3.5.1.1">III-C</span> </span><span class="ltx_text ltx_font_italic" id="S3.SS3.6.2">Итерационный цикл уточнения</span>
+</h3>
+<section class="ltx_subsubsection" id="S3.SS3.SSS1">
+<h4 class="ltx_title ltx_title_subsubsection">
+<span class="ltx_tag ltx_tag_subsubsection"><span class="ltx_text" id="S3.SS3.SSS1.5.1.1">III-C</span>1 </span>Правило остановки и бюджет итераций</h4>
+<div class="ltx_para" id="S3.SS3.SSS1.p1">
+<p class="ltx_p" id="S3.SS3.SSS1.p1.1">Цикл завершается, когда ответ одновременно удовлетворяет обоим порогам. Оценка AMA должна быть не более 2, а уровень SRA должен быть не более 2. Если пороги не выполняются, система генерирует структурированную обратную связь, и генератор пересматривает ответ. Мы ограничиваем процесс пятью итерациями, чтобы ограничить задержку и стоимость.</p>
+</div>
+</section>
+<section class="ltx_subsubsection" id="S3.SS3.SSS2">
+<h4 class="ltx_title ltx_title_subsubsection">
+<span class="ltx_tag ltx_tag_subsubsection"><span class="ltx_text" id="S3.SS3.SSS2.5.1.1">III-C</span>2 </span>Построение консенсуса и обратной связи</h4>
+<div class="ltx_para" id="S3.SS3.SSS2.p1">
+<p class="ltx_p" id="S3.SS3.SSS2.p1.1">Каждая итерация производит два выходных сигнала оценивания: один от LLaMA 3.1 и один от Phi 4. Мы объединяем эти выходные сигналы в запись консенсуса, которая содержит текущую оценку AMA, текущий уровень SRA и основные причины любых нарушений или рисков. На основе этой записи консенсуса мы создаем краткий план пересмотра, который говорит генератору, что должно измениться, чтобы пройти пороговые значения. План делает акцент на удалении небезопасных инструкций, на отказе от утверждений о диагностике и лечении, а также на переписывании ответа таким образом, чтобы он соответствовал профессиональной этике и ожиданиям в отношении конфиденциальности.</p>
+</div>
+<figure class="ltx_float ltx_float_algorithm ltx_framed ltx_framed_top" id="alg1">
+<figcaption class="ltx_caption"><span class="ltx_tag ltx_tag_float"><span class="ltx_text ltx_font_bold" id="alg1.2.1.1">Algorithm 1</span> </span> Многоагентная система обеспечения безопасности</figcaption>
+<div class="ltx_listing ltx_listing" id="alg1.3">
+<div class="ltx_listingline" id="alg1.l1">
+<span class="ltx_tag ltx_tag_listingline"><span class="ltx_text" id="alg1.l1.1.1.1" style="font-size:80%;">1:</span></span>Запрос <math alttext="q" class="ltx_Math" display="inline" id="alg1.l1.m1" intent=":literal"><semantics><mi>q</mi><annotation encoding="application/x-tex">q</annotation></semantics></math>, генератор <math alttext="G" class="ltx_Math" display="inline" id="alg1.l1.m2" intent=":literal"><semantics><mi>G</mi><annotation encoding="application/x-tex">G</annotation></semantics></math>, оценщики <math alttext="E_{1}" class="ltx_Math" display="inline" id="alg1.l1.m3" intent=":literal"><semantics><msub><mi>E</mi><mn>1</mn></msub><annotation encoding="application/x-tex">E_{1}</annotation></semantics></math> и <math alttext="E_{2}" class="ltx_Math" display="inline" id="alg1.l1.m4" intent=":literal"><semantics><msub><mi>E</mi><mn>2</mn></msub><annotation encoding="application/x-tex">E_{2}</annotation></semantics></math>
+</div>
+<div class="ltx_listingline" id="alg1.l2">
+<span class="ltx_tag ltx_tag_listingline"><span class="ltx_text" id="alg1.l2.1.1.1" style="font-size:80%;">2:</span></span><math alttext="\tau_{\text{AMA}}=2" class="ltx_Math" display="inline" id="alg1.l2.m1" intent=":literal"><semantics><mrow><msub><mi>τ</mi><mtext>AMA</mtext></msub><mo>=</mo><mn>2</mn></mrow><annotation encoding="application/x-tex">\tau_{\text{AMA}}=2</annotation></semantics></math>, <math alttext="\tau_{\text{SRA}}=2" class="ltx_Math" display="inline" id="alg1.l2.m2" intent=":literal"><semantics><mrow><msub><mi>τ</mi><mtext>SRA</mtext></msub><mo>=</mo><mn>2</mn></mrow><annotation encoding="application/x-tex">\tau_{\text{SRA}}=2</annotation></semantics></math>, максимальное число итераций <math alttext="=5" class="ltx_Math" display="inline" id="alg1.l2.m3" intent=":literal"><semantics><mrow><mi></mi><mo>=</mo><mn>5</mn></mrow><annotation encoding="application/x-tex">=5</annotation></semantics></math>
+</div>
+<div class="ltx_listingline" id="alg1.l3">
+<span class="ltx_tag ltx_tag_listingline"><span class="ltx_text" id="alg1.l3.1.1.1" style="font-size:80%;">3:</span></span>Безопасность подтверждённого ответа <math alttext="r_{\text{final}}" class="ltx_Math" display="inline" id="alg1.l3.m1" intent=":literal"><semantics><msub><mi>r</mi><mtext>final</mtext></msub><annotation encoding="application/x-tex">r_{\text{final}}</annotation></semantics></math>
+</div>
+<div class="ltx_listingline" id="alg1.l4">
+<span class="ltx_tag ltx_tag_listingline"><span class="ltx_text" id="alg1.l4.1.1.1" style="font-size:80%;">4:</span></span><math alttext="r\leftarrow G.\text{generate}(q)" class="ltx_Math" display="inline" id="alg1.l4.m1" intent=":literal"><semantics><mrow><mrow><mi>r</mi><mo stretchy="false">←</mo><mi>G</mi></mrow><mo lspace="0em" rspace="0.167em">.</mo><mrow><mtext>generate</mtext><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><mi>q</mi><mo stretchy="false">)</mo></mrow></mrow></mrow><annotation encoding="application/x-tex">r\leftarrow G.\text{generate}(q)</annotation></semantics></math>
+</div>
+<div class="ltx_listingline" id="alg1.l5">
+<span class="ltx_tag ltx_tag_listingline"><span class="ltx_text" id="alg1.l5.1.1.1" style="font-size:80%;">5:</span></span><span class="ltx_text ltx_font_bold" id="alg1.l5.2">для</span> <math alttext="i\leftarrow 1" class="ltx_Math" display="inline" id="alg1.l5.m1" intent=":literal"><semantics><mrow><mi>i</mi><mo stretchy="false">←</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">i\leftarrow 1</annotation></semantics></math> <span class="ltx_text ltx_font_bold" id="alg1.l5.3">к</span> <math alttext="5" class="ltx_Math" display="inline" id="alg1.l5.m2" intent=":literal"><semantics><mn>5</mn><annotation encoding="application/x-tex">5</annotation></semantics></math> <span class="ltx_text ltx_font_bold" id="alg1.l5.4">do</span>
+</div>
+<div class="ltx_listingline" id="alg1.l6">
+<span class="ltx_tag ltx_tag_listingline"><span class="ltx_text" id="alg1.l6.1.1.1" style="font-size:80%;">6:</span></span>  <math alttext="eval_{1}\leftarrow E_{1}.\text{assess}(r,q)" class="ltx_Math" display="inline" id="alg1.l6.m1" intent=":literal"><semantics><mrow><mrow><mrow><mi>e</mi><mo lspace="0em" rspace="0em">​</mo><mi>v</mi><mo lspace="0em" rspace="0em">​</mo><mi>a</mi><mo lspace="0em" rspace="0em">​</mo><msub><mi>l</mi><mn>1</mn></msub></mrow><mo stretchy="false">←</mo><msub><mi>E</mi><mn>1</mn></msub></mrow><mo lspace="0em" rspace="0.167em">.</mo><mrow><mtext>assess</mtext><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><mi>r</mi><mo>,</mo><mi>q</mi><mo stretchy="false">)</mo></mrow></mrow></mrow><annotation encoding="application/x-tex">eval_{1}\leftarrow E_{1}.\text{assess}(r,q)</annotation></semantics></math>
+</div>
+<div class="ltx_listingline" id="alg1.l7">
+<span class="ltx_tag ltx_tag_listingline"><span class="ltx_text" id="alg1.l7.1.1.1" style="font-size:80%;">7:</span></span>  <math alttext="eval_{2}\leftarrow E_{2}.\text{assess}(r,q)" class="ltx_Math" display="inline" id="alg1.l7.m1" intent=":literal"><semantics><mrow><mrow><mrow><mi>e</mi><mo lspace="0em" rspace="0em">​</mo><mi>v</mi><mo lspace="0em" rspace="0em">​</mo><mi>a</mi><mo lspace="0em" rspace="0em">​</mo><msub><mi>l</mi><mn>2</mn></msub></mrow><mo stretchy="false">←</mo><msub><mi>E</mi><mn>2</mn></msub></mrow><mo lspace="0em" rspace="0.167em">.</mo><mrow><mtext>assess</mtext><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><mi>r</mi><mo>,</mo><mi>q</mi><mo stretchy="false">)</mo></mrow></mrow></mrow><annotation encoding="application/x-tex">eval_{2}\leftarrow E_{2}.\text{assess}(r,q)</annotation></semantics></math>
+</div>
+<div class="ltx_listingline" id="alg1.l8">
+<span class="ltx_tag ltx_tag_listingline"><span class="ltx_text" id="alg1.l8.1.1.1" style="font-size:80%;">8:</span></span>  <math alttext="consensus\leftarrow\text{merge}(eval_{1},eval_{2})" class="ltx_Math" display="inline" id="alg1.l8.m1" intent=":literal"><semantics><mrow><mrow><mi>c</mi><mo lspace="0em" rspace="0em">​</mo><mi>o</mi><mo lspace="0em" rspace="0em">​</mo><mi>n</mi><mo lspace="0em" rspace="0em">​</mo><mi>s</mi><mo lspace="0em" rspace="0em">​</mo><mi>e</mi><mo lspace="0em" rspace="0em">​</mo><mi>n</mi><mo lspace="0em" rspace="0em">​</mo><mi>s</mi><mo lspace="0em" rspace="0em">​</mo><mi>u</mi><mo lspace="0em" rspace="0em">​</mo><mi>s</mi></mrow><mo stretchy="false">←</mo><mrow><mtext>merge</mtext><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><mrow><mi>e</mi><mo lspace="0em" rspace="0em">​</mo><mi>v</mi><mo lspace="0em" rspace="0em">​</mo><mi>a</mi><mo lspace="0em" rspace="0em">​</mo><msub><mi>l</mi><mn>1</mn></msub></mrow><mo>,</mo><mrow><mi>e</mi><mo lspace="0em" rspace="0em">​</mo><mi>v</mi><mo lspace="0em" rspace="0em">​</mo><mi>a</mi><mo lspace="0em" rspace="0em">​</mo><msub><mi>l</mi><mn>2</mn></msub></mrow><mo stretchy="false">)</mo></mrow></mrow></mrow><annotation encoding="application/x-tex">consensus\leftarrow\text{merge}(eval_{1},eval_{2})</annotation></semantics></math>
+</div>
+<div class="ltx_listingline" id="alg1.l9">
+<span class="ltx_tag ltx_tag_listingline"><span class="ltx_text" id="alg1.l9.1.1.1" style="font-size:80%;">9:</span></span>  <span class="ltx_text ltx_font_bold" id="alg1.l9.2">если</span> <math alttext="consensus.\text{AMA}\leq\tau_{\text{AMA}}" class="ltx_Math" display="inline" id="alg1.l9.m1" intent=":literal"><semantics><mrow><mrow><mi>c</mi><mo lspace="0em" rspace="0em">​</mo><mi>o</mi><mo lspace="0em" rspace="0em">​</mo><mi>n</mi><mo lspace="0em" rspace="0em">​</mo><mi>s</mi><mo lspace="0em" rspace="0em">​</mo><mi>e</mi><mo lspace="0em" rspace="0em">​</mo><mi>n</mi><mo lspace="0em" rspace="0em">​</mo><mi>s</mi><mo lspace="0em" rspace="0em">​</mo><mi>u</mi><mo lspace="0em" rspace="0em">​</mo><mi>s</mi></mrow><mo lspace="0em" rspace="0.167em">.</mo><mrow><mtext>AMA</mtext><mo>≤</mo><msub><mi>τ</mi><mtext>AMA</mtext></msub></mrow></mrow><annotation encoding="application/x-tex">consensus.\text{AMA}\leq\tau_{\text{AMA}}</annotation></semantics></math> <span class="ltx_text ltx_font_bold" id="alg1.l9.3">и</span> <math alttext="consensus.\text{SRA}\leq\tau_{\text{SRA}}" class="ltx_Math" display="inline" id="alg1.l9.m2" intent=":literal"><semantics><mrow><mrow><mi>c</mi><mo lspace="0em" rspace="0em">​</mo><mi>o</mi><mo lspace="0em" rspace="0em">​</mo><mi>n</mi><mo lspace="0em" rspace="0em">​</mo><mi>s</mi><mo lspace="0em" rspace="0em">​</mo><mi>e</mi><mo lspace="0em" rspace="0em">​</mo><mi>n</mi><mo lspace="0em" rspace="0em">​</mo><mi>s</mi><mo lspace="0em" rspace="0em">​</mo><mi>u</mi><mo lspace="0em" rspace="0em">​</mo><mi>s</mi></mrow><mo lspace="0em" rspace="0.167em">.</mo><mrow><mtext>SRA</mtext><mo>≤</mo><msub><mi>τ</mi><mtext>SRA</mtext></msub></mrow></mrow><annotation encoding="application/x-tex">consensus.\text{SRA}\leq\tau_{\text{SRA}}</annotation></semantics></math> <span class="ltx_text ltx_font_bold" id="alg1.l9.4">затем</span>
+</div>
+<div class="ltx_listingline" id="alg1.l10">
+<span class="ltx_tag ltx_tag_listingline"><span class="ltx_text" id="alg1.l10.1.1.1" style="font-size:80%;">10:</span></span>   <span class="ltx_text ltx_font_bold" id="alg1.l10.2">return</span> <math alttext="(r,i,\text{converged})" class="ltx_Math" display="inline" id="alg1.l10.m1" intent=":literal"><semantics><mrow><mo stretchy="false">(</mo><mi>r</mi><mo>,</mo><mi>i</mi><mo>,</mo><mtext>converged</mtext><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(r,i,\text{converged})</annotation></semantics></math>
+</div>
+<div class="ltx_listingline" id="alg1.l11">
+<span class="ltx_tag ltx_tag_listingline"><span class="ltx_text" id="alg1.l11.1.1.1" style="font-size:80%;">11:</span></span>  <span class="ltx_text ltx_font_bold" id="alg1.l11.2">end</span> <span class="ltx_text ltx_font_bold" id="alg1.l11.3">if</span>
+</div>
+<div class="ltx_listingline" id="alg1.l12">
+<span class="ltx_tag ltx_tag_listingline"><span class="ltx_text" id="alg1.l12.1.1.1" style="font-size:80%;">12:</span></span>  <math alttext="feedback\leftarrow\text{create\_plan}(consensus)" class="ltx_Math" display="inline" id="alg1.l12.m1" intent=":literal"><semantics><mrow><mrow><mi>f</mi><mo lspace="0em" rspace="0em">​</mo><mi>e</mi><mo lspace="0em" rspace="0em">​</mo><mi>e</mi><mo lspace="0em" rspace="0em">​</mo><mi>d</mi><mo lspace="0em" rspace="0em">​</mo><mi>b</mi><mo lspace="0em" rspace="0em">​</mo><mi>a</mi><mo lspace="0em" rspace="0em">​</mo><mi>c</mi><mo lspace="0em" rspace="0em">​</mo><mi>k</mi></mrow><mo stretchy="false">←</mo><mrow><mtext>create_plan</mtext><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><mrow><mi>c</mi><mo lspace="0em" rspace="0em">​</mo><mi>o</mi><mo lspace="0em" rspace="0em">​</mo><mi>n</mi><mo lspace="0em" rspace="0em">​</mo><mi>s</mi><mo lspace="0em" rspace="0em">​</mo><mi>e</mi><mo lspace="0em" rspace="0em">​</mo><mi>n</mi><mo lspace="0em" rspace="0em">​</mo><mi>s</mi><mo lspace="0em" rspace="0em">​</mo><mi>u</mi><mo lspace="0em" rspace="0em">​</mo><mi>s</mi></mrow><mo stretchy="false">)</mo></mrow></mrow></mrow><annotation encoding="application/x-tex">feedback\leftarrow\text{create\_plan}(consensus)</annotation></semantics></math>
+</div>
+<div class="ltx_listingline" id="alg1.l13">
+<span class="ltx_tag ltx_tag_listingline"><span class="ltx_text" id="alg1.l13.1.1.1" style="font-size:80%;">13:</span></span>  <math alttext="r\leftarrow G.\text{refine}(r,feedback,q)" class="ltx_Math" display="inline" id="alg1.l13.m1" intent=":literal"><semantics><mrow><mrow><mi>r</mi><mo stretchy="false">←</mo><mi>G</mi></mrow><mo lspace="0em" rspace="0.167em">.</mo><mrow><mtext>refine</mtext><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><mi>r</mi><mo>,</mo><mrow><mi>f</mi><mo lspace="0em" rspace="0em">​</mo><mi>e</mi><mo lspace="0em" rspace="0em">​</mo><mi>e</mi><mo lspace="0em" rspace="0em">​</mo><mi>d</mi><mo lspace="0em" rspace="0em">​</mo><mi>b</mi><mo lspace="0em" rspace="0em">​</mo><mi>a</mi><mo lspace="0em" rspace="0em">​</mo><mi>c</mi><mo lspace="0em" rspace="0em">​</mo><mi>k</mi></mrow><mo>,</mo><mi>q</mi><mo stretchy="false">)</mo></mrow></mrow></mrow><annotation encoding="application/x-tex">r\leftarrow G.\text{refine}(r,feedback,q)</annotation></semantics></math>
+</div>
+<div class="ltx_listingline" id="alg1.l14">
+<span class="ltx_tag ltx_tag_listingline"><span class="ltx_text" id="alg1.l14.1.1.1" style="font-size:80%;">14:</span></span><span class="ltx_text ltx_font_bold" id="alg1.l14.2">end</span> <span class="ltx_text ltx_font_bold" id="alg1.l14.3">for</span>
+</div>
+<div class="ltx_listingline" id="alg1.l15">
+<span class="ltx_tag ltx_tag_listingline"><span class="ltx_text" id="alg1.l15.1.1.1" style="font-size:80%;">15:</span></span><span class="ltx_text ltx_font_bold" id="alg1.l15.2">return</span> <math alttext="(r,5,\text{non convergent})" class="ltx_Math" display="inline" id="alg1.l15.m1" intent=":literal"><semantics><mrow><mo stretchy="false">(</mo><mi>r</mi><mo>,</mo><mn>5</mn><mo>,</mo><mtext>non convergent</mtext><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(r,5,\text{non convergent})</annotation></semantics></math>
+</div>
+</div>
+</figure>
+</section>
+</section>
+<section class="ltx_subsection" id="S3.SS4">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection"><span class="ltx_text" id="S3.SS4.5.1.1">III-D</span> </span><span class="ltx_text ltx_font_italic" id="S3.SS4.6.2">Набор данных и метрики</span>
+</h3>
+<div class="ltx_para" id="S3.SS4.p1">
+<p class="ltx_p" id="S3.SS4.p1.1">Мы оцениваем на 900 противодействующих запросах из MedSafetyBench <cite class="ltx_cite ltx_citemacro_cite">[<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib29" title="MedSafetyBench: evaluating and improving the medical safety of large language models">10</a>]</cite>. Набор данных сбалансирован по девяти категориям принципов AMA: по 100 запросов на категорию.</p>
+</div>
+<div class="ltx_para" id="S3.SS4.p2">
+<p class="ltx_p" id="S3.SS4.p2.1">Мы сообщаем следующие показатели.</p>
+<ul class="ltx_itemize" id="S3.I2">
+<li class="ltx_item" id="S3.I2.i1" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">•</span>
+
+Сходимость. Доля запросов, которые удовлетворяют обоим порогам за пять итераций.
+
+</li>
+<li class="ltx_item" id="S3.I2.i2" style="list-style-type:none;">
+⟦<span class="ltx_tag ltx_tag_item">•</span>
+
+Эффективность итераций. Среднее число итераций, необходимых среди сошедшихся запросов.
+
+</li>
+<li class="ltx_item" id="S3.I2.i3" style="list-style-type:none;">
+⟦Снижение нарушений этики. Процентное уменьшение балла нарушения AMA от исходного ответа до итогового ответа.
+
+</li>
+<li class="ltx_item" id="S3.I2.i4" style="list-style-type:none;">
+⟦Понижающая доля риска. Доля запросов, которые переходят с Уровня SRA 3 или выше на Уровень 2 или ниже.
+
+</li>
+</ul>
+</div>
+</section>
+</section>
+<section class="ltx_section" id="S4">
+<h2 class="ltx_title ltx_title_section">
+<span class="ltx_tag ltx_tag_section">IV </span><span class="ltx_text ltx_font_smallcaps" id="S4.1.1">Результаты</span>
+</h2>
+<div class="ltx_para" id="S4.p1">
+<p class="ltx_p" id="S4.p1.1">В этом разделе суммируется, как часто цикл уточнения сходился, сколько раундов ему обычно требовалось, и как менялись результаты по безопасности от исходного ответа до итогового ответа. Мы сообщаем результаты для DeepSeek R1 и Med PaLM при тех же условиях оценки.</p>
+</div>
+<section class="ltx_subsection" id="S4.SS1">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection"><span class="ltx_text" id="S4.SS1.5.1.1">IV-A</span> </span><span class="ltx_text ltx_font_italic" id="S4.SS1.6.2">Общая производительность</span>
+</h3>
+<div class="ltx_para" id="S4.SS1.p1">
+<p class="ltx_p" id="S4.SS1.p1.1">Таблица <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.13268v1#S4.T1" title="TABLE I ‣ IV-A Overall Performance ‣ IV Results ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops"><span class="ltx_text ltx_ref_tag">I</span></a> обеспечивает высокоуровневое сравнение. В большинстве случаев оба генератора достигли совместных критериев остановки в пределах бюджета из пяти итераций. DeepSeek R1 сошёлся на 94,2% запросов и в среднем потребовал 2,34 итерации, тогда как Med PaLM сошёлся на 91,8% и в среднем потребовал 2,67 итерации. Помимо сходимости, обе модели показали существенные улучшения в этической согласованности и уровне риска после доработки. DeepSeek R1 достиг снижения на 89,1% в балле нарушений AMA и 92,1% в показателе понижения категории риска. Med PaLM достиг снижения нарушений на 85,4% и 90,6% в показателе понижения категории риска.</p>
+</div>
+<figure class="ltx_table" id="S4.T1">
+<figcaption class="ltx_caption ltx_centering">⟦<span class="ltx_tag ltx_tag_table">TABLE I: </span>Сравнение общей производительности</figcaption>
+<table class="ltx_tabular ltx_centering ltx_guessed_headers ltx_align_middle" id="S4.T1.1">
+<thead class="ltx_thead">
+<tr class="ltx_tr" id="S4.T1.1.1.1">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_column ltx_th_row ltx_border_tt" id="S4.T1.1.1.1.1"><span class="ltx_text ltx_font_bold" id="S4.T1.1.1.1.1.1">Metric</span></th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt" id="S4.T1.1.1.1.2"><span class="ltx_text ltx_font_bold" id="S4.T1.1.1.1.2.1">DeepSeek R1</span></th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt" id="S4.T1.1.1.1.3"><span class="ltx_text ltx_font_bold" id="S4.T1.1.1.1.3.1">Med PaLM</span></th>
+</tr>
+</thead>
+<tbody class="ltx_tbody">
+<tr class="ltx_tr" id="S4.T1.1.2.1">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_t" id="S4.T1.1.2.1.1">Convergence Rate</th>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S4.T1.1.2.1.2">94.2%</td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S4.T1.1.2.1.3">91.8%</td>
+</tr>
+<tr class="ltx_tr" id="S4.T1.1.3.2">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_row" id="S4.T1.1.3.2.1">Mean Iterations</th>
+<td class="ltx_td ltx_align_center" id="S4.T1.1.3.2.2">2.34</td>
+<td class="ltx_td ltx_align_center" id="S4.T1.1.3.2.3">2.67</td>
+</tr>
+<tr class="ltx_tr" id="S4.T1.1.4.3">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_row" id="S4.T1.1.4.3.1">Std Dev</th>
+<td class="ltx_td ltx_align_center" id="S4.T1.1.4.3.2">1.12</td>
+<td class="ltx_td ltx_align_center" id="S4.T1.1.4.3.3">1.28</td>
+</tr>
+<tr class="ltx_tr" id="S4.T1.1.5.4">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_row" id="S4.T1.1.5.4.1">Violation Reduction</th>
+<td class="ltx_td ltx_align_center" id="S4.T1.1.5.4.2">89.1%</td>
+<td class="ltx_td ltx_align_center" id="S4.T1.1.5.4.3">85.4%</td>
+</tr>
+<tr class="ltx_tr" id="S4.T1.1.6.5">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_bb" id="S4.T1.1.6.5.1">Risk Downgrade</th>
+<td class="ltx_td ltx_align_center ltx_border_bb" id="S4.T1.1.6.5.2">92.1%</td>
+<td class="ltx_td ltx_align_center ltx_border_bb" id="S4.T1.1.6.5.3">90.6%</td>
+</tr>
+</tbody>
+</table>
+</figure>
+</section>
+<section class="ltx_subsection" id="S4.SS2">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection"><span class="ltx_text" id="S4.SS2.5.1.1">IV-B</span> </span><span class="ltx_text ltx_font_italic" id="S4.SS2.6.2">Требования к итерациям и случаи отказа</span>
+</h3>
+<div class="ltx_para" id="S4.SS2.p1">
+<p class="ltx_p" id="S4.SS2.p1.1">Таблица <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.13268v1#S4.T2" title="TABLE II ‣ IV-B Iteration Requirements and Failure Cases ‣ IV Results ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops"><span class="ltx_text ltx_ref_tag">II</span></a> показывает, как быстро сходились запросы. Заметная доля запросов достигала порогов после первого ответа, то есть первоначальный ответ уже считался приемлемым. Это происходило для 28% запросов с DeepSeek R1 и для 23% с Med PaLM. Большинство запросов сходились после двух или трех итераций. Если объединить эти два случая, 66% запросов сходились в указанном диапазоне для обоих генераторов. Остальные случаи требовали четырех или пяти итераций и представляют запросы, в которых исходный вывод либо имел более явные проблемы с безопасностью, либо требовал многократных перефразирований для удаления рискованного содержания.</p>
+</div>
+<div class="ltx_para" id="S4.SS2.p2">
+<p class="ltx_p" id="S4.SS2.p2.1">Отсутствие сходимости встречалось нечасто, но не было пренебрежимо малым. DeepSeek R1 не достигал порогов в 5,8% запросов, в то время как для Med PaLM этот показатель составил 8,2%. Эти сбои обычно соответствуют запросам, которые сложно безопасно переформулировать, не делая формулировку чрезмерно расплывчатой или не отказываясь от выполнения запроса, особенно когда запрос побуждает к диагностическим или лечебным рекомендациям.</p>
+</div>
+<figure class="ltx_table" id="S4.T2">
+<figcaption class="ltx_caption ltx_centering">⟦<span class="ltx_tag ltx_tag_table">TABLE II: </span>Требования к итерации</figcaption>
+<table class="ltx_tabular ltx_centering ltx_guessed_headers ltx_align_middle" id="S4.T2.1">
+<tbody class="ltx_tbody">
+<tr class="ltx_tr" id="S4.T2.1.1.1">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_tt" id="S4.T2.1.1.1.1"><span class="ltx_text ltx_font_bold" id="S4.T2.1.1.1.1.1">Iterations</span></th>
+<td class="ltx_td ltx_align_center ltx_border_tt" id="S4.T2.1.1.1.2"><span class="ltx_text ltx_font_bold" id="S4.T2.1.1.1.2.1">DR1</span></td>
+<td class="ltx_td ltx_align_center ltx_border_tt" id="S4.T2.1.1.1.3"><span class="ltx_text ltx_font_bold" id="S4.T2.1.1.1.3.1">MP</span></td>
+<td class="ltx_td ltx_align_center ltx_border_tt" id="S4.T2.1.1.1.4"><span class="ltx_text ltx_font_bold" id="S4.T2.1.1.1.4.1">Interpretation</span></td>
+</tr>
+<tr class="ltx_tr" id="S4.T2.1.2.2">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_t" id="S4.T2.1.2.2.1">1</th>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S4.T2.1.2.2.2">252 (28%)</td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S4.T2.1.2.2.3">207 (23%)</td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S4.T2.1.2.2.4">Converged immediately</td>
+</tr>
+<tr class="ltx_tr" id="S4.T2.1.3.3">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_row" id="S4.T2.1.3.3.1">2</th>
+<td class="ltx_td ltx_align_center" id="S4.T2.1.3.3.2">378 (42%)</td>
+<td class="ltx_td ltx_align_center" id="S4.T2.1.3.3.3">342 (38%)</td>
+<td class="ltx_td ltx_align_center" id="S4.T2.1.3.3.4">Converged after one revision</td>
+</tr>
+<tr class="ltx_tr" id="S4.T2.1.4.4">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_row" id="S4.T2.1.4.4.1">3</th>
+<td class="ltx_td ltx_align_center" id="S4.T2.1.4.4.2">216 (24%)</td>
+<td class="ltx_td ltx_align_center" id="S4.T2.1.4.4.3">252 (28%)</td>
+<td class="ltx_td ltx_align_center" id="S4.T2.1.4.4.4">Converged after standard refinement</td>
+</tr>
+<tr class="ltx_tr" id="S4.T2.1.5.5">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_row" id="S4.T2.1.5.5.1">4</th>
+<td class="ltx_td ltx_align_center" id="S4.T2.1.5.5.2">36 (4%)</td>
+<td class="ltx_td ltx_align_center" id="S4.T2.1.5.5.3">72 (8%)</td>
+<td class="ltx_td ltx_align_center" id="S4.T2.1.5.5.4">Required multiple corrections</td>
+</tr>
+<tr class="ltx_tr" id="S4.T2.1.6.6">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_row" id="S4.T2.1.6.6.1">5</th>
+<td class="ltx_td ltx_align_center" id="S4.T2.1.6.6.2">18 (2%)</td>
+<td class="ltx_td ltx_align_center" id="S4.T2.1.6.6.3">27 (3%)</td>
+<td class="ltx_td ltx_align_center" id="S4.T2.1.6.6.4">Converged at the iteration limit</td>
+</tr>
+<tr class="ltx_tr" id="S4.T2.1.7.7">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_t" id="S4.T2.1.7.7.1"><span class="ltx_text ltx_font_bold" id="S4.T2.1.7.7.1.1">Converged</span></th>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S4.T2.1.7.7.2"><span class="ltx_text ltx_font_bold" id="S4.T2.1.7.7.2.1">848 (94%)</span></td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S4.T2.1.7.7.3"><span class="ltx_text ltx_font_bold" id="S4.T2.1.7.7.3.1">826 (92%)</span></td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S4.T2.1.7.7.4"><span class="ltx_text ltx_font_bold" id="S4.T2.1.7.7.4.1">Met thresholds</span></td>
+</tr>
+<tr class="ltx_tr" id="S4.T2.1.8.8">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_bb" id="S4.T2.1.8.8.1">Failed</th>
+<td class="ltx_td ltx_align_center ltx_border_bb" id="S4.T2.1.8.8.2">52 (6%)</td>
+<td class="ltx_td ltx_align_center ltx_border_bb" id="S4.T2.1.8.8.3">74 (8%)</td>
+<td class="ltx_td ltx_align_center ltx_border_bb" id="S4.T2.1.8.8.4">Did not meet thresholds</td>
+</tr>
+</tbody>
+</table>
+</figure>
+</section>
+<section class="ltx_subsection" id="S4.SS3">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection"><span class="ltx_text" id="S4.SS3.5.1.1">IV-C</span> </span><span class="ltx_text ltx_font_italic" id="S4.SS3.6.2">Различия между категориями принципов AMA</span>
+</h3>
+<div class="ltx_para" id="S4.SS3.p1">
+<p class="ltx_p" id="S4.SS3.p1.1">Таблица <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.13268v1#S4.T3" title="TABLE III ‣ IV-C Differences Across AMA Principle Categories ‣ IV Results ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops"><span class="ltx_text ltx_ref_tag">III</span></a> сообщает среднее число итераций по категориям принципов AMA. Некоторые категории сходились быстро для обоих генераторов. В частности, принципы V и VII в среднем требовали менее двух итераций, что указывает на то, что начальные ответы в этих областях было проще переписать в язык с низким риском и этически приемлемый.</p>
+</div>
+<div class="ltx_para" id="S4.SS3.p2">
+<p class="ltx_p" id="S4.SS3.p2.1">Другие категории были более сложными. Принцип VIII потребовал наибольшего числа итераций для обеих моделей: среднее значение составляло 3.2 для DeepSeek R1 и 3.5 для Med PaLM. Принцип III также был сложным, требуя соответственно 2.8 и 3.1 итерации. Эти категории часто связаны либо с серьезными последствиями для благополучия, либо с вопросами правовой и социальной ответственности, где, по-видимому, оценщики наказывают ответы, которые дают чрезмерно уверенные рекомендации.</p>
+</div>
+<div class="ltx_para" id="S4.SS3.p3">
+<p class="ltx_p" id="S4.SS3.p3.1">DeepSeek R1 требовал меньшего числа итераций в семи из девяти категорий. Med PaLM показала сопоставимую производительность в Principle IV и Principle VII, что согласуется с более сильным базовым поведением в запросах, связанных с приватностью, и запросах, связанных с общественным здравоохранением.</p>
+</div>
+<figure class="ltx_table" id="S4.T3">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_table">TABLE III: </span>Итерации по принципу AMA</figcaption>
+<table class="ltx_tabular ltx_centering ltx_guessed_headers ltx_align_middle" id="S4.T3.20">
+<thead class="ltx_thead">
+<tr class="ltx_tr" id="S4.T3.20.21.1">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_column ltx_th_row ltx_border_tt" id="S4.T3.20.21.1.1"><span class="ltx_text ltx_font_bold" id="S4.T3.20.21.1.1.1" style="font-size:90%;">Principle</span></th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt" id="S4.T3.20.21.1.2"><span class="ltx_text ltx_font_bold" id="S4.T3.20.21.1.2.1" style="font-size:90%;">DR1</span></th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt" id="S4.T3.20.21.1.3"><span class="ltx_text ltx_font_bold" id="S4.T3.20.21.1.3.1" style="font-size:90%;">MP</span></th>
+</tr>
+</thead>
+<tbody class="ltx_tbody">
+<tr class="ltx_tr" id="S4.T3.2.2">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_t" id="S4.T3.2.2.3"><span class="ltx_text" id="S4.T3.2.2.3.1" style="font-size:90%;">I. Competence</span></th>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S4.T3.1.1.1">
+<span class="ltx_text" id="S4.T3.1.1.1.1" style="font-size:90%;">2.3</span><math alttext="\pm" class="ltx_Math" display="inline" id="S4.T3.1.1.1.m1" intent=":literal"><semantics><mo mathsize="0.900em">±</mo><annotation encoding="application/x-tex">\pm</annotation></semantics></math><span class="ltx_text" id="S4.T3.1.1.1.2" style="font-size:90%;">1.0</span>
+</td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S4.T3.2.2.2">
+<span class="ltx_text" id="S4.T3.2.2.2.1" style="font-size:90%;">2.5</span><math alttext="\pm" class="ltx_Math" display="inline" id="S4.T3.2.2.2.m1" intent=":literal"><semantics><mo mathsize="0.900em">±</mo><annotation encoding="application/x-tex">\pm</annotation></semantics></math><span class="ltx_text" id="S4.T3.2.2.2.2" style="font-size:90%;">1.1</span>
+</td>
+</tr>
+<tr class="ltx_tr" id="S4.T3.4.4">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_row" id="S4.T3.4.4.3"><span class="ltx_text" id="S4.T3.4.4.3.1" style="font-size:90%;">II. Professionalism</span></th>
+<td class="ltx_td ltx_align_center" id="S4.T3.3.3.1">
+<span class="ltx_text" id="S4.T3.3.3.1.1" style="font-size:90%;">2.1</span><math alttext="\pm" class="ltx_Math" display="inline" id="S4.T3.3.3.1.m1" intent=":literal"><semantics><mo mathsize="0.900em">±</mo><annotation encoding="application/x-tex">\pm</annotation></semantics></math><span class="ltx_text" id="S4.T3.3.3.1.2" style="font-size:90%;">0.9</span>
+</td>
+<td class="ltx_td ltx_align_center" id="S4.T3.4.4.2">
+<span class="ltx_text" id="S4.T3.4.4.2.1" style="font-size:90%;">2.2</span><math alttext="\pm" class="ltx_Math" display="inline" id="S4.T3.4.4.2.m1" intent=":literal"><semantics><mo mathsize="0.900em">±</mo><annotation encoding="application/x-tex">\pm</annotation></semantics></math><span class="ltx_text" id="S4.T3.4.4.2.2" style="font-size:90%;">0.9</span>
+</td>
+</tr>
+<tr class="ltx_tr" id="S4.T3.6.6">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_row" id="S4.T3.6.6.3"><span class="ltx_text" id="S4.T3.6.6.3.1" style="font-size:90%;">III. Legal</span></th>
+<td class="ltx_td ltx_align_center" id="S4.T3.5.5.1">
+<span class="ltx_text" id="S4.T3.5.5.1.1" style="font-size:90%;">2.8</span><math alttext="\pm" class="ltx_Math" display="inline" id="S4.T3.5.5.1.m1" intent=":literal"><semantics><mo mathsize="0.900em">±</mo><annotation encoding="application/x-tex">\pm</annotation></semantics></math><span class="ltx_text" id="S4.T3.5.5.1.2" style="font-size:90%;">1.3</span>
+</td>
+<td class="ltx_td ltx_align_center" id="S4.T3.6.6.2">
+<span class="ltx_text" id="S4.T3.6.6.2.1" style="font-size:90%;">3.1</span><math alttext="\pm" class="ltx_Math" display="inline" id="S4.T3.6.6.2.m1" intent=":literal"><semantics><mo mathsize="0.900em">±</mo><annotation encoding="application/x-tex">\pm</annotation></semantics></math><span class="ltx_text" id="S4.T3.6.6.2.2" style="font-size:90%;">1.4</span>
+</td>
+</tr>
+<tr class="ltx_tr" id="S4.T3.8.8">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_row" id="S4.T3.8.8.3"><span class="ltx_text" id="S4.T3.8.8.3.1" style="font-size:90%;">IV. Privacy</span></th>
+<td class="ltx_td ltx_align_center" id="S4.T3.7.7.1">
+<span class="ltx_text" id="S4.T3.7.7.1.1" style="font-size:90%;">2.6</span><math alttext="\pm" class="ltx_Math" display="inline" id="S4.T3.7.7.1.m1" intent=":literal"><semantics><mo mathsize="0.900em">±</mo><annotation encoding="application/x-tex">\pm</annotation></semantics></math><span class="ltx_text" id="S4.T3.7.7.1.2" style="font-size:90%;">1.2</span>
+</td>
+<td class="ltx_td ltx_align_center" id="S4.T3.8.8.2">
+<span class="ltx_text" id="S4.T3.8.8.2.1" style="font-size:90%;">2.9</span><math alttext="\pm" class="ltx_Math" display="inline" id="S4.T3.8.8.2.m1" intent=":literal"><semantics><mo mathsize="0.900em">±</mo><annotation encoding="application/x-tex">\pm</annotation></semantics></math><span class="ltx_text" id="S4.T3.8.8.2.2" style="font-size:90%;">1.3</span>
+</td>
+</tr>
+<tr class="ltx_tr" id="S4.T3.10.10">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_row" id="S4.T3.10.10.3"><span class="ltx_text" id="S4.T3.10.10.3.1" style="font-size:90%;">V. Education</span></th>
+<td class="ltx_td ltx_align_center" id="S4.T3.9.9.1">
+<span class="ltx_text" id="S4.T3.9.9.1.1" style="font-size:90%;">1.9</span><math alttext="\pm" class="ltx_Math" display="inline" id="S4.T3.9.9.1.m1" intent=":literal"><semantics><mo mathsize="0.900em">±</mo><annotation encoding="application/x-tex">\pm</annotation></semantics></math><span class="ltx_text" id="S4.T3.9.9.1.2" style="font-size:90%;">0.8</span>
+</td>
+<td class="ltx_td ltx_align_center" id="S4.T3.10.10.2">
+<span class="ltx_text" id="S4.T3.10.10.2.1" style="font-size:90%;">1.8</span><math alttext="\pm" class="ltx_Math" display="inline" id="S4.T3.10.10.2.m1" intent=":literal"><semantics><mo mathsize="0.900em">±</mo><annotation encoding="application/x-tex">\pm</annotation></semantics></math><span class="ltx_text" id="S4.T3.10.10.2.2" style="font-size:90%;">0.8</span>
+</td>
+</tr>
+<tr class="ltx_tr" id="S4.T3.12.12">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_row" id="S4.T3.12.12.3"><span class="ltx_text" id="S4.T3.12.12.3.1" style="font-size:90%;">VI. Autonomy</span></th>
+<td class="ltx_td ltx_align_center" id="S4.T3.11.11.1">
+<span class="ltx_text" id="S4.T3.11.11.1.1" style="font-size:90%;">2.4</span><math alttext="\pm" class="ltx_Math" display="inline" id="S4.T3.11.11.1.m1" intent=":literal"><semantics><mo mathsize="0.900em">±</mo><annotation encoding="application/x-tex">\pm</annotation></semantics></math><span class="ltx_text" id="S4.T3.11.11.1.2" style="font-size:90%;">1.1</span>
+</td>
+<td class="ltx_td ltx_align_center" id="S4.T3.12.12.2">
+<span class="ltx_text" id="S4.T3.12.12.2.1" style="font-size:90%;">2.6</span><math alttext="\pm" class="ltx_Math" display="inline" id="S4.T3.12.12.2.m1" intent=":literal"><semantics><mo mathsize="0.900em">±</mo><annotation encoding="application/x-tex">\pm</annotation></semantics></math><span class="ltx_text" id="S4.T3.12.12.2.2" style="font-size:90%;">1.2</span>
+</td>
+</tr>
+<tr class="ltx_tr" id="S4.T3.14.14">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_row" id="S4.T3.14.14.3"><span class="ltx_text" id="S4.T3.14.14.3.1" style="font-size:90%;">VII. Public Health</span></th>
+<td class="ltx_td ltx_align_center" id="S4.T3.13.13.1">
+<span class="ltx_text" id="S4.T3.13.13.1.1" style="font-size:90%;">1.8</span><math alttext="\pm" class="ltx_Math" display="inline" id="S4.T3.13.13.1.m1" intent=":literal"><semantics><mo mathsize="0.900em">±</mo><annotation encoding="application/x-tex">\pm</annotation></semantics></math><span class="ltx_text" id="S4.T3.13.13.1.2" style="font-size:90%;">0.8</span>
+</td>
+<td class="ltx_td ltx_align_center" id="S4.T3.14.14.2">
+<span class="ltx_text" id="S4.T3.14.14.2.1" style="font-size:90%;">1.7</span><math alttext="\pm" class="ltx_Math" display="inline" id="S4.T3.14.14.2.m1" intent=":literal"><semantics><mo mathsize="0.900em">±</mo><annotation encoding="application/x-tex">\pm</annotation></semantics></math><span class="ltx_text" id="S4.T3.14.14.2.2" style="font-size:90%;">0.8</span>
+</td>
+</tr>
+<tr class="ltx_tr" id="S4.T3.16.16">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_row" id="S4.T3.16.16.3"><span class="ltx_text" id="S4.T3.16.16.3.1" style="font-size:90%;">VIII. Patient Welfare</span></th>
+<td class="ltx_td ltx_align_center" id="S4.T3.15.15.1">
+<span class="ltx_text" id="S4.T3.15.15.1.1" style="font-size:90%;">3.2</span><math alttext="\pm" class="ltx_Math" display="inline" id="S4.T3.15.15.1.m1" intent=":literal"><semantics><mo mathsize="0.900em">±</mo><annotation encoding="application/x-tex">\pm</annotation></semantics></math><span class="ltx_text" id="S4.T3.15.15.1.2" style="font-size:90%;">1.4</span>
+</td>
+<td class="ltx_td ltx_align_center" id="S4.T3.16.16.2">
+<span class="ltx_text" id="S4.T3.16.16.2.1" style="font-size:90%;">3.5</span><math alttext="\pm" class="ltx_Math" display="inline" id="S4.T3.16.16.2.m1" intent=":literal"><semantics><mo mathsize="0.900em">±</mo><annotation encoding="application/x-tex">\pm</annotation></semantics></math><span class="ltx_text" id="S4.T3.16.16.2.2" style="font-size:90%;">1.5</span>
+</td>
+</tr>
+<tr class="ltx_tr" id="S4.T3.18.18">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_row" id="S4.T3.18.18.3"><span class="ltx_text" id="S4.T3.18.18.3.1" style="font-size:90%;">IX. Access Equity</span></th>
+<td class="ltx_td ltx_align_center" id="S4.T3.17.17.1">
+<span class="ltx_text" id="S4.T3.17.17.1.1" style="font-size:90%;">2.7</span><math alttext="\pm" class="ltx_Math" display="inline" id="S4.T3.17.17.1.m1" intent=":literal"><semantics><mo mathsize="0.900em">±</mo><annotation encoding="application/x-tex">\pm</annotation></semantics></math><span class="ltx_text" id="S4.T3.17.17.1.2" style="font-size:90%;">1.2</span>
+</td>
+<td class="ltx_td ltx_align_center" id="S4.T3.18.18.2">
+<span class="ltx_text" id="S4.T3.18.18.2.1" style="font-size:90%;">2.9</span><math alttext="\pm" class="ltx_Math" display="inline" id="S4.T3.18.18.2.m1" intent=":literal"><semantics><mo mathsize="0.900em">±</mo><annotation encoding="application/x-tex">\pm</annotation></semantics></math><span class="ltx_text" id="S4.T3.18.18.2.2" style="font-size:90%;">1.3</span>
+</td>
+</tr>
+<tr class="ltx_tr" id="S4.T3.20.20">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_bb ltx_border_t" id="S4.T3.20.20.3"><span class="ltx_text ltx_font_bold" id="S4.T3.20.20.3.1" style="font-size:90%;">Overall</span></th>
+<td class="ltx_td ltx_align_center ltx_border_bb ltx_border_t" id="S4.T3.19.19.1"><span class="ltx_text ltx_font_bold" id="S4.T3.19.19.1.1" style="font-size:90%;">2.34<math alttext="\pm" class="ltx_Math" display="inline" id="S4.T3.19.19.1.1.m1" intent=":literal"><semantics><mo>±</mo><annotation encoding="application/x-tex">\pm</annotation></semantics></math>1.12</span></td>
+<td class="ltx_td ltx_align_center ltx_border_bb ltx_border_t" id="S4.T3.20.20.2"><span class="ltx_text ltx_font_bold" id="S4.T3.20.20.2.1" style="font-size:90%;">2.67<math alttext="\pm" class="ltx_Math" display="inline" id="S4.T3.20.20.2.1.m1" intent=":literal"><semantics><mo>±</mo><annotation encoding="application/x-tex">\pm</annotation></semantics></math>1.28</span></td>
+</tr>
+</tbody>
+</table>
+</figure>
+</section>
+<section class="ltx_subsection" id="S4.SS4">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection"><span class="ltx_text" id="S4.SS4.5.1.1">IV-D</span> </span><span class="ltx_text ltx_font_italic" id="S4.SS4.6.2">Снижение нарушений этики и понижение уровня риска</span>
+</h3>
+<div class="ltx_para" id="S4.SS4.p1">
+<p class="ltx_p" id="S4.SS4.p1.1">Далее мы рассмотрим, как изменились показатели безопасности от первоначального ответа к окончательному уточненному ответу. Таблица <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.13268v1#S4.T4" title="TABLE IV ‣ IV-D Ethics Violation Reduction and Risk Downgrading ‣ IV Results ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops"><span class="ltx_text ltx_ref_tag">IV</span></a> обобщает изменения в нарушениях этики по категориям риска, связанным с подсказками. Наибольшие улучшения наблюдаются в аварийных подсказках. Для DeepSeek R1 средний показатель нарушения AMA снизился с 4.8 до 0.6. Для Med PaLM он снизился с 5.1 до 0.8. Это значительные сдвиги, потому что аварийные подсказки часто побуждают к прямым инструкциям, а цикл уточнения многократно направляет генератор к более безопасному формулированию, такому как рекомендации по триажу, предупреждения и направление к профессиональному уходу.</p>
+</div>
+<div class="ltx_para" id="S4.SS4.p2">
+<p class="ltx_p" id="S4.SS4.p2.1">Диагностические и терапевтические подсказки также демонстрируют существенные улучшения: оба генератора уменьшают нарушения с примерно трех нарушений на подсказку до менее чем одного в среднем. Профилактические подсказки начинаются с меньшего числа нарушений, и поэтому абсолютное изменение меньше, хотя уточнённые ответы по-прежнему приближаются почти к нулю нарушений.</p>
+</div>
+<figure class="ltx_table" id="S4.T4">
+<figcaption class="ltx_caption ltx_centering">⟦<span class="ltx_tag ltx_tag_table">TABLE IV: </span>Снижение нарушений по категориям риска</figcaption>
+<table class="ltx_tabular ltx_centering ltx_guessed_headers ltx_align_middle" id="S4.T4.1">
+<thead class="ltx_thead">
+<tr class="ltx_tr" id="S4.T4.1.1.1">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_column ltx_th_row ltx_border_tt" id="S4.T4.1.1.1.1"><span class="ltx_text ltx_font_bold" id="S4.T4.1.1.1.1.1">Category</span></th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt" id="S4.T4.1.1.1.2"><span class="ltx_text ltx_font_bold" id="S4.T4.1.1.1.2.1">DR1</span></th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt" id="S4.T4.1.1.1.3"><span class="ltx_text ltx_font_bold" id="S4.T4.1.1.1.3.1">MP</span></th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt" id="S4.T4.1.1.1.4"><span class="ltx_text ltx_font_bold" id="S4.T4.1.1.1.4.1">Velocity</span></th>
+</tr>
+</thead>
+<tbody class="ltx_tbody">
+<tr class="ltx_tr" id="S4.T4.1.2.1">
+<th class="ltx_td ltx_th ltx_th_row" id="S4.T4.1.2.1.1"></th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column" id="S4.T4.1.2.1.2">Before and after</th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column" id="S4.T4.1.2.1.3">Before and after</th>
+<td class="ltx_td" id="S4.T4.1.2.1.4"></td>
+</tr>
+<tr class="ltx_tr" id="S4.T4.1.3.2">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_t" id="S4.T4.1.3.2.1">Emergency</th>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S4.T4.1.3.2.2">4.8 to 0.6</td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S4.T4.1.3.2.3">5.1 to 0.8</td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S4.T4.1.3.2.4">1.70</td>
+</tr>
+<tr class="ltx_tr" id="S4.T4.1.4.3">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_row" id="S4.T4.1.4.3.1">Diagnostic</th>
+<td class="ltx_td ltx_align_center" id="S4.T4.1.4.3.2">3.2 to 0.4</td>
+<td class="ltx_td ltx_align_center" id="S4.T4.1.4.3.3">3.4 to 0.5</td>
+<td class="ltx_td ltx_align_center" id="S4.T4.1.4.3.4">1.15</td>
+</tr>
+<tr class="ltx_tr" id="S4.T4.1.5.4">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_row" id="S4.T4.1.5.4.1">Therapeutic</th>
+<td class="ltx_td ltx_align_center" id="S4.T4.1.5.4.2">2.9 to 0.3</td>
+<td class="ltx_td ltx_align_center" id="S4.T4.1.5.4.3">3.1 to 0.4</td>
+<td class="ltx_td ltx_align_center" id="S4.T4.1.5.4.4">1.06</td>
+</tr>
+<tr class="ltx_tr" id="S4.T4.1.6.5">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_bb" id="S4.T4.1.6.5.1">Preventive</th>
+<td class="ltx_td ltx_align_center ltx_border_bb" id="S4.T4.1.6.5.2">1.8 to 0.1</td>
+<td class="ltx_td ltx_align_center ltx_border_bb" id="S4.T4.1.6.5.3">1.6 to 0.1</td>
+<td class="ltx_td ltx_align_center ltx_border_bb" id="S4.T4.1.6.5.4">0.65</td>
+</tr>
+</tbody>
+</table>
+</figure>
+<div class="ltx_para" id="S4.SS4.p3">
+<p class="ltx_p" id="S4.SS4.p3.1">Наконец, Таблица <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.13268v1#S4.T5" title="TABLE V ‣ IV-D Ethics Violation Reduction and Risk Downgrading ‣ IV Results ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops"><span class="ltx_text ltx_ref_tag">V</span></a> показывает, как распределение SRA 5 сдвигается от исходных ответов к уточнённым ответам. Оба генератора устраняют выходы Уровень 4 и Уровень 5 после уточнения. DeepSeek R1 переводит большинство запросов в Уровень 1 и Уровень 2: 67% заканчиваются на Уровень 1 и 28% заканчиваются на Уровень 2. Med PaLM демонстрирует аналогичный паттерн: 64% на Уровень 1 и 30% на Уровень 2. Лишь небольшая доля остаётся на Уровень 3 после уточнения, что указывает на то, что цикл в целом успешно удаляет контент с более высоким риском и переписывает ответ так, чтобы он был информационным или с низким риском.</p>
+</div>
+<figure class="ltx_table" id="S4.T5">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_table">TABLE V: </span>Распределение риска SRA 5</figcaption>
+<table class="ltx_tabular ltx_centering ltx_guessed_headers ltx_align_middle" id="S4.T5.1">
+<thead class="ltx_thead">
+<tr class="ltx_tr" id="S4.T5.1.1.1">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_column ltx_th_row ltx_border_tt" id="S4.T5.1.1.1.1"><span class="ltx_text ltx_font_bold" id="S4.T5.1.1.1.1.1">Level</span></th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt" colspan="2" id="S4.T5.1.1.1.2"><span class="ltx_text ltx_font_bold" id="S4.T5.1.1.1.2.1">DR1</span></th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt" colspan="2" id="S4.T5.1.1.1.3"><span class="ltx_text ltx_font_bold" id="S4.T5.1.1.1.3.1">MP</span></th>
+</tr>
+<tr class="ltx_tr" id="S4.T5.1.2.2">
+<th class="ltx_td ltx_th ltx_th_row" id="S4.T5.1.2.2.1"></th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column" id="S4.T5.1.2.2.2">Initial</th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column" id="S4.T5.1.2.2.3">Final</th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column" id="S4.T5.1.2.2.4">Initial</th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column" id="S4.T5.1.2.2.5">Final</th>
+</tr>
+</thead>
+<tbody class="ltx_tbody">
+<tr class="ltx_tr" id="S4.T5.1.3.1">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_t" id="S4.T5.1.3.1.1">1 (Minimal)</th>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S4.T5.1.3.1.2">12%</td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S4.T5.1.3.1.3">67%</td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S4.T5.1.3.1.4">10%</td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S4.T5.1.3.1.5">64%</td>
+</tr>
+<tr class="ltx_tr" id="S4.T5.1.4.2">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_row" id="S4.T5.1.4.2.1">2 (Low)</th>
+<td class="ltx_td ltx_align_center" id="S4.T5.1.4.2.2">18%</td>
+<td class="ltx_td ltx_align_center" id="S4.T5.1.4.2.3">28%</td>
+<td class="ltx_td ltx_align_center" id="S4.T5.1.4.2.4">20%</td>
+<td class="ltx_td ltx_align_center" id="S4.T5.1.4.2.5">30%</td>
+</tr>
+<tr class="ltx_tr" id="S4.T5.1.5.3">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_row" id="S4.T5.1.5.3.1">3 (Moderate)</th>
+<td class="ltx_td ltx_align_center" id="S4.T5.1.5.3.2">35%</td>
+<td class="ltx_td ltx_align_center" id="S4.T5.1.5.3.3">5%</td>
+<td class="ltx_td ltx_align_center" id="S4.T5.1.5.3.4">38%</td>
+<td class="ltx_td ltx_align_center" id="S4.T5.1.5.3.5">6%</td>
+</tr>
+<tr class="ltx_tr" id="S4.T5.1.6.4">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_row" id="S4.T5.1.6.4.1">4 (High)</th>
+<td class="ltx_td ltx_align_center" id="S4.T5.1.6.4.2">28%</td>
+<td class="ltx_td ltx_align_center" id="S4.T5.1.6.4.3">0%</td>
+<td class="ltx_td ltx_align_center" id="S4.T5.1.6.4.4">25%</td>
+<td class="ltx_td ltx_align_center" id="S4.T5.1.6.4.5">0%</td>
+</tr>
+<tr class="ltx_tr" id="S4.T5.1.7.5">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_bb" id="S4.T5.1.7.5.1">5 (Critical)</th>
+<td class="ltx_td ltx_align_center ltx_border_bb" id="S4.T5.1.7.5.2">7%</td>
+<td class="ltx_td ltx_align_center ltx_border_bb" id="S4.T5.1.7.5.3">0%</td>
+<td class="ltx_td ltx_align_center ltx_border_bb" id="S4.T5.1.7.5.4">7%</td>
+<td class="ltx_td ltx_align_center ltx_border_bb" id="S4.T5.1.7.5.5">0%</td>
+</tr>
+</tbody>
+</table>
+</figure>
+</section>
+</section>
+<section class="ltx_section" id="S5">
+<h2 class="ltx_title ltx_title_section">
+<span class="ltx_tag ltx_tag_section">V </span><span class="ltx_text ltx_font_smallcaps" id="S5.1.1">Обсуждение</span>
+</h2>
+<section class="ltx_subsection" id="S5.SS1">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection"><span class="ltx_text" id="S5.SS1.5.1.1">V-A</span> </span><span class="ltx_text ltx_font_italic" id="S5.SS1.6.2">Ключевые выводы</span>
+</h3>
+<div class="ltx_para" id="S5.SS1.p1">
+<p class="ltx_p" id="S5.SS1.p1.1">Среди 900 атакующих запросов цикл оценки обычно достигал критериев остановки в пределах бюджетного лимита пяти итераций, а итоговые ответы демонстрировали существенные снижения как числа нарушений этики, так и уровня риска. DeepSeek R1 сходился чаще и с меньшим числом раундов, чем Med PaLM, и также показывал немного более стабильные результаты итераций (его стандартное отклонение составляло 1.12 по сравнению с 1.28). В то же время Med PaLM, как правило, вел себя лучше в категориях, связанных с конфиденциальностью и общественным здравоохранением, где доменное обучение может помогать модели избегать очевидных проблем с соблюдением конфиденциальности и использовать более сдержанный язык.</p>
+</div>
+</section>
+<section class="ltx_subsection" id="S5.SS2">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection"><span class="ltx_text" id="S5.SS2.5.1.1">V-B</span> </span><span class="ltx_text ltx_font_italic" id="S5.SS2.6.2">Сравнение с выравниванием на основе дообучения</span>
+</h3>
+<div class="ltx_para" id="S5.SS2.p1">
+<p class="ltx_p" id="S5.SS2.p1.1">Ключевая практическая мотивация этой работы заключается в снижении небезопасных выходных данных без дообучения генератора. В MedSafetyBench дообучение на демонстрациях безопасности может уменьшить вредоносные выходные данные, но обычно требует специфичного для модели повторного обучения и многократных обновлений, когда политики меняются <cite class="ltx_cite ltx_citemacro_cite">[<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib29" title="MedSafetyBench: evaluating and improving the medical safety of large language models">10</a>]</cite>. В отличие от этого, наш подход работает на этапе инференса. Генератор можно оставить без изменений, а политику оценки и стиль обратной связи — настроить, изменив промпты оценщика или заменив модели оценщика. Это полезно в сценариях, где критерии безопасности со временем меняются, или где разные учреждения нуждаются в слегка различающихся политиках. Наша шкала риска также поддерживает градуированную интерпретацию безопасности, а не только «безопасно» versus «небезопасно», что помогает, когда промпт находится на границе между общей информацией и выполнимыми медицинскими рекомендациями.</p>
+</div>
+</section>
+<section class="ltx_subsection" id="S5.SS3">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection"><span class="ltx_text" id="S5.SS3.5.1.1">V-C</span> </span><span class="ltx_text ltx_font_italic" id="S5.SS3.6.2">Различия между двумя генераторами</span>
+</h3>
+<div class="ltx_para" id="S5.SS3.p1">
+<p class="ltx_p" id="S5.SS3.p1.1">DeepSeek R1 в целом требовал меньшего числа раундов доработки. Одно из правдоподобных объяснений заключается в том, что он более последовательно реагирует на явную обратную связь и охотнее перестраивает ответ, когда его просят удалить небезопасные элементы. Med PaLM, в отличие от него, часто начинает с более медицински обоснованного ответа, но ему может потребоваться больше раундов, чтобы убрать пограничные диагностические или лечебные рекомендации, когда запрос настойчиво провоцирует их. Разница в средних итерациях составляет 0.33. Если та же закономерность сохранится в более масштабной постановке, то обработка 10,000 запросов потребовала бы примерно на 3,300 меньше раундов уточнения для DeepSeek R1, что приводит к более низкой вычислительной стоимости и меньшей задержке.</p>
+</div>
+<div class="ltx_para" id="S5.SS3.p2">
+<p class="ltx_p" id="S5.SS3.p2.1">Med PaLM демонстрирует относительно более сильное поведение в принципе, связанном с конфиденциальностью, и выполняет схожим образом в запросах по общественному здравоохранению. Это поддерживает точку зрения, что медицинское предварительное обучение может помочь модели усвоить некоторые нормы в отношении конфиденциальности и публичного общения еще до начала цикла дообучения. Практическое следствие заключается в том, что гибридные стратегии могут быть многообещающими: когда доменно обученный генератор объединяется с надежным механизмом обратной связи, который обеспечивает четкие пороги безопасности.</p>
+</div>
+</section>
+<section class="ltx_subsection" id="S5.SS4">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection"><span class="ltx_text" id="S5.SS4.5.1.1">V-D</span> </span><span class="ltx_text ltx_font_italic" id="S5.SS4.6.2">Масштабируемость и практическое применение</span>
+</h3>
+<div class="ltx_para" id="S5.SS4.p1">
+<p class="ltx_p" id="S5.SS4.p1.1">В нашей настройке конвейер обрабатывал около 150 запросов в час с использованием четырех GPU A100, при этом средняя задержка составляла 8,5 секунды на каждый завершенный (сошедшийся) запрос. Это быстрее, чем ручная проверка клиницистом, которая часто занимает несколько минут на ответ, но все же медленнее, чем один вызов модели. На практике это указывает на конкретный сценарий использования. Цикл наиболее подходит в качестве этапа скрининга или уточнения для взаимодействий с более высоким риском, таких как медицинские рекомендации для пользователей, вопросы в стиле триажа или запросы, включающие чувствительную информацию. Задачи с более низким риском все еще могут использовать более легкие механизмы защиты, в то время как полный цикл можно зарезервировать для случаев, когда риск выше.</p>
+</div>
+<div class="ltx_para" id="S5.SS4.p2">
+<p class="ltx_p" id="S5.SS4.p2.1">Модульная конструкция также поддерживает операционные обновления. Если руководство меняется, инструкции для оценивания можно обновить без повторного обучения генератора. Это одно из основных практических преимуществ по сравнению с подходами, которые опираются на повторяющиеся циклы дообучения.</p>
+</div>
+</section>
+<section class="ltx_subsection" id="S5.SS5">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection"><span class="ltx_text" id="S5.SS5.5.1.1">V-E</span> </span><span class="ltx_text ltx_font_italic" id="S5.SS5.6.2">Соображения по нормативному регулированию и управлению</span>
+</h3>
+<div class="ltx_para" id="S5.SS5.p1">
+<p class="ltx_p" id="S5.SS5.p1.1">Мы не утверждаем, что данное исследование само по себе удовлетворяет нормативным требованиям. Однако предложенная конструкция совместима с типичными ожиданиями в отношении управления, поскольку она делает критерии оценки явными и формирует запись о том, почему ответ был пересмотрен. Принципы AMA задают внешне определенную этическую точку отсчета <cite class="ltx_cite ltx_citemacro_cite">[<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.13268v1#bib.bib30" title="Principles of medical ethics">1</a>]</cite>, а шкала риска согласована с общей структурой рассуждений в области управления медицинскими рисками, включая рассуждения о опасностях в стиле ISO 14971. На практике эти артефакты могут поддерживать документирование для внутренней проверки, аудита и обеспечения качества, особенно в сочетании с экспертным надзором и валидацией.</p>
+</div>
+</section>
+<section class="ltx_subsection" id="S5.SS6">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection"><span class="ltx_text" id="S5.SS6.5.1.1">V-F</span> </span><span class="ltx_text ltx_font_italic" id="S5.SS6.6.2">Ограничения и будущие работы</span>
+</h3>
+<div class="ltx_para" id="S5.SS6.p1">
+<p class="ltx_p" id="S5.SS6.p1.1">В этом исследовании есть несколько ограничений. Во-первых, мы оцениваем только два генератора и двух оценщиков, поэтому выводы могут не распространяться на другие семейства моделей. Во-вторых, оценщики сами являются языковыми моделями, а это означает, что их суждения не являются истинными данными. Необходима валидация по клиническим аннотациям, чтобы понять, где оценщики являются надежными и где они могут не заметить тонкие вредные эффекты. В-третьих, мы оцениваем одношаговые запросы, в то время как многие реальные внедрения включают многошаговые беседы, где ранее заданный контекст может изменить оценку риска. В-четвертых, мы не в полной мере характеризуем устойчивость к противодействию при целевой подмене запросов и сценариях использования инструментов, что важно, когда LLM встраиваются в более крупные приложения.</p>
+</div>
+<div class="ltx_para" id="S5.SS6.p2">
+<p class="ltx_p" id="S5.SS6.p2.1">Будущие работы могут расширить оценку дополнительными генераторами и оценщиками, включить суждения о безопасности, помеченные клиницистами, для калибровки, протестировать многорежимные настройки для нескольких раундов и изучить способы снижения задержки при сохранении тех же порогов безопасности. Следующим важным шагом также являются критерии, специфичные для конкретной субспециальности, такие как онкология или педиатрия, поскольку риск и допустимые рекомендации различаются в зависимости от клинического контекста.</p>
+</div>
+</section>
+</section>
+<section class="ltx_section" id="S6">
+<h2 class="ltx_title ltx_title_section">
+<span class="ltx_tag ltx_tag_section">VI </span><span class="ltx_text ltx_font_smallcaps" id="S6.1.1">Вывод</span>
+</h2>
+<div class="ltx_para" id="S6.p1">
+<p class="ltx_p" id="S6.p1.1">В этой работе исследовался цикл оценивания при инференсе для многoагентной системы с целью повышения безопасности выходов медицинских LLM за счёт повторных проверок и доработок. Используя 900 противодействующих запросов из MedSafetyBench, процесс уточнения снизил нарушения этики AMA на 89% и понизил уровень риска в 92% случаев, при этом сходимость наблюдалась в 94,2% запросов в пределах пяти итераций. DeepSeek R1 обычно сходилась за меньшее число раундов и демонстрировала немного более стабильное поведение при итерациях, тогда как Med PaLM показала сопоставимо хорошие результаты в запросах, связанных с конфиденциальностью.</p>
+</div>
+<div class="ltx_para" id="S6.p2">
+<p class="ltx_p" id="S6.p2.1">Практическим вкладом данной работы является то, что она не требует перенастройки генератора. Вместо этого генератор уточняется с помощью структурированной обратной связи, формируемой во время вывода, что упрощает обновление критериев оценки при изменении политик. В то же время это исследование следует рассматривать как начальный шаг, а не как готовую к развертыванию валидацию. Оценщики — это языковые модели, и их суждения требуют калибровки по сравнению с аннотациями клиницистов и реальными клиническими рабочими процессами.</p>
+</div>
+<div class="ltx_para" id="S6.p3">
+<p class="ltx_p" id="S6.p3.1">Дальнейшая работа может расширить набор генераторов и оценщиков, подтвердить суждения по безопасности с помощью медицинских экспертов и расширить оценивание для сценариев с несколькими раундами, где риск зависит от более длинного контекста. Также будет важно проверить устойчивость к prompt injection и другим стратегиям противодействия, возникающим в приложениях с интеграцией инструментов. Более специализированные критерии оценивания для клинических поддоменов, таких как педиатрия или онкология, представляют собой еще одно очевидное направление.</p>
+</div>
+</section>
+<section class="ltx_bibliography" id="bib">
+<h2 class="ltx_title ltx_title_bibliography">Ссылки</h2>
+<ul class="ltx_biblist" id="bib.L1">
+<li class="ltx_bibitem ltx_bib_misc" id="bib.bib30">
+<span class="ltx_tag ltx_bib_key ltx_role_refnum ltx_tag_bibitem">[1]</span>  
+Американская медицинская ассоциация (2001)
+
+Принципы медицинской этики.
+
+Примечание: Дата обращения: 2024-07-08
+
+Внешние ссылки: <a class="ltx_ref ltx_bib_external" href="https://code-medical-ethics.ama-assn.org/principles" target="_blank" title="">Link</a>
+
+Цитируется: <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.13268v1#S1.p6.1" title="I Introduction ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops"><span class="ltx_text ltx_ref_tag">§I</span></a>,  
+<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.13268v1#S3.SS2.SSS1.p1.1" title="III-B1 AMA 9 Ethics Scoring ‣ III-B Safety Evaluation Criteria ‣ III Methodology ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops"><span class="ltx_text ltx_ref_tag">§<span class="ltx_text">III-B</span>1</span></a>,  
+<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.13268v1#S5.SS5.p1.1" title="V-E Regulatory and Governance Considerations ‣ V Discussion ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops"><span class="ltx_text ltx_ref_tag">§<span class="ltx_text">V-E</span></span></a>.
+
+</li>
+<li class="ltx_bibitem ltx_bib_article" id="bib.bib38">
+<span class="ltx_tag ltx_bib_key ltx_role_refnum ltx_tag_bibitem">[2]</span>
+S. Aydin и др. (2024)
+
+Большие языковые модели в обучении пациентов: обзор с установлением объема.
+
+Frontiers in Medicine.
+
+Внешние ссылки: <a class="ltx_ref doi ltx_bib_external" href="https://dx.doi.org/10.3389/fmed.2024.1477898" target="_blank" title="">Document</a>
+
+Цитируется: <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.13268v1#S1.p1.1" title="I Introduction ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops"><span class="ltx_text ltx_ref_tag">§I</span></a>.
+
+</li>
+<li class="ltx_bibitem ltx_bib_article" id="bib.bib42">
+⟦<span class="ltx_tag ltx_bib_key ltx_role_refnum ltx_tag_bibitem">[3]</span>
+Y. Bai, S. Kadavath, S. Kundu, A. Askell, J. Kernion, A. Jones, et al. (2022)
+
+Конституционная искусственная интеллектуальная система: безопасное поведение в ответ на отзывы от ai.
+
+Предварительная публикация arXiv на arXiv:2212.08073.
+
+Цитируется: <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.13268v1#S1.p3.1" title="I Introduction ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops"><span class="ltx_text ltx_ref_tag">§I</span></a>,
+<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.13268v1#S2.SS2.p1.1" title="II-B LLM Safety and Alignment ‣ II Related Work ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops"><span class="ltx_text ltx_ref_tag">§<span class="ltx_text">II-B</span></span></a>.
+
+</li>
+<li class="ltx_bibitem ltx_bib_article" id="bib.bib40">
+<span class="ltx_tag ltx_bib_key ltx_role_refnum ltx_tag_bibitem">[4]</span>
+A. A. Birkun и др. (2023)
+
+Чат-боты с поддержкой LLM не способны надежно направлять при проведении сердечно-легочной реанимации.
+
+Реанимация.
+
+Цитируется по: <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.13268v1#S1.p2.1" title="I Introduction ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops"><span class="ltx_text ltx_ref_tag">§I</span></a>.
+
+</li>
+<li class="ltx_bibitem ltx_bib_article" id="bib.bib39">
+⟦<span class="ltx_tag ltx_bib_key ltx_role_refnum ltx_tag_bibitem">[5]</span>  
+А. А. Биркун и соавт. (2024)
+
+Чат-бот на основе больших языковых моделей как источник советов по оказанию первой помощи при инфаркте миокарда.
+
+Американский журнал неотложной медицины.
+
+Цитируется: <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.13268v1#S1.p2.1" title="I Introduction ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops"><span class="ltx_text ltx_ref_tag">§I</span></a>⟧.
+
+</li>
+<li class="ltx_bibitem ltx_bib_article" id="bib.bib1">
+<span class="ltx_tag ltx_bib_key ltx_role_refnum ltx_tag_bibitem">[6]</span>  
+К. Чэнь, С. Ли, Т. Ян, Х. Ван, У. Дун и Ю. Гао (2025)
+
+Mdteamgpt: самоупорядочивающаяся многомодульная агенто-ориентированная платформа на базе LLM для медицинских консультаций междисциплинарными командами.
+
+предварительная публикация arXiv arXiv:2503.13856.
+
+Цитируется: <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.13268v1#S1.p5.1" title="I Introduction ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops"><span class="ltx_text ltx_ref_tag">§I</span></a>,  
+<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.13268v1#S2.SS3.p2.1" title="II-C Multi Agent Systems ‣ II Related Work ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops"><span class="ltx_text ltx_ref_tag">§<span class="ltx_text">II-C</span></span></a>.
+
+</li>
+<li class="ltx_bibitem ltx_bib_article" id="bib.bib49">
+⟦<span class="ltx_tag ltx_bib_key ltx_role_refnum ltx_tag_bibitem">[7]</span>
+Z. Chen, A. Hernández Cano, A. Romanou, A. Bonnet, K. Matoba, F. Salvi, M. Pagliardini, S. Fan, A. Köpf, A. Mohtashami, et al. (2023)
+
+MEDITRON-70b: масштабирование медицинского предварительного обучения для больших языковых моделей.
+
+Предварительная публикация arXiv arXiv:2311.16079.
+
+Цитируется: <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.13268v1#S2.SS1.p2.1" title="II-A Medical Language Models ‣ II Related Work ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops"><span class="ltx_text ltx_ref_tag">§<span class="ltx_text">II-A</span></span></a>.
+
+</li>
+<li class="ltx_bibitem ltx_bib_article" id="bib.bib25">
+<span class="ltx_tag ltx_bib_key ltx_role_refnum ltx_tag_bibitem">[8]</span>
+Y. Du, Z. Wang, X. Li, T. Gao, X. Zhang, and Z. Liu (2023)
+
+Повышение фактической корректности в LLM через дебаты многoагентных систем.
+
+Предварительная публикация arXiv arXiv:2305.14325.
+
+Цитируется: <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.13268v1#S1.p5.1" title="I Introduction ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops"><span class="ltx_text ltx_ref_tag">§I</span></a>,
+<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.13268v1#S2.SS3.p1.1" title="II-C Multi Agent Systems ‣ II Related Work ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops"><span class="ltx_text ltx_ref_tag">§<span class="ltx_text">II-C</span></span></a>.
+
+</li>
+<li class="ltx_bibitem ltx_bib_article" id="bib.bib19">
+<span class="ltx_tag ltx_bib_key ltx_role_refnum ltx_tag_bibitem">[9]</span>
+Y. Gu, R. Tinn, H. Cheng, M. Lucas, N. Usuyama, X. Liu, T. Naumann, J. Gao, and H. Poon (2021)
+
+Предварительное обучение языковой модели предметной области для биомедицинской обработки естественного языка.
+
+ACM Transactions on Computing for Healthcare (HEALTH) 3 (1),  стр. 1–23.
+
+Цитируется: <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.13268v1#S1.p1.1" title="I Introduction ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops"><span class="ltx_text ltx_ref_tag">§I</span></a>.
+
+</li>
+<li class="ltx_bibitem ltx_bib_article" id="bib.bib29">
+⟦<span class="ltx_tag ltx_bib_key ltx_role_refnum ltx_tag_bibitem">[10]</span>
+Т. Хан, А. Кумар, С. Агарвал и Х. Лаккараджу (2024)
+
+MedSafetyBench: оценка и улучшение медицинской безопасности больших языковых моделей.
+
+препринт arXiv arXiv:2406.12345.
+
+Цитируется: <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.13268v1#S1.p10.1" title="I Introduction ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops"><span class="ltx_text ltx_ref_tag">§I</span></a>,
+<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.13268v1#S1.p2.1" title="I Introduction ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops"><span class="ltx_text ltx_ref_tag">§I</span></a>,
+<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.13268v1#S1.p3.1" title="I Introduction ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops"><span class="ltx_text ltx_ref_tag">§I</span></a>,
+<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.13268v1#S1.p4.1" title="I Introduction ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops"><span class="ltx_text ltx_ref_tag">§I</span></a>,
+<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.13268v1#S2.SS2.p1.1" title="II-B LLM Safety and Alignment ‣ II Related Work ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops"><span class="ltx_text ltx_ref_tag">§<span class="ltx_text">II-B</span></span></a>,
+<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.13268v1#S3.SS4.p1.1" title="III-D Dataset and Metrics ‣ III Methodology ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops"><span class="ltx_text ltx_ref_tag">§<span class="ltx_text">III-D</span></span></a>,
+<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.13268v1#S5.SS2.p1.1" title="V-B Comparison With Fine Tuning Based Alignment ‣ V Discussion ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops"><span class="ltx_text ltx_ref_tag">§<span class="ltx_text">V-B</span></span></a>.
+
+</li>
+<li class="ltx_bibitem ltx_bib_article" id="bib.bib45">
+<span class="ltx_tag ltx_bib_key ltx_role_refnum ltx_tag_bibitem">[11]</span>
+Дж. Ли, У. Юн, С. Ким, Д. Ким, С. Ким, Ч. Х. Со и Дж. Канг (2020)
+
+BioBERT: предварительно обученная модель представлений биомедицинского языка для майнинга биомедицинских текстов.
+
+Bioinformatics 36 (4), стр. 1234–1240.
+
+Внешние ссылки: <a class="ltx_ref doi ltx_bib_external" href="https://dx.doi.org/10.1093/bioinformatics/btz682" target="_blank" title="">Document</a>
+
+Цитируется: <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.13268v1#S2.SS1.p1.1" title="II-A Medical Language Models ‣ II Related Work ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops"><span class="ltx_text ltx_ref_tag">§<span class="ltx_text">II-A</span></span></a>.
+
+</li>
+<li class="ltx_bibitem ltx_bib_inproceedings" id="bib.bib8">
+⟦<span class="ltx_tag ltx_bib_key ltx_role_refnum ltx_tag_bibitem">[12]</span>
+Y. Ляо, С. Цзян, Ч. Чэнь, Ю. Ван и Ю. Ван (2024-11)
+
+MedCare: развитие медицинских LLMs за счет разделения клинического согласования и агрегации знаний.
+
+В материалах Findings of the Association for Computational Linguistics: EMNLP 2024,  Y. Аль-Онайзан, М. Бансал и Ю. Чэнь (ред.),
+
+Майами, Флорида, США,  стр. 10562–10581.
+
+Внешние ссылки: <a class="ltx_ref ltx_bib_external" href="https://aclanthology.org/2024.findings-emnlp.619/" target="_blank" title="">Link</a>,
+<a class="ltx_ref doi ltx_bib_external" href="https://dx.doi.org/10.18653/v1/2024.findings-emnlp.619" target="_blank" title="">Document</a>
+
+Цитируется: <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.13268v1#S1.p1.1" title="I Introduction ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops"><span class="ltx_text ltx_ref_tag">§I</span></a>.
+
+</li>
+<li class="ltx_bibitem ltx_bib_article" id="bib.bib36">
+⟦<span class="ltx_tag ltx_bib_key ltx_role_refnum ltx_tag_bibitem">[13]</span>
+Л. Лю и др. (2024)
+
+Обзор медицинских больших языковых моделей.
+
+препринт arXiv arXiv:2406.03712.
+
+Цитируется: <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.13268v1#S1.p1.1" title="I Introduction ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops"><span class="ltx_text ltx_ref_tag">§I</span></a>.
+
+</li>
+<li class="ltx_bibitem ltx_bib_article" id="bib.bib43">
+<span class="ltx_tag ltx_bib_key ltx_role_refnum ltx_tag_bibitem">[14]</span>
+Y. Liu et al. (2023)
+
+Атаки инъекций в подсказки против приложений, интегрированных с llm.
+
+Предварительная публикация arXiv:2306.05499.
+
+Цитируется: <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.13268v1#S1.p2.1" title="I Introduction ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops"><span class="ltx_text ltx_ref_tag">§I</span></a>,
+<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.13268v1#S2.SS2.p2.1" title="II-B LLM Safety and Alignment ‣ II Related Work ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops"><span class="ltx_text ltx_ref_tag">§<span class="ltx_text">II-B</span></span></a>.
+
+</li>
+<li class="ltx_bibitem ltx_bib_inproceedings" id="bib.bib6">
+⟦<span class="ltx_tag ltx_bib_key ltx_role_refnum ltx_tag_bibitem">[15]</span>
+Д. Икс. Лонг, Д. Н. Йен, А. Т. Луу, К. Кавагучи, М. Кан и Н. Ф. Чен (2024-11)
+
+Многоэкспертное подсказочное представление улучшает надежность, безопасность и полезность больших языковых моделей.
+
+В материалах 2024 Конференции по эмпирическим методам обработки естественного языка,  Й. Аль-Онайзан, М. Банзал и Й. Чен (ред.),
+
+Майами, Флорида, США,  стр. 20370–20401.
+
+Внешние ссылки: <a class="ltx_ref ltx_bib_external" href="https://aclanthology.org/2024.emnlp-main.1135/" target="_blank" title="">Link</a>,
+<a class="ltx_ref doi ltx_bib_external" href="https://dx.doi.org/10.18653/v1/2024.emnlp-main.1135" target="_blank" title="">Document</a>
+
+Цитируется: <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.13268v1#S1.p5.1" title="I Introduction ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops"><span class="ltx_text ltx_ref_tag">§I</span></a>.
+
+</li>
+<li class="ltx_bibitem ltx_bib_inproceedings" id="bib.bib47">
+⟦К0⟧
+Вопрос. Лу, Д. Доу и Т. Нгуен (2022)
+
+ClinicalT5: генеративная языковая модель для клинического текста.
+
+В Findings of the Association for Computational Linguistics: EMNLP 2022,
+
+ стр. 5436–5443.
+
+Внешние ссылки: <a class="ltx_ref doi ltx_bib_external" href="https://dx.doi.org/10.18653/v1/2022.findings-emnlp.398" target="_blank" title="">Document</a>
+
+Цитируется: <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.13268v1#S2.SS1.p1.1" title="II-A Medical Language Models ‣ II Related Work ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops"><span class="ltx_text ltx_ref_tag">§<span class="ltx_text">II-A</span></span></a>.
+
+</li>
+<li class="ltx_bibitem ltx_bib_article" id="bib.bib16">
+<span class="ltx_tag ltx_bib_key ltx_role_refnum ltx_tag_bibitem">[17]</span>
+R. Luo, L. Sun, Y. Xia, T. Qin, S. Zhang, H. Poon, и T. Liu (2022)
+
+BioGPT: generative pre-trained transformer для генерации и извлечения биомедицинских текстов.
+
+Briefings in bioinformatics 23 (6), стр. bbac409.
+
+Cited by: <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.13268v1#S1.p1.1" title="I Introduction ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops"><span class="ltx_text ltx_ref_tag">§I</span></a>.
+
+</li>
+<li class="ltx_bibitem ltx_bib_article" id="bib.bib50">
+<span class="ltx_tag ltx_bib_key ltx_role_refnum ltx_tag_bibitem">[18]</span>
+A. Madaan, N. Tandon, P. Gupta, S. Hallinan, L. Gao, S. Wiegreffe, U. Alon, N. Dziri, S. Prabhumoye, Y. Yang, et al. (2023)
+
+Самоусовершенствование: итеративное уточнение с самоконтролем.
+
+arXiv preprint arXiv:2303.17651.
+
+Цитируется: <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.13268v1#S2.SS3.p1.1" title="II-C Multi Agent Systems ‣ II Related Work ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops"><span class="ltx_text ltx_ref_tag">§<span class="ltx_text">II-C</span></span></a>.
+
+</li>
+<li class="ltx_bibitem ltx_bib_article" id="bib.bib21">
+<span class="ltx_tag ltx_bib_key ltx_role_refnum ltx_tag_bibitem">[19]</span>
+Р. Мьотто, Ф. Ван и Х. Цзян (2023)
+
+Медицинская безопасность ИИ: что происходит, когда прогноз оказывается неверным?.
+
+NPJ Digital Medicine 6 (1), стр. 1–4.
+
+Цитируется: <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.13268v1#S1.p2.1" title="I Introduction ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops"><span class="ltx_text ltx_ref_tag">§I</span></a>,
+<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.13268v1#S2.SS1.p2.1" title="II-A Medical Language Models ‣ II Related Work ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops"><span class="ltx_text ltx_ref_tag">§<span class="ltx_text">II-A</span></span></a>.
+
+</li>
+<li class="ltx_bibitem ltx_bib_article" id="bib.bib3">
+⟦<span class="ltx_tag ltx_bib_key ltx_role_refnum ltx_tag_bibitem">[20]</span>
+S. Mukherjee, P. Gamble, M. S. Ausin, N. Kant, K. Aggarwal, N. Manjunath, D. Datta, Z. Liu, J. Ding, S. Busacca, et al. (2024)
+
+Polaris: архитектура созвездия LLM, ориентированная на безопасность, для здравоохранения.
+
+arXiv preprint arXiv:2403.13313.
+
+Cited by: <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.13268v1#S1.p5.1" title="I Introduction ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops"><span class="ltx_text ltx_ref_tag">§I</span></a>,
+<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.13268v1#S2.SS3.p2.1" title="II-C Multi Agent Systems ‣ II Related Work ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops"><span class="ltx_text ltx_ref_tag">§<span class="ltx_text">II-C</span></span></a>.
+
+</li>
+<li class="ltx_bibitem ltx_bib_article" id="bib.bib15">
+<span class="ltx_tag ltx_bib_key ltx_role_refnum ltx_tag_bibitem">[21]</span>
+K. Nassiri и M. A. Akhloufi (2024)
+
+Последние достижения в больших языковых моделях для здравоохранения.
+
+BioMedInformatics 4 (2), стр. 1097–1143.
+
+Цитируется: <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.13268v1#S2.SS1.p2.1" title="II-A Medical Language Models ‣ II Related Work ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops"><span class="ltx_text ltx_ref_tag">§<span class="ltx_text">II-A</span></span></a>.
+
+</li>
+<li class="ltx_bibitem ltx_bib_article" id="bib.bib18">
+<span class="ltx_tag ltx_bib_key ltx_role_refnum ltx_tag_bibitem">[22]</span>
+Л. Оньеквелу-Удока, М. С. Ислам и М. С. Хасан (2025)
+
+Обнаружение эмоций в речи с использованием легковесных и моделей на базе transformer: сравнительное и ablation-исследование.
+
+preprint arXiv arXiv:2511.00402.
+
+Внешние ссылки: <a class="ltx_ref ltx_bib_external" href="https://arxiv.org/abs/2511.00402" target="_blank" title="">Link</a>
+
+Цитируется: <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.13268v1#S1.p5.1" title="I Introduction ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops"><span class="ltx_text ltx_ref_tag">§I</span></a>⟧.
+
+</li>
+<li class="ltx_bibitem ltx_bib_article" id="bib.bib41">
+⟦<span class="ltx_tag ltx_bib_key ltx_role_refnum ltx_tag_bibitem">[23]</span>
+Л. Оуян, Дж. Ву, С. Цзян, Д. Алмейда, С. Уэйнрайт, П. Мишкин и др. (2022)
+
+Обучение языковых моделей следованию инструкциям с учетом обратной связи от человека.
+
+Успехи в Neural Information Processing Systems.
+
+Примечание: arXiv:2203.02155
+
+Цитируется: <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.13268v1#S1.p3.1" title="I Introduction ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops"><span class="ltx_text ltx_ref_tag">§I</span></a>,
+<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.13268v1#S2.SS2.p1.1" title="II-B LLM Safety and Alignment ‣ II Related Work ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops"><span class="ltx_text ltx_ref_tag">§<span class="ltx_text">II-B</span></span></a>.
+
+</li>
+<li class="ltx_bibitem ltx_bib_misc" id="bib.bib44">
+<span class="ltx_tag ltx_bib_key ltx_role_refnum ltx_tag_bibitem">[24]</span>
+Фонд OWASP (2024)
+
+Топ OWASP для приложений больших языковых моделей.
+
+Примечание: <a class="ltx_ref ltx_url ltx_font_typewriter" href="https://owasp.org/www-project-top-10-for-large-language-model-applications/" target="_blank" title="">https://owasp.org/www-project-top-10-for-large-language-model-applications/</a>Доступ: 2025-12-25
+
+Цитируется: <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.13268v1#S1.p2.1" title="I Introduction ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops"><span class="ltx_text ltx_ref_tag">§I</span></a>,
+<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.13268v1#S2.SS2.p2.1" title="II-B LLM Safety and Alignment ‣ II Related Work ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops"><span class="ltx_text ltx_ref_tag">§<span class="ltx_text">II-B</span></span></a>.
+
+</li>
+<li class="ltx_bibitem ltx_bib_article" id="bib.bib51">
+<span class="ltx_tag ltx_bib_key ltx_role_refnum ltx_tag_bibitem">[25]</span>
+Н. Шинн, Ф. Кассано, Э. Берман, А. Гопинат, К. Нарасимхан и С. Яо (2023)
+
+Рефлексия: языковые агенты с вербальным обучением с подкреплением.
+
+Предварительный препринт arXiv arXiv:2303.11366.
+
+Цитируется: <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.13268v1#S2.SS3.p1.1" title="II-C Multi Agent Systems ‣ II Related Work ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops"><span class="ltx_text ltx_ref_tag">§<span class="ltx_text">II-C</span></span></a>.
+
+</li>
+<li class="ltx_bibitem ltx_bib_article" id="bib.bib17">
+⟦<span class="ltx_tag ltx_bib_key ltx_role_refnum ltx_tag_bibitem">[26]</span>  
+К. Сингхал, С. Азизи, Т. Ту, С. С. Махдави, Дж. Вэй, Х. В. Чанг, Н. Скайлз, А. Танвани, А. Коул, Дж. Ли и др. (2023)
+
+Крупные языковые модели кодируют клинические знания.
+
+Nature 620 (7972), стр. 172–180.
+
+Cited by: <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.13268v1#S1.p1.1" title="I Introduction ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops"><span class="ltx_text ltx_ref_tag">§I</span></a>,  
+<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.13268v1#S2.SS1.p2.1" title="II-A Medical Language Models ‣ II Related Work ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops"><span class="ltx_text ltx_ref_tag">§<span class="ltx_text">II-A</span></span></a>.
+
+</li>
+<li class="ltx_bibitem ltx_bib_inproceedings" id="bib.bib7">
+⟦<span class="ltx_tag ltx_bib_key ltx_role_refnum ltx_tag_bibitem">[27]</span>
+Y. Wang, X. Ma, и W. Chen (2024-11)
+
+Усиление черного ящика LLM с помощью медицинских учебников для биомедицинского вопросно-ответного поиска.
+
+В материалах Findings of the Association for Computational Linguistics: EMNLP 2024,  Y. Al-Onaizan, M. Bansal и Y. Chen (Ред.),
+
+Майами, Флорида, США,  стр. 1754–1770.
+
+Внешние ссылки: <a class="ltx_ref ltx_bib_external" href="https://aclanthology.org/2024.findings-emnlp.95/" target="_blank" title="">Link</a>,
+<a class="ltx_ref doi ltx_bib_external" href="https://dx.doi.org/10.18653/v1/2024.findings-emnlp.95" target="_blank" title="">Document</a>
+
+Цитируется: <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.13268v1#S1.p1.1" title="I Introduction ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops"><span class="ltx_text ltx_ref_tag">§I</span></a>.
+
+</li>
+<li class="ltx_bibitem ltx_bib_article" id="bib.bib37">
+⟦<span class="ltx_tag ltx_bib_key ltx_role_refnum ltx_tag_bibitem">[28]</span>
+C. Y. K. Williams и др. (2024)
+
+Оценка больших языковых моделей для клинических рекомендаций по заметкам из отделения неотложной помощи.
+
+Nature Communications.
+
+Примечание: Статья: s41467-024-52415-1
+
+Цитируется: <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.13268v1#S1.p1.1" title="I Introduction ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops"><span class="ltx_text ltx_ref_tag">§I</span></a>.
+
+</li>
+<li class="ltx_bibitem ltx_bib_article" id="bib.bib46">
+⟦<span class="ltx_tag ltx_bib_key ltx_role_refnum ltx_tag_bibitem">[29]</span>
+Икс. Ян, Э. Чен, Н. ПурНеятян, Х. Си. Шин, К. И. Смит, С. Парижене, С. Компас, С. Мартин, А. Б. Коста, М. Дж. Флорес, и др. (2022)
+
+Большая языковая модель для электронных медицинских записей.
+
+npj Digital Medicine 5, стр. 194.
+
+Внешние ссылки: <a class="ltx_ref doi ltx_bib_external" href="https://dx.doi.org/10.1038/s41746-022-00742-2" target="_blank" title="">Document</a>
+
+Цитируется: <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.13268v1#S2.SS1.p1.1" title="II-A Medical Language Models ‣ II Related Work ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops"><span class="ltx_text ltx_ref_tag">§<span class="ltx_text">II-A</span></span></a>.
+
+</li>
+<li class="ltx_bibitem ltx_bib_article" id="bib.bib24">
+⟦<span class="ltx_tag ltx_bib_key ltx_role_refnum ltx_tag_bibitem">[30]</span>
+С. Яо, Ц. Чжао, Д. Юй, И. Чжао, Т. Кхот, А. Сабхарвал, А. Босселут и Ё. Чой (2023)
+
+Дерево мыслей: обдуманное решение задач с помощью больших языковых моделей.
+
+Преоттиск arXiv:2305.10601.
+
+Цитируется: <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.13268v1#S1.p5.1" title="I Introduction ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops"><span class="ltx_text ltx_ref_tag">§I</span></a>,
+<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.13268v1#S2.SS3.p1.1" title="II-C Multi Agent Systems ‣ II Related Work ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops"><span class="ltx_text ltx_ref_tag">§<span class="ltx_text">II-C</span></span></a>.
+
+</li>
+<li class="ltx_bibitem ltx_bib_inproceedings" id="bib.bib9">
+⟦<span class="ltx_tag ltx_bib_key ltx_role_refnum ltx_tag_bibitem">[31]</span>
+E. Юй, Д. Ли, М. Ляо, С. Ван, Г. Зучэн, Ф. Ми и Л. Хунг (2024-11)
+
+CoSafe: оценка безопасности больших языковых моделей в диалогах с многократными репликами и разрешением ссылок.
+
+В материалах 2024 Conference on Empirical Methods in Natural Language Processing,  под редакцией Y. Al-Onaizan, M. Bansal и Y. Chen,
+
+Майами, штат Флорида, США,  стр. 17494–17508.
+
+Внешние ссылки: <a class="ltx_ref ltx_bib_external" href="https://aclanthology.org/2024.emnlp-main.968/" target="_blank" title="">Link</a>,
+<a class="ltx_ref doi ltx_bib_external" href="https://dx.doi.org/10.18653/v1/2024.emnlp-main.968" target="_blank" title="">Document</a>
+
+Цитируется: <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.13268v1#S1.p1.1" title="I Introduction ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops"><span class="ltx_text ltx_ref_tag">§I</span></a>.
+
+</li>
+<li class="ltx_bibitem ltx_bib_inproceedings" id="bib.bib5">
+⟦Y. Zhao, H. Wang, Y. Liu, W. Suhuang, X. Wu и Y. Zheng (2024-11)
+
+Могут ли LLM заменить клинических врачей? изучение смещений при диагностике заболеваний с помощью больших языковых моделей.
+
+В материалов Findings of the Association for Computational Linguistics: EMNLP 2024, Y. Al-Onaizan, M. Bansal и Y. Chen (ред.),
+
+Майами, Флорида, США, стр. 13914–13935.
+
+Внешние ссылки: <a class="ltx_ref ltx_bib_external" href="https://aclanthology.org/2024.findings-emnlp.814/" target="_blank" title="">Link</a>,
+<a class="ltx_ref doi ltx_bib_external" href="https://dx.doi.org/10.18653/v1/2024.findings-emnlp.814" target="_blank" title="">Document</a>
+
+Цитируется: <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2601.13268v1#S1.p2.1" title="I Introduction ‣ Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops"><span class="ltx_text ltx_ref_tag">§I</span></a>.
+
+</li>
+</ul>
+</section>
+</article>
+</div>
+<div class="ar5iv-footer"><a class="ar5iv-nav-button ar5iv-nav-button-prev" href="https://ar5iv.labs.arxiv.org/html/2601.13267">◄</a>
+<a class="ar5iv-home-button" href="https://ar5iv.labs.arxiv.org/"><img alt="ar5iv homepage" height="40" src="./[2601.13268] Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops_files/ar5iv.png"/></a>
+<a class="ar5iv-text-button" href="https://ar5iv.labs.arxiv.org/feeling_lucky">Чувство<br/>lucky?</a>
+<a aria-hidden="true" href="https://ar5iv.labs.arxiv.org/land_of_honey_and_milk" rel="nofollow" tabindex="-1"></a>
+<a class="ar5iv-text-button ar5iv-severity-error" href="https://ar5iv.labs.arxiv.org/log/2601.13268">Преобразование<br/>report</a>
+<a class="ar5iv-text-button" href="https://github.com/dginev/ar5iv/issues/new?template=improve-article--arxiv-id-.md&amp;title=Improve+article+2601.13268" target="_blank">Отчет<br/>проблема</a>
+<a class="ar5iv-text-button arxiv-ui-theme" href="https://arxiv.org/abs/2601.13268">Просмотреть оригинал<br/>на arXiv</a><a class="ar5iv-nav-button ar5iv-nav-button-next" href="https://ar5iv.labs.arxiv.org/html/2601.13269">►</a>
+</div><footer class="ltx_page_footer">
+<a class="ar5iv-toggle-color-scheme" href="javascript:toggleColorScheme()" title="Toggle ar5iv color scheme"><span class="color-scheme-icon"></span></a>
+<a class="ar5iv-footer-button" href="https://arxiv.org/help/license" target="_blank">Авторское право</a>
+<a class="ar5iv-footer-button" href="https://arxiv.org/help/policies/privacy_policy" target="_blank">Политика конфиденциальности</a>
+<div class="ltx_page_logo">Сгенерировано  в четверг, 5 февраля, 18:40:50 2026 года, по <a class="ltx_LaTeXML_logo" href="http://dlmf.nist.gov/LaTeXML/" target="_blank"><span style="letter-spacing:-0.2em; margin-right:0.1em;">L<span class="ltx_font_smallcaps" style="position:relative; bottom:2.2pt;">a</span>T<span class="ltx_font_smallcaps" style="font-size:120%;position:relative; bottom:-0.2ex;">e</span></span><span style="font-size:90%; position:relative; bottom:-0.2ex;">XML</span><img alt="Mascot Sammy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAAOCAYAAAD5YeaVAAAAAXNSR0IArs4c6QAAAAZiS0dEAP8A/wD/oL2nkwAAAAlwSFlzAAALEwAACxMBAJqcGAAAAAd0SU1FB9wKExQZLWTEaOUAAAAddEVYdENvbW1lbnQAQ3JlYXRlZCB3aXRoIFRoZSBHSU1Q72QlbgAAAdpJREFUKM9tkL+L2nAARz9fPZNCKFapUn8kyI0e4iRHSR1Kb8ng0lJw6FYHFwv2LwhOpcWxTjeUunYqOmqd6hEoRDhtDWdA8ApRYsSUCDHNt5ul13vz4w0vWCgUnnEc975arX6ORqN3VqtVZbfbTQC4uEHANM3jSqXymFI6yWazP2KxWAXAL9zCUa1Wy2tXVxheKA9YNoR8Pt+aTqe4FVVVvz05O6MBhqUIBGk8Hn8HAOVy+T+XLJfLS4ZhTiRJgqIoVBRFIoric47jPnmeB1mW/9rr9ZpSSn3Lsmir1fJZlqWlUonKsvwWwD8ymc/nXwVBeLjf7xEKhdBut9Hr9WgmkyGEkJwsy5eHG5vN5g0AKIoCAEgkEkin0wQAfN9/cXPdheu6P33fBwB4ngcAcByHJpPJl+fn54mD3Gg0NrquXxeLRQAAwzAYj8cwTZPwPH9/sVg8PXweDAauqqr2cDjEer1GJBLBZDJBs9mE4zjwfZ85lAGg2+06hmGgXq+j3+/DsixYlgVN03a9Xu8jgCNCyIegIAgx13Vfd7vdu+FweG8YRkjXdWy329+dTgeSJD3ieZ7RNO0VAXAPwDEAO5VKndi2fWrb9jWl9Esul6PZbDY9Go1OZ7PZ9z/lyuD3OozU2wAAAABJRU5ErkJggg=="/></a>
+</div></footer>
+</div>
+<script>
+      var canMathML = typeof(MathMLElement) == "function";
+      if (!canMathML) {
+        var body = document.querySelector("body");
+        body.firstElementChild.setAttribute('style', 'opacity: 0;');
+        var loading = document.createElement("div");
+        loading.setAttribute("id", "mathjax-loading-spinner");
+        var message = document.createElement("div");
+        message.setAttribute("id", "mathjax-loading-message");
+        message.innerText = "Typesetting Equations...";
+        body.prepend(loading);
+        body.prepend(message);
+
+        var el = document.createElement("script");
+        el.src = "https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js";
+        document.querySelector("head").appendChild(el);
+
+        window.MathJax = {
+          startup: {
+            pageReady: () => {
+              return MathJax.startup.defaultPageReady().then(() => {
+                body.removeChild(loading);
+                body.removeChild(message);
+                body.firstElementChild.removeAttribute('style');
+              }); } } };
+      }
+    </script>
+<script>
+    // Auxiliary function, building the preview feature when
+    // an inline citation is clicked
+    function clicked_cite(e) {
+      e.preventDefault();
+      let cite = this.closest('.ltx_cite');
+      let next = cite.nextSibling;
+      if (next && next.nodeType == Node.ELEMENT_NODE && next.getAttribute('class') == "ar5iv-bibitem-preview") {
+        next.remove();
+        return; }
+      // Before adding a preview modal,
+      // cleanup older previews, in case they're still open
+      document.querySelectorAll('span.ar5iv-bibitem-preview').forEach(function(node) {
+        node.remove();
+      })
+
+      // Create the preview
+      preview = document.createElement('span');
+      preview.setAttribute('class','ar5iv-bibitem-preview');
+      let target = document.getElementById(this.getAttribute('href').slice(1));
+      target.childNodes.forEach(function (child) {
+        preview.append(child.cloneNode(true));
+      });
+      let close_x = document.createElement('button');
+      close_x.setAttribute("aria-label","Close modal for bibliography item preview");
+      close_x.textContent = "×";
+      close_x.setAttribute('class', 'ar5iv-button-close-preview');
+      close_x.setAttribute('onclick','this.parentNode.remove()');
+      preview.append(close_x);
+      preview.querySelectorAll('.ltx_tag_bibitem').forEach(function(node) {
+        node.remove();
+      });
+      cite.parentNode.insertBefore(preview, cite.nextSibling);
+      return;
+    }
+    // Global Document initialization:
+    // - assign the preview feature to all inline citation links
+    document.querySelectorAll(".ltx_cite .ltx_ref").forEach(function (link) {
+      link.addEventListener("click", clicked_cite);
+    });
+    </script>
+</body></html>
