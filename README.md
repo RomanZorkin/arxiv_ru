@@ -80,9 +80,6 @@ LLM должна начинать работу с этих файлов, а не
 > Новые переводы и разборы arXiv-статей
 ---
 
-# Блок «Последние статьи»
-# Вставить в README.md после заголовка «# 🔥 Последние статьи»
-
 ### Справедливость в найме с применением ИИ: проблемы, показатели, методы и будущие направления
 [2405.19699] дата публикации в arXiv - 05.2024  
 📅 дата перевода 27.06.2026  
@@ -211,21 +208,6 @@ LLM должна начинать работу с этих файлов, а не
 | [2503.23979](articles/2503.23979/README.md) | 03.2025 | 27.06.2026 | Чем больше, тем веселее: логические и многоступенчатые процессоры в скоринге кредитоспособности (`The more the merrier: logical and multistage processors in credit scoring`) ||
 | [2511.03916](articles/2511.03916/README.md) | 11.2025 | 27.06.2026 | Управление человеческими ресурсами и ИИ: контекстная база данных для прозрачности (`Human Resource Management and AI: A Contextual Transparency Database`) ||
 | [2511.14231](articles/2511.14231/README.md) | 11.2025 | 27.06.2026 | Алгоритмическое управление и будущее человеческого труда: последствия для автономии, сотрудничества и инноваций (`Algorithmic Management and the Future of Human Work: Implications for Autonomy, Collaboration, and Innovation`) ||
-| [2601.13268](articles/2601.13268/README.md) | 01.2026 | 27.06.2026 | Повышение безопасности и надежности медицинского ИИ с помощью циклов оценки многими агентами (`Improving the Safety and Trustworthiness of Medical AI via Multi-Agent Evaluation Loops`) ||
-| [2604.00186](articles/2604.00186/README.md) | 04.2026 | 27.06.2026 | Агентный ИИ и вытеснение с рабочих мест: многорегиональный анализ экспозиции задач развивающимся нарушениям на рынке труда (`Agentic AI and Occupational Displacement: A Multi-Regional Task Exposure Analysis of Emerging Labor Market Disruption`) ||
-| [2605.12189](articles/2605.12189/README.md) | 05.2026 | 27.06.2026 | Глубокое обучение для ценообразования конвертируемых облигаций с зависящими от пути условиями сброса и оговорками о досрочном погашении по требованию (`A deep learning approach for pricing convertible bonds with path-dependent reset and call provisions`) ||
-| [2606.19846](articles/2606.19846/README.md) | 06.2026 | 27.06.2026 | Какой капитал после труда? Прогнозирование перехода к возврату инвестиций в таланты в эпоху человек–ИИ (`What Capital After Labor? Forecasting the Talent ROI Transition in the Human-AI Era`) ||
-| [2402.05200](articles/2402.05200/README.md) | 02.2024 | 18.06.2026 | Готовы ли LLM к реальному открытию материалов? (`Are LLMs Ready for Real-World Materials Discovery?`) ||
-| [2510.07645](articles/2510.07645/README.md) | 10.2025 | 21.06.2026 | Банкинг, сделанный правильно: переосмысление розничного банкинга с помощью языко-ориентированного ИИ (`Banking Done Right: Redefining Retail Banking with Language-Centric AI`) ||
-| [2601.01321](articles/2601.01321/README.md) | 01.2026 | 17.06.2026 | Цифровой двойник ИИ: возможности и вызовы от больших языковых моделей к моделям мира (`Digital Twin AI: Opportunities and Challenges from Large Language Models to World Models`) ||
-| [2601.20221](articles/2601.20221/README.md) | 01.2026 | 17.06.2026 | Масштабирование верификации медицинских рассуждений с помощью инструментально-интегрированного обучения с подкреплением (`Scaling Medical Reasoning Verification via Tool-Integrated Reinforcement Learning`) ||
-| [2603.14312](articles/2603.14312/README.md) | 03.2026 | 20.06.2026 | Автономные агенты, координирующие распределённый поиск посредством возникающего обмена артефактами (`Autonomous Agents Coordinating Distributed Discovery Through Emergent Artifact Exchange`) ||
-| [2605.05358](articles/2605.05358/README.md) | 05.2026 | 17.06.2026 | Баланс устойчивости и пластичности при последовательном обучении Раннее прекращение нейронных сетей (`Balancing Stability and Plasticity in Sequentially Trained Early-Exiting Neural Networks`) ||
-| [2605.09842](articles/2605.09842/README.md) | 05.2026 | 17.06.2026 | Прогнозирование кривой доходности с использованием машинного обучения и эконометрики: сравнительный анализ (`Yield Curve Forecasting using Machine Learning and Econometrics: A Comparative Analysis`) ||
-| [2605.10923](articles/2605.10923/README.md) | 05.2026 | 21.06.2026 | Динамическое управление жизненным циклом навыков в агентном обучении с подкреплением (`Dynamic Skill Lifecycle Management for Agentic Reinforcement Learning`) ||
-| [2605.30351](articles/2605.30351/README.md) | 05.2026 | 17.06.2026 | VideoMLA: Кэш KV скрытых признаков с низким рангом для авторегрессионной видеодиффузии с минутным масштабом (`VideoMLA: Low-Rank Latent KV Cache for Minute-Scale Autoregressive Video Diffusion`) ||
-| [2005.09830](articles/2005.09830/README.md) | 05.2020 | 07.06.2026 | Глубокое обучение для облаков точек LiDAR в автономном вождении: обзор (`Deep Learning for LiDAR Point Clouds in Autonomous Driving: A Review`) |✅|
-| [2511.18303](articles/2511.18303/README.md) | 11.2025 | 07.06.2026 | Иерархическое глубокое исследование с локальным–веб RAG: к автоматизированному системному поиску материалов (`Hierarchical Deep Research with Local–Web RAG: Toward Automated System-Level Materials Discovery`) |✅|
 | [2601.11196](articles/2601.11196/README.md) | 01.2026 | 07.06.2026 | Искусственный интеллект и экономика США: бухгалтерский взгляд на инвестиции и производство (`Artificial Intelligence and the US Economy: An Accounting Perspective on Investment and Production`) |✅|
 | [2601.20217](articles/2601.20217/README.md) | 01.2026 | 07.06.2026 | Учетная тождественность для алгоритмической справедливости (`An Accounting Identity for Algorithmic Fairness`) ||
 | [2602.04813](articles/2602.04813/README.md) | 02.2026 | 07.06.2026 | Агентный ИИ в здравоохранении и медицине: семимерное таксономическое описание для эмпирической оценки агентов на основе LLM (`Agentic AI in Healthcare & Medicine: A Seven-Dimensional Taxonomy for Empirical Evaluation of LLM-based Agents`) |✅|
