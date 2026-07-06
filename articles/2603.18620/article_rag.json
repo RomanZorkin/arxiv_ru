@@ -1,0 +1,1506 @@
+{
+  "title": "[2603.18620] Learning to Self-Evolve",
+  "sections": [
+    {
+      "heading": "Learning to Self-Evolve",
+      "level": 1,
+      "content": [],
+      "children": [
+        {
+          "heading": "Abstract",
+          "level": 6,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "We introduce Learning to Self-Evolve (LSE), a reinforcement learning framework that trains large language models (LLMs) to improve their own contexts at test time. We situate LSE in the setting of test-time self-evolution, where a model iteratively refines its context from feedback on seen problems to perform better on new ones. Existing approaches rely entirely on the inherent reasoning ability of the model and never explicitly train it for this task. LSE reduces the multi-step evolution problem to a single-step RL objective, where each context edit is rewarded by the improvement in downstream performance. We pair this objective with a tree-guided evolution loop. On Text-to-SQL generation (BIRD) and general question answering (MMLU-Redux), a 4B-parameter model trained with LSE outperforms self-evolving policies powered by GPT-5 and Claude Sonnet 4.5, as well as prompt optimization methods including GEPA and TextGrad, and transfers to guide other models without additional training. Our results highlight the effectiveness of treating self-evolution as a learnable skill.111Code is available at <https://github.com/chenyn66/learning-to-self-evolve>."
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "1 Introduction",
+          "level": 2,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "The ability to adapt and evolve in response to environmental feedback has long been considered central to human intelligence (Piaget, [1952](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib1 \"The origins of intelligence in children\"); Sternberg, [2019](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib2 \"A theory of adaptive intelligence and its relation to general intelligence\")). A chess player improves by analyzing past games; a software engineer grows more proficient with a codebase through months of daily work. In both cases, experience accumulates and the person adjusts their approach accordingly. Current large language model (LLM) training pipelines exhibit a similar dynamic, particularly at the post-training stage, where reinforcement learning (RL) refines the behavior of the model on its own generated data (Lightman et al., [2023](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib4 \"Let’s verify step by step\"); [OpenAI,](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib3 \"Learning to reason with llms\") ; DeepSeek-AI, [2025](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib23 \"DeepSeek-R1: incentivizing reasoning capability in LLMs via reinforcement learning\")). However, this learning stops once training ends. At deployment, an LLM applies the same policy regardless of how many problems it has solved in a domain, and discards all accumulated experience once the context resets. This gap between static deployment and dynamic adaptation motivates the study of *test-time self-evolving* systems: systems that continuously update themselves in response to new observations at test time."
+            },
+            {
+              "type": "paragraph",
+              "text": "Test-time self-evolution can be characterized along at least two dimensions: *how* the policy is updated and *when*. On one end of the first dimension, gradient-based methods modify model parameters directly; on the other, prompt-based methods rewrite the model context while keeping parameters frozen. Along the second dimension, *intra-episode* evolution updates the policy within a single episode: the model revisits its own attempts and refines its answer to a particular problem, trading additional compute for instance-level gains (Shinn et al., [2023](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib8 \"Reflexion: language agents with verbal reinforcement learning\"); Kumar et al., [2025](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib9 \"Training language models to self-correct via reinforcement learning\"); Yuksekgonul et al., [2026](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib25 \"Learning to discover at test time\")). *Inter-episode* evolution updates the policy after one or more completed episodes and applies the result to new problems, extracting transferable knowledge that generalizes across tasks (Yin et al., [2024](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib26 \"Gödel agent: a self-referential agent framework for recursive self-improvement\"); Hu et al., [2025](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib17 \"Automated design of agentic systems\"); Zhang et al., [2025b](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib27 \"Darwin godel machine: open-ended evolution of self-improving agents\"))."
+            },
+            {
+              "type": "paragraph",
+              "text": "We focus on inter-episode, prompt-based self-evolution: an LLM observes its performance on a batch of problems and rewrites its own context to improve on the next batch. Several recent works explore this direction through automatic prompt optimization (Khattab et al., [2024](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib13 \"DSPy: compiling declarative language model calls into state-of-the-art pipelines\"); Agrawal et al., [2025](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib14 \"GEPA: reflective prompt evolution can outperform reinforcement learning\"); Yuksekgonul et al., [2024](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib37 \"TextGrad: automatic ”differentiation” via text\")), self-referential updates (Fernando et al., [2024](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib12 \"Promptbreeder: self-referential self-improvement via prompt evolution\"); Zhao et al., [2024](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib16 \"ExpeL: LLM agents are experiential learners\"); Zhang et al., [2025b](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib27 \"Darwin godel machine: open-ended evolution of self-improving agents\"); Hu et al., [2025](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib17 \"Automated design of agentic systems\"); Zhang et al., [2025c](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib28 \"Agentic context engineering: evolving contexts for self-improving language models\")), and agentic memory systems (Zhang et al., [2025a](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib29 \"MemGen: weaving generative latent memory for self-evolving agents\"); [c](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib28 \"Agentic context engineering: evolving contexts for self-improving language models\"); Chhikara et al., [2025](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib18 \"Mem0: building production-ready AI agents with scalable long-term memory\")). These methods, however, rely entirely on the inherent ability of the LLM to analyze feedback and propose better context. The model is never explicitly trained for this self-improvement task."
+            },
+            {
+              "type": "paragraph",
+              "text": "We argue that self-evolution poses a reasoning challenge distinct from other reasoning domains. The process, in essence, shares the structure of an RL problem. An RL optimizer relies on dedicated algorithms to assign credit, estimate gradients, and balance exploration against exploitation. In self-evolution, the model must perform all three implicitly, through natural language reasoning alone. It must judge which parts of the current context help and which hurt, anticipate how a revision will change downstream behavior, and decide whether to refine what works or try something new. These demands motivate explicit optimization for self-evolution."
+            },
+            {
+              "type": "paragraph",
+              "text": "We propose Learning to Self-Evolve (LSE), an RL framework that explicitly trains an LLM to be an effective self-evolving policy. Rather than optimizing over the full multi-step evolution trajectory, LSE simplifies training to a single step: the model receives the current context and a performance summary, and produces a better context. Each edit is rewarded by the *improvement* in downstream performance, instead of the absolute post-edit score. At test time, we leverage a tree-guided evolution loop that allows the system to explore and backtrack across possible contexts."
+            },
+            {
+              "type": "paragraph",
+              "text": "We evaluate LSE on Text-to-SQL generation and general question answering. Despite using only a 4B-parameter model, the LSE-trained policy outperforms self-evolving policies powered by frontier models such as GPT-5 and Claude Sonnet 4.5, as well as prompt optimization methods such as GEPA and TextGrad. Our contributions are as follows:"
+            },
+            {
+              "type": "list",
+              "text": "* • We formalize test-time inter-episode self-evolution and operationalize it through prompt-based updates with tree-guided search (§[3.1](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S3.SS1 \"3.1 Test-Time Inter-Episode Evolution ‣ 3 Method ‣ Learning to Self-Evolve\"), §[3.2](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S3.SS2 \"3.2 Prompt-Based Evolution with Tree Search ‣ 3 Method ‣ Learning to Self-Evolve\")). * • We propose LSE, an RL framework that explicitly trains the self-evolving policy with an improvement-based reward (§[3.3](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S3.SS3 \"3.3 Learning to Self-Evolve (LSE) ‣ 3 Method ‣ Learning to Self-Evolve\")). * • We show that a 4B-parameter model trained with LSE outperforms larger untrained models and prompt optimization methods, and transfers to guide other models without additional training (§[4](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S4 \"4 Experiments ‣ Learning to Self-Evolve\"))."
+            },
+            {
+              "type": "paragraph",
+              "text": "We formalize test-time inter-episode self-evolution and operationalize it through prompt-based updates with tree-guided search (§[3.1](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S3.SS1 \"3.1 Test-Time Inter-Episode Evolution ‣ 3 Method ‣ Learning to Self-Evolve\"), §[3.2](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S3.SS2 \"3.2 Prompt-Based Evolution with Tree Search ‣ 3 Method ‣ Learning to Self-Evolve\"))."
+            },
+            {
+              "type": "paragraph",
+              "text": "We propose LSE, an RL framework that explicitly trains the self-evolving policy with an improvement-based reward (§[3.3](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S3.SS3 \"3.3 Learning to Self-Evolve (LSE) ‣ 3 Method ‣ Learning to Self-Evolve\"))."
+            },
+            {
+              "type": "paragraph",
+              "text": "We show that a 4B-parameter model trained with LSE outperforms larger untrained models and prompt optimization methods, and transfers to guide other models without additional training (§[4](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S4 \"4 Experiments ‣ Learning to Self-Evolve\"))."
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "2 Related Work",
+          "level": 2,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "The term *self-evolution* has been used to refer to many different concepts in recent LLM research. We organize the landscape into two broad categories. *Training-time self-evolution* focuses on using LLMs to generate their own training data and learning signals during training. *Test-time self-evolution* enables a policy to continue updating itself after training, adapting dynamically based on experience accumulated during deployment."
+            }
+          ],
+          "children": [
+            {
+              "heading": "Training-time self-evolution.",
+              "level": 4,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "A growing body of work leverages LLMs to generate their own data and learning signals during training. RL-based post-training has the model produce reasoning traces and optimizes them against verifiable rewards (Lightman et al., [2023](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib4 \"Let’s verify step by step\"); [OpenAI,](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib3 \"Learning to reason with llms\") ; DeepSeek-AI, [2025](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib23 \"DeepSeek-R1: incentivizing reasoning capability in LLMs via reinforcement learning\")). Bootstrapping methods such as STaR (Zelikman et al., [2022](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib40 \"STaR: bootstrapping reasoning with reasoning\")) iteratively generate candidate rationales and fine-tune on the correct ones. Self-rewarding approaches (Yuan et al., [2024](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib41 \"Self-rewarding language models\"); Zhao et al., [2025b](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib42 \"Learning to reason without external rewards\")) extend this by using the model itself as the reward signal. Absolute Zero (Zhao et al., [2025a](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib39 \"Absolute zero: reinforced self-play reasoning with zero data\")) takes this to its extreme: a single model both proposes and solves tasks with no external data, using a code executor as the sole source of verifiable reward. While these methods produce stronger models, the resulting policy remains static once training ends. Our work addresses a complementary problem: enabling the policy to continue improving at test time."
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "Test-time self-evolution.",
+              "level": 4,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "A static policy cannot accommodate distribution shifts encountered at test time. Test-time self-evolution addresses this by enabling the model to self-update based on its own experience after deployment. This capability spans two temporal scales. *Intra-episode* methods improve on a single problem instance by allocating additional compute. Reflexion (Shinn et al., [2023](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib8 \"Reflexion: language agents with verbal reinforcement learning\")) prompts the model to reflect on failed attempts and retry, SCoRe (Kumar et al., [2025](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib9 \"Training language models to self-correct via reinforcement learning\")) trains self-correction through RL, and TTRL (Zuo et al., [2025](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib10 \"TTRL: test-time reinforcement learning\")) applies RL directly at test time using majority voting as a proxy reward. TTT-Discover (Yuksekgonul et al., [2026](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib25 \"Learning to discover at test time\")) continues training the model at test time through RL to find the best solution on a single open-ended problem. These methods trade compute for accuracy on individual instances but do not transfer knowledge across problems."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "*Inter-episode* methods accumulate experience across completed episodes and apply it to new ones. One active direction is automatic prompt optimization. GEPA (Agrawal et al., [2025](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib14 \"GEPA: reflective prompt evolution can outperform reinforcement learning\")) and TextGrad (Yuksekgonul et al., [2024](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib37 \"TextGrad: automatic ”differentiation” via text\")) use natural-language feedback from rollouts to iteratively mutate and rewrite prompts. A second direction develops self-referential agents that modify their own code or instructions. ExpeL (Zhao et al., [2024](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib16 \"ExpeL: LLM agents are experiential learners\")) extracts transferable lessons from successful and failed trajectories. PromptBreeder (Fernando et al., [2024](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib12 \"Promptbreeder: self-referential self-improvement via prompt evolution\")) evolves prompts through mutation and crossover operators. More recent systems such as ADAS (Hu et al., [2025](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib17 \"Automated design of agentic systems\")) and Darwin Gödel Machine (Zhang et al., [2025b](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib27 \"Darwin godel machine: open-ended evolution of self-improving agents\")) extend this by recursively redesigning the self-evolving policy itself (Yin et al., [2024](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib26 \"Gödel agent: a self-referential agent framework for recursive self-improvement\")). A third direction builds agentic memory systems: Voyager (Wang et al., [2023](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib15 \"Voyager: an open-ended embodied agent with large language models\")) accumulates a reusable skill library from experience in Minecraft, while systems such as MemGen (Zhang et al., [2025a](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib29 \"MemGen: weaving generative latent memory for self-evolving agents\")) and Mem0 (Chhikara et al., [2025](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib18 \"Mem0: building production-ready AI agents with scalable long-term memory\")) maintain evolving memory stores that persist across episodes (Zhang et al., [2025c](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib28 \"Agentic context engineering: evolving contexts for self-improving language models\")). All of these methods rely on the inherent reasoning ability of the LLM to analyze feedback and propose improvements. Our work falls in this category but takes a distinct approach: rather than relying on emergent ability, we explicitly train the self-evolving policy through RL."
+                }
+              ],
+              "children": []
+            }
+          ]
+        },
+        {
+          "heading": "3 Method",
+          "level": 2,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "We now introduce our proposed framework and method. We first formalize the test-time inter-episode self-evolution (§[3.1](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S3.SS1 \"3.1 Test-Time Inter-Episode Evolution ‣ 3 Method ‣ Learning to Self-Evolve\")). We then describe how we operationalize it through prompt-based updates and tree-guided search (§[3.2](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S3.SS2 \"3.2 Prompt-Based Evolution with Tree Search ‣ 3 Method ‣ Learning to Self-Evolve\")). Finally, we present Learning to Self-Evolve (LSE), an RL framework that trains the self-evolving policy (§[3.3](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S3.SS3 \"3.3 Learning to Self-Evolve (LSE) ‣ 3 Method ‣ Learning to Self-Evolve\"))."
+            }
+          ],
+          "children": [
+            {
+              "heading": "3.1 Test-Time Inter-Episode Evolution",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "Consider a task 𝒯=(𝒳,𝒴,R){\\mathcal{T}}=({\\mathcal{X}},{\\mathcal{Y}},R) comprising an input space 𝒳{\\mathcal{X}}, an output space 𝒴{\\mathcal{Y}}, and a reward function R:𝒳×𝒴→ℝR:{\\mathcal{X}}\\times{\\mathcal{Y}}\\to\\mathbb{R}. A policy π\\pi maps inputs x∈𝒳x\\in{\\mathcal{X}} to outputs y∈𝒴y\\in{\\mathcal{Y}}. A *self-evolving policy* is a function ff that updates the current policy based on experience collected during interaction. Given a task 𝒯{\\mathcal{T}}, the system executes TT rounds of evolution. At each round tt, the current policy π(t)\\pi^{(t)} is applied to a batch of kk problems sampled from 𝒳{\\mathcal{X}}, producing experience tuples {(xi,yi,ri)}i=1k\\{(x\\_{i},y\\_{i},r\\_{i})\\}\\_{i=1}^{k}. The self-evolving policy then computes an updated policy:"
+                },
+                {
+                  "type": "formula",
+                  "text": "𝒯=(𝒳,𝒴,R){\\mathcal{T}}=({\\mathcal{X}},{\\mathcal{Y}},R)"
+                },
+                {
+                  "type": "formula",
+                  "text": "𝒳{\\mathcal{X}}"
+                },
+                {
+                  "type": "formula",
+                  "text": "𝒴{\\mathcal{Y}}"
+                },
+                {
+                  "type": "formula",
+                  "text": "R:𝒳×𝒴→ℝR:{\\mathcal{X}}\\times{\\mathcal{Y}}\\to\\mathbb{R}"
+                },
+                {
+                  "type": "formula",
+                  "text": "π\\pi"
+                },
+                {
+                  "type": "formula",
+                  "text": "x∈𝒳x\\in{\\mathcal{X}}"
+                },
+                {
+                  "type": "formula",
+                  "text": "y∈𝒴y\\in{\\mathcal{Y}}"
+                },
+                {
+                  "type": "formula",
+                  "text": "ff"
+                },
+                {
+                  "type": "formula",
+                  "text": "𝒯{\\mathcal{T}}"
+                },
+                {
+                  "type": "formula",
+                  "text": "TT"
+                },
+                {
+                  "type": "formula",
+                  "text": "tt"
+                },
+                {
+                  "type": "formula",
+                  "text": "π(t)\\pi^{(t)}"
+                },
+                {
+                  "type": "formula",
+                  "text": "kk"
+                },
+                {
+                  "type": "formula",
+                  "text": "𝒳{\\mathcal{X}}"
+                },
+                {
+                  "type": "formula",
+                  "text": "{(xi,yi,ri)}i=1k\\{(x_{i},y_{i},r_{i})\\}_{i=1}^{k}"
+                },
+                {
+                  "type": "table",
+                  "text": "| | | | | | --- | --- | --- | --- | | | π(t+1)=f​(π(t),{(xi,yi,ri)}i=1k).\\pi^{(t+1)}=f\\big(\\pi^{(t)},\\;\\{(x\\_{i},y\\_{i},r\\_{i})\\}\\_{i=1}^{k}\\big). | | (1) |"
+                },
+                {
+                  "type": "formula",
+                  "text": "π(t+1)=f​(π(t),{(xi,yi,ri)}i=1k).\\pi^{(t+1)}=f\\big(\\pi^{(t)},\\;\\{(x_{i},y_{i},r_{i})\\}_{i=1}^{k}\\big)."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "This produces a sequence of policies π(0),π(1),…,π(T)\\pi^{(0)},\\pi^{(1)},\\ldots,\\pi^{(T)}. The objective of ff is to maximize the cumulative reward over TT rounds of evolution:"
+                },
+                {
+                  "type": "formula",
+                  "text": "π(0),π(1),…,π(T)\\pi^{(0)},\\pi^{(1)},\\ldots,\\pi^{(T)}"
+                },
+                {
+                  "type": "formula",
+                  "text": "ff"
+                },
+                {
+                  "type": "formula",
+                  "text": "TT"
+                },
+                {
+                  "type": "table",
+                  "text": "| | | | | | --- | --- | --- | --- | | | ∑t=0T𝔼x∼𝒳​[R​(x,π(t)​(x))].\\sum\\_{t=0}^{T}\\mathbb{E}\\_{x\\sim{\\mathcal{X}}}\\big[R\\big(x,\\,\\pi^{(t)}(x)\\big)\\big]. | | (2) |"
+                },
+                {
+                  "type": "formula",
+                  "text": "∑t=0T𝔼x∼𝒳​[R​(x,π(t)​(x))].\\sum_{t=0}^{T}\\mathbb{E}_{x\\sim{\\mathcal{X}}}\\big[R\\big(x,\\,\\pi^{(t)}(x)\\big)\\big]."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "In the language model setting, a policy πθ\\pi\\_{\\theta} is determined by its parameters θ\\theta and context cc, comprising system prompts, instructions, skill libraries, and any other textual input that shapes behavior. This decomposition admits two natural instantiations of ff:"
+                },
+                {
+                  "type": "formula",
+                  "text": "πθ\\pi_{\\theta}"
+                },
+                {
+                  "type": "formula",
+                  "text": "θ\\theta"
+                },
+                {
+                  "type": "formula",
+                  "text": "cc"
+                },
+                {
+                  "type": "formula",
+                  "text": "ff"
+                },
+                {
+                  "type": "list",
+                  "text": "* • Gradient-based: ff modifies θ\\theta directly (e.g., via RL or SFT on recent experience); * • Prompt-based: ff modifies cc while keeping θ\\theta frozen."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Gradient-based: ff modifies θ\\theta directly (e.g., via RL or SFT on recent experience);"
+                },
+                {
+                  "type": "formula",
+                  "text": "ff"
+                },
+                {
+                  "type": "formula",
+                  "text": "θ\\theta"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Prompt-based: ff modifies cc while keeping θ\\theta frozen."
+                },
+                {
+                  "type": "formula",
+                  "text": "ff"
+                },
+                {
+                  "type": "formula",
+                  "text": "cc"
+                },
+                {
+                  "type": "formula",
+                  "text": "θ\\theta"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "We focus on the prompt-based instantiation, where ff is itself an LLM that generates updated contexts from past experience. This choice requires no gradient computation at test time, thereby avoiding the catastrophic forgetting problem with continual learning, and casts the evolution problem as a natural-language reasoning task that can itself be improved through training."
+                },
+                {
+                  "type": "formula",
+                  "text": "ff"
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "3.2 Prompt-Based Evolution with Tree Search",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "An LLM with frozen parameters θ\\theta defines a conditional policy πθ​(y∣x,c)\\pi\\_{\\theta}(y\\mid x,c), where x∈𝒳x\\in{\\mathcal{X}} is a problem instance and cc is the context introduced in §[3.1](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S3.SS1 \"3.1 Test-Time Inter-Episode Evolution ‣ 3 Method ‣ Learning to Self-Evolve\"). In our implementation, we designate a special *instruction field* within cc for the self-evolving policy to edit, leaving all other components (e.g., task description, format specification) fixed."
+                },
+                {
+                  "type": "formula",
+                  "text": "θ\\theta"
+                },
+                {
+                  "type": "formula",
+                  "text": "πθ​(y∣x,c)\\pi_{\\theta}(y\\mid x,c)"
+                },
+                {
+                  "type": "formula",
+                  "text": "x∈𝒳x\\in{\\mathcal{X}}"
+                },
+                {
+                  "type": "formula",
+                  "text": "cc"
+                },
+                {
+                  "type": "formula",
+                  "text": "cc"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "At each round, the self-evolving policy fψf\\_{\\psi} maps the current context and a performance summary to an updated context:"
+                },
+                {
+                  "type": "formula",
+                  "text": "fψf_{\\psi}"
+                },
+                {
+                  "type": "table",
+                  "text": "| | | | | | --- | --- | --- | --- | | | ct+1=fψ​(ct,St),c\\_{t+1}=f\\_{\\psi}\\big(c\\_{t},\\,S\\_{t}\\big), | | (3) |"
+                },
+                {
+                  "type": "formula",
+                  "text": "ct+1=fψ​(ct,St),c_{t+1}=f_{\\psi}\\big(c_{t},\\,S_{t}\\big),"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "where St={(xi,yi,yi∗,ri)}i=1kS\\_{t}=\\{(x\\_{i},y\\_{i},y\\_{i}^{\\*},r\\_{i})\\}\\_{i=1}^{k} is a *structured performance summary* containing the problems, the outputs of the action LLM, ground-truth answers, and per-problem correctness signals from round tt."
+                },
+                {
+                  "type": "formula",
+                  "text": "St={(xi,yi,yi∗,ri)}i=1kS_{t}=\\{(x_{i},y_{i},y_{i}^{*},r_{i})\\}_{i=1}^{k}"
+                },
+                {
+                  "type": "formula",
+                  "text": "tt"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Note that StS\\_{t} contains only kk problems, where kk is typically small, and a different batch is drawn at each round. In-batch performance therefore provides only a noisy estimate of context quality. To obtain a consistent measure across rounds, we fix a separate holdout set D⊂𝒳D\\subset{\\mathcal{X}} and define the reward of context cc as"
+                },
+                {
+                  "type": "formula",
+                  "text": "StS_{t}"
+                },
+                {
+                  "type": "formula",
+                  "text": "kk"
+                },
+                {
+                  "type": "formula",
+                  "text": "kk"
+                },
+                {
+                  "type": "formula",
+                  "text": "D⊂𝒳D\\subset{\\mathcal{X}}"
+                },
+                {
+                  "type": "formula",
+                  "text": "cc"
+                },
+                {
+                  "type": "table",
+                  "text": "| | | | | | --- | --- | --- | --- | | | R¯(c)=1|D|∑x∈DR(x,y),y∼πθ(⋅∣x,c).\\bar{R}(c)\\;=\\;\\frac{1}{|D|}\\sum\\_{x\\in D}R(x,\\,y),\\quad y\\sim\\pi\\_{\\theta}(\\cdot\\mid x,c). | | (4) |"
+                },
+                {
+                  "type": "formula",
+                  "text": "πθ\\pi_{\\theta}"
+                },
+                {
+                  "type": "formula",
+                  "text": "fψf_{\\psi}"
+                },
+                {
+                  "type": "formula",
+                  "text": "𝒯=(𝒳,𝒴,R){\\mathcal{T}}=({\\mathcal{X}},{\\mathcal{Y}},R)"
+                },
+                {
+                  "type": "formula",
+                  "text": "D⊂𝒳D\\subset{\\mathcal{X}}"
+                },
+                {
+                  "type": "formula",
+                  "text": "c0c_{0}"
+                },
+                {
+                  "type": "formula",
+                  "text": "TT"
+                },
+                {
+                  "type": "formula",
+                  "text": "kk"
+                },
+                {
+                  "type": "formula",
+                  "text": "CC"
+                },
+                {
+                  "type": "formula",
+                  "text": "𝒢←{(c0,∅,R¯​(c0), 0)}{\\mathcal{G}}\\leftarrow\\{(c_{0},\\,\\emptyset,\\,\\bar{R}(c_{0}),\\,0)\\}"
+                },
+                {
+                  "type": "formula",
+                  "text": "t=0,1,…,T−1t=0,1,\\ldots,T{-}1"
+                },
+                {
+                  "type": "formula",
+                  "text": "n∗←arg​maxn∈𝒢⁡R¯n+C​(ln⁡N)/vnn^{*}\\leftarrow\\operatorname*{arg\\,max}_{n\\in{\\mathcal{G}}}\\;\\bar{R}_{n}+C\\sqrt{(\\ln N)/v_{n}}"
+                },
+                {
+                  "type": "formula",
+                  "text": "⊳\\triangleright"
+                },
+                {
+                  "type": "formula",
+                  "text": "{xi}i=1k∼𝒳\\{x_{i}\\}_{i=1}^{k}\\sim{\\mathcal{X}}"
+                },
+                {
+                  "type": "formula",
+                  "text": "i=1,…,ki=1,\\ldots,k"
+                },
+                {
+                  "type": "formula",
+                  "text": "⊳\\triangleright"
+                },
+                {
+                  "type": "formula",
+                  "text": "ri←R​(xi,yi)r_{i}\\leftarrow R(x_{i},y_{i})"
+                },
+                {
+                  "type": "formula",
+                  "text": "i=1,…,ki=1,\\ldots,k"
+                },
+                {
+                  "type": "formula",
+                  "text": "⊳\\triangleright"
+                },
+                {
+                  "type": "formula",
+                  "text": "St={(xi,yi,yi∗,ri)}i=1kS_{t}=\\{(x_{i},y_{i},y_{i}^{*},r_{i})\\}_{i=1}^{k}"
+                },
+                {
+                  "type": "formula",
+                  "text": "cnew←fψ​(cn∗,St)c_{\\mathrm{new}}\\leftarrow f_{\\psi}(c_{n^{*}},S_{t})"
+                },
+                {
+                  "type": "formula",
+                  "text": "⊳\\triangleright"
+                },
+                {
+                  "type": "formula",
+                  "text": "R¯​(cnew)\\bar{R}(c_{\\mathrm{new}})"
+                },
+                {
+                  "type": "formula",
+                  "text": "DD"
+                },
+                {
+                  "type": "formula",
+                  "text": "⊳\\triangleright"
+                },
+                {
+                  "type": "formula",
+                  "text": "(cnew,St,R¯​(cnew), 0)(c_{\\mathrm{new}},\\,S_{t},\\,\\bar{R}(c_{\\mathrm{new}}),\\,0)"
+                },
+                {
+                  "type": "formula",
+                  "text": "n∗n^{*}"
+                },
+                {
+                  "type": "formula",
+                  "text": "𝒢{\\mathcal{G}}"
+                },
+                {
+                  "type": "formula",
+                  "text": "vn∗v_{n^{*}}"
+                },
+                {
+                  "type": "formula",
+                  "text": "arg​maxn∈𝒢⁡R¯n\\operatorname*{arg\\,max}_{n\\in{\\mathcal{G}}}\\;\\bar{R}_{n}"
+                }
+              ],
+              "children": [
+                {
+                  "heading": "Tree-guided evolution.",
+                  "level": 4,
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "text": "The linear evolution chain c0→c1→⋯c\\_{0}\\to c\\_{1}\\to\\cdots greedily extends the most recent context, which risks committing irreversibly to a suboptimal evolution path. To enable broader exploration of the context space, we maintain an *evolution tree* 𝒢{\\mathcal{G}} in which each node nn stores a tuple (cn,Sn,R¯n,vn)(c\\_{n},S\\_{n},\\bar{R}\\_{n},v\\_{n}) of context, performance summary, mean holdout reward, and visit count. At each round, rather than always extending the latest node, we select the node that maximizes the Upper Confidence Bound (UCB) score (Auer, [2002](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib24 \"Using confidence bounds for exploitation-exploration trade-offs\")):"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "c0→c1→⋯c_{0}\\to c_{1}\\to\\cdots"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "𝒢{\\mathcal{G}}"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "nn"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "(cn,Sn,R¯n,vn)(c_{n},S_{n},\\bar{R}_{n},v_{n})"
+                    },
+                    {
+                      "type": "table",
+                      "text": "| | | | | | --- | --- | --- | --- | | | n∗=arg​maxn∈𝒢⁡R¯n+C​ln⁡Nvn,n^{\\*}=\\operatorname\\*{arg\\,max}\\_{n\\in{\\mathcal{G}}}\\;\\bar{R}\\_{n}+C\\sqrt{\\frac{\\ln N}{v\\_{n}}}, | | (5) |"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "n∗=arg​maxn∈𝒢⁡R¯n+C​ln⁡Nvn,n^{*}=\\operatorname*{arg\\,max}_{n\\in{\\mathcal{G}}}\\;\\bar{R}_{n}+C\\sqrt{\\frac{\\ln N}{v_{n}}},"
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "where NN is the number of completed rounds and C>0C>0 controls the exploration-exploitation trade-off. The context and summary of n∗n^{\\*} are used as input to the next evolution step, and the resulting child node is appended to 𝒢{\\mathcal{G}}. This allows the system to revisit and branch from promising contexts discovered earlier, rather than committing to a single evolution path. The full procedure is summarized in Algorithm [1](https://ar5iv.labs.arxiv.org/html/2603.18620v1#alg1 \"Algorithm 1 ‣ 3.2 Prompt-Based Evolution with Tree Search ‣ 3 Method ‣ Learning to Self-Evolve\")."
+                    },
+                    {
+                      "type": "formula",
+                      "text": "NN"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "C>0C>0"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "n∗n^{*}"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "𝒢{\\mathcal{G}}"
+                    }
+                  ],
+                  "children": []
+                }
+              ]
+            },
+            {
+              "heading": "3.3 Learning to Self-Evolve (LSE)",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "While off-the-shelf LLMs already exhibit some ability to iteratively refine their own prompts (Yin et al., [2024](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib26 \"Gödel agent: a self-referential agent framework for recursive self-improvement\"); Agrawal et al., [2025](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib14 \"GEPA: reflective prompt evolution can outperform reinforcement learning\"); Zhang et al., [2025b](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib27 \"Darwin godel machine: open-ended evolution of self-improving agents\")), this ability emerges entirely from pretraining and standard post-training, and the model is never explicitly optimized for self-improvement. We propose Learning to Self-Evolve (LSE), an RL framework that explicitly trains fψf\\_{\\psi} to be an effective self-evolving policy."
+                },
+                {
+                  "type": "formula",
+                  "text": "fψf_{\\psi}"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Recall from Eq. ([2](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S3.E2 \"In 3.1 Test-Time Inter-Episode Evolution ‣ 3 Method ‣ Learning to Self-Evolve\")) that the goal of the self-evolving policy is to maximize the cumulative reward over evolution rounds. A natural training objective for fψf\\_{\\psi} is:"
+                },
+                {
+                  "type": "formula",
+                  "text": "fψf_{\\psi}"
+                },
+                {
+                  "type": "table",
+                  "text": "| | | | | | --- | --- | --- | --- | | | maxfψ​∑t=0TR¯​(ct),where ​ct+1=fψ​(ct,St)​∀t.\\max\\_{f\\_{\\psi}}\\;\\sum\\_{t=0}^{T}\\bar{R}(c\\_{t}),\\quad\\text{where }c\\_{t+1}=f\\_{\\psi}(c\\_{t},S\\_{t})\\;\\;\\forall\\,t. | | (6) |"
+                },
+                {
+                  "type": "formula",
+                  "text": "maxfψ​∑t=0TR¯​(ct),where ​ct+1=fψ​(ct,St)​∀t.\\max_{f_{\\psi}}\\;\\sum_{t=0}^{T}\\bar{R}(c_{t}),\\quad\\text{where }c_{t+1}=f_{\\psi}(c_{t},S_{t})\\;\\;\\forall\\,t."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Directly optimizing this TT-step objective is costly: each rollout requires TT sequential rounds of evaluation and context generation, and the trajectory-level reward introduces a long-horizon credit-assignment problem. We therefore simplify to the *single-step* setting (T=1T=1), where fψf\\_{\\psi} produces a single context update c1=fψ​(c0,S0)c\\_{1}=f\\_{\\psi}(c\\_{0},S\\_{0}) and is rewarded immediately. This reduces the problem to a contextual bandit and avoids the long-horizon credit-assignment difficulty while still capturing the core challenge of learning to improve instructions from feedback."
+                },
+                {
+                  "type": "formula",
+                  "text": "TT"
+                },
+                {
+                  "type": "formula",
+                  "text": "TT"
+                },
+                {
+                  "type": "formula",
+                  "text": "T=1T=1"
+                },
+                {
+                  "type": "formula",
+                  "text": "fψf_{\\psi}"
+                },
+                {
+                  "type": "formula",
+                  "text": "c1=fψ​(c0,S0)c_{1}=f_{\\psi}(c_{0},S_{0})"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Even in the single-step setting, the choice of reward function is consequential. A natural candidate is the post-edit reward R¯​(c1)\\bar{R}(c\\_{1}), the performance of the action policy under the updated context. However, this reward is biased toward contexts that are already effective. Consider two scenarios: (1) the initial context achieves 80% accuracy and drops to 70% after editing, yielding r=0.7r=0.7; (2) the initial context achieves 30% accuracy and improves to 60%, yielding only r=0.6r=0.6. The post-edit reward ranks the first scenario higher despite the *degradation* in performance, because it conflates the quality of the starting point with that of the edit. This bias encourages the policy to preserve already-effective contexts rather than genuinely learn to improve them. We instead define the reward as the *improvement in reward*:"
+                },
+                {
+                  "type": "formula",
+                  "text": "R¯​(c1)\\bar{R}(c_{1})"
+                },
+                {
+                  "type": "formula",
+                  "text": "r=0.7r=0.7"
+                },
+                {
+                  "type": "formula",
+                  "text": "r=0.6r=0.6"
+                },
+                {
+                  "type": "table",
+                  "text": "| | | | | | --- | --- | --- | --- | | | rLSE=R¯​(c1)−R¯​(c0),r\\_{\\mathrm{LSE}}\\;=\\;\\bar{R}(c\\_{1})-\\bar{R}(c\\_{0}), | | (7) |"
+                },
+                {
+                  "type": "formula",
+                  "text": "rLSE=R¯​(c1)−R¯​(c0),r_{\\mathrm{LSE}}\\;=\\;\\bar{R}(c_{1})-\\bar{R}(c_{0}),"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "which directly incentivizes fψf\\_{\\psi} to produce edits that improve performance relative to the starting point, regardless of the initial performance level."
+                },
+                {
+                  "type": "formula",
+                  "text": "fψf_{\\psi}"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Notably, if rLSEr\\_{\\mathrm{LSE}} is used as the reward in a standard policy-gradient algorithm such as PPO or GRPO, the baseline estimator absorbs the R¯​(c0)\\bar{R}(c\\_{0}) term. To see this, let s=(c0,S0)s=(c\\_{0},S\\_{0}) denote the state observed before the edit. A baseline V​(s)V(s) estimated under rLSEr\\_{\\mathrm{LSE}} satisfies V′​(s)=𝔼​[R¯​(c1)−R¯​(c0)∣s]=V​(s)−R¯​(c0)V^{\\prime}(s)=\\mathbb{E}[\\bar{R}(c\\_{1})-\\bar{R}(c\\_{0})\\mid s]=V(s)-\\bar{R}(c\\_{0}), where V​(s)=𝔼​[R¯​(c1)∣s]V(s)=\\mathbb{E}[\\bar{R}(c\\_{1})\\mid s] is the baseline under the post-edit reward. The advantage then reduces to:"
+                },
+                {
+                  "type": "formula",
+                  "text": "rLSEr_{\\mathrm{LSE}}"
+                },
+                {
+                  "type": "formula",
+                  "text": "R¯​(c0)\\bar{R}(c_{0})"
+                },
+                {
+                  "type": "formula",
+                  "text": "s=(c0,S0)s=(c_{0},S_{0})"
+                },
+                {
+                  "type": "formula",
+                  "text": "V​(s)V(s)"
+                },
+                {
+                  "type": "formula",
+                  "text": "rLSEr_{\\mathrm{LSE}}"
+                },
+                {
+                  "type": "formula",
+                  "text": "V′​(s)=𝔼​[R¯​(c1)−R¯​(c0)∣s]=V​(s)−R¯​(c0)V^{\\prime}(s)=\\mathbb{E}[\\bar{R}(c_{1})-\\bar{R}(c_{0})\\mid s]=V(s)-\\bar{R}(c_{0})"
+                },
+                {
+                  "type": "formula",
+                  "text": "V​(s)=𝔼​[R¯​(c1)∣s]V(s)=\\mathbb{E}[\\bar{R}(c_{1})\\mid s]"
+                },
+                {
+                  "type": "table",
+                  "text": "| | | | | | --- | --- | --- | --- | | | A′​(s,c1)=rLSE−V′​(s)=(R¯​(c1)−R¯​(c0))−(V​(s)−R¯​(c0))=R¯​(c1)−V​(s),A^{\\prime}(s,c\\_{1})\\;=\\;r\\_{\\mathrm{LSE}}-V^{\\prime}(s)\\;=\\;\\big(\\bar{R}(c\\_{1})-\\bar{R}(c\\_{0})\\big)-\\big(V(s)-\\bar{R}(c\\_{0})\\big)\\;=\\;\\bar{R}(c\\_{1})-V(s), | | (8) |"
+                },
+                {
+                  "type": "formula",
+                  "text": "A′​(s,c1)=rLSE−V′​(s)=(R¯​(c1)−R¯​(c0))−(V​(s)−R¯​(c0))=R¯​(c1)−V​(s),A^{\\prime}(s,c_{1})\\;=\\;r_{\\mathrm{LSE}}-V^{\\prime}(s)\\;=\\;\\big(\\bar{R}(c_{1})-\\bar{R}(c_{0})\\big)-\\big(V(s)-\\bar{R}(c_{0})\\big)\\;=\\;\\bar{R}(c_{1})-V(s),"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "which is identical to the advantage under the post-edit reward alone. That is, the delta-reward and the post-edit reward yield the same gradient estimates whenever a learned baseline is used. Rather than using a value model or group-based normalization as the baseline, we can bypass baseline estimation entirely: the pre-edit reward R¯​(c0)\\bar{R}(c\\_{0}) is known before fψf\\_{\\psi} acts and equals the reward of a null edit that returns c0c\\_{0} unchanged, so it can serve directly as the baseline. This yields the LSE advantage:"
+                },
+                {
+                  "type": "formula",
+                  "text": "R¯​(c0)\\bar{R}(c_{0})"
+                },
+                {
+                  "type": "formula",
+                  "text": "fψf_{\\psi}"
+                },
+                {
+                  "type": "formula",
+                  "text": "c0c_{0}"
+                },
+                {
+                  "type": "table",
+                  "text": "| | | | | | --- | --- | --- | --- | | | ALSE=R¯​(c1)−R¯​(c0),A\\_{\\mathrm{LSE}}\\;=\\;\\bar{R}(c\\_{1})-\\bar{R}(c\\_{0}), | | (9) |"
+                },
+                {
+                  "type": "formula",
+                  "text": "ALSE=R¯​(c1)−R¯​(c0),A_{\\mathrm{LSE}}\\;=\\;\\bar{R}(c_{1})-\\bar{R}(c_{0}),"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "and the corresponding policy-gradient estimate:"
+                },
+                {
+                  "type": "table",
+                  "text": "| | | | | | --- | --- | --- | --- | | | ∇ψJ=𝔼c1∼fψ(⋅∣c0,S0)​[ALSE​∇ψlog⁡fψ​(c1∣c0,S0)].\\nabla\\_{\\psi}J\\;=\\;\\mathbb{E}\\_{c\\_{1}\\sim f\\_{\\psi}(\\cdot\\mid c\\_{0},S\\_{0})}\\Big[A\\_{\\mathrm{LSE}}\\;\\nabla\\_{\\psi}\\log f\\_{\\psi}(c\\_{1}\\mid c\\_{0},S\\_{0})\\Big]. | | (10) |"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Because R¯​(c0)\\bar{R}(c\\_{0}) is action-independent, using it as a baseline does not alter the expected gradient. It is, however, a control variate that cancels prompt-specific offsets. In practice, evaluation noise and between-prompt difficulty variation likely dominate raw accuracy scores. Under these conditions, the improvement-based advantage provides a cleaner learning signal and more stable policy-gradient updates. It also reduces training cost, as it requires neither multiple rollouts per prompt for group-based normalization nor a separate value network."
+                },
+                {
+                  "type": "formula",
+                  "text": "R¯​(c0)\\bar{R}(c_{0})"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "The gradient in Eq. ([10](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S3.E10 \"In 3.3 Learning to Self-Evolve (LSE) ‣ 3 Method ‣ Learning to Self-Evolve\")) depends on the distribution of starting states s=(c0,S0)s=(c\\_{0},S\\_{0}). If c0c\\_{0} is always the seed context, a mismatch arises: at test time, the policy runs for multiple rounds (Algorithm [1](https://ar5iv.labs.arxiv.org/html/2603.18620v1#alg1 \"Algorithm 1 ‣ 3.2 Prompt-Based Evolution with Tree Search ‣ 3 Method ‣ Learning to Self-Evolve\")) and must improve contexts produced by its own prior edits. We therefore populate the tree 𝒢{\\mathcal{G}} with multiple rounds of evolution to construct the training dataset, then randomly sample nodes from 𝒢{\\mathcal{G}} as starting contexts at every RL step. This exposes fψf\\_{\\psi} to a distribution of contexts similar to what it will see during multi-step evolution."
+                },
+                {
+                  "type": "formula",
+                  "text": "s=(c0,S0)s=(c_{0},S_{0})"
+                },
+                {
+                  "type": "formula",
+                  "text": "c0c_{0}"
+                },
+                {
+                  "type": "formula",
+                  "text": "𝒢{\\mathcal{G}}"
+                },
+                {
+                  "type": "formula",
+                  "text": "𝒢{\\mathcal{G}}"
+                },
+                {
+                  "type": "formula",
+                  "text": "fψf_{\\psi}"
+                }
+              ],
+              "children": []
+            }
+          ]
+        },
+        {
+          "heading": "4 Experiments",
+          "level": 2,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "We evaluate LSE on two task domains, Text-to-SQL generation and general question answering, comparing against both stronger models and alternative prompt optimization methods (§[4.1](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S4.SS1 \"4.1 Experimental Setup ‣ 4 Experiments ‣ Learning to Self-Evolve\")–[4.2](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S4.SS2 \"4.2 Main Results ‣ 4 Experiments ‣ Learning to Self-Evolve\")). We then ablate the reward design and search strategy in §[4.3](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S4.SS3 \"4.3 Analysis ‣ 4 Experiments ‣ Learning to Self-Evolve\")."
+            }
+          ],
+          "children": [
+            {
+              "heading": "4.1 Experimental Setup",
+              "level": 3,
+              "content": [
+                {
+                  "type": "formula",
+                  "text": "πθ\\pi_{\\theta}"
+                },
+                {
+                  "type": "table",
+                  "text": "| | | | | | | | | --- | --- | --- | --- | --- | --- | --- | | Method | Financial | Toxicology | Codebase | Formula 1 | Card Games | Avg. | | Seed prompt | 51.0 | 60.3 | 63.7 | 54.5 | 56.5 | 57.2 | | Qwen3-4B-Instruct | 63.7 | 60.3 | 70.2 | 56.0 | 61.0 | 62.2 | | Claude Sonnet 4.5 | 70.8 | 63.8 | 67.8 | 57.3 | 63.0 | 64.5 | | GPT-5 | 70.8 | 65.8 | 72.0 | 54.3 | 63.3 | 65.2 | | GEPA | 64.0 | 62.0 | 72.0 | 54.0 | 62.0 | 62.8 | | TextGrad | 60.3 | 66.0 | 71.5 | 56.5 | 61.3 | 63.1 | | LSE (ours) | 72.0 | 68.5 | 72.0 | 59.8 | 64.0 | 67.3 |"
+                }
+              ],
+              "children": [
+                {
+                  "heading": "Models.",
+                  "level": 4,
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "text": "We use Qwen3-4B-Instruct as both the action policy πθ\\pi\\_{\\theta} and the self-evolving policy fψf\\_{\\psi}, unless otherwise specified. Training details and hyperparameters can be found in Appendix [A](https://ar5iv.labs.arxiv.org/html/2603.18620v1#A1 \"Appendix A Training and Evaluation Details ‣ Learning to Self-Evolve\")."
+                    },
+                    {
+                      "type": "formula",
+                      "text": "πθ\\pi_{\\theta}"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "fψf_{\\psi}"
+                    }
+                  ],
+                  "children": []
+                },
+                {
+                  "heading": "Tasks and datasets.",
+                  "level": 4,
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "text": "We evaluate on tasks across two domains: Text-to-SQL generation, where the policy produces executable SQL queries that retrieve the data specified by a user question, and general question answering (QA), where the policy answers multiple-choice questions across diverse academic subjects. The prompts for each task are in Appendix [B](https://ar5iv.labs.arxiv.org/html/2603.18620v1#A2 \"Appendix B Prompts ‣ Learning to Self-Evolve\")."
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "For Text-to-SQL, we use BIRD (Li et al., [2024](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib31 \"Can llm already serve as a database interface? a big bench for large-scale database grounded text-to-sqls\")), which pairs natural-language questions with SQL queries across database domains. Each database is a separate task domain: problems are sampled from the same domain for both evolution rounds and holdout evaluation. We train on the BIRD training split and evaluate on five randomly selected databases from the BIRD-SQL Mini-Dev split."
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "For general QA, we use SuperGPQA (Team et al., [2025](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib32 \"SuperGPQA: scaling llm evaluation across 285 graduate disciplines\")) and MMLU-Redux (Gema et al., [2024](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib33 \"Are we done with mmlu?\")). We convert SuperGPQA questions to four-way multiple-choice format to match MMLU-Redux, and treat each subject as a separate task domain. As with Text-to-SQL, each evolution run operates within a single subject domain. We train on SuperGPQA and evaluate on ten subjects from MMLU-Redux."
+                    }
+                  ],
+                  "children": []
+                },
+                {
+                  "heading": "Baselines.",
+                  "level": 4,
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "text": "We first evaluate stronger models as the self-evolving policy fψf\\_{\\psi} while keeping Qwen3-4B-Instruct as the action policy πθ\\pi\\_{\\theta}. We consider two frontier closed-source models, GPT-5 (OpenAI, [2025](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib34 \"OpenAI gpt-5 system card\")) and Claude Sonnet 4.5 (Anthropic, [2025](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib36 \"System card: claude opus 4.5\"))"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "fψf_{\\psi}"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "πθ\\pi_{\\theta}"
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "We also compare with two alternative designs of the self-evolving policy. For both methods, we use Qwen3-4B-Instruct as the prompt proposer and optimizer."
+                    },
+                    {
+                      "type": "list",
+                      "text": "* • GEPA (Agrawal et al., [2025](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib14 \"GEPA: reflective prompt evolution can outperform reinforcement learning\")) is a reflective prompt optimizer that merges textual reflection with multi-objective evolutionary search. GEPA mutates prompts based on natural-language feedback from new rollouts and maintains a Pareto front over per-instance performance to avoid greedy local optima. Each GEPA optimization step corresponds to one evolution round: the sampled problem batch is the training data for reflection, and the holdout set DD is DparetoD\\_{\\mathrm{pareto}} in GEPA. * • TextGrad (Yuksekgonul et al., [2024](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib37 \"TextGrad: automatic ”differentiation” via text\")) decomposes each prompt update into two LLM calls: a *backward* call that critiques the current instruction given the batch failures and produces natural-language “gradients” (feedback on how the instruction should change), followed by a *Textual Gradient Descent (TGD)* call that rewrites the instruction by incorporating the feedback. We follow the example provided in the official repository222<https://github.com/zou-group/textgrad/blob/main/evaluation/prompt_optimization.py> and treat each backward–TGD step as one evolution round."
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "GEPA (Agrawal et al., [2025](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib14 \"GEPA: reflective prompt evolution can outperform reinforcement learning\")) is a reflective prompt optimizer that merges textual reflection with multi-objective evolutionary search. GEPA mutates prompts based on natural-language feedback from new rollouts and maintains a Pareto front over per-instance performance to avoid greedy local optima. Each GEPA optimization step corresponds to one evolution round: the sampled problem batch is the training data for reflection, and the holdout set DD is DparetoD\\_{\\mathrm{pareto}} in GEPA."
+                    },
+                    {
+                      "type": "formula",
+                      "text": "DD"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "DparetoD_{\\mathrm{pareto}}"
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "TextGrad (Yuksekgonul et al., [2024](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib37 \"TextGrad: automatic ”differentiation” via text\")) decomposes each prompt update into two LLM calls: a *backward* call that critiques the current instruction given the batch failures and produces natural-language “gradients” (feedback on how the instruction should change), followed by a *Textual Gradient Descent (TGD)* call that rewrites the instruction by incorporating the feedback. We follow the example provided in the official repository222<https://github.com/zou-group/textgrad/blob/main/evaluation/prompt_optimization.py> and treat each backward–TGD step as one evolution round."
+                    }
+                  ],
+                  "children": []
+                },
+                {
+                  "heading": "Evaluation protocol.",
+                  "level": 4,
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "text": "For all methods, we sample problems and present them to the action policy in a fixed order across runs. The holdout set DD is also fixed across all evaluation runs within each task domain. We report the best performance achieved over TT rounds of evolution. Additional details can be found in Appendix [A](https://ar5iv.labs.arxiv.org/html/2603.18620v1#A1 \"Appendix A Training and Evaluation Details ‣ Learning to Self-Evolve\")."
+                    },
+                    {
+                      "type": "formula",
+                      "text": "DD"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "TT"
+                    }
+                  ],
+                  "children": []
+                }
+              ]
+            },
+            {
+              "heading": "4.2 Main Results",
+              "level": 3,
+              "content": [
+                {
+                  "type": "formula",
+                  "text": "πθ\\pi_{\\theta}"
+                },
+                {
+                  "type": "table",
+                  "text": "| | | | | | | | | | | | | | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | | Method | Bus. Eth. | Phil. | Prof. Acc. | Econ. | Anat. | Security | Virol. | Moral Sc. | Glob. Facts | Prof. Law | Avg. | | Seed prompt | 70.5 | 76.0 | 67.7 | 76.2 | 76.0 | 68.2 | 72.5 | 59.7 | 55.5 | 54.0 | 67.6 | | Qwen3-4B-Instruct | 75.5 | 79.2 | 73.0 | 83.0 | 82.3 | 68.8 | 77.0 | 59.7 | 56.0 | 57.3 | 71.2 | | Claude Sonnet 4.5 | 75.3 | 79.0 | 75.5 | 81.0 | 79.8 | 69.3 | 77.5 | 67.3 | 57.0 | 58.5 | 72.0 | | GPT-5 | 77.5 | 80.0 | 73.0 | 83.5 | 81.0 | 70.0 | 82.0 | 64.8 | 55.5 | 58.0 | 72.5 | | GEPA | 76.0 | 80.0 | 78.0 | 84.0 | 82.0 | 70.0 | 78.0 | 62.0 | 56.0 | 64.0 | 73.0 | | TextGrad | 74.0 | 79.0 | 67.8 | 73.3 | 80.0 | 67.8 | 77.3 | 62.5 | 51.3 | 58.3 | 69.1 | | LSE (ours) | 75.0 | 82.0 | 73.0 | 85.0 | 84.5 | 70.5 | 79.0 | 64.5 | 57.0 | 62.0 | 73.3 |"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Tables [1](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S4.T1 \"Table 1 ‣ 4.1 Experimental Setup ‣ 4 Experiments ‣ Learning to Self-Evolve\") and [2](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S4.T2 \"Table 2 ‣ 4.2 Main Results ‣ 4 Experiments ‣ Learning to Self-Evolve\") report results on Text-to-SQL and QA. Even without explicit training for self-improvement, off-the-shelf LLMs can refine their own prompts when given test-time feedback. The untrained Qwen3-4B-Instruct baseline improves over the seed prompt by 5% on BIRD and 3.6% on MMLU-Redux. This confirms that LLMs can already learn from their own experience within the evolution loop of Algorithm [1](https://ar5iv.labs.arxiv.org/html/2603.18620v1#alg1 \"Algorithm 1 ‣ 3.2 Prompt-Based Evolution with Tree Search ‣ 3 Method ‣ Learning to Self-Evolve\")."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "RL training with LSE substantially improves this ability. Despite using only a 4B-parameter model, LSE outperforms both frontier models on BIRD, surpassing GPT-5 by 2.1% (67.3% vs. 65.2%) and Claude Sonnet 4.5 by 2.8%. On MMLU-Redux, LSE matches GPT-5 (73.3% vs. 72.5%) and outperforms Claude Sonnet 4.5. These results indicate that explicit RL training for self-evolution is effective, enabling a small model to match or surpass frontier models."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "LSE also outperforms both prompt optimization methods. On BIRD, LSE surpasses GEPA by 4.5% (67.3% vs. 62.8%) and TextGrad by 4.2% (67.3% vs. 63.1%). On MMLU-Redux, LSE matches GEPA (73.3% vs. 73.0%) and outperforms TextGrad by 4.2%. Together, these results show that while off-the-shelf LLMs have some prompt-refinement ability, explicit training to self-evolve matches or outperforms untrained baselines, larger models, and specialized optimization methods."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Finally, both the improvement from self-evolution over the seed prompt and the additional benefit of LSE are smaller on MMLU-Redux than on BIRD. One possible explanation is the structure of the two tasks. In BIRD, all queries within a domain target the same database, so there is clear shared knowledge across problems: understanding the schema, common join patterns, or column semantics from one query directly helps with others. In MMLU-Redux, problems within the same subject are deliberately deduplicated and designed to cover broad topics. Solving one econometrics question does not guarantee useful knowledge for the next. This limits how much any self-evolving policy can improve the action policy’s context from experience within a single domain."
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "4.3 Analysis",
+              "level": 3,
+              "content": [
+                {
+                  "type": "formula",
+                  "text": "AGRPOA_{\\mathrm{GRPO}}"
+                },
+                {
+                  "type": "formula",
+                  "text": "R¯​(c1)\\bar{R}(c_{1})"
+                },
+                {
+                  "type": "formula",
+                  "text": "ALSEA_{\\mathrm{LSE}}"
+                },
+                {
+                  "type": "formula",
+                  "text": "rLSE=R¯​(c1)−R¯​(c0)r_{\\mathrm{LSE}}=\\bar{R}(c_{1})-\\bar{R}(c_{0})"
+                },
+                {
+                  "type": "formula",
+                  "text": "fψf_{\\psi}"
+                }
+              ],
+              "children": [
+                {
+                  "heading": "Effect of reward design.",
+                  "level": 4,
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "text": "In §[3.3](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S3.SS3 \"3.3 Learning to Self-Evolve (LSE) ‣ 3 Method ‣ Learning to Self-Evolve\") we motivated ALSE=R¯​(c1)−R¯​(c0)A\\_{\\mathrm{LSE}}=\\bar{R}(c\\_{1})-\\bar{R}(c\\_{0}) as a cleaner learning signal than the standard GRPO advantage AGRPOA\\_{\\mathrm{GRPO}}, which reduces to optimizing post-edit accuracy. We train a variant with AGRPOA\\_{\\mathrm{GRPO}}, keeping all other settings identical. On BIRD, ALSEA\\_{\\mathrm{LSE}} outperforms AGRPOA\\_{\\mathrm{GRPO}} by 4.3% (67.3% vs. 63.0%; Figure [2(a)](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S4.F2.sf1 \"In Figure 2 ‣ 4.3 Analysis ‣ 4 Experiments ‣ Learning to Self-Evolve\")). These results provide empirical evidence that the improvement-based objective is more effective for training self-evolving policies."
+                    },
+                    {
+                      "type": "formula",
+                      "text": "ALSE=R¯​(c1)−R¯​(c0)A_{\\mathrm{LSE}}=\\bar{R}(c_{1})-\\bar{R}(c_{0})"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "AGRPOA_{\\mathrm{GRPO}}"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "AGRPOA_{\\mathrm{GRPO}}"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "ALSEA_{\\mathrm{LSE}}"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "AGRPOA_{\\mathrm{GRPO}}"
+                    }
+                  ],
+                  "children": []
+                },
+                {
+                  "heading": "Effect of search strategy.",
+                  "level": 4,
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "text": "We compare UCB tree search against a linear-chain baseline that always extends the most recent node. Both use the untrained Qwen3-4B-Instruct as fψf\\_{\\psi}. Figure [2(b)](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S4.F2.sf2 \"In Figure 2 ‣ 4.3 Analysis ‣ 4 Experiments ‣ Learning to Self-Evolve\") shows that tree search improves the average by 2.4% on BIRD (62.2% vs. 59.8%) and 2.2% on MMLU-Redux (71.2% vs. 69.0%; Figure [4](https://ar5iv.labs.arxiv.org/html/2603.18620v1#A1.F4 \"Figure 4 ‣ Dataset sizes. ‣ Appendix A Training and Evaluation Details ‣ Learning to Self-Evolve\"))."
+                    },
+                    {
+                      "type": "formula",
+                      "text": "fψf_{\\psi}"
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "The key advantage is that tree search does not commit to a bad edit irrevocably. Figure [3](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S4.F3 \"Figure 3 ‣ Effect of search strategy. ‣ 4.3 Analysis ‣ 4 Experiments ‣ Learning to Self-Evolve\") shows a concrete example on the BIRD Card Games split. The linear chain’s average accuracy collapses from 56% to below 30% after a sequence of bad edits, and never recovers because each round builds on the previous context. With tree search, a bad edit at an early round does not cascade: UCB selection shifts back to a higher-scoring ancestor, keeping the trajectory out of bad local optima."
+                    }
+                  ],
+                  "children": []
+                },
+                {
+                  "heading": "Test-time self-evolution for specialized models.",
+                  "level": 4,
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "text": "Current LLM development often involves training specialized models for a domain of tasks. Can test-time self-evolution further improve such models? We test this by replacing πθ\\pi\\_{\\theta} with Arctic-Text2SQL-R1-7B (Yao et al., [2025](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib38 \"Arctic-text2sql-r1: simple rewards, strong reasoning in text-to-sql\")), a text-to-SQL model fine-tuned with RL on the BIRD training set, and applying the same LSE-trained fψf\\_{\\psi} (Qwen3-4B-Instruct) without additional training."
+                    },
+                    {
+                      "type": "formula",
+                      "text": "πθ\\pi_{\\theta}"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "fψf_{\\psi}"
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "Table [3](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S4.T3 \"Table 3 ‣ Test-time self-evolution for specialized models. ‣ 4.3 Analysis ‣ 4 Experiments ‣ Learning to Self-Evolve\") shows that LSE evolution improves Arctic by 6.7% on average (57.7% →\\to 64.4%). This indicates that parameter-level and prompt-level optimization are complementary: RL training encodes general SQL patterns into model weights, while prompt evolution adapts the context to each database at test time. The result also demonstrates that the LSE-trained policy transfers across action models: although fψf\\_{\\psi} was trained exclusively with Qwen3-4B-Instruct, the evolution strategy generalizes to guide a different model."
+                    },
+                    {
+                      "type": "formula",
+                      "text": "→\\to"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "fψf_{\\psi}"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "πθ\\pi_{\\theta}"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "fψf_{\\psi}"
+                    },
+                    {
+                      "type": "table",
+                      "text": "| Variant | Financial | Toxicology | Codebase | Formula 1 | Card Games | Avg. | | --- | --- | --- | --- | --- | --- | --- | | Seed prompt | 56.8 | 54.5 | 65.3 | 52.3 | 59.5 | 57.7 | | + LSE evolution | 68.3 | 62.3 | 71.5 | 57.0 | 63.0 | 64.4 |"
+                    }
+                  ],
+                  "children": []
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "heading": "5 Conclusion",
+          "level": 2,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "This work demonstrates that test-time self-evolution is a learnable skill that can be directly optimized through fine-tuning. The central design choice in LSE is a single-step RL objective that rewards the improvement each edit produces, sidestepping multi-step trajectory optimization while still capturing the core challenge of learning from feedback. Tree-guided search then composes these edits into multi-round evolution at test time. Our results show that direct optimization for self-evolution is effective, enabling a 4B-parameter model to match or surpass frontier models and prompt optimizers. Taken together, these findings highlight the benefit of targeting self-evolution as a distinct skill and designing learning algorithms for it."
+            }
+          ],
+          "children": [
+            {
+              "heading": "Limitations.",
+              "level": 4,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "Our work has several limitations. First, we reduce the multi-step evolution problem to a single-step training objective, delegating exploration entirely to the tree search algorithm at test time. Jointly optimizing over multi-step trajectories could yield stronger policies but would introduce additional challenges in credit assignment and computational cost. Second, we train a separate self-evolving policy for each task domain. Training a single policy that generalizes across diverse tasks is a natural extension, though it likely requires large-scale training across many domains. Third, we constrain evolution to the instruction field of the context; other components such as tools, skill libraries, and external memory are not explored. More broadly, the LSE framework could be paired with updates in the latent space or parameter space (Sun et al., [2020](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib19 \"Test-time training with self-supervision for generalization under distribution shifts\"); Tandon et al., [2025](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib20 \"End-to-end test-time training for long context\")). Finally, our training and evaluation environments are relatively small in scale. Curating effective environments for test-time self-evolution is difficult, as it requires not only sufficient problems with feedback but also problems that share enough structure for evolution to be meaningful. Developing more principled and scalable approaches to environment curation and evaluation remains an important open problem."
+                }
+              ],
+              "children": []
+            }
+          ]
+        },
+        {
+          "heading": "References",
+          "level": 2,
+          "content": [
+            {
+              "type": "list",
+              "text": "* L. A. Agrawal, S. Tan, D. Soylu, N. Ziems, R. Khare, K. Opsahl-Ong, A. Singhvi, H. Shandilya, M. J. Ryan, M. Jiang, C. Potts, K. Sen, A. G. Dimakis, I. Stoica, D. Klein, M. Zaharia, and O. Khattab (2025) GEPA: reflective prompt evolution can outperform reinforcement learning. arXiv preprint arXiv:2507.19457. Cited by: [§1](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S1.p3.1 \"1 Introduction ‣ Learning to Self-Evolve\"), [§2](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S2.SS0.SSS0.Px2.p2.1 \"Test-time self-evolution. ‣ 2 Related Work ‣ Learning to Self-Evolve\"), [§3.3](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S3.SS3.p1.1 \"3.3 Learning to Self-Evolve (LSE) ‣ 3 Method ‣ Learning to Self-Evolve\"), [1st item](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S4.I1.i1.p1.2 \"In Baselines. ‣ 4.1 Experimental Setup ‣ 4 Experiments ‣ Learning to Self-Evolve\"). * Anthropic (2025) System card: claude opus 4.5. External Links: [Link](https://www-cdn.anthropic.com/bf10f64990cfda0ba858290be7b8cc6317685f47.pdf) Cited by: [§4.1](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S4.SS1.SSS0.Px3.p1.2 \"Baselines. ‣ 4.1 Experimental Setup ‣ 4 Experiments ‣ Learning to Self-Evolve\"). * P. Auer (2002) Using confidence bounds for exploitation-exploration trade-offs. Journal of machine learning research 3 (Nov), pp. 397–422. Cited by: [§3.2](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S3.SS2.SSS0.Px1.p1.4 \"Tree-guided evolution. ‣ 3.2 Prompt-Based Evolution with Tree Search ‣ 3 Method ‣ Learning to Self-Evolve\"). * P. Chhikara, D. Khant, S. Aryan, T. Singh, and D. Yadav (2025) Mem0: building production-ready AI agents with scalable long-term memory. In ECAI 2025 - 28th European Conference on Artificial Intelligence, 25-30 October 2025, Bologna, Italy - Including 14th Conference on Prestigious Applications of Intelligent Systems (PAIS 2025), I. Lynce, N. Murano, M. Vallati, S. Villata, F. Chesani, M. Milano, A. Omicini, and M. Dastani (Eds.), Frontiers in Artificial Intelligence and Applications, Vol. 413, pp. 2993–3000. External Links: [Link](https://doi.org/10.3233/FAIA251160), [Document](https://dx.doi.org/10.3233/FAIA251160) Cited by: [§1](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S1.p3.1 \"1 Introduction ‣ Learning to Self-Evolve\"), [§2](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S2.SS0.SSS0.Px2.p2.1 \"Test-time self-evolution. ‣ 2 Related Work ‣ Learning to Self-Evolve\"). * DeepSeek-AI (2025) DeepSeek-R1: incentivizing reasoning capability in LLMs via reinforcement learning. arXiv preprint arXiv:2501.12948. Cited by: [§1](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S1.p1.1 \"1 Introduction ‣ Learning to Self-Evolve\"), [§2](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S2.SS0.SSS0.Px1.p1.1 \"Training-time self-evolution. ‣ 2 Related Work ‣ Learning to Self-Evolve\"). * C. Fernando, D. Banarse, H. Michalewski, S. Osindero, and T. Rocktäschel (2024) Promptbreeder: self-referential self-improvement via prompt evolution. In Proceedings of the 41st International Conference on Machine Learning, Cited by: [§1](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S1.p3.1 \"1 Introduction ‣ Learning to Self-Evolve\"), [§2](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S2.SS0.SSS0.Px2.p2.1 \"Test-time self-evolution. ‣ 2 Related Work ‣ Learning to Self-Evolve\"). * A. P. Gema, J. O. J. Leang, G. Hong, A. Devoto, A. C. M. Mancino, R. Saxena, X. He, Y. Zhao, X. Du, M. R. G. Madani, C. Barale, R. McHardy, J. Harris, J. Kaddour, E. van Krieken, and P. Minervini (2024) Are we done with mmlu?. External Links: 2406.04127 Cited by: [§4.1](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S4.SS1.SSS0.Px2.p3.1 \"Tasks and datasets. ‣ 4.1 Experimental Setup ‣ 4 Experiments ‣ Learning to Self-Evolve\"). * S. Hu, C. Lu, and J. Clune (2025) Automated design of agentic systems. In International Conference on Learning Representations, Cited by: [§1](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S1.p2.1 \"1 Introduction ‣ Learning to Self-Evolve\"), [§1](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S1.p3.1 \"1 Introduction ‣ Learning to Self-Evolve\"), [§2](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S2.SS0.SSS0.Px2.p2.1 \"Test-time self-evolution. ‣ 2 Related Work ‣ Learning to Self-Evolve\"). * O. Khattab, A. Singhvi, P. Maheshwari, Z. Zhang, K. Santhanam, S. Vardhamanan, S. Haq, A. Sharma, T. T. Joshi, H. Mober, et al. (2024) DSPy: compiling declarative language model calls into state-of-the-art pipelines. In International Conference on Learning Representations, Cited by: [§1](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S1.p3.1 \"1 Introduction ‣ Learning to Self-Evolve\"). * A. Kumar, V. Du, A. S. Rawat, and R. Agarwal (2025) Training language models to self-correct via reinforcement learning. In International Conference on Learning Representations, Cited by: [§1](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S1.p2.1 \"1 Introduction ‣ Learning to Self-Evolve\"), [§2](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S2.SS0.SSS0.Px2.p1.1 \"Test-time self-evolution. ‣ 2 Related Work ‣ Learning to Self-Evolve\"). * J. Li, B. Hui, G. Qu, J. Yang, B. Li, B. Li, B. Wang, B. Qin, R. Geng, N. Huo, et al. (2024) Can llm already serve as a database interface? a big bench for large-scale database grounded text-to-sqls. Advances in Neural Information Processing Systems 36. Cited by: [§4.1](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S4.SS1.SSS0.Px2.p2.1 \"Tasks and datasets. ‣ 4.1 Experimental Setup ‣ 4 Experiments ‣ Learning to Self-Evolve\"). * H. Lightman, V. Kosaraju, Y. Burda, H. Edwards, B. Baker, T. Lee, J. Leike, J. Schulman, I. Sutskever, and K. Cobbe (2023) Let’s verify step by step. In The Twelfth International Conference on Learning Representations, Cited by: [§1](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S1.p1.1 \"1 Introduction ‣ Learning to Self-Evolve\"), [§2](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S2.SS0.SSS0.Px1.p1.1 \"Training-time self-evolution. ‣ 2 Related Work ‣ Learning to Self-Evolve\"). * [13] OpenAI Learning to reason with llms. Note: <https://openai.com/index/learning-to-reason-with-llms/>Accessed: 2025-03-21 Cited by: [§1](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S1.p1.1 \"1 Introduction ‣ Learning to Self-Evolve\"), [§2](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S2.SS0.SSS0.Px1.p1.1 \"Training-time self-evolution. ‣ 2 Related Work ‣ Learning to Self-Evolve\"). * OpenAI (2025) OpenAI gpt-5 system card. arXiv preprint arXiv: 2601.03267. Cited by: [§4.1](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S4.SS1.SSS0.Px3.p1.2 \"Baselines. ‣ 4.1 Experimental Setup ‣ 4 Experiments ‣ Learning to Self-Evolve\"). * J. Piaget (1952) The origins of intelligence in children. W. W. Norton & Company. Note: Trans. M. Cook External Links: [Document](https://dx.doi.org/10.1037/11494-000) Cited by: [§1](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S1.p1.1 \"1 Introduction ‣ Learning to Self-Evolve\"). * G. Sheng, C. Zhang, Z. Ye, X. Wu, W. Zhang, R. Zhang, Y. Peng, H. Lin, and C. Wu (2024) HybridFlow: a flexible and efficient rlhf framework. arXiv preprint arXiv: 2409.19256. Cited by: [Appendix A](https://ar5iv.labs.arxiv.org/html/2603.18620v1#A1.SS0.SSS0.Px2.p1.1 \"RL training. ‣ Appendix A Training and Evaluation Details ‣ Learning to Self-Evolve\"). * N. Shinn, F. Cassano, A. Gopinath, K. Narasimhan, and S. Yao (2023) Reflexion: language agents with verbal reinforcement learning. In Advances in Neural Information Processing Systems, Vol. 36. Cited by: [§1](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S1.p2.1 \"1 Introduction ‣ Learning to Self-Evolve\"), [§2](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S2.SS0.SSS0.Px2.p1.1 \"Test-time self-evolution. ‣ 2 Related Work ‣ Learning to Self-Evolve\"). * R. J. Sternberg (2019) A theory of adaptive intelligence and its relation to general intelligence. Journal of Intelligence 7 (4). External Links: [Link](https://www.mdpi.com/2079-3200/7/4/23), ISSN 2079-3200, [Document](https://dx.doi.org/10.3390/jintelligence7040023) Cited by: [§1](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S1.p1.1 \"1 Introduction ‣ Learning to Self-Evolve\"). * Y. Sun, X. Wang, L. Zhuang, J. Miller, M. Hardt, and A. A. Efros (2020) Test-time training with self-supervision for generalization under distribution shifts. In ICML, Cited by: [§5](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S5.SS0.SSS0.Px1.p1.1 \"Limitations. ‣ 5 Conclusion ‣ Learning to Self-Evolve\"). * A. Tandon, K. Dalal, X. Li, D. Koceja, M. Rød, S. Buchanan, X. Wang, J. Leskovec, S. Koyejo, T. Hashimoto, C. Guestrin, J. McCaleb, Y. Choi, and Y. Sun (2025) End-to-end test-time training for long context. arXiv preprint arXiv: 2512.23675. Cited by: [§5](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S5.SS0.SSS0.Px1.p1.1 \"Limitations. ‣ 5 Conclusion ‣ Learning to Self-Evolve\"). * M. Team, X. Du, Y. Yao, K. Ma, B. Wang, T. Zheng, K. Zhu, M. Liu, Y. Liang, X. Jin, Z. Wei, C. Zheng, K. Deng, S. Jia, S. Jiang, Y. Liao, R. Li, Q. Li, S. Li, Y. Li, Y. Li, D. Ma, Y. Ni, H. Que, Q. Wang, Z. Wen, S. Wu, T. Xing, M. Xu, Z. Yang, Z. M. Wang, J. Zhou, Y. Bai, X. Bu, C. Cai, L. Chen, Y. Chen, C. Cheng, T. Cheng, K. Ding, S. Huang, Y. Huang, Y. Li, Y. Li, Z. Li, T. Liang, C. Lin, H. Lin, Y. Ma, T. Pang, Z. Peng, Z. Peng, Q. Qi, S. Qiu, X. Qu, S. Quan, Y. Tan, Z. Wang, C. Wang, H. Wang, Y. Wang, Y. Wang, J. Xu, K. Yang, R. Yuan, Y. Yue, T. Zhan, C. Zhang, J. Zhang, X. Zhang, X. Zhang, Y. Zhang, Y. Zhao, X. Zheng, C. Zhong, Y. Gao, Z. Li, D. Liu, Q. Liu, T. Liu, S. Ni, J. Peng, Y. Qin, W. Su, G. Wang, S. Wang, J. Yang, M. Yang, M. Cao, X. Yue, Z. Zhang, W. Zhou, J. Liu, Q. Lin, W. Huang, and G. Zhang (2025) SuperGPQA: scaling llm evaluation across 285 graduate disciplines. External Links: 2502.14739, [Link](https://arxiv.org/abs/2502.14739) Cited by: [§4.1](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S4.SS1.SSS0.Px2.p3.1 \"Tasks and datasets. ‣ 4.1 Experimental Setup ‣ 4 Experiments ‣ Learning to Self-Evolve\"). * G. Wang, Y. Xie, Y. Jiang, A. Mandlekar, C. Xiao, Y. Zhu, L. Fan, and A. Anandkumar (2023) Voyager: an open-ended embodied agent with large language models. In Advances in Neural Information Processing Systems, Vol. 36. Cited by: [§2](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S2.SS0.SSS0.Px2.p2.1 \"Test-time self-evolution. ‣ 2 Related Work ‣ Learning to Self-Evolve\"). * Z. Yao, G. Sun, L. Borchmann, G. Nuti, Z. Shen, M. Deng, B. Zhai, H. Zhang, A. Li, and Y. He (2025) Arctic-text2sql-r1: simple rewards, strong reasoning in text-to-sql. arXiv preprint arXiv:2505.20315. Cited by: [§4.3](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S4.SS3.SSS0.Px3.p1.2 \"Test-time self-evolution for specialized models. ‣ 4.3 Analysis ‣ 4 Experiments ‣ Learning to Self-Evolve\"), [Table 3](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S4.T3 \"In Test-time self-evolution for specialized models. ‣ 4.3 Analysis ‣ 4 Experiments ‣ Learning to Self-Evolve\"). * X. Yin, X. Wang, L. Pan, L. Lin, X. Wan, and W. Y. Wang (2024) Gödel agent: a self-referential agent framework for recursive self-improvement. arXiv preprint arXiv: 2410.04444. Cited by: [§1](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S1.p2.1 \"1 Introduction ‣ Learning to Self-Evolve\"), [§2](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S2.SS0.SSS0.Px2.p2.1 \"Test-time self-evolution. ‣ 2 Related Work ‣ Learning to Self-Evolve\"), [§3.3](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S3.SS3.p1.1 \"3.3 Learning to Self-Evolve (LSE) ‣ 3 Method ‣ Learning to Self-Evolve\"). * W. Yuan, R. Y. Pang, K. Cho, X. Li, S. Sukhbaatar, J. Xu, and J. Weston (2024) Self-rewarding language models. In Proceedings of the 41st International Conference on Machine Learning, Cited by: [§2](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S2.SS0.SSS0.Px1.p1.1 \"Training-time self-evolution. ‣ 2 Related Work ‣ Learning to Self-Evolve\"). * M. Yuksekgonul, F. Bianchi, J. Boen, S. Liu, Z. Huang, C. Guestrin, and J. Zou (2024) TextGrad: automatic ”differentiation” via text. arXiv preprint arXiv: 2406.07496. Cited by: [§1](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S1.p3.1 \"1 Introduction ‣ Learning to Self-Evolve\"), [§2](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S2.SS0.SSS0.Px2.p2.1 \"Test-time self-evolution. ‣ 2 Related Work ‣ Learning to Self-Evolve\"), [2nd item](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S4.I1.i2.p1.1 \"In Baselines. ‣ 4.1 Experimental Setup ‣ 4 Experiments ‣ Learning to Self-Evolve\"). * M. Yuksekgonul, D. Koceja, X. Li, F. Bianchi, J. McCaleb, X. Wang, J. Kautz, Y. Choi, J. Zou, C. Guestrin, and Y. Sun (2026) Learning to discover at test time. arXiv preprint arXiv: 2601.16175. Cited by: [§1](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S1.p2.1 \"1 Introduction ‣ Learning to Self-Evolve\"), [§2](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S2.SS0.SSS0.Px2.p1.1 \"Test-time self-evolution. ‣ 2 Related Work ‣ Learning to Self-Evolve\"). * E. Zelikman, Y. Wu, J. Mu, and N. Goodman (2022) STaR: bootstrapping reasoning with reasoning. In Advances in Neural Information Processing Systems, Vol. 35. Cited by: [§2](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S2.SS0.SSS0.Px1.p1.1 \"Training-time self-evolution. ‣ 2 Related Work ‣ Learning to Self-Evolve\"). * G. Zhang, M. Fu, and S. Yan (2025a) MemGen: weaving generative latent memory for self-evolving agents. arXiv preprint arXiv: 2509.24704. Cited by: [§1](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S1.p3.1 \"1 Introduction ‣ Learning to Self-Evolve\"), [§2](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S2.SS0.SSS0.Px2.p2.1 \"Test-time self-evolution. ‣ 2 Related Work ‣ Learning to Self-Evolve\"). * J. Zhang, S. Hu, C. Lu, R. Lange, and J. Clune (2025b) Darwin godel machine: open-ended evolution of self-improving agents. arXiv preprint arXiv:2505.22954. Cited by: [§1](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S1.p2.1 \"1 Introduction ‣ Learning to Self-Evolve\"), [§1](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S1.p3.1 \"1 Introduction ‣ Learning to Self-Evolve\"), [§2](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S2.SS0.SSS0.Px2.p2.1 \"Test-time self-evolution. ‣ 2 Related Work ‣ Learning to Self-Evolve\"), [§3.3](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S3.SS3.p1.1 \"3.3 Learning to Self-Evolve (LSE) ‣ 3 Method ‣ Learning to Self-Evolve\"). * Q. Zhang, C. Hu, S. Upasani, B. Ma, F. Hong, V. Kamanuru, J. Rainton, C. Wu, M. Ji, H. Li, U. Thakker, J. Zou, and K. Olukotun (2025c) Agentic context engineering: evolving contexts for self-improving language models. arXiv preprint arXiv: 2510.04618. Cited by: [§1](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S1.p3.1 \"1 Introduction ‣ Learning to Self-Evolve\"), [§2](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S2.SS0.SSS0.Px2.p2.1 \"Test-time self-evolution. ‣ 2 Related Work ‣ Learning to Self-Evolve\"). * A. Zhao, D. Huang, Q. Xu, M. Lin, Y. Liu, and G. Huang (2024) ExpeL: LLM agents are experiential learners. In Proceedings of the AAAI Conference on Artificial Intelligence, Vol. 38. Cited by: [§1](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S1.p3.1 \"1 Introduction ‣ Learning to Self-Evolve\"), [§2](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S2.SS0.SSS0.Px2.p2.1 \"Test-time self-evolution. ‣ 2 Related Work ‣ Learning to Self-Evolve\"). * A. Zhao, Y. Wu, Y. Yue, T. Wu, Q. Xu, Y. Yue, M. Lin, S. Wang, Q. Wu, Z. Zheng, and G. Huang (2025a) Absolute zero: reinforced self-play reasoning with zero data. arXiv preprint arXiv:2505.03335. Cited by: [§2](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S2.SS0.SSS0.Px1.p1.1 \"Training-time self-evolution. ‣ 2 Related Work ‣ Learning to Self-Evolve\"). * X. Zhao, Z. Kang, A. Feng, S. Levine, and D. Song (2025b) Learning to reason without external rewards. arXiv preprint arXiv: 2505.19590. Cited by: [§2](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S2.SS0.SSS0.Px1.p1.1 \"Training-time self-evolution. ‣ 2 Related Work ‣ Learning to Self-Evolve\"). * Y. Zuo, J. Zhang, D. Yang, G. Chen, S. Li, H. Dong, M. Wang, and Z. Xu (2025) TTRL: test-time reinforcement learning. arXiv preprint arXiv:2504.16084. Cited by: [§2](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S2.SS0.SSS0.Px2.p1.1 \"Test-time self-evolution. ‣ 2 Related Work ‣ Learning to Self-Evolve\")."
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "Appendix A Training and Evaluation Details",
+          "level": 2,
+          "content": [],
+          "children": [
+            {
+              "heading": "Data generation.",
+              "level": 4,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "We train a separate self-evolving policy for each task domain (Text-to-SQL and QA) using evolutions trajectories generated from the corresponding training set. For each domain, we run 200 data-generation runs, each containing 20 rounds of evolution, yielding approximately 4,000 tree nodes to sample from during RL training."
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "RL training.",
+              "level": 4,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "We implement our RL framework using verl (Sheng et al., [2024](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib43 \"HybridFlow: a flexible and efficient rlhf framework\")). We find that randomly sampling nodes from the evolution trees produces weak training signal early in training. Instead, we build a simple curriculum by preferentially sampling nodes with the highest improvement potential, defined as the difference between a node’s performance and the maximum performance in its own tree. We use a learning rate of 1×10−51\\times 10^{-5}, sample 32 nodes per batch, and generate 4 rollouts per node. We perform on-policy training and do not apply KL regularization. We train for 4 epochs and select the best checkpoint based on a separate development set."
+                },
+                {
+                  "type": "formula",
+                  "text": "1×10−51\\times 10^{-5}"
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "Evaluation protocol.",
+              "level": 4,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "For every domain, we fix the holdout set DD at 50 problems. Performance on the holdout set is calculated as the average over eight generations. We run 25 rounds of evolution and report the best holdout performance achieved by each self-evolving method over the course of evolution. At each round, a batch of 10 problems is sampled with replacement and presented to the action model. The random seed is fixed so that all methods observe the same sequence of problem batches."
+                },
+                {
+                  "type": "formula",
+                  "text": "DD"
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "Dataset sizes.",
+              "level": 4,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "Table [4](https://ar5iv.labs.arxiv.org/html/2603.18620v1#A1.T4 \"Table 4 ‣ Dataset sizes. ‣ Appendix A Training and Evaluation Details ‣ Learning to Self-Evolve\") reports the number of evaluation problems per domain."
+                },
+                {
+                  "type": "table",
+                  "text": "| Task | Domain | # Problems | | --- | --- | --- | | BIRD | Financial | 106 | | Toxicology | 145 | | Card Games | 191 | | Formula 1 | 174 | | Codebase | 186 | | MMLU-Redux | Business Ethics | 100 | | Philosophy | 100 | | Professional Accounting | 95 | | Econometrics | 100 | | Anatomy | 100 | | Security Studies | 100 | | Virology | 96 | | Moral Scenarios | 100 | | Global Facts | 96 | | Professional Law | 100 |"
+                },
+                {
+                  "type": "formula",
+                  "text": "fψf_{\\psi}"
+                }
+              ],
+              "children": []
+            }
+          ]
+        },
+        {
+          "heading": "Appendix B Prompts",
+          "level": 2,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "Each task uses three prompt templates: (1) a *system prompt* that provides the action model πθ\\pi\\_{\\theta} with task context and the current instructions, (2) a *user message* that presents each problem instance, and (3) a *self-evolution prompt* that the self-evolving policy fψf\\_{\\psi} receives to produce a revised instruction. The instruction field within the system prompt is the component that fψf\\_{\\psi} edits at each evolution round. Below we reproduce the templates for both tasks."
+            },
+            {
+              "type": "formula",
+              "text": "πθ\\pi_{\\theta}"
+            },
+            {
+              "type": "formula",
+              "text": "fψf_{\\psi}"
+            },
+            {
+              "type": "formula",
+              "text": "fψf_{\\psi}"
+            }
+          ],
+          "children": [
+            {
+              "heading": "B.1 Text-to-SQL",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "Action model system prompt."
+                },
+                {
+                  "type": "code",
+                  "text": "Task Overview:\nYou are a data science expert. Below, you are provided with a\ndatabase schema and a natural language question. Your task is to\nunderstand the schema and generate a valid SQL query to answer the\nquestion.\n\nDatabase Engine:\nSQLite\n\nDatabase Schema:\n{schema}\nThis schema describes the database’s structure, including tables,\ncolumns, primary keys, foreign keys, and any relevant relationships\nor constraints.\n\n**Instructions**\n{instructions}"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "The seed instruction is: Return only a single valid SQLite SQL statement in <answer>...</answer>."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Action model user message."
+                },
+                {
+                  "type": "code",
+                  "text": "Question:\n{question}\n\n**Instructions**\n{instructions}\n\nFollow the instructions and show your work. When you are ready,\nreturn the query output list in tags: <answer> ... </answer>"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Self-evolving policy prompt."
+                },
+                {
+                  "type": "code",
+                  "text": "You are an expert at designing text-to-SQL agents. The agent is\nrunning on a fixed database schema. Below is the current agent\nprompt and a summary of recent performance. Rewrite ONLY the\ninstructions to improve execution accuracy while maintaining\nstrict output format.\n\nCurrent prompt:\n{old_prompt}\n\nEvaluation summary over {n_problems} problems and the agent’s\nfull thinking process:\n{summary}\n\n**How to write Instructions**\n- The agent will continue receive different user queries so don’t\n  make the instructions too specific to a single question.\n  Referring to the questions in the current summary with only the\n  question number is not helpful.\n- Keep it concise and practical.\n- You may include rules, heuristics, knowledge about the database,\n  low-level instructions/examples, high-level ideas/strategies,\n  pitfalls and any information that you think can make the agent\n  better.\n- Organize however you like (bullets, headings, checklists).\n- Be creative and think about the agent’s behavior across\n  iterations. Don’t be confined by what I told you.\n- Don’t change the output format, the agent should still return\n  the final SQL query in tags: <answer> ... </answer>.\n\nThink step by step and show your work. Reason about the history\nof the model’s behavior across iterations.\n\nWhen you are ready, put your revised Instructions within\n<prompt>[your new instructions]</prompt> tags."
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "B.2 Question Answering",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "Action model system prompt."
+                },
+                {
+                  "type": "code",
+                  "text": "Task Overview:\nYou are an expert taking a test. Below, you are provided with a\nquestion and a list of choices. Your task is to select the correct\nanswer from the choices.\n\n**Instructions**\n{instructions}"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "The seed instruction is: Return only the letter of the correct choice (A, B, C, or D) in <answer>...</answer>."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Action model user message."
+                },
+                {
+                  "type": "code",
+                  "text": "Question:\n{question}\n\nChoices:\n{choices}\n\nFollow the instructions and show your work. When you are ready,\nreturn the answer letter in tags: <answer> ... </answer>"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Self-evolving policy prompt."
+                },
+                {
+                  "type": "code",
+                  "text": "You are an expert at designing agents for solving multiple-choice\nquestions that involve both factual knowledge and reasoning.\nBelow is the current agent prompt and a summary of recent\nperformance on a set of problems. Rewrite ONLY the instructions\nto improve accuracy while maintaining strict output format.\n\nCurrent prompt:\n{old_prompt}\n\nEvaluation summary over {n_problems} problems and the agent’s\nfull thinking process:\n{summary}\n\n**How to write Instructions**\n- The agent will continue to receive different questions from the\n  same subjects. Don’t make the instructions too specific to a\n  single question.\n- Keep it concise and practical.\n- You may include rules, heuristics, strategies for multiple\n  choice questions (e.g., elimination, careful reading), knowledge\n  about the subjects (e.g., common misconceptions, important\n  facts, etc.), and any information that you think can make the\n  agent better.\n- Organize however you like (bullets, headings, checklists).\n- Be creative and think about the agent’s behavior across\n  iterations. Don’t be confined by what I told you.\n- Don’t change the output format, the agent should still return\n  the final answer letter in tags: <answer> ... </answer>.\n\nThink step by step and show your work. Reason about the history\nof the model’s behavior across iterations.\n\nWhen you are ready, put your revised Instructions within\n<prompt>[your new instructions]</prompt> tags."
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "B.3 Example Instructions Found by LSE",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "Below we reproduce the best instructions discovered by the LSE-trained self-evolving policy on one domain from each task. These instructions replace the seed instruction in the action model prompt after multiple rounds of tree-guided evolution."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Text-to-SQL: BIRD Codebase database."
+                },
+                {
+                  "type": "code",
+                  "text": "1. Always return exactly one valid SQLite query in the format:\n   <answer>YOUR_SQL_QUERY_HERE</answer>\n\n2. Carefully analyze the natural language question to identify:\n   - The target attribute (e.g., name, count, date, status)\n   - The relevant tables and their columns\n   - Any joins required to connect tables via foreign keys\n   - Any filters (e.g., equality, date ranges, null checks)\n\n3. Use only the provided schema. Do not assume columns or\n   tables that are not defined.\n\n4. When joining tables:\n   - Match foreign key references precisely\n     (e.g., posts.OwnerUserId -> users.Id)\n   - Use explicit column aliases only if needed for clarity\n   - Ensure join conditions match the schema\n\n5. For date filtering:\n   - Use strftime(’%Y’, column) to extract year\n   - Never use YEAR() -- SQLite does not support it\n   - Match date format exactly (e.g., ’2014-04-23 20:29:39.0’)\n\n6. For conditional outputs (e.g., \"well-finished\"):\n   - Use CASE WHEN or IIF to map NULL / non-NULL values\n   - Match the definition in the question\n     (e.g., \"not well-finished\" = ClosedDate IS NULL)\n\n7. Common pitfalls to avoid:\n   - Misidentifying OwnerUserId vs. LastEditorUserId\n   - Incorrectly joining on UserId instead of Id\n   - Misspelling column names (e.g., CreaionDate)\n   - Forgetting required joins for user attributes\n   - Confusing UserDisplayName in comments with post ownership\n\n8. Always use subqueries for exact values (MIN, MAX):\n   - e.g., WHERE Age = (SELECT MIN(Age) FROM users)\n     instead of ORDER BY Age LIMIT 1\n\n9. For percentages or ratios, compute numerator and\n   denominator separately using subqueries. Use\n   CAST(... AS REAL) for floating-point division.\n\n10. Avoid redundant joins -- if a query can be answered\n    from a single table, do not introduce unnecessary joins."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Question answering: MMLU-Redux Anatomy subject."
+                },
+                {
+                  "type": "code",
+                  "text": "- Return only the letter of the correct choice (A, B, C,\n  or D) in <answer>...</answer>.\n- Carefully analyze the question and all answer options\n  before selecting.\n- Use elimination to rule out clearly incorrect choices\n  based on factual knowledge or logical inconsistency.\n- For biological and anatomical questions, recall key\n  structures and their functions (e.g., fertilization\n  occurs in the fallopian tube, not the ovary or uterus;\n  the pituitary is the \"master gland\").\n- In neurology: upper motor neuron lesions cause spastic\n  paralysis; lower motor neuron lesions cause flaccid\n  paralysis; sympathetic pathways use noradrenaline.\n- In embryology, palatine shelf elevation is due to turgor\n  pressure from hydrophilic molecules, not directly from\n  tongue descent or brain flexure.\n- For spinal cord injuries, breathing is controlled by the\n  brainstem (medulla), not the cervical spinal cord.\n- Fracture types: closed = skin intact; greenstick = bent\n  but not displaced; open = skin broken; spiral = twisting.\n- In autonomic responses, sympathetic chain damage leads to\n  pupillary constriction and vasodilation (loss of\n  vasoconstriction), not increased sweating.\n- In Horner’s syndrome: miosis, facial vasodilation,\n  decreased lacrimation, and anhydrosis.\n- In cerebrovascular accidents, internal capsule lesions\n  cause contralateral spastic paralysis.\n- Prioritize accuracy over common assumptions -- especially\n  regarding directionality (contralateral vs ipsilateral),\n  timing (diastole vs systole), and structural relationships.\n- Be vigilant for common misconceptions used as distractors.\n- Do not over-rely on common associations; base decisions\n  on precise anatomical, physiological, or pathological facts."
+                }
+              ],
+              "children": []
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "chunks": [
+    {
+      "heading_path": [
+        "Learning to Self-Evolve"
+      ],
+      "text": "# Learning to Self-Evolve"
+    },
+    {
+      "heading_path": [
+        "Learning to Self-Evolve",
+        "Abstract"
+      ],
+      "text": "###### Abstract\n\nWe introduce Learning to Self-Evolve (LSE), a reinforcement learning framework that trains large language models (LLMs) to improve their own contexts at test time. We situate LSE in the setting of test-time self-evolution, where a model iteratively refines its context from feedback on seen problems to perform better on new ones. Existing approaches rely entirely on the inherent reasoning ability of the model and never explicitly train it for this task. LSE reduces the multi-step evolution problem to a single-step RL objective, where each context edit is rewarded by the improvement in downstream performance. We pair this objective with a tree-guided evolution loop. On Text-to-SQL generation (BIRD) and general question answering (MMLU-Redux), a 4B-parameter model trained with LSE outperforms self-evolving policies powered by GPT-5 and Claude Sonnet 4.5, as well as prompt optimization methods including GEPA and TextGrad, and transfers to guide other models without additional training. Our results highlight the effectiveness of treating self-evolution as a learnable skill.111Code is available at <https://github.com/chenyn66/learning-to-self-evolve>."
+    },
+    {
+      "heading_path": [
+        "Learning to Self-Evolve",
+        "1 Introduction"
+      ],
+      "text": "## 1 Introduction\n\nThe ability to adapt and evolve in response to environmental feedback has long been considered central to human intelligence (Piaget, [1952](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib1 \"The origins of intelligence in children\"); Sternberg, [2019](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib2 \"A theory of adaptive intelligence and its relation to general intelligence\")). A chess player improves by analyzing past games; a software engineer grows more proficient with a codebase through months of daily work. In both cases, experience accumulates and the person adjusts their approach accordingly. Current large language model (LLM) training pipelines exhibit a similar dynamic, particularly at the post-training stage, where reinforcement learning (RL) refines the behavior of the model on its own generated data (Lightman et al., [2023](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib4 \"Let’s verify step by step\"); [OpenAI,](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib3 \"Learning to reason with llms\") ; DeepSeek-AI, [2025](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib23 \"DeepSeek-R1: incentivizing reasoning capability in LLMs via reinforcement learning\")). However, this learning stops once training ends. At deployment, an LLM applies the same policy regardless of how many problems it has solved in a domain, and discards all accumulated experience once the context resets. This gap between static deployment and dynamic adaptation motivates the study of *test-time self-evolving* systems: systems that continuously update themselves in response to new observations at test time.\n\nTest-time self-evolution can be characterized along at least two dimensions: *how* the policy is updated and *when*. On one end of the first dimension, gradient-based methods modify model parameters directly; on the other, prompt-based methods rewrite the model context while keeping parameters frozen. Along the second dimension, *intra-episode* evolution updates the policy within a single episode: the model revisits its own attempts and refines its answer to a particular problem, trading additional compute for instance-level gains (Shinn et al., [2023](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib8 \"Reflexion: language agents with verbal reinforcement learning\"); Kumar et al., [2025](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib9 \"Training language models to self-correct via reinforcement learning\"); Yuksekgonul et al., [2026](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib25 \"Learning to discover at test time\")). *Inter-episode* evolution updates the policy after one or more completed episodes and applies the result to new problems, extracting transferable knowledge that generalizes across tasks (Yin et al., [2024](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib26 \"Gödel agent: a self-referential agent framework for recursive self-improvement\"); Hu et al., [2025](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib17 \"Automated design of agentic systems\"); Zhang et al., [2025b](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib27 \"Darwin godel machine: open-ended evolution of self-improving agents\")).\n\nWe focus on inter-episode, prompt-based self-evolution: an LLM observes its performance on a batch of problems and rewrites its own context to improve on the next batch. Several recent works explore this direction through automatic prompt optimization (Khattab et al., [2024](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib13 \"DSPy: compiling declarative language model calls into state-of-the-art pipelines\"); Agrawal et al., [2025](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib14 \"GEPA: reflective prompt evolution can outperform reinforcement learning\"); Yuksekgonul et al., [2024](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib37 \"TextGrad: automatic ”differentiation” via text\")), self-referential updates (Fernando et al., [2024](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib12 \"Promptbreeder: self-referential self-improvement via prompt evolution\"); Zhao et al., [2024](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib16 \"ExpeL: LLM agents are experiential learners\"); Zhang et al., [2025b](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib27 \"Darwin godel machine: open-ended evolution of self-improving agents\"); Hu et al., [2025](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib17 \"Automated design of agentic systems\"); Zhang et al., [2025c](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib28 \"Agentic context engineering: evolving contexts for self-improving language models\")), and agentic memory systems (Zhang et al., [2025a](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib29 \"MemGen: weaving generative latent memory for self-evolving agents\"); [c](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib28 \"Agentic context engineering: evolving contexts for self-improving language models\"); Chhikara et al., [2025](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib18 \"Mem0: building production-ready AI agents with scalable long-term memory\")). These methods, however, rely entirely on the inherent ability of the LLM to analyze feedback and propose better context. The model is never explicitly trained for this self-improvement task.\n\nWe argue that self-evolution poses a reasoning challenge distinct from other reasoning domains. The process, in essence, shares the structure of an RL problem. An RL optimizer relies on dedicated algorithms to assign credit, estimate gradients, and balance exploration against exploitation. In self-evolution, the model must perform all three implicitly, through natural language reasoning alone. It must judge which parts of the current context help and which hurt, anticipate how a revision will change downstream behavior, and decide whether to refine what works or try something new. These demands motivate explicit optimization for self-evolution.\n\nWe propose Learning to Self-Evolve (LSE), an RL framework that explicitly trains an LLM to be an effective self-evolving policy. Rather than optimizing over the full multi-step evolution trajectory, LSE simplifies training to a single step: the model receives the current context and a performance summary, and produces a better context. Each edit is rewarded by the *improvement* in downstream performance, instead of the absolute post-edit score. At test time, we leverage a tree-guided evolution loop that allows the system to explore and backtrack across possible contexts.\n\nWe evaluate LSE on Text-to-SQL generation and general question answering. Despite using only a 4B-parameter model, the LSE-trained policy outperforms self-evolving policies powered by frontier models such as GPT-5 and Claude Sonnet 4.5, as well as prompt optimization methods such as GEPA and TextGrad. Our contributions are as follows:\n\n* • We formalize test-time inter-episode self-evolution and operationalize it through prompt-based updates with tree-guided search (§[3.1](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S3.SS1 \"3.1 Test-Time Inter-Episode Evolution ‣ 3 Method ‣ Learning to Self-Evolve\"), §[3.2](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S3.SS2 \"3.2 Prompt-Based Evolution with Tree Search ‣ 3 Method ‣ Learning to Self-Evolve\")). * • We propose LSE, an RL framework that explicitly trains the self-evolving policy with an improvement-based reward (§[3.3](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S3.SS3 \"3.3 Learning to Self-Evolve (LSE) ‣ 3 Method ‣ Learning to Self-Evolve\")). * • We show that a 4B-parameter model trained with LSE outperforms larger untrained models and prompt optimization methods, and transfers to guide other models without additional training (§[4](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S4 \"4 Experiments ‣ Learning to Self-Evolve\")).\n\nWe formalize test-time inter-episode self-evolution and operationalize it through prompt-based updates with tree-guided search (§[3.1](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S3.SS1 \"3.1 Test-Time Inter-Episode Evolution ‣ 3 Method ‣ Learning to Self-Evolve\"), §[3.2](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S3.SS2 \"3.2 Prompt-Based Evolution with Tree Search ‣ 3 Method ‣ Learning to Self-Evolve\")).\n\nWe propose LSE, an RL framework that explicitly trains the self-evolving policy with an improvement-based reward (§[3.3](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S3.SS3 \"3.3 Learning to Self-Evolve (LSE) ‣ 3 Method ‣ Learning to Self-Evolve\")).\n\nWe show that a 4B-parameter model trained with LSE outperforms larger untrained models and prompt optimization methods, and transfers to guide other models without additional training (§[4](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S4 \"4 Experiments ‣ Learning to Self-Evolve\"))."
+    },
+    {
+      "heading_path": [
+        "Learning to Self-Evolve",
+        "2 Related Work"
+      ],
+      "text": "## 2 Related Work\n\nThe term *self-evolution* has been used to refer to many different concepts in recent LLM research. We organize the landscape into two broad categories. *Training-time self-evolution* focuses on using LLMs to generate their own training data and learning signals during training. *Test-time self-evolution* enables a policy to continue updating itself after training, adapting dynamically based on experience accumulated during deployment."
+    },
+    {
+      "heading_path": [
+        "Learning to Self-Evolve",
+        "2 Related Work",
+        "Training-time self-evolution."
+      ],
+      "text": "#### Training-time self-evolution.\n\nA growing body of work leverages LLMs to generate their own data and learning signals during training. RL-based post-training has the model produce reasoning traces and optimizes them against verifiable rewards (Lightman et al., [2023](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib4 \"Let’s verify step by step\"); [OpenAI,](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib3 \"Learning to reason with llms\") ; DeepSeek-AI, [2025](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib23 \"DeepSeek-R1: incentivizing reasoning capability in LLMs via reinforcement learning\")). Bootstrapping methods such as STaR (Zelikman et al., [2022](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib40 \"STaR: bootstrapping reasoning with reasoning\")) iteratively generate candidate rationales and fine-tune on the correct ones. Self-rewarding approaches (Yuan et al., [2024](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib41 \"Self-rewarding language models\"); Zhao et al., [2025b](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib42 \"Learning to reason without external rewards\")) extend this by using the model itself as the reward signal. Absolute Zero (Zhao et al., [2025a](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib39 \"Absolute zero: reinforced self-play reasoning with zero data\")) takes this to its extreme: a single model both proposes and solves tasks with no external data, using a code executor as the sole source of verifiable reward. While these methods produce stronger models, the resulting policy remains static once training ends. Our work addresses a complementary problem: enabling the policy to continue improving at test time."
+    },
+    {
+      "heading_path": [
+        "Learning to Self-Evolve",
+        "2 Related Work",
+        "Test-time self-evolution."
+      ],
+      "text": "#### Test-time self-evolution.\n\nA static policy cannot accommodate distribution shifts encountered at test time. Test-time self-evolution addresses this by enabling the model to self-update based on its own experience after deployment. This capability spans two temporal scales. *Intra-episode* methods improve on a single problem instance by allocating additional compute. Reflexion (Shinn et al., [2023](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib8 \"Reflexion: language agents with verbal reinforcement learning\")) prompts the model to reflect on failed attempts and retry, SCoRe (Kumar et al., [2025](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib9 \"Training language models to self-correct via reinforcement learning\")) trains self-correction through RL, and TTRL (Zuo et al., [2025](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib10 \"TTRL: test-time reinforcement learning\")) applies RL directly at test time using majority voting as a proxy reward. TTT-Discover (Yuksekgonul et al., [2026](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib25 \"Learning to discover at test time\")) continues training the model at test time through RL to find the best solution on a single open-ended problem. These methods trade compute for accuracy on individual instances but do not transfer knowledge across problems.\n\n*Inter-episode* methods accumulate experience across completed episodes and apply it to new ones. One active direction is automatic prompt optimization. GEPA (Agrawal et al., [2025](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib14 \"GEPA: reflective prompt evolution can outperform reinforcement learning\")) and TextGrad (Yuksekgonul et al., [2024](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib37 \"TextGrad: automatic ”differentiation” via text\")) use natural-language feedback from rollouts to iteratively mutate and rewrite prompts. A second direction develops self-referential agents that modify their own code or instructions. ExpeL (Zhao et al., [2024](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib16 \"ExpeL: LLM agents are experiential learners\")) extracts transferable lessons from successful and failed trajectories. PromptBreeder (Fernando et al., [2024](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib12 \"Promptbreeder: self-referential self-improvement via prompt evolution\")) evolves prompts through mutation and crossover operators. More recent systems such as ADAS (Hu et al., [2025](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib17 \"Automated design of agentic systems\")) and Darwin Gödel Machine (Zhang et al., [2025b](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib27 \"Darwin godel machine: open-ended evolution of self-improving agents\")) extend this by recursively redesigning the self-evolving policy itself (Yin et al., [2024](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib26 \"Gödel agent: a self-referential agent framework for recursive self-improvement\")). A third direction builds agentic memory systems: Voyager (Wang et al., [2023](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib15 \"Voyager: an open-ended embodied agent with large language models\")) accumulates a reusable skill library from experience in Minecraft, while systems such as MemGen (Zhang et al., [2025a](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib29 \"MemGen: weaving generative latent memory for self-evolving agents\")) and Mem0 (Chhikara et al., [2025](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib18 \"Mem0: building production-ready AI agents with scalable long-term memory\")) maintain evolving memory stores that persist across episodes (Zhang et al., [2025c](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib28 \"Agentic context engineering: evolving contexts for self-improving language models\")). All of these methods rely on the inherent reasoning ability of the LLM to analyze feedback and propose improvements. Our work falls in this category but takes a distinct approach: rather than relying on emergent ability, we explicitly train the self-evolving policy through RL."
+    },
+    {
+      "heading_path": [
+        "Learning to Self-Evolve",
+        "3 Method"
+      ],
+      "text": "## 3 Method\n\nWe now introduce our proposed framework and method. We first formalize the test-time inter-episode self-evolution (§[3.1](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S3.SS1 \"3.1 Test-Time Inter-Episode Evolution ‣ 3 Method ‣ Learning to Self-Evolve\")). We then describe how we operationalize it through prompt-based updates and tree-guided search (§[3.2](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S3.SS2 \"3.2 Prompt-Based Evolution with Tree Search ‣ 3 Method ‣ Learning to Self-Evolve\")). Finally, we present Learning to Self-Evolve (LSE), an RL framework that trains the self-evolving policy (§[3.3](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S3.SS3 \"3.3 Learning to Self-Evolve (LSE) ‣ 3 Method ‣ Learning to Self-Evolve\"))."
+    },
+    {
+      "heading_path": [
+        "Learning to Self-Evolve",
+        "3 Method",
+        "3.1 Test-Time Inter-Episode Evolution"
+      ],
+      "text": "### 3.1 Test-Time Inter-Episode Evolution\n\nConsider a task 𝒯=(𝒳,𝒴,R){\\mathcal{T}}=({\\mathcal{X}},{\\mathcal{Y}},R) comprising an input space 𝒳{\\mathcal{X}}, an output space 𝒴{\\mathcal{Y}}, and a reward function R:𝒳×𝒴→ℝR:{\\mathcal{X}}\\times{\\mathcal{Y}}\\to\\mathbb{R}. A policy π\\pi maps inputs x∈𝒳x\\in{\\mathcal{X}} to outputs y∈𝒴y\\in{\\mathcal{Y}}. A *self-evolving policy* is a function ff that updates the current policy based on experience collected during interaction. Given a task 𝒯{\\mathcal{T}}, the system executes TT rounds of evolution. At each round tt, the current policy π(t)\\pi^{(t)} is applied to a batch of kk problems sampled from 𝒳{\\mathcal{X}}, producing experience tuples {(xi,yi,ri)}i=1k\\{(x\\_{i},y\\_{i},r\\_{i})\\}\\_{i=1}^{k}. The self-evolving policy then computes an updated policy:\n\n𝒯=(𝒳,𝒴,R){\\mathcal{T}}=({\\mathcal{X}},{\\mathcal{Y}},R)\n\n𝒳{\\mathcal{X}}\n\n𝒴{\\mathcal{Y}}\n\nR:𝒳×𝒴→ℝR:{\\mathcal{X}}\\times{\\mathcal{Y}}\\to\\mathbb{R}\n\nπ\\pi\n\nx∈𝒳x\\in{\\mathcal{X}}\n\ny∈𝒴y\\in{\\mathcal{Y}}\n\nff\n\n𝒯{\\mathcal{T}}\n\nTT\n\ntt\n\nπ(t)\\pi^{(t)}\n\nkk\n\n𝒳{\\mathcal{X}}\n\n{(xi,yi,ri)}i=1k\\{(x_{i},y_{i},r_{i})\\}_{i=1}^{k}\n\n| | | | | | --- | --- | --- | --- | | | π(t+1)=f​(π(t),{(xi,yi,ri)}i=1k).\\pi^{(t+1)}=f\\big(\\pi^{(t)},\\;\\{(x\\_{i},y\\_{i},r\\_{i})\\}\\_{i=1}^{k}\\big). | | (1) |\n\nπ(t+1)=f​(π(t),{(xi,yi,ri)}i=1k).\\pi^{(t+1)}=f\\big(\\pi^{(t)},\\;\\{(x_{i},y_{i},r_{i})\\}_{i=1}^{k}\\big).\n\nThis produces a sequence of policies π(0),π(1),…,π(T)\\pi^{(0)},\\pi^{(1)},\\ldots,\\pi^{(T)}. The objective of ff is to maximize the cumulative reward over TT rounds of evolution:\n\nπ(0),π(1),…,π(T)\\pi^{(0)},\\pi^{(1)},\\ldots,\\pi^{(T)}\n\nff\n\nTT\n\n| | | | | | --- | --- | --- | --- | | | ∑t=0T𝔼x∼𝒳​[R​(x,π(t)​(x))].\\sum\\_{t=0}^{T}\\mathbb{E}\\_{x\\sim{\\mathcal{X}}}\\big[R\\big(x,\\,\\pi^{(t)}(x)\\big)\\big]. | | (2) |\n\n∑t=0T𝔼x∼𝒳​[R​(x,π(t)​(x))].\\sum_{t=0}^{T}\\mathbb{E}_{x\\sim{\\mathcal{X}}}\\big[R\\big(x,\\,\\pi^{(t)}(x)\\big)\\big].\n\nIn the language model setting, a policy πθ\\pi\\_{\\theta} is determined by its parameters θ\\theta and context cc, comprising system prompts, instructions, skill libraries, and any other textual input that shapes behavior. This decomposition admits two natural instantiations of ff:\n\nπθ\\pi_{\\theta}\n\nθ\\theta\n\ncc\n\nff\n\n* • Gradient-based: ff modifies θ\\theta directly (e.g., via RL or SFT on recent experience); * • Prompt-based: ff modifies cc while keeping θ\\theta frozen.\n\nGradient-based: ff modifies θ\\theta directly (e.g., via RL or SFT on recent experience);\n\nff\n\nθ\\theta\n\nPrompt-based: ff modifies cc while keeping θ\\theta frozen.\n\nff\n\ncc\n\nθ\\theta\n\nWe focus on the prompt-based instantiation, where ff is itself an LLM that generates updated contexts from past experience. This choice requires no gradient computation at test time, thereby avoiding the catastrophic forgetting problem with continual learning, and casts the evolution problem as a natural-language reasoning task that can itself be improved through training.\n\nff"
+    },
+    {
+      "heading_path": [
+        "Learning to Self-Evolve",
+        "3 Method",
+        "3.2 Prompt-Based Evolution with Tree Search"
+      ],
+      "text": "### 3.2 Prompt-Based Evolution with Tree Search\n\nAn LLM with frozen parameters θ\\theta defines a conditional policy πθ​(y∣x,c)\\pi\\_{\\theta}(y\\mid x,c), where x∈𝒳x\\in{\\mathcal{X}} is a problem instance and cc is the context introduced in §[3.1](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S3.SS1 \"3.1 Test-Time Inter-Episode Evolution ‣ 3 Method ‣ Learning to Self-Evolve\"). In our implementation, we designate a special *instruction field* within cc for the self-evolving policy to edit, leaving all other components (e.g., task description, format specification) fixed.\n\nθ\\theta\n\nπθ​(y∣x,c)\\pi_{\\theta}(y\\mid x,c)\n\nx∈𝒳x\\in{\\mathcal{X}}\n\ncc\n\ncc\n\nAt each round, the self-evolving policy fψf\\_{\\psi} maps the current context and a performance summary to an updated context:\n\nfψf_{\\psi}\n\n| | | | | | --- | --- | --- | --- | | | ct+1=fψ​(ct,St),c\\_{t+1}=f\\_{\\psi}\\big(c\\_{t},\\,S\\_{t}\\big), | | (3) |\n\nct+1=fψ​(ct,St),c_{t+1}=f_{\\psi}\\big(c_{t},\\,S_{t}\\big),\n\nwhere St={(xi,yi,yi∗,ri)}i=1kS\\_{t}=\\{(x\\_{i},y\\_{i},y\\_{i}^{\\*},r\\_{i})\\}\\_{i=1}^{k} is a *structured performance summary* containing the problems, the outputs of the action LLM, ground-truth answers, and per-problem correctness signals from round tt.\n\nSt={(xi,yi,yi∗,ri)}i=1kS_{t}=\\{(x_{i},y_{i},y_{i}^{*},r_{i})\\}_{i=1}^{k}\n\ntt\n\nNote that StS\\_{t} contains only kk problems, where kk is typically small, and a different batch is drawn at each round. In-batch performance therefore provides only a noisy estimate of context quality. To obtain a consistent measure across rounds, we fix a separate holdout set D⊂𝒳D\\subset{\\mathcal{X}} and define the reward of context cc as\n\nStS_{t}\n\nkk\n\nkk\n\nD⊂𝒳D\\subset{\\mathcal{X}}\n\ncc\n\n| | | | | | --- | --- | --- | --- | | | R¯(c)=1|D|∑x∈DR(x,y),y∼πθ(⋅∣x,c).\\bar{R}(c)\\;=\\;\\frac{1}{|D|}\\sum\\_{x\\in D}R(x,\\,y),\\quad y\\sim\\pi\\_{\\theta}(\\cdot\\mid x,c). | | (4) |\n\nπθ\\pi_{\\theta}\n\nfψf_{\\psi}\n\n𝒯=(𝒳,𝒴,R){\\mathcal{T}}=({\\mathcal{X}},{\\mathcal{Y}},R)\n\nD⊂𝒳D\\subset{\\mathcal{X}}\n\nc0c_{0}\n\nTT\n\nkk\n\nCC\n\n𝒢←{(c0,∅,R¯​(c0), 0)}{\\mathcal{G}}\\leftarrow\\{(c_{0},\\,\\emptyset,\\,\\bar{R}(c_{0}),\\,0)\\}\n\nt=0,1,…,T−1t=0,1,\\ldots,T{-}1\n\nn∗←arg​maxn∈𝒢⁡R¯n+C​(ln⁡N)/vnn^{*}\\leftarrow\\operatorname*{arg\\,max}_{n\\in{\\mathcal{G}}}\\;\\bar{R}_{n}+C\\sqrt{(\\ln N)/v_{n}}\n\n⊳\\triangleright\n\n{xi}i=1k∼𝒳\\{x_{i}\\}_{i=1}^{k}\\sim{\\mathcal{X}}\n\ni=1,…,ki=1,\\ldots,k\n\n⊳\\triangleright\n\nri←R​(xi,yi)r_{i}\\leftarrow R(x_{i},y_{i})\n\ni=1,…,ki=1,\\ldots,k\n\n⊳\\triangleright\n\nSt={(xi,yi,yi∗,ri)}i=1kS_{t}=\\{(x_{i},y_{i},y_{i}^{*},r_{i})\\}_{i=1}^{k}\n\ncnew←fψ​(cn∗,St)c_{\\mathrm{new}}\\leftarrow f_{\\psi}(c_{n^{*}},S_{t})\n\n⊳\\triangleright\n\nR¯​(cnew)\\bar{R}(c_{\\mathrm{new}})\n\nDD\n\n⊳\\triangleright\n\n(cnew,St,R¯​(cnew), 0)(c_{\\mathrm{new}},\\,S_{t},\\,\\bar{R}(c_{\\mathrm{new}}),\\,0)\n\nn∗n^{*}\n\n𝒢{\\mathcal{G}}\n\nvn∗v_{n^{*}}\n\narg​maxn∈𝒢⁡R¯n\\operatorname*{arg\\,max}_{n\\in{\\mathcal{G}}}\\;\\bar{R}_{n}"
+    },
+    {
+      "heading_path": [
+        "Learning to Self-Evolve",
+        "3 Method",
+        "3.2 Prompt-Based Evolution with Tree Search",
+        "Tree-guided evolution."
+      ],
+      "text": "#### Tree-guided evolution.\n\nThe linear evolution chain c0→c1→⋯c\\_{0}\\to c\\_{1}\\to\\cdots greedily extends the most recent context, which risks committing irreversibly to a suboptimal evolution path. To enable broader exploration of the context space, we maintain an *evolution tree* 𝒢{\\mathcal{G}} in which each node nn stores a tuple (cn,Sn,R¯n,vn)(c\\_{n},S\\_{n},\\bar{R}\\_{n},v\\_{n}) of context, performance summary, mean holdout reward, and visit count. At each round, rather than always extending the latest node, we select the node that maximizes the Upper Confidence Bound (UCB) score (Auer, [2002](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib24 \"Using confidence bounds for exploitation-exploration trade-offs\")):\n\nc0→c1→⋯c_{0}\\to c_{1}\\to\\cdots\n\n𝒢{\\mathcal{G}}\n\nnn\n\n(cn,Sn,R¯n,vn)(c_{n},S_{n},\\bar{R}_{n},v_{n})\n\n| | | | | | --- | --- | --- | --- | | | n∗=arg​maxn∈𝒢⁡R¯n+C​ln⁡Nvn,n^{\\*}=\\operatorname\\*{arg\\,max}\\_{n\\in{\\mathcal{G}}}\\;\\bar{R}\\_{n}+C\\sqrt{\\frac{\\ln N}{v\\_{n}}}, | | (5) |\n\nn∗=arg​maxn∈𝒢⁡R¯n+C​ln⁡Nvn,n^{*}=\\operatorname*{arg\\,max}_{n\\in{\\mathcal{G}}}\\;\\bar{R}_{n}+C\\sqrt{\\frac{\\ln N}{v_{n}}},\n\nwhere NN is the number of completed rounds and C>0C>0 controls the exploration-exploitation trade-off. The context and summary of n∗n^{\\*} are used as input to the next evolution step, and the resulting child node is appended to 𝒢{\\mathcal{G}}. This allows the system to revisit and branch from promising contexts discovered earlier, rather than committing to a single evolution path. The full procedure is summarized in Algorithm [1](https://ar5iv.labs.arxiv.org/html/2603.18620v1#alg1 \"Algorithm 1 ‣ 3.2 Prompt-Based Evolution with Tree Search ‣ 3 Method ‣ Learning to Self-Evolve\").\n\nNN\n\nC>0C>0\n\nn∗n^{*}\n\n𝒢{\\mathcal{G}}"
+    },
+    {
+      "heading_path": [
+        "Learning to Self-Evolve",
+        "3 Method",
+        "3.3 Learning to Self-Evolve (LSE)"
+      ],
+      "text": "### 3.3 Learning to Self-Evolve (LSE)\n\nWhile off-the-shelf LLMs already exhibit some ability to iteratively refine their own prompts (Yin et al., [2024](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib26 \"Gödel agent: a self-referential agent framework for recursive self-improvement\"); Agrawal et al., [2025](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib14 \"GEPA: reflective prompt evolution can outperform reinforcement learning\"); Zhang et al., [2025b](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib27 \"Darwin godel machine: open-ended evolution of self-improving agents\")), this ability emerges entirely from pretraining and standard post-training, and the model is never explicitly optimized for self-improvement. We propose Learning to Self-Evolve (LSE), an RL framework that explicitly trains fψf\\_{\\psi} to be an effective self-evolving policy.\n\nfψf_{\\psi}\n\nRecall from Eq. ([2](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S3.E2 \"In 3.1 Test-Time Inter-Episode Evolution ‣ 3 Method ‣ Learning to Self-Evolve\")) that the goal of the self-evolving policy is to maximize the cumulative reward over evolution rounds. A natural training objective for fψf\\_{\\psi} is:\n\nfψf_{\\psi}\n\n| | | | | | --- | --- | --- | --- | | | maxfψ​∑t=0TR¯​(ct),where ​ct+1=fψ​(ct,St)​∀t.\\max\\_{f\\_{\\psi}}\\;\\sum\\_{t=0}^{T}\\bar{R}(c\\_{t}),\\quad\\text{where }c\\_{t+1}=f\\_{\\psi}(c\\_{t},S\\_{t})\\;\\;\\forall\\,t. | | (6) |\n\nmaxfψ​∑t=0TR¯​(ct),where ​ct+1=fψ​(ct,St)​∀t.\\max_{f_{\\psi}}\\;\\sum_{t=0}^{T}\\bar{R}(c_{t}),\\quad\\text{where }c_{t+1}=f_{\\psi}(c_{t},S_{t})\\;\\;\\forall\\,t.\n\nDirectly optimizing this TT-step objective is costly: each rollout requires TT sequential rounds of evaluation and context generation, and the trajectory-level reward introduces a long-horizon credit-assignment problem. We therefore simplify to the *single-step* setting (T=1T=1), where fψf\\_{\\psi} produces a single context update c1=fψ​(c0,S0)c\\_{1}=f\\_{\\psi}(c\\_{0},S\\_{0}) and is rewarded immediately. This reduces the problem to a contextual bandit and avoids the long-horizon credit-assignment difficulty while still capturing the core challenge of learning to improve instructions from feedback.\n\nTT\n\nTT\n\nT=1T=1\n\nfψf_{\\psi}\n\nc1=fψ​(c0,S0)c_{1}=f_{\\psi}(c_{0},S_{0})\n\nEven in the single-step setting, the choice of reward function is consequential. A natural candidate is the post-edit reward R¯​(c1)\\bar{R}(c\\_{1}), the performance of the action policy under the updated context. However, this reward is biased toward contexts that are already effective. Consider two scenarios: (1) the initial context achieves 80% accuracy and drops to 70% after editing, yielding r=0.7r=0.7; (2) the initial context achieves 30% accuracy and improves to 60%, yielding only r=0.6r=0.6. The post-edit reward ranks the first scenario higher despite the *degradation* in performance, because it conflates the quality of the starting point with that of the edit. This bias encourages the policy to preserve already-effective contexts rather than genuinely learn to improve them. We instead define the reward as the *improvement in reward*:\n\nR¯​(c1)\\bar{R}(c_{1})\n\nr=0.7r=0.7\n\nr=0.6r=0.6\n\n| | | | | | --- | --- | --- | --- | | | rLSE=R¯​(c1)−R¯​(c0),r\\_{\\mathrm{LSE}}\\;=\\;\\bar{R}(c\\_{1})-\\bar{R}(c\\_{0}), | | (7) |\n\nrLSE=R¯​(c1)−R¯​(c0),r_{\\mathrm{LSE}}\\;=\\;\\bar{R}(c_{1})-\\bar{R}(c_{0}),\n\nwhich directly incentivizes fψf\\_{\\psi} to produce edits that improve performance relative to the starting point, regardless of the initial performance level.\n\nfψf_{\\psi}\n\nNotably, if rLSEr\\_{\\mathrm{LSE}} is used as the reward in a standard policy-gradient algorithm such as PPO or GRPO, the baseline estimator absorbs the R¯​(c0)\\bar{R}(c\\_{0}) term. To see this, let s=(c0,S0)s=(c\\_{0},S\\_{0}) denote the state observed before the edit. A baseline V​(s)V(s) estimated under rLSEr\\_{\\mathrm{LSE}} satisfies V′​(s)=𝔼​[R¯​(c1)−R¯​(c0)∣s]=V​(s)−R¯​(c0)V^{\\prime}(s)=\\mathbb{E}[\\bar{R}(c\\_{1})-\\bar{R}(c\\_{0})\\mid s]=V(s)-\\bar{R}(c\\_{0}), where V​(s)=𝔼​[R¯​(c1)∣s]V(s)=\\mathbb{E}[\\bar{R}(c\\_{1})\\mid s] is the baseline under the post-edit reward. The advantage then reduces to:\n\nrLSEr_{\\mathrm{LSE}}\n\nR¯​(c0)\\bar{R}(c_{0})\n\ns=(c0,S0)s=(c_{0},S_{0})\n\nV​(s)V(s)\n\nrLSEr_{\\mathrm{LSE}}\n\nV′​(s)=𝔼​[R¯​(c1)−R¯​(c0)∣s]=V​(s)−R¯​(c0)V^{\\prime}(s)=\\mathbb{E}[\\bar{R}(c_{1})-\\bar{R}(c_{0})\\mid s]=V(s)-\\bar{R}(c_{0})\n\nV​(s)=𝔼​[R¯​(c1)∣s]V(s)=\\mathbb{E}[\\bar{R}(c_{1})\\mid s]\n\n| | | | | | --- | --- | --- | --- | | | A′​(s,c1)=rLSE−V′​(s)=(R¯​(c1)−R¯​(c0))−(V​(s)−R¯​(c0))=R¯​(c1)−V​(s),A^{\\prime}(s,c\\_{1})\\;=\\;r\\_{\\mathrm{LSE}}-V^{\\prime}(s)\\;=\\;\\big(\\bar{R}(c\\_{1})-\\bar{R}(c\\_{0})\\big)-\\big(V(s)-\\bar{R}(c\\_{0})\\big)\\;=\\;\\bar{R}(c\\_{1})-V(s), | | (8) |\n\nA′​(s,c1)=rLSE−V′​(s)=(R¯​(c1)−R¯​(c0))−(V​(s)−R¯​(c0))=R¯​(c1)−V​(s),A^{\\prime}(s,c_{1})\\;=\\;r_{\\mathrm{LSE}}-V^{\\prime}(s)\\;=\\;\\big(\\bar{R}(c_{1})-\\bar{R}(c_{0})\\big)-\\big(V(s)-\\bar{R}(c_{0})\\big)\\;=\\;\\bar{R}(c_{1})-V(s),\n\nwhich is identical to the advantage under the post-edit reward alone. That is, the delta-reward and the post-edit reward yield the same gradient estimates whenever a learned baseline is used. Rather than using a value model or group-based normalization as the baseline, we can bypass baseline estimation entirely: the pre-edit reward R¯​(c0)\\bar{R}(c\\_{0}) is known before fψf\\_{\\psi} acts and equals the reward of a null edit that returns c0c\\_{0} unchanged, so it can serve directly as the baseline. This yields the LSE advantage:\n\nR¯​(c0)\\bar{R}(c_{0})\n\nfψf_{\\psi}\n\nc0c_{0}\n\n| | | | | | --- | --- | --- | --- | | | ALSE=R¯​(c1)−R¯​(c0),A\\_{\\mathrm{LSE}}\\;=\\;\\bar{R}(c\\_{1})-\\bar{R}(c\\_{0}), | | (9) |\n\nALSE=R¯​(c1)−R¯​(c0),A_{\\mathrm{LSE}}\\;=\\;\\bar{R}(c_{1})-\\bar{R}(c_{0}),\n\nand the corresponding policy-gradient estimate:\n\n| | | | | | --- | --- | --- | --- | | | ∇ψJ=𝔼c1∼fψ(⋅∣c0,S0)​[ALSE​∇ψlog⁡fψ​(c1∣c0,S0)].\\nabla\\_{\\psi}J\\;=\\;\\mathbb{E}\\_{c\\_{1}\\sim f\\_{\\psi}(\\cdot\\mid c\\_{0},S\\_{0})}\\Big[A\\_{\\mathrm{LSE}}\\;\\nabla\\_{\\psi}\\log f\\_{\\psi}(c\\_{1}\\mid c\\_{0},S\\_{0})\\Big]. | | (10) |\n\nBecause R¯​(c0)\\bar{R}(c\\_{0}) is action-independent, using it as a baseline does not alter the expected gradient. It is, however, a control variate that cancels prompt-specific offsets. In practice, evaluation noise and between-prompt difficulty variation likely dominate raw accuracy scores. Under these conditions, the improvement-based advantage provides a cleaner learning signal and more stable policy-gradient updates. It also reduces training cost, as it requires neither multiple rollouts per prompt for group-based normalization nor a separate value network.\n\nR¯​(c0)\\bar{R}(c_{0})\n\nThe gradient in Eq. ([10](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S3.E10 \"In 3.3 Learning to Self-Evolve (LSE) ‣ 3 Method ‣ Learning to Self-Evolve\")) depends on the distribution of starting states s=(c0,S0)s=(c\\_{0},S\\_{0}). If c0c\\_{0} is always the seed context, a mismatch arises: at test time, the policy runs for multiple rounds (Algorithm [1](https://ar5iv.labs.arxiv.org/html/2603.18620v1#alg1 \"Algorithm 1 ‣ 3.2 Prompt-Based Evolution with Tree Search ‣ 3 Method ‣ Learning to Self-Evolve\")) and must improve contexts produced by its own prior edits. We therefore populate the tree 𝒢{\\mathcal{G}} with multiple rounds of evolution to construct the training dataset, then randomly sample nodes from 𝒢{\\mathcal{G}} as starting contexts at every RL step. This exposes fψf\\_{\\psi} to a distribution of contexts similar to what it will see during multi-step evolution.\n\ns=(c0,S0)s=(c_{0},S_{0})\n\nc0c_{0}\n\n𝒢{\\mathcal{G}}\n\n𝒢{\\mathcal{G}}\n\nfψf_{\\psi}"
+    },
+    {
+      "heading_path": [
+        "Learning to Self-Evolve",
+        "4 Experiments"
+      ],
+      "text": "## 4 Experiments\n\nWe evaluate LSE on two task domains, Text-to-SQL generation and general question answering, comparing against both stronger models and alternative prompt optimization methods (§[4.1](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S4.SS1 \"4.1 Experimental Setup ‣ 4 Experiments ‣ Learning to Self-Evolve\")–[4.2](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S4.SS2 \"4.2 Main Results ‣ 4 Experiments ‣ Learning to Self-Evolve\")). We then ablate the reward design and search strategy in §[4.3](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S4.SS3 \"4.3 Analysis ‣ 4 Experiments ‣ Learning to Self-Evolve\")."
+    },
+    {
+      "heading_path": [
+        "Learning to Self-Evolve",
+        "4 Experiments",
+        "4.1 Experimental Setup"
+      ],
+      "text": "### 4.1 Experimental Setup\n\nπθ\\pi_{\\theta}\n\n| | | | | | | | | --- | --- | --- | --- | --- | --- | --- | | Method | Financial | Toxicology | Codebase | Formula 1 | Card Games | Avg. | | Seed prompt | 51.0 | 60.3 | 63.7 | 54.5 | 56.5 | 57.2 | | Qwen3-4B-Instruct | 63.7 | 60.3 | 70.2 | 56.0 | 61.0 | 62.2 | | Claude Sonnet 4.5 | 70.8 | 63.8 | 67.8 | 57.3 | 63.0 | 64.5 | | GPT-5 | 70.8 | 65.8 | 72.0 | 54.3 | 63.3 | 65.2 | | GEPA | 64.0 | 62.0 | 72.0 | 54.0 | 62.0 | 62.8 | | TextGrad | 60.3 | 66.0 | 71.5 | 56.5 | 61.3 | 63.1 | | LSE (ours) | 72.0 | 68.5 | 72.0 | 59.8 | 64.0 | 67.3 |"
+    },
+    {
+      "heading_path": [
+        "Learning to Self-Evolve",
+        "4 Experiments",
+        "4.1 Experimental Setup",
+        "Models."
+      ],
+      "text": "#### Models.\n\nWe use Qwen3-4B-Instruct as both the action policy πθ\\pi\\_{\\theta} and the self-evolving policy fψf\\_{\\psi}, unless otherwise specified. Training details and hyperparameters can be found in Appendix [A](https://ar5iv.labs.arxiv.org/html/2603.18620v1#A1 \"Appendix A Training and Evaluation Details ‣ Learning to Self-Evolve\").\n\nπθ\\pi_{\\theta}\n\nfψf_{\\psi}"
+    },
+    {
+      "heading_path": [
+        "Learning to Self-Evolve",
+        "4 Experiments",
+        "4.1 Experimental Setup",
+        "Tasks and datasets."
+      ],
+      "text": "#### Tasks and datasets.\n\nWe evaluate on tasks across two domains: Text-to-SQL generation, where the policy produces executable SQL queries that retrieve the data specified by a user question, and general question answering (QA), where the policy answers multiple-choice questions across diverse academic subjects. The prompts for each task are in Appendix [B](https://ar5iv.labs.arxiv.org/html/2603.18620v1#A2 \"Appendix B Prompts ‣ Learning to Self-Evolve\").\n\nFor Text-to-SQL, we use BIRD (Li et al., [2024](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib31 \"Can llm already serve as a database interface? a big bench for large-scale database grounded text-to-sqls\")), which pairs natural-language questions with SQL queries across database domains. Each database is a separate task domain: problems are sampled from the same domain for both evolution rounds and holdout evaluation. We train on the BIRD training split and evaluate on five randomly selected databases from the BIRD-SQL Mini-Dev split.\n\nFor general QA, we use SuperGPQA (Team et al., [2025](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib32 \"SuperGPQA: scaling llm evaluation across 285 graduate disciplines\")) and MMLU-Redux (Gema et al., [2024](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib33 \"Are we done with mmlu?\")). We convert SuperGPQA questions to four-way multiple-choice format to match MMLU-Redux, and treat each subject as a separate task domain. As with Text-to-SQL, each evolution run operates within a single subject domain. We train on SuperGPQA and evaluate on ten subjects from MMLU-Redux."
+    },
+    {
+      "heading_path": [
+        "Learning to Self-Evolve",
+        "4 Experiments",
+        "4.1 Experimental Setup",
+        "Baselines."
+      ],
+      "text": "#### Baselines.\n\nWe first evaluate stronger models as the self-evolving policy fψf\\_{\\psi} while keeping Qwen3-4B-Instruct as the action policy πθ\\pi\\_{\\theta}. We consider two frontier closed-source models, GPT-5 (OpenAI, [2025](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib34 \"OpenAI gpt-5 system card\")) and Claude Sonnet 4.5 (Anthropic, [2025](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib36 \"System card: claude opus 4.5\"))\n\nfψf_{\\psi}\n\nπθ\\pi_{\\theta}\n\nWe also compare with two alternative designs of the self-evolving policy. For both methods, we use Qwen3-4B-Instruct as the prompt proposer and optimizer.\n\n* • GEPA (Agrawal et al., [2025](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib14 \"GEPA: reflective prompt evolution can outperform reinforcement learning\")) is a reflective prompt optimizer that merges textual reflection with multi-objective evolutionary search. GEPA mutates prompts based on natural-language feedback from new rollouts and maintains a Pareto front over per-instance performance to avoid greedy local optima. Each GEPA optimization step corresponds to one evolution round: the sampled problem batch is the training data for reflection, and the holdout set DD is DparetoD\\_{\\mathrm{pareto}} in GEPA. * • TextGrad (Yuksekgonul et al., [2024](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib37 \"TextGrad: automatic ”differentiation” via text\")) decomposes each prompt update into two LLM calls: a *backward* call that critiques the current instruction given the batch failures and produces natural-language “gradients” (feedback on how the instruction should change), followed by a *Textual Gradient Descent (TGD)* call that rewrites the instruction by incorporating the feedback. We follow the example provided in the official repository222<https://github.com/zou-group/textgrad/blob/main/evaluation/prompt_optimization.py> and treat each backward–TGD step as one evolution round.\n\nGEPA (Agrawal et al., [2025](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib14 \"GEPA: reflective prompt evolution can outperform reinforcement learning\")) is a reflective prompt optimizer that merges textual reflection with multi-objective evolutionary search. GEPA mutates prompts based on natural-language feedback from new rollouts and maintains a Pareto front over per-instance performance to avoid greedy local optima. Each GEPA optimization step corresponds to one evolution round: the sampled problem batch is the training data for reflection, and the holdout set DD is DparetoD\\_{\\mathrm{pareto}} in GEPA.\n\nDD\n\nDparetoD_{\\mathrm{pareto}}\n\nTextGrad (Yuksekgonul et al., [2024](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib37 \"TextGrad: automatic ”differentiation” via text\")) decomposes each prompt update into two LLM calls: a *backward* call that critiques the current instruction given the batch failures and produces natural-language “gradients” (feedback on how the instruction should change), followed by a *Textual Gradient Descent (TGD)* call that rewrites the instruction by incorporating the feedback. We follow the example provided in the official repository222<https://github.com/zou-group/textgrad/blob/main/evaluation/prompt_optimization.py> and treat each backward–TGD step as one evolution round."
+    },
+    {
+      "heading_path": [
+        "Learning to Self-Evolve",
+        "4 Experiments",
+        "4.1 Experimental Setup",
+        "Evaluation protocol."
+      ],
+      "text": "#### Evaluation protocol.\n\nFor all methods, we sample problems and present them to the action policy in a fixed order across runs. The holdout set DD is also fixed across all evaluation runs within each task domain. We report the best performance achieved over TT rounds of evolution. Additional details can be found in Appendix [A](https://ar5iv.labs.arxiv.org/html/2603.18620v1#A1 \"Appendix A Training and Evaluation Details ‣ Learning to Self-Evolve\").\n\nDD\n\nTT"
+    },
+    {
+      "heading_path": [
+        "Learning to Self-Evolve",
+        "4 Experiments",
+        "4.2 Main Results"
+      ],
+      "text": "### 4.2 Main Results\n\nπθ\\pi_{\\theta}\n\n| | | | | | | | | | | | | | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | | Method | Bus. Eth. | Phil. | Prof. Acc. | Econ. | Anat. | Security | Virol. | Moral Sc. | Glob. Facts | Prof. Law | Avg. | | Seed prompt | 70.5 | 76.0 | 67.7 | 76.2 | 76.0 | 68.2 | 72.5 | 59.7 | 55.5 | 54.0 | 67.6 | | Qwen3-4B-Instruct | 75.5 | 79.2 | 73.0 | 83.0 | 82.3 | 68.8 | 77.0 | 59.7 | 56.0 | 57.3 | 71.2 | | Claude Sonnet 4.5 | 75.3 | 79.0 | 75.5 | 81.0 | 79.8 | 69.3 | 77.5 | 67.3 | 57.0 | 58.5 | 72.0 | | GPT-5 | 77.5 | 80.0 | 73.0 | 83.5 | 81.0 | 70.0 | 82.0 | 64.8 | 55.5 | 58.0 | 72.5 | | GEPA | 76.0 | 80.0 | 78.0 | 84.0 | 82.0 | 70.0 | 78.0 | 62.0 | 56.0 | 64.0 | 73.0 | | TextGrad | 74.0 | 79.0 | 67.8 | 73.3 | 80.0 | 67.8 | 77.3 | 62.5 | 51.3 | 58.3 | 69.1 | | LSE (ours) | 75.0 | 82.0 | 73.0 | 85.0 | 84.5 | 70.5 | 79.0 | 64.5 | 57.0 | 62.0 | 73.3 |\n\nTables [1](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S4.T1 \"Table 1 ‣ 4.1 Experimental Setup ‣ 4 Experiments ‣ Learning to Self-Evolve\") and [2](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S4.T2 \"Table 2 ‣ 4.2 Main Results ‣ 4 Experiments ‣ Learning to Self-Evolve\") report results on Text-to-SQL and QA. Even without explicit training for self-improvement, off-the-shelf LLMs can refine their own prompts when given test-time feedback. The untrained Qwen3-4B-Instruct baseline improves over the seed prompt by 5% on BIRD and 3.6% on MMLU-Redux. This confirms that LLMs can already learn from their own experience within the evolution loop of Algorithm [1](https://ar5iv.labs.arxiv.org/html/2603.18620v1#alg1 \"Algorithm 1 ‣ 3.2 Prompt-Based Evolution with Tree Search ‣ 3 Method ‣ Learning to Self-Evolve\").\n\nRL training with LSE substantially improves this ability. Despite using only a 4B-parameter model, LSE outperforms both frontier models on BIRD, surpassing GPT-5 by 2.1% (67.3% vs. 65.2%) and Claude Sonnet 4.5 by 2.8%. On MMLU-Redux, LSE matches GPT-5 (73.3% vs. 72.5%) and outperforms Claude Sonnet 4.5. These results indicate that explicit RL training for self-evolution is effective, enabling a small model to match or surpass frontier models.\n\nLSE also outperforms both prompt optimization methods. On BIRD, LSE surpasses GEPA by 4.5% (67.3% vs. 62.8%) and TextGrad by 4.2% (67.3% vs. 63.1%). On MMLU-Redux, LSE matches GEPA (73.3% vs. 73.0%) and outperforms TextGrad by 4.2%. Together, these results show that while off-the-shelf LLMs have some prompt-refinement ability, explicit training to self-evolve matches or outperforms untrained baselines, larger models, and specialized optimization methods.\n\nFinally, both the improvement from self-evolution over the seed prompt and the additional benefit of LSE are smaller on MMLU-Redux than on BIRD. One possible explanation is the structure of the two tasks. In BIRD, all queries within a domain target the same database, so there is clear shared knowledge across problems: understanding the schema, common join patterns, or column semantics from one query directly helps with others. In MMLU-Redux, problems within the same subject are deliberately deduplicated and designed to cover broad topics. Solving one econometrics question does not guarantee useful knowledge for the next. This limits how much any self-evolving policy can improve the action policy’s context from experience within a single domain."
+    },
+    {
+      "heading_path": [
+        "Learning to Self-Evolve",
+        "4 Experiments",
+        "4.3 Analysis"
+      ],
+      "text": "### 4.3 Analysis\n\nAGRPOA_{\\mathrm{GRPO}}\n\nR¯​(c1)\\bar{R}(c_{1})\n\nALSEA_{\\mathrm{LSE}}\n\nrLSE=R¯​(c1)−R¯​(c0)r_{\\mathrm{LSE}}=\\bar{R}(c_{1})-\\bar{R}(c_{0})\n\nfψf_{\\psi}"
+    },
+    {
+      "heading_path": [
+        "Learning to Self-Evolve",
+        "4 Experiments",
+        "4.3 Analysis",
+        "Effect of reward design."
+      ],
+      "text": "#### Effect of reward design.\n\nIn §[3.3](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S3.SS3 \"3.3 Learning to Self-Evolve (LSE) ‣ 3 Method ‣ Learning to Self-Evolve\") we motivated ALSE=R¯​(c1)−R¯​(c0)A\\_{\\mathrm{LSE}}=\\bar{R}(c\\_{1})-\\bar{R}(c\\_{0}) as a cleaner learning signal than the standard GRPO advantage AGRPOA\\_{\\mathrm{GRPO}}, which reduces to optimizing post-edit accuracy. We train a variant with AGRPOA\\_{\\mathrm{GRPO}}, keeping all other settings identical. On BIRD, ALSEA\\_{\\mathrm{LSE}} outperforms AGRPOA\\_{\\mathrm{GRPO}} by 4.3% (67.3% vs. 63.0%; Figure [2(a)](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S4.F2.sf1 \"In Figure 2 ‣ 4.3 Analysis ‣ 4 Experiments ‣ Learning to Self-Evolve\")). These results provide empirical evidence that the improvement-based objective is more effective for training self-evolving policies.\n\nALSE=R¯​(c1)−R¯​(c0)A_{\\mathrm{LSE}}=\\bar{R}(c_{1})-\\bar{R}(c_{0})\n\nAGRPOA_{\\mathrm{GRPO}}\n\nAGRPOA_{\\mathrm{GRPO}}\n\nALSEA_{\\mathrm{LSE}}\n\nAGRPOA_{\\mathrm{GRPO}}"
+    },
+    {
+      "heading_path": [
+        "Learning to Self-Evolve",
+        "4 Experiments",
+        "4.3 Analysis",
+        "Effect of search strategy."
+      ],
+      "text": "#### Effect of search strategy.\n\nWe compare UCB tree search against a linear-chain baseline that always extends the most recent node. Both use the untrained Qwen3-4B-Instruct as fψf\\_{\\psi}. Figure [2(b)](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S4.F2.sf2 \"In Figure 2 ‣ 4.3 Analysis ‣ 4 Experiments ‣ Learning to Self-Evolve\") shows that tree search improves the average by 2.4% on BIRD (62.2% vs. 59.8%) and 2.2% on MMLU-Redux (71.2% vs. 69.0%; Figure [4](https://ar5iv.labs.arxiv.org/html/2603.18620v1#A1.F4 \"Figure 4 ‣ Dataset sizes. ‣ Appendix A Training and Evaluation Details ‣ Learning to Self-Evolve\")).\n\nfψf_{\\psi}\n\nThe key advantage is that tree search does not commit to a bad edit irrevocably. Figure [3](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S4.F3 \"Figure 3 ‣ Effect of search strategy. ‣ 4.3 Analysis ‣ 4 Experiments ‣ Learning to Self-Evolve\") shows a concrete example on the BIRD Card Games split. The linear chain’s average accuracy collapses from 56% to below 30% after a sequence of bad edits, and never recovers because each round builds on the previous context. With tree search, a bad edit at an early round does not cascade: UCB selection shifts back to a higher-scoring ancestor, keeping the trajectory out of bad local optima."
+    },
+    {
+      "heading_path": [
+        "Learning to Self-Evolve",
+        "4 Experiments",
+        "4.3 Analysis",
+        "Test-time self-evolution for specialized models."
+      ],
+      "text": "#### Test-time self-evolution for specialized models.\n\nCurrent LLM development often involves training specialized models for a domain of tasks. Can test-time self-evolution further improve such models? We test this by replacing πθ\\pi\\_{\\theta} with Arctic-Text2SQL-R1-7B (Yao et al., [2025](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib38 \"Arctic-text2sql-r1: simple rewards, strong reasoning in text-to-sql\")), a text-to-SQL model fine-tuned with RL on the BIRD training set, and applying the same LSE-trained fψf\\_{\\psi} (Qwen3-4B-Instruct) without additional training.\n\nπθ\\pi_{\\theta}\n\nfψf_{\\psi}\n\nTable [3](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S4.T3 \"Table 3 ‣ Test-time self-evolution for specialized models. ‣ 4.3 Analysis ‣ 4 Experiments ‣ Learning to Self-Evolve\") shows that LSE evolution improves Arctic by 6.7% on average (57.7% →\\to 64.4%). This indicates that parameter-level and prompt-level optimization are complementary: RL training encodes general SQL patterns into model weights, while prompt evolution adapts the context to each database at test time. The result also demonstrates that the LSE-trained policy transfers across action models: although fψf\\_{\\psi} was trained exclusively with Qwen3-4B-Instruct, the evolution strategy generalizes to guide a different model.\n\n→\\to\n\nfψf_{\\psi}\n\nπθ\\pi_{\\theta}\n\nfψf_{\\psi}\n\n| Variant | Financial | Toxicology | Codebase | Formula 1 | Card Games | Avg. | | --- | --- | --- | --- | --- | --- | --- | | Seed prompt | 56.8 | 54.5 | 65.3 | 52.3 | 59.5 | 57.7 | | + LSE evolution | 68.3 | 62.3 | 71.5 | 57.0 | 63.0 | 64.4 |"
+    },
+    {
+      "heading_path": [
+        "Learning to Self-Evolve",
+        "5 Conclusion"
+      ],
+      "text": "## 5 Conclusion\n\nThis work demonstrates that test-time self-evolution is a learnable skill that can be directly optimized through fine-tuning. The central design choice in LSE is a single-step RL objective that rewards the improvement each edit produces, sidestepping multi-step trajectory optimization while still capturing the core challenge of learning from feedback. Tree-guided search then composes these edits into multi-round evolution at test time. Our results show that direct optimization for self-evolution is effective, enabling a 4B-parameter model to match or surpass frontier models and prompt optimizers. Taken together, these findings highlight the benefit of targeting self-evolution as a distinct skill and designing learning algorithms for it."
+    },
+    {
+      "heading_path": [
+        "Learning to Self-Evolve",
+        "5 Conclusion",
+        "Limitations."
+      ],
+      "text": "#### Limitations.\n\nOur work has several limitations. First, we reduce the multi-step evolution problem to a single-step training objective, delegating exploration entirely to the tree search algorithm at test time. Jointly optimizing over multi-step trajectories could yield stronger policies but would introduce additional challenges in credit assignment and computational cost. Second, we train a separate self-evolving policy for each task domain. Training a single policy that generalizes across diverse tasks is a natural extension, though it likely requires large-scale training across many domains. Third, we constrain evolution to the instruction field of the context; other components such as tools, skill libraries, and external memory are not explored. More broadly, the LSE framework could be paired with updates in the latent space or parameter space (Sun et al., [2020](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib19 \"Test-time training with self-supervision for generalization under distribution shifts\"); Tandon et al., [2025](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib20 \"End-to-end test-time training for long context\")). Finally, our training and evaluation environments are relatively small in scale. Curating effective environments for test-time self-evolution is difficult, as it requires not only sufficient problems with feedback but also problems that share enough structure for evolution to be meaningful. Developing more principled and scalable approaches to environment curation and evaluation remains an important open problem."
+    },
+    {
+      "heading_path": [
+        "Learning to Self-Evolve",
+        "References"
+      ],
+      "text": "## References\n\n* L. A. Agrawal, S. Tan, D. Soylu, N. Ziems, R. Khare, K. Opsahl-Ong, A. Singhvi, H. Shandilya, M. J. Ryan, M. Jiang, C. Potts, K. Sen, A. G. Dimakis, I. Stoica, D. Klein, M. Zaharia, and O. Khattab (2025) GEPA: reflective prompt evolution can outperform reinforcement learning. arXiv preprint arXiv:2507.19457. Cited by: [§1](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S1.p3.1 \"1 Introduction ‣ Learning to Self-Evolve\"), [§2](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S2.SS0.SSS0.Px2.p2.1 \"Test-time self-evolution. ‣ 2 Related Work ‣ Learning to Self-Evolve\"), [§3.3](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S3.SS3.p1.1 \"3.3 Learning to Self-Evolve (LSE) ‣ 3 Method ‣ Learning to Self-Evolve\"), [1st item](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S4.I1.i1.p1.2 \"In Baselines. ‣ 4.1 Experimental Setup ‣ 4 Experiments ‣ Learning to Self-Evolve\"). * Anthropic (2025) System card: claude opus 4.5. External Links: [Link](https://www-cdn.anthropic.com/bf10f64990cfda0ba858290be7b8cc6317685f47.pdf) Cited by: [§4.1](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S4.SS1.SSS0.Px3.p1.2 \"Baselines. ‣ 4.1 Experimental Setup ‣ 4 Experiments ‣ Learning to Self-Evolve\"). * P. Auer (2002) Using confidence bounds for exploitation-exploration trade-offs. Journal of machine learning research 3 (Nov), pp. 397–422. Cited by: [§3.2](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S3.SS2.SSS0.Px1.p1.4 \"Tree-guided evolution. ‣ 3.2 Prompt-Based Evolution with Tree Search ‣ 3 Method ‣ Learning to Self-Evolve\"). * P. Chhikara, D. Khant, S. Aryan, T. Singh, and D. Yadav (2025) Mem0: building production-ready AI agents with scalable long-term memory. In ECAI 2025 - 28th European Conference on Artificial Intelligence, 25-30 October 2025, Bologna, Italy - Including 14th Conference on Prestigious Applications of Intelligent Systems (PAIS 2025), I. Lynce, N. Murano, M. Vallati, S. Villata, F. Chesani, M. Milano, A. Omicini, and M. Dastani (Eds.), Frontiers in Artificial Intelligence and Applications, Vol. 413, pp. 2993–3000. External Links: [Link](https://doi.org/10.3233/FAIA251160), [Document](https://dx.doi.org/10.3233/FAIA251160) Cited by: [§1](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S1.p3.1 \"1 Introduction ‣ Learning to Self-Evolve\"), [§2](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S2.SS0.SSS0.Px2.p2.1 \"Test-time self-evolution. ‣ 2 Related Work ‣ Learning to Self-Evolve\"). * DeepSeek-AI (2025) DeepSeek-R1: incentivizing reasoning capability in LLMs via reinforcement learning. arXiv preprint arXiv:2501.12948. Cited by: [§1](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S1.p1.1 \"1 Introduction ‣ Learning to Self-Evolve\"), [§2](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S2.SS0.SSS0.Px1.p1.1 \"Training-time self-evolution. ‣ 2 Related Work ‣ Learning to Self-Evolve\"). * C. Fernando, D. Banarse, H. Michalewski, S. Osindero, and T. Rocktäschel (2024) Promptbreeder: self-referential self-improvement via prompt evolution. In Proceedings of the 41st International Conference on Machine Learning, Cited by: [§1](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S1.p3.1 \"1 Introduction ‣ Learning to Self-Evolve\"), [§2](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S2.SS0.SSS0.Px2.p2.1 \"Test-time self-evolution. ‣ 2 Related Work ‣ Learning to Self-Evolve\"). * A. P. Gema, J. O. J. Leang, G. Hong, A. Devoto, A. C. M. Mancino, R. Saxena, X. He, Y. Zhao, X. Du, M. R. G. Madani, C. Barale, R. McHardy, J. Harris, J. Kaddour, E. van Krieken, and P. Minervini (2024) Are we done with mmlu?. External Links: 2406.04127 Cited by: [§4.1](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S4.SS1.SSS0.Px2.p3.1 \"Tasks and datasets. ‣ 4.1 Experimental Setup ‣ 4 Experiments ‣ Learning to Self-Evolve\"). * S. Hu, C. Lu, and J. Clune (2025) Automated design of agentic systems. In International Conference on Learning Representations, Cited by: [§1](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S1.p2.1 \"1 Introduction ‣ Learning to Self-Evolve\"), [§1](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S1.p3.1 \"1 Introduction ‣ Learning to Self-Evolve\"), [§2](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S2.SS0.SSS0.Px2.p2.1 \"Test-time self-evolution. ‣ 2 Related Work ‣ Learning to Self-Evolve\"). * O. Khattab, A. Singhvi, P. Maheshwari, Z. Zhang, K. Santhanam, S. Vardhamanan, S. Haq, A. Sharma, T. T. Joshi, H. Mober, et al. (2024) DSPy: compiling declarative language model calls into state-of-the-art pipelines. In International Conference on Learning Representations, Cited by: [§1](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S1.p3.1 \"1 Introduction ‣ Learning to Self-Evolve\"). * A. Kumar, V. Du, A. S. Rawat, and R. Agarwal (2025) Training language models to self-correct via reinforcement learning. In International Conference on Learning Representations, Cited by: [§1](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S1.p2.1 \"1 Introduction ‣ Learning to Self-Evolve\"), [§2](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S2.SS0.SSS0.Px2.p1.1 \"Test-time self-evolution. ‣ 2 Related Work ‣ Learning to Self-Evolve\"). * J. Li, B. Hui, G. Qu, J. Yang, B. Li, B. Li, B. Wang, B. Qin, R. Geng, N. Huo, et al. (2024) Can llm already serve as a database interface? a big bench for large-scale database grounded text-to-sqls. Advances in Neural Information Processing Systems 36. Cited by: [§4.1](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S4.SS1.SSS0.Px2.p2.1 \"Tasks and datasets. ‣ 4.1 Experimental Setup ‣ 4 Experiments ‣ Learning to Self-Evolve\"). * H. Lightman, V. Kosaraju, Y. Burda, H. Edwards, B. Baker, T. Lee, J. Leike, J. Schulman, I. Sutskever, and K. Cobbe (2023) Let’s verify step by step. In The Twelfth International Conference on Learning Representations, Cited by: [§1](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S1.p1.1 \"1 Introduction ‣ Learning to Self-Evolve\"), [§2](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S2.SS0.SSS0.Px1.p1.1 \"Training-time self-evolution. ‣ 2 Related Work ‣ Learning to Self-Evolve\"). * [13] OpenAI Learning to reason with llms. Note: <https://openai.com/index/learning-to-reason-with-llms/>Accessed: 2025-03-21 Cited by: [§1](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S1.p1.1 \"1 Introduction ‣ Learning to Self-Evolve\"), [§2](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S2.SS0.SSS0.Px1.p1.1 \"Training-time self-evolution. ‣ 2 Related Work ‣ Learning to Self-Evolve\"). * OpenAI (2025) OpenAI gpt-5 system card. arXiv preprint arXiv: 2601.03267. Cited by: [§4.1](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S4.SS1.SSS0.Px3.p1.2 \"Baselines. ‣ 4.1 Experimental Setup ‣ 4 Experiments ‣ Learning to Self-Evolve\"). * J. Piaget (1952) The origins of intelligence in children. W. W. Norton & Company. Note: Trans. M. Cook External Links: [Document](https://dx.doi.org/10.1037/11494-000) Cited by: [§1](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S1.p1.1 \"1 Introduction ‣ Learning to Self-Evolve\"). * G. Sheng, C. Zhang, Z. Ye, X. Wu, W. Zhang, R. Zhang, Y. Peng, H. Lin, and C. Wu (2024) HybridFlow: a flexible and efficient rlhf framework. arXiv preprint arXiv: 2409.19256. Cited by: [Appendix A](https://ar5iv.labs.arxiv.org/html/2603.18620v1#A1.SS0.SSS0.Px2.p1.1 \"RL training. ‣ Appendix A Training and Evaluation Details ‣ Learning to Self-Evolve\"). * N. Shinn, F. Cassano, A. Gopinath, K. Narasimhan, and S. Yao (2023) Reflexion: language agents with verbal reinforcement learning. In Advances in Neural Information Processing Systems, Vol. 36. Cited by: [§1](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S1.p2.1 \"1 Introduction ‣ Learning to Self-Evolve\"), [§2](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S2.SS0.SSS0.Px2.p1.1 \"Test-time self-evolution. ‣ 2 Related Work ‣ Learning to Self-Evolve\"). * R. J. Sternberg (2019) A theory of adaptive intelligence and its relation to general intelligence. Journal of Intelligence 7 (4). External Links: [Link](https://www.mdpi.com/2079-3200/7/4/23), ISSN 2079-3200, [Document](https://dx.doi.org/10.3390/jintelligence7040023) Cited by: [§1](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S1.p1.1 \"1 Introduction ‣ Learning to Self-Evolve\"). * Y. Sun, X. Wang, L. Zhuang, J. Miller, M. Hardt, and A. A. Efros (2020) Test-time training with self-supervision for generalization under distribution shifts. In ICML, Cited by: [§5](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S5.SS0.SSS0.Px1.p1.1 \"Limitations. ‣ 5 Conclusion ‣ Learning to Self-Evolve\"). * A. Tandon, K. Dalal, X. Li, D. Koceja, M. Rød, S. Buchanan, X. Wang, J. Leskovec, S. Koyejo, T. Hashimoto, C. Guestrin, J. McCaleb, Y. Choi, and Y. Sun (2025) End-to-end test-time training for long context. arXiv preprint arXiv: 2512.23675. Cited by: [§5](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S5.SS0.SSS0.Px1.p1.1 \"Limitations. ‣ 5 Conclusion ‣ Learning to Self-Evolve\"). * M. Team, X. Du, Y. Yao, K. Ma, B. Wang, T. Zheng, K. Zhu, M. Liu, Y. Liang, X. Jin, Z. Wei, C. Zheng, K. Deng, S. Jia, S. Jiang, Y. Liao, R. Li, Q. Li, S. Li, Y. Li, Y. Li, D. Ma, Y. Ni, H. Que, Q. Wang, Z. Wen, S. Wu, T. Xing, M. Xu, Z. Yang, Z. M. Wang, J. Zhou, Y. Bai, X. Bu, C. Cai, L. Chen, Y. Chen, C. Cheng, T. Cheng, K. Ding, S. Huang, Y. Huang, Y. Li, Y. Li, Z. Li, T. Liang, C. Lin, H. Lin, Y. Ma, T. Pang, Z. Peng, Z. Peng, Q. Qi, S. Qiu, X. Qu, S. Quan, Y. Tan, Z. Wang, C. Wang, H. Wang, Y. Wang, Y. Wang, J. Xu, K. Yang, R. Yuan, Y. Yue, T. Zhan, C. Zhang, J. Zhang, X. Zhang, X. Zhang, Y. Zhang, Y. Zhao, X. Zheng, C. Zhong, Y. Gao, Z. Li, D. Liu, Q. Liu, T. Liu, S. Ni, J. Peng, Y. Qin, W. Su, G. Wang, S. Wang, J. Yang, M. Yang, M. Cao, X. Yue, Z. Zhang, W. Zhou, J. Liu, Q. Lin, W. Huang, and G. Zhang (2025) SuperGPQA: scaling llm evaluation across 285 graduate disciplines. External Links: 2502.14739, [Link](https://arxiv.org/abs/2502.14739) Cited by: [§4.1](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S4.SS1.SSS0.Px2.p3.1 \"Tasks and datasets. ‣ 4.1 Experimental Setup ‣ 4 Experiments ‣ Learning to Self-Evolve\"). * G. Wang, Y. Xie, Y. Jiang, A. Mandlekar, C. Xiao, Y. Zhu, L. Fan, and A. Anandkumar (2023) Voyager: an open-ended embodied agent with large language models. In Advances in Neural Information Processing Systems, Vol. 36. Cited by: [§2](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S2.SS0.SSS0.Px2.p2.1 \"Test-time self-evolution. ‣ 2 Related Work ‣ Learning to Self-Evolve\"). * Z. Yao, G. Sun, L. Borchmann, G. Nuti, Z. Shen, M. Deng, B. Zhai, H. Zhang, A. Li, and Y. He (2025) Arctic-text2sql-r1: simple rewards, strong reasoning in text-to-sql. arXiv preprint arXiv:2505.20315. Cited by: [§4.3](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S4.SS3.SSS0.Px3.p1.2 \"Test-time self-evolution for specialized models. ‣ 4.3 Analysis ‣ 4 Experiments ‣ Learning to Self-Evolve\"), [Table 3](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S4.T3 \"In Test-time self-evolution for specialized models. ‣ 4.3 Analysis ‣ 4 Experiments ‣ Learning to Self-Evolve\"). * X. Yin, X. Wang, L. Pan, L. Lin, X. Wan, and W. Y. Wang (2024) Gödel agent: a self-referential agent framework for recursive self-improvement. arXiv preprint arXiv: 2410.04444. Cited by: [§1](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S1.p2.1 \"1 Introduction ‣ Learning to Self-Evolve\"), [§2](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S2.SS0.SSS0.Px2.p2.1 \"Test-time self-evolution. ‣ 2 Related Work ‣ Learning to Self-Evolve\"), [§3.3](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S3.SS3.p1.1 \"3.3 Learning to Self-Evolve (LSE) ‣ 3 Method ‣ Learning to Self-Evolve\"). * W. Yuan, R. Y. Pang, K. Cho, X. Li, S. Sukhbaatar, J. Xu, and J. Weston (2024) Self-rewarding language models. In Proceedings of the 41st International Conference on Machine Learning, Cited by: [§2](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S2.SS0.SSS0.Px1.p1.1 \"Training-time self-evolution. ‣ 2 Related Work ‣ Learning to Self-Evolve\"). * M. Yuksekgonul, F. Bianchi, J. Boen, S. Liu, Z. Huang, C. Guestrin, and J. Zou (2024) TextGrad: automatic ”differentiation” via text. arXiv preprint arXiv: 2406.07496. Cited by: [§1](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S1.p3.1 \"1 Introduction ‣ Learning to Self-Evolve\"), [§2](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S2.SS0.SSS0.Px2.p2.1 \"Test-time self-evolution. ‣ 2 Related Work ‣ Learning to Self-Evolve\"), [2nd item](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S4.I1.i2.p1.1 \"In Baselines. ‣ 4.1 Experimental Setup ‣ 4 Experiments ‣ Learning to Self-Evolve\"). * M. Yuksekgonul, D. Koceja, X. Li, F. Bianchi, J. McCaleb, X. Wang, J. Kautz, Y. Choi, J. Zou, C. Guestrin, and Y. Sun (2026) Learning to discover at test time. arXiv preprint arXiv: 2601.16175. Cited by: [§1](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S1.p2.1 \"1 Introduction ‣ Learning to Self-Evolve\"), [§2](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S2.SS0.SSS0.Px2.p1.1 \"Test-time self-evolution. ‣ 2 Related Work ‣ Learning to Self-Evolve\"). * E. Zelikman, Y. Wu, J. Mu, and N. Goodman (2022) STaR: bootstrapping reasoning with reasoning. In Advances in Neural Information Processing Systems, Vol. 35. Cited by: [§2](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S2.SS0.SSS0.Px1.p1.1 \"Training-time self-evolution. ‣ 2 Related Work ‣ Learning to Self-Evolve\"). * G. Zhang, M. Fu, and S. Yan (2025a) MemGen: weaving generative latent memory for self-evolving agents. arXiv preprint arXiv: 2509.24704. Cited by: [§1](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S1.p3.1 \"1 Introduction ‣ Learning to Self-Evolve\"), [§2](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S2.SS0.SSS0.Px2.p2.1 \"Test-time self-evolution. ‣ 2 Related Work ‣ Learning to Self-Evolve\"). * J. Zhang, S. Hu, C. Lu, R. Lange, and J. Clune (2025b) Darwin godel machine: open-ended evolution of self-improving agents. arXiv preprint arXiv:2505.22954. Cited by: [§1](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S1.p2.1 \"1 Introduction ‣ Learning to Self-Evolve\"), [§1](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S1.p3.1 \"1 Introduction ‣ Learning to Self-Evolve\"), [§2](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S2.SS0.SSS0.Px2.p2.1 \"Test-time self-evolution. ‣ 2 Related Work ‣ Learning to Self-Evolve\"), [§3.3](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S3.SS3.p1.1 \"3.3 Learning to Self-Evolve (LSE) ‣ 3 Method ‣ Learning to Self-Evolve\"). * Q. Zhang, C. Hu, S. Upasani, B. Ma, F. Hong, V. Kamanuru, J. Rainton, C. Wu, M. Ji, H. Li, U. Thakker, J. Zou, and K. Olukotun (2025c) Agentic context engineering: evolving contexts for self-improving language models. arXiv preprint arXiv: 2510.04618. Cited by: [§1](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S1.p3.1 \"1 Introduction ‣ Learning to Self-Evolve\"), [§2](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S2.SS0.SSS0.Px2.p2.1 \"Test-time self-evolution. ‣ 2 Related Work ‣ Learning to Self-Evolve\"). * A. Zhao, D. Huang, Q. Xu, M. Lin, Y. Liu, and G. Huang (2024) ExpeL: LLM agents are experiential learners. In Proceedings of the AAAI Conference on Artificial Intelligence, Vol. 38. Cited by: [§1](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S1.p3.1 \"1 Introduction ‣ Learning to Self-Evolve\"), [§2](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S2.SS0.SSS0.Px2.p2.1 \"Test-time self-evolution. ‣ 2 Related Work ‣ Learning to Self-Evolve\"). * A. Zhao, Y. Wu, Y. Yue, T. Wu, Q. Xu, Y. Yue, M. Lin, S. Wang, Q. Wu, Z. Zheng, and G. Huang (2025a) Absolute zero: reinforced self-play reasoning with zero data. arXiv preprint arXiv:2505.03335. Cited by: [§2](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S2.SS0.SSS0.Px1.p1.1 \"Training-time self-evolution. ‣ 2 Related Work ‣ Learning to Self-Evolve\"). * X. Zhao, Z. Kang, A. Feng, S. Levine, and D. Song (2025b) Learning to reason without external rewards. arXiv preprint arXiv: 2505.19590. Cited by: [§2](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S2.SS0.SSS0.Px1.p1.1 \"Training-time self-evolution. ‣ 2 Related Work ‣ Learning to Self-Evolve\"). * Y. Zuo, J. Zhang, D. Yang, G. Chen, S. Li, H. Dong, M. Wang, and Z. Xu (2025) TTRL: test-time reinforcement learning. arXiv preprint arXiv:2504.16084. Cited by: [§2](https://ar5iv.labs.arxiv.org/html/2603.18620v1#S2.SS0.SSS0.Px2.p1.1 \"Test-time self-evolution. ‣ 2 Related Work ‣ Learning to Self-Evolve\")."
+    },
+    {
+      "heading_path": [
+        "Learning to Self-Evolve",
+        "Appendix A Training and Evaluation Details"
+      ],
+      "text": "## Appendix A Training and Evaluation Details"
+    },
+    {
+      "heading_path": [
+        "Learning to Self-Evolve",
+        "Appendix A Training and Evaluation Details",
+        "Data generation."
+      ],
+      "text": "#### Data generation.\n\nWe train a separate self-evolving policy for each task domain (Text-to-SQL and QA) using evolutions trajectories generated from the corresponding training set. For each domain, we run 200 data-generation runs, each containing 20 rounds of evolution, yielding approximately 4,000 tree nodes to sample from during RL training."
+    },
+    {
+      "heading_path": [
+        "Learning to Self-Evolve",
+        "Appendix A Training and Evaluation Details",
+        "RL training."
+      ],
+      "text": "#### RL training.\n\nWe implement our RL framework using verl (Sheng et al., [2024](https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib43 \"HybridFlow: a flexible and efficient rlhf framework\")). We find that randomly sampling nodes from the evolution trees produces weak training signal early in training. Instead, we build a simple curriculum by preferentially sampling nodes with the highest improvement potential, defined as the difference between a node’s performance and the maximum performance in its own tree. We use a learning rate of 1×10−51\\times 10^{-5}, sample 32 nodes per batch, and generate 4 rollouts per node. We perform on-policy training and do not apply KL regularization. We train for 4 epochs and select the best checkpoint based on a separate development set.\n\n1×10−51\\times 10^{-5}"
+    },
+    {
+      "heading_path": [
+        "Learning to Self-Evolve",
+        "Appendix A Training and Evaluation Details",
+        "Evaluation protocol."
+      ],
+      "text": "#### Evaluation protocol.\n\nFor every domain, we fix the holdout set DD at 50 problems. Performance on the holdout set is calculated as the average over eight generations. We run 25 rounds of evolution and report the best holdout performance achieved by each self-evolving method over the course of evolution. At each round, a batch of 10 problems is sampled with replacement and presented to the action model. The random seed is fixed so that all methods observe the same sequence of problem batches.\n\nDD"
+    },
+    {
+      "heading_path": [
+        "Learning to Self-Evolve",
+        "Appendix A Training and Evaluation Details",
+        "Dataset sizes."
+      ],
+      "text": "#### Dataset sizes.\n\nTable [4](https://ar5iv.labs.arxiv.org/html/2603.18620v1#A1.T4 \"Table 4 ‣ Dataset sizes. ‣ Appendix A Training and Evaluation Details ‣ Learning to Self-Evolve\") reports the number of evaluation problems per domain.\n\n| Task | Domain | # Problems | | --- | --- | --- | | BIRD | Financial | 106 | | Toxicology | 145 | | Card Games | 191 | | Formula 1 | 174 | | Codebase | 186 | | MMLU-Redux | Business Ethics | 100 | | Philosophy | 100 | | Professional Accounting | 95 | | Econometrics | 100 | | Anatomy | 100 | | Security Studies | 100 | | Virology | 96 | | Moral Scenarios | 100 | | Global Facts | 96 | | Professional Law | 100 |\n\nfψf_{\\psi}"
+    },
+    {
+      "heading_path": [
+        "Learning to Self-Evolve",
+        "Appendix B Prompts"
+      ],
+      "text": "## Appendix B Prompts\n\nEach task uses three prompt templates: (1) a *system prompt* that provides the action model πθ\\pi\\_{\\theta} with task context and the current instructions, (2) a *user message* that presents each problem instance, and (3) a *self-evolution prompt* that the self-evolving policy fψf\\_{\\psi} receives to produce a revised instruction. The instruction field within the system prompt is the component that fψf\\_{\\psi} edits at each evolution round. Below we reproduce the templates for both tasks.\n\nπθ\\pi_{\\theta}\n\nfψf_{\\psi}\n\nfψf_{\\psi}"
+    },
+    {
+      "heading_path": [
+        "Learning to Self-Evolve",
+        "Appendix B Prompts",
+        "B.1 Text-to-SQL"
+      ],
+      "text": "### B.1 Text-to-SQL\n\nAction model system prompt.\n\nTask Overview:\nYou are a data science expert. Below, you are provided with a\ndatabase schema and a natural language question. Your task is to\nunderstand the schema and generate a valid SQL query to answer the\nquestion.\n\nDatabase Engine:\nSQLite\n\nDatabase Schema:\n{schema}\nThis schema describes the database’s structure, including tables,\ncolumns, primary keys, foreign keys, and any relevant relationships\nor constraints.\n\n**Instructions**\n{instructions}\n\nThe seed instruction is: Return only a single valid SQLite SQL statement in <answer>...</answer>.\n\nAction model user message.\n\nQuestion:\n{question}\n\n**Instructions**\n{instructions}\n\nFollow the instructions and show your work. When you are ready,\nreturn the query output list in tags: <answer> ... </answer>\n\nSelf-evolving policy prompt.\n\nYou are an expert at designing text-to-SQL agents. The agent is\nrunning on a fixed database schema. Below is the current agent\nprompt and a summary of recent performance. Rewrite ONLY the\ninstructions to improve execution accuracy while maintaining\nstrict output format.\n\nCurrent prompt:\n{old_prompt}\n\nEvaluation summary over {n_problems} problems and the agent’s\nfull thinking process:\n{summary}\n\n**How to write Instructions**\n- The agent will continue receive different user queries so don’t\n  make the instructions too specific to a single question.\n  Referring to the questions in the current summary with only the\n  question number is not helpful.\n- Keep it concise and practical.\n- You may include rules, heuristics, knowledge about the database,\n  low-level instructions/examples, high-level ideas/strategies,\n  pitfalls and any information that you think can make the agent\n  better.\n- Organize however you like (bullets, headings, checklists).\n- Be creative and think about the agent’s behavior across\n  iterations. Don’t be confined by what I told you.\n- Don’t change the output format, the agent should still return\n  the final SQL query in tags: <answer> ... </answer>.\n\nThink step by step and show your work. Reason about the history\nof the model’s behavior across iterations.\n\nWhen you are ready, put your revised Instructions within\n<prompt>[your new instructions]</prompt> tags."
+    },
+    {
+      "heading_path": [
+        "Learning to Self-Evolve",
+        "Appendix B Prompts",
+        "B.2 Question Answering"
+      ],
+      "text": "### B.2 Question Answering\n\nAction model system prompt.\n\nTask Overview:\nYou are an expert taking a test. Below, you are provided with a\nquestion and a list of choices. Your task is to select the correct\nanswer from the choices.\n\n**Instructions**\n{instructions}\n\nThe seed instruction is: Return only the letter of the correct choice (A, B, C, or D) in <answer>...</answer>.\n\nAction model user message.\n\nQuestion:\n{question}\n\nChoices:\n{choices}\n\nFollow the instructions and show your work. When you are ready,\nreturn the answer letter in tags: <answer> ... </answer>\n\nSelf-evolving policy prompt.\n\nYou are an expert at designing agents for solving multiple-choice\nquestions that involve both factual knowledge and reasoning.\nBelow is the current agent prompt and a summary of recent\nperformance on a set of problems. Rewrite ONLY the instructions\nto improve accuracy while maintaining strict output format.\n\nCurrent prompt:\n{old_prompt}\n\nEvaluation summary over {n_problems} problems and the agent’s\nfull thinking process:\n{summary}\n\n**How to write Instructions**\n- The agent will continue to receive different questions from the\n  same subjects. Don’t make the instructions too specific to a\n  single question.\n- Keep it concise and practical.\n- You may include rules, heuristics, strategies for multiple\n  choice questions (e.g., elimination, careful reading), knowledge\n  about the subjects (e.g., common misconceptions, important\n  facts, etc.), and any information that you think can make the\n  agent better.\n- Organize however you like (bullets, headings, checklists).\n- Be creative and think about the agent’s behavior across\n  iterations. Don’t be confined by what I told you.\n- Don’t change the output format, the agent should still return\n  the final answer letter in tags: <answer> ... </answer>.\n\nThink step by step and show your work. Reason about the history\nof the model’s behavior across iterations.\n\nWhen you are ready, put your revised Instructions within\n<prompt>[your new instructions]</prompt> tags."
+    },
+    {
+      "heading_path": [
+        "Learning to Self-Evolve",
+        "Appendix B Prompts",
+        "B.3 Example Instructions Found by LSE"
+      ],
+      "text": "### B.3 Example Instructions Found by LSE\n\nBelow we reproduce the best instructions discovered by the LSE-trained self-evolving policy on one domain from each task. These instructions replace the seed instruction in the action model prompt after multiple rounds of tree-guided evolution.\n\nText-to-SQL: BIRD Codebase database.\n\n1. Always return exactly one valid SQLite query in the format:\n   <answer>YOUR_SQL_QUERY_HERE</answer>\n\n2. Carefully analyze the natural language question to identify:\n   - The target attribute (e.g., name, count, date, status)\n   - The relevant tables and their columns\n   - Any joins required to connect tables via foreign keys\n   - Any filters (e.g., equality, date ranges, null checks)\n\n3. Use only the provided schema. Do not assume columns or\n   tables that are not defined.\n\n4. When joining tables:\n   - Match foreign key references precisely\n     (e.g., posts.OwnerUserId -> users.Id)\n   - Use explicit column aliases only if needed for clarity\n   - Ensure join conditions match the schema\n\n5. For date filtering:\n   - Use strftime(’%Y’, column) to extract year\n   - Never use YEAR() -- SQLite does not support it\n   - Match date format exactly (e.g., ’2014-04-23 20:29:39.0’)\n\n6. For conditional outputs (e.g., \"well-finished\"):\n   - Use CASE WHEN or IIF to map NULL / non-NULL values\n   - Match the definition in the question\n     (e.g., \"not well-finished\" = ClosedDate IS NULL)\n\n7. Common pitfalls to avoid:\n   - Misidentifying OwnerUserId vs. LastEditorUserId\n   - Incorrectly joining on UserId instead of Id\n   - Misspelling column names (e.g., CreaionDate)\n   - Forgetting required joins for user attributes\n   - Confusing UserDisplayName in comments with post ownership\n\n8. Always use subqueries for exact values (MIN, MAX):\n   - e.g., WHERE Age = (SELECT MIN(Age) FROM users)\n     instead of ORDER BY Age LIMIT 1\n\n9. For percentages or ratios, compute numerator and\n   denominator separately using subqueries. Use\n   CAST(... AS REAL) for floating-point division.\n\n10. Avoid redundant joins -- if a query can be answered\n    from a single table, do not introduce unnecessary joins.\n\nQuestion answering: MMLU-Redux Anatomy subject.\n\n- Return only the letter of the correct choice (A, B, C,\n  or D) in <answer>...</answer>.\n- Carefully analyze the question and all answer options\n  before selecting.\n- Use elimination to rule out clearly incorrect choices\n  based on factual knowledge or logical inconsistency.\n- For biological and anatomical questions, recall key\n  structures and their functions (e.g., fertilization\n  occurs in the fallopian tube, not the ovary or uterus;\n  the pituitary is the \"master gland\").\n- In neurology: upper motor neuron lesions cause spastic\n  paralysis; lower motor neuron lesions cause flaccid\n  paralysis; sympathetic pathways use noradrenaline.\n- In embryology, palatine shelf elevation is due to turgor\n  pressure from hydrophilic molecules, not directly from\n  tongue descent or brain flexure.\n- For spinal cord injuries, breathing is controlled by the\n  brainstem (medulla), not the cervical spinal cord.\n- Fracture types: closed = skin intact; greenstick = bent\n  but not displaced; open = skin broken; spiral = twisting.\n- In autonomic responses, sympathetic chain damage leads to\n  pupillary constriction and vasodilation (loss of\n  vasoconstriction), not increased sweating.\n- In Horner’s syndrome: miosis, facial vasodilation,\n  decreased lacrimation, and anhydrosis.\n- In cerebrovascular accidents, internal capsule lesions\n  cause contralateral spastic paralysis.\n- Prioritize accuracy over common assumptions -- especially\n  regarding directionality (contralateral vs ipsilateral),\n  timing (diastole vs systole), and structural relationships.\n- Be vigilant for common misconceptions used as distractors.\n- Do not over-rely on common associations; base decisions\n  on precise anatomical, physiological, or pathological facts."
+    }
+  ]
+}

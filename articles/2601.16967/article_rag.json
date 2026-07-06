@@ -1,0 +1,712 @@
+{
+  "title": "[2601.16967] Empowering Medical Equipment Sustainability in Low-Resource Settings: An AI-Powered Diagnostic and Support Platform for Biomedical Technicians",
+  "sections": [
+    {
+      "heading": "Empowering Medical Equipment Sustainability in Low-Resource Settings: An AI-Powered Diagnostic and Support Platform for Biomedical Technicians",
+      "level": 1,
+      "content": [],
+      "children": [
+        {
+          "heading": "Abstract",
+          "level": 6,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "In low- and middle-income countries (LMICs), a significant proportion of medical diagnostic equipment remains underutilized or non-functional due to a lack of timely maintenance, limited access to technical expertise, and minimal support from manufacturers, particularly for devices acquired through third-party vendors or donations. This challenge contributes to increased equipment downtime, delayed diagnoses, and compromised patient care. This research explores the development and validation of an AI-powered support platform designed to assist biomedical technicians in diagnosing and repairing medical devices in real-time. The system integrates a large language model (LLM) with a user-friendly web interface, enabling imaging technologists/radiographers and biomedical technicians to input error codes or device symptoms and receive accurate, step-by-step troubleshooting guidance. The platform also includes a global peer-to-peer discussion forum to support knowledge exchange and provide additional context for rare or undocumented issues. A proof of concept was developed using the Philips HDI 5000 ultrasound machine, achieving 100% precision in error code interpretation and 80% accuracy in suggesting corrective actions. This study demonstrates the feasibility and potential of AI-driven systems to support medical device maintenance, with the aim of reducing equipment downtime to improve healthcare delivery in resource-constrained environments."
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "1 Introduction and Background",
+          "level": 2,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "Medical devices are indispensable for delivering quality healthcare services, encompassing diagnosis, treatment, and patient monitoring. In high-resource settings, these devices benefit from regular maintenance, trained operators, and manufacturer support. Conversely, in low- and middle-income countries (LMICs), the situation is markedly different. Studies estimate that 40% to 70% of medical equipment in LMICs is non-functional or underutilized at any given time due to factors like poor maintenance systems, lack of spare parts, and insufficiently trained personnel [[2](https://ar5iv.labs.arxiv.org/html/2601.16967v1#bib.bib2)] [[1](https://ar5iv.labs.arxiv.org/html/2601.16967v1#bib.bib1)] [[3](https://ar5iv.labs.arxiv.org/html/2601.16967v1#bib.bib3)] [[4](https://ar5iv.labs.arxiv.org/html/2601.16967v1#bib.bib4)]. For instance, a detailed case study in Tanzania found that 30–50% of medical equipment in sub-Saharan Africa experiences downtime because of unstructured maintenance practices and limited technician capacity[[5](https://ar5iv.labs.arxiv.org/html/2601.16967v1#bib.bib5)]. In Uganda, research conducted across nine tertiary hospitals and five research institutions revealed that 34% of medical devices were faulty, and 85.6% lacked operational manuals, making even minor issues difficult to resolve [[8](https://ar5iv.labs.arxiv.org/html/2601.16967v1#bib.bib8)]. The lifespan of usable devices is often reduced by as much as 80%, primarily due to inexperienced operators and a lack of preventive maintenance protocols [[11](https://ar5iv.labs.arxiv.org/html/2601.16967v1#bib.bib11)]. The World Health Organization estimates that up to 70% of donated equipment fails to function as intended due to mismatches with infrastructure or lack of user training [[6](https://ar5iv.labs.arxiv.org/html/2601.16967v1#bib.bib6)]. Moreover, 40% of devices donated by Medical Surplus Recovery Organizations (MSROs) are inoperable due to missing documentation or limited manufacturer support[[12](https://ar5iv.labs.arxiv.org/html/2601.16967v1#bib.bib12)] [[10](https://ar5iv.labs.arxiv.org/html/2601.16967v1#bib.bib10)]."
+            },
+            {
+              "type": "paragraph",
+              "text": "The shortage of trained biomedical engineering technicians (BMETs) further aggravates the issue. With only a few organizations globally offering formal BMET training (e.g., Engineering World Health, Medisend) [[12](https://ar5iv.labs.arxiv.org/html/2601.16967v1#bib.bib12)], many LMICs lack the workforce needed to keep devices operational. Additionally, equipment donated or procured through third-party vendors often comes without access to manufacturer service forums or troubleshooting support, leaving technicians isolated and ill-equipped. In many African hospitals and clinics, even minor technical issues such as unfamiliar error codes or calibration warnings can result in devices being taken offline for extended periods. This leads to significant delays in diagnostics, unnecessary patient referrals, and, in some cases, avoidable mortality. While digital health innovations have improved access to care and information, very few have directly addressed the operational gap in maintaining physical medical infrastructure. This study aims to bridge that gap through the design and implementation of an AI-powered medical device support system (INGENZI Tech) for diagnostic imaging devices. By integrating advanced natural language processing with structured manuals, log data, and peer-generated insights, the system empowers biomedical technicians to act with confidence. The goal of this project is to reduce downtime, improve technician efficiency, and enhance healthcare system reliability, starting with a validated use case on the Philips HDI 5000 ultrasound machine in East Africa."
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "2 Related Work and Differentiation",
+          "level": 2,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "While a number of AI-driven platforms exist globally for medical device management, most are tied to proprietary hardware, operate in online-only contexts, or target high-resource health systems. Table 1 provides a comparative overview of notable commercial solutions and positions INGENZI Tech within this landscape."
+            },
+            {
+              "type": "paragraph",
+              "text": "In parallel, academic research has made significant progress in predictive maintenance for medical equipment. For instance, Shamayleh et al. [[13](https://ar5iv.labs.arxiv.org/html/2601.16967v1#bib.bib13)] deployed an IoT-based maintenance system across over 8,000 medical devices in Malaysia, achieving a 25% cost reduction using SVM-based failure classification. Similarly, Zamzam et al. [[14](https://ar5iv.labs.arxiv.org/html/2601.16967v1#bib.bib14)] achieved 99.4% prediction accuracy using sensor fusion methods applied to over 13,000 medical assets. Mohamed et al. [[15](https://ar5iv.labs.arxiv.org/html/2601.16967v1#bib.bib15)] proposed a digital twin approach for MRI equipment, reducing machine downtime by 20%. Deep learning approaches, such as CNN-LSTM hybrid models, have shown 92–99% accuracy in remaining useful life estimation across several medical device categories [[16](https://ar5iv.labs.arxiv.org/html/2601.16967v1#bib.bib16), [17](https://ar5iv.labs.arxiv.org/html/2601.16967v1#bib.bib17)]. Luschi et al. [[18](https://ar5iv.labs.arxiv.org/html/2601.16967v1#bib.bib18)] further demonstrated how predictive analytics integrated with IoT positioning systems can support hospital maintenance workflows in structured environments."
+            },
+            {
+              "type": "paragraph",
+              "text": "Despite this progress, such systems typically require continuous data streams, sensor infrastructure, and robust connectivity, conditions that are often absent in LMIC settings. Research by Anazodo et al. [[4](https://ar5iv.labs.arxiv.org/html/2601.16967v1#bib.bib4)] and Diaconu et al. [[2](https://ar5iv.labs.arxiv.org/html/2601.16967v1#bib.bib2)] highlights the infrastructural barriers to medical equipment usage in LMICs, including poor internet access, inconsistent power supply, and lack of OEM support, particularly for donated devices."
+            },
+            {
+              "type": "paragraph",
+              "text": "In terms of knowledge management, Abidi [[19](https://ar5iv.labs.arxiv.org/html/2601.16967v1#bib.bib19)] and Tabrizi and Morgan [[20](https://ar5iv.labs.arxiv.org/html/2601.16967v1#bib.bib20)] emphasize the need for collaborative technical knowledge platforms in healthcare. While prior work has demonstrated the effectiveness of training platforms [[21](https://ar5iv.labs.arxiv.org/html/2601.16967v1#bib.bib21)], few systems combine this with real-time, context-aware AI guidance for medical equipment."
+            },
+            {
+              "type": "paragraph",
+              "text": "INGENZI Tech differentiates itself through its integrated design tailored for LMICs. Unlike systems that focus solely on predictive analytics [[14](https://ar5iv.labs.arxiv.org/html/2601.16967v1#bib.bib14), [15](https://ar5iv.labs.arxiv.org/html/2601.16967v1#bib.bib15)] or manufacturer-side service workflows [[22](https://ar5iv.labs.arxiv.org/html/2601.16967v1#bib.bib22)], INGENZI Tech offers an end-user diagnostic platform combining:"
+            },
+            {
+              "type": "list",
+              "text": "* • A multilingual, LLM-powered chatbot for step-by-step device guidance. * • A RAG-based architecture with segmented vector stores to reduce hallucinations and enhance contextual precision [[23](https://ar5iv.labs.arxiv.org/html/2601.16967v1#bib.bib23), [24](https://ar5iv.labs.arxiv.org/html/2601.16967v1#bib.bib24)]. * • Offline-first deployment suitable for low-bandwidth and rural clinics. * • A peer-to-peer technician forum for continuous feedback, local adaptation, and model improvement [[19](https://ar5iv.labs.arxiv.org/html/2601.16967v1#bib.bib19), [20](https://ar5iv.labs.arxiv.org/html/2601.16967v1#bib.bib20)]."
+            },
+            {
+              "type": "paragraph",
+              "text": "A multilingual, LLM-powered chatbot for step-by-step device guidance."
+            },
+            {
+              "type": "paragraph",
+              "text": "A RAG-based architecture with segmented vector stores to reduce hallucinations and enhance contextual precision [[23](https://ar5iv.labs.arxiv.org/html/2601.16967v1#bib.bib23), [24](https://ar5iv.labs.arxiv.org/html/2601.16967v1#bib.bib24)]."
+            },
+            {
+              "type": "paragraph",
+              "text": "Offline-first deployment suitable for low-bandwidth and rural clinics."
+            },
+            {
+              "type": "paragraph",
+              "text": "A peer-to-peer technician forum for continuous feedback, local adaptation, and model improvement [[19](https://ar5iv.labs.arxiv.org/html/2601.16967v1#bib.bib19), [20](https://ar5iv.labs.arxiv.org/html/2601.16967v1#bib.bib20)]."
+            },
+            {
+              "type": "paragraph",
+              "text": "The Phase 0 proof-of-concept targets the Philips HDI 5000 ultrasound, a device commonly found in African clinics but frequently unsupported, addressing the challenges raised in recent surveys on equipment non-functionality [[8](https://ar5iv.labs.arxiv.org/html/2601.16967v1#bib.bib8), [1](https://ar5iv.labs.arxiv.org/html/2601.16967v1#bib.bib1)]. Future phases include scaling to CT, MRI, and X-ray machines."
+            },
+            {
+              "type": "table",
+              "text": "| AI Solution | Strengths | Limitations in LMIC Context / Differentiation vs. INGENZI Tech | | --- | --- | --- | | Bruviti | LLM-powered diagnostics; preserves institutional knowledge; supports global manufacturers | No public deployments in LMICs; not optimized for offline use or multilingual environments; high dependency on OEM integrations | | Hadleigh Health, Vestfrost EMS, Nexleaf Analytics | IoT-based predictive maintenance; real-time monitoring; some LMIC deployments | Primarily hardware-embedded systems; limited end-user diagnostic interaction; lacks LLM or multilingual troubleshooting support | | Bosnia AI-Metrology Project | Applies AI to device calibration and performance in public hospitals; shows feasibility in low-resource settings | Regional, narrow scope; focused on measurement and standards, not interactive technician support or documentation retrieval | | Circuitry.ai | Real-time advisory systems for maintenance; global operations; multilingual support | Tailored for manufacturers and enterprise clients; unclear adaptation to LMIC infrastructure or offline-first needs | | Stellarix, Kodexo Labs, Toronto Digital | Offer AI-powered predictive maintenance with IoT and ML; adaptable for various device types | Require continuous data streams and sensor integrations; do not provide peer-to-peer learning or AI chatbot interactions | | GE Healthcare Edison AI | Advanced anomaly detection in imaging systems; global footprint | High-end solution tied to GE devices; closed ecosystem; limited accessibility or relevance for third-party equipment in LMICs | | INGENZI Tech (This Work) | LLM-based multilingual chatbot; RAG-based contextual retrieval; peer-driven technician forum; designed for offline use | Currently piloting; early-stage for multi-device support; open architecture enables adaptation across vendors and regions |"
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "3 Scope of the Study",
+          "level": 2,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "This study focuses on the development and validation of an AI-powered support platform designed to assist biomedical technicians in diagnosing and repairing medical diagnostic equipment in low-resource settings. The platform integrates a large language model (LLM) with structured device knowledge, error logs, and technician-driven feedback to offer step-by-step troubleshooting and guided repair workflows. The initial scope centers on the Philips HDI 5000 ultrasound machine, which served as a proof-of-concept device for prototyping. With the framework developed in the initial phase, a full study will be conducted to expand the focus to include more complex imaging devices such as magnetic resonance imaging (MRI), computed tomography (CT), and X-ray machines, with a specific emphasis on widely used and often unsupported devices in LMIC settings. Therefore, this study aims to:"
+            },
+            {
+              "type": "list",
+              "text": "* • Build a scalable, multilingual AI agent that provides real-time, context-aware repair guidance. * • Integrate a global technician knowledge-sharing forum to complement automated responses. * • Test the tool’s accuracy, relevance, and usability in both clinical and training environments. * • Evaluate its adaptability across different medical device types and manufacturers."
+            },
+            {
+              "type": "paragraph",
+              "text": "Build a scalable, multilingual AI agent that provides real-time, context-aware repair guidance."
+            },
+            {
+              "type": "paragraph",
+              "text": "Integrate a global technician knowledge-sharing forum to complement automated responses."
+            },
+            {
+              "type": "paragraph",
+              "text": "Test the tool’s accuracy, relevance, and usability in both clinical and training environments."
+            },
+            {
+              "type": "paragraph",
+              "text": "Evaluate its adaptability across different medical device types and manufacturers."
+            },
+            {
+              "type": "paragraph",
+              "text": "This study does not include physical repair execution, device manufacturing processes, or regulatory approval for device use, which are currently being investigated. Instead, it aims to establish a digitalized and generalizable support framework that can bridge the technical knowledge gap for biomedical equipment across a variety of healthcare settings, with a focus on medical imaging devices."
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "4 Methods",
+          "level": 2,
+          "content": [],
+          "children": [
+            {
+              "heading": "4.1 Research Design",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "This project follows a phased, mixed-methods approach, combining iterative system development with both quantitative system performance evaluations and qualitative user feedback analysis. It is designed to be descriptive and exploratory, establishing the foundational tools, workflows, and interactions needed to support scalable medical device maintenance via AI, particularly in resource-limited healthcare environments. The project is being carried out in 5 phases, outlined briefly below, with the initial proof-of-concept (Phase 0) reported in detail below."
+                }
+              ],
+              "children": [
+                {
+                  "heading": "4.1.1 Phase 0: Proof of Concept (Completed)",
+                  "level": 4,
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "text": "The initial prototype was developed using the Philips HDI 5000 ultrasound machine as a case study. The assistant was built using a RAG (Retrieval-Augmented Generation) architecture supported by:"
+                    },
+                    {
+                      "type": "list",
+                      "text": "* • LLM: GPT-3.5 Turbo for generation and embedding * • Vector store: Facebook AI Similarity Search (FAISS) for document retrieval * • Frontend/Backend: React and Flask * • Core functionalities: Error code lookup, Log analysis, Self-test simulation, Maintenance scheduling via Google Calendar API, Multilingual chatbot interface"
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "LLM: GPT-3.5 Turbo for generation and embedding"
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "Vector store: Facebook AI Similarity Search (FAISS) for document retrieval"
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "Frontend/Backend: React and Flask"
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "Core functionalities: Error code lookup, Log analysis, Self-test simulation, Maintenance scheduling via Google Calendar API, Multilingual chatbot interface"
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "To improve retrieval accuracy and reduce hallucinations, separate vector databases were used for User Manuals, Service Manuals, and Error Codes. The proof-of-concept achieved 100% precision in error code matching and 80% troubleshooting accuracy using internal evaluation methods."
+                    }
+                  ],
+                  "children": []
+                },
+                {
+                  "heading": "4.1.2 Phase 1: Forum Integration & Feedback Loop",
+                  "level": 4,
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "text": "This phase introduces a collaborative technician forum to complement the AI assistant. The forum will allow users to post issues, share solutions, upvote helpful responses, and generate valuable context data."
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "Development Tasks:"
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "Build or integrate a forum engine"
+                    },
+                    {
+                      "type": "list",
+                      "text": "* • Link forum user accounts with diagnostic tool profiles * • Design a schema for tracking usage and technician feedback * • Connect forum feedback into a structured pipeline for LLM fine-tuning and retrieval augmentation"
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "Link forum user accounts with diagnostic tool profiles"
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "Design a schema for tracking usage and technician feedback"
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "Connect forum feedback into a structured pipeline for LLM fine-tuning and retrieval augmentation"
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "This human-in-the-loop design ensures continuous model improvement and crowd-sourced domain knowledge."
+                    }
+                  ],
+                  "children": []
+                },
+                {
+                  "heading": "4.1.3 Phase 2: API & IoT Connectivity for Device Integration",
+                  "level": 4,
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "text": "The second development phase focuses on real-time interaction with physical devices, enabling automated log streaming and predictive diagnostics."
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "Planned Tasks:"
+                    },
+                    {
+                      "type": "list",
+                      "text": "* • Evaluate and implement healthcare communication protocols such as DICOM, HL7, and MQTT. * • Define secure API contracts for medical device integration. * • Build a simulation layer for testing log ingestion without live devices. * • Prototype fault-alert dashboards for remote monitoring."
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "Evaluate and implement healthcare communication protocols such as DICOM, HL7, and MQTT."
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "Define secure API contracts for medical device integration."
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "Build a simulation layer for testing log ingestion without live devices."
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "Prototype fault-alert dashboards for remote monitoring."
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "This phase extends the system beyond a passive assistant into a proactive maintenance layer."
+                    }
+                  ],
+                  "children": []
+                },
+                {
+                  "heading": "4.1.4 Phase 3: Model Optimization & Continuous Learning",
+                  "level": 4,
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "text": "With data from the tool and forum, the LLM will be fine-tuned for domain-specific reasoning and reliability."
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "Optimization Activities:"
+                    },
+                    {
+                      "type": "list",
+                      "text": "* • Introduce a feedback classifier to label suggestions as correct/incorrect. * • Use forum responses and real-world interactions for semi-supervised learning. * • Monitor hallucination frequency and optimize vector store indexing. * • Regularly retrain and evaluate the LLM against gold-standard troubleshooting guides."
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "Introduce a feedback classifier to label suggestions as correct/incorrect."
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "Use forum responses and real-world interactions for semi-supervised learning."
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "Monitor hallucination frequency and optimize vector store indexing."
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "Regularly retrain and evaluate the LLM against gold-standard troubleshooting guides."
+                    }
+                  ],
+                  "children": []
+                },
+                {
+                  "heading": "4.1.5 Phase 4: Pilot Deployment & Evaluation",
+                  "level": 4,
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "text": "The system will be deployed and evaluated in clinical environments in LMICs, starting with East Africa."
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "Execution Plan:"
+                    },
+                    {
+                      "type": "list",
+                      "text": "* • Partner with hospitals and biomedical schools for pilot testing * • Train local technicians on usage and provide onboarding materials * • Collect metrics: Time-to-diagnosis Technician satisfaction Device uptime improvement * • Use real feedback to further optimize UI, model performance, and workflow integration"
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "Partner with hospitals and biomedical schools for pilot testing"
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "Train local technicians on usage and provide onboarding materials"
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "Collect metrics:"
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "Time-to-diagnosis"
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "Technician satisfaction"
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "Device uptime improvement"
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "Use real feedback to further optimize UI, model performance, and workflow integration"
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "All user interactions will be logged and anonymized for research analysis. No patient data will be used."
+                    }
+                  ],
+                  "children": []
+                },
+                {
+                  "heading": "4.1.6 Phase 5: Multi-Device Expansion",
+                  "level": 4,
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "text": "In this phase, INGENZI Tech will scale to support a broader range of devices (MRI, CT, and X-ray), beginning with one original equipment manufacturer (OEM, i.e., Siemens)."
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "Tasks:"
+                    },
+                    {
+                      "type": "list",
+                      "text": "* • Collect manuals, error codes, and logs for new devices * • Expand vector stores or segment them by device class * • Add model-switching capabilities in the backend based on device detection * • Standardize input/output formats for scalable ingestion"
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "Collect manuals, error codes, and logs for new devices"
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "Expand vector stores or segment them by device class"
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "Add model-switching capabilities in the backend based on device detection"
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "Standardize input/output formats for scalable ingestion"
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "This positions the system as a brand-agnostic, AI-powered maintenance layer that can operate across multiple health systems and equipment ecosystems."
+                    }
+                  ],
+                  "children": []
+                }
+              ]
+            },
+            {
+              "heading": "4.2 Phase 0 Dataset",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "The dataset used in Phase 0 was built from 15 technical documents related to the Philips HDI 5000 ultrasound system, including user manuals, service manuals, and detailed error code catalogs. These documents were parsed and chunked using a semantic-aware splitting strategy to preserve contextual meaning. Each chunk was then embedded using OpenAI’s GPT-3.5 Turbo embedding model and stored in Facebook AI Similarity Search (FAISS), a high-performance vector database. FAISS was selected due to its ability to handle large-scale similarity search efficiently, offering fast retrieval speeds with minimal memory overhead. Given the need for real-time, lightweight deployment in resource-constrained settings, FAISS provided the optimal trade-off between scalability, speed, and customization. To further reduce hallucinations and improve specificity, the vector database was segmented into three discrete stores: (1) user manuals, (2) service manuals, and (3) error codes. This structured storage approach allowed for domain-specific querying and significantly improved the system’s contextual accuracy during troubleshooting tasks."
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "4.3 LLM Model",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "The Phase 0 assistant was built using the GPT-3.5 Turbo model and operated within a Retrieval-Augmented Generation (RAG) framework. Technician queries were first interpreted through prompt engineering and sent to the FAISS-powered vector stores to retrieve the top-k most relevant document chunks. These chunks were then appended as context to the LLM prompt, enabling accurate and explainable response generation. The system supported various custom tools, including: Error code lookup Log parsing, Maintenance schedule generation, and Simulated self-testing"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Each tool selection was driven by prompt conditioning and intent classification strategies. The backend was deployed using a lightweight Flask server, interfacing with a React-based frontend, ensuring accessibility on low-power machines. By combining a modular tool pipeline with FAISS-enhanced RAG retrieval, the system maintained sub-10-second average latency, making it suitable for near real-time use in clinical environments."
+                }
+              ],
+              "children": []
+            }
+          ]
+        },
+        {
+          "heading": "5 Preliminary Results of Phase 0",
+          "level": 2,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "To evaluate the effectiveness of the INGENZI Tech prototype, we conducted two core assessments focused on the platform’s accuracy in retrieving device-specific information using its RAG-based architecture."
+            }
+          ],
+          "children": [
+            {
+              "heading": "5.1 Error Code Interpretation Accuracy",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "A total of 90 error codes, along with their corresponding descriptions, were extracted from the Philips HDI 5000 ultrasound service manuals. These were used as input queries to the system to test its ability to retrieve accurate contextual matches from the embedded vector stores. The system successfully retrieved the correct description for 100% of the error codes, confirming high alignment between query semantics and stored content. This demonstrated the model’s robustness in precise retrieval of structured, short-form diagnostic information."
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "5.2 Instructional Query Evaluation",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "To assess the system’s performance on broader instructional support, we curated a set of 30 natural language queries derived from the device’s user and service manuals. These questions spanned operational instructions, safety guidelines, and device handling procedures. Out of the 30 questions, the system returned accurate and complete responses for 24 of them, yielding an 80% success rate. The remaining six responses were either partially accurate or missing critical details, indicating areas for improvement in document chunking, relevance scoring, or retrieval granularity."
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "5.3 Implications",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "These preliminary results validate the feasibility of leveraging a segmented RAG framework for technical document retrieval in low-resource settings. The perfect performance on structured error code queries suggests high utility in fault identification workflows, while the 80% accuracy on unstructured instructional queries highlights potential for effective user guidance, with room for refinement in LLM prompt tuning and vector search thresholds."
+                }
+              ],
+              "children": []
+            }
+          ]
+        },
+        {
+          "heading": "6 Discussion",
+          "level": 2,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "This study is expected to yield a robust, AI-powered support platform tailored to the needs of biomedical technicians in low-resource settings. The anticipated outcomes include both tangible software components and insights that can inform future research and development in the domain of intelligent medical device maintenance. First, the research aims to validate the effectiveness of a multilingual diagnostic assistant powered by large language models (LLMs). This assistant will interpret error codes, retrieve context-specific documentation, and guide users through actionable repair workflows. Evaluation will rely not only on internal metrics but also on established LLM benchmarks adapted to the task of technical reasoning and document retrieval. Performance targets include high exact match (EM), precision, and recall in context matching, as well as positive assessments from real-world users. To enhance accuracy and reduce hallucinations, the system will incorporate segmented vector stores, specifically dedicated to user manuals, service manuals, and error codes. This structural refinement is expected to result in more contextually relevant responses and better model alignment with technician expectations. In addition to the AI assistant, the project will deliver a fully integrated peer-to-peer discussion forum. This forum will allow technicians to post unresolved issues, upvote helpful responses, and share field-tested solutions. Feedback gathered through this platform will contribute to a semi-supervised learning loop for continuous model refinement. A key outcome of this study is ensuring accessibility. The system will include offline support and a multilingual interface to accommodate technicians working in bandwidth-constrained or non-English-speaking environments, typical of many LMICs. Looking ahead, the solution will be structured for scalability across multiple device types. While the proof of concept focused on the Philips HDI 5000 ultrasound machine, the system architecture will support transition to more advanced diagnostic tools such as Siemens MRI, CT, and X-ray systems. This includes the addition of device-detection logic and ingestion format standardization to support multi-device workflows. Finally, the research will provide user insights drawn from technician interaction logs, surveys, and qualitative feedback. These insights will inform improvements in AI-guided repair recommendations, interface usability, and system reliability in real-world clinical contexts."
+            },
+            {
+              "type": "paragraph",
+              "text": "Final Deliverables:"
+            },
+            {
+              "type": "list",
+              "text": "* • A fully functional, web-based diagnostic tool powered by an LLM and Retrieval-Augmented Generation (RAG) * • A segmented vectorized knowledge base of user manuals, service guides, and error codes. * • A technician discussion forum with structured feedback tracking. * • Offline-capable and multilingual user interface. * • A comprehensive evaluation report, including benchmark results and technician feedback. * • Technical documentation, onboarding materials, and a deployment-ready software package for pilot testing"
+            },
+            {
+              "type": "paragraph",
+              "text": "A fully functional, web-based diagnostic tool powered by an LLM and Retrieval-Augmented Generation (RAG)"
+            },
+            {
+              "type": "paragraph",
+              "text": "A segmented vectorized knowledge base of user manuals, service guides, and error codes."
+            },
+            {
+              "type": "paragraph",
+              "text": "A technician discussion forum with structured feedback tracking."
+            },
+            {
+              "type": "paragraph",
+              "text": "Offline-capable and multilingual user interface."
+            },
+            {
+              "type": "paragraph",
+              "text": "A comprehensive evaluation report, including benchmark results and technician feedback."
+            },
+            {
+              "type": "paragraph",
+              "text": "Technical documentation, onboarding materials, and a deployment-ready software package for pilot testing"
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "7 Significance of the Study",
+          "level": 2,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "This study addresses a pressing and persistent gap in global health systems, ensuring that life-saving medical devices remain operational in low-resource environments. In LMICs, prolonged equipment downtime due to a lack of technical expertise and support results in avoidable diagnostic delays, poor patient outcomes, and significant resource waste. By offering a scalable, AI-powered support platform tailored to biomedical technicians, this research directly contributes to the continuity and quality of healthcare services where they are most vulnerable. The proposed solution aligns with global health and technology goals, including WHO’s call for improved health technology management and the increasing emphasis on sustainable, equitable digital health infrastructure. Unlike many existing tools limited to specific manufacturers or high-connectivity settings, this platform provides multilingual, offline-capable assistance and incorporates peer knowledge exchange to support long-term learning. By combining cutting-edge natural language processing, practical engineering workflows, and feedback-driven model improvement, the study also contributes to the growing field of human-centered AI in healthcare. Its outcomes can inform the development of future AI tools for technical domains that suffer from knowledge bottlenecks, especially in under-resourced contexts. Ultimately, this research not only advances technical innovation but has the potential to transform biomedical maintenance from a reactive to a proactive discipline, reducing equipment failure, empowering local technicians, and improving care delivery across LMIC health systems."
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "8 Conclusion",
+          "level": 2,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "This research proposes a practical and scalable solution to a longstanding challenge in global healthcare, ensuring the continuous functionality of medical devices in low-resource settings. By combining large language models, structured knowledge retrieval, and collaborative technician input, the platform aims to shift maintenance practices from reactive to proactive. The integration of multilingual, offline support ensures accessibility, while modular design allows expansion to various device types and manufacturers. Through phased development and real-world validation, this study not only contributes a novel AI tool but also advances the broader mission of equitable, reliable healthcare delivery in LMICs and beyond."
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "References",
+          "level": 2,
+          "content": [
+            {
+              "type": "list",
+              "text": "* [1] Perry, L., Malkin, R.: Effectiveness of medical equipment donations to improve health systems: how much medical equipment is broken in the developing world? Medical & Biological Engineering & Computing 49(7), 719–722 (2011). https://doi.org/10.1007/s11517-011-0786-3 * [2] Diaconu, K., Chen, Y.F., Cummins, C., Jimenez Moyao, G., Manaseki-Holland, S., Lilford, R.: Methods for medical device and equipment procurement and prioritization within low- and middle-income countries: findings of a systematic literature review. Globalization and Health 13(1), 59 (2017) * [3] Malkin, R.A.: Design of health care technologies for the developing world. Annual Review of Biomedical Engineering 9(1), 567–587 (2007) * [4] Anazodo, U.C., et al.: A framework for advancing sustainable magnetic resonance imaging access in Africa. NMR in Biomedicine 36(3), e4846 (2023) * [5] Kebby Abdallah, A., Haule, S., Werlein, R., Mvanga, V., Delcroix, P., Saric, J., Stoermer, M.: Medical device management reform, United Republic of Tanzania. Bulletin of the World Health Organization 102(9), 665–673 (2024) * [6] World Health Organization: Medical device donations: considerations for solicitation and provision (2011) * [7] Pokvic, L.: AI for MD maintenance and metrology in LMICs: the case of Bosnia and Herzegovinian (2025). https://youtu.be/7wvQME3PxpA * [8] Ssekitoleko, R.T., et al.: Status of medical devices and their utilization in 9 tertiary hospitals and 5 research institutions in Uganda. Global Clinical Engineering Journal 4(3), 5–15 (2022) * [9] Mullally, S., Frize, M.: Survey of clinical engineering effectiveness in developing world hospitals: Equipment resources, procurement and donations. In: 2008 30th Annual International Conference of the IEEE Engineering in Medicine and Biology Society, pp. 4499–4502. IEEE (2008) * [10] Diaconu, K., Chen, Y.F., Manaseki-Holland, S., Cummins, C., Lilford, R.: Medical device procurement in low- and middle-income settings: protocol for a systematic review. Systematic Reviews 3(1), 118 (2014) * [11] Marks, I.H., Thomas, H., Bakhet, M., Fitzgerald, E.: Medical equipment donation in low-resource settings: a review of the literature and guidelines for surgery and anaesthesia in low-income and middle-income countries. BMJ Global Health 4(5), e001785 (2019) * [12] Spring, T.: Lack of serviceable laboratory and medical equipment for doctors and nurses in Sub-Saharan Africa. LinkedIn (Apr 2024). https://www.linkedin.com/pulse/lack-serviceable-laboratory-medical-equipment-doctors-truman-spring-qoggc/ * [13] Shamayleh, A., Awad, M., Farhat, J.: IoT based predictive maintenance management of medical equipment. Journal of Medical Systems 44(4), 72 (2020) * [14] Zamzam, A.H., Abdul Wahab, A.K., Azizan, M.M., Satapathy, S.C., Lai, K.W., Hasikin, K.: A systematic review of medical equipment reliability assessment in improving the quality of healthcare services. Frontiers in Public Health 9, 753951 (2021) * [15] Abd Wahab, N.H., Hasikin, K., Wee Lai, K., Xia, K., Bei, L., Huang, K., Wu, X.: Systematic review of predictive maintenance and digital twin technologies challenges, opportunities, and best practices. PeerJ Computer Science 10, e1943 (2024) * [16] Fernandes, S., Antunes, M., Santiago, A.R., Barraca, J.P., Gomes, D., Aguiar, R.L.: Forecasting appliances failures: A machine-learning approach to predictive maintenance. Information (Basel) 11(4), 208 (2020) * [17] Çınar, Z.M., Abdussalam Nuhu, A., Zeeshan, Q., Korhan, O., Asmael, M., Safaei, B.: Machine learning in predictive maintenance towards sustainable smart manufacturing in Industry 4.0. Sustainability 12(19), 8211 (2020) * [18] Guissi, M., El Yousfi Alaoui, M.H., Belarbi, L., Chaik, A.: IoT for predictive maintenance of critical medical equipment in a hospital structure. Informatyka, Automatyka, Pomiary w Gospodarce i Ochronie Środowiska 14(2), 71–76 (2024) * [19] Abidi, S.S.R.: Healthcare knowledge sharing: Purpose, practices, and prospects. In: Bali, R.K., Dwivedi, A.N. (eds.) Healthcare Knowledge Management: Issues, Advances, and Successes, pp. 67–86. Springer, New York (2007). https://doi.org/10.1007/978-0-387-49009-0\\_6 * [20] Tabrizi, N.M., Morgan, S.: Models for describing knowledge sharing practices in the healthcare industry: Example of experience knowledge sharing. International Journal of Management and Applied Research 1(2), 48–67 (2014) * [21] Arneson, W., Robinson, C., Nyary, B.: Biomedical laboratory science education: standardising teaching content in resource-limited countries. African Journal of Laboratory Medicine 2(1), e1–e6 (2013) * [22] Circuitry.ai: Circuitry-ai-decision-intelligence-company-overview (2025). https://circuitry.ai/ * [23] Lewis, P., Perez, E., Piktus, A., Petroni, F., Karpukhin, V., Goyal, N., Küttler, H., Lewis, M., Yih, W.T., Rocktäschel, T., Riedel, S., Kiela, D.: Retrieval-augmented generation for knowledge-intensive NLP tasks (2020) * [24] Friel, R., Belyi, M., Sanyal, A.: RAGBench: Explainable benchmark for retrieval-augmented generation systems (2024) * [25] Bruviti: Bruviti AI Platform (2025). https://bruviti.com/platform/ * [26] Hadleigh Health: Hadleigh health technologies and patient platforms (2025). https://www.hadleighhealth.co.uk/ * [27] Vestfrost Solutions: Equipment monitoring system (EMS) features (2025). https://www.vestfrostsolutions.com/new-features/ * [28] Nexleaf Analytics: Predictive maintenance technologies (2025). https://nexleaf.org/ * [29] Circuitry.ai: Circuitry.ai decision intelligence platform overview (2025). https://circuitry.ai/ * [30] Stellarix: Generative AI perspectives (2025). https://stellarix.com/insights/stellarix-perspectives/generative-ai/ * [31] Kodexo Labs: AI software development company (2025). https://kodexolabs.com/ * [32] Toronto Digital: Toronto digital - official website (2025). https://torontodigital.ca/ * [33] GE HealthCare: GE healthcare medical systems and solutions (2025). https://www.gehealthcare.com/ * [34] Datacamp: Learn how to use Chroma DB: A step-by-step guide. https://www.datacamp.com/tutorial/chromadb-tutorial-step-by-step-guide * [35] Datacamp: The 7 best vector databases in 2025. https://www.datacamp.com/blog/the-top-5-vector-databases * [36] Getting started with Chroma DB: A beginner’s tutorial. https://medium.com/@pierrelouislet/getting-started-with-chroma-db-a-beginners-tutorial-6efa32300902"
+            }
+          ],
+          "children": []
+        }
+      ]
+    }
+  ],
+  "chunks": [
+    {
+      "heading_path": [
+        "Empowering Medical Equipment Sustainability in Low-Resource Settings: An AI-Powered Diagnostic and Support Platform for Biomedical Technicians"
+      ],
+      "text": "# Empowering Medical Equipment Sustainability in Low-Resource Settings: An AI-Powered Diagnostic and Support Platform for Biomedical Technicians"
+    },
+    {
+      "heading_path": [
+        "Empowering Medical Equipment Sustainability in Low-Resource Settings: An AI-Powered Diagnostic and Support Platform for Biomedical Technicians",
+        "Abstract"
+      ],
+      "text": "###### Abstract\n\nIn low- and middle-income countries (LMICs), a significant proportion of medical diagnostic equipment remains underutilized or non-functional due to a lack of timely maintenance, limited access to technical expertise, and minimal support from manufacturers, particularly for devices acquired through third-party vendors or donations. This challenge contributes to increased equipment downtime, delayed diagnoses, and compromised patient care. This research explores the development and validation of an AI-powered support platform designed to assist biomedical technicians in diagnosing and repairing medical devices in real-time. The system integrates a large language model (LLM) with a user-friendly web interface, enabling imaging technologists/radiographers and biomedical technicians to input error codes or device symptoms and receive accurate, step-by-step troubleshooting guidance. The platform also includes a global peer-to-peer discussion forum to support knowledge exchange and provide additional context for rare or undocumented issues. A proof of concept was developed using the Philips HDI 5000 ultrasound machine, achieving 100% precision in error code interpretation and 80% accuracy in suggesting corrective actions. This study demonstrates the feasibility and potential of AI-driven systems to support medical device maintenance, with the aim of reducing equipment downtime to improve healthcare delivery in resource-constrained environments."
+    },
+    {
+      "heading_path": [
+        "Empowering Medical Equipment Sustainability in Low-Resource Settings: An AI-Powered Diagnostic and Support Platform for Biomedical Technicians",
+        "1 Introduction and Background"
+      ],
+      "text": "## 1 Introduction and Background\n\nMedical devices are indispensable for delivering quality healthcare services, encompassing diagnosis, treatment, and patient monitoring. In high-resource settings, these devices benefit from regular maintenance, trained operators, and manufacturer support. Conversely, in low- and middle-income countries (LMICs), the situation is markedly different. Studies estimate that 40% to 70% of medical equipment in LMICs is non-functional or underutilized at any given time due to factors like poor maintenance systems, lack of spare parts, and insufficiently trained personnel [[2](https://ar5iv.labs.arxiv.org/html/2601.16967v1#bib.bib2)] [[1](https://ar5iv.labs.arxiv.org/html/2601.16967v1#bib.bib1)] [[3](https://ar5iv.labs.arxiv.org/html/2601.16967v1#bib.bib3)] [[4](https://ar5iv.labs.arxiv.org/html/2601.16967v1#bib.bib4)]. For instance, a detailed case study in Tanzania found that 30–50% of medical equipment in sub-Saharan Africa experiences downtime because of unstructured maintenance practices and limited technician capacity[[5](https://ar5iv.labs.arxiv.org/html/2601.16967v1#bib.bib5)]. In Uganda, research conducted across nine tertiary hospitals and five research institutions revealed that 34% of medical devices were faulty, and 85.6% lacked operational manuals, making even minor issues difficult to resolve [[8](https://ar5iv.labs.arxiv.org/html/2601.16967v1#bib.bib8)]. The lifespan of usable devices is often reduced by as much as 80%, primarily due to inexperienced operators and a lack of preventive maintenance protocols [[11](https://ar5iv.labs.arxiv.org/html/2601.16967v1#bib.bib11)]. The World Health Organization estimates that up to 70% of donated equipment fails to function as intended due to mismatches with infrastructure or lack of user training [[6](https://ar5iv.labs.arxiv.org/html/2601.16967v1#bib.bib6)]. Moreover, 40% of devices donated by Medical Surplus Recovery Organizations (MSROs) are inoperable due to missing documentation or limited manufacturer support[[12](https://ar5iv.labs.arxiv.org/html/2601.16967v1#bib.bib12)] [[10](https://ar5iv.labs.arxiv.org/html/2601.16967v1#bib.bib10)].\n\nThe shortage of trained biomedical engineering technicians (BMETs) further aggravates the issue. With only a few organizations globally offering formal BMET training (e.g., Engineering World Health, Medisend) [[12](https://ar5iv.labs.arxiv.org/html/2601.16967v1#bib.bib12)], many LMICs lack the workforce needed to keep devices operational. Additionally, equipment donated or procured through third-party vendors often comes without access to manufacturer service forums or troubleshooting support, leaving technicians isolated and ill-equipped. In many African hospitals and clinics, even minor technical issues such as unfamiliar error codes or calibration warnings can result in devices being taken offline for extended periods. This leads to significant delays in diagnostics, unnecessary patient referrals, and, in some cases, avoidable mortality. While digital health innovations have improved access to care and information, very few have directly addressed the operational gap in maintaining physical medical infrastructure. This study aims to bridge that gap through the design and implementation of an AI-powered medical device support system (INGENZI Tech) for diagnostic imaging devices. By integrating advanced natural language processing with structured manuals, log data, and peer-generated insights, the system empowers biomedical technicians to act with confidence. The goal of this project is to reduce downtime, improve technician efficiency, and enhance healthcare system reliability, starting with a validated use case on the Philips HDI 5000 ultrasound machine in East Africa."
+    },
+    {
+      "heading_path": [
+        "Empowering Medical Equipment Sustainability in Low-Resource Settings: An AI-Powered Diagnostic and Support Platform for Biomedical Technicians",
+        "2 Related Work and Differentiation"
+      ],
+      "text": "## 2 Related Work and Differentiation\n\nWhile a number of AI-driven platforms exist globally for medical device management, most are tied to proprietary hardware, operate in online-only contexts, or target high-resource health systems. Table 1 provides a comparative overview of notable commercial solutions and positions INGENZI Tech within this landscape.\n\nIn parallel, academic research has made significant progress in predictive maintenance for medical equipment. For instance, Shamayleh et al. [[13](https://ar5iv.labs.arxiv.org/html/2601.16967v1#bib.bib13)] deployed an IoT-based maintenance system across over 8,000 medical devices in Malaysia, achieving a 25% cost reduction using SVM-based failure classification. Similarly, Zamzam et al. [[14](https://ar5iv.labs.arxiv.org/html/2601.16967v1#bib.bib14)] achieved 99.4% prediction accuracy using sensor fusion methods applied to over 13,000 medical assets. Mohamed et al. [[15](https://ar5iv.labs.arxiv.org/html/2601.16967v1#bib.bib15)] proposed a digital twin approach for MRI equipment, reducing machine downtime by 20%. Deep learning approaches, such as CNN-LSTM hybrid models, have shown 92–99% accuracy in remaining useful life estimation across several medical device categories [[16](https://ar5iv.labs.arxiv.org/html/2601.16967v1#bib.bib16), [17](https://ar5iv.labs.arxiv.org/html/2601.16967v1#bib.bib17)]. Luschi et al. [[18](https://ar5iv.labs.arxiv.org/html/2601.16967v1#bib.bib18)] further demonstrated how predictive analytics integrated with IoT positioning systems can support hospital maintenance workflows in structured environments.\n\nDespite this progress, such systems typically require continuous data streams, sensor infrastructure, and robust connectivity, conditions that are often absent in LMIC settings. Research by Anazodo et al. [[4](https://ar5iv.labs.arxiv.org/html/2601.16967v1#bib.bib4)] and Diaconu et al. [[2](https://ar5iv.labs.arxiv.org/html/2601.16967v1#bib.bib2)] highlights the infrastructural barriers to medical equipment usage in LMICs, including poor internet access, inconsistent power supply, and lack of OEM support, particularly for donated devices.\n\nIn terms of knowledge management, Abidi [[19](https://ar5iv.labs.arxiv.org/html/2601.16967v1#bib.bib19)] and Tabrizi and Morgan [[20](https://ar5iv.labs.arxiv.org/html/2601.16967v1#bib.bib20)] emphasize the need for collaborative technical knowledge platforms in healthcare. While prior work has demonstrated the effectiveness of training platforms [[21](https://ar5iv.labs.arxiv.org/html/2601.16967v1#bib.bib21)], few systems combine this with real-time, context-aware AI guidance for medical equipment.\n\nINGENZI Tech differentiates itself through its integrated design tailored for LMICs. Unlike systems that focus solely on predictive analytics [[14](https://ar5iv.labs.arxiv.org/html/2601.16967v1#bib.bib14), [15](https://ar5iv.labs.arxiv.org/html/2601.16967v1#bib.bib15)] or manufacturer-side service workflows [[22](https://ar5iv.labs.arxiv.org/html/2601.16967v1#bib.bib22)], INGENZI Tech offers an end-user diagnostic platform combining:\n\n* • A multilingual, LLM-powered chatbot for step-by-step device guidance. * • A RAG-based architecture with segmented vector stores to reduce hallucinations and enhance contextual precision [[23](https://ar5iv.labs.arxiv.org/html/2601.16967v1#bib.bib23), [24](https://ar5iv.labs.arxiv.org/html/2601.16967v1#bib.bib24)]. * • Offline-first deployment suitable for low-bandwidth and rural clinics. * • A peer-to-peer technician forum for continuous feedback, local adaptation, and model improvement [[19](https://ar5iv.labs.arxiv.org/html/2601.16967v1#bib.bib19), [20](https://ar5iv.labs.arxiv.org/html/2601.16967v1#bib.bib20)].\n\nA multilingual, LLM-powered chatbot for step-by-step device guidance.\n\nA RAG-based architecture with segmented vector stores to reduce hallucinations and enhance contextual precision [[23](https://ar5iv.labs.arxiv.org/html/2601.16967v1#bib.bib23), [24](https://ar5iv.labs.arxiv.org/html/2601.16967v1#bib.bib24)].\n\nOffline-first deployment suitable for low-bandwidth and rural clinics.\n\nA peer-to-peer technician forum for continuous feedback, local adaptation, and model improvement [[19](https://ar5iv.labs.arxiv.org/html/2601.16967v1#bib.bib19), [20](https://ar5iv.labs.arxiv.org/html/2601.16967v1#bib.bib20)].\n\nThe Phase 0 proof-of-concept targets the Philips HDI 5000 ultrasound, a device commonly found in African clinics but frequently unsupported, addressing the challenges raised in recent surveys on equipment non-functionality [[8](https://ar5iv.labs.arxiv.org/html/2601.16967v1#bib.bib8), [1](https://ar5iv.labs.arxiv.org/html/2601.16967v1#bib.bib1)]. Future phases include scaling to CT, MRI, and X-ray machines.\n\n| AI Solution | Strengths | Limitations in LMIC Context / Differentiation vs. INGENZI Tech | | --- | --- | --- | | Bruviti | LLM-powered diagnostics; preserves institutional knowledge; supports global manufacturers | No public deployments in LMICs; not optimized for offline use or multilingual environments; high dependency on OEM integrations | | Hadleigh Health, Vestfrost EMS, Nexleaf Analytics | IoT-based predictive maintenance; real-time monitoring; some LMIC deployments | Primarily hardware-embedded systems; limited end-user diagnostic interaction; lacks LLM or multilingual troubleshooting support | | Bosnia AI-Metrology Project | Applies AI to device calibration and performance in public hospitals; shows feasibility in low-resource settings | Regional, narrow scope; focused on measurement and standards, not interactive technician support or documentation retrieval | | Circuitry.ai | Real-time advisory systems for maintenance; global operations; multilingual support | Tailored for manufacturers and enterprise clients; unclear adaptation to LMIC infrastructure or offline-first needs | | Stellarix, Kodexo Labs, Toronto Digital | Offer AI-powered predictive maintenance with IoT and ML; adaptable for various device types | Require continuous data streams and sensor integrations; do not provide peer-to-peer learning or AI chatbot interactions | | GE Healthcare Edison AI | Advanced anomaly detection in imaging systems; global footprint | High-end solution tied to GE devices; closed ecosystem; limited accessibility or relevance for third-party equipment in LMICs | | INGENZI Tech (This Work) | LLM-based multilingual chatbot; RAG-based contextual retrieval; peer-driven technician forum; designed for offline use | Currently piloting; early-stage for multi-device support; open architecture enables adaptation across vendors and regions |"
+    },
+    {
+      "heading_path": [
+        "Empowering Medical Equipment Sustainability in Low-Resource Settings: An AI-Powered Diagnostic and Support Platform for Biomedical Technicians",
+        "3 Scope of the Study"
+      ],
+      "text": "## 3 Scope of the Study\n\nThis study focuses on the development and validation of an AI-powered support platform designed to assist biomedical technicians in diagnosing and repairing medical diagnostic equipment in low-resource settings. The platform integrates a large language model (LLM) with structured device knowledge, error logs, and technician-driven feedback to offer step-by-step troubleshooting and guided repair workflows. The initial scope centers on the Philips HDI 5000 ultrasound machine, which served as a proof-of-concept device for prototyping. With the framework developed in the initial phase, a full study will be conducted to expand the focus to include more complex imaging devices such as magnetic resonance imaging (MRI), computed tomography (CT), and X-ray machines, with a specific emphasis on widely used and often unsupported devices in LMIC settings. Therefore, this study aims to:\n\n* • Build a scalable, multilingual AI agent that provides real-time, context-aware repair guidance. * • Integrate a global technician knowledge-sharing forum to complement automated responses. * • Test the tool’s accuracy, relevance, and usability in both clinical and training environments. * • Evaluate its adaptability across different medical device types and manufacturers.\n\nBuild a scalable, multilingual AI agent that provides real-time, context-aware repair guidance.\n\nIntegrate a global technician knowledge-sharing forum to complement automated responses.\n\nTest the tool’s accuracy, relevance, and usability in both clinical and training environments.\n\nEvaluate its adaptability across different medical device types and manufacturers.\n\nThis study does not include physical repair execution, device manufacturing processes, or regulatory approval for device use, which are currently being investigated. Instead, it aims to establish a digitalized and generalizable support framework that can bridge the technical knowledge gap for biomedical equipment across a variety of healthcare settings, with a focus on medical imaging devices."
+    },
+    {
+      "heading_path": [
+        "Empowering Medical Equipment Sustainability in Low-Resource Settings: An AI-Powered Diagnostic and Support Platform for Biomedical Technicians",
+        "4 Methods"
+      ],
+      "text": "## 4 Methods"
+    },
+    {
+      "heading_path": [
+        "Empowering Medical Equipment Sustainability in Low-Resource Settings: An AI-Powered Diagnostic and Support Platform for Biomedical Technicians",
+        "4 Methods",
+        "4.1 Research Design"
+      ],
+      "text": "### 4.1 Research Design\n\nThis project follows a phased, mixed-methods approach, combining iterative system development with both quantitative system performance evaluations and qualitative user feedback analysis. It is designed to be descriptive and exploratory, establishing the foundational tools, workflows, and interactions needed to support scalable medical device maintenance via AI, particularly in resource-limited healthcare environments. The project is being carried out in 5 phases, outlined briefly below, with the initial proof-of-concept (Phase 0) reported in detail below."
+    },
+    {
+      "heading_path": [
+        "Empowering Medical Equipment Sustainability in Low-Resource Settings: An AI-Powered Diagnostic and Support Platform for Biomedical Technicians",
+        "4 Methods",
+        "4.1 Research Design",
+        "4.1.1 Phase 0: Proof of Concept (Completed)"
+      ],
+      "text": "#### 4.1.1 Phase 0: Proof of Concept (Completed)\n\nThe initial prototype was developed using the Philips HDI 5000 ultrasound machine as a case study. The assistant was built using a RAG (Retrieval-Augmented Generation) architecture supported by:\n\n* • LLM: GPT-3.5 Turbo for generation and embedding * • Vector store: Facebook AI Similarity Search (FAISS) for document retrieval * • Frontend/Backend: React and Flask * • Core functionalities: Error code lookup, Log analysis, Self-test simulation, Maintenance scheduling via Google Calendar API, Multilingual chatbot interface\n\nLLM: GPT-3.5 Turbo for generation and embedding\n\nVector store: Facebook AI Similarity Search (FAISS) for document retrieval\n\nFrontend/Backend: React and Flask\n\nCore functionalities: Error code lookup, Log analysis, Self-test simulation, Maintenance scheduling via Google Calendar API, Multilingual chatbot interface\n\nTo improve retrieval accuracy and reduce hallucinations, separate vector databases were used for User Manuals, Service Manuals, and Error Codes. The proof-of-concept achieved 100% precision in error code matching and 80% troubleshooting accuracy using internal evaluation methods."
+    },
+    {
+      "heading_path": [
+        "Empowering Medical Equipment Sustainability in Low-Resource Settings: An AI-Powered Diagnostic and Support Platform for Biomedical Technicians",
+        "4 Methods",
+        "4.1 Research Design",
+        "4.1.2 Phase 1: Forum Integration & Feedback Loop"
+      ],
+      "text": "#### 4.1.2 Phase 1: Forum Integration & Feedback Loop\n\nThis phase introduces a collaborative technician forum to complement the AI assistant. The forum will allow users to post issues, share solutions, upvote helpful responses, and generate valuable context data.\n\nDevelopment Tasks:\n\nBuild or integrate a forum engine\n\n* • Link forum user accounts with diagnostic tool profiles * • Design a schema for tracking usage and technician feedback * • Connect forum feedback into a structured pipeline for LLM fine-tuning and retrieval augmentation\n\nLink forum user accounts with diagnostic tool profiles\n\nDesign a schema for tracking usage and technician feedback\n\nConnect forum feedback into a structured pipeline for LLM fine-tuning and retrieval augmentation\n\nThis human-in-the-loop design ensures continuous model improvement and crowd-sourced domain knowledge."
+    },
+    {
+      "heading_path": [
+        "Empowering Medical Equipment Sustainability in Low-Resource Settings: An AI-Powered Diagnostic and Support Platform for Biomedical Technicians",
+        "4 Methods",
+        "4.1 Research Design",
+        "4.1.3 Phase 2: API & IoT Connectivity for Device Integration"
+      ],
+      "text": "#### 4.1.3 Phase 2: API & IoT Connectivity for Device Integration\n\nThe second development phase focuses on real-time interaction with physical devices, enabling automated log streaming and predictive diagnostics.\n\nPlanned Tasks:\n\n* • Evaluate and implement healthcare communication protocols such as DICOM, HL7, and MQTT. * • Define secure API contracts for medical device integration. * • Build a simulation layer for testing log ingestion without live devices. * • Prototype fault-alert dashboards for remote monitoring.\n\nEvaluate and implement healthcare communication protocols such as DICOM, HL7, and MQTT.\n\nDefine secure API contracts for medical device integration.\n\nBuild a simulation layer for testing log ingestion without live devices.\n\nPrototype fault-alert dashboards for remote monitoring.\n\nThis phase extends the system beyond a passive assistant into a proactive maintenance layer."
+    },
+    {
+      "heading_path": [
+        "Empowering Medical Equipment Sustainability in Low-Resource Settings: An AI-Powered Diagnostic and Support Platform for Biomedical Technicians",
+        "4 Methods",
+        "4.1 Research Design",
+        "4.1.4 Phase 3: Model Optimization & Continuous Learning"
+      ],
+      "text": "#### 4.1.4 Phase 3: Model Optimization & Continuous Learning\n\nWith data from the tool and forum, the LLM will be fine-tuned for domain-specific reasoning and reliability.\n\nOptimization Activities:\n\n* • Introduce a feedback classifier to label suggestions as correct/incorrect. * • Use forum responses and real-world interactions for semi-supervised learning. * • Monitor hallucination frequency and optimize vector store indexing. * • Regularly retrain and evaluate the LLM against gold-standard troubleshooting guides.\n\nIntroduce a feedback classifier to label suggestions as correct/incorrect.\n\nUse forum responses and real-world interactions for semi-supervised learning.\n\nMonitor hallucination frequency and optimize vector store indexing.\n\nRegularly retrain and evaluate the LLM against gold-standard troubleshooting guides."
+    },
+    {
+      "heading_path": [
+        "Empowering Medical Equipment Sustainability in Low-Resource Settings: An AI-Powered Diagnostic and Support Platform for Biomedical Technicians",
+        "4 Methods",
+        "4.1 Research Design",
+        "4.1.5 Phase 4: Pilot Deployment & Evaluation"
+      ],
+      "text": "#### 4.1.5 Phase 4: Pilot Deployment & Evaluation\n\nThe system will be deployed and evaluated in clinical environments in LMICs, starting with East Africa.\n\nExecution Plan:\n\n* • Partner with hospitals and biomedical schools for pilot testing * • Train local technicians on usage and provide onboarding materials * • Collect metrics: Time-to-diagnosis Technician satisfaction Device uptime improvement * • Use real feedback to further optimize UI, model performance, and workflow integration\n\nPartner with hospitals and biomedical schools for pilot testing\n\nTrain local technicians on usage and provide onboarding materials\n\nCollect metrics:\n\nTime-to-diagnosis\n\nTechnician satisfaction\n\nDevice uptime improvement\n\nUse real feedback to further optimize UI, model performance, and workflow integration\n\nAll user interactions will be logged and anonymized for research analysis. No patient data will be used."
+    },
+    {
+      "heading_path": [
+        "Empowering Medical Equipment Sustainability in Low-Resource Settings: An AI-Powered Diagnostic and Support Platform for Biomedical Technicians",
+        "4 Methods",
+        "4.1 Research Design",
+        "4.1.6 Phase 5: Multi-Device Expansion"
+      ],
+      "text": "#### 4.1.6 Phase 5: Multi-Device Expansion\n\nIn this phase, INGENZI Tech will scale to support a broader range of devices (MRI, CT, and X-ray), beginning with one original equipment manufacturer (OEM, i.e., Siemens).\n\nTasks:\n\n* • Collect manuals, error codes, and logs for new devices * • Expand vector stores or segment them by device class * • Add model-switching capabilities in the backend based on device detection * • Standardize input/output formats for scalable ingestion\n\nCollect manuals, error codes, and logs for new devices\n\nExpand vector stores or segment them by device class\n\nAdd model-switching capabilities in the backend based on device detection\n\nStandardize input/output formats for scalable ingestion\n\nThis positions the system as a brand-agnostic, AI-powered maintenance layer that can operate across multiple health systems and equipment ecosystems."
+    },
+    {
+      "heading_path": [
+        "Empowering Medical Equipment Sustainability in Low-Resource Settings: An AI-Powered Diagnostic and Support Platform for Biomedical Technicians",
+        "4 Methods",
+        "4.2 Phase 0 Dataset"
+      ],
+      "text": "### 4.2 Phase 0 Dataset\n\nThe dataset used in Phase 0 was built from 15 technical documents related to the Philips HDI 5000 ultrasound system, including user manuals, service manuals, and detailed error code catalogs. These documents were parsed and chunked using a semantic-aware splitting strategy to preserve contextual meaning. Each chunk was then embedded using OpenAI’s GPT-3.5 Turbo embedding model and stored in Facebook AI Similarity Search (FAISS), a high-performance vector database. FAISS was selected due to its ability to handle large-scale similarity search efficiently, offering fast retrieval speeds with minimal memory overhead. Given the need for real-time, lightweight deployment in resource-constrained settings, FAISS provided the optimal trade-off between scalability, speed, and customization. To further reduce hallucinations and improve specificity, the vector database was segmented into three discrete stores: (1) user manuals, (2) service manuals, and (3) error codes. This structured storage approach allowed for domain-specific querying and significantly improved the system’s contextual accuracy during troubleshooting tasks."
+    },
+    {
+      "heading_path": [
+        "Empowering Medical Equipment Sustainability in Low-Resource Settings: An AI-Powered Diagnostic and Support Platform for Biomedical Technicians",
+        "4 Methods",
+        "4.3 LLM Model"
+      ],
+      "text": "### 4.3 LLM Model\n\nThe Phase 0 assistant was built using the GPT-3.5 Turbo model and operated within a Retrieval-Augmented Generation (RAG) framework. Technician queries were first interpreted through prompt engineering and sent to the FAISS-powered vector stores to retrieve the top-k most relevant document chunks. These chunks were then appended as context to the LLM prompt, enabling accurate and explainable response generation. The system supported various custom tools, including: Error code lookup Log parsing, Maintenance schedule generation, and Simulated self-testing\n\nEach tool selection was driven by prompt conditioning and intent classification strategies. The backend was deployed using a lightweight Flask server, interfacing with a React-based frontend, ensuring accessibility on low-power machines. By combining a modular tool pipeline with FAISS-enhanced RAG retrieval, the system maintained sub-10-second average latency, making it suitable for near real-time use in clinical environments."
+    },
+    {
+      "heading_path": [
+        "Empowering Medical Equipment Sustainability in Low-Resource Settings: An AI-Powered Diagnostic and Support Platform for Biomedical Technicians",
+        "5 Preliminary Results of Phase 0"
+      ],
+      "text": "## 5 Preliminary Results of Phase 0\n\nTo evaluate the effectiveness of the INGENZI Tech prototype, we conducted two core assessments focused on the platform’s accuracy in retrieving device-specific information using its RAG-based architecture."
+    },
+    {
+      "heading_path": [
+        "Empowering Medical Equipment Sustainability in Low-Resource Settings: An AI-Powered Diagnostic and Support Platform for Biomedical Technicians",
+        "5 Preliminary Results of Phase 0",
+        "5.1 Error Code Interpretation Accuracy"
+      ],
+      "text": "### 5.1 Error Code Interpretation Accuracy\n\nA total of 90 error codes, along with their corresponding descriptions, were extracted from the Philips HDI 5000 ultrasound service manuals. These were used as input queries to the system to test its ability to retrieve accurate contextual matches from the embedded vector stores. The system successfully retrieved the correct description for 100% of the error codes, confirming high alignment between query semantics and stored content. This demonstrated the model’s robustness in precise retrieval of structured, short-form diagnostic information."
+    },
+    {
+      "heading_path": [
+        "Empowering Medical Equipment Sustainability in Low-Resource Settings: An AI-Powered Diagnostic and Support Platform for Biomedical Technicians",
+        "5 Preliminary Results of Phase 0",
+        "5.2 Instructional Query Evaluation"
+      ],
+      "text": "### 5.2 Instructional Query Evaluation\n\nTo assess the system’s performance on broader instructional support, we curated a set of 30 natural language queries derived from the device’s user and service manuals. These questions spanned operational instructions, safety guidelines, and device handling procedures. Out of the 30 questions, the system returned accurate and complete responses for 24 of them, yielding an 80% success rate. The remaining six responses were either partially accurate or missing critical details, indicating areas for improvement in document chunking, relevance scoring, or retrieval granularity."
+    },
+    {
+      "heading_path": [
+        "Empowering Medical Equipment Sustainability in Low-Resource Settings: An AI-Powered Diagnostic and Support Platform for Biomedical Technicians",
+        "5 Preliminary Results of Phase 0",
+        "5.3 Implications"
+      ],
+      "text": "### 5.3 Implications\n\nThese preliminary results validate the feasibility of leveraging a segmented RAG framework for technical document retrieval in low-resource settings. The perfect performance on structured error code queries suggests high utility in fault identification workflows, while the 80% accuracy on unstructured instructional queries highlights potential for effective user guidance, with room for refinement in LLM prompt tuning and vector search thresholds."
+    },
+    {
+      "heading_path": [
+        "Empowering Medical Equipment Sustainability in Low-Resource Settings: An AI-Powered Diagnostic and Support Platform for Biomedical Technicians",
+        "6 Discussion"
+      ],
+      "text": "## 6 Discussion\n\nThis study is expected to yield a robust, AI-powered support platform tailored to the needs of biomedical technicians in low-resource settings. The anticipated outcomes include both tangible software components and insights that can inform future research and development in the domain of intelligent medical device maintenance. First, the research aims to validate the effectiveness of a multilingual diagnostic assistant powered by large language models (LLMs). This assistant will interpret error codes, retrieve context-specific documentation, and guide users through actionable repair workflows. Evaluation will rely not only on internal metrics but also on established LLM benchmarks adapted to the task of technical reasoning and document retrieval. Performance targets include high exact match (EM), precision, and recall in context matching, as well as positive assessments from real-world users. To enhance accuracy and reduce hallucinations, the system will incorporate segmented vector stores, specifically dedicated to user manuals, service manuals, and error codes. This structural refinement is expected to result in more contextually relevant responses and better model alignment with technician expectations. In addition to the AI assistant, the project will deliver a fully integrated peer-to-peer discussion forum. This forum will allow technicians to post unresolved issues, upvote helpful responses, and share field-tested solutions. Feedback gathered through this platform will contribute to a semi-supervised learning loop for continuous model refinement. A key outcome of this study is ensuring accessibility. The system will include offline support and a multilingual interface to accommodate technicians working in bandwidth-constrained or non-English-speaking environments, typical of many LMICs. Looking ahead, the solution will be structured for scalability across multiple device types. While the proof of concept focused on the Philips HDI 5000 ultrasound machine, the system architecture will support transition to more advanced diagnostic tools such as Siemens MRI, CT, and X-ray systems. This includes the addition of device-detection logic and ingestion format standardization to support multi-device workflows. Finally, the research will provide user insights drawn from technician interaction logs, surveys, and qualitative feedback. These insights will inform improvements in AI-guided repair recommendations, interface usability, and system reliability in real-world clinical contexts.\n\nFinal Deliverables:\n\n* • A fully functional, web-based diagnostic tool powered by an LLM and Retrieval-Augmented Generation (RAG) * • A segmented vectorized knowledge base of user manuals, service guides, and error codes. * • A technician discussion forum with structured feedback tracking. * • Offline-capable and multilingual user interface. * • A comprehensive evaluation report, including benchmark results and technician feedback. * • Technical documentation, onboarding materials, and a deployment-ready software package for pilot testing\n\nA fully functional, web-based diagnostic tool powered by an LLM and Retrieval-Augmented Generation (RAG)\n\nA segmented vectorized knowledge base of user manuals, service guides, and error codes.\n\nA technician discussion forum with structured feedback tracking.\n\nOffline-capable and multilingual user interface.\n\nA comprehensive evaluation report, including benchmark results and technician feedback.\n\nTechnical documentation, onboarding materials, and a deployment-ready software package for pilot testing"
+    },
+    {
+      "heading_path": [
+        "Empowering Medical Equipment Sustainability in Low-Resource Settings: An AI-Powered Diagnostic and Support Platform for Biomedical Technicians",
+        "7 Significance of the Study"
+      ],
+      "text": "## 7 Significance of the Study\n\nThis study addresses a pressing and persistent gap in global health systems, ensuring that life-saving medical devices remain operational in low-resource environments. In LMICs, prolonged equipment downtime due to a lack of technical expertise and support results in avoidable diagnostic delays, poor patient outcomes, and significant resource waste. By offering a scalable, AI-powered support platform tailored to biomedical technicians, this research directly contributes to the continuity and quality of healthcare services where they are most vulnerable. The proposed solution aligns with global health and technology goals, including WHO’s call for improved health technology management and the increasing emphasis on sustainable, equitable digital health infrastructure. Unlike many existing tools limited to specific manufacturers or high-connectivity settings, this platform provides multilingual, offline-capable assistance and incorporates peer knowledge exchange to support long-term learning. By combining cutting-edge natural language processing, practical engineering workflows, and feedback-driven model improvement, the study also contributes to the growing field of human-centered AI in healthcare. Its outcomes can inform the development of future AI tools for technical domains that suffer from knowledge bottlenecks, especially in under-resourced contexts. Ultimately, this research not only advances technical innovation but has the potential to transform biomedical maintenance from a reactive to a proactive discipline, reducing equipment failure, empowering local technicians, and improving care delivery across LMIC health systems."
+    },
+    {
+      "heading_path": [
+        "Empowering Medical Equipment Sustainability in Low-Resource Settings: An AI-Powered Diagnostic and Support Platform for Biomedical Technicians",
+        "8 Conclusion"
+      ],
+      "text": "## 8 Conclusion\n\nThis research proposes a practical and scalable solution to a longstanding challenge in global healthcare, ensuring the continuous functionality of medical devices in low-resource settings. By combining large language models, structured knowledge retrieval, and collaborative technician input, the platform aims to shift maintenance practices from reactive to proactive. The integration of multilingual, offline support ensures accessibility, while modular design allows expansion to various device types and manufacturers. Through phased development and real-world validation, this study not only contributes a novel AI tool but also advances the broader mission of equitable, reliable healthcare delivery in LMICs and beyond."
+    },
+    {
+      "heading_path": [
+        "Empowering Medical Equipment Sustainability in Low-Resource Settings: An AI-Powered Diagnostic and Support Platform for Biomedical Technicians",
+        "References"
+      ],
+      "text": "## References\n\n* [1] Perry, L., Malkin, R.: Effectiveness of medical equipment donations to improve health systems: how much medical equipment is broken in the developing world? Medical & Biological Engineering & Computing 49(7), 719–722 (2011). https://doi.org/10.1007/s11517-011-0786-3 * [2] Diaconu, K., Chen, Y.F., Cummins, C., Jimenez Moyao, G., Manaseki-Holland, S., Lilford, R.: Methods for medical device and equipment procurement and prioritization within low- and middle-income countries: findings of a systematic literature review. Globalization and Health 13(1), 59 (2017) * [3] Malkin, R.A.: Design of health care technologies for the developing world. Annual Review of Biomedical Engineering 9(1), 567–587 (2007) * [4] Anazodo, U.C., et al.: A framework for advancing sustainable magnetic resonance imaging access in Africa. NMR in Biomedicine 36(3), e4846 (2023) * [5] Kebby Abdallah, A., Haule, S., Werlein, R., Mvanga, V., Delcroix, P., Saric, J., Stoermer, M.: Medical device management reform, United Republic of Tanzania. Bulletin of the World Health Organization 102(9), 665–673 (2024) * [6] World Health Organization: Medical device donations: considerations for solicitation and provision (2011) * [7] Pokvic, L.: AI for MD maintenance and metrology in LMICs: the case of Bosnia and Herzegovinian (2025). https://youtu.be/7wvQME3PxpA * [8] Ssekitoleko, R.T., et al.: Status of medical devices and their utilization in 9 tertiary hospitals and 5 research institutions in Uganda. Global Clinical Engineering Journal 4(3), 5–15 (2022) * [9] Mullally, S., Frize, M.: Survey of clinical engineering effectiveness in developing world hospitals: Equipment resources, procurement and donations. In: 2008 30th Annual International Conference of the IEEE Engineering in Medicine and Biology Society, pp. 4499–4502. IEEE (2008) * [10] Diaconu, K., Chen, Y.F., Manaseki-Holland, S., Cummins, C., Lilford, R.: Medical device procurement in low- and middle-income settings: protocol for a systematic review. Systematic Reviews 3(1), 118 (2014) * [11] Marks, I.H., Thomas, H., Bakhet, M., Fitzgerald, E.: Medical equipment donation in low-resource settings: a review of the literature and guidelines for surgery and anaesthesia in low-income and middle-income countries. BMJ Global Health 4(5), e001785 (2019) * [12] Spring, T.: Lack of serviceable laboratory and medical equipment for doctors and nurses in Sub-Saharan Africa. LinkedIn (Apr 2024). https://www.linkedin.com/pulse/lack-serviceable-laboratory-medical-equipment-doctors-truman-spring-qoggc/ * [13] Shamayleh, A., Awad, M., Farhat, J.: IoT based predictive maintenance management of medical equipment. Journal of Medical Systems 44(4), 72 (2020) * [14] Zamzam, A.H., Abdul Wahab, A.K., Azizan, M.M., Satapathy, S.C., Lai, K.W., Hasikin, K.: A systematic review of medical equipment reliability assessment in improving the quality of healthcare services. Frontiers in Public Health 9, 753951 (2021) * [15] Abd Wahab, N.H., Hasikin, K., Wee Lai, K., Xia, K., Bei, L., Huang, K., Wu, X.: Systematic review of predictive maintenance and digital twin technologies challenges, opportunities, and best practices. PeerJ Computer Science 10, e1943 (2024) * [16] Fernandes, S., Antunes, M., Santiago, A.R., Barraca, J.P., Gomes, D., Aguiar, R.L.: Forecasting appliances failures: A machine-learning approach to predictive maintenance. Information (Basel) 11(4), 208 (2020) * [17] Çınar, Z.M., Abdussalam Nuhu, A., Zeeshan, Q., Korhan, O., Asmael, M., Safaei, B.: Machine learning in predictive maintenance towards sustainable smart manufacturing in Industry 4.0. Sustainability 12(19), 8211 (2020) * [18] Guissi, M., El Yousfi Alaoui, M.H., Belarbi, L., Chaik, A.: IoT for predictive maintenance of critical medical equipment in a hospital structure. Informatyka, Automatyka, Pomiary w Gospodarce i Ochronie Środowiska 14(2), 71–76 (2024) * [19] Abidi, S.S.R.: Healthcare knowledge sharing: Purpose, practices, and prospects. In: Bali, R.K., Dwivedi, A.N. (eds.) Healthcare Knowledge Management: Issues, Advances, and Successes, pp. 67–86. Springer, New York (2007). https://doi.org/10.1007/978-0-387-49009-0\\_6 * [20] Tabrizi, N.M., Morgan, S.: Models for describing knowledge sharing practices in the healthcare industry: Example of experience knowledge sharing. International Journal of Management and Applied Research 1(2), 48–67 (2014) * [21] Arneson, W., Robinson, C., Nyary, B.: Biomedical laboratory science education: standardising teaching content in resource-limited countries. African Journal of Laboratory Medicine 2(1), e1–e6 (2013) * [22] Circuitry.ai: Circuitry-ai-decision-intelligence-company-overview (2025). https://circuitry.ai/ * [23] Lewis, P., Perez, E., Piktus, A., Petroni, F., Karpukhin, V., Goyal, N., Küttler, H., Lewis, M., Yih, W.T., Rocktäschel, T., Riedel, S., Kiela, D.: Retrieval-augmented generation for knowledge-intensive NLP tasks (2020) * [24] Friel, R., Belyi, M., Sanyal, A.: RAGBench: Explainable benchmark for retrieval-augmented generation systems (2024) * [25] Bruviti: Bruviti AI Platform (2025). https://bruviti.com/platform/ * [26] Hadleigh Health: Hadleigh health technologies and patient platforms (2025). https://www.hadleighhealth.co.uk/ * [27] Vestfrost Solutions: Equipment monitoring system (EMS) features (2025). https://www.vestfrostsolutions.com/new-features/ * [28] Nexleaf Analytics: Predictive maintenance technologies (2025). https://nexleaf.org/ * [29] Circuitry.ai: Circuitry.ai decision intelligence platform overview (2025). https://circuitry.ai/ * [30] Stellarix: Generative AI perspectives (2025). https://stellarix.com/insights/stellarix-perspectives/generative-ai/ * [31] Kodexo Labs: AI software development company (2025). https://kodexolabs.com/ * [32] Toronto Digital: Toronto digital - official website (2025). https://torontodigital.ca/ * [33] GE HealthCare: GE healthcare medical systems and solutions (2025). https://www.gehealthcare.com/ * [34] Datacamp: Learn how to use Chroma DB: A step-by-step guide. https://www.datacamp.com/tutorial/chromadb-tutorial-step-by-step-guide * [35] Datacamp: The 7 best vector databases in 2025. https://www.datacamp.com/blog/the-top-5-vector-databases * [36] Getting started with Chroma DB: A beginner’s tutorial. https://medium.com/@pierrelouislet/getting-started-with-chroma-db-a-beginners-tutorial-6efa32300902"
+    }
+  ]
+}

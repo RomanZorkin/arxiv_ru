@@ -1,0 +1,1146 @@
+{
+  "title": "[2604.07590] 1 Introduction",
+  "sections": [
+    {
+      "heading": "Abstract",
+      "level": 6,
+      "content": [
+        {
+          "type": "paragraph",
+          "text": "Retrieval-Augmented Generation (RAG) is widely used to ground large language models in external knowledge sources. However, when applied to heterogeneous corpora and multi-step queries, Naive RAG pipelines often degrade in quality due to flat knowledge representations and the absence of explicit workflows. In this work, we introduce DCD (Domain–Collection–Document), a domain-oriented design to structure knowledge and control query processing in RAG systems without modifying the underlying language model. The proposed approach relies on a hierarchical decomposition of the information space and multi-stage routing based on structured model outputs, enabling progressive restriction of both retrieval and generation scopes. The architecture is complemented by smart chunking, hybrid retrieval, and integrated validation and generation guardrail mechanisms. We describe the DCD architecture and workflow and discuss evaluation results on synthetic evaluation dataset, highlighting their impact on robustness, factual accuracy, and answer relevance in applied RAG scenarios."
+        },
+        {
+          "type": "paragraph",
+          "text": "DCD: Domain-Oriented Design for Controlled Retrieval-Augmented Generation"
+        },
+        {
+          "type": "paragraph",
+          "text": "Valeriy Kovalskiy, Nikita Belov, Nikita Miteyko, Igor Reshetnikov, Max Maximov"
+        },
+        {
+          "type": "paragraph",
+          "text": "red\\_mad\\_robot"
+        }
+      ],
+      "children": []
+    },
+    {
+      "heading": "1 Introduction",
+      "level": 2,
+      "content": [
+        {
+          "type": "paragraph",
+          "text": "RAG has gained widespread adoption as a practical approach for integrating language models with external knowledge sources [[Lewis et al., 2020](https://ar5iv.labs.arxiv.org/html/2604.07590v2#my_anchor \"Lewis, P. ‣ 10 References\")]. Even basic Naive RAG implementations can effectively address a broad range of applied tasks, from customer support query handling to enterprise document analysis [[Izacard et al., 2021](https://ar5iv.labs.arxiv.org/html/2604.07590v2#Izacard \"Izacard, G. ‣ 10 References\")]."
+        },
+        {
+          "type": "paragraph",
+          "text": "However, as data volumes grow and user queries become more complex, the limitations of standard RAG pipelines become increasingly apparent. In particular, the linear architecture of Naive RAG exhibits degraded performance on multi-step queries that require sequential interpretation, retrieval across multiple knowledge slices, and result aggregation [[Wei et al., 2023](https://ar5iv.labs.arxiv.org/html/2604.07590v2#Wei \"Wei, J. ‣ 10 References\")]. Another critical issue is the sensitivity of RAG systems to document segmentation parameters. These factors limit the applicability of Naive RAG in scenarios demanding high accuracy and predictable behavior."
+        },
+        {
+          "type": "paragraph",
+          "text": "In this work, we consider an architectural approach to organizing knowledge and workflows around a language model, aimed at improving the accuracy and safety of RAG systems without modifying the models themselves. We propose DCD (Domain–Collection–Document), a domain-oriented design that introduces an explicit knowledge hierarchy and a controlled query-processing workflow. The proposed approach demonstrates substantial improvements in answer quality for multi-step queries while ensuring reproducibility and controllability in applied settings."
+        }
+      ],
+      "children": []
+    },
+    {
+      "heading": "2 Preliminaries",
+      "level": 2,
+      "content": [],
+      "children": [
+        {
+          "heading": "2.1 Retrieval-Augmented Generation",
+          "level": 3,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "We focus on improving the accuracy and robustness of RAG systems in scenarios involving multi-step queries and heterogeneous knowledge corpora. Specifically, we consider architectural approaches that enable:"
+            },
+            {
+              "type": "list",
+              "text": "* • restricting the retrieval space to relevant subsets of knowledge, * • explicit control over query processing workflows, * • reproducibility and quality assurance of generated outputs."
+            },
+            {
+              "type": "paragraph",
+              "text": "restricting the retrieval space to relevant subsets of knowledge,"
+            },
+            {
+              "type": "paragraph",
+              "text": "explicit control over query processing workflows,"
+            },
+            {
+              "type": "paragraph",
+              "text": "reproducibility and quality assurance of generated outputs."
+            },
+            {
+              "type": "paragraph",
+              "text": "Throughout this work, Naive RAG refers to a linear pipeline without explicit knowledge structuring, query decomposition, or multi-stage generation control. We deliberately focus not on modifying the language model itself, but on organizing knowledge and workflows around it."
+            },
+            {
+              "type": "paragraph",
+              "text": "In many practical RAG implementations, retrieval is performed once at the beginning of the pipeline and remains fixed throughout the generation process. This design assumes that a single retrieval step can provide all information required to answer the query. However, when the knowledge corpus contains documents from multiple semantic domains, similarity-based retrieval may return fragments that are locally relevant but belong to different knowledge contexts. As a result, the retrieved context may contain partially compatible evidence, forcing the language model to reconcile inconsistent information during generation [[Li et al., 2025](https://ar5iv.labs.arxiv.org/html/2604.07590v2#Li \"Li, Y. ‣ 10 References\")]."
+            },
+            {
+              "type": "paragraph",
+              "text": "We conceptualize a RAG system as a composition of the following stages:"
+            },
+            {
+              "type": "list",
+              "text": "* • user query interpretation, * • selection of a relevant knowledge subset, * • retrieval and aggregation of contextual information, * • answer generation by a language model, * • validation and quality control of the output [[Guu et al., 2020](https://ar5iv.labs.arxiv.org/html/2604.07590v2#Guu \"Guu ‣ 10 References\")]."
+            },
+            {
+              "type": "paragraph",
+              "text": "user query interpretation,"
+            },
+            {
+              "type": "paragraph",
+              "text": "selection of a relevant knowledge subset,"
+            },
+            {
+              "type": "paragraph",
+              "text": "retrieval and aggregation of contextual information,"
+            },
+            {
+              "type": "paragraph",
+              "text": "answer generation by a language model,"
+            },
+            {
+              "type": "paragraph",
+              "text": "validation and quality control of the output [[Guu et al., 2020](https://ar5iv.labs.arxiv.org/html/2604.07590v2#Guu \"Guu ‣ 10 References\")]."
+            },
+            {
+              "type": "paragraph",
+              "text": "In standard implementations, these stages are often implicit or collapsed into a single step. In contrast, our approach treats each stage as an explicit workflow component, enabling fine-grained control and additional validation."
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "2.2 Chunking",
+          "level": 3,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "The quality of a RAG system is highly dependent on document segmentation strategies. Common chunking approaches include paragraph-based segmentation, fixed-length chunks, and sliding-window techniques [[Gao et al., 2021](https://ar5iv.labs.arxiv.org/html/2604.07590v2#Gao \"Gao, L. ‣ 10 References\")]. In our implementation, we apply a sliding-window segmentation strategy with overlap ranging from 5–10% of the chunk size. A 5% overlap is typically sufficient to preserve contextual continuity between adjacent chunks. For documents containing semantically similar or repetitive sections, the overlap is increased to 10% to better capture contextual dependencies."
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "2.3 Guardrails",
+          "level": 3,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "Classical RAG implementations typically rely on built-in safety mechanisms of language models and lack explicit architectural procedures for validating generated outputs [[Ji et al., 2023](https://ar5iv.labs.arxiv.org/html/2604.07590v2#Ji \"Ji, Z. ‣ 10 References\")]. In particular, they provide no systematic means to verify alignment between generated answers and retrieved context or to refuse generation outside the system’s functional scope [Lin et al., 2022]. Our system incorporates a guardrails mechanism combined with a hallucination prevention module. This mechanism consists of two interrelated components. The first component analyzes user queries for prohibited topics using a composite dictionary that includes both a base set of stop-words and custom elements defined by the system owner. The second component analyzes generated outputs, ensuring the absence of prohibited content and detecting hallucinations. This is achieved by comparing the original query, the retrieved context, and the generated response, enabling early detection of deviations during generation."
+            }
+          ],
+          "children": []
+        }
+      ]
+    },
+    {
+      "heading": "3 Method",
+      "level": 2,
+      "content": [],
+      "children": [
+        {
+          "heading": "3.1 Key Assumption",
+          "level": 3,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "The central methodological assumption of this work is that answer quality significantly improves when retrieval and generation are constrained to semantically homogeneous knowledge regions — a subset of the corpus whose documents share a common topical scope, terminology, and expected user intent, while remaining clearly distinguishable from documents belonging to other regions [[Yao et al., 2023](https://ar5iv.labs.arxiv.org/html/2604.07590v2#Yao \"Yao, S. ‣ 10 References\")]. Within such a region, documents address closely related subject areas and therefore compete primarily with semantically relevant sources during retrieval."
+            },
+            {
+              "type": "paragraph",
+              "text": "This constraint allows the retrieval process to operate within a bounded semantic space, reducing interference from unrelated documents and improving the alignment between retrieved evidence and the informational structure of the query. Rather than operating over a monolithic document store, we assume a prior decomposition of the corpus into independent subspaces, within which documents compete only with semantically similar sources [[Khot et al., 2023](https://ar5iv.labs.arxiv.org/html/2604.07590v2#Khot \"Khot, T. ‣ 10 References\")]."
+            },
+            {
+              "type": "paragraph",
+              "text": "This issue is closely related to the organization of the knowledge space itself. When retrieval operates over a heterogeneous corpus without explicit semantic boundaries, documents from different knowledge regions compete within the same search space. In such settings, embedding similarity alone may not reflect the structural dependencies between pieces of information required to answer the query. As a result, retrieved evidence may be individually relevant but collectively insufficient for coherent reasoning [[Li et al., 2025](https://ar5iv.labs.arxiv.org/html/2604.07590v2#Li \"Li, Y. ‣ 10 References\")]."
+            },
+            {
+              "type": "paragraph",
+              "text": "Evidence retrieval studies for long documents demonstrate that coarse-to-fine search strategies can improve the identification of relevant evidence compared to flat fragment-level retrieval. In such approaches, higher-level structural segments are first identified and only then used to guide fine-grained passage selection. By narrowing the search space to semantically coherent regions of a document, retrieval systems preserve global contextual relationships and improve the reliability of downstream question answering [[Nair et al., 2023](https://ar5iv.labs.arxiv.org/html/2604.07590v2#Nair \"Nair, I. ‣ 10 References\")]."
+            },
+            {
+              "type": "paragraph",
+              "text": "The proposed DCD architecture addresses this limitation through explicit decomposition of the knowledge space prior to retrieval. By constraining retrieval to semantically homogeneous regions, the system reduces cross-domain interference and improves alignment between retrieved context and the reasoning structure of the query."
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "3.2 Experimental Validation of the Assumption",
+          "level": 3,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "To validate this assumption, we conducted experiments on a synthetic dataset constructed to approximate real-world RAG scenarios. The corpora consist of heterogeneous documents with varying structures and semantic granularity — conditions under which pipelines most frequently degrade due to flat knowledge organization and unstable retrieval."
+            },
+            {
+              "type": "paragraph",
+              "text": "All datasets were anonymized for confidentiality: client identifiers and sensitive metadata were removed. The paper reports procedures and observed effects without disclosing document contents. In addition to quality metrics, we recorded operational characteristics of the pipeline, including total evaluation time, mean end-to-end response time, and time to first token, allowing analysis of the trade-off between accuracy and latency under increased workflow complexity."
+            }
+          ],
+          "children": []
+        }
+      ]
+    },
+    {
+      "heading": "4 DCD: Domain–Collection–Document",
+      "level": 2,
+      "content": [
+        {
+          "type": "paragraph",
+          "text": "The DCD (Domain–Collection–Document) Design is an approach to organizing knowledge in RAG systems through explicit hierarchical segmentation of the information space. Its primary goal is to minimize overlap between knowledge areas and prevent irrelevant context from being passed to the language model [[Makin, 2024](https://ar5iv.labs.arxiv.org/html/2604.07590v2#Makin \"Makin, A. ‣ 10 References\")]."
+        },
+        {
+          "type": "paragraph",
+          "text": "DCD structures data across three levels:"
+        },
+        {
+          "type": "list",
+          "text": "* • Domain — a high-level subject area, * • Collection — a thematically homogeneous subset within a domain, * • Document — an atomic knowledge unit with metadata."
+        },
+        {
+          "type": "paragraph",
+          "text": "Domain — a high-level subject area,"
+        },
+        {
+          "type": "paragraph",
+          "text": "Collection — a thematically homogeneous subset within a domain,"
+        },
+        {
+          "type": "paragraph",
+          "text": "Document — an atomic knowledge unit with metadata."
+        }
+      ],
+      "children": [
+        {
+          "heading": "4.1 Hierarchical Levels",
+          "level": 3,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "A Domain defines top-level search boundaries and is constructed to minimize semantic overlap with other domains. A Collection represents a narrower thematic slice within a domain and further restricts the retrieval space. Examples include legal documents, reference materials, or user FAQs within a single domain. A Document is the basic unit used in the RAG process. Documents are enriched with metadata and may be further segmented into chunks for context retrieval. Information retrieval follows a top-down principle: from domain to collection to document."
+            },
+            {
+              "type": "paragraph",
+              "text": "Navigation through the hierarchy is performed by the DCD Router, which sequentially selects the most relevant domain, collection, and document for a given query. At each level, routing is formulated as a selection task over a limited candidate set [[Shazeer et al., 2017](https://ar5iv.labs.arxiv.org/html/2604.07590v2#Shazeer \"Shazeer, N. ‣ 10 References\")]. Router decisions are produced using structured outputs from the language model, ensuring transparency, reproducibility, and intermediate result caching. To improve robustness, fallback elements (main domain, main collection, main document) are defined at each level."
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "4.2 DCD Router",
+          "level": 3,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "The functional core of domain segmentation is the DCD Router, a specialized module responsible for identifying the target knowledge segment for retrieval. Like most system components, it relies on structured language model outputs (JSON), enabling high-precision processing and transparent decision-making [[OpenAI, 2024](https://ar5iv.labs.arxiv.org/html/2604.07590v2#OpenAI \"OpenAI ‣ 10 References\")]."
+            },
+            {
+              "type": "paragraph",
+              "text": "Initial configuration involves defining domain and collection structures and assigning knowledge assets accordingly. Documents retain their original titles, while domains and collections receive manually defined identifiers. Upon receiving a user query, the system submits it — along with the registry of available domains — to the language model to identify the most relevant domain. This procedure is repeated hierarchically for collections and documents. If the language model produces incorrect outputs, fallback elements at each level ensure system robustness and guarantee a response even after multiple failed routing attempts."
+            },
+            {
+              "type": "paragraph",
+              "text": "Higher hierarchy levels are described with richer metadata to reduce routing errors, since mistakes at upper levels may propagate downstream and restrict the search space to an incorrect semantic region of the knowledge base. Providing clearer semantic descriptions for domains and collections improves the reliability of the initial routing decisions and helps maintain stable navigation across the hierarchy."
+            },
+            {
+              "type": "paragraph",
+              "text": "In the present study, routing accuracy at individual hierarchy levels was not evaluated as a separate classification metric. Instead, the routing mechanism is considered as part of the overall retrieval pipeline, and its effectiveness is reflected in downstream system behaviour, including answer relevance, factual accuracy, and retrieval coverage."
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "4.3 Integration with the RAG Pipeline",
+          "level": 3,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "After a document is selected, the system retrieves relevant fragments using semantic and full-text search, followed by deduplication and reranking. The resulting context is passed to the language model for answer generation."
+            },
+            {
+              "type": "paragraph",
+              "text": "By constraining the retrieval space upfront, DCD reduces the likelihood of irrelevant context inclusion and improves generation robustness on multi-step queries. While Naive RAG employs a linear processing pipeline — chunking, embedding, retrieval, and generation — DCD preserves a similar user interface but introduces a fundamentally different internal organization based on multi-level processing."
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "4.4 Smart Chunking",
+          "level": 3,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "Smart chunking is an integral component of the DCD design. Although DCD can operate with classical chunking methods, the selected strategy provided the most stable behaviour within the proposed architecture, as it better preserves the structural properties of the underlying knowledge base."
+            },
+            {
+              "type": "paragraph",
+              "text": "In this approach, documents are segmented using a sliding window mechanism with partial overlap between neighbouring fragments. This segmentation strategy preserves local semantic continuity and reduces the likelihood that relevant contextual information will be lost at chunk boundaries. As a result, logically connected statements that span multiple sentences or paragraphs remain accessible during retrieval, which is particularly important for queries requiring compositional reasoning."
+            },
+            {
+              "type": "paragraph",
+              "text": "Each fragment is additionally enriched with chunk-level metadata derived from the document structure. These metadata describe the fragment’s position within the document hierarchy and maintain references to the corresponding document-level entity. Such structural annotations allow the retrieval stage to operate not only on semantic similarity but also on contextual relationships between fragments originating from the same document or collection."
+            },
+            {
+              "type": "paragraph",
+              "text": "The combination of overlapping segmentation and structured metadata improves the consistency of fragment retrieval and reduces the probability of assembling answers from semantically unrelated contexts. This design enables the retrieval pipeline to better align selected evidence with the conceptual structure of the query and contributes to more stable answer generation in retrieval-augmented workflows, as reflected in the experimental evaluation presented later in the paper."
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "4.5 Fast Guardrails",
+          "level": 3,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "In addition to the main retrieval and generation pipeline, the system introduces a fast guardrails mechanism for early response validation. The system includes a guardrails mechanism combined with hallucination prevention and a fast pre-check function that evaluates responses before full generation completes [[Manakul et al., 2023](https://ar5iv.labs.arxiv.org/html/2604.07590v2#Manakul \"Manakul, P. ‣ 10 References\")]."
+            },
+            {
+              "type": "paragraph",
+              "text": "The guardrails workflow is as follows:"
+            },
+            {
+              "type": "list",
+              "text": "* • the user query undergoes stop-word screening, * • compliant queries are passed to the DCD RAG pipeline, * • during response streaming, the first 150 tokens are analyzed, * • based on query, context, and partial output, the system decides whether to display or block the response."
+            },
+            {
+              "type": "paragraph",
+              "text": "the user query undergoes stop-word screening,"
+            },
+            {
+              "type": "paragraph",
+              "text": "compliant queries are passed to the DCD RAG pipeline,"
+            },
+            {
+              "type": "paragraph",
+              "text": "during response streaming, the first 150 tokens are analyzed,"
+            },
+            {
+              "type": "paragraph",
+              "text": "based on query, context, and partial output, the system decides whether to display or block the response."
+            },
+            {
+              "type": "paragraph",
+              "text": "This mechanism filters unsupported queries and validates generated content in parallel with generation, avoiding additional latency."
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "4.6 System Completeness Summary",
+          "level": 3,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "The DCD architecture demonstrates significant advantages in adaptability when processing heterogeneous data and structurally complex queries. Its flexibility yields substantial accuracy improvements in multi-level knowledge scenarios while integrating critical validation and control stages absent in Naive RAG systems. While initial configuration requires additional setup effort, these costs are offset by superior performance and rapid amortization through improved operational efficiency."
+            }
+          ],
+          "children": []
+        }
+      ]
+    },
+    {
+      "heading": "5 Metrics",
+      "level": 2,
+      "content": [
+        {
+          "type": "paragraph",
+          "text": "To comprehensively evaluate the proposed DCD approach, we employ a metric suite extending beyond standard evaluations. The assessment relies on structured generation quality evaluation using an LLM as an assessor [[Liu et al., 2023](https://ar5iv.labs.arxiv.org/html/2604.07590v2#Liu \"Liu, Y. ‣ 10 References\")]."
+        }
+      ],
+      "children": [
+        {
+          "heading": "5.1 Strict Binary Answer Relevance & Completeness",
+          "level": 3,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "S​B​A​R​CSBARC is a strict binary metric assessing whether an answer is both relevant and complete with respect to a question."
+            },
+            {
+              "type": "formula",
+              "text": "S​B​A​R​CSBARC"
+            },
+            {
+              "type": "table",
+              "text": "| | | | | | --- | --- | --- | --- | | | S​(Q,A)=D​(Q,A)∧P​(Q,A)∧S​p​(Q,A)∧¬V​(A)S(Q,A)=D(Q,A)\\land P(Q,A)\\land Sp(Q,A)\\land\\lnot V(A) | | (1) |"
+            },
+            {
+              "type": "formula",
+              "text": "S​(Q,A)=D​(Q,A)∧P​(Q,A)∧S​p​(Q,A)∧¬V​(A)S(Q,A)=D(Q,A)\\land P(Q,A)\\land Sp(Q,A)\\land\\lnot V(A)"
+            },
+            {
+              "type": "paragraph",
+              "text": "Q,AQ,A — the question and the answer, respectively,"
+            },
+            {
+              "type": "formula",
+              "text": "Q,AQ,A"
+            },
+            {
+              "type": "paragraph",
+              "text": "S​(Q,A)S(Q,A) — the binary output verdict,"
+            },
+            {
+              "type": "formula",
+              "text": "S​(Q,A)S(Q,A)"
+            },
+            {
+              "type": "paragraph",
+              "text": "D​(Q,A)D(Q,A) — the direct-answer criterion,"
+            },
+            {
+              "type": "formula",
+              "text": "D​(Q,A)D(Q,A)"
+            },
+            {
+              "type": "paragraph",
+              "text": "P​(Q,A)P(Q,A) — the completeness criterion,"
+            },
+            {
+              "type": "formula",
+              "text": "P​(Q,A)P(Q,A)"
+            },
+            {
+              "type": "paragraph",
+              "text": "S​p​(Q,A)Sp(Q,A) — the specificity criterion,"
+            },
+            {
+              "type": "formula",
+              "text": "S​p​(Q,A)Sp(Q,A)"
+            },
+            {
+              "type": "paragraph",
+              "text": "V​(A)V(A) — the vagueness criterion,"
+            },
+            {
+              "type": "formula",
+              "text": "V​(A)V(A)"
+            },
+            {
+              "type": "table",
+              "text": "| | | | | | --- | --- | --- | --- | | | S​B​A​R​C=∑i=1NS​(Q,Ai)NSB\\ ARC=\\frac{\\sum\\_{i=1}^{N}S(Q,A\\_{i})}{N} | | (2) |"
+            },
+            {
+              "type": "formula",
+              "text": "S​B​A​R​C=∑i=1NS​(Q,Ai)NSB\\ ARC=\\frac{\\sum_{i=1}^{N}S(Q,A_{i})}{N}"
+            },
+            {
+              "type": "paragraph",
+              "text": "NN — the total number of pairs (question, answer) in the evaluation dataset."
+            },
+            {
+              "type": "formula",
+              "text": "NN"
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "5.2 Strict Binary Context Recall",
+          "level": 3,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "S​B​C​RSBCR evaluates whether all relevant contextual information is utilized in the answer."
+            },
+            {
+              "type": "formula",
+              "text": "S​B​C​RSBCR"
+            },
+            {
+              "type": "table",
+              "text": "| | | | | | --- | --- | --- | --- | | | U​(C,A)=𝟙​(Fused≡Frelevant)U(C,A)=\\mathds{1}\\bigl(F\\_{\\text{used}}\\equiv F\\_{\\text{relevant}}\\bigr) | | (3) |"
+            },
+            {
+              "type": "formula",
+              "text": "U​(C,A)=𝟙​(Fused≡Frelevant)U(C,A)=\\mathds{1}\\bigl(F_{\\text{used}}\\equiv F_{\\text{relevant}}\\bigr)"
+            },
+            {
+              "type": "paragraph",
+              "text": "C,AC,A — the context and the answer, respectively,"
+            },
+            {
+              "type": "formula",
+              "text": "C,AC,A"
+            },
+            {
+              "type": "paragraph",
+              "text": "U​(C,A)U(C,A) — the binary output verdict,"
+            },
+            {
+              "type": "formula",
+              "text": "U​(C,A)U(C,A)"
+            },
+            {
+              "type": "paragraph",
+              "text": "FrelevantF\\_{\\text{relevant}} — the set of all relevant facts present in the context,"
+            },
+            {
+              "type": "formula",
+              "text": "FrelevantF_{\\text{relevant}}"
+            },
+            {
+              "type": "paragraph",
+              "text": "FusedF\\_{\\text{used}} — the set of facts from the context that are used in the answer,"
+            },
+            {
+              "type": "formula",
+              "text": "FusedF_{\\text{used}}"
+            },
+            {
+              "type": "table",
+              "text": "| | | | | | --- | --- | --- | --- | | | S​B​C​R=∑i=1NU​(Ci,Ai)NSB\\,CR=\\frac{\\displaystyle\\sum\\_{i=1}^{N}U(C\\_{i},A\\_{i})}{N} | | (4) |"
+            },
+            {
+              "type": "formula",
+              "text": "S​B​C​R=∑i=1NU​(Ci,Ai)NSB\\,CR=\\frac{\\displaystyle\\sum_{i=1}^{N}U(C_{i},A_{i})}{N}"
+            },
+            {
+              "type": "paragraph",
+              "text": "NN — the total number of pairs (question, answer) in the evaluation dataset."
+            },
+            {
+              "type": "formula",
+              "text": "NN"
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "5.3 Strict Binary Factual Accuracy",
+          "level": 3,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "S​B​F​ASBFA evaluates factual correctness and hallucination absence."
+            },
+            {
+              "type": "formula",
+              "text": "S​B​F​ASBFA"
+            },
+            {
+              "type": "table",
+              "text": "| | | | | | --- | --- | --- | --- | | | F​(C,A)=𝟙​(S​(A,C)∧¬C​(A,C)∧¬H​(A,C))F(C,A)=\\mathds{1}(\\textit{S}(A,C)\\land\\lnot\\textit{C}(A,C)\\land\\lnot\\textit{H}(A,C)) | | (5) |"
+            },
+            {
+              "type": "formula",
+              "text": "F​(C,A)=𝟙​(S​(A,C)∧¬C​(A,C)∧¬H​(A,C))F(C,A)=\\mathds{1}(\\textit{S}(A,C)\\land\\lnot\\textit{C}(A,C)\\land\\lnot\\textit{H}(A,C))"
+            },
+            {
+              "type": "paragraph",
+              "text": "C,AC,A — the context and the answer, respectively,"
+            },
+            {
+              "type": "formula",
+              "text": "C,AC,A"
+            },
+            {
+              "type": "paragraph",
+              "text": "F​(C,A)F(C,A) — the binary output verdict,"
+            },
+            {
+              "type": "formula",
+              "text": "F​(C,A)F(C,A)"
+            },
+            {
+              "type": "paragraph",
+              "text": "S​u​p​p​o​r​t​e​d​(C,A)Supported(C,A) — all statements in the answer are explicitly present in or directly entailed by the context,"
+            },
+            {
+              "type": "formula",
+              "text": "S​u​p​p​o​r​t​e​d​(C,A)Supported(C,A)"
+            },
+            {
+              "type": "paragraph",
+              "text": "¬Contradicts​(A,C)\\lnot\\textit{Contradicts}(A,C) — the answer does not contradict the information in the context,"
+            },
+            {
+              "type": "formula",
+              "text": "¬Contradicts​(A,C)\\lnot\\textit{Contradicts}(A,C)"
+            },
+            {
+              "type": "paragraph",
+              "text": "¬Hallucinates​(A,C)\\lnot\\textit{Hallucinates}(A,C) — the answer does not contain information that is absent from the context,"
+            },
+            {
+              "type": "formula",
+              "text": "¬Hallucinates​(A,C)\\lnot\\textit{Hallucinates}(A,C)"
+            },
+            {
+              "type": "table",
+              "text": "| | | | | | --- | --- | --- | --- | | | S​B​F​A=∑i=1NF​(Ci,Ai)NSB\\,FA=\\frac{\\sum\\_{i=1}^{N}F(C\\_{i},A\\_{i})}{N} | | (6) |"
+            },
+            {
+              "type": "formula",
+              "text": "S​B​F​A=∑i=1NF​(Ci,Ai)NSB\\,FA=\\frac{\\sum_{i=1}^{N}F(C_{i},A_{i})}{N}"
+            },
+            {
+              "type": "paragraph",
+              "text": "NN — the total number of pairs (question, answer) in the evaluation dataset."
+            },
+            {
+              "type": "formula",
+              "text": "NN"
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "5.4 Retrieval Coverage Score (RCS)",
+          "level": 3,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "R​C​SRCS measures how completely the retrieved context reproduces the original (reference) context and therefore characterizes the quality of the retriever."
+            },
+            {
+              "type": "formula",
+              "text": "R​C​SRCS"
+            },
+            {
+              "type": "paragraph",
+              "text": "Let Co​r​i​gC\\_{orig} be the original context and Cr​e​t​rC\\_{retr} the context retrieved by the retriever. The evaluation function S​(Co​r​i​g,Cr​e​t​r)S(C\\_{orig},C\\_{retr}) is defined as follows:"
+            },
+            {
+              "type": "formula",
+              "text": "Co​r​i​gC_{orig}"
+            },
+            {
+              "type": "formula",
+              "text": "Cr​e​t​rC_{retr}"
+            },
+            {
+              "type": "formula",
+              "text": "S​(Co​r​i​g,Cr​e​t​r)S(C_{orig},C_{retr})"
+            },
+            {
+              "type": "table",
+              "text": "| | | | | | --- | --- | --- | --- | | | S​(Co​r​i​g,Cr​e​t​r)={0,if ​C​o​v​(Co​r​i​g,Cr​e​t​r)=n​o​n​e1,if ​C​o​v​(Co​r​i​g,Cr​e​t​r)=p​a​r​t​i​a​l2,if ​C​o​v​(Co​r​i​g,Cr​e​t​r)=c​o​m​p​l​e​t​eS(C\\_{orig},C\\_{retr})=\\begin{cases}\\text{0},&\\text{if }Cov(C\\_{orig},C\\_{retr})=none\\\\ \\text{1},&\\text{if }Cov(C\\_{orig},C\\_{retr})=partial\\\\ \\text{2},&\\text{if }Cov(C\\_{orig},C\\_{retr})=complete\\\\ \\end{cases} | | (7) |"
+            },
+            {
+              "type": "formula",
+              "text": "S​(Co​r​i​g,Cr​e​t​r)={0,if ​C​o​v​(Co​r​i​g,Cr​e​t​r)=n​o​n​e1,if ​C​o​v​(Co​r​i​g,Cr​e​t​r)=p​a​r​t​i​a​l2,if ​C​o​v​(Co​r​i​g,Cr​e​t​r)=c​o​m​p​l​e​t​eS(C_{orig},C_{retr})=\\begin{cases}\\text{0},&\\text{if }Cov(C_{orig},C_{retr})=none\\\\ \\text{1},&\\text{if }Cov(C_{orig},C_{retr})=partial\\\\ \\text{2},&\\text{if }Cov(C_{orig},C_{retr})=complete\\\\ \\end{cases}"
+            },
+            {
+              "type": "paragraph",
+              "text": "Here, C​o​v​e​r​a​g​e​(S​(Co​r​i​g,Cr​e​t​r))Coverage(S(C\\_{orig},C\\_{retr})) is either an expert assessment or the result of an LLM-based evaluator that compares the two texts."
+            },
+            {
+              "type": "formula",
+              "text": "C​o​v​e​r​a​g​e​(S​(Co​r​i​g,Cr​e​t​r))Coverage(S(C_{orig},C_{retr}))"
+            },
+            {
+              "type": "paragraph",
+              "text": "S=0S=0 — the retrieved context Cr​e​t​rC\\_{retr} does not contain information from the original context Co​r​i​gC\\_{orig},"
+            },
+            {
+              "type": "formula",
+              "text": "S=0S=0"
+            },
+            {
+              "type": "formula",
+              "text": "Cr​e​t​rC_{retr}"
+            },
+            {
+              "type": "formula",
+              "text": "Co​r​i​gC_{orig}"
+            },
+            {
+              "type": "paragraph",
+              "text": "S=1S=1 — the retrieved context Cr​e​t​rC\\_{retr} contains part of the information from Co​r​i​gC\\_{orig}, but not all of it,"
+            },
+            {
+              "type": "formula",
+              "text": "S=1S=1"
+            },
+            {
+              "type": "formula",
+              "text": "Cr​e​t​rC_{retr}"
+            },
+            {
+              "type": "formula",
+              "text": "Co​r​i​gC_{orig}"
+            },
+            {
+              "type": "paragraph",
+              "text": "S=2S=2 — all information from the original context Cr​e​t​rC\\_{retr} is present in the retrieved context Co​r​i​gC\\_{orig}."
+            },
+            {
+              "type": "formula",
+              "text": "S=2S=2"
+            },
+            {
+              "type": "formula",
+              "text": "Cr​e​t​rC_{retr}"
+            },
+            {
+              "type": "formula",
+              "text": "Co​r​i​gC_{orig}"
+            },
+            {
+              "type": "paragraph",
+              "text": "The final R​C​SRCS value for a dataset is computed as the arithmetic mean:"
+            },
+            {
+              "type": "formula",
+              "text": "R​C​SRCS"
+            },
+            {
+              "type": "table",
+              "text": "| | | | | | --- | --- | --- | --- | | | R​C​S=∑i=1NS​(Co​r​i​gi,Cr​e​t​ri)NRCS=\\frac{\\sum\\_{i=1}^{N}S(C\\_{orig}^{i},C\\_{retr}^{i})}{N} | | (8) |"
+            },
+            {
+              "type": "formula",
+              "text": "R​C​S=∑i=1NS​(Co​r​i​gi,Cr​e​t​ri)NRCS=\\frac{\\sum_{i=1}^{N}S(C_{orig}^{i},C_{retr}^{i})}{N}"
+            },
+            {
+              "type": "paragraph",
+              "text": "Where NN is the total number of queries in the evaluation dataset."
+            },
+            {
+              "type": "formula",
+              "text": "NN"
+            }
+          ],
+          "children": []
+        }
+      ]
+    },
+    {
+      "heading": "6 Experiment",
+      "level": 2,
+      "content": [
+        {
+          "type": "paragraph",
+          "text": "The goal of the experiment was to evaluate the effectiveness of the DCD approach compared to a baseline Naive RAG pipeline. The research process consisted of five sequential stages:"
+        },
+        {
+          "type": "list",
+          "text": "1. 1. Generation of a text dataset 2. 2. Generation of evaluation data (question–answer–context), 3. 3. Construction of a vector database, 4. 4. Inference with DCD and Naive RAG pipelines, 5. 5. Metric computation."
+        },
+        {
+          "type": "paragraph",
+          "text": "Generation of a text dataset"
+        },
+        {
+          "type": "paragraph",
+          "text": "Generation of evaluation data (question–answer–context),"
+        },
+        {
+          "type": "paragraph",
+          "text": "Construction of a vector database,"
+        },
+        {
+          "type": "paragraph",
+          "text": "Inference with DCD and Naive RAG pipelines,"
+        },
+        {
+          "type": "paragraph",
+          "text": "Metric computation."
+        },
+        {
+          "type": "paragraph",
+          "text": "At the first stage, a synthetic text dataset was generated. Using the language model gpt-oss-120b and a set of predefined templates, we synthesized texts describing different domains. Ten residential complexes were used as domains. Within each domain, several document collections were created corresponding to different sections, such as infrastructure, security, and complex description. Dataset variability was achieved via template-based generation of semantically aligned prompt instances, where numerical parameters and variables were systematically varied while maintaining the same underlying reasoning pattern. This approach allowed us to generate a document corpus with a controlled semantic structure."
+        },
+        {
+          "type": "paragraph",
+          "text": "At the second stage, question–answer pairs were generated for the resulting document corpus. Using the language model gpt-oss-120b, relevant questions, answers, and the supporting context were synthesized for each document. The resulting question–answer–context dataset served as the reference set for evaluating the retrieval and generation pipelines."
+        },
+        {
+          "type": "paragraph",
+          "text": "The third stage involved constructing a vector database. ChromaDB was used as the storage solution. Documents were split using a window-based splitter with a fixed window size of 300 tokens and an overlap of 20%. Chunk embeddings were generated using the bge-m3 embedding model."
+        },
+        {
+          "type": "paragraph",
+          "text": "At the fourth stage, both approaches were evaluated. For each query from the evaluation dataset, the system retrieved relevant context and generated an answer using an LLM. Query embeddings were computed using bge-m3, while answer generation was performed by qwen2.5-7b-instruct. This procedure was executed separately for the DCD pipeline and the Naive RAG pipeline."
+        },
+        {
+          "type": "paragraph",
+          "text": "Finally, we computed the metrics described in Section 5."
+        },
+        {
+          "type": "table",
+          "text": "| Metrics | DCD | Naive | | --- | --- | --- | | Strict Binary Answer Relevance | 0.86 | 0.87 | | Strict Binary Context Recall | 0.95 | 0.59 | | Strict Binary Factual Accuracy | 0.89 | 0.40 | | Retrieval Coverage Score | 1.76 | 1.28 |"
+        },
+        {
+          "type": "paragraph",
+          "text": "In terms of answer generation quality, both approaches demonstrated comparable results. At the same time, the evaluation of the retriever shows a clear advantage for DCD: the proposed approach provides more accurate retrieval of relevant context. On a dataset with a template-based document structure, DCD significantly outperforms Naive RAG in retrieving relevant information."
+        }
+      ],
+      "children": []
+    },
+    {
+      "heading": "7 Limitations",
+      "level": 2,
+      "content": [],
+      "children": [
+        {
+          "heading": "7.1 Configuration Complexity",
+          "level": 3,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "The proposed DCD approach introduces additional configuration complexity as the size and heterogeneity of the knowledge base increase. The difficulty of maintaining a correct domain segmentation grows proportionally with the number of semantically disconnected knowledge areas [[Yao et al., 2023](https://ar5iv.labs.arxiv.org/html/2604.07590v2#Yao \"Yao, S. ‣ 10 References\")], a trade-off commonly observed in systems relying on explicit reasoning structure and controlled search spaces."
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "7.2 Fully Unstructured Data",
+          "level": 3,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "DCD assumes the presence of at least minimal semantic organization within the knowledge corpus. When applied to fully unstructured data, the effectiveness of structured retrieval and routing mechanisms degrades, often converging toward the behavior of advanced naive RAG pipelines [[Gao et al., 2021](https://ar5iv.labs.arxiv.org/html/2604.07590v2#Gao \"Gao, L. ‣ 10 References\")]."
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "7.3 Computational Overhead",
+          "level": 3,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "It is important to consider the specifics of the generated dataset: all documents have a template-based structure in which texts within each domain are almost identical and differ only in specific values such as names and numerical characteristics, while preserving the same overall syntactic and semantic structure. [[Shazeer et al., 2017](https://ar5iv.labs.arxiv.org/html/2604.07590v2#Shazeer \"Shazeer, N. ‣ 10 References\")]."
+            },
+            {
+              "type": "paragraph",
+              "text": "For this type of data, characterized by a high degree of contextual overlap, DCD predictably demonstrates higher retrieval quality compared to the naive RAG approach."
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "7.4 Evaluation Methodology",
+          "level": 3,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "Answer quality in this study was assessed using an LLM-as-a-Judge setup with the gpt-oss-120b model. The judge evaluated generated answers according to the evaluation metrics defined in Section 5, receiving as input the user query, the retrieved context, and the generated answer. The evaluation prompts instructed the model to assess responses according to the metric definitions and to produce a structured justification before assigning the final decision. The temperature for these evaluations was set to 0 to ensure deterministic scoring."
+            },
+            {
+              "type": "paragraph",
+              "text": "Retrieval quality was evaluated separately using the Retrieval Coverage Score. In this setting, the judge compared the retrieved context with the reference context and assigned a score on a three-point scale from 0 to 2, reflecting whether the retrieved information was absent, partially sufficient, or fully matched the reference context. For this evaluation, the temperature was set to 0.1 to allow limited variability in explanatory reasoning."
+            }
+          ],
+          "children": []
+        }
+      ]
+    },
+    {
+      "heading": "8 Conclusion",
+      "level": 2,
+      "content": [
+        {
+          "type": "paragraph",
+          "text": "We introduced DCD, a domain-oriented RAG design based on explicit knowledge hierarchies and controlled multi-stage workflows. Experiments on production data demonstrate consistent quality improvements for heterogeneous corpora and multi-step queries at a predictable computational cost. Future work includes replacing general-purpose LLMs in routing tasks with specialized lightweight models and integrating backward navigation mechanisms with contextual relevance validation."
+        }
+      ],
+      "children": []
+    },
+    {
+      "heading": "9 Resources",
+      "level": 2,
+      "content": [
+        {
+          "type": "paragraph",
+          "text": "Dataset: [Huggin Face](https://huggingface.co/datasets/redmadrobot-rnd/dcd)"
+        },
+        {
+          "type": "paragraph",
+          "text": "Code repository: [GitHub](https://github.com/redmadrobot-rnd/dcd)"
+        },
+        {
+          "type": "paragraph",
+          "text": "Both resources are maintained by the AI R&D team at red\\_mad\\_robot."
+        }
+      ],
+      "children": []
+    },
+    {
+      "heading": "10 References",
+      "level": 2,
+      "content": [
+        {
+          "type": "paragraph",
+          "text": "Lewis, P., Perez, E., Piktus, A., et al. Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks. Advances in Neural Information Processing Systems (NeurIPS), 2020."
+        },
+        {
+          "type": "paragraph",
+          "text": "Guu, K., Lee, K., Tung, Z., Pasupat, P., Chang, M.-W. REALM: Retrieval-Augmented Language Model Pre-Training. International Conference on Machine Learning (ICML), 2020."
+        },
+        {
+          "type": "paragraph",
+          "text": "Izacard, G., Grave, E. Leveraging Passage Retrieval with Generative Models for Open Domain Question Answering. European Chapter of the ACL (EACL), 2021."
+        },
+        {
+          "type": "paragraph",
+          "text": "Khot, T. Khot, T., Sabharwal, A., Clark, P. Decomposed Prompting: A Modular Approach for Solving Complex Tasks. International Conference on Learning Representations (ICLR), 2023."
+        },
+        {
+          "type": "paragraph",
+          "text": "Wei, J., Wang, X., Schuurmans, D., et al. Chain-of-Thought Prompting Elicits Reasoning in Large Language Models. NeurIPS, 2022."
+        },
+        {
+          "type": "paragraph",
+          "text": "Yao, S., Zhao, J., Yu, D., et al. Tree of Thoughts: Deliberate Problem Solving with Large Language Models. arXiv preprint arXiv:2305.10601, 2023."
+        },
+        {
+          "type": "paragraph",
+          "text": "Shazeer, N., Mirhoseini, A., Maziarz, K., et al. Outrageously Large Neural Networks: The Sparsely-Gated Mixture-of-Experts Layer. ICLR, 2017."
+        },
+        {
+          "type": "paragraph",
+          "text": "OpenAI Structured Outputs in Language Models. Technical report / documentation, 2024."
+        },
+        {
+          "type": "paragraph",
+          "text": "Gao, L., Ma, X., Lin, J., Callan, J. Precise Zero-Shot Dense Retrieval without Relevance Labels. ACL, 2021."
+        },
+        {
+          "type": "paragraph",
+          "text": "Zheng, L., Chiang, W.-L., Sheng, Y., et al. Judging LLM-as-a-Judge with MT-Bench and Chatbot Arena. NeurIPS, 2023."
+        },
+        {
+          "type": "paragraph",
+          "text": "Ji, Z., Lee, N., Frieske, R., et al. Survey of Hallucination in Natural Language Generation. ACM Computing Surveys, 2023."
+        },
+        {
+          "type": "paragraph",
+          "text": "Li, Y., Weizhi Zhang, Yuyao Yang, et al. Towards Agentic RAG with Deep Reasoning: A Survey of RAG-Reasoning Systems in LLMs. arXiv preprint, 2025."
+        },
+        {
+          "type": "paragraph",
+          "text": "Liu, Y. Iter, D., et al. G-Eval: NLG Evaluation using GPT-4 with Better Human Alignment. arXiv preprint arXiv:2303.16634, 2023."
+        },
+        {
+          "type": "paragraph",
+          "text": "Liu, Y. Lin, S., Hilton, J., Evans, O. TruthfulQA: Measuring How Models Mimic Human Falsehoods. ACL, 2022."
+        },
+        {
+          "type": "paragraph",
+          "text": "Manakul, P., Liusie, A., Gales, M. Manakul, P.. EMNLP, 2023."
+        },
+        {
+          "type": "paragraph",
+          "text": "Makin, A. Ontology-Driven Knowledge Management Systems Enhanced by Large Language Models. ResearchGate preprint, 2024."
+        },
+        {
+          "type": "paragraph",
+          "text": "Nair, I. Somasundaram, S., Saxena, A., Goswami, K. Drilling Down into the Discourse Structure with LLMs for Long Document Question Answering. arXiv preprint, 2023."
+        }
+      ],
+      "children": []
+    }
+  ],
+  "chunks": [
+    {
+      "heading_path": [
+        "Abstract"
+      ],
+      "text": "###### Abstract\n\nRetrieval-Augmented Generation (RAG) is widely used to ground large language models in external knowledge sources. However, when applied to heterogeneous corpora and multi-step queries, Naive RAG pipelines often degrade in quality due to flat knowledge representations and the absence of explicit workflows. In this work, we introduce DCD (Domain–Collection–Document), a domain-oriented design to structure knowledge and control query processing in RAG systems without modifying the underlying language model. The proposed approach relies on a hierarchical decomposition of the information space and multi-stage routing based on structured model outputs, enabling progressive restriction of both retrieval and generation scopes. The architecture is complemented by smart chunking, hybrid retrieval, and integrated validation and generation guardrail mechanisms. We describe the DCD architecture and workflow and discuss evaluation results on synthetic evaluation dataset, highlighting their impact on robustness, factual accuracy, and answer relevance in applied RAG scenarios.\n\nDCD: Domain-Oriented Design for Controlled Retrieval-Augmented Generation\n\nValeriy Kovalskiy, Nikita Belov, Nikita Miteyko, Igor Reshetnikov, Max Maximov\n\nred\\_mad\\_robot"
+    },
+    {
+      "heading_path": [
+        "1 Introduction"
+      ],
+      "text": "## 1 Introduction\n\nRAG has gained widespread adoption as a practical approach for integrating language models with external knowledge sources [[Lewis et al., 2020](https://ar5iv.labs.arxiv.org/html/2604.07590v2#my_anchor \"Lewis, P. ‣ 10 References\")]. Even basic Naive RAG implementations can effectively address a broad range of applied tasks, from customer support query handling to enterprise document analysis [[Izacard et al., 2021](https://ar5iv.labs.arxiv.org/html/2604.07590v2#Izacard \"Izacard, G. ‣ 10 References\")].\n\nHowever, as data volumes grow and user queries become more complex, the limitations of standard RAG pipelines become increasingly apparent. In particular, the linear architecture of Naive RAG exhibits degraded performance on multi-step queries that require sequential interpretation, retrieval across multiple knowledge slices, and result aggregation [[Wei et al., 2023](https://ar5iv.labs.arxiv.org/html/2604.07590v2#Wei \"Wei, J. ‣ 10 References\")]. Another critical issue is the sensitivity of RAG systems to document segmentation parameters. These factors limit the applicability of Naive RAG in scenarios demanding high accuracy and predictable behavior.\n\nIn this work, we consider an architectural approach to organizing knowledge and workflows around a language model, aimed at improving the accuracy and safety of RAG systems without modifying the models themselves. We propose DCD (Domain–Collection–Document), a domain-oriented design that introduces an explicit knowledge hierarchy and a controlled query-processing workflow. The proposed approach demonstrates substantial improvements in answer quality for multi-step queries while ensuring reproducibility and controllability in applied settings."
+    },
+    {
+      "heading_path": [
+        "2 Preliminaries"
+      ],
+      "text": "## 2 Preliminaries"
+    },
+    {
+      "heading_path": [
+        "2 Preliminaries",
+        "2.1 Retrieval-Augmented Generation"
+      ],
+      "text": "### 2.1 Retrieval-Augmented Generation\n\nWe focus on improving the accuracy and robustness of RAG systems in scenarios involving multi-step queries and heterogeneous knowledge corpora. Specifically, we consider architectural approaches that enable:\n\n* • restricting the retrieval space to relevant subsets of knowledge, * • explicit control over query processing workflows, * • reproducibility and quality assurance of generated outputs.\n\nrestricting the retrieval space to relevant subsets of knowledge,\n\nexplicit control over query processing workflows,\n\nreproducibility and quality assurance of generated outputs.\n\nThroughout this work, Naive RAG refers to a linear pipeline without explicit knowledge structuring, query decomposition, or multi-stage generation control. We deliberately focus not on modifying the language model itself, but on organizing knowledge and workflows around it.\n\nIn many practical RAG implementations, retrieval is performed once at the beginning of the pipeline and remains fixed throughout the generation process. This design assumes that a single retrieval step can provide all information required to answer the query. However, when the knowledge corpus contains documents from multiple semantic domains, similarity-based retrieval may return fragments that are locally relevant but belong to different knowledge contexts. As a result, the retrieved context may contain partially compatible evidence, forcing the language model to reconcile inconsistent information during generation [[Li et al., 2025](https://ar5iv.labs.arxiv.org/html/2604.07590v2#Li \"Li, Y. ‣ 10 References\")].\n\nWe conceptualize a RAG system as a composition of the following stages:\n\n* • user query interpretation, * • selection of a relevant knowledge subset, * • retrieval and aggregation of contextual information, * • answer generation by a language model, * • validation and quality control of the output [[Guu et al., 2020](https://ar5iv.labs.arxiv.org/html/2604.07590v2#Guu \"Guu ‣ 10 References\")].\n\nuser query interpretation,\n\nselection of a relevant knowledge subset,\n\nretrieval and aggregation of contextual information,\n\nanswer generation by a language model,\n\nvalidation and quality control of the output [[Guu et al., 2020](https://ar5iv.labs.arxiv.org/html/2604.07590v2#Guu \"Guu ‣ 10 References\")].\n\nIn standard implementations, these stages are often implicit or collapsed into a single step. In contrast, our approach treats each stage as an explicit workflow component, enabling fine-grained control and additional validation."
+    },
+    {
+      "heading_path": [
+        "2 Preliminaries",
+        "2.2 Chunking"
+      ],
+      "text": "### 2.2 Chunking\n\nThe quality of a RAG system is highly dependent on document segmentation strategies. Common chunking approaches include paragraph-based segmentation, fixed-length chunks, and sliding-window techniques [[Gao et al., 2021](https://ar5iv.labs.arxiv.org/html/2604.07590v2#Gao \"Gao, L. ‣ 10 References\")]. In our implementation, we apply a sliding-window segmentation strategy with overlap ranging from 5–10% of the chunk size. A 5% overlap is typically sufficient to preserve contextual continuity between adjacent chunks. For documents containing semantically similar or repetitive sections, the overlap is increased to 10% to better capture contextual dependencies."
+    },
+    {
+      "heading_path": [
+        "2 Preliminaries",
+        "2.3 Guardrails"
+      ],
+      "text": "### 2.3 Guardrails\n\nClassical RAG implementations typically rely on built-in safety mechanisms of language models and lack explicit architectural procedures for validating generated outputs [[Ji et al., 2023](https://ar5iv.labs.arxiv.org/html/2604.07590v2#Ji \"Ji, Z. ‣ 10 References\")]. In particular, they provide no systematic means to verify alignment between generated answers and retrieved context or to refuse generation outside the system’s functional scope [Lin et al., 2022]. Our system incorporates a guardrails mechanism combined with a hallucination prevention module. This mechanism consists of two interrelated components. The first component analyzes user queries for prohibited topics using a composite dictionary that includes both a base set of stop-words and custom elements defined by the system owner. The second component analyzes generated outputs, ensuring the absence of prohibited content and detecting hallucinations. This is achieved by comparing the original query, the retrieved context, and the generated response, enabling early detection of deviations during generation."
+    },
+    {
+      "heading_path": [
+        "3 Method"
+      ],
+      "text": "## 3 Method"
+    },
+    {
+      "heading_path": [
+        "3 Method",
+        "3.1 Key Assumption"
+      ],
+      "text": "### 3.1 Key Assumption\n\nThe central methodological assumption of this work is that answer quality significantly improves when retrieval and generation are constrained to semantically homogeneous knowledge regions — a subset of the corpus whose documents share a common topical scope, terminology, and expected user intent, while remaining clearly distinguishable from documents belonging to other regions [[Yao et al., 2023](https://ar5iv.labs.arxiv.org/html/2604.07590v2#Yao \"Yao, S. ‣ 10 References\")]. Within such a region, documents address closely related subject areas and therefore compete primarily with semantically relevant sources during retrieval.\n\nThis constraint allows the retrieval process to operate within a bounded semantic space, reducing interference from unrelated documents and improving the alignment between retrieved evidence and the informational structure of the query. Rather than operating over a monolithic document store, we assume a prior decomposition of the corpus into independent subspaces, within which documents compete only with semantically similar sources [[Khot et al., 2023](https://ar5iv.labs.arxiv.org/html/2604.07590v2#Khot \"Khot, T. ‣ 10 References\")].\n\nThis issue is closely related to the organization of the knowledge space itself. When retrieval operates over a heterogeneous corpus without explicit semantic boundaries, documents from different knowledge regions compete within the same search space. In such settings, embedding similarity alone may not reflect the structural dependencies between pieces of information required to answer the query. As a result, retrieved evidence may be individually relevant but collectively insufficient for coherent reasoning [[Li et al., 2025](https://ar5iv.labs.arxiv.org/html/2604.07590v2#Li \"Li, Y. ‣ 10 References\")].\n\nEvidence retrieval studies for long documents demonstrate that coarse-to-fine search strategies can improve the identification of relevant evidence compared to flat fragment-level retrieval. In such approaches, higher-level structural segments are first identified and only then used to guide fine-grained passage selection. By narrowing the search space to semantically coherent regions of a document, retrieval systems preserve global contextual relationships and improve the reliability of downstream question answering [[Nair et al., 2023](https://ar5iv.labs.arxiv.org/html/2604.07590v2#Nair \"Nair, I. ‣ 10 References\")].\n\nThe proposed DCD architecture addresses this limitation through explicit decomposition of the knowledge space prior to retrieval. By constraining retrieval to semantically homogeneous regions, the system reduces cross-domain interference and improves alignment between retrieved context and the reasoning structure of the query."
+    },
+    {
+      "heading_path": [
+        "3 Method",
+        "3.2 Experimental Validation of the Assumption"
+      ],
+      "text": "### 3.2 Experimental Validation of the Assumption\n\nTo validate this assumption, we conducted experiments on a synthetic dataset constructed to approximate real-world RAG scenarios. The corpora consist of heterogeneous documents with varying structures and semantic granularity — conditions under which pipelines most frequently degrade due to flat knowledge organization and unstable retrieval.\n\nAll datasets were anonymized for confidentiality: client identifiers and sensitive metadata were removed. The paper reports procedures and observed effects without disclosing document contents. In addition to quality metrics, we recorded operational characteristics of the pipeline, including total evaluation time, mean end-to-end response time, and time to first token, allowing analysis of the trade-off between accuracy and latency under increased workflow complexity."
+    },
+    {
+      "heading_path": [
+        "4 DCD: Domain–Collection–Document"
+      ],
+      "text": "## 4 DCD: Domain–Collection–Document\n\nThe DCD (Domain–Collection–Document) Design is an approach to organizing knowledge in RAG systems through explicit hierarchical segmentation of the information space. Its primary goal is to minimize overlap between knowledge areas and prevent irrelevant context from being passed to the language model [[Makin, 2024](https://ar5iv.labs.arxiv.org/html/2604.07590v2#Makin \"Makin, A. ‣ 10 References\")].\n\nDCD structures data across three levels:\n\n* • Domain — a high-level subject area, * • Collection — a thematically homogeneous subset within a domain, * • Document — an atomic knowledge unit with metadata.\n\nDomain — a high-level subject area,\n\nCollection — a thematically homogeneous subset within a domain,\n\nDocument — an atomic knowledge unit with metadata."
+    },
+    {
+      "heading_path": [
+        "4 DCD: Domain–Collection–Document",
+        "4.1 Hierarchical Levels"
+      ],
+      "text": "### 4.1 Hierarchical Levels\n\nA Domain defines top-level search boundaries and is constructed to minimize semantic overlap with other domains. A Collection represents a narrower thematic slice within a domain and further restricts the retrieval space. Examples include legal documents, reference materials, or user FAQs within a single domain. A Document is the basic unit used in the RAG process. Documents are enriched with metadata and may be further segmented into chunks for context retrieval. Information retrieval follows a top-down principle: from domain to collection to document.\n\nNavigation through the hierarchy is performed by the DCD Router, which sequentially selects the most relevant domain, collection, and document for a given query. At each level, routing is formulated as a selection task over a limited candidate set [[Shazeer et al., 2017](https://ar5iv.labs.arxiv.org/html/2604.07590v2#Shazeer \"Shazeer, N. ‣ 10 References\")]. Router decisions are produced using structured outputs from the language model, ensuring transparency, reproducibility, and intermediate result caching. To improve robustness, fallback elements (main domain, main collection, main document) are defined at each level."
+    },
+    {
+      "heading_path": [
+        "4 DCD: Domain–Collection–Document",
+        "4.2 DCD Router"
+      ],
+      "text": "### 4.2 DCD Router\n\nThe functional core of domain segmentation is the DCD Router, a specialized module responsible for identifying the target knowledge segment for retrieval. Like most system components, it relies on structured language model outputs (JSON), enabling high-precision processing and transparent decision-making [[OpenAI, 2024](https://ar5iv.labs.arxiv.org/html/2604.07590v2#OpenAI \"OpenAI ‣ 10 References\")].\n\nInitial configuration involves defining domain and collection structures and assigning knowledge assets accordingly. Documents retain their original titles, while domains and collections receive manually defined identifiers. Upon receiving a user query, the system submits it — along with the registry of available domains — to the language model to identify the most relevant domain. This procedure is repeated hierarchically for collections and documents. If the language model produces incorrect outputs, fallback elements at each level ensure system robustness and guarantee a response even after multiple failed routing attempts.\n\nHigher hierarchy levels are described with richer metadata to reduce routing errors, since mistakes at upper levels may propagate downstream and restrict the search space to an incorrect semantic region of the knowledge base. Providing clearer semantic descriptions for domains and collections improves the reliability of the initial routing decisions and helps maintain stable navigation across the hierarchy.\n\nIn the present study, routing accuracy at individual hierarchy levels was not evaluated as a separate classification metric. Instead, the routing mechanism is considered as part of the overall retrieval pipeline, and its effectiveness is reflected in downstream system behaviour, including answer relevance, factual accuracy, and retrieval coverage."
+    },
+    {
+      "heading_path": [
+        "4 DCD: Domain–Collection–Document",
+        "4.3 Integration with the RAG Pipeline"
+      ],
+      "text": "### 4.3 Integration with the RAG Pipeline\n\nAfter a document is selected, the system retrieves relevant fragments using semantic and full-text search, followed by deduplication and reranking. The resulting context is passed to the language model for answer generation.\n\nBy constraining the retrieval space upfront, DCD reduces the likelihood of irrelevant context inclusion and improves generation robustness on multi-step queries. While Naive RAG employs a linear processing pipeline — chunking, embedding, retrieval, and generation — DCD preserves a similar user interface but introduces a fundamentally different internal organization based on multi-level processing."
+    },
+    {
+      "heading_path": [
+        "4 DCD: Domain–Collection–Document",
+        "4.4 Smart Chunking"
+      ],
+      "text": "### 4.4 Smart Chunking\n\nSmart chunking is an integral component of the DCD design. Although DCD can operate with classical chunking methods, the selected strategy provided the most stable behaviour within the proposed architecture, as it better preserves the structural properties of the underlying knowledge base.\n\nIn this approach, documents are segmented using a sliding window mechanism with partial overlap between neighbouring fragments. This segmentation strategy preserves local semantic continuity and reduces the likelihood that relevant contextual information will be lost at chunk boundaries. As a result, logically connected statements that span multiple sentences or paragraphs remain accessible during retrieval, which is particularly important for queries requiring compositional reasoning.\n\nEach fragment is additionally enriched with chunk-level metadata derived from the document structure. These metadata describe the fragment’s position within the document hierarchy and maintain references to the corresponding document-level entity. Such structural annotations allow the retrieval stage to operate not only on semantic similarity but also on contextual relationships between fragments originating from the same document or collection.\n\nThe combination of overlapping segmentation and structured metadata improves the consistency of fragment retrieval and reduces the probability of assembling answers from semantically unrelated contexts. This design enables the retrieval pipeline to better align selected evidence with the conceptual structure of the query and contributes to more stable answer generation in retrieval-augmented workflows, as reflected in the experimental evaluation presented later in the paper."
+    },
+    {
+      "heading_path": [
+        "4 DCD: Domain–Collection–Document",
+        "4.5 Fast Guardrails"
+      ],
+      "text": "### 4.5 Fast Guardrails\n\nIn addition to the main retrieval and generation pipeline, the system introduces a fast guardrails mechanism for early response validation. The system includes a guardrails mechanism combined with hallucination prevention and a fast pre-check function that evaluates responses before full generation completes [[Manakul et al., 2023](https://ar5iv.labs.arxiv.org/html/2604.07590v2#Manakul \"Manakul, P. ‣ 10 References\")].\n\nThe guardrails workflow is as follows:\n\n* • the user query undergoes stop-word screening, * • compliant queries are passed to the DCD RAG pipeline, * • during response streaming, the first 150 tokens are analyzed, * • based on query, context, and partial output, the system decides whether to display or block the response.\n\nthe user query undergoes stop-word screening,\n\ncompliant queries are passed to the DCD RAG pipeline,\n\nduring response streaming, the first 150 tokens are analyzed,\n\nbased on query, context, and partial output, the system decides whether to display or block the response.\n\nThis mechanism filters unsupported queries and validates generated content in parallel with generation, avoiding additional latency."
+    },
+    {
+      "heading_path": [
+        "4 DCD: Domain–Collection–Document",
+        "4.6 System Completeness Summary"
+      ],
+      "text": "### 4.6 System Completeness Summary\n\nThe DCD architecture demonstrates significant advantages in adaptability when processing heterogeneous data and structurally complex queries. Its flexibility yields substantial accuracy improvements in multi-level knowledge scenarios while integrating critical validation and control stages absent in Naive RAG systems. While initial configuration requires additional setup effort, these costs are offset by superior performance and rapid amortization through improved operational efficiency."
+    },
+    {
+      "heading_path": [
+        "5 Metrics"
+      ],
+      "text": "## 5 Metrics\n\nTo comprehensively evaluate the proposed DCD approach, we employ a metric suite extending beyond standard evaluations. The assessment relies on structured generation quality evaluation using an LLM as an assessor [[Liu et al., 2023](https://ar5iv.labs.arxiv.org/html/2604.07590v2#Liu \"Liu, Y. ‣ 10 References\")]."
+    },
+    {
+      "heading_path": [
+        "5 Metrics",
+        "5.1 Strict Binary Answer Relevance & Completeness"
+      ],
+      "text": "### 5.1 Strict Binary Answer Relevance & Completeness\n\nS​B​A​R​CSBARC is a strict binary metric assessing whether an answer is both relevant and complete with respect to a question.\n\nS​B​A​R​CSBARC\n\n| | | | | | --- | --- | --- | --- | | | S​(Q,A)=D​(Q,A)∧P​(Q,A)∧S​p​(Q,A)∧¬V​(A)S(Q,A)=D(Q,A)\\land P(Q,A)\\land Sp(Q,A)\\land\\lnot V(A) | | (1) |\n\nS​(Q,A)=D​(Q,A)∧P​(Q,A)∧S​p​(Q,A)∧¬V​(A)S(Q,A)=D(Q,A)\\land P(Q,A)\\land Sp(Q,A)\\land\\lnot V(A)\n\nQ,AQ,A — the question and the answer, respectively,\n\nQ,AQ,A\n\nS​(Q,A)S(Q,A) — the binary output verdict,\n\nS​(Q,A)S(Q,A)\n\nD​(Q,A)D(Q,A) — the direct-answer criterion,\n\nD​(Q,A)D(Q,A)\n\nP​(Q,A)P(Q,A) — the completeness criterion,\n\nP​(Q,A)P(Q,A)\n\nS​p​(Q,A)Sp(Q,A) — the specificity criterion,\n\nS​p​(Q,A)Sp(Q,A)\n\nV​(A)V(A) — the vagueness criterion,\n\nV​(A)V(A)\n\n| | | | | | --- | --- | --- | --- | | | S​B​A​R​C=∑i=1NS​(Q,Ai)NSB\\ ARC=\\frac{\\sum\\_{i=1}^{N}S(Q,A\\_{i})}{N} | | (2) |\n\nS​B​A​R​C=∑i=1NS​(Q,Ai)NSB\\ ARC=\\frac{\\sum_{i=1}^{N}S(Q,A_{i})}{N}\n\nNN — the total number of pairs (question, answer) in the evaluation dataset.\n\nNN"
+    },
+    {
+      "heading_path": [
+        "5 Metrics",
+        "5.2 Strict Binary Context Recall"
+      ],
+      "text": "### 5.2 Strict Binary Context Recall\n\nS​B​C​RSBCR evaluates whether all relevant contextual information is utilized in the answer.\n\nS​B​C​RSBCR\n\n| | | | | | --- | --- | --- | --- | | | U​(C,A)=𝟙​(Fused≡Frelevant)U(C,A)=\\mathds{1}\\bigl(F\\_{\\text{used}}\\equiv F\\_{\\text{relevant}}\\bigr) | | (3) |\n\nU​(C,A)=𝟙​(Fused≡Frelevant)U(C,A)=\\mathds{1}\\bigl(F_{\\text{used}}\\equiv F_{\\text{relevant}}\\bigr)\n\nC,AC,A — the context and the answer, respectively,\n\nC,AC,A\n\nU​(C,A)U(C,A) — the binary output verdict,\n\nU​(C,A)U(C,A)\n\nFrelevantF\\_{\\text{relevant}} — the set of all relevant facts present in the context,\n\nFrelevantF_{\\text{relevant}}\n\nFusedF\\_{\\text{used}} — the set of facts from the context that are used in the answer,\n\nFusedF_{\\text{used}}\n\n| | | | | | --- | --- | --- | --- | | | S​B​C​R=∑i=1NU​(Ci,Ai)NSB\\,CR=\\frac{\\displaystyle\\sum\\_{i=1}^{N}U(C\\_{i},A\\_{i})}{N} | | (4) |\n\nS​B​C​R=∑i=1NU​(Ci,Ai)NSB\\,CR=\\frac{\\displaystyle\\sum_{i=1}^{N}U(C_{i},A_{i})}{N}\n\nNN — the total number of pairs (question, answer) in the evaluation dataset.\n\nNN"
+    },
+    {
+      "heading_path": [
+        "5 Metrics",
+        "5.3 Strict Binary Factual Accuracy"
+      ],
+      "text": "### 5.3 Strict Binary Factual Accuracy\n\nS​B​F​ASBFA evaluates factual correctness and hallucination absence.\n\nS​B​F​ASBFA\n\n| | | | | | --- | --- | --- | --- | | | F​(C,A)=𝟙​(S​(A,C)∧¬C​(A,C)∧¬H​(A,C))F(C,A)=\\mathds{1}(\\textit{S}(A,C)\\land\\lnot\\textit{C}(A,C)\\land\\lnot\\textit{H}(A,C)) | | (5) |\n\nF​(C,A)=𝟙​(S​(A,C)∧¬C​(A,C)∧¬H​(A,C))F(C,A)=\\mathds{1}(\\textit{S}(A,C)\\land\\lnot\\textit{C}(A,C)\\land\\lnot\\textit{H}(A,C))\n\nC,AC,A — the context and the answer, respectively,\n\nC,AC,A\n\nF​(C,A)F(C,A) — the binary output verdict,\n\nF​(C,A)F(C,A)\n\nS​u​p​p​o​r​t​e​d​(C,A)Supported(C,A) — all statements in the answer are explicitly present in or directly entailed by the context,\n\nS​u​p​p​o​r​t​e​d​(C,A)Supported(C,A)\n\n¬Contradicts​(A,C)\\lnot\\textit{Contradicts}(A,C) — the answer does not contradict the information in the context,\n\n¬Contradicts​(A,C)\\lnot\\textit{Contradicts}(A,C)\n\n¬Hallucinates​(A,C)\\lnot\\textit{Hallucinates}(A,C) — the answer does not contain information that is absent from the context,\n\n¬Hallucinates​(A,C)\\lnot\\textit{Hallucinates}(A,C)\n\n| | | | | | --- | --- | --- | --- | | | S​B​F​A=∑i=1NF​(Ci,Ai)NSB\\,FA=\\frac{\\sum\\_{i=1}^{N}F(C\\_{i},A\\_{i})}{N} | | (6) |\n\nS​B​F​A=∑i=1NF​(Ci,Ai)NSB\\,FA=\\frac{\\sum_{i=1}^{N}F(C_{i},A_{i})}{N}\n\nNN — the total number of pairs (question, answer) in the evaluation dataset.\n\nNN"
+    },
+    {
+      "heading_path": [
+        "5 Metrics",
+        "5.4 Retrieval Coverage Score (RCS)"
+      ],
+      "text": "### 5.4 Retrieval Coverage Score (RCS)\n\nR​C​SRCS measures how completely the retrieved context reproduces the original (reference) context and therefore characterizes the quality of the retriever.\n\nR​C​SRCS\n\nLet Co​r​i​gC\\_{orig} be the original context and Cr​e​t​rC\\_{retr} the context retrieved by the retriever. The evaluation function S​(Co​r​i​g,Cr​e​t​r)S(C\\_{orig},C\\_{retr}) is defined as follows:\n\nCo​r​i​gC_{orig}\n\nCr​e​t​rC_{retr}\n\nS​(Co​r​i​g,Cr​e​t​r)S(C_{orig},C_{retr})\n\n| | | | | | --- | --- | --- | --- | | | S​(Co​r​i​g,Cr​e​t​r)={0,if ​C​o​v​(Co​r​i​g,Cr​e​t​r)=n​o​n​e1,if ​C​o​v​(Co​r​i​g,Cr​e​t​r)=p​a​r​t​i​a​l2,if ​C​o​v​(Co​r​i​g,Cr​e​t​r)=c​o​m​p​l​e​t​eS(C\\_{orig},C\\_{retr})=\\begin{cases}\\text{0},&\\text{if }Cov(C\\_{orig},C\\_{retr})=none\\\\ \\text{1},&\\text{if }Cov(C\\_{orig},C\\_{retr})=partial\\\\ \\text{2},&\\text{if }Cov(C\\_{orig},C\\_{retr})=complete\\\\ \\end{cases} | | (7) |\n\nS​(Co​r​i​g,Cr​e​t​r)={0,if ​C​o​v​(Co​r​i​g,Cr​e​t​r)=n​o​n​e1,if ​C​o​v​(Co​r​i​g,Cr​e​t​r)=p​a​r​t​i​a​l2,if ​C​o​v​(Co​r​i​g,Cr​e​t​r)=c​o​m​p​l​e​t​eS(C_{orig},C_{retr})=\\begin{cases}\\text{0},&\\text{if }Cov(C_{orig},C_{retr})=none\\\\ \\text{1},&\\text{if }Cov(C_{orig},C_{retr})=partial\\\\ \\text{2},&\\text{if }Cov(C_{orig},C_{retr})=complete\\\\ \\end{cases}\n\nHere, C​o​v​e​r​a​g​e​(S​(Co​r​i​g,Cr​e​t​r))Coverage(S(C\\_{orig},C\\_{retr})) is either an expert assessment or the result of an LLM-based evaluator that compares the two texts.\n\nC​o​v​e​r​a​g​e​(S​(Co​r​i​g,Cr​e​t​r))Coverage(S(C_{orig},C_{retr}))\n\nS=0S=0 — the retrieved context Cr​e​t​rC\\_{retr} does not contain information from the original context Co​r​i​gC\\_{orig},\n\nS=0S=0\n\nCr​e​t​rC_{retr}\n\nCo​r​i​gC_{orig}\n\nS=1S=1 — the retrieved context Cr​e​t​rC\\_{retr} contains part of the information from Co​r​i​gC\\_{orig}, but not all of it,\n\nS=1S=1\n\nCr​e​t​rC_{retr}\n\nCo​r​i​gC_{orig}\n\nS=2S=2 — all information from the original context Cr​e​t​rC\\_{retr} is present in the retrieved context Co​r​i​gC\\_{orig}.\n\nS=2S=2\n\nCr​e​t​rC_{retr}\n\nCo​r​i​gC_{orig}\n\nThe final R​C​SRCS value for a dataset is computed as the arithmetic mean:\n\nR​C​SRCS\n\n| | | | | | --- | --- | --- | --- | | | R​C​S=∑i=1NS​(Co​r​i​gi,Cr​e​t​ri)NRCS=\\frac{\\sum\\_{i=1}^{N}S(C\\_{orig}^{i},C\\_{retr}^{i})}{N} | | (8) |\n\nR​C​S=∑i=1NS​(Co​r​i​gi,Cr​e​t​ri)NRCS=\\frac{\\sum_{i=1}^{N}S(C_{orig}^{i},C_{retr}^{i})}{N}\n\nWhere NN is the total number of queries in the evaluation dataset.\n\nNN"
+    },
+    {
+      "heading_path": [
+        "6 Experiment"
+      ],
+      "text": "## 6 Experiment\n\nThe goal of the experiment was to evaluate the effectiveness of the DCD approach compared to a baseline Naive RAG pipeline. The research process consisted of five sequential stages:\n\n1. 1. Generation of a text dataset 2. 2. Generation of evaluation data (question–answer–context), 3. 3. Construction of a vector database, 4. 4. Inference with DCD and Naive RAG pipelines, 5. 5. Metric computation.\n\nGeneration of a text dataset\n\nGeneration of evaluation data (question–answer–context),\n\nConstruction of a vector database,\n\nInference with DCD and Naive RAG pipelines,\n\nMetric computation.\n\nAt the first stage, a synthetic text dataset was generated. Using the language model gpt-oss-120b and a set of predefined templates, we synthesized texts describing different domains. Ten residential complexes were used as domains. Within each domain, several document collections were created corresponding to different sections, such as infrastructure, security, and complex description. Dataset variability was achieved via template-based generation of semantically aligned prompt instances, where numerical parameters and variables were systematically varied while maintaining the same underlying reasoning pattern. This approach allowed us to generate a document corpus with a controlled semantic structure.\n\nAt the second stage, question–answer pairs were generated for the resulting document corpus. Using the language model gpt-oss-120b, relevant questions, answers, and the supporting context were synthesized for each document. The resulting question–answer–context dataset served as the reference set for evaluating the retrieval and generation pipelines.\n\nThe third stage involved constructing a vector database. ChromaDB was used as the storage solution. Documents were split using a window-based splitter with a fixed window size of 300 tokens and an overlap of 20%. Chunk embeddings were generated using the bge-m3 embedding model.\n\nAt the fourth stage, both approaches were evaluated. For each query from the evaluation dataset, the system retrieved relevant context and generated an answer using an LLM. Query embeddings were computed using bge-m3, while answer generation was performed by qwen2.5-7b-instruct. This procedure was executed separately for the DCD pipeline and the Naive RAG pipeline.\n\nFinally, we computed the metrics described in Section 5.\n\n| Metrics | DCD | Naive | | --- | --- | --- | | Strict Binary Answer Relevance | 0.86 | 0.87 | | Strict Binary Context Recall | 0.95 | 0.59 | | Strict Binary Factual Accuracy | 0.89 | 0.40 | | Retrieval Coverage Score | 1.76 | 1.28 |\n\nIn terms of answer generation quality, both approaches demonstrated comparable results. At the same time, the evaluation of the retriever shows a clear advantage for DCD: the proposed approach provides more accurate retrieval of relevant context. On a dataset with a template-based document structure, DCD significantly outperforms Naive RAG in retrieving relevant information."
+    },
+    {
+      "heading_path": [
+        "7 Limitations"
+      ],
+      "text": "## 7 Limitations"
+    },
+    {
+      "heading_path": [
+        "7 Limitations",
+        "7.1 Configuration Complexity"
+      ],
+      "text": "### 7.1 Configuration Complexity\n\nThe proposed DCD approach introduces additional configuration complexity as the size and heterogeneity of the knowledge base increase. The difficulty of maintaining a correct domain segmentation grows proportionally with the number of semantically disconnected knowledge areas [[Yao et al., 2023](https://ar5iv.labs.arxiv.org/html/2604.07590v2#Yao \"Yao, S. ‣ 10 References\")], a trade-off commonly observed in systems relying on explicit reasoning structure and controlled search spaces."
+    },
+    {
+      "heading_path": [
+        "7 Limitations",
+        "7.2 Fully Unstructured Data"
+      ],
+      "text": "### 7.2 Fully Unstructured Data\n\nDCD assumes the presence of at least minimal semantic organization within the knowledge corpus. When applied to fully unstructured data, the effectiveness of structured retrieval and routing mechanisms degrades, often converging toward the behavior of advanced naive RAG pipelines [[Gao et al., 2021](https://ar5iv.labs.arxiv.org/html/2604.07590v2#Gao \"Gao, L. ‣ 10 References\")]."
+    },
+    {
+      "heading_path": [
+        "7 Limitations",
+        "7.3 Computational Overhead"
+      ],
+      "text": "### 7.3 Computational Overhead\n\nIt is important to consider the specifics of the generated dataset: all documents have a template-based structure in which texts within each domain are almost identical and differ only in specific values such as names and numerical characteristics, while preserving the same overall syntactic and semantic structure. [[Shazeer et al., 2017](https://ar5iv.labs.arxiv.org/html/2604.07590v2#Shazeer \"Shazeer, N. ‣ 10 References\")].\n\nFor this type of data, characterized by a high degree of contextual overlap, DCD predictably demonstrates higher retrieval quality compared to the naive RAG approach."
+    },
+    {
+      "heading_path": [
+        "7 Limitations",
+        "7.4 Evaluation Methodology"
+      ],
+      "text": "### 7.4 Evaluation Methodology\n\nAnswer quality in this study was assessed using an LLM-as-a-Judge setup with the gpt-oss-120b model. The judge evaluated generated answers according to the evaluation metrics defined in Section 5, receiving as input the user query, the retrieved context, and the generated answer. The evaluation prompts instructed the model to assess responses according to the metric definitions and to produce a structured justification before assigning the final decision. The temperature for these evaluations was set to 0 to ensure deterministic scoring.\n\nRetrieval quality was evaluated separately using the Retrieval Coverage Score. In this setting, the judge compared the retrieved context with the reference context and assigned a score on a three-point scale from 0 to 2, reflecting whether the retrieved information was absent, partially sufficient, or fully matched the reference context. For this evaluation, the temperature was set to 0.1 to allow limited variability in explanatory reasoning."
+    },
+    {
+      "heading_path": [
+        "8 Conclusion"
+      ],
+      "text": "## 8 Conclusion\n\nWe introduced DCD, a domain-oriented RAG design based on explicit knowledge hierarchies and controlled multi-stage workflows. Experiments on production data demonstrate consistent quality improvements for heterogeneous corpora and multi-step queries at a predictable computational cost. Future work includes replacing general-purpose LLMs in routing tasks with specialized lightweight models and integrating backward navigation mechanisms with contextual relevance validation."
+    },
+    {
+      "heading_path": [
+        "9 Resources"
+      ],
+      "text": "## 9 Resources\n\nDataset: [Huggin Face](https://huggingface.co/datasets/redmadrobot-rnd/dcd)\n\nCode repository: [GitHub](https://github.com/redmadrobot-rnd/dcd)\n\nBoth resources are maintained by the AI R&D team at red\\_mad\\_robot."
+    },
+    {
+      "heading_path": [
+        "10 References"
+      ],
+      "text": "## 10 References\n\nLewis, P., Perez, E., Piktus, A., et al. Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks. Advances in Neural Information Processing Systems (NeurIPS), 2020.\n\nGuu, K., Lee, K., Tung, Z., Pasupat, P., Chang, M.-W. REALM: Retrieval-Augmented Language Model Pre-Training. International Conference on Machine Learning (ICML), 2020.\n\nIzacard, G., Grave, E. Leveraging Passage Retrieval with Generative Models for Open Domain Question Answering. European Chapter of the ACL (EACL), 2021.\n\nKhot, T. Khot, T., Sabharwal, A., Clark, P. Decomposed Prompting: A Modular Approach for Solving Complex Tasks. International Conference on Learning Representations (ICLR), 2023.\n\nWei, J., Wang, X., Schuurmans, D., et al. Chain-of-Thought Prompting Elicits Reasoning in Large Language Models. NeurIPS, 2022.\n\nYao, S., Zhao, J., Yu, D., et al. Tree of Thoughts: Deliberate Problem Solving with Large Language Models. arXiv preprint arXiv:2305.10601, 2023.\n\nShazeer, N., Mirhoseini, A., Maziarz, K., et al. Outrageously Large Neural Networks: The Sparsely-Gated Mixture-of-Experts Layer. ICLR, 2017.\n\nOpenAI Structured Outputs in Language Models. Technical report / documentation, 2024.\n\nGao, L., Ma, X., Lin, J., Callan, J. Precise Zero-Shot Dense Retrieval without Relevance Labels. ACL, 2021.\n\nZheng, L., Chiang, W.-L., Sheng, Y., et al. Judging LLM-as-a-Judge with MT-Bench and Chatbot Arena. NeurIPS, 2023.\n\nJi, Z., Lee, N., Frieske, R., et al. Survey of Hallucination in Natural Language Generation. ACM Computing Surveys, 2023.\n\nLi, Y., Weizhi Zhang, Yuyao Yang, et al. Towards Agentic RAG with Deep Reasoning: A Survey of RAG-Reasoning Systems in LLMs. arXiv preprint, 2025.\n\nLiu, Y. Iter, D., et al. G-Eval: NLG Evaluation using GPT-4 with Better Human Alignment. arXiv preprint arXiv:2303.16634, 2023.\n\nLiu, Y. Lin, S., Hilton, J., Evans, O. TruthfulQA: Measuring How Models Mimic Human Falsehoods. ACL, 2022.\n\nManakul, P., Liusie, A., Gales, M. Manakul, P.. EMNLP, 2023.\n\nMakin, A. Ontology-Driven Knowledge Management Systems Enhanced by Large Language Models. ResearchGate preprint, 2024.\n\nNair, I. Somasundaram, S., Saxena, A., Goswami, K. Drilling Down into the Discourse Structure with LLMs for Long Document Question Answering. arXiv preprint, 2023."
+    }
+  ]
+}

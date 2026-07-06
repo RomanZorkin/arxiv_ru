@@ -1,0 +1,1510 @@
+<!DOCTYPE html>
+
+<!-- saved from url=(0046)https://ar5iv.labs.arxiv.org/html/2603.18620v1 -->
+<html data-theme="light" lang="en"><head><meta content="text/html; charset=utf-8" http-equiv="Content-Type"/>
+<title>[2603.18620] Learning to Self-Evolve</title><meta content="We introduce Learning to Self-Evolve (LSE), a reinforcement learning framework that trains large language models (LLMs) to improve their own contexts at test time. We situate LSE in the setting of test-time self-evolut…" property="og:description"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<meta content="summary" name="twitter:card"/>
+<meta content="Learning to Self-Evolve" name="twitter:title"/>
+<meta content="https://ar5iv.labs.arxiv.org/assets/ar5iv_card.png" name="twitter:image:src"/>
+<meta content="ar5iv logo" name="twitter:image:alt"/>
+<meta content="Learning to Self-Evolve" property="og:title"/>
+<meta content="ar5iv" property="og:site_name"/>
+<meta content="https://ar5iv.labs.arxiv.org/assets/ar5iv_card.png" property="og:image"/>
+<meta content="article" property="og:type"/>
+<meta content="https://ar5iv.labs.arxiv.org/html/2603.18620" property="og:url"/>
+<link href="https://ar5iv.labs.arxiv.org/html/2603.18620" rel="canonical" target="_blank"/>
+<!--Generated on Mon Apr  6 04:07:27 2026 by LaTeXML (version 0.8.8) http://dlmf.nist.gov/LaTeXML/.-->
+<meta content="width=device-width, initial-scale=1, shrink-to-fit=no" name="viewport"/>
+<script>
+  function detectColorScheme(){
+    var theme="light";
+    var current_theme = localStorage.getItem("ar5iv_theme");
+    if(current_theme){
+      if(current_theme == "dark"){
+        theme = "dark";
+      } }
+    else if(!window.matchMedia) { return false; }
+    else if(window.matchMedia("(prefers-color-scheme: dark)").matches) {
+      theme = "dark"; }
+    if (theme=="dark") {
+      document.documentElement.setAttribute("data-theme", "dark");
+    } else {
+      document.documentElement.setAttribute("data-theme", "light"); } }
+
+  detectColorScheme();
+
+  function toggleColorScheme(){
+    var current_theme = localStorage.getItem("ar5iv_theme");
+    if (current_theme) {
+      if (current_theme == "light") {
+        localStorage.setItem("ar5iv_theme", "dark"); }
+      else {
+        localStorage.setItem("ar5iv_theme", "light"); } }
+    else {
+        localStorage.setItem("ar5iv_theme", "dark"); }
+    detectColorScheme(); }
+</script>
+<link href="./[2603.18620] Learning to Self-Evolve_files/ar5iv-fonts.0.8.4.css" media="all" rel="stylesheet"/><link href="./[2603.18620] Learning to Self-Evolve_files/ar5iv.0.8.5.css" media="all" rel="stylesheet"/><link href="./[2603.18620] Learning to Self-Evolve_files/ar5iv-site.0.2.2.css" media="all" rel="stylesheet"/>
+<meta content="extension" property="gosuslugi.plugin.extension.content"/></head>
+<body>
+<div class="ltx_page_main">
+<div class="ltx_page_content">
+<article class="ltx_document ltx_authors_1line">
+<h1 class="ltx_title ltx_title_document">Обучение саморазвитию</h1>
+<div class="ltx_authors">
+<span class="ltx_creator ltx_role_author">
+<span class="ltx_personname">Сяоинь Чэнь<sup class="ltx_sup" id="id1.1.id1">1, 2</sup>  Канвэнь Сюй<sup class="ltx_sup" id="id2.2.id2">3</sup>  Йите Ван<sup class="ltx_sup" id="id3.3.id3">3</sup>  Бойи Лю<sup class="ltx_sup" id="id4.4.id4">3</sup>  Чжэвэй Яо<sup class="ltx_sup" id="id5.5.id5">3</sup>  Юсюн Хэ<sup class="ltx_sup" id="id6.6.id6">3</sup>
+<br class="ltx_break"/><sup class="ltx_sup" id="id7.7.id7">1</sup>Mila – Квебекский институт ИИ  <sup class="ltx_sup" id="id8.8.id8">2</sup>Монреальский университет  <sup class="ltx_sup" id="id9.9.id9">3</sup>Snowflake
+</span><span class="ltx_author_notes">Эта работа была выполнена во время стажировки Сяоинь в Snowflake. По вопросам корреспонденции следует обращаться к Канвэнь Сюй: <span class="ltx_text ltx_font_typewriter" id="id10.10.id1">canwen.xu@snowflake.com</span>.</span></span>
+</div>
+<div class="ltx_abstract" id="abstract1">
+<h6 class="ltx_title ltx_title_abstract">Аннотация</h6>
+<p class="ltx_p">Мы представляем Learning to Self-Evolve (LSE) — фреймворк обучения с подкреплением, который тренирует LLM улучшать собственные контексты во время тестирования. Мы рассматриваем LSE в контексте самоэволюции во время тестирования, где модель итеративно уточняет свой контекст на основе обратной связи по уже увиденным задачам для более эффективного выполнения новых. Существующие подходы полностью полагаются на внутренние способности модели к рассуждению и никогда не обучают её этой задаче явным образом. LSE сводит проблему многошаговой эволюции к одношаговой целевой функции RL, где каждое изменение контекста поощряется улучшением производительности в последующих задачах. Мы сочетаем эту целевую функцию с циклом эволюции, управляемым деревом. В задачах генерации Text-to-SQL (BIRD) и общего QA (MMLU-Redux) модель с 4B-параметрами, обученная с помощью LSE, превосходит политики самоэволюции на базе GPT-5 и Claude Sonnet 4.5, а также методы оптимизации промптов, включая GEPA и TextGrad, и переносится для управления другими моделями без дополнительного обучения. Наши результаты подчеркивают эффективность рассмотрения самоэволюции как обучаемого навыка.11<span class="ltx_tag ltx_tag_note">1</span>Код доступен по адресу <a class="ltx_ref ltx_url ltx_font_typewriter" href="https://github.com/chenyn66/learning-to-self-evolve" target="_blank" title="">https://github.com/chenyn66/learning-to-self-evolve</a>.</p>
+</div>
+<section class="ltx_section" id="S1">
+<h2 class="ltx_title ltx_title_section">
+<span class="ltx_tag ltx_tag_section">1 </span>Введение</h2>
+<div class="ltx_para" id="S1.p1">
+<p class="ltx_p" id="S1.p1.1">Способность адаптироваться и развиваться в ответ на обратную связь от окружающей среды долгое время считалась центральным элементом человеческого интеллекта <cite class="ltx_cite ltx_citemacro_citep">(Piaget, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib1" title="The origins of intelligence in children">1952</a>; Sternberg, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib2" title="A theory of adaptive intelligence and its relation to general intelligence">2019</a>)</cite>. Шахматист совершенствуется, анализируя прошлые партии; инженер-программист становится более опытным в работе с кодовой базой благодаря месяцам ежедневной практики. В обоих случаях опыт накапливается, и человек соответствующим образом корректирует свой подход. Текущие конвейеры обучения LLM демонстрируют схожую динамику, особенно на этапе пост-обучения, где reinforcement learning (RL) уточняет поведение модели на основе её собственных сгенерированных данных <cite class="ltx_cite ltx_citemacro_citep">(Lightman<span class="ltx_text ltx_bib_etal"> et al.</span>, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib4" title="Let’s verify step by step">2023</a>; <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib3" title="Learning to reason with llms">OpenAI, </a>; DeepSeek-AI, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib23" title="DeepSeek-R1: incentivizing reasoning capability in LLMs via reinforcement learning">2025</a>)</cite>. Однако это обучение прекращается, как только завершается процесс тренировки. При развертывании LLM применяет одну и ту же стратегию независимо от того, сколько задач она решила в данной предметной области, и отбрасывает весь накопленный опыт, как только контекст сбрасывается. Этот разрыв между статическим развертыванием и динамической адаптацией стимулирует изучение саморазвивающихся систем на этапе тестирования: систем, которые непрерывно обновляют себя в ответ на новые наблюдения во время тестирования..</p>
+</div>
+<figure class="ltx_figure" id="S1.F1"><img alt="Refer to caption" class="ltx_graphics ltx_centering ltx_img_landscape" height="291" id="S1.F1.g1" src="./[2603.18620] Learning to Self-Evolve_files/x1.png" width="598"/>
+<figcaption class="ltx_caption ltx_centering">⟦<span class="ltx_tag ltx_tag_figure">Figure 1: </span>Обзор обучения саморазвитию (LSE). Слева: саморазвитие на основе дерева во время тестирования. Выбор по верхней доверительной границе (UCB) выбирает контекст из дерева эволюции; модель действий генерирует выходные данные для новой партии задач; политика саморазвития получает сводку производительности и предлагает пересмотренный контекст. Справа: LSE обучает политику саморазвития посредством RL с вознаграждением на основе улучшения, вычисляемым как разница между производительностью после редактирования и до редактирования..</figcaption>
+</figure>
+<div class="ltx_para ltx_noindent" id="S1.p2">
+<p class="ltx_p" id="S1.p2.1">Самоэволюция во время тестирования может быть охарактеризована как минимум по двум измерениям: как обновляется стратегия и когда это происходит. На одном конце первого измерения градиентные методы напрямую модифицируют параметры модели; на другом — методы на основе промптов переписывают контекст модели, сохраняя параметры неизменными. Вдоль второго измерения внутриэпизодическая эволюция обновляет стратегию в рамках одного эпизода: модель пересматривает свои собственные попытки и уточняет ответ на конкретную задачу, обменивая дополнительные вычислительные ресурсы на прирост производительности для конкретного экземпляра <cite class="ltx_cite ltx_citemacro_citep">(Shinn<span class="ltx_text ltx_bib_etal"> et al.</span>, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib8" title="Reflexion: language agents with verbal reinforcement learning">2023</a>; Kumar<span class="ltx_text ltx_bib_etal"> et al.</span>, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib9" title="Training language models to self-correct via reinforcement learning">2025</a>; Yuksekgonul<span class="ltx_text ltx_bib_etal"> et al.</span>, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib25" title="Learning to discover at test time">2026</a>)</cite>. Межэпизодическая эволюция обновляет стратегию после одного или нескольких завершенных эпизодов и применяет результат к новым задачам, извлекая переносимые знания, которые обобщаются на различные задачи <cite class="ltx_cite ltx_citemacro_citep">(Yin<span class="ltx_text ltx_bib_etal"> et al.</span>, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib26" title="Gödel agent: a self-referential agent framework for recursive self-improvement">2024</a>; Hu<span class="ltx_text ltx_bib_etal"> et al.</span>, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib17" title="Automated design of agentic systems">2025</a>; Zhang<span class="ltx_text ltx_bib_etal"> et al.</span>, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib27" title="Darwin godel machine: open-ended evolution of self-improving agents">2025b</a>)</cite>⟧.</p>
+</div>
+<div class="ltx_para ltx_noindent" id="S1.p3">
+<p class="ltx_p" id="S1.p3.1">Мы фокусируемся на межэпизодной, основанной на промптах самоэволюции: LLM анализирует свою производительность на пакете задач и переписывает собственный контекст для улучшения результатов на следующем пакете. В ряде недавних работ это направление исследуется через автоматическую оптимизацию промптов <cite class="ltx_cite ltx_citemacro_citep">(Khattab<span class="ltx_text ltx_bib_etal"> et al.</span>, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib13" title="DSPy: compiling declarative language model calls into state-of-the-art pipelines">2024</a>; Agrawal<span class="ltx_text ltx_bib_etal"> et al.</span>, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib14" title="GEPA: reflective prompt evolution can outperform reinforcement learning">2025</a>; Yuksekgonul<span class="ltx_text ltx_bib_etal"> et al.</span>, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib37" title="TextGrad: automatic ”differentiation” via text">2024</a>)</cite>, самореферентные обновления <cite class="ltx_cite ltx_citemacro_citep">(Fernando<span class="ltx_text ltx_bib_etal"> et al.</span>, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib12" title="Promptbreeder: self-referential self-improvement via prompt evolution">2024</a>; Zhao<span class="ltx_text ltx_bib_etal"> et al.</span>, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib16" title="ExpeL: LLM agents are experiential learners">2024</a>; Zhang<span class="ltx_text ltx_bib_etal"> et al.</span>, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib27" title="Darwin godel machine: open-ended evolution of self-improving agents">2025b</a>; Hu<span class="ltx_text ltx_bib_etal"> et al.</span>, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib17" title="Automated design of agentic systems">2025</a>; Zhang<span class="ltx_text ltx_bib_etal"> et al.</span>, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib28" title="Agentic context engineering: evolving contexts for self-improving language models">2025c</a>)</cite> и агентные системы памяти <cite class="ltx_cite ltx_citemacro_citep">(Zhang<span class="ltx_text ltx_bib_etal"> et al.</span>, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib29" title="MemGen: weaving generative latent memory for self-evolving agents">2025a</a>; <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib28" title="Agentic context engineering: evolving contexts for self-improving language models">c</a>; Chhikara<span class="ltx_text ltx_bib_etal"> et al.</span>, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib18" title="Mem0: building production-ready AI agents with scalable long-term memory">2025</a>)</cite>. Однако эти методы полностью полагаются на внутреннюю способность LLM анализировать обратную связь и предлагать более качественный контекст. Модель никогда не обучается этой задаче самосовершенствования явным образом..</p>
+</div>
+<div class="ltx_para ltx_noindent" id="S1.p4">
+<p class="ltx_p" id="S1.p4.1">Мы утверждаем, что самоэволюция представляет собой задачу рассуждения, отличную от других областей рассуждений. Этот процесс, по сути, разделяет структуру проблемы RL. Оптимизатор RL полагается на специализированные алгоритмы для распределения кредита, оценки градиентов и баланса между исследованием и эксплуатацией. В самоэволюции модель должна выполнять все три действия неявно, используя только рассуждения на естественном языке. Она должна оценивать, какие части текущего контекста помогают, а какие вредят, предвидеть, как пересмотр изменит последующее поведение, и решать, стоит ли уточнять то, что работает, или пробовать что-то новое. Эти требования обосновывают явную оптимизацию для самоэволюции.</p>
+</div>
+<div class="ltx_para ltx_noindent" id="S1.p5">
+<p class="ltx_p" id="S1.p5.1">Мы предлагаем Learning to Self-Evolve (LSE) — фреймворк RL, который целенаправленно обучает LLM быть эффективной саморазвивающейся стратегией. Вместо оптимизации всей многошаговой траектории эволюции, LSE упрощает обучение до одного шага: модель получает текущий контекст и сводку производительности, а затем создает улучшенный контекст. Каждое изменение вознаграждается за счет повышения производительности в последующих задачах, а не за счет абсолютной оценки после редактирования. На этапе тестирования мы используем цикл эволюции с древовидным поиском, который позволяет системе исследовать возможные контексты и возвращаться к предыдущим состояниям..</p>
+</div>
+<div class="ltx_para ltx_noindent" id="S1.p6">
+<p class="ltx_p" id="S1.p6.1">Мы оцениваем LSE в задачах генерации Text-to-SQL и общем QA. Несмотря на использование модели всего с 4B параметрами, стратегия, обученная с помощью LSE, превосходит саморазвивающиеся стратегии, работающие на базе передовых моделей, таких как GPT-5 и Claude Sonnet 4.5, а также методы оптимизации промптов, такие как GEPA и TextGrad. Наши основные результаты заключаются в следующем:</p>
+<ul class="ltx_itemize" id="S1.I1">
+<li class="ltx_item" id="S1.I1.i1" style="list-style-type:none;">
+⟦<span class="ltx_tag ltx_tag_item">•</span>
+
+Мы формализуем самоэволюцию между эпизодами во время тестирования и реализуем её посредством обновлений на основе промптов с поиском, управляемым деревом (§<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#S3.SS1" title="3.1 Test-Time Inter-Episode Evolution ‣ 3 Method ‣ Learning to Self-Evolve"><span class="ltx_text ltx_ref_tag">3.1</span></a>, §<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#S3.SS2" title="3.2 Prompt-Based Evolution with Tree Search ‣ 3 Method ‣ Learning to Self-Evolve"><span class="ltx_text ltx_ref_tag">3.2</span></a>⟧).
+
+</li>
+<li class="ltx_item" id="S1.I1.i2" style="list-style-type:none;">
+⟦<span class="ltx_tag ltx_tag_item">•</span>
+
+Мы предлагаем LSE, структуру RL, которая явным образом обучает саморазвивающуюся стратегию с помощью вознаграждения, основанного на улучшении (§<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#S3.SS3" title="3.3 Learning to Self-Evolve (LSE) ‣ 3 Method ‣ Learning to Self-Evolve"><span class="ltx_text ltx_ref_tag">3.3</span></a>).
+
+</li>
+<li class="ltx_item" id="S1.I1.i3" style="list-style-type:none;">
+⟦<span class="ltx_tag ltx_tag_item">•</span>
+
+Мы показываем, что модель с 4 миллиардами параметров, обученная с использованием LSE, превосходит более крупные необученные модели и методы оптимизации промптов, а также переносится для управления другими моделями без дополнительного обучения (§<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#S4" title="4 Experiments ‣ Learning to Self-Evolve"><span class="ltx_text ltx_ref_tag">4</span></a>).
+
+</li>
+</ul>
+</div>
+</section>
+<section class="ltx_section" id="S2">
+<h2 class="ltx_title ltx_title_section">
+<span class="ltx_tag ltx_tag_section">2 </span>Связанные работы</h2>
+<div class="ltx_para ltx_noindent" id="S2.p1">
+<p class="ltx_p" id="S2.p1.1">Термин self-evolution использовался для обозначения множества различных концепций в недавних исследованиях LLM. Мы классифицируем этот ландшафт на две широкие категории. Training-time self-evolution фокусируется на использовании LLM для генерации собственных обучающих данных и сигналов обучения в процессе тренировки. Test-time self-evolution позволяет стратегии продолжать самообновление после завершения обучения, динамически адаптируясь на основе опыта, накопленного во время развертывания..</p>
+</div>
+<section class="ltx_paragraph" id="S2.SS0.SSS0.Px1">
+<h4 class="ltx_title ltx_title_paragraph">Самообучение во время тренировки.</h4>
+<div class="ltx_para ltx_noindent" id="S2.SS0.SSS0.Px1.p1">
+<p class="ltx_p" id="S2.SS0.SSS0.Px1.p1.1">Растущий объем исследований использует LLM для генерации собственных данных и сигналов обучения в процессе тренировки. Пост-тренировка на основе RL заставляет модель создавать цепочки рассуждений и оптимизирует их с учетом проверяемых вознаграждений <cite class="ltx_cite ltx_citemacro_citep">(Lightman<span class="ltx_text ltx_bib_etal"> et al.</span>, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib4" title="Let’s verify step by step">2023</a>; <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib3" title="Learning to reason with llms">OpenAI, </a>; DeepSeek-AI, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib23" title="DeepSeek-R1: incentivizing reasoning capability in LLMs via reinforcement learning">2025</a>)</cite>. Методы бутстрэппинга, такие как STaR <cite class="ltx_cite ltx_citemacro_citep">(Zelikman<span class="ltx_text ltx_bib_etal"> et al.</span>, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib40" title="STaR: bootstrapping reasoning with reasoning">2022</a>)</cite>, итеративно генерируют варианты обоснований и проводят SFT на основе правильных. Подходы с самовознаграждением <cite class="ltx_cite ltx_citemacro_citep">(Yuan<span class="ltx_text ltx_bib_etal"> et al.</span>, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib41" title="Self-rewarding language models">2024</a>; Zhao<span class="ltx_text ltx_bib_etal"> et al.</span>, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib42" title="Learning to reason without external rewards">2025b</a>)</cite> расширяют это, используя саму модель в качестве сигнала вознаграждения. Absolute Zero <cite class="ltx_cite ltx_citemacro_citep">(Zhao<span class="ltx_text ltx_bib_etal"> et al.</span>, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib39" title="Absolute zero: reinforced self-play reasoning with zero data">2025a</a>)</cite> доводит это до крайности: одна модель одновременно предлагает и решает задачи без внешних данных, используя исполнитель кода в качестве единственного источника проверяемого вознаграждения. Хотя эти методы позволяют создавать более мощные модели, итоговая политика остается статической после завершения обучения. Наша работа решает дополнительную задачу: обеспечение возможности для политики продолжать улучшаться во время тестирования..</p>
+</div>
+</section>
+<section class="ltx_paragraph" id="S2.SS0.SSS0.Px2">
+<h4 class="ltx_title ltx_title_paragraph">Самоэволюция во время тестирования.</h4>
+<div class="ltx_para ltx_noindent" id="S2.SS0.SSS0.Px2.p1">
+<p class="ltx_p" id="S2.SS0.SSS0.Px2.p1.1">Статическая политика не способна адаптироваться к сдвигам распределения, возникающим во время тестирования. Саморазвитие на этапе тестирования решает эту проблему, позволяя модели самостоятельно обновляться на основе собственного опыта после развертывания. Эта возможность охватывает два временных масштаба. Методы внутри эпизода улучшают решение отдельной задачи за счет выделения дополнительных вычислительных ресурсов. Reflexion <cite class="ltx_cite ltx_citemacro_citep">(Shinn<span class="ltx_text ltx_bib_etal"> et al.</span>, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib8" title="Reflexion: language agents with verbal reinforcement learning">2023</a>)</cite> побуждает модель анализировать неудачные попытки и повторять их, SCoRe <cite class="ltx_cite ltx_citemacro_citep">(Kumar<span class="ltx_text ltx_bib_etal"> et al.</span>, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib9" title="Training language models to self-correct via reinforcement learning">2025</a>)</cite> обучает самокоррекции с помощью RL, а TTRL <cite class="ltx_cite ltx_citemacro_citep">(Zuo<span class="ltx_text ltx_bib_etal"> et al.</span>, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib10" title="TTRL: test-time reinforcement learning">2025</a>)</cite> применяет RL непосредственно во время тестирования, используя мажоритарное голосование в качестве прокси-награды. TTT-Discover <cite class="ltx_cite ltx_citemacro_citep">(Yuksekgonul<span class="ltx_text ltx_bib_etal"> et al.</span>, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib25" title="Learning to discover at test time">2026</a>)</cite> продолжает обучение модели на этапе тестирования с помощью RL для поиска наилучшего решения одной открытой задачи. Эти методы обменивают вычислительные ресурсы на точность в отдельных случаях, но не переносят знания между задачами..</p>
+</div>
+<div class="ltx_para ltx_noindent" id="S2.SS0.SSS0.Px2.p2">
+<p class="ltx_p" id="S2.SS0.SSS0.Px2.p2.1">Методы межэпизодного обучения накапливают опыт на основе завершенных эпизодов и применяют его к новым. Одним из активных направлений является автоматическая оптимизация промптов. GEPA <cite class="ltx_cite ltx_citemacro_citep">(Agrawal<span class="ltx_text ltx_bib_etal"> et al.</span>, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib14" title="GEPA: reflective prompt evolution can outperform reinforcement learning">2025</a>)</cite> и TextGrad <cite class="ltx_cite ltx_citemacro_citep">(Yuksekgonul<span class="ltx_text ltx_bib_etal"> et al.</span>, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib37" title="TextGrad: automatic ”differentiation” via text">2024</a>)</cite> используют обратную связь на естественном языке, полученную в ходе выполнения задач, для итеративного изменения и переписывания промптов. Второе направление развивает самореферентные агенты, которые модифицируют собственный код или инструкции. ExpeL <cite class="ltx_cite ltx_citemacro_citep">(Zhao<span class="ltx_text ltx_bib_etal"> et al.</span>, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib16" title="ExpeL: LLM agents are experiential learners">2024</a>)</cite> извлекает переносимые уроки из успешных и неудачных траекторий. PromptBreeder <cite class="ltx_cite ltx_citemacro_citep">(Fernando<span class="ltx_text ltx_bib_etal"> et al.</span>, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib12" title="Promptbreeder: self-referential self-improvement via prompt evolution">2024</a>)</cite> эволюционирует промпты с помощью операторов мутации и кроссовера. Более современные системы, такие как ADAS <cite class="ltx_cite ltx_citemacro_citep">(Hu<span class="ltx_text ltx_bib_etal"> et al.</span>, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib17" title="Automated design of agentic systems">2025</a>)</cite> и Darwin Gödel Machine <cite class="ltx_cite ltx_citemacro_citep">(Zhang<span class="ltx_text ltx_bib_etal"> et al.</span>, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib27" title="Darwin godel machine: open-ended evolution of self-improving agents">2025b</a>)</cite>, расширяют этот подход путем рекурсивной переработки самой самоэволюционирующей политики <cite class="ltx_cite ltx_citemacro_citep">(Yin<span class="ltx_text ltx_bib_etal"> et al.</span>, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib26" title="Gödel agent: a self-referential agent framework for recursive self-improvement">2024</a>)</cite>. Третье направление создает агентные системы памяти: Voyager <cite class="ltx_cite ltx_citemacro_citep">(Wang<span class="ltx_text ltx_bib_etal"> et al.</span>, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib15" title="Voyager: an open-ended embodied agent with large language models">2023</a>)</cite> накапливает библиотеку повторно используемых навыков на основе опыта в Minecraft, в то время как системы, такие как MemGen <cite class="ltx_cite ltx_citemacro_citep">(Zhang<span class="ltx_text ltx_bib_etal"> et al.</span>, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib29" title="MemGen: weaving generative latent memory for self-evolving agents">2025a</a>)</cite> и Mem0 <cite class="ltx_cite ltx_citemacro_citep">(Chhikara<span class="ltx_text ltx_bib_etal"> et al.</span>, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib18" title="Mem0: building production-ready AI agents with scalable long-term memory">2025</a>)</cite>, поддерживают развивающиеся хранилища памяти, сохраняющиеся между эпизодами <cite class="ltx_cite ltx_citemacro_citep">(Zhang<span class="ltx_text ltx_bib_etal"> et al.</span>, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib28" title="Agentic context engineering: evolving contexts for self-improving language models">2025c</a>)</cite>. Все эти методы опираются на присущую LLM способность к рассуждению для анализа обратной связи и предложения улучшений. Наша работа относится к этой категории, но использует иной подход: вместо того чтобы полагаться на эмерджентные способности, мы явно обучаем самоэволюционирующую политику с помощью RL..</p>
+</div>
+</section>
+</section>
+<section class="ltx_section" id="S3">
+<h2 class="ltx_title ltx_title_section">
+<span class="ltx_tag ltx_tag_section">3 </span>Метод</h2>
+<div class="ltx_para ltx_noindent" id="S3.p1">
+<p class="ltx_p" id="S3.p1.1">Теперь мы представляем нашу предлагаемую структуру и метод. Сначала мы формализуем саморазвитие между эпизодами во время тестирования (§<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#S3.SS1" title="3.1 Test-Time Inter-Episode Evolution ‣ 3 Method ‣ Learning to Self-Evolve"><span class="ltx_text ltx_ref_tag">3.1</span></a>). Затем мы описываем, как мы реализуем это на практике с помощью обновлений на основе промптов и поиска, управляемого деревом (§<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#S3.SS2" title="3.2 Prompt-Based Evolution with Tree Search ‣ 3 Method ‣ Learning to Self-Evolve"><span class="ltx_text ltx_ref_tag">3.2</span></a>). Наконец, мы представляем Learning to Self-Evolve (LSE) — RL структуру, которая обучает политику саморазвития (§<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#S3.SS3" title="3.3 Learning to Self-Evolve (LSE) ‣ 3 Method ‣ Learning to Self-Evolve"><span class="ltx_text ltx_ref_tag">3.3</span></a>⟧).</p>
+</div>
+<section class="ltx_subsection" id="S3.SS1">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">3.1 </span>Эволюция между эпизодами во время тестирования</h3>
+<div class="ltx_para ltx_noindent" id="S3.SS1.p1">
+<p class="ltx_p" id="S3.SS1.p1.15">Рассмотрим задачу <math alttext="{\mathcal{T}}=({\mathcal{X}},{\mathcal{Y}},R)" class="ltx_Math" display="inline" id="S3.SS1.p1.1.m1" intent=":literal"><semantics><mrow><mi class="ltx_font_mathcaligraphic">𝒯</mi><mo>=</mo><mrow><mo stretchy="false">(</mo><mi class="ltx_font_mathcaligraphic">𝒳</mi><mo>,</mo><mi class="ltx_font_mathcaligraphic">𝒴</mi><mo>,</mo><mi>R</mi><mo stretchy="false">)</mo></mrow></mrow><annotation encoding="application/x-tex">{\mathcal{T}}=({\mathcal{X}},{\mathcal{Y}},R)</annotation></semantics></math>, включающую пространство входных данных <math alttext="{\mathcal{X}}" class="ltx_Math" display="inline" id="S3.SS1.p1.2.m2" intent=":literal"><semantics><mi class="ltx_font_mathcaligraphic">𝒳</mi><annotation encoding="application/x-tex">{\mathcal{X}}</annotation></semantics></math>, пространство выходных данных <math alttext="{\mathcal{Y}}" class="ltx_Math" display="inline" id="S3.SS1.p1.3.m3" intent=":literal"><semantics><mi class="ltx_font_mathcaligraphic">𝒴</mi><annotation encoding="application/x-tex">{\mathcal{Y}}</annotation></semantics></math> и функцию вознаграждения <math alttext="R:{\mathcal{X}}\times{\mathcal{Y}}\to\mathbb{R}" class="ltx_Math" display="inline" id="S3.SS1.p1.4.m4" intent=":literal"><semantics><mrow><mi>R</mi><mo lspace="0.278em" rspace="0.278em">:</mo><mrow><mrow><mi class="ltx_font_mathcaligraphic">𝒳</mi><mo lspace="0.222em" rspace="0.222em">×</mo><mi class="ltx_font_mathcaligraphic">𝒴</mi></mrow><mo stretchy="false">→</mo><mi>ℝ</mi></mrow></mrow><annotation encoding="application/x-tex">R:{\mathcal{X}}\times{\mathcal{Y}}\to\mathbb{R}</annotation></semantics></math>. Стратегия <math alttext="\pi" class="ltx_Math" display="inline" id="S3.SS1.p1.5.m5" intent=":literal"><semantics><mi>π</mi><annotation encoding="application/x-tex">\pi</annotation></semantics></math> отображает входные данные <math alttext="x\in{\mathcal{X}}" class="ltx_Math" display="inline" id="S3.SS1.p1.6.m6" intent=":literal"><semantics><mrow><mi>x</mi><mo>∈</mo><mi class="ltx_font_mathcaligraphic">𝒳</mi></mrow><annotation encoding="application/x-tex">x\in{\mathcal{X}}</annotation></semantics></math> в выходные данные <math alttext="y\in{\mathcal{Y}}" class="ltx_Math" display="inline" id="S3.SS1.p1.7.m7" intent=":literal"><semantics><mrow><mi>y</mi><mo>∈</mo><mi class="ltx_font_mathcaligraphic">𝒴</mi></mrow><annotation encoding="application/x-tex">y\in{\mathcal{Y}}</annotation></semantics></math>.
+Саморазвивающаяся стратегия представляет собой функцию <math alttext="f" class="ltx_Math" display="inline" id="S3.SS1.p1.8.m8" intent=":literal"><semantics><mi>f</mi><annotation encoding="application/x-tex">f</annotation></semantics></math>, которая обновляет текущую стратегию на основе опыта, накопленного в ходе взаимодействия. Для заданной задачи <math alttext="{\mathcal{T}}" class="ltx_Math" display="inline" id="S3.SS1.p1.9.m9" intent=":literal"><semantics><mi class="ltx_font_mathcaligraphic">𝒯</mi><annotation encoding="application/x-tex">{\mathcal{T}}</annotation></semantics></math> система выполняет <math alttext="T" class="ltx_Math" display="inline" id="S3.SS1.p1.10.m10" intent=":literal"><semantics><mi>T</mi><annotation encoding="application/x-tex">T</annotation></semantics></math> раундов эволюции. На каждом раунде <math alttext="t" class="ltx_Math" display="inline" id="S3.SS1.p1.11.m11" intent=":literal"><semantics><mi>t</mi><annotation encoding="application/x-tex">t</annotation></semantics></math> текущая стратегия <math alttext="\pi^{(t)}" class="ltx_Math" display="inline" id="S3.SS1.p1.12.m12" intent=":literal"><semantics><msup><mi>π</mi><mrow><mo stretchy="false">(</mo><mi>t</mi><mo stretchy="false">)</mo></mrow></msup><annotation encoding="application/x-tex">\pi^{(t)}</annotation></semantics></math> применяется к пакету <math alttext="k" class="ltx_Math" display="inline" id="S3.SS1.p1.13.m13" intent=":literal"><semantics><mi>k</mi><annotation encoding="application/x-tex">k</annotation></semantics></math> задач, выбранных из <math alttext="{\mathcal{X}}" class="ltx_Math" display="inline" id="S3.SS1.p1.14.m14" intent=":literal"><semantics><mi class="ltx_font_mathcaligraphic">𝒳</mi><annotation encoding="application/x-tex">{\mathcal{X}}</annotation></semantics></math>, создавая кортежи опыта <math alttext="\{(x_{i},y_{i},r_{i})\}_{i=1}^{k}" class="ltx_Math" display="inline" id="S3.SS1.p1.15.m15" intent=":literal"><semantics><msubsup><mrow><mo stretchy="false">{</mo><mrow><mo stretchy="false">(</mo><msub><mi>x</mi><mi>i</mi></msub><mo>,</mo><msub><mi>y</mi><mi>i</mi></msub><mo>,</mo><msub><mi>r</mi><mi>i</mi></msub><mo stretchy="false">)</mo></mrow><mo stretchy="false">}</mo></mrow><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>k</mi></msubsup><annotation encoding="application/x-tex">\{(x_{i},y_{i},r_{i})\}_{i=1}^{k}</annotation></semantics></math>. Затем саморазвивающаяся стратегия вычисляет обновленную стратегию:</p>
+<table class="ltx_equation ltx_eqn_table" id="S3.E1">
+<tbody><tr class="ltx_equation ltx_eqn_row ltx_align_baseline">
+<td class="ltx_eqn_cell ltx_eqn_center_padleft"></td>
+<td class="ltx_eqn_cell ltx_align_center"><math alttext="\pi^{(t+1)}=f\big(\pi^{(t)},\;\{(x_{i},y_{i},r_{i})\}_{i=1}^{k}\big)." class="ltx_Math" display="block" id="S3.E1.m1" intent=":literal"><semantics><mrow><mrow><msup><mi>π</mi><mrow><mo stretchy="false">(</mo><mrow><mi>t</mi><mo>+</mo><mn>1</mn></mrow><mo stretchy="false">)</mo></mrow></msup><mo>=</mo><mrow><mi>f</mi><mo lspace="0em" rspace="0em">​</mo><mrow><mo maxsize="1.200em" minsize="1.200em">(</mo><msup><mi>π</mi><mrow><mo stretchy="false">(</mo><mi>t</mi><mo stretchy="false">)</mo></mrow></msup><mo rspace="0.447em">,</mo><msubsup><mrow><mo stretchy="false">{</mo><mrow><mo stretchy="false">(</mo><msub><mi>x</mi><mi>i</mi></msub><mo>,</mo><msub><mi>y</mi><mi>i</mi></msub><mo>,</mo><msub><mi>r</mi><mi>i</mi></msub><mo stretchy="false">)</mo></mrow><mo stretchy="false">}</mo></mrow><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>k</mi></msubsup><mo maxsize="1.200em" minsize="1.200em">)</mo></mrow></mrow></mrow><mo lspace="0em">.</mo></mrow><annotation encoding="application/x-tex">\pi^{(t+1)}=f\big(\pi^{(t)},\;\{(x_{i},y_{i},r_{i})\}_{i=1}^{k}\big).</annotation></semantics></math></td>
+<td class="ltx_eqn_cell ltx_eqn_center_padright"></td>
+<td class="ltx_eqn_cell ltx_eqn_eqno ltx_align_middle ltx_align_right" rowspan="1"><span class="ltx_tag ltx_tag_equation ltx_align_right">(1)</span></td>
+</tr></tbody>
+</table>
+<p class="ltx_p" id="S3.SS1.p1.18">Это создает последовательность стратегий <math alttext="\pi^{(0)},\pi^{(1)},\ldots,\pi^{(T)}" class="ltx_Math" display="inline" id="S3.SS1.p1.16.m1" intent=":literal"><semantics><mrow><msup><mi>π</mi><mrow><mo stretchy="false">(</mo><mn>0</mn><mo stretchy="false">)</mo></mrow></msup><mo>,</mo><msup><mi>π</mi><mrow><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo></mrow></msup><mo>,</mo><mi mathvariant="normal">…</mi><mo>,</mo><msup><mi>π</mi><mrow><mo stretchy="false">(</mo><mi>T</mi><mo stretchy="false">)</mo></mrow></msup></mrow><annotation encoding="application/x-tex">\pi^{(0)},\pi^{(1)},\ldots,\pi^{(T)}</annotation></semantics></math>. Цель <math alttext="f" class="ltx_Math" display="inline" id="S3.SS1.p1.17.m2" intent=":literal"><semantics><mi>f</mi><annotation encoding="application/x-tex">f</annotation></semantics></math> заключается в максимизации совокупного вознаграждения за <math alttext="T" class="ltx_Math" display="inline" id="S3.SS1.p1.18.m3" intent=":literal"><semantics><mi>T</mi><annotation encoding="application/x-tex">T</annotation></semantics></math> раундов эволюции:</p>
+<table class="ltx_equation ltx_eqn_table" id="S3.E2">
+<tbody><tr class="ltx_equation ltx_eqn_row ltx_align_baseline">
+<td class="ltx_eqn_cell ltx_eqn_center_padleft"></td>
+<td class="ltx_eqn_cell ltx_align_center"><math alttext="\sum_{t=0}^{T}\mathbb{E}_{x\sim{\mathcal{X}}}\big[R\big(x,\,\pi^{(t)}(x)\big)\big]." class="ltx_Math" display="block" id="S3.E2.m1" intent=":literal"><semantics><mrow><mrow><munderover><mo movablelimits="false">∑</mo><mrow><mi>t</mi><mo>=</mo><mn>0</mn></mrow><mi>T</mi></munderover><mrow><msub><mi>𝔼</mi><mrow><mi>x</mi><mo>∼</mo><mi class="ltx_font_mathcaligraphic">𝒳</mi></mrow></msub><mo lspace="0em" rspace="0em">​</mo><mrow><mo maxsize="1.200em" minsize="1.200em">[</mo><mrow><mi>R</mi><mo lspace="0em" rspace="0em">​</mo><mrow><mo maxsize="1.200em" minsize="1.200em">(</mo><mi>x</mi><mo rspace="0.337em">,</mo><mrow><msup><mi>π</mi><mrow><mo stretchy="false">(</mo><mi>t</mi><mo stretchy="false">)</mo></mrow></msup><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo></mrow></mrow><mo maxsize="1.200em" minsize="1.200em">)</mo></mrow></mrow><mo maxsize="1.200em" minsize="1.200em">]</mo></mrow></mrow></mrow><mo lspace="0em">.</mo></mrow><annotation encoding="application/x-tex">\sum_{t=0}^{T}\mathbb{E}_{x\sim{\mathcal{X}}}\big[R\big(x,\,\pi^{(t)}(x)\big)\big].</annotation></semantics></math></td>
+<td class="ltx_eqn_cell ltx_eqn_center_padright"></td>
+<td class="ltx_eqn_cell ltx_eqn_eqno ltx_align_middle ltx_align_right" rowspan="1"><span class="ltx_tag ltx_tag_equation ltx_align_right">(2)</span></td>
+</tr></tbody>
+</table>
+</div>
+<div class="ltx_para ltx_noindent" id="S3.SS1.p2">
+<p class="ltx_p" id="S3.SS1.p2.4">В контексте языковых моделей стратегия <math alttext="\pi_{\theta}" class="ltx_Math" display="inline" id="S3.SS1.p2.1.m1" intent=":literal"><semantics><msub><mi>π</mi><mi>θ</mi></msub><annotation encoding="application/x-tex">\pi_{\theta}</annotation></semantics></math> определяется её параметрами <math alttext="\theta" class="ltx_Math" display="inline" id="S3.SS1.p2.2.m2" intent=":literal"><semantics><mi>θ</mi><annotation encoding="application/x-tex">\theta</annotation></semantics></math> и контекстом <math alttext="c" class="ltx_Math" display="inline" id="S3.SS1.p2.3.m3" intent=":literal"><semantics><mi>c</mi><annotation encoding="application/x-tex">c</annotation></semantics></math>, включающим системные промпты, инструкции, библиотеки навыков и любые другие текстовые входные данные, формирующие поведение. Такая декомпозиция допускает две естественные реализации <math alttext="f" class="ltx_Math" display="inline" id="S3.SS1.p2.4.m4" intent=":literal"><semantics><mi>f</mi><annotation encoding="application/x-tex">f</annotation></semantics></math>:</p>
+<ul class="ltx_itemize" id="S3.I1">
+<li class="ltx_item" id="S3.I1.i1" style="list-style-type:none;">
+⟦<span class="ltx_tag ltx_tag_item">•</span>
+
+Основанный на градиентах: <math alttext="f" class="ltx_Math" display="inline" id="S3.I1.i1.p1.1.m1" intent=":literal"><semantics><mi>f</mi><annotation encoding="application/x-tex">f</annotation></semantics></math> изменяет <math alttext="\theta" class="ltx_Math" display="inline" id="S3.I1.i1.p1.2.m2" intent=":literal"><semantics><mi>θ</mi><annotation encoding="application/x-tex">\theta</annotation></semantics></math> напрямую (например, посредством RL или SFT на основе недавнего опыта);
+
+</li>
+<li class="ltx_item" id="S3.I1.i2" style="list-style-type:none;">
+⟦<span class="ltx_tag ltx_tag_item">•</span>
+
+На основе промптов: <math alttext="f" class="ltx_Math" display="inline" id="S3.I1.i2.p1.1.m1" intent=":literal"><semantics><mi>f</mi><annotation encoding="application/x-tex">f</annotation></semantics></math> модифицирует <math alttext="c" class="ltx_Math" display="inline" id="S3.I1.i2.p1.2.m2" intent=":literal"><semantics><mi>c</mi><annotation encoding="application/x-tex">c</annotation></semantics></math>, сохраняя <math alttext="\theta" class="ltx_Math" display="inline" id="S3.I1.i2.p1.3.m3" intent=":literal"><semantics><mi>θ</mi><annotation encoding="application/x-tex">\theta</annotation></semantics></math> замороженными.
+
+</li>
+</ul>
+<p class="ltx_p" id="S3.SS1.p2.5">Мы фокусируемся на инстанцировании на основе промптов, где <math alttext="f" class="ltx_Math" display="inline" id="S3.SS1.p2.5.m1" intent=":literal"><semantics><mi>f</mi><annotation encoding="application/x-tex">f</annotation></semantics></math> сама по себе является LLM, которая генерирует обновленные контексты на основе прошлого опыта. Этот выбор не требует вычисления градиентов во время тестирования, тем самым позволяя избежать проблемы катастрофического забывания при непрерывном обучении, и представляет задачу эволюции как задачу рассуждения на естественном языке, которая сама по себе может быть улучшена посредством обучения..</p>
+</div>
+</section>
+<section class="ltx_subsection" id="S3.SS2">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">3.2 </span>Эволюция на основе промптов с использованием древовидного поиска</h3>
+<div class="ltx_para ltx_noindent" id="S3.SS2.p1">
+<p class="ltx_p" id="S3.SS2.p1.5">LLM с замороженными параметрами <math alttext="\theta" class="ltx_Math" display="inline" id="S3.SS2.p1.1.m1" intent=":literal"><semantics><mi>θ</mi><annotation encoding="application/x-tex">\theta</annotation></semantics></math> определяет условную стратегию <math alttext="\pi_{\theta}(y\mid x,c)" class="ltx_Math" display="inline" id="S3.SS2.p1.2.m2" intent=":literal"><semantics><mrow><msub><mi>π</mi><mi>θ</mi></msub><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><mrow><mi>y</mi><mo>∣</mo><mrow><mi>x</mi><mo>,</mo><mi>c</mi></mrow></mrow><mo stretchy="false">)</mo></mrow></mrow><annotation encoding="application/x-tex">\pi_{\theta}(y\mid x,c)</annotation></semantics></math>, где <math alttext="x\in{\mathcal{X}}" class="ltx_Math" display="inline" id="S3.SS2.p1.3.m3" intent=":literal"><semantics><mrow><mi>x</mi><mo>∈</mo><mi class="ltx_font_mathcaligraphic">𝒳</mi></mrow><annotation encoding="application/x-tex">x\in{\mathcal{X}}</annotation></semantics></math> — это экземпляр задачи, а <math alttext="c" class="ltx_Math" display="inline" id="S3.SS2.p1.4.m4" intent=":literal"><semantics><mi>c</mi><annotation encoding="application/x-tex">c</annotation></semantics></math> — контекст, представленный в §<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#S3.SS1" title="3.1 Test-Time Inter-Episode Evolution ‣ 3 Method ‣ Learning to Self-Evolve"><span class="ltx_text ltx_ref_tag">3.1</span></a>. В нашей реализации мы выделяем специальное поле инструкций внутри <math alttext="c" class="ltx_Math" display="inline" id="S3.SS2.p1.5.m5" intent=":literal"><semantics><mi>c</mi><annotation encoding="application/x-tex">c</annotation></semantics></math> для редактирования саморазвивающейся стратегией, оставляя все остальные компоненты (например, описание задачи, спецификацию формата) неизменными..</p>
+</div>
+<div class="ltx_para ltx_noindent" id="S3.SS2.p2">
+<p class="ltx_p" id="S3.SS2.p2.1">На каждом этапе саморазвивающаяся стратегия <math alttext="f_{\psi}" class="ltx_Math" display="inline" id="S3.SS2.p2.1.m1" intent=":literal"><semantics><msub><mi>f</mi><mi>ψ</mi></msub><annotation encoding="application/x-tex">f_{\psi}</annotation></semantics></math> сопоставляет текущий контекст и сводку производительности с обновленным контекстом:</p>
+<table class="ltx_equation ltx_eqn_table" id="S3.E3">
+<tbody><tr class="ltx_equation ltx_eqn_row ltx_align_baseline">
+<td class="ltx_eqn_cell ltx_eqn_center_padleft"></td>
+<td class="ltx_eqn_cell ltx_align_center"><math alttext="c_{t+1}=f_{\psi}\big(c_{t},\,S_{t}\big)," class="ltx_Math" display="block" id="S3.E3.m1" intent=":literal"><semantics><mrow><mrow><msub><mi>c</mi><mrow><mi>t</mi><mo>+</mo><mn>1</mn></mrow></msub><mo>=</mo><mrow><msub><mi>f</mi><mi>ψ</mi></msub><mo lspace="0em" rspace="0em">​</mo><mrow><mo maxsize="1.200em" minsize="1.200em">(</mo><msub><mi>c</mi><mi>t</mi></msub><mo rspace="0.337em">,</mo><msub><mi>S</mi><mi>t</mi></msub><mo maxsize="1.200em" minsize="1.200em">)</mo></mrow></mrow></mrow><mo>,</mo></mrow><annotation encoding="application/x-tex">c_{t+1}=f_{\psi}\big(c_{t},\,S_{t}\big),</annotation></semantics></math></td>
+<td class="ltx_eqn_cell ltx_eqn_center_padright"></td>
+<td class="ltx_eqn_cell ltx_eqn_eqno ltx_align_middle ltx_align_right" rowspan="1"><span class="ltx_tag ltx_tag_equation ltx_align_right">(3)</span></td>
+</tr></tbody>
+</table>
+<p class="ltx_p" id="S3.SS2.p2.3">где <math alttext="S_{t}=\{(x_{i},y_{i},y_{i}^{*},r_{i})\}_{i=1}^{k}" class="ltx_Math" display="inline" id="S3.SS2.p2.2.m1" intent=":literal"><semantics><mrow><msub><mi>S</mi><mi>t</mi></msub><mo>=</mo><msubsup><mrow><mo stretchy="false">{</mo><mrow><mo stretchy="false">(</mo><msub><mi>x</mi><mi>i</mi></msub><mo>,</mo><msub><mi>y</mi><mi>i</mi></msub><mo>,</mo><msubsup><mi>y</mi><mi>i</mi><mo>∗</mo></msubsup><mo>,</mo><msub><mi>r</mi><mi>i</mi></msub><mo stretchy="false">)</mo></mrow><mo stretchy="false">}</mo></mrow><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>k</mi></msubsup></mrow><annotation encoding="application/x-tex">S_{t}=\{(x_{i},y_{i},y_{i}^{*},r_{i})\}_{i=1}^{k}</annotation></semantics></math> представляет собой структурированную сводку производительности, содержащую задачи, выходные данные action LLM, эталонные ответы и сигналы правильности для каждой задачи из раунда <math alttext="t" class="ltx_Math" display="inline" id="S3.SS2.p2.3.m2" intent=":literal"><semantics><mi>t</mi><annotation encoding="application/x-tex">t</annotation></semantics></math>⟧.</p>
+</div>
+<div class="ltx_para ltx_noindent" id="S3.SS2.p3">
+<p class="ltx_p" id="S3.SS2.p3.5">Заметьте, что <math alttext="S_{t}" class="ltx_Math" display="inline" id="S3.SS2.p3.1.m1" intent=":literal"><semantics><msub><mi>S</mi><mi>t</mi></msub><annotation encoding="application/x-tex">S_{t}</annotation></semantics></math> содержит только <math alttext="k" class="ltx_Math" display="inline" id="S3.SS2.p3.2.m2" intent=":literal"><semantics><mi>k</mi><annotation encoding="application/x-tex">k</annotation></semantics></math> задачи, где <math alttext="k" class="ltx_Math" display="inline" id="S3.SS2.p3.3.m3" intent=":literal"><semantics><mi>k</mi><annotation encoding="application/x-tex">k</annotation></semantics></math> обычно невелик, и на каждом раунде извлекается разный пакет. Таким образом, производительность внутри пакета дает лишь зашумленную оценку качества контекста. Чтобы получить согласованную меру по всем раундам, мы фиксируем отдельный отложенный набор <math alttext="D\subset{\mathcal{X}}" class="ltx_Math" display="inline" id="S3.SS2.p3.4.m4" intent=":literal"><semantics><mrow><mi>D</mi><mo>⊂</mo><mi class="ltx_font_mathcaligraphic">𝒳</mi></mrow><annotation encoding="application/x-tex">D\subset{\mathcal{X}}</annotation></semantics></math> и определяем вознаграждение контекста <math alttext="c" class="ltx_Math" display="inline" id="S3.SS2.p3.5.m5" intent=":literal"><semantics><mi>c</mi><annotation encoding="application/x-tex">c</annotation></semantics></math> как</p>
+<table class="ltx_equation ltx_eqn_table" id="S3.E4">
+<tbody><tr class="ltx_equation ltx_eqn_row ltx_align_baseline">
+<td class="ltx_eqn_cell ltx_eqn_center_padleft"></td>
+<td class="ltx_eqn_cell ltx_align_center"><math alttext="\bar{R}(c)\;=\;\frac{1}{|D|}\sum_{x\in D}R(x,\,y),\quad y\sim\pi_{\theta}(\cdot\mid x,c)." class="ltx_math_unparsed" display="block" id="S3.E4.m1" intent=":literal"><semantics><mrow><mover accent="true"><mi>R</mi><mo>¯</mo></mover><mrow><mo stretchy="false">(</mo><mi>c</mi><mo rspace="0.280em" stretchy="false">)</mo></mrow><mo rspace="0.558em">=</mo><mfrac><mn>1</mn><mrow><mo stretchy="false">|</mo><mi>D</mi><mo stretchy="false">|</mo></mrow></mfrac><munder><mo movablelimits="false">∑</mo><mrow><mi>x</mi><mo>∈</mo><mi>D</mi></mrow></munder><mi>R</mi><mrow><mo stretchy="false">(</mo><mi>x</mi><mo rspace="0.337em">,</mo><mi>y</mi><mo stretchy="false">)</mo></mrow><mo rspace="1.167em">,</mo><mi>y</mi><mo>∼</mo><msub><mi>π</mi><mi>θ</mi></msub><mrow><mo stretchy="false">(</mo><mo lspace="0em" rspace="0em">⋅</mo><mo lspace="0em" rspace="0.167em">∣</mo><mi>x</mi><mo>,</mo><mi>c</mi><mo stretchy="false">)</mo></mrow><mo lspace="0em">.</mo></mrow><annotation encoding="application/x-tex">\bar{R}(c)\;=\;\frac{1}{|D|}\sum_{x\in D}R(x,\,y),\quad y\sim\pi_{\theta}(\cdot\mid x,c).</annotation></semantics></math></td>
+<td class="ltx_eqn_cell ltx_eqn_center_padright"></td>
+<td class="ltx_eqn_cell ltx_eqn_eqno ltx_align_middle ltx_align_right" rowspan="1"><span class="ltx_tag ltx_tag_equation ltx_align_right">(4)</span></td>
+</tr></tbody>
+</table>
+</div>
+<figure class="ltx_float ltx_float_algorithm ltx_framed ltx_framed_top" id="alg1">
+<figcaption class="ltx_caption">⟦<span class="ltx_tag ltx_tag_float"><span class="ltx_text ltx_font_bold" id="alg1.2.1.1">Algorithm 1</span> </span> Эволюция на основе промптов с использованием древовидного поиска</figcaption>
+<div class="ltx_listing ltx_listing" id="alg1.3">
+<div class="ltx_listingline" id="alg1.l0">
+<span class="ltx_tag ltx_tag_listingline">0:</span> Политика действий <math alttext="\pi_{\theta}" class="ltx_Math" display="inline" id="alg1.l0.m1" intent=":literal"><semantics><msub><mi>π</mi><mi>θ</mi></msub><annotation encoding="application/x-tex">\pi_{\theta}</annotation></semantics></math>; саморазвивающаяся стратегия <math alttext="f_{\psi}" class="ltx_Math" display="inline" id="alg1.l0.m2" intent=":literal"><semantics><msub><mi>f</mi><mi>ψ</mi></msub><annotation encoding="application/x-tex">f_{\psi}</annotation></semantics></math>; задача <math alttext="{\mathcal{T}}=({\mathcal{X}},{\mathcal{Y}},R)" class="ltx_Math" display="inline" id="alg1.l0.m3" intent=":literal"><semantics><mrow><mi class="ltx_font_mathcaligraphic">𝒯</mi><mo>=</mo><mrow><mo stretchy="false">(</mo><mi class="ltx_font_mathcaligraphic">𝒳</mi><mo>,</mo><mi class="ltx_font_mathcaligraphic">𝒴</mi><mo>,</mo><mi>R</mi><mo stretchy="false">)</mo></mrow></mrow><annotation encoding="application/x-tex">{\mathcal{T}}=({\mathcal{X}},{\mathcal{Y}},R)</annotation></semantics></math>; отложенная выборка <math alttext="D\subset{\mathcal{X}}" class="ltx_Math" display="inline" id="alg1.l0.m4" intent=":literal"><semantics><mrow><mi>D</mi><mo>⊂</mo><mi class="ltx_font_mathcaligraphic">𝒳</mi></mrow><annotation encoding="application/x-tex">D\subset{\mathcal{X}}</annotation></semantics></math>; начальный контекст <math alttext="c_{0}" class="ltx_Math" display="inline" id="alg1.l0.m5" intent=":literal"><semantics><msub><mi>c</mi><mn>0</mn></msub><annotation encoding="application/x-tex">c_{0}</annotation></semantics></math>; раунды <math alttext="T" class="ltx_Math" display="inline" id="alg1.l0.m6" intent=":literal"><semantics><mi>T</mi><annotation encoding="application/x-tex">T</annotation></semantics></math>; размер пакета <math alttext="k" class="ltx_Math" display="inline" id="alg1.l0.m7" intent=":literal"><semantics><mi>k</mi><annotation encoding="application/x-tex">k</annotation></semantics></math>; константа исследования <math alttext="C" class="ltx_Math" display="inline" id="alg1.l0.m8" intent=":literal"><semantics><mi>C</mi><annotation encoding="application/x-tex">C</annotation></semantics></math>
+</div>
+<div class="ltx_listingline" id="alg1.l1">
+<span class="ltx_tag ltx_tag_listingline">1:</span> Инициализировать дерево <math alttext="{\mathcal{G}}\leftarrow\{(c_{0},\,\emptyset,\,\bar{R}(c_{0}),\,0)\}" class="ltx_Math" display="inline" id="alg1.l1.m1" intent=":literal"><semantics><mrow><mi class="ltx_font_mathcaligraphic">𝒢</mi><mo stretchy="false">←</mo><mrow><mo stretchy="false">{</mo><mrow><mo stretchy="false">(</mo><msub><mi>c</mi><mn>0</mn></msub><mo rspace="0.337em">,</mo><mi mathvariant="normal">∅</mi><mo rspace="0.337em">,</mo><mrow><mover accent="true"><mi>R</mi><mo>¯</mo></mover><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><msub><mi>c</mi><mn>0</mn></msub><mo stretchy="false">)</mo></mrow></mrow><mo>,</mo><mn> 0</mn><mo stretchy="false">)</mo></mrow><mo stretchy="false">}</mo></mrow></mrow><annotation encoding="application/x-tex">{\mathcal{G}}\leftarrow\{(c_{0},\,\emptyset,\,\bar{R}(c_{0}),\,0)\}</annotation></semantics></math>
+</div>
+<div class="ltx_listingline" id="alg1.l2">
+<span class="ltx_tag ltx_tag_listingline">2:</span> <span class="ltx_text ltx_font_bold" id="alg1.l2.1">для</span> <math alttext="t=0,1,\ldots,T{-}1" class="ltx_Math" display="inline" id="alg1.l2.m1" intent=":literal"><semantics><mrow><mi>t</mi><mo>=</mo><mrow><mn>0</mn><mo>,</mo><mn>1</mn><mo>,</mo><mi mathvariant="normal">…</mi><mo>,</mo><mrow><mi>T</mi><mo>−</mo><mn>1</mn></mrow></mrow></mrow><annotation encoding="application/x-tex">t=0,1,\ldots,T{-}1</annotation></semantics></math> <span class="ltx_text ltx_font_bold" id="alg1.l2.2">делать</span>
+</div>
+<div class="ltx_listingline" id="alg1.l3">
+<span class="ltx_tag ltx_tag_listingline">3:</span>  Выберите узел <math alttext="n^{*}\leftarrow\operatorname*{arg\,max}_{n\in{\mathcal{G}}}\;\bar{R}_{n}+C\sqrt{(\ln N)/v_{n}}" class="ltx_Math" display="inline" id="alg1.l3.m1" intent=":literal"><semantics><mrow><msup><mi>n</mi><mo>∗</mo></msup><mo stretchy="false">←</mo><mrow><mrow><msub><mrow><mi>arg</mi><mo lspace="0.170em" rspace="0em">​</mo><mi>max</mi></mrow><mrow><mi>n</mi><mo>∈</mo><mi class="ltx_font_mathcaligraphic">𝒢</mi></mrow></msub><mo>⁡</mo><msub><mover accent="true"><mi>R</mi><mo>¯</mo></mover><mi>n</mi></msub></mrow><mo>+</mo><mrow><mi>C</mi><mo lspace="0em" rspace="0em">​</mo><msqrt><mrow><mrow><mo stretchy="false">(</mo><mrow><mi>ln</mi><mo lspace="0.167em">⁡</mo><mi>N</mi></mrow><mo stretchy="false">)</mo></mrow><mo>/</mo><msub><mi>v</mi><mi>n</mi></msub></mrow></msqrt></mrow></mrow></mrow><annotation encoding="application/x-tex">n^{*}\leftarrow\operatorname*{arg\,max}_{n\in{\mathcal{G}}}\;\bar{R}_{n}+C\sqrt{(\ln N)/v_{n}}</annotation></semantics></math> <span class="ltx_text" id="alg1.l3.1" style="float:right;"><math alttext="\triangleright" class="ltx_Math" display="inline" id="alg1.l3.1.m1" intent=":literal"><semantics><mo>⊳</mo><annotation encoding="application/x-tex">\triangleright</annotation></semantics></math> <span class="ltx_text ltx_font_italic" id="alg1.l3.1.1">Выбор UCB</span>
+</span>
+</div>
+<div class="ltx_listingline" id="alg1.l4">
+<span class="ltx_tag ltx_tag_listingline">4:</span>  Примеры задач <math alttext="\{x_{i}\}_{i=1}^{k}\sim{\mathcal{X}}" class="ltx_Math" display="inline" id="alg1.l4.m1" intent=":literal"><semantics><mrow><msubsup><mrow><mo stretchy="false">{</mo><msub><mi>x</mi><mi>i</mi></msub><mo stretchy="false">}</mo></mrow><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>k</mi></msubsup><mo>∼</mo><mi class="ltx_font_mathcaligraphic">𝒳</mi></mrow><annotation encoding="application/x-tex">\{x_{i}\}_{i=1}^{k}\sim{\mathcal{X}}</annotation></semantics></math>
+</div>
+<div class="ltx_listingline" id="alg1.l5">
+<span class="ltx_tag ltx_tag_listingline">5:</span>  Генерировать ответы <math alttext="y_{i}\sim\pi_{\theta}(\cdot\mid x_{i},c_{n^{*}})" class="ltx_math_unparsed" display="inline" id="alg1.l5.m1" intent=":literal"><semantics><mrow><msub><mi>y</mi><mi>i</mi></msub><mo>∼</mo><msub><mi>π</mi><mi>θ</mi></msub><mrow><mo stretchy="false">(</mo><mo lspace="0em" rspace="0em">⋅</mo><mo lspace="0em" rspace="0.167em">∣</mo><msub><mi>x</mi><mi>i</mi></msub><mo>,</mo><msub><mi>c</mi><msup><mi>n</mi><mo>∗</mo></msup></msub><mo stretchy="false">)</mo></mrow></mrow><annotation encoding="application/x-tex">y_{i}\sim\pi_{\theta}(\cdot\mid x_{i},c_{n^{*}})</annotation></semantics></math> для <math alttext="i=1,\ldots,k" class="ltx_Math" display="inline" id="alg1.l5.m2" intent=":literal"><semantics><mrow><mi>i</mi><mo>=</mo><mrow><mn>1</mn><mo>,</mo><mi mathvariant="normal">…</mi><mo>,</mo><mi>k</mi></mrow></mrow><annotation encoding="application/x-tex">i=1,\ldots,k</annotation></semantics></math> <span class="ltx_text" id="alg1.l5.1" style="float:right;"><math alttext="\triangleright" class="ltx_Math" display="inline" id="alg1.l5.1.m1" intent=":literal"><semantics><mo>⊳</mo><annotation encoding="application/x-tex">\triangleright</annotation></semantics></math> <span class="ltx_text ltx_font_italic" id="alg1.l5.1.1">Действовать</span>
+</span>
+</div>
+<div class="ltx_listingline" id="alg1.l6">
+<span class="ltx_tag ltx_tag_listingline">6:</span>  Оценить <math alttext="r_{i}\leftarrow R(x_{i},y_{i})" class="ltx_Math" display="inline" id="alg1.l6.m1" intent=":literal"><semantics><mrow><msub><mi>r</mi><mi>i</mi></msub><mo stretchy="false">←</mo><mrow><mi>R</mi><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><msub><mi>x</mi><mi>i</mi></msub><mo>,</mo><msub><mi>y</mi><mi>i</mi></msub><mo stretchy="false">)</mo></mrow></mrow></mrow><annotation encoding="application/x-tex">r_{i}\leftarrow R(x_{i},y_{i})</annotation></semantics></math> для <math alttext="i=1,\ldots,k" class="ltx_Math" display="inline" id="alg1.l6.m2" intent=":literal"><semantics><mrow><mi>i</mi><mo>=</mo><mrow><mn>1</mn><mo>,</mo><mi mathvariant="normal">…</mi><mo>,</mo><mi>k</mi></mrow></mrow><annotation encoding="application/x-tex">i=1,\ldots,k</annotation></semantics></math> <span class="ltx_text" id="alg1.l6.1" style="float:right;"><math alttext="\triangleright" class="ltx_Math" display="inline" id="alg1.l6.1.m1" intent=":literal"><semantics><mo>⊳</mo><annotation encoding="application/x-tex">\triangleright</annotation></semantics></math> <span class="ltx_text ltx_font_italic" id="alg1.l6.1.1">Оценить</span>
+</span>
+</div>
+<div class="ltx_listingline" id="alg1.l7">
+<span class="ltx_tag ltx_tag_listingline">7:</span>  Составить резюме <math alttext="S_{t}=\{(x_{i},y_{i},y_{i}^{*},r_{i})\}_{i=1}^{k}" class="ltx_Math" display="inline" id="alg1.l7.m1" intent=":literal"><semantics><mrow><msub><mi>S</mi><mi>t</mi></msub><mo>=</mo><msubsup><mrow><mo stretchy="false">{</mo><mrow><mo stretchy="false">(</mo><msub><mi>x</mi><mi>i</mi></msub><mo>,</mo><msub><mi>y</mi><mi>i</mi></msub><mo>,</mo><msubsup><mi>y</mi><mi>i</mi><mo>∗</mo></msubsup><mo>,</mo><msub><mi>r</mi><mi>i</mi></msub><mo stretchy="false">)</mo></mrow><mo stretchy="false">}</mo></mrow><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>k</mi></msubsup></mrow><annotation encoding="application/x-tex">S_{t}=\{(x_{i},y_{i},y_{i}^{*},r_{i})\}_{i=1}^{k}</annotation></semantics></math>
+</div>
+<div class="ltx_listingline" id="alg1.l8">
+<span class="ltx_tag ltx_tag_listingline">8:</span>  <math alttext="c_{\mathrm{new}}\leftarrow f_{\psi}(c_{n^{*}},S_{t})" class="ltx_Math" display="inline" id="alg1.l8.m1" intent=":literal"><semantics><mrow><msub><mi>c</mi><mi>new</mi></msub><mo stretchy="false">←</mo><mrow><msub><mi>f</mi><mi>ψ</mi></msub><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><msub><mi>c</mi><msup><mi>n</mi><mo>∗</mo></msup></msub><mo>,</mo><msub><mi>S</mi><mi>t</mi></msub><mo stretchy="false">)</mo></mrow></mrow></mrow><annotation encoding="application/x-tex">c_{\mathrm{new}}\leftarrow f_{\psi}(c_{n^{*}},S_{t})</annotation></semantics></math> <span class="ltx_text" id="alg1.l8.1" style="float:right;"><math alttext="\triangleright" class="ltx_Math" display="inline" id="alg1.l8.1.m1" intent=":literal"><semantics><mo>⊳</mo><annotation encoding="application/x-tex">\triangleright</annotation></semantics></math> <span class="ltx_text ltx_font_italic" id="alg1.l8.1.1">Развиваться</span>
+</span>
+</div>
+<div class="ltx_listingline" id="alg1.l9">
+<span class="ltx_tag ltx_tag_listingline">9:</span>  Оценить <math alttext="\bar{R}(c_{\mathrm{new}})" class="ltx_Math" display="inline" id="alg1.l9.m1" intent=":literal"><semantics><mrow><mover accent="true"><mi>R</mi><mo>¯</mo></mover><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><msub><mi>c</mi><mi>new</mi></msub><mo stretchy="false">)</mo></mrow></mrow><annotation encoding="application/x-tex">\bar{R}(c_{\mathrm{new}})</annotation></semantics></math> на отложенной выборке <math alttext="D" class="ltx_Math" display="inline" id="alg1.l9.m2" intent=":literal"><semantics><mi>D</mi><annotation encoding="application/x-tex">D</annotation></semantics></math> <span class="ltx_text" id="alg1.l9.1" style="float:right;"><math alttext="\triangleright" class="ltx_Math" display="inline" id="alg1.l9.1.m1" intent=":literal"><semantics><mo>⊳</mo><annotation encoding="application/x-tex">\triangleright</annotation></semantics></math> <span class="ltx_text ltx_font_italic" id="alg1.l9.1.1">Уравнение. (<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#S3.E4" title="In 3.2 Prompt-Based Evolution with Tree Search ‣ 3 Method ‣ Learning to Self-Evolve"><span class="ltx_text ltx_ref_tag">4</span></a>)</span>
+</span>
+</div>
+<div class="ltx_listingline" id="alg1.l10">
+<span class="ltx_tag ltx_tag_listingline">10:</span>  Добавить дочерний элемент <math alttext="(c_{\mathrm{new}},\,S_{t},\,\bar{R}(c_{\mathrm{new}}),\,0)" class="ltx_Math" display="inline" id="alg1.l10.m1" intent=":literal"><semantics><mrow><mo stretchy="false">(</mo><msub><mi>c</mi><mi>new</mi></msub><mo rspace="0.337em">,</mo><msub><mi>S</mi><mi>t</mi></msub><mo rspace="0.337em">,</mo><mrow><mover accent="true"><mi>R</mi><mo>¯</mo></mover><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><msub><mi>c</mi><mi>new</mi></msub><mo stretchy="false">)</mo></mrow></mrow><mo>,</mo><mn> 0</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(c_{\mathrm{new}},\,S_{t},\,\bar{R}(c_{\mathrm{new}}),\,0)</annotation></semantics></math> к <math alttext="n^{*}" class="ltx_Math" display="inline" id="alg1.l10.m2" intent=":literal"><semantics><msup><mi>n</mi><mo>∗</mo></msup><annotation encoding="application/x-tex">n^{*}</annotation></semantics></math> в <math alttext="{\mathcal{G}}" class="ltx_Math" display="inline" id="alg1.l10.m3" intent=":literal"><semantics><mi class="ltx_font_mathcaligraphic">𝒢</mi><annotation encoding="application/x-tex">{\mathcal{G}}</annotation></semantics></math>; инкремент <math alttext="v_{n^{*}}" class="ltx_Math" display="inline" id="alg1.l10.m4" intent=":literal"><semantics><msub><mi>v</mi><msup><mi>n</mi><mo>∗</mo></msup></msub><annotation encoding="application/x-tex">v_{n^{*}}</annotation></semantics></math>
+</div>
+<div class="ltx_listingline" id="alg1.l11">
+<span class="ltx_tag ltx_tag_listingline">11:</span> <span class="ltx_text ltx_font_bold" id="alg1.l11.1">конец</span> <span class="ltx_text ltx_font_bold" id="alg1.l11.2">для</span>
+</div>
+<div class="ltx_listingline" id="alg1.l12">
+<span class="ltx_tag ltx_tag_listingline">12:</span> <span class="ltx_text ltx_font_bold" id="alg1.l12.1">вернуть</span> <math alttext="\operatorname*{arg\,max}_{n\in{\mathcal{G}}}\;\bar{R}_{n}" class="ltx_Math" display="inline" id="alg1.l12.m1" intent=":literal"><semantics><mrow><msub><mrow><mi>arg</mi><mo lspace="0.170em" rspace="0em">​</mo><mi>max</mi></mrow><mrow><mi>n</mi><mo>∈</mo><mi class="ltx_font_mathcaligraphic">𝒢</mi></mrow></msub><mo lspace="0.447em">⁡</mo><msub><mover accent="true"><mi>R</mi><mo>¯</mo></mover><mi>n</mi></msub></mrow><annotation encoding="application/x-tex">\operatorname*{arg\,max}_{n\in{\mathcal{G}}}\;\bar{R}_{n}</annotation></semantics></math>
+</div>
+</div>
+</figure>
+<section class="ltx_paragraph" id="S3.SS2.SSS0.Px1">
+<h4 class="ltx_title ltx_title_paragraph">Древовидно-направленная эволюция.</h4>
+<div class="ltx_para ltx_noindent" id="S3.SS2.SSS0.Px1.p1">
+<p class="ltx_p" id="S3.SS2.SSS0.Px1.p1.4">Линейная цепочка эволюции <math alttext="c_{0}\to c_{1}\to\cdots" class="ltx_Math" display="inline" id="S3.SS2.SSS0.Px1.p1.1.m1" intent=":literal"><semantics><mrow><msub><mi>c</mi><mn>0</mn></msub><mo stretchy="false">→</mo><msub><mi>c</mi><mn>1</mn></msub><mo stretchy="false">→</mo><mi mathvariant="normal">⋯</mi></mrow><annotation encoding="application/x-tex">c_{0}\to c_{1}\to\cdots</annotation></semantics></math> жадно расширяет самый последний контекст, что создает риск необратимого выбора субоптимального пути эволюции. Чтобы обеспечить более широкое исследование пространства контекстов, мы поддерживаем дерево эволюции <math alttext="{\mathcal{G}}" class="ltx_Math" display="inline" id="S3.SS2.SSS0.Px1.p1.2.m2" intent=":literal"><semantics><mi class="ltx_font_mathcaligraphic">𝒢</mi><annotation encoding="application/x-tex">{\mathcal{G}}</annotation></semantics></math>, в котором каждый узел <math alttext="n" class="ltx_Math" display="inline" id="S3.SS2.SSS0.Px1.p1.3.m3" intent=":literal"><semantics><mi>n</mi><annotation encoding="application/x-tex">n</annotation></semantics></math> хранит кортеж <math alttext="(c_{n},S_{n},\bar{R}_{n},v_{n})" class="ltx_Math" display="inline" id="S3.SS2.SSS0.Px1.p1.4.m4" intent=":literal"><semantics><mrow><mo stretchy="false">(</mo><msub><mi>c</mi><mi>n</mi></msub><mo>,</mo><msub><mi>S</mi><mi>n</mi></msub><mo>,</mo><msub><mover accent="true"><mi>R</mi><mo>¯</mo></mover><mi>n</mi></msub><mo>,</mo><msub><mi>v</mi><mi>n</mi></msub><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(c_{n},S_{n},\bar{R}_{n},v_{n})</annotation></semantics></math> из контекста, сводки производительности, среднего вознаграждения на отложенной выборке и количества посещений. На каждом раунде, вместо того чтобы всегда расширять последний узел, мы выбираем узел, который максимизирует оценку Upper Confidence Bound (UCB) <cite class="ltx_cite ltx_citemacro_citep">(Auer, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib24" title="Using confidence bounds for exploitation-exploration trade-offs">2002</a>)</cite>:</p>
+<table class="ltx_equation ltx_eqn_table" id="S3.E5">
+<tbody><tr class="ltx_equation ltx_eqn_row ltx_align_baseline">
+<td class="ltx_eqn_cell ltx_eqn_center_padleft"></td>
+<td class="ltx_eqn_cell ltx_align_center"><math alttext="n^{*}=\operatorname*{arg\,max}_{n\in{\mathcal{G}}}\;\bar{R}_{n}+C\sqrt{\frac{\ln N}{v_{n}}}," class="ltx_Math" display="block" id="S3.E5.m1" intent=":literal"><semantics><mrow><mrow><msup><mi>n</mi><mo>∗</mo></msup><mo>=</mo><mrow><mrow><munder><mrow><mi>arg</mi><mo lspace="0.170em" rspace="0em">​</mo><mi>max</mi></mrow><mrow><mi>n</mi><mo>∈</mo><mi class="ltx_font_mathcaligraphic">𝒢</mi></mrow></munder><mo>⁡</mo><msub><mover accent="true"><mi>R</mi><mo>¯</mo></mover><mi>n</mi></msub></mrow><mo>+</mo><mrow><mi>C</mi><mo lspace="0em" rspace="0em">​</mo><msqrt><mfrac><mrow><mi>ln</mi><mo lspace="0.167em">⁡</mo><mi>N</mi></mrow><msub><mi>v</mi><mi>n</mi></msub></mfrac></msqrt></mrow></mrow></mrow><mo>,</mo></mrow><annotation encoding="application/x-tex">n^{*}=\operatorname*{arg\,max}_{n\in{\mathcal{G}}}\;\bar{R}_{n}+C\sqrt{\frac{\ln N}{v_{n}}},</annotation></semantics></math></td>
+<td class="ltx_eqn_cell ltx_eqn_center_padright"></td>
+<td class="ltx_eqn_cell ltx_eqn_eqno ltx_align_middle ltx_align_right" rowspan="1"><span class="ltx_tag ltx_tag_equation ltx_align_right">(5)</span></td>
+</tr></tbody>
+</table>
+<p class="ltx_p" id="S3.SS2.SSS0.Px1.p1.8">где <math alttext="N" class="ltx_Math" display="inline" id="S3.SS2.SSS0.Px1.p1.5.m1" intent=":literal"><semantics><mi>N</mi><annotation encoding="application/x-tex">N</annotation></semantics></math> — это количество завершенных раундов, а <math alttext="C&gt;0" class="ltx_Math" display="inline" id="S3.SS2.SSS0.Px1.p1.6.m2" intent=":literal"><semantics><mrow><mi>C</mi><mo>&gt;</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">C&gt;0</annotation></semantics></math> управляет балансом между исследованием и эксплуатацией. Контекст и резюме <math alttext="n^{*}" class="ltx_Math" display="inline" id="S3.SS2.SSS0.Px1.p1.7.m3" intent=":literal"><semantics><msup><mi>n</mi><mo>∗</mo></msup><annotation encoding="application/x-tex">n^{*}</annotation></semantics></math> используются в качестве входных данных для следующего этапа эволюции, а полученный дочерний узел добавляется к <math alttext="{\mathcal{G}}" class="ltx_Math" display="inline" id="S3.SS2.SSS0.Px1.p1.8.m4" intent=":literal"><semantics><mi class="ltx_font_mathcaligraphic">𝒢</mi><annotation encoding="application/x-tex">{\mathcal{G}}</annotation></semantics></math>. Это позволяет системе возвращаться к перспективным контекстам, обнаруженным ранее, и создавать от них ответвления, вместо того чтобы следовать единственному пути эволюции. Полная процедура обобщена в алгоритме <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#alg1" title="Algorithm 1 ‣ 3.2 Prompt-Based Evolution with Tree Search ‣ 3 Method ‣ Learning to Self-Evolve"><span class="ltx_text ltx_ref_tag">1</span></a>.</p>
+</div>
+</section>
+</section>
+<section class="ltx_subsection" id="S3.SS3">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">3.3 </span>Обучение саморазвитию ⟦K0⟧)</h3>
+<div class="ltx_para ltx_noindent" id="S3.SS3.p1">
+<p class="ltx_p" id="S3.SS3.p1.1">Хотя готовые LLM уже демонстрируют некоторую способность к итеративному уточнению собственных промптов <cite class="ltx_cite ltx_citemacro_citep">(Yin<span class="ltx_text ltx_bib_etal"> et al.</span>, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib26" title="Gödel agent: a self-referential agent framework for recursive self-improvement">2024</a>; Agrawal<span class="ltx_text ltx_bib_etal"> et al.</span>, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib14" title="GEPA: reflective prompt evolution can outperform reinforcement learning">2025</a>; Zhang<span class="ltx_text ltx_bib_etal"> et al.</span>, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib27" title="Darwin godel machine: open-ended evolution of self-improving agents">2025b</a>)</cite>, эта способность полностью возникает в результате предварительного обучения и стандартного пост-тренинга, а модель никогда не оптимизируется явным образом для самосовершенствования. Мы предлагаем Learning to Self-Evolve (LSE) — RL-фреймворк, который явно обучает <math alttext="f_{\psi}" class="ltx_Math" display="inline" id="S3.SS3.p1.1.m1" intent=":literal"><semantics><msub><mi>f</mi><mi>ψ</mi></msub><annotation encoding="application/x-tex">f_{\psi}</annotation></semantics></math> быть эффективной саморазвивающейся стратегией..</p>
+</div>
+<div class="ltx_para ltx_noindent" id="S3.SS3.p2">
+<p class="ltx_p" id="S3.SS3.p2.1">Вспомните из уравнения (<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#S3.E2" title="In 3.1 Test-Time Inter-Episode Evolution ‣ 3 Method ‣ Learning to Self-Evolve"><span class="ltx_text ltx_ref_tag">2</span></a>), что целью саморазвивающейся стратегии является максимизация совокупного вознаграждения за раунды эволюции. Естественной целью обучения для <math alttext="f_{\psi}" class="ltx_Math" display="inline" id="S3.SS3.p2.1.m1" intent=":literal"><semantics><msub><mi>f</mi><mi>ψ</mi></msub><annotation encoding="application/x-tex">f_{\psi}</annotation></semantics></math> является:</p>
+<table class="ltx_equation ltx_eqn_table" id="S3.E6">
+<tbody><tr class="ltx_equation ltx_eqn_row ltx_align_baseline">
+<td class="ltx_eqn_cell ltx_eqn_center_padleft"></td>
+<td class="ltx_eqn_cell ltx_align_center"><math alttext="\max_{f_{\psi}}\;\sum_{t=0}^{T}\bar{R}(c_{t}),\quad\text{where }c_{t+1}=f_{\psi}(c_{t},S_{t})\;\;\forall\,t." class="ltx_Math" display="block" id="S3.E6.m1" intent=":literal"><semantics><mrow><mrow><mrow><mrow><munder><mi>max</mi><msub><mi>f</mi><mi>ψ</mi></msub></munder><mo lspace="0.447em" rspace="0em">​</mo><mrow><munderover><mo movablelimits="false">∑</mo><mrow><mi>t</mi><mo>=</mo><mn>0</mn></mrow><mi>T</mi></munderover><mrow><mover accent="true"><mi>R</mi><mo>¯</mo></mover><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><msub><mi>c</mi><mi>t</mi></msub><mo stretchy="false">)</mo></mrow></mrow></mrow></mrow><mo rspace="1.167em">,</mo><mrow><mtext>where </mtext><mo lspace="0em" rspace="0em">​</mo><msub><mi>c</mi><mrow><mi>t</mi><mo>+</mo><mn>1</mn></mrow></msub></mrow></mrow><mo>=</mo><mrow><msub><mi>f</mi><mi>ψ</mi></msub><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><msub><mi>c</mi><mi>t</mi></msub><mo>,</mo><msub><mi>S</mi><mi>t</mi></msub><mo stretchy="false">)</mo></mrow><mo lspace="0.727em" rspace="0em">​</mo><mrow><mo rspace="0.337em">∀</mo><mi>t</mi></mrow></mrow></mrow><mo lspace="0em">.</mo></mrow><annotation encoding="application/x-tex">\max_{f_{\psi}}\;\sum_{t=0}^{T}\bar{R}(c_{t}),\quad\text{where }c_{t+1}=f_{\psi}(c_{t},S_{t})\;\;\forall\,t.</annotation></semantics></math></td>
+<td class="ltx_eqn_cell ltx_eqn_center_padright"></td>
+<td class="ltx_eqn_cell ltx_eqn_eqno ltx_align_middle ltx_align_right" rowspan="1"><span class="ltx_tag ltx_tag_equation ltx_align_right">(6)</span></td>
+</tr></tbody>
+</table>
+<p class="ltx_p" id="S3.SS3.p2.6">Прямая оптимизация этой <math alttext="T" class="ltx_Math" display="inline" id="S3.SS3.p2.2.m1" intent=":literal"><semantics><mi>T</mi><annotation encoding="application/x-tex">T</annotation></semantics></math>-шаговой целевой функции является затратной: каждый прогон требует <math alttext="T" class="ltx_Math" display="inline" id="S3.SS3.p2.3.m2" intent=":literal"><semantics><mi>T</mi><annotation encoding="application/x-tex">T</annotation></semantics></math> последовательных раундов оценки и генерации контекста, а вознаграждение на уровне траектории создает проблему распределения кредита на длинном горизонте. Поэтому мы упрощаем задачу до одношаговой настройки (<math alttext="T=1" class="ltx_Math" display="inline" id="S3.SS3.p2.4.m3" intent=":literal"><semantics><mrow><mi>T</mi><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">T=1</annotation></semantics></math>), где <math alttext="f_{\psi}" class="ltx_Math" display="inline" id="S3.SS3.p2.5.m4" intent=":literal"><semantics><msub><mi>f</mi><mi>ψ</mi></msub><annotation encoding="application/x-tex">f_{\psi}</annotation></semantics></math> создает одно обновление контекста <math alttext="c_{1}=f_{\psi}(c_{0},S_{0})" class="ltx_Math" display="inline" id="S3.SS3.p2.6.m5" intent=":literal"><semantics><mrow><msub><mi>c</mi><mn>1</mn></msub><mo>=</mo><mrow><msub><mi>f</mi><mi>ψ</mi></msub><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><msub><mi>c</mi><mn>0</mn></msub><mo>,</mo><msub><mi>S</mi><mn>0</mn></msub><mo stretchy="false">)</mo></mrow></mrow></mrow><annotation encoding="application/x-tex">c_{1}=f_{\psi}(c_{0},S_{0})</annotation></semantics></math> и получает вознаграждение немедленно. Это сводит проблему к контекстному бандиту и позволяет избежать трудностей с распределением кредита на длинном горизонте, при этом сохраняя основную задачу обучения улучшению инструкций на основе обратной связи.</p>
+</div>
+<div class="ltx_para ltx_noindent" id="S3.SS3.p3">
+<p class="ltx_p" id="S3.SS3.p3.3">Даже в одношаговой постановке выбор функции вознаграждения имеет существенное значение. Естественным кандидатом является вознаграждение после редактирования <math alttext="\bar{R}(c_{1})" class="ltx_Math" display="inline" id="S3.SS3.p3.1.m1" intent=":literal"><semantics><mrow><mover accent="true"><mi>R</mi><mo>¯</mo></mover><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><msub><mi>c</mi><mn>1</mn></msub><mo stretchy="false">)</mo></mrow></mrow><annotation encoding="application/x-tex">\bar{R}(c_{1})</annotation></semantics></math>, то есть эффективность стратегии действий в обновленном контексте. Однако это вознаграждение смещено в сторону контекстов, которые уже являются эффективными. Рассмотрим два сценария: (1) исходный контекст достигает точности 80%, а после редактирования она падает до 70%, что дает <math alttext="r=0.7" class="ltx_Math" display="inline" id="S3.SS3.p3.2.m2" intent=":literal"><semantics><mrow><mi>r</mi><mo>=</mo><mn>0.7</mn></mrow><annotation encoding="application/x-tex">r=0.7</annotation></semantics></math>; (2) исходный контекст достигает точности 30%, а после улучшения доходит до 60%, что дает лишь <math alttext="r=0.6" class="ltx_Math" display="inline" id="S3.SS3.p3.3.m3" intent=":literal"><semantics><mrow><mi>r</mi><mo>=</mo><mn>0.6</mn></mrow><annotation encoding="application/x-tex">r=0.6</annotation></semantics></math>. Вознаграждение после редактирования оценивает первый сценарий выше, несмотря на снижение эффективности, поскольку оно смешивает качество отправной точки с качеством самого редактирования. Это смещение побуждает стратегию сохранять уже эффективные контексты, вместо того чтобы по-настоящему учиться их улучшать. Вместо этого мы определяем вознаграждение как улучшение вознаграждения:</p>
+<table class="ltx_equation ltx_eqn_table" id="S3.E7">
+<tbody><tr class="ltx_equation ltx_eqn_row ltx_align_baseline">
+<td class="ltx_eqn_cell ltx_eqn_center_padleft"></td>
+<td class="ltx_eqn_cell ltx_align_center"><math alttext="r_{\mathrm{LSE}}\;=\;\bar{R}(c_{1})-\bar{R}(c_{0})," class="ltx_Math" display="block" id="S3.E7.m1" intent=":literal"><semantics><mrow><mrow><msub><mi>r</mi><mi>LSE</mi></msub><mo lspace="0.558em" rspace="0.558em">=</mo><mrow><mrow><mover accent="true"><mi>R</mi><mo>¯</mo></mover><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><msub><mi>c</mi><mn>1</mn></msub><mo stretchy="false">)</mo></mrow></mrow><mo>−</mo><mrow><mover accent="true"><mi>R</mi><mo>¯</mo></mover><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><msub><mi>c</mi><mn>0</mn></msub><mo stretchy="false">)</mo></mrow></mrow></mrow></mrow><mo>,</mo></mrow><annotation encoding="application/x-tex">r_{\mathrm{LSE}}\;=\;\bar{R}(c_{1})-\bar{R}(c_{0}),</annotation></semantics></math></td>
+<td class="ltx_eqn_cell ltx_eqn_center_padright"></td>
+<td class="ltx_eqn_cell ltx_eqn_eqno ltx_align_middle ltx_align_right" rowspan="1"><span class="ltx_tag ltx_tag_equation ltx_align_right">(7)</span></td>
+</tr></tbody>
+</table>
+<p class="ltx_p" id="S3.SS3.p3.4">что напрямую стимулирует <math alttext="f_{\psi}" class="ltx_Math" display="inline" id="S3.SS3.p3.4.m1" intent=":literal"><semantics><msub><mi>f</mi><mi>ψ</mi></msub><annotation encoding="application/x-tex">f_{\psi}</annotation></semantics></math> создавать правки, повышающие производительность относительно исходной точки, независимо от начального уровня производительности.</p>
+</div>
+<div class="ltx_para ltx_noindent" id="S3.SS3.p4">
+<p class="ltx_p" id="S3.SS3.p4.7">Примечательно, что если <math alttext="r_{\mathrm{LSE}}" class="ltx_Math" display="inline" id="S3.SS3.p4.1.m1" intent=":literal"><semantics><msub><mi>r</mi><mi>LSE</mi></msub><annotation encoding="application/x-tex">r_{\mathrm{LSE}}</annotation></semantics></math> используется в качестве вознаграждения в стандартном алгоритме градиента стратегии, таком как PPO или GRPO, базовый оценщик поглощает член <math alttext="\bar{R}(c_{0})" class="ltx_Math" display="inline" id="S3.SS3.p4.2.m2" intent=":literal"><semantics><mrow><mover accent="true"><mi>R</mi><mo>¯</mo></mover><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><msub><mi>c</mi><mn>0</mn></msub><mo stretchy="false">)</mo></mrow></mrow><annotation encoding="application/x-tex">\bar{R}(c_{0})</annotation></semantics></math>. Чтобы убедиться в этом, пусть <math alttext="s=(c_{0},S_{0})" class="ltx_Math" display="inline" id="S3.SS3.p4.3.m3" intent=":literal"><semantics><mrow><mi>s</mi><mo>=</mo><mrow><mo stretchy="false">(</mo><msub><mi>c</mi><mn>0</mn></msub><mo>,</mo><msub><mi>S</mi><mn>0</mn></msub><mo stretchy="false">)</mo></mrow></mrow><annotation encoding="application/x-tex">s=(c_{0},S_{0})</annotation></semantics></math> обозначает состояние, наблюдаемое до редактирования. Базовая линия <math alttext="V(s)" class="ltx_Math" display="inline" id="S3.SS3.p4.4.m4" intent=":literal"><semantics><mrow><mi>V</mi><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><mi>s</mi><mo stretchy="false">)</mo></mrow></mrow><annotation encoding="application/x-tex">V(s)</annotation></semantics></math>, оцененная при <math alttext="r_{\mathrm{LSE}}" class="ltx_Math" display="inline" id="S3.SS3.p4.5.m5" intent=":literal"><semantics><msub><mi>r</mi><mi>LSE</mi></msub><annotation encoding="application/x-tex">r_{\mathrm{LSE}}</annotation></semantics></math>, удовлетворяет <math alttext="V^{\prime}(s)=\mathbb{E}[\bar{R}(c_{1})-\bar{R}(c_{0})\mid s]=V(s)-\bar{R}(c_{0})" class="ltx_Math" display="inline" id="S3.SS3.p4.6.m6" intent=":literal"><semantics><mrow><mrow><msup><mi>V</mi><mo>′</mo></msup><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><mi>s</mi><mo stretchy="false">)</mo></mrow></mrow><mo>=</mo><mrow><mi>𝔼</mi><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">[</mo><mrow><mrow><mover accent="true"><mi>R</mi><mo>¯</mo></mover><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><msub><mi>c</mi><mn>1</mn></msub><mo stretchy="false">)</mo></mrow></mrow><mo>−</mo><mrow><mrow><mover accent="true"><mi>R</mi><mo>¯</mo></mover><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><msub><mi>c</mi><mn>0</mn></msub><mo stretchy="false">)</mo></mrow></mrow><mo>∣</mo><mi>s</mi></mrow></mrow><mo stretchy="false">]</mo></mrow></mrow><mo>=</mo><mrow><mrow><mi>V</mi><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><mi>s</mi><mo stretchy="false">)</mo></mrow></mrow><mo>−</mo><mrow><mover accent="true"><mi>R</mi><mo>¯</mo></mover><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><msub><mi>c</mi><mn>0</mn></msub><mo stretchy="false">)</mo></mrow></mrow></mrow></mrow><annotation encoding="application/x-tex">V^{\prime}(s)=\mathbb{E}[\bar{R}(c_{1})-\bar{R}(c_{0})\mid s]=V(s)-\bar{R}(c_{0})</annotation></semantics></math>, где <math alttext="V(s)=\mathbb{E}[\bar{R}(c_{1})\mid s]" class="ltx_Math" display="inline" id="S3.SS3.p4.7.m7" intent=":literal"><semantics><mrow><mrow><mi>V</mi><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><mi>s</mi><mo stretchy="false">)</mo></mrow></mrow><mo>=</mo><mrow><mi>𝔼</mi><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">[</mo><mrow><mrow><mover accent="true"><mi>R</mi><mo>¯</mo></mover><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><msub><mi>c</mi><mn>1</mn></msub><mo stretchy="false">)</mo></mrow></mrow><mo>∣</mo><mi>s</mi></mrow><mo stretchy="false">]</mo></mrow></mrow></mrow><annotation encoding="application/x-tex">V(s)=\mathbb{E}[\bar{R}(c_{1})\mid s]</annotation></semantics></math> — это базовая линия при вознаграждении после редактирования. Тогда преимущество сводится к:</p>
+<table class="ltx_equation ltx_eqn_table" id="S3.E8">
+<tbody><tr class="ltx_equation ltx_eqn_row ltx_align_baseline">
+<td class="ltx_eqn_cell ltx_eqn_center_padleft"></td>
+<td class="ltx_eqn_cell ltx_align_center"><math alttext="A^{\prime}(s,c_{1})\;=\;r_{\mathrm{LSE}}-V^{\prime}(s)\;=\;\big(\bar{R}(c_{1})-\bar{R}(c_{0})\big)-\big(V(s)-\bar{R}(c_{0})\big)\;=\;\bar{R}(c_{1})-V(s)," class="ltx_Math" display="block" id="S3.E8.m1" intent=":literal"><semantics><mrow><mrow><mrow><msup><mi>A</mi><mo>′</mo></msup><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><mi>s</mi><mo>,</mo><msub><mi>c</mi><mn>1</mn></msub><mo rspace="0.280em" stretchy="false">)</mo></mrow></mrow><mo rspace="0.558em">=</mo><mrow><msub><mi>r</mi><mi>LSE</mi></msub><mo>−</mo><mrow><msup><mi>V</mi><mo>′</mo></msup><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><mi>s</mi><mo rspace="0.280em" stretchy="false">)</mo></mrow></mrow></mrow><mo rspace="0.558em">=</mo><mrow><mrow><mo maxsize="1.200em" minsize="1.200em">(</mo><mrow><mrow><mover accent="true"><mi>R</mi><mo>¯</mo></mover><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><msub><mi>c</mi><mn>1</mn></msub><mo stretchy="false">)</mo></mrow></mrow><mo>−</mo><mrow><mover accent="true"><mi>R</mi><mo>¯</mo></mover><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><msub><mi>c</mi><mn>0</mn></msub><mo stretchy="false">)</mo></mrow></mrow></mrow><mo maxsize="1.200em" minsize="1.200em">)</mo></mrow><mo>−</mo><mrow><mo maxsize="1.200em" minsize="1.200em">(</mo><mrow><mrow><mi>V</mi><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><mi>s</mi><mo stretchy="false">)</mo></mrow></mrow><mo>−</mo><mrow><mover accent="true"><mi>R</mi><mo>¯</mo></mover><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><msub><mi>c</mi><mn>0</mn></msub><mo stretchy="false">)</mo></mrow></mrow></mrow><mo maxsize="1.200em" minsize="1.200em" rspace="0.280em">)</mo></mrow></mrow><mo rspace="0.558em">=</mo><mrow><mrow><mover accent="true"><mi>R</mi><mo>¯</mo></mover><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><msub><mi>c</mi><mn>1</mn></msub><mo stretchy="false">)</mo></mrow></mrow><mo>−</mo><mrow><mi>V</mi><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><mi>s</mi><mo stretchy="false">)</mo></mrow></mrow></mrow></mrow><mo>,</mo></mrow><annotation encoding="application/x-tex">A^{\prime}(s,c_{1})\;=\;r_{\mathrm{LSE}}-V^{\prime}(s)\;=\;\big(\bar{R}(c_{1})-\bar{R}(c_{0})\big)-\big(V(s)-\bar{R}(c_{0})\big)\;=\;\bar{R}(c_{1})-V(s),</annotation></semantics></math></td>
+<td class="ltx_eqn_cell ltx_eqn_center_padright"></td>
+<td class="ltx_eqn_cell ltx_eqn_eqno ltx_align_middle ltx_align_right" rowspan="1"><span class="ltx_tag ltx_tag_equation ltx_align_right">(8)</span></td>
+</tr></tbody>
+</table>
+<p class="ltx_p" id="S3.SS3.p4.10">что идентично преимуществу при использовании только награды за пост-редактирование. То есть дельта-награда и награда за пост-редактирование дают одинаковые оценки градиента всякий раз, когда используется обученная базовая линия. Вместо использования модели оценки или групповой нормализации в качестве базовой линии, мы можем полностью обойти оценку базовой линии: награда за пре-редактирование <math alttext="\bar{R}(c_{0})" class="ltx_Math" display="inline" id="S3.SS3.p4.8.m1" intent=":literal"><semantics><mrow><mover accent="true"><mi>R</mi><mo>¯</mo></mover><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><msub><mi>c</mi><mn>0</mn></msub><mo stretchy="false">)</mo></mrow></mrow><annotation encoding="application/x-tex">\bar{R}(c_{0})</annotation></semantics></math> известна до того, как <math alttext="f_{\psi}" class="ltx_Math" display="inline" id="S3.SS3.p4.9.m2" intent=":literal"><semantics><msub><mi>f</mi><mi>ψ</mi></msub><annotation encoding="application/x-tex">f_{\psi}</annotation></semantics></math> начинает действовать, и равна награде за нулевое редактирование, которое возвращает <math alttext="c_{0}" class="ltx_Math" display="inline" id="S3.SS3.p4.10.m3" intent=":literal"><semantics><msub><mi>c</mi><mn>0</mn></msub><annotation encoding="application/x-tex">c_{0}</annotation></semantics></math> без изменений, поэтому она может служить непосредственно в качестве базовой линии. Это дает преимущество LSE:</p>
+<table class="ltx_equation ltx_eqn_table" id="S3.E9">
+<tbody><tr class="ltx_equation ltx_eqn_row ltx_align_baseline">
+<td class="ltx_eqn_cell ltx_eqn_center_padleft"></td>
+<td class="ltx_eqn_cell ltx_align_center"><math alttext="A_{\mathrm{LSE}}\;=\;\bar{R}(c_{1})-\bar{R}(c_{0})," class="ltx_Math" display="block" id="S3.E9.m1" intent=":literal"><semantics><mrow><mrow><msub><mi>A</mi><mi>LSE</mi></msub><mo lspace="0.558em" rspace="0.558em">=</mo><mrow><mrow><mover accent="true"><mi>R</mi><mo>¯</mo></mover><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><msub><mi>c</mi><mn>1</mn></msub><mo stretchy="false">)</mo></mrow></mrow><mo>−</mo><mrow><mover accent="true"><mi>R</mi><mo>¯</mo></mover><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><msub><mi>c</mi><mn>0</mn></msub><mo stretchy="false">)</mo></mrow></mrow></mrow></mrow><mo>,</mo></mrow><annotation encoding="application/x-tex">A_{\mathrm{LSE}}\;=\;\bar{R}(c_{1})-\bar{R}(c_{0}),</annotation></semantics></math></td>
+<td class="ltx_eqn_cell ltx_eqn_center_padright"></td>
+<td class="ltx_eqn_cell ltx_eqn_eqno ltx_align_middle ltx_align_right" rowspan="1"><span class="ltx_tag ltx_tag_equation ltx_align_right">(9)</span></td>
+</tr></tbody>
+</table>
+<p class="ltx_p" id="S3.SS3.p4.12">и соответствующая оценка градиента стратегии:</p>
+<table class="ltx_equation ltx_eqn_table" id="S3.E10">
+<tbody><tr class="ltx_equation ltx_eqn_row ltx_align_baseline">
+<td class="ltx_eqn_cell ltx_eqn_center_padleft"></td>
+<td class="ltx_eqn_cell ltx_align_center"><math alttext="\nabla_{\psi}J\;=\;\mathbb{E}_{c_{1}\sim f_{\psi}(\cdot\mid c_{0},S_{0})}\Big[A_{\mathrm{LSE}}\;\nabla_{\psi}\log f_{\psi}(c_{1}\mid c_{0},S_{0})\Big]." class="ltx_math_unparsed" display="block" id="S3.E10.m1" intent=":literal"><semantics><mrow><mrow><mrow><msub><mo>∇</mo><mi>ψ</mi></msub><mi>J</mi></mrow><mo lspace="0.558em" rspace="0.558em">=</mo><mrow><msub><mi>𝔼</mi><mrow><msub><mi>c</mi><mn>1</mn></msub><mo>∼</mo><msub><mi>f</mi><mi>ψ</mi></msub><mrow><mo stretchy="false">(</mo><mo lspace="0em" rspace="0em">⋅</mo><mo lspace="0em" rspace="0.167em">∣</mo><msub><mi>c</mi><mn>0</mn></msub><mo>,</mo><msub><mi>S</mi><mn>0</mn></msub><mo stretchy="false">)</mo></mrow></mrow></msub><mo lspace="0em" rspace="0em">​</mo><mrow><mo maxsize="1.600em" minsize="1.600em">[</mo><mrow><msub><mi>A</mi><mi>LSE</mi></msub><mo lspace="0.167em" rspace="0em">​</mo><mrow><mrow><msub><mo rspace="0.167em">∇</mo><mi>ψ</mi></msub><mi>log</mi></mrow><mo lspace="0.167em">⁡</mo><msub><mi>f</mi><mi>ψ</mi></msub></mrow><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><mrow><msub><mi>c</mi><mn>1</mn></msub><mo>∣</mo><mrow><msub><mi>c</mi><mn>0</mn></msub><mo>,</mo><msub><mi>S</mi><mn>0</mn></msub></mrow></mrow><mo stretchy="false">)</mo></mrow></mrow><mo maxsize="1.600em" minsize="1.600em">]</mo></mrow></mrow></mrow><mo lspace="0em">.</mo></mrow><annotation encoding="application/x-tex">\nabla_{\psi}J\;=\;\mathbb{E}_{c_{1}\sim f_{\psi}(\cdot\mid c_{0},S_{0})}\Big[A_{\mathrm{LSE}}\;\nabla_{\psi}\log f_{\psi}(c_{1}\mid c_{0},S_{0})\Big].</annotation></semantics></math></td>
+<td class="ltx_eqn_cell ltx_eqn_center_padright"></td>
+<td class="ltx_eqn_cell ltx_eqn_eqno ltx_align_middle ltx_align_right" rowspan="1"><span class="ltx_tag ltx_tag_equation ltx_align_right">(10)</span></td>
+</tr></tbody>
+</table>
+<p class="ltx_p" id="S3.SS3.p4.11">Поскольку <math alttext="\bar{R}(c_{0})" class="ltx_Math" display="inline" id="S3.SS3.p4.11.m1" intent=":literal"><semantics><mrow><mover accent="true"><mi>R</mi><mo>¯</mo></mover><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><msub><mi>c</mi><mn>0</mn></msub><mo stretchy="false">)</mo></mrow></mrow><annotation encoding="application/x-tex">\bar{R}(c_{0})</annotation></semantics></math> не зависит от действия, использование его в качестве базовой линии не изменяет ожидаемый градиент. Однако это контрольная переменная, которая нивелирует смещения, специфичные для конкретного промпта. На практике шум при оценке и различия в сложности между промптами, вероятно, преобладают над показателями точности в чистом виде. В этих условиях преимущество, основанное на улучшении, обеспечивает более четкий сигнал обучения и более стабильные обновления градиента стратегии. Это также снижает стоимость обучения, поскольку не требует ни множественных прогонов для каждого промпта для групповой нормализации, ни отдельной сети оценки..</p>
+</div>
+<div class="ltx_para ltx_noindent" id="S3.SS3.p5">
+<p class="ltx_p" id="S3.SS3.p5.5">Градиент в Eq. (<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#S3.E10" title="In 3.3 Learning to Self-Evolve (LSE) ‣ 3 Method ‣ Learning to Self-Evolve"><span class="ltx_text ltx_ref_tag">10</span></a>) зависит от распределения начальных состояний <math alttext="s=(c_{0},S_{0})" class="ltx_Math" display="inline" id="S3.SS3.p5.1.m1" intent=":literal"><semantics><mrow><mi>s</mi><mo>=</mo><mrow><mo stretchy="false">(</mo><msub><mi>c</mi><mn>0</mn></msub><mo>,</mo><msub><mi>S</mi><mn>0</mn></msub><mo stretchy="false">)</mo></mrow></mrow><annotation encoding="application/x-tex">s=(c_{0},S_{0})</annotation></semantics></math>. Если <math alttext="c_{0}" class="ltx_Math" display="inline" id="S3.SS3.p5.2.m2" intent=":literal"><semantics><msub><mi>c</mi><mn>0</mn></msub><annotation encoding="application/x-tex">c_{0}</annotation></semantics></math> всегда является исходным контекстом, возникает несоответствие: во время тестирования policy выполняется в течение нескольких раундов (Algorithm <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#alg1" title="Algorithm 1 ‣ 3.2 Prompt-Based Evolution with Tree Search ‣ 3 Method ‣ Learning to Self-Evolve"><span class="ltx_text ltx_ref_tag">1</span></a>) и должна улучшать контексты, созданные ее собственными предыдущими правками. Поэтому мы наполняем дерево <math alttext="{\mathcal{G}}" class="ltx_Math" display="inline" id="S3.SS3.p5.3.m3" intent=":literal"><semantics><mi class="ltx_font_mathcaligraphic">𝒢</mi><annotation encoding="application/x-tex">{\mathcal{G}}</annotation></semantics></math> несколькими раундами эволюции для формирования обучающего набора данных, а затем случайным образом выбираем узлы из <math alttext="{\mathcal{G}}" class="ltx_Math" display="inline" id="S3.SS3.p5.4.m4" intent=":literal"><semantics><mi class="ltx_font_mathcaligraphic">𝒢</mi><annotation encoding="application/x-tex">{\mathcal{G}}</annotation></semantics></math> в качестве начальных контекстов на каждом шаге RL. Это подвергает <math alttext="f_{\psi}" class="ltx_Math" display="inline" id="S3.SS3.p5.5.m5" intent=":literal"><semantics><msub><mi>f</mi><mi>ψ</mi></msub><annotation encoding="application/x-tex">f_{\psi}</annotation></semantics></math> воздействию распределения контекстов, аналогичного тому, которое она увидит во время многошаговой эволюции.</p>
+</div>
+</section>
+</section>
+<section class="ltx_section" id="S4">
+<h2 class="ltx_title ltx_title_section">
+<span class="ltx_tag ltx_tag_section">4 </span>Эксперименты</h2>
+<div class="ltx_para ltx_noindent" id="S4.p1">
+<p class="ltx_p" id="S4.p1.1">Мы оцениваем LSE в двух предметных областях: генерации Text-to-SQL и общих вопросно-ответных системах, проводя сравнение как с более мощными моделями, так и с альтернативными методами оптимизации промптов (§<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#S4.SS1" title="4.1 Experimental Setup ‣ 4 Experiments ‣ Learning to Self-Evolve"><span class="ltx_text ltx_ref_tag">4.1</span></a>–<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#S4.SS2" title="4.2 Main Results ‣ 4 Experiments ‣ Learning to Self-Evolve"><span class="ltx_text ltx_ref_tag">4.2</span></a>). Затем мы проводим абляционное исследование дизайна вознаграждения и стратегии поиска в §<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#S4.SS3" title="4.3 Analysis ‣ 4 Experiments ‣ Learning to Self-Evolve"><span class="ltx_text ltx_ref_tag">4.3</span></a>.</p>
+</div>
+<section class="ltx_subsection" id="S4.SS1">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">4.1 </span>Экспериментальная установка</h3>
+<figure class="ltx_table" id="S4.T1">
+<figcaption class="ltx_caption">⟦<span class="ltx_tag ltx_tag_table">Table 1: </span>Результаты Text-to-SQL на BIRD. Все методы используют Qwen3-4B-Instruct в качестве политики действий <math alttext="\pi_{\theta}" class="ltx_Math" display="inline" id="S4.T1.2.m1" intent=":literal"><semantics><msub><mi>π</mi><mi>θ</mi></msub><annotation encoding="application/x-tex">\pi_{\theta}</annotation></semantics></math>. Мы приводим точность выполнения (%). Лучший результат в каждом столбце выделен жирным шрифтом.</figcaption>
+<table class="ltx_tabular ltx_centering ltx_guessed_headers ltx_align_middle" id="S4.T1.5">
+<tbody class="ltx_tbody">
+<tr class="ltx_tr" id="S4.T1.5.1.1">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_tt" id="S4.T1.5.1.1.1">Method</th>
+<td class="ltx_td ltx_align_center ltx_border_tt" id="S4.T1.5.1.1.2">Financial</td>
+<td class="ltx_td ltx_align_center ltx_border_tt" id="S4.T1.5.1.1.3">Toxicology</td>
+<td class="ltx_td ltx_align_center ltx_border_tt" id="S4.T1.5.1.1.4">Codebase</td>
+<td class="ltx_td ltx_align_center ltx_border_tt" id="S4.T1.5.1.1.5">Formula 1</td>
+<td class="ltx_td ltx_align_center ltx_border_tt" id="S4.T1.5.1.1.6">Card Games</td>
+<td class="ltx_td ltx_align_center ltx_border_tt" id="S4.T1.5.1.1.7">Avg.</td>
+</tr>
+<tr class="ltx_tr" id="S4.T1.5.2.2">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_t" id="S4.T1.5.2.2.1">Seed prompt</th>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S4.T1.5.2.2.2">51.0</td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S4.T1.5.2.2.3">60.3</td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S4.T1.5.2.2.4">63.7</td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S4.T1.5.2.2.5">54.5</td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S4.T1.5.2.2.6">56.5</td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S4.T1.5.2.2.7">57.2</td>
+</tr>
+<tr class="ltx_tr" id="S4.T1.5.3.3">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_row" id="S4.T1.5.3.3.1">Qwen3-4B-Instruct</th>
+<td class="ltx_td ltx_align_center" id="S4.T1.5.3.3.2">63.7</td>
+<td class="ltx_td ltx_align_center" id="S4.T1.5.3.3.3">60.3</td>
+<td class="ltx_td ltx_align_center" id="S4.T1.5.3.3.4">70.2</td>
+<td class="ltx_td ltx_align_center" id="S4.T1.5.3.3.5">56.0</td>
+<td class="ltx_td ltx_align_center" id="S4.T1.5.3.3.6">61.0</td>
+<td class="ltx_td ltx_align_center" id="S4.T1.5.3.3.7">62.2</td>
+</tr>
+<tr class="ltx_tr" id="S4.T1.5.4.4">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_t" id="S4.T1.5.4.4.1">Claude Sonnet 4.5</th>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S4.T1.5.4.4.2">70.8</td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S4.T1.5.4.4.3">63.8</td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S4.T1.5.4.4.4">67.8</td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S4.T1.5.4.4.5">57.3</td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S4.T1.5.4.4.6">63.0</td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S4.T1.5.4.4.7">64.5</td>
+</tr>
+<tr class="ltx_tr" id="S4.T1.5.5.5">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_row" id="S4.T1.5.5.5.1">GPT-5</th>
+<td class="ltx_td ltx_align_center" id="S4.T1.5.5.5.2">70.8</td>
+<td class="ltx_td ltx_align_center" id="S4.T1.5.5.5.3">65.8</td>
+<td class="ltx_td ltx_align_center" id="S4.T1.5.5.5.4"><span class="ltx_text ltx_font_bold" id="S4.T1.5.5.5.4.1">72.0</span></td>
+<td class="ltx_td ltx_align_center" id="S4.T1.5.5.5.5">54.3</td>
+<td class="ltx_td ltx_align_center" id="S4.T1.5.5.5.6">63.3</td>
+<td class="ltx_td ltx_align_center" id="S4.T1.5.5.5.7">65.2</td>
+</tr>
+<tr class="ltx_tr" id="S4.T1.5.6.6">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_t" id="S4.T1.5.6.6.1">GEPA</th>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S4.T1.5.6.6.2">64.0</td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S4.T1.5.6.6.3">62.0</td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S4.T1.5.6.6.4"><span class="ltx_text ltx_font_bold" id="S4.T1.5.6.6.4.1">72.0</span></td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S4.T1.5.6.6.5">54.0</td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S4.T1.5.6.6.6">62.0</td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S4.T1.5.6.6.7">62.8</td>
+</tr>
+<tr class="ltx_tr" id="S4.T1.5.7.7">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_row" id="S4.T1.5.7.7.1">TextGrad</th>
+<td class="ltx_td ltx_align_center" id="S4.T1.5.7.7.2">60.3</td>
+<td class="ltx_td ltx_align_center" id="S4.T1.5.7.7.3">66.0</td>
+<td class="ltx_td ltx_align_center" id="S4.T1.5.7.7.4">71.5</td>
+<td class="ltx_td ltx_align_center" id="S4.T1.5.7.7.5">56.5</td>
+<td class="ltx_td ltx_align_center" id="S4.T1.5.7.7.6">61.3</td>
+<td class="ltx_td ltx_align_center" id="S4.T1.5.7.7.7">63.1</td>
+</tr>
+<tr class="ltx_tr" id="S4.T1.5.8.8">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_bb ltx_border_t" id="S4.T1.5.8.8.1">LSE (ours)</th>
+<td class="ltx_td ltx_align_center ltx_border_bb ltx_border_t" id="S4.T1.5.8.8.2"><span class="ltx_text ltx_font_bold" id="S4.T1.5.8.8.2.1">72.0</span></td>
+<td class="ltx_td ltx_align_center ltx_border_bb ltx_border_t" id="S4.T1.5.8.8.3"><span class="ltx_text ltx_font_bold" id="S4.T1.5.8.8.3.1">68.5</span></td>
+<td class="ltx_td ltx_align_center ltx_border_bb ltx_border_t" id="S4.T1.5.8.8.4"><span class="ltx_text ltx_font_bold" id="S4.T1.5.8.8.4.1">72.0</span></td>
+<td class="ltx_td ltx_align_center ltx_border_bb ltx_border_t" id="S4.T1.5.8.8.5"><span class="ltx_text ltx_font_bold" id="S4.T1.5.8.8.5.1">59.8</span></td>
+<td class="ltx_td ltx_align_center ltx_border_bb ltx_border_t" id="S4.T1.5.8.8.6"><span class="ltx_text ltx_font_bold" id="S4.T1.5.8.8.6.1">64.0</span></td>
+<td class="ltx_td ltx_align_center ltx_border_bb ltx_border_t" id="S4.T1.5.8.8.7"><span class="ltx_text ltx_font_bold" id="S4.T1.5.8.8.7.1">67.3</span></td>
+</tr>
+</tbody>
+</table>
+</figure>
+<section class="ltx_paragraph" id="S4.SS1.SSS0.Px1">
+<h4 class="ltx_title ltx_title_paragraph">Модели.</h4>
+<div class="ltx_para ltx_noindent" id="S4.SS1.SSS0.Px1.p1">
+<p class="ltx_p" id="S4.SS1.SSS0.Px1.p1.2">Мы используем Qwen3-4B-Instruct как в качестве политики действий <math alttext="\pi_{\theta}" class="ltx_Math" display="inline" id="S4.SS1.SSS0.Px1.p1.1.m1" intent=":literal"><semantics><msub><mi>π</mi><mi>θ</mi></msub><annotation encoding="application/x-tex">\pi_{\theta}</annotation></semantics></math>, так и в качестве саморазвивающейся политики <math alttext="f_{\psi}" class="ltx_Math" display="inline" id="S4.SS1.SSS0.Px1.p1.2.m2" intent=":literal"><semantics><msub><mi>f</mi><mi>ψ</mi></msub><annotation encoding="application/x-tex">f_{\psi}</annotation></semantics></math>, если не указано иное. Подробности обучения и гиперпараметры можно найти в Приложении <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#A1" title="Appendix A Training and Evaluation Details ‣ Learning to Self-Evolve"><span class="ltx_text ltx_ref_tag">A</span></a>.</p>
+</div>
+</section>
+<section class="ltx_paragraph" id="S4.SS1.SSS0.Px2">
+<h4 class="ltx_title ltx_title_paragraph">Задачи и наборы данных.</h4>
+<div class="ltx_para ltx_noindent" id="S4.SS1.SSS0.Px2.p1">
+<p class="ltx_p" id="S4.SS1.SSS0.Px2.p1.1">Мы проводим оценку на задачах из двух областей: генерация Text-to-SQL, где политика создает исполняемые SQL-запросы, извлекающие данные, указанные в вопросе пользователя, и общее вопросно-ответное взаимодействие (QA), где политика отвечает на вопросы с множественным выбором по различным академическим дисциплинам. Промпты для каждой задачи находятся в Приложении <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#A2" title="Appendix B Prompts ‣ Learning to Self-Evolve"><span class="ltx_text ltx_ref_tag">B</span></a>.</p>
+</div>
+<div class="ltx_para ltx_noindent" id="S4.SS1.SSS0.Px2.p2">
+<p class="ltx_p" id="S4.SS1.SSS0.Px2.p2.1">Для Text-to-SQL мы используем BIRD <cite class="ltx_cite ltx_citemacro_citep">(Li<span class="ltx_text ltx_bib_etal"> et al.</span>, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib31" title="Can llm already serve as a database interface? a big bench for large-scale database grounded text-to-sqls">2024</a>)</cite>, который сопоставляет вопросы на естественном языке с SQL-запросами в различных предметных областях баз данных. Каждая база данных представляет собой отдельную предметную область задачи: проблемы выбираются из одной и той же области как для раундов эволюции, так и для отложенной оценки. Мы проводим обучение на обучающей выборке BIRD и выполняем оценку на пяти случайно выбранных базах данных из выборки BIRD-SQL Mini-Dev..</p>
+</div>
+<div class="ltx_para ltx_noindent" id="S4.SS1.SSS0.Px2.p3">
+<p class="ltx_p" id="S4.SS1.SSS0.Px2.p3.1">Для общих QA мы используем SuperGPQA <cite class="ltx_cite ltx_citemacro_citep">(Team<span class="ltx_text ltx_bib_etal"> et al.</span>, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib32" title="SuperGPQA: scaling llm evaluation across 285 graduate disciplines">2025</a>)</cite> и MMLU-Redux <cite class="ltx_cite ltx_citemacro_citep">(Gema<span class="ltx_text ltx_bib_etal"> et al.</span>, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib33" title="Are we done with mmlu?">2024</a>)</cite>. Мы преобразуем вопросы SuperGPQA в формат с четырьмя вариантами ответа, чтобы они соответствовали MMLU-Redux, и рассматриваем каждый предмет как отдельную область задач. Как и в случае с Text-to-SQL, каждый цикл эволюции работает в рамках одной предметной области. Мы проводим обучение на SuperGPQA и оценку по десяти предметам из MMLU-Redux.</p>
+</div>
+</section>
+<section class="ltx_paragraph" id="S4.SS1.SSS0.Px3">
+<h4 class="ltx_title ltx_title_paragraph">Базовые модели.</h4>
+<div class="ltx_para ltx_noindent" id="S4.SS1.SSS0.Px3.p1">
+<p class="ltx_p" id="S4.SS1.SSS0.Px3.p1.2">Сначала мы оцениваем более мощные модели в качестве саморазвивающейся стратегии <math alttext="f_{\psi}" class="ltx_Math" display="inline" id="S4.SS1.SSS0.Px3.p1.1.m1" intent=":literal"><semantics><msub><mi>f</mi><mi>ψ</mi></msub><annotation encoding="application/x-tex">f_{\psi}</annotation></semantics></math>, сохраняя при этом Qwen3-4B-Instruct в качестве стратегии действий <math alttext="\pi_{\theta}" class="ltx_Math" display="inline" id="S4.SS1.SSS0.Px3.p1.2.m2" intent=":literal"><semantics><msub><mi>π</mi><mi>θ</mi></msub><annotation encoding="application/x-tex">\pi_{\theta}</annotation></semantics></math>. Мы рассматриваем две передовые модели с закрытым исходным кодом, GPT-5 <cite class="ltx_cite ltx_citemacro_citep">(OpenAI, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib34" title="OpenAI gpt-5 system card">2025</a>)</cite> и Claude Sonnet 4.5 <cite class="ltx_cite ltx_citemacro_citep">(Anthropic, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib36" title="System card: claude opus 4.5">2025</a>)</cite></p>
+</div>
+<div class="ltx_para ltx_noindent" id="S4.SS1.SSS0.Px3.p2">
+<p class="ltx_p" id="S4.SS1.SSS0.Px3.p2.1">Мы также проводим сравнение с двумя альтернативными проектами саморазвивающейся стратегии. Для обоих методов мы используем Qwen3-4B-Instruct в качестве генератора промптов и оптимизатора..</p>
+<ul class="ltx_itemize" id="S4.I1">
+<li class="ltx_item" id="S4.I1.i1" style="list-style-type:none;">
+⟦<span class="ltx_tag ltx_tag_item">•</span>
+
+GEPA <cite class="ltx_cite ltx_citemacro_citep">(Agrawal<span class="ltx_text ltx_bib_etal"> et al.</span>, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib14" title="GEPA: reflective prompt evolution can outperform reinforcement learning">2025</a>)</cite> — это рефлексивный оптимизатор промптов, который объединяет текстовую рефлексию с многокритериальным эволюционным поиском. GEPA мутирует промпты на основе обратной связи на естественном языке от новых развертываний и поддерживает фронт Парето по производительности для каждого экземпляра, чтобы избежать жадных локальных оптимумов. Каждый шаг оптимизации GEPA соответствует одному раунду эволюции: выбранный пакет задач является обучающими данными для рефлексии, а отложенный набор <math alttext="D" class="ltx_Math" display="inline" id="S4.I1.i1.p1.1.m1" intent=":literal"><semantics><mi>D</mi><annotation encoding="application/x-tex">D</annotation></semantics></math> — это <math alttext="D_{\mathrm{pareto}}" class="ltx_Math" display="inline" id="S4.I1.i1.p1.2.m2" intent=":literal"><semantics><msub><mi>D</mi><mi>pareto</mi></msub><annotation encoding="application/x-tex">D_{\mathrm{pareto}}</annotation></semantics></math> в GEPA.
+
+</li>
+<li class="ltx_item" id="S4.I1.i2" style="list-style-type:none;">
+⟦<span class="ltx_tag ltx_tag_item">•</span>
+
+TextGrad <cite class="ltx_cite ltx_citemacro_citep">(Yuksekgonul<span class="ltx_text ltx_bib_etal"> et al.</span>, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib37" title="TextGrad: automatic ”differentiation” via text">2024</a>)</cite> декомпозирует каждое обновление промпта на два вызова LLM: обратный вызов, который критикует текущую инструкцию с учетом сбоев в пакете и создает «градиенты» на естественном языке (обратную связь о том, как следует изменить инструкцию), за которым следует вызов Textual Gradient Descent (TGD), переписывающий инструкцию с учетом этой обратной связи. Мы следуем примеру, представленному в официальном репозитории22<span class="ltx_tag ltx_tag_note">2</span><a class="ltx_ref ltx_url ltx_font_typewriter" href="https://github.com/zou-group/textgrad/blob/main/evaluation/prompt_optimization.py" target="_blank" title="">https://github.com/zou-group/textgrad/blob/main/evaluation/prompt_optimization.py</a>, и рассматриваем каждый шаг backward–TGD как один раунд эволюции.
+
+</li>
+</ul>
+</div>
+</section>
+<section class="ltx_paragraph" id="S4.SS1.SSS0.Px4">
+<h4 class="ltx_title ltx_title_paragraph">Протокол оценки.</h4>
+<div class="ltx_para ltx_noindent" id="S4.SS1.SSS0.Px4.p1">
+<p class="ltx_p" id="S4.SS1.SSS0.Px4.p1.2">Для всех методов мы производим выборку задач и представляем их стратегии действий в фиксированном порядке для всех запусков. Отложенная выборка <math alttext="D" class="ltx_Math" display="inline" id="S4.SS1.SSS0.Px4.p1.1.m1" intent=":literal"><semantics><mi>D</mi><annotation encoding="application/x-tex">D</annotation></semantics></math> также остается неизменной для всех оценочных запусков в рамках каждой предметной области. Мы приводим лучшие показатели, достигнутые за <math alttext="T" class="ltx_Math" display="inline" id="S4.SS1.SSS0.Px4.p1.2.m2" intent=":literal"><semantics><mi>T</mi><annotation encoding="application/x-tex">T</annotation></semantics></math> раундов эволюции. Дополнительные сведения можно найти в Приложении <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#A1" title="Appendix A Training and Evaluation Details ‣ Learning to Self-Evolve"><span class="ltx_text ltx_ref_tag">A</span></a>⟧.</p>
+</div>
+</section>
+</section>
+<section class="ltx_subsection" id="S4.SS2">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">4.2 </span>Основные результаты</h3>
+<figure class="ltx_table" id="S4.T2">
+<figcaption class="ltx_caption">⟦<span class="ltx_tag ltx_tag_table">Table 2: </span>Результаты ответов на вопросы в MMLU-Redux. Все методы используют Qwen3-4B-Instruct в качестве политики действий <math alttext="\pi_{\theta}" class="ltx_Math" display="inline" id="S4.T2.2.m1" intent=":literal"><semantics><msub><mi>π</mi><mi>θ</mi></msub><annotation encoding="application/x-tex">\pi_{\theta}</annotation></semantics></math>. Мы приводим точность (%). Лучший результат в каждом столбце выделен жирным шрифтом.</figcaption>
+<div class="ltx_inline-block ltx_align_center ltx_transformed_outer" id="S4.T2.5" style="width:397.5pt;height:64.5pt;vertical-align:-30.6pt;"><span class="ltx_transformed_inner" style="transform:translate(-104.2pt,16.9pt) scale(0.656008384150257,0.656008384150257) ;">
+<table class="ltx_tabular ltx_guessed_headers ltx_align_middle" id="S4.T2.5.1">
+<tbody class="ltx_tbody">
+<tr class="ltx_tr" id="S4.T2.5.1.1.1">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_tt" id="S4.T2.5.1.1.1.1">Method</th>
+<td class="ltx_td ltx_align_center ltx_border_tt" id="S4.T2.5.1.1.1.2">Bus. Eth.</td>
+<td class="ltx_td ltx_align_center ltx_border_tt" id="S4.T2.5.1.1.1.3">Phil.</td>
+<td class="ltx_td ltx_align_center ltx_border_tt" id="S4.T2.5.1.1.1.4">Prof. Acc.</td>
+<td class="ltx_td ltx_align_center ltx_border_tt" id="S4.T2.5.1.1.1.5">Econ.</td>
+<td class="ltx_td ltx_align_center ltx_border_tt" id="S4.T2.5.1.1.1.6">Anat.</td>
+<td class="ltx_td ltx_align_center ltx_border_tt" id="S4.T2.5.1.1.1.7">Security</td>
+<td class="ltx_td ltx_align_center ltx_border_tt" id="S4.T2.5.1.1.1.8">Virol.</td>
+<td class="ltx_td ltx_align_center ltx_border_tt" id="S4.T2.5.1.1.1.9">Moral Sc.</td>
+<td class="ltx_td ltx_align_center ltx_border_tt" id="S4.T2.5.1.1.1.10">Glob. Facts</td>
+<td class="ltx_td ltx_align_center ltx_border_tt" id="S4.T2.5.1.1.1.11">Prof. Law</td>
+<td class="ltx_td ltx_align_center ltx_border_tt" id="S4.T2.5.1.1.1.12">Avg.</td>
+</tr>
+<tr class="ltx_tr" id="S4.T2.5.1.2.2">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_t" id="S4.T2.5.1.2.2.1">Seed prompt</th>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S4.T2.5.1.2.2.2">70.5</td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S4.T2.5.1.2.2.3">76.0</td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S4.T2.5.1.2.2.4">67.7</td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S4.T2.5.1.2.2.5">76.2</td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S4.T2.5.1.2.2.6">76.0</td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S4.T2.5.1.2.2.7">68.2</td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S4.T2.5.1.2.2.8">72.5</td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S4.T2.5.1.2.2.9">59.7</td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S4.T2.5.1.2.2.10">55.5</td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S4.T2.5.1.2.2.11">54.0</td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S4.T2.5.1.2.2.12">67.6</td>
+</tr>
+<tr class="ltx_tr" id="S4.T2.5.1.3.3">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_row" id="S4.T2.5.1.3.3.1">Qwen3-4B-Instruct</th>
+<td class="ltx_td ltx_align_center" id="S4.T2.5.1.3.3.2">75.5</td>
+<td class="ltx_td ltx_align_center" id="S4.T2.5.1.3.3.3">79.2</td>
+<td class="ltx_td ltx_align_center" id="S4.T2.5.1.3.3.4">73.0</td>
+<td class="ltx_td ltx_align_center" id="S4.T2.5.1.3.3.5">83.0</td>
+<td class="ltx_td ltx_align_center" id="S4.T2.5.1.3.3.6">82.3</td>
+<td class="ltx_td ltx_align_center" id="S4.T2.5.1.3.3.7">68.8</td>
+<td class="ltx_td ltx_align_center" id="S4.T2.5.1.3.3.8">77.0</td>
+<td class="ltx_td ltx_align_center" id="S4.T2.5.1.3.3.9">59.7</td>
+<td class="ltx_td ltx_align_center" id="S4.T2.5.1.3.3.10">56.0</td>
+<td class="ltx_td ltx_align_center" id="S4.T2.5.1.3.3.11">57.3</td>
+<td class="ltx_td ltx_align_center" id="S4.T2.5.1.3.3.12">71.2</td>
+</tr>
+<tr class="ltx_tr" id="S4.T2.5.1.4.4">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_t" id="S4.T2.5.1.4.4.1">Claude Sonnet 4.5</th>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S4.T2.5.1.4.4.2">75.3</td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S4.T2.5.1.4.4.3">79.0</td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S4.T2.5.1.4.4.4">75.5</td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S4.T2.5.1.4.4.5">81.0</td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S4.T2.5.1.4.4.6">79.8</td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S4.T2.5.1.4.4.7">69.3</td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S4.T2.5.1.4.4.8">77.5</td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S4.T2.5.1.4.4.9"><span class="ltx_text ltx_font_bold" id="S4.T2.5.1.4.4.9.1">67.3</span></td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S4.T2.5.1.4.4.10"><span class="ltx_text ltx_font_bold" id="S4.T2.5.1.4.4.10.1">57.0</span></td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S4.T2.5.1.4.4.11">58.5</td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S4.T2.5.1.4.4.12">72.0</td>
+</tr>
+<tr class="ltx_tr" id="S4.T2.5.1.5.5">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_row" id="S4.T2.5.1.5.5.1">GPT-5</th>
+<td class="ltx_td ltx_align_center" id="S4.T2.5.1.5.5.2"><span class="ltx_text ltx_font_bold" id="S4.T2.5.1.5.5.2.1">77.5</span></td>
+<td class="ltx_td ltx_align_center" id="S4.T2.5.1.5.5.3">80.0</td>
+<td class="ltx_td ltx_align_center" id="S4.T2.5.1.5.5.4">73.0</td>
+<td class="ltx_td ltx_align_center" id="S4.T2.5.1.5.5.5">83.5</td>
+<td class="ltx_td ltx_align_center" id="S4.T2.5.1.5.5.6">81.0</td>
+<td class="ltx_td ltx_align_center" id="S4.T2.5.1.5.5.7">70.0</td>
+<td class="ltx_td ltx_align_center" id="S4.T2.5.1.5.5.8"><span class="ltx_text ltx_font_bold" id="S4.T2.5.1.5.5.8.1">82.0</span></td>
+<td class="ltx_td ltx_align_center" id="S4.T2.5.1.5.5.9">64.8</td>
+<td class="ltx_td ltx_align_center" id="S4.T2.5.1.5.5.10">55.5</td>
+<td class="ltx_td ltx_align_center" id="S4.T2.5.1.5.5.11">58.0</td>
+<td class="ltx_td ltx_align_center" id="S4.T2.5.1.5.5.12">72.5</td>
+</tr>
+<tr class="ltx_tr" id="S4.T2.5.1.6.6">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_t" id="S4.T2.5.1.6.6.1">GEPA</th>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S4.T2.5.1.6.6.2">76.0</td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S4.T2.5.1.6.6.3">80.0</td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S4.T2.5.1.6.6.4"><span class="ltx_text ltx_font_bold" id="S4.T2.5.1.6.6.4.1">78.0</span></td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S4.T2.5.1.6.6.5">84.0</td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S4.T2.5.1.6.6.6">82.0</td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S4.T2.5.1.6.6.7">70.0</td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S4.T2.5.1.6.6.8">78.0</td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S4.T2.5.1.6.6.9">62.0</td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S4.T2.5.1.6.6.10">56.0</td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S4.T2.5.1.6.6.11"><span class="ltx_text ltx_font_bold" id="S4.T2.5.1.6.6.11.1">64.0</span></td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S4.T2.5.1.6.6.12">73.0</td>
+</tr>
+<tr class="ltx_tr" id="S4.T2.5.1.7.7">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_row" id="S4.T2.5.1.7.7.1">TextGrad</th>
+<td class="ltx_td ltx_align_center" id="S4.T2.5.1.7.7.2">74.0</td>
+<td class="ltx_td ltx_align_center" id="S4.T2.5.1.7.7.3">79.0</td>
+<td class="ltx_td ltx_align_center" id="S4.T2.5.1.7.7.4">67.8</td>
+<td class="ltx_td ltx_align_center" id="S4.T2.5.1.7.7.5">73.3</td>
+<td class="ltx_td ltx_align_center" id="S4.T2.5.1.7.7.6">80.0</td>
+<td class="ltx_td ltx_align_center" id="S4.T2.5.1.7.7.7">67.8</td>
+<td class="ltx_td ltx_align_center" id="S4.T2.5.1.7.7.8">77.3</td>
+<td class="ltx_td ltx_align_center" id="S4.T2.5.1.7.7.9">62.5</td>
+<td class="ltx_td ltx_align_center" id="S4.T2.5.1.7.7.10">51.3</td>
+<td class="ltx_td ltx_align_center" id="S4.T2.5.1.7.7.11">58.3</td>
+<td class="ltx_td ltx_align_center" id="S4.T2.5.1.7.7.12">69.1</td>
+</tr>
+<tr class="ltx_tr" id="S4.T2.5.1.8.8">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_bb ltx_border_t" id="S4.T2.5.1.8.8.1">LSE (ours)</th>
+<td class="ltx_td ltx_align_center ltx_border_bb ltx_border_t" id="S4.T2.5.1.8.8.2">75.0</td>
+<td class="ltx_td ltx_align_center ltx_border_bb ltx_border_t" id="S4.T2.5.1.8.8.3"><span class="ltx_text ltx_font_bold" id="S4.T2.5.1.8.8.3.1">82.0</span></td>
+<td class="ltx_td ltx_align_center ltx_border_bb ltx_border_t" id="S4.T2.5.1.8.8.4">73.0</td>
+<td class="ltx_td ltx_align_center ltx_border_bb ltx_border_t" id="S4.T2.5.1.8.8.5"><span class="ltx_text ltx_font_bold" id="S4.T2.5.1.8.8.5.1">85.0</span></td>
+<td class="ltx_td ltx_align_center ltx_border_bb ltx_border_t" id="S4.T2.5.1.8.8.6"><span class="ltx_text ltx_font_bold" id="S4.T2.5.1.8.8.6.1">84.5</span></td>
+<td class="ltx_td ltx_align_center ltx_border_bb ltx_border_t" id="S4.T2.5.1.8.8.7"><span class="ltx_text ltx_font_bold" id="S4.T2.5.1.8.8.7.1">70.5</span></td>
+<td class="ltx_td ltx_align_center ltx_border_bb ltx_border_t" id="S4.T2.5.1.8.8.8">79.0</td>
+<td class="ltx_td ltx_align_center ltx_border_bb ltx_border_t" id="S4.T2.5.1.8.8.9">64.5</td>
+<td class="ltx_td ltx_align_center ltx_border_bb ltx_border_t" id="S4.T2.5.1.8.8.10"><span class="ltx_text ltx_font_bold" id="S4.T2.5.1.8.8.10.1">57.0</span></td>
+<td class="ltx_td ltx_align_center ltx_border_bb ltx_border_t" id="S4.T2.5.1.8.8.11">62.0</td>
+<td class="ltx_td ltx_align_center ltx_border_bb ltx_border_t" id="S4.T2.5.1.8.8.12"><span class="ltx_text ltx_font_bold" id="S4.T2.5.1.8.8.12.1">73.3</span></td>
+</tr>
+</tbody>
+</table>
+</span></div>
+</figure>
+<div class="ltx_para ltx_noindent" id="S4.SS2.p1">
+<p class="ltx_p" id="S4.SS2.p1.1">В таблицах <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#S4.T1" title="Table 1 ‣ 4.1 Experimental Setup ‣ 4 Experiments ‣ Learning to Self-Evolve"><span class="ltx_text ltx_ref_tag">1</span></a> и <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#S4.T2" title="Table 2 ‣ 4.2 Main Results ‣ 4 Experiments ‣ Learning to Self-Evolve"><span class="ltx_text ltx_ref_tag">2</span></a> представлены результаты по Text-to-SQL и QA. Даже без специального обучения для самосовершенствования, готовые LLM могут улучшать свои собственные промпты при получении обратной связи во время тестирования. Базовая модель Qwen3-4B-Instruct без дополнительного обучения превосходит исходный промпт на 5% в BIRD и на 3,6% в MMLU-Redux. Это подтверждает, что LLM уже способны учиться на собственном опыте в рамках эволюционного цикла алгоритма <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#alg1" title="Algorithm 1 ‣ 3.2 Prompt-Based Evolution with Tree Search ‣ 3 Method ‣ Learning to Self-Evolve"><span class="ltx_text ltx_ref_tag">1</span></a>.</p>
+</div>
+<div class="ltx_para ltx_noindent" id="S4.SS2.p2">
+<p class="ltx_p" id="S4.SS2.p2.1">Обучение с подкреплением с использованием LSE существенно улучшает эту способность. Несмотря на использование модели всего с 4 миллиардами параметров, LSE превосходит обе передовые модели в BIRD, опережая GPT-5 на 2,1% (67,3% против 65,2%) и Claude Sonnet 4.5 на 2,8%. В MMLU-Redux LSE сравнивается с GPT-5 (73,3% против 72,5%) и превосходит Claude Sonnet 4.5. Эти результаты показывают, что явное обучение с подкреплением для самоэволюции эффективно, позволяя небольшой модели сравниться с передовыми моделями или превзойти их..</p>
+</div>
+<div class="ltx_para ltx_noindent" id="S4.SS2.p3">
+<p class="ltx_p" id="S4.SS2.p3.1">LSE также превосходит оба метода оптимизации промптов. На BIRD LSE опережает GEPA на 4,5% (67,3% против 62,8%) и TextGrad на 4,2% (67,3% против 63,1%). На MMLU-Redux LSE показывает результаты, сопоставимые с GEPA (73,3% против 73,0%), и превосходит TextGrad на 4,2%. В совокупности эти результаты показывают, что, хотя готовые LLM обладают определенной способностью к уточнению промптов, явное обучение саморазвитию соответствует или превосходит нетренированные базовые модели, более крупные модели и специализированные методы оптимизации..</p>
+</div>
+<div class="ltx_para ltx_noindent" id="S4.SS2.p4">
+<p class="ltx_p" id="S4.SS2.p4.1">Наконец, как улучшение за счет самоэволюции на основе исходного промпта, так и дополнительное преимущество LSE на MMLU-Redux меньше, чем на BIRD. Одно из возможных объяснений заключается в структуре этих двух задач. В BIRD все запросы внутри домена нацелены на одну и ту же базу данных, поэтому существует четкое общее знание между задачами: понимание схемы, общих шаблонов объединения или семантики столбцов из одного запроса напрямую помогает при работе с другими. В MMLU-Redux задачи в рамках одного предмета намеренно дедуплицированы и разработаны для охвата широких тем. Решение одного вопроса по эконометрике не гарантирует полезных знаний для следующего. Это ограничивает возможности любой самоэволюционирующей стратегии по улучшению контекста стратегии действий на основе опыта в рамках одного домена..</p>
+</div>
+</section>
+<section class="ltx_subsection" id="S4.SS3">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">4.3 </span>Анализ</h3>
+<figure class="ltx_figure" id="S4.F2">
+<div class="ltx_flex_figure">
+<div class="ltx_flex_cell ltx_flex_size_2">
+<figure class="ltx_figure ltx_figure_panel ltx_align_center" id="S4.F2.sf1"><img alt="Refer to caption" class="ltx_graphics ltx_centering ltx_img_landscape" height="560" id="S4.F2.sf1.g1" src="./[2603.18620] Learning to Self-Evolve_files/x2.png" width="830"/>
+<figcaption class="ltx_caption ltx_centering">⟦<span class="ltx_tag ltx_tag_figure">(a) </span>Влияние проектирования вознаграждения</figcaption>
+</figure>
+</div>
+<div class="ltx_flex_cell ltx_flex_size_2">
+<figure class="ltx_figure ltx_figure_panel ltx_align_center" id="S4.F2.sf2"><img alt="Refer to caption" class="ltx_graphics ltx_centering ltx_img_landscape" height="559" id="S4.F2.sf2.g1" src="./[2603.18620] Learning to Self-Evolve_files/x3.png" width="830"/>
+<figcaption class="ltx_caption ltx_centering">⟦<span class="ltx_tag ltx_tag_figure">(b) </span>Влияние стратегии поиска</figcaption>
+</figure>
+</div>
+</div>
+<figcaption class="ltx_caption ltx_centering">⟦<span class="ltx_tag ltx_tag_figure">Figure 2: </span>Абляционные исследования по проектированию вознаграждения и стратегии поиска. (a) <math alttext="A_{\mathrm{GRPO}}" class="ltx_Math" display="inline" id="S4.F2.6.m1" intent=":literal"><semantics><msub><mi>A</mi><mi>GRPO</mi></msub><annotation encoding="application/x-tex">A_{\mathrm{GRPO}}</annotation></semantics></math> использует <math alttext="\bar{R}(c_{1})" class="ltx_Math" display="inline" id="S4.F2.7.m2" intent=":literal"><semantics><mrow><mover accent="true"><mi>R</mi><mo>¯</mo></mover><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><msub><mi>c</mi><mn>1</mn></msub><mo stretchy="false">)</mo></mrow></mrow><annotation encoding="application/x-tex">\bar{R}(c_{1})</annotation></semantics></math> с групповым преимуществом GRPO; <math alttext="A_{\mathrm{LSE}}" class="ltx_Math" display="inline" id="S4.F2.8.m3" intent=":literal"><semantics><msub><mi>A</mi><mi>LSE</mi></msub><annotation encoding="application/x-tex">A_{\mathrm{LSE}}</annotation></semantics></math> использует вознаграждение на основе улучшения <math alttext="r_{\mathrm{LSE}}=\bar{R}(c_{1})-\bar{R}(c_{0})" class="ltx_Math" display="inline" id="S4.F2.9.m4" intent=":literal"><semantics><mrow><msub><mi>r</mi><mi>LSE</mi></msub><mo>=</mo><mrow><mrow><mover accent="true"><mi>R</mi><mo>¯</mo></mover><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><msub><mi>c</mi><mn>1</mn></msub><mo stretchy="false">)</mo></mrow></mrow><mo>−</mo><mrow><mover accent="true"><mi>R</mi><mo>¯</mo></mover><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><msub><mi>c</mi><mn>0</mn></msub><mo stretchy="false">)</mo></mrow></mrow></mrow></mrow><annotation encoding="application/x-tex">r_{\mathrm{LSE}}=\bar{R}(c_{1})-\bar{R}(c_{0})</annotation></semantics></math> (Ур. <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#S3.E7" title="In 3.3 Learning to Self-Evolve (LSE) ‣ 3 Method ‣ Learning to Self-Evolve"><span class="ltx_text ltx_ref_tag">7</span></a>). (b) Древовидный поиск (UCB) против линейной цепочки (всегда расширяет самый последний узел), оба с необученной моделью Qwen3-4B-Instruct в качестве <math alttext="f_{\psi}" class="ltx_Math" display="inline" id="S4.F2.10.m5" intent=":literal"><semantics><msub><mi>f</mi><mi>ψ</mi></msub><annotation encoding="application/x-tex">f_{\psi}</annotation></semantics></math>.</figcaption>
+</figure>
+<section class="ltx_paragraph" id="S4.SS3.SSS0.Px1">
+<h4 class="ltx_title ltx_title_paragraph">Влияние проектирования вознаграждения.</h4>
+<div class="ltx_para ltx_noindent" id="S4.SS3.SSS0.Px1.p1">
+<p class="ltx_p" id="S4.SS3.SSS0.Px1.p1.5">В §<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#S3.SS3" title="3.3 Learning to Self-Evolve (LSE) ‣ 3 Method ‣ Learning to Self-Evolve"><span class="ltx_text ltx_ref_tag">3.3</span></a> мы обосновали <math alttext="A_{\mathrm{LSE}}=\bar{R}(c_{1})-\bar{R}(c_{0})" class="ltx_Math" display="inline" id="S4.SS3.SSS0.Px1.p1.1.m1" intent=":literal"><semantics><mrow><msub><mi>A</mi><mi>LSE</mi></msub><mo>=</mo><mrow><mrow><mover accent="true"><mi>R</mi><mo>¯</mo></mover><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><msub><mi>c</mi><mn>1</mn></msub><mo stretchy="false">)</mo></mrow></mrow><mo>−</mo><mrow><mover accent="true"><mi>R</mi><mo>¯</mo></mover><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><msub><mi>c</mi><mn>0</mn></msub><mo stretchy="false">)</mo></mrow></mrow></mrow></mrow><annotation encoding="application/x-tex">A_{\mathrm{LSE}}=\bar{R}(c_{1})-\bar{R}(c_{0})</annotation></semantics></math> как более чистый сигнал обучения, чем стандартное преимущество GRPO <math alttext="A_{\mathrm{GRPO}}" class="ltx_Math" display="inline" id="S4.SS3.SSS0.Px1.p1.2.m2" intent=":literal"><semantics><msub><mi>A</mi><mi>GRPO</mi></msub><annotation encoding="application/x-tex">A_{\mathrm{GRPO}}</annotation></semantics></math>, которое сводится к оптимизации точности после редактирования. Мы обучаем вариант с <math alttext="A_{\mathrm{GRPO}}" class="ltx_Math" display="inline" id="S4.SS3.SSS0.Px1.p1.3.m3" intent=":literal"><semantics><msub><mi>A</mi><mi>GRPO</mi></msub><annotation encoding="application/x-tex">A_{\mathrm{GRPO}}</annotation></semantics></math>, сохраняя все остальные настройки идентичными. На BIRD <math alttext="A_{\mathrm{LSE}}" class="ltx_Math" display="inline" id="S4.SS3.SSS0.Px1.p1.4.m4" intent=":literal"><semantics><msub><mi>A</mi><mi>LSE</mi></msub><annotation encoding="application/x-tex">A_{\mathrm{LSE}}</annotation></semantics></math> превосходит <math alttext="A_{\mathrm{GRPO}}" class="ltx_Math" display="inline" id="S4.SS3.SSS0.Px1.p1.5.m5" intent=":literal"><semantics><msub><mi>A</mi><mi>GRPO</mi></msub><annotation encoding="application/x-tex">A_{\mathrm{GRPO}}</annotation></semantics></math> на 4,3% (67,3% против 63,0%; Рисунок <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#S4.F2.sf1" title="In Figure 2 ‣ 4.3 Analysis ‣ 4 Experiments ‣ Learning to Self-Evolve"><span class="ltx_text ltx_ref_tag">2(a)</span></a>). Эти результаты предоставляют эмпирические доказательства того, что целевая функция, основанная на улучшении, более эффективна для обучения саморазвивающихся стратегий..</p>
+</div>
+</section>
+<section class="ltx_paragraph" id="S4.SS3.SSS0.Px2">
+<h4 class="ltx_title ltx_title_paragraph">Влияние стратегии поиска.</h4>
+<div class="ltx_para ltx_noindent" id="S4.SS3.SSS0.Px2.p1">
+<p class="ltx_p" id="S4.SS3.SSS0.Px2.p1.1">Мы сравниваем древовидный поиск UCB с базовой моделью линейной цепи, которая всегда расширяет самый последний узел. Оба метода используют необученную Qwen3-4B-Instruct в качестве <math alttext="f_{\psi}" class="ltx_Math" display="inline" id="S4.SS3.SSS0.Px2.p1.1.m1" intent=":literal"><semantics><msub><mi>f</mi><mi>ψ</mi></msub><annotation encoding="application/x-tex">f_{\psi}</annotation></semantics></math>. Рисунок <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#S4.F2.sf2" title="In Figure 2 ‣ 4.3 Analysis ‣ 4 Experiments ‣ Learning to Self-Evolve"><span class="ltx_text ltx_ref_tag">2(b)</span></a> показывает, что древовидный поиск улучшает средний показатель на 2,4% в BIRD (62,2% против 59,8%) и на 2,2% в MMLU-Redux (71,2% против 69,0%; Рисунок <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#A1.F4" title="Figure 4 ‣ Dataset sizes. ‣ Appendix A Training and Evaluation Details ‣ Learning to Self-Evolve"><span class="ltx_text ltx_ref_tag">4</span></a>).</p>
+</div>
+<figure class="ltx_figure ltx_align_floatright" id="S4.F3"><img alt="Refer to caption" class="ltx_graphics ltx_centering ltx_img_landscape" height="560" id="S4.F3.g1" src="./[2603.18620] Learning to Self-Evolve_files/x4.png" width="830"/>
+<figcaption class="ltx_caption ltx_centering">⟦<span class="ltx_tag ltx_tag_figure">Figure 3: </span>Средняя точность за раунд в базе данных BIRD Card Games. Линейная цепочка не может восстановиться после неудачных правок, в то время как древовидный поиск (UCB) выполняет возврат к предкам с более высокими показателями..</figcaption>
+</figure>
+<div class="ltx_para ltx_noindent" id="S4.SS3.SSS0.Px2.p2">
+<p class="ltx_p" id="S4.SS3.SSS0.Px2.p2.1">Ключевое преимущество заключается в том, что древовидный поиск не фиксирует ошибочную правку безвозвратно. На рисунке <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#S4.F3" title="Figure 3 ‣ Effect of search strategy. ‣ 4.3 Analysis ‣ 4 Experiments ‣ Learning to Self-Evolve"><span class="ltx_text ltx_ref_tag">3</span></a> показан конкретный пример на наборе данных BIRD Card Games. Средняя точность линейной цепочки падает с 56% до менее чем 30% после последовательности ошибочных правок и никогда не восстанавливается, поскольку каждый раунд опирается на предыдущий контекст. При использовании древовидного поиска ошибочная правка на раннем этапе не приводит к каскадным последствиям: выбор UCB переключается обратно на предка с более высоким баллом, что позволяет траектории избежать плохих локальных оптимумов..</p>
+</div>
+</section>
+<section class="ltx_paragraph" id="S4.SS3.SSS0.Px3">
+<h4 class="ltx_title ltx_title_paragraph">Самоэволюция во время тестирования для специализированных моделей.</h4>
+<div class="ltx_para ltx_noindent" id="S4.SS3.SSS0.Px3.p1">
+<p class="ltx_p" id="S4.SS3.SSS0.Px3.p1.2">Современная разработка LLM часто включает обучение специализированных моделей для определенной области задач. Может ли саморазвитие во время тестирования дополнительно улучшить такие модели? Мы проверяем это, заменяя <math alttext="\pi_{\theta}" class="ltx_Math" display="inline" id="S4.SS3.SSS0.Px3.p1.1.m1" intent=":literal"><semantics><msub><mi>π</mi><mi>θ</mi></msub><annotation encoding="application/x-tex">\pi_{\theta}</annotation></semantics></math> на Arctic-Text2SQL-R1-7B <cite class="ltx_cite ltx_citemacro_citep">(Yao<span class="ltx_text ltx_bib_etal"> et al.</span>, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib38" title="Arctic-text2sql-r1: simple rewards, strong reasoning in text-to-sql">2025</a>)</cite>, модель преобразования текста в SQL, дообученную с помощью RL на обучающем наборе BIRD, и применяя ту же <math alttext="f_{\psi}" class="ltx_Math" display="inline" id="S4.SS3.SSS0.Px3.p1.2.m2" intent=":literal"><semantics><msub><mi>f</mi><mi>ψ</mi></msub><annotation encoding="application/x-tex">f_{\psi}</annotation></semantics></math> (Qwen3-4B-Instruct), обученную методом LSE, без дополнительного обучения..</p>
+</div>
+<div class="ltx_para ltx_noindent" id="S4.SS3.SSS0.Px3.p2">
+<p class="ltx_p" id="S4.SS3.SSS0.Px3.p2.2">Таблица <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#S4.T3" title="Table 3 ‣ Test-time self-evolution for specialized models. ‣ 4.3 Analysis ‣ 4 Experiments ‣ Learning to Self-Evolve"><span class="ltx_text ltx_ref_tag">3</span></a> показывает, что эволюция LSE улучшает Arctic в среднем на 6,7% (с 57,7% <math alttext="\to" class="ltx_Math" display="inline" id="S4.SS3.SSS0.Px3.p2.1.m1" intent=":literal"><semantics><mo stretchy="false">→</mo><annotation encoding="application/x-tex">\to</annotation></semantics></math> до 64,4%). Это указывает на то, что оптимизация на уровне параметров и на уровне промптов дополняют друг друга: обучение RL кодирует общие шаблоны SQL в веса модели, в то время как эволюция промптов адаптирует контекст к каждой базе данных во время тестирования. Результат также демонстрирует, что стратегия, обученная с помощью LSE, переносится между моделями действий: хотя <math alttext="f_{\psi}" class="ltx_Math" display="inline" id="S4.SS3.SSS0.Px3.p2.2.m2" intent=":literal"><semantics><msub><mi>f</mi><mi>ψ</mi></msub><annotation encoding="application/x-tex">f_{\psi}</annotation></semantics></math> обучалась исключительно с использованием Qwen3-4B-Instruct, стратегия эволюции обобщается для управления другой моделью.</p>
+</div>
+<figure class="ltx_table" id="S4.T3">
+<figcaption class="ltx_caption">⟦<span class="ltx_tag ltx_tag_table">Table 3: </span>Самоэволюция специализированной модели действий во время тестирования на BIRD. Arctic-Text2SQL-R1-7B <cite class="ltx_cite ltx_citemacro_citep">(Yao<span class="ltx_text ltx_bib_etal"> et al.</span>, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib38" title="Arctic-text2sql-r1: simple rewards, strong reasoning in text-to-sql">2025</a>)</cite>, модель преобразования текста в SQL, настроенная с помощью RL, служит стратегией действий <math alttext="\pi_{\theta}" class="ltx_Math" display="inline" id="S4.T3.3.m1" intent=":literal"><semantics><msub><mi>π</mi><mi>θ</mi></msub><annotation encoding="application/x-tex">\pi_{\theta}</annotation></semantics></math>. Самоэволюционирующая стратегия <math alttext="f_{\psi}" class="ltx_Math" display="inline" id="S4.T3.4.m2" intent=":literal"><semantics><msub><mi>f</mi><mi>ψ</mi></msub><annotation encoding="application/x-tex">f_{\psi}</annotation></semantics></math> представляет собой обученную методом LSE модель Qwen3-4B-Instruct из основных экспериментов, применяемую без дополнительного обучения. Мы приводим точность выполнения (%).</figcaption>
+<table class="ltx_tabular ltx_centering ltx_guessed_headers ltx_align_middle" id="S4.T3.5">
+<thead class="ltx_thead">
+<tr class="ltx_tr" id="S4.T3.5.1.1">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_column ltx_th_row ltx_border_tt" id="S4.T3.5.1.1.1">Variant</th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt" id="S4.T3.5.1.1.2">Financial</th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt" id="S4.T3.5.1.1.3">Toxicology</th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt" id="S4.T3.5.1.1.4">Codebase</th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt" id="S4.T3.5.1.1.5">Formula 1</th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt" id="S4.T3.5.1.1.6">Card Games</th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt" id="S4.T3.5.1.1.7">Avg.</th>
+</tr>
+</thead>
+<tbody class="ltx_tbody">
+<tr class="ltx_tr" id="S4.T3.5.2.1">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_t" id="S4.T3.5.2.1.1">Seed prompt</th>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S4.T3.5.2.1.2">56.8</td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S4.T3.5.2.1.3">54.5</td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S4.T3.5.2.1.4">65.3</td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S4.T3.5.2.1.5">52.3</td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S4.T3.5.2.1.6">59.5</td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S4.T3.5.2.1.7">57.7</td>
+</tr>
+<tr class="ltx_tr" id="S4.T3.5.3.2">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_bb" id="S4.T3.5.3.2.1">+ LSE evolution</th>
+<td class="ltx_td ltx_align_center ltx_border_bb" id="S4.T3.5.3.2.2">68.3</td>
+<td class="ltx_td ltx_align_center ltx_border_bb" id="S4.T3.5.3.2.3">62.3</td>
+<td class="ltx_td ltx_align_center ltx_border_bb" id="S4.T3.5.3.2.4">71.5</td>
+<td class="ltx_td ltx_align_center ltx_border_bb" id="S4.T3.5.3.2.5">57.0</td>
+<td class="ltx_td ltx_align_center ltx_border_bb" id="S4.T3.5.3.2.6">63.0</td>
+<td class="ltx_td ltx_align_center ltx_border_bb" id="S4.T3.5.3.2.7">64.4</td>
+</tr>
+</tbody>
+</table>
+</figure>
+</section>
+</section>
+</section>
+<section class="ltx_section" id="S5">
+<h2 class="ltx_title ltx_title_section">
+<span class="ltx_tag ltx_tag_section">5 </span>Заключение</h2>
+<div class="ltx_para ltx_noindent" id="S5.p1">
+<p class="ltx_p" id="S5.p1.1">Данная работа демонстрирует, что самоэволюция во время тестирования является обучаемым навыком, который можно напрямую оптимизировать посредством fine-tuning. Ключевым проектным решением в LSE является одношаговая целевая функция RL, которая вознаграждает улучшение, достигаемое каждой правкой, что позволяет избежать многошаговой оптимизации траектории, сохраняя при этом основную задачу обучения на основе обратной связи. Поиск с направляющим деревом затем объединяет эти правки в многораундовую эволюцию во время тестирования. Наши результаты показывают, что прямая оптимизация самоэволюции эффективна, позволяя модели с 4B-параметрами сравниться с передовыми моделями и оптимизаторами промптов или превзойти их. В совокупности эти выводы подчеркивают преимущество выделения самоэволюции в качестве отдельного навыка и разработки алгоритмов обучения для него..</p>
+</div>
+<section class="ltx_paragraph" id="S5.SS0.SSS0.Px1">
+<h4 class="ltx_title ltx_title_paragraph">Ограничения.</h4>
+<div class="ltx_para ltx_noindent" id="S5.SS0.SSS0.Px1.p1">
+<p class="ltx_p" id="S5.SS0.SSS0.Px1.p1.1">Наша работа имеет несколько ограничений. Во-первых, мы сводим задачу многошаговой эволюции к одношаговой цели обучения, полностью делегируя исследование алгоритму древовидного поиска на этапе тестирования. Совместная оптимизация по многошаговым траекториям могла бы дать более сильные стратегии, но создала бы дополнительные трудности в распределении кредита и вычислительных затратах. Во-вторых, мы обучаем отдельную саморазвивающуюся стратегию для каждой предметной области. Обучение единой стратегии, которая обобщается на различные задачи, является естественным расширением, хотя, вероятно, требует масштабного обучения во многих областях. В-третьих, мы ограничиваем эволюцию полем инструкций в контексте; другие компоненты, такие как инструменты, библиотеки навыков и внешняя память, не исследуются. В более широком смысле, фреймворк LSE может быть объединен с обновлениями в латентном пространстве или пространстве параметров <cite class="ltx_cite ltx_citemacro_citep">(Sun<span class="ltx_text ltx_bib_etal"> et al.</span>, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib19" title="Test-time training with self-supervision for generalization under distribution shifts">2020</a>; Tandon<span class="ltx_text ltx_bib_etal"> et al.</span>, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib20" title="End-to-end test-time training for long context">2025</a>)</cite>. Наконец, наши среды обучения и оценки относительно невелики по масштабу. Подбор эффективных сред для самоэволюции во время тестирования затруднителен, так как требует не только достаточного количества задач с обратной связью, но и задач, которые имеют достаточно общую структуру для того, чтобы эволюция была значимой. Разработка более принципиальных и масштабируемых подходов к подбору сред и оценке остается важной открытой проблемой..</p>
+</div>
+</section>
+</section>
+<section class="ltx_bibliography" id="bib">
+<h2 class="ltx_title ltx_title_bibliography">Список литературы</h2>
+<ul class="ltx_biblist" id="bib.L1">
+<li class="ltx_bibitem ltx_bib_article" id="bib.bib14">
+⟦<span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">L. A. Agrawal, S. Tan, D. Soylu, N. Ziems, R. Khare, K. Opsahl-Ong, A. Singhvi, H. Shandilya, M. J. Ryan, M. Jiang, C. Potts, K. Sen, A. G. Dimakis, I. Stoica, D. Klein, M. Zaharia, and O. Khattab (2025)</span>
+GEPA: рефлексивная эволюция промптов может превосходить обучение с подкреплением.
+
+arXiv preprint arXiv:2507.19457.
+
+Цитируется в: <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#S1.p3.1" title="1 Introduction ‣ Learning to Self-Evolve"><span class="ltx_text ltx_ref_tag">§1</span></a>,
+<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#S2.SS0.SSS0.Px2.p2.1" title="Test-time self-evolution. ‣ 2 Related Work ‣ Learning to Self-Evolve"><span class="ltx_text ltx_ref_tag">§2</span></a>,
+<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#S3.SS3.p1.1" title="3.3 Learning to Self-Evolve (LSE) ‣ 3 Method ‣ Learning to Self-Evolve"><span class="ltx_text ltx_ref_tag">§3.3</span></a>,
+<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#S4.I1.i1.p1.2" title="In Baselines. ‣ 4.1 Experimental Setup ‣ 4 Experiments ‣ Learning to Self-Evolve"><span class="ltx_text ltx_ref_tag">1st item</span></a>.
+
+</li>
+<li class="ltx_bibitem ltx_bib_misc" id="bib.bib36">
+⟦<span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">Anthropic (2025)</span>
+Системная карта: claude opus 4.5.
+
+Внешние ссылки: <a class="ltx_ref ltx_bib_external" href="https://www-cdn.anthropic.com/bf10f64990cfda0ba858290be7b8cc6317685f47.pdf" target="_blank" title="">Link</a>
+
+Цитируется в: <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#S4.SS1.SSS0.Px3.p1.2" title="Baselines. ‣ 4.1 Experimental Setup ‣ 4 Experiments ‣ Learning to Self-Evolve"><span class="ltx_text ltx_ref_tag">§4.1</span></a>⟧.
+
+</li>
+<li class="ltx_bibitem ltx_bib_article" id="bib.bib24">
+⟦<span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">P. Auer (2002)</span>
+Использование доверительных границ для компромисса между эксплуатацией и исследованием.
+
+Journal of machine learning research 3 (нояб.), стр. 397–422.
+
+Цитируется в: <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#S3.SS2.SSS0.Px1.p1.4" title="Tree-guided evolution. ‣ 3.2 Prompt-Based Evolution with Tree Search ‣ 3 Method ‣ Learning to Self-Evolve"><span class="ltx_text ltx_ref_tag">§3.2</span></a>.
+
+</li>
+<li class="ltx_bibitem ltx_bib_inproceedings" id="bib.bib18">
+⟦<span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">P. Chhikara, D. Khant, S. Aryan, T. Singh, and D. Yadav (2025)</span>
+Mem0: создание готовых к промышленному внедрению ИИ-агентов с масштабируемой долговременной памятью.
+
+В материалах ECAI 2025 — 28-й Европейской конференции по искусственному интеллекту, 25–30 октября 2025 г., Болонья, Италия — включая 14-ю конференцию по престижным приложениям интеллектуальных систем (PAIS 2025), под редакцией И. Линс, Н. Мурано, М. Валлати, С. Виллата, Ф. Чезани, М. Милано, А. Омичини и М. Дастани,
+
+Frontiers in Artificial Intelligence and Applications, том 413, стр. 2993–3000.
+
+Внешние ссылки: <a class="ltx_ref ltx_bib_external" href="https://doi.org/10.3233/FAIA251160" target="_blank" title="">Link</a>,
+<a class="ltx_ref doi ltx_bib_external" href="https://dx.doi.org/10.3233/FAIA251160" target="_blank" title="">Document</a>
+
+Цитируется в: <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#S1.p3.1" title="1 Introduction ‣ Learning to Self-Evolve"><span class="ltx_text ltx_ref_tag">§1</span></a>,
+<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#S2.SS0.SSS0.Px2.p2.1" title="Test-time self-evolution. ‣ 2 Related Work ‣ Learning to Self-Evolve"><span class="ltx_text ltx_ref_tag">§2</span></a>⟧.
+
+</li>
+<li class="ltx_bibitem ltx_bib_article" id="bib.bib23">
+⟦<span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">DeepSeek-AI (2025)</span>
+DeepSeek-R1: стимулирование способности к рассуждению в LLM посредством обучения с подкреплением.
+
+arXiv preprint arXiv:2501.12948.
+
+Цитируется в: <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#S1.p1.1" title="1 Introduction ‣ Learning to Self-Evolve"><span class="ltx_text ltx_ref_tag">§1</span></a>,
+<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#S2.SS0.SSS0.Px1.p1.1" title="Training-time self-evolution. ‣ 2 Related Work ‣ Learning to Self-Evolve"><span class="ltx_text ltx_ref_tag">§2</span></a>.
+
+</li>
+<li class="ltx_bibitem ltx_bib_inproceedings" id="bib.bib12">
+⟦<span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">C. Fernando, D. Banarse, H. Michalewski, S. Osindero, and T. Rocktäschel (2024)</span>
+Promptbreeder: самореферентное самосовершенствование посредством эволюции промптов.
+
+В материалах 41-й Международной конференции по машинному обучению,
+
+Цитируется: <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#S1.p3.1" title="1 Introduction ‣ Learning to Self-Evolve"><span class="ltx_text ltx_ref_tag">§1</span></a>,
+<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#S2.SS0.SSS0.Px2.p2.1" title="Test-time self-evolution. ‣ 2 Related Work ‣ Learning to Self-Evolve"><span class="ltx_text ltx_ref_tag">§2</span></a>.
+
+</li>
+<li class="ltx_bibitem ltx_bib_misc" id="bib.bib33">
+⟦<span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">A. P. Gema, J. O. J. Leang, G. Hong, A. Devoto, A. C. M. Mancino, R. Saxena, X. He, Y. Zhao, X. Du, M. R. G. Madani, C. Barale, R. McHardy, J. Harris, J. Kaddour, E. van Krieken, and P. Minervini (2024)</span>
+Покончили ли мы с mmlu?.
+
+Внешние ссылки: 2406.04127
+
+Цитируется в: <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#S4.SS1.SSS0.Px2.p3.1" title="Tasks and datasets. ‣ 4.1 Experimental Setup ‣ 4 Experiments ‣ Learning to Self-Evolve"><span class="ltx_text ltx_ref_tag">§4.1</span></a>⟧.
+
+</li>
+<li class="ltx_bibitem ltx_bib_inproceedings" id="bib.bib17">
+⟦<span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">S. Hu, C. Lu, and J. Clune (2025)</span>
+Автоматизированное проектирование агентных систем.
+
+В Международной конференции по обучению представлениям,
+
+Цитируется: <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#S1.p2.1" title="1 Introduction ‣ Learning to Self-Evolve"><span class="ltx_text ltx_ref_tag">§1</span></a>,
+<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#S1.p3.1" title="1 Introduction ‣ Learning to Self-Evolve"><span class="ltx_text ltx_ref_tag">§1</span></a>,
+<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#S2.SS0.SSS0.Px2.p2.1" title="Test-time self-evolution. ‣ 2 Related Work ‣ Learning to Self-Evolve"><span class="ltx_text ltx_ref_tag">§2</span></a>.
+
+</li>
+<li class="ltx_bibitem ltx_bib_inproceedings" id="bib.bib13">
+⟦<span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">O. Khattab, A. Singhvi, P. Maheshwari, Z. Zhang, K. Santhanam, S. Vardhamanan, S. Haq, A. Sharma, T. T. Joshi, H. Mober, <span class="ltx_text ltx_bib_etal">et al.</span> (2024)</span>
+DSPy: компиляция декларативных вызовов языковых моделей в современные конвейеры.
+
+В Международной конференции по обучению представлений,
+
+Цитируется: <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#S1.p3.1" title="1 Introduction ‣ Learning to Self-Evolve"><span class="ltx_text ltx_ref_tag">§1</span></a>.
+
+</li>
+<li class="ltx_bibitem ltx_bib_inproceedings" id="bib.bib9">
+⟦<span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">A. Kumar, V. Du, A. S. Rawat, and R. Agarwal (2025)</span>
+Обучение языковых моделей самокоррекции посредством обучения с подкреплением.
+
+В Международной конференции по обучению представлениям,
+
+Цитируется: <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#S1.p2.1" title="1 Introduction ‣ Learning to Self-Evolve"><span class="ltx_text ltx_ref_tag">§1</span></a>,
+<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#S2.SS0.SSS0.Px2.p1.1" title="Test-time self-evolution. ‣ 2 Related Work ‣ Learning to Self-Evolve"><span class="ltx_text ltx_ref_tag">§2</span></a>.
+
+</li>
+<li class="ltx_bibitem ltx_bib_article" id="bib.bib31">
+⟦<span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">J. Li, B. Hui, G. Qu, J. Yang, B. Li, B. Li, B. Wang, B. Qin, R. Geng, N. Huo, <span class="ltx_text ltx_bib_etal">et al.</span> (2024)</span>
+Могут ли LLM уже служить интерфейсом для баз данных? Большой стенд для крупномасштабных text-to-sql, основанных на базах данных.
+
+Достижения в системах нейронной обработки информации 36.
+
+Цитируется: <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#S4.SS1.SSS0.Px2.p2.1" title="Tasks and datasets. ‣ 4.1 Experimental Setup ‣ 4 Experiments ‣ Learning to Self-Evolve"><span class="ltx_text ltx_ref_tag">§4.1</span></a>.
+
+</li>
+<li class="ltx_bibitem ltx_bib_inproceedings" id="bib.bib4">
+⟦<span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">H. Lightman, V. Kosaraju, Y. Burda, H. Edwards, B. Baker, T. Lee, J. Leike, J. Schulman, I. Sutskever, and K. Cobbe (2023)</span>
+Давайте проверим шаг за шагом.
+
+На Двенадцатой международной конференции по обучению представлениям,
+
+Цитируется: <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#S1.p1.1" title="1 Introduction ‣ Learning to Self-Evolve"><span class="ltx_text ltx_ref_tag">§1</span></a>,
+<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#S2.SS0.SSS0.Px1.p1.1" title="Training-time self-evolution. ‣ 2 Related Work ‣ Learning to Self-Evolve"><span class="ltx_text ltx_ref_tag">§2</span></a>.
+
+</li>
+<li class="ltx_bibitem ltx_bib_misc" id="bib.bib3">
+⟦<span class="ltx_tag ltx_bib_key ltx_role_refnum ltx_tag_bibitem">[13]</span>
+OpenAI
+
+Обучение рассуждению с помощью LLMs.
+
+Примечание: <a class="ltx_ref ltx_url ltx_font_typewriter" href="https://openai.com/index/learning-to-reason-with-llms/" target="_blank" title="">https://openai.com/index/learning-to-reason-with-llms/</a>Дата обращения: 2025-03-21
+
+Цитируется: <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#S1.p1.1" title="1 Introduction ‣ Learning to Self-Evolve"><span class="ltx_text ltx_ref_tag">§1</span></a>,
+<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#S2.SS0.SSS0.Px1.p1.1" title="Training-time self-evolution. ‣ 2 Related Work ‣ Learning to Self-Evolve"><span class="ltx_text ltx_ref_tag">§2</span></a>.
+
+</li>
+<li class="ltx_bibitem ltx_bib_article" id="bib.bib34">
+⟦<span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">OpenAI (2025)</span>
+Системная карта OpenAI gpt-5.
+
+Препринт arXiv: 2601.03267.
+
+Цитируется в: <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#S4.SS1.SSS0.Px3.p1.2" title="Baselines. ‣ 4.1 Experimental Setup ‣ 4 Experiments ‣ Learning to Self-Evolve"><span class="ltx_text ltx_ref_tag">§4.1</span></a>⟧.
+
+</li>
+<li class="ltx_bibitem ltx_bib_book" id="bib.bib1">
+⟦<span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">J. Piaget (1952)</span>
+Истоки интеллекта у детей.
+
+ W. W. Norton &amp; Company.
+
+Примечание: Пер. М. Кук
+
+Внешние ссылки: <a class="ltx_ref doi ltx_bib_external" href="https://dx.doi.org/10.1037/11494-000" target="_blank" title="">Document</a>
+
+Цитируется: <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#S1.p1.1" title="1 Introduction ‣ Learning to Self-Evolve"><span class="ltx_text ltx_ref_tag">§1</span></a>.
+
+</li>
+<li class="ltx_bibitem ltx_bib_article" id="bib.bib43">
+⟦<span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">G. Sheng, C. Zhang, Z. Ye, X. Wu, W. Zhang, R. Zhang, Y. Peng, H. Lin, and C. Wu (2024)</span>
+HybridFlow: гибкая и эффективная структура RLHF.
+
+Препринт arXiv: 2409.19256.
+
+Цитируется в: <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#A1.SS0.SSS0.Px2.p1.1" title="RL training. ‣ Appendix A Training and Evaluation Details ‣ Learning to Self-Evolve"><span class="ltx_text ltx_ref_tag">Appendix A</span></a>.
+
+</li>
+<li class="ltx_bibitem ltx_bib_inproceedings" id="bib.bib8">
+⟦<span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">N. Shinn, F. Cassano, A. Gopinath, K. Narasimhan, and S. Yao (2023)</span>
+Reflexion: языковые агенты с вербальным обучением с подкреплением.
+
+В сборнике Advances in Neural Information Processing Systems,
+
+Том 36.
+
+Цитируется: <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#S1.p2.1" title="1 Introduction ‣ Learning to Self-Evolve"><span class="ltx_text ltx_ref_tag">§1</span></a>,
+<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#S2.SS0.SSS0.Px2.p1.1" title="Test-time self-evolution. ‣ 2 Related Work ‣ Learning to Self-Evolve"><span class="ltx_text ltx_ref_tag">§2</span></a>.
+
+</li>
+<li class="ltx_bibitem ltx_bib_article" id="bib.bib2">
+⟦<span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">R. J. Sternberg (2019)</span>
+Теория адаптивного интеллекта и ее связь с общим интеллектом.
+
+Journal of Intelligence 7 (4).
+
+Внешние ссылки: <a class="ltx_ref ltx_bib_external" href="https://www.mdpi.com/2079-3200/7/4/23" target="_blank" title="">Link</a>,
+ISSN 2079-3200,
+<a class="ltx_ref doi ltx_bib_external" href="https://dx.doi.org/10.3390/jintelligence7040023" target="_blank" title="">Document</a>
+
+Цитируется: <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#S1.p1.1" title="1 Introduction ‣ Learning to Self-Evolve"><span class="ltx_text ltx_ref_tag">§1</span></a>.
+
+</li>
+<li class="ltx_bibitem ltx_bib_inproceedings" id="bib.bib19">
+⟦<span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">Y. Sun, X. Wang, L. Zhuang, J. Miller, M. Hardt, and A. A. Efros (2020)</span>
+Обучение во время тестирования с самообучением для обеспечения обобщающей способности при сдвигах распределения.
+
+В ICML,
+
+Цитируется: <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#S5.SS0.SSS0.Px1.p1.1" title="Limitations. ‣ 5 Conclusion ‣ Learning to Self-Evolve"><span class="ltx_text ltx_ref_tag">§5</span></a>.
+
+</li>
+<li class="ltx_bibitem ltx_bib_article" id="bib.bib20">
+⟦<span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">A. Tandon, K. Dalal, X. Li, D. Koceja, M. Rød, S. Buchanan, X. Wang, J. Leskovec, S. Koyejo, T. Hashimoto, C. Guestrin, J. McCaleb, Y. Choi, and Y. Sun (2025)</span>
+Сквозное обучение во время тестирования для длинного контекста.
+
+arXiv препринт arXiv: 2512.23675.
+
+Цитируется в: <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#S5.SS0.SSS0.Px1.p1.1" title="Limitations. ‣ 5 Conclusion ‣ Learning to Self-Evolve"><span class="ltx_text ltx_ref_tag">§5</span></a>.
+
+</li>
+<li class="ltx_bibitem ltx_bib_misc" id="bib.bib32">
+⟦<span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">M. Team, X. Du, Y. Yao, K. Ma, B. Wang, T. Zheng, K. Zhu, M. Liu, Y. Liang, X. Jin, Z. Wei, C. Zheng, K. Deng, S. Jia, S. Jiang, Y. Liao, R. Li, Q. Li, S. Li, Y. Li, Y. Li, D. Ma, Y. Ni, H. Que, Q. Wang, Z. Wen, S. Wu, T. Xing, M. Xu, Z. Yang, Z. M. Wang, J. Zhou, Y. Bai, X. Bu, C. Cai, L. Chen, Y. Chen, C. Cheng, T. Cheng, K. Ding, S. Huang, Y. Huang, Y. Li, Y. Li, Z. Li, T. Liang, C. Lin, H. Lin, Y. Ma, T. Pang, Z. Peng, Z. Peng, Q. Qi, S. Qiu, X. Qu, S. Quan, Y. Tan, Z. Wang, C. Wang, H. Wang, Y. Wang, Y. Wang, J. Xu, K. Yang, R. Yuan, Y. Yue, T. Zhan, C. Zhang, J. Zhang, X. Zhang, X. Zhang, Y. Zhang, Y. Zhao, X. Zheng, C. Zhong, Y. Gao, Z. Li, D. Liu, Q. Liu, T. Liu, S. Ni, J. Peng, Y. Qin, W. Su, G. Wang, S. Wang, J. Yang, M. Yang, M. Cao, X. Yue, Z. Zhang, W. Zhou, J. Liu, Q. Lin, W. Huang, and G. Zhang (2025)</span>
+SuperGPQA: масштабирование оценки LLM по 285 дисциплинам уровня магистратуры.
+
+Внешние ссылки: 2502.14739,
+<a class="ltx_ref ltx_bib_external" href="https://arxiv.org/abs/2502.14739" target="_blank" title="">Link</a>
+
+Цитируется: <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#S4.SS1.SSS0.Px2.p3.1" title="Tasks and datasets. ‣ 4.1 Experimental Setup ‣ 4 Experiments ‣ Learning to Self-Evolve"><span class="ltx_text ltx_ref_tag">§4.1</span></a>.
+
+</li>
+<li class="ltx_bibitem ltx_bib_inproceedings" id="bib.bib15">
+⟦<span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">G. Wang, Y. Xie, Y. Jiang, A. Mandlekar, C. Xiao, Y. Zhu, L. Fan, and A. Anandkumar (2023)</span>
+Voyager: агент с открытым финалом, воплощенный в среде, на базе LLM.
+
+В сборнике Advances in Neural Information Processing Systems,
+
+Том 36.
+
+Цитируется в: <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#S2.SS0.SSS0.Px2.p2.1" title="Test-time self-evolution. ‣ 2 Related Work ‣ Learning to Self-Evolve"><span class="ltx_text ltx_ref_tag">§2</span></a>.
+
+</li>
+<li class="ltx_bibitem ltx_bib_article" id="bib.bib38">
+⟦<span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">Z. Yao, G. Sun, L. Borchmann, G. Nuti, Z. Shen, M. Deng, B. Zhai, H. Zhang, A. Li, and Y. He (2025)</span>
+Arctic-text2sql-r1: простые вознаграждения, сильное рассуждение в задачах преобразования текста в SQL.
+
+arXiv preprint arXiv:2505.20315.
+
+Цитируется в: <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#S4.SS3.SSS0.Px3.p1.2" title="Test-time self-evolution for specialized models. ‣ 4.3 Analysis ‣ 4 Experiments ‣ Learning to Self-Evolve"><span class="ltx_text ltx_ref_tag">§4.3</span></a>,
+<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#S4.T3" title="In Test-time self-evolution for specialized models. ‣ 4.3 Analysis ‣ 4 Experiments ‣ Learning to Self-Evolve"><span class="ltx_text ltx_ref_tag">Table 3</span></a>.
+
+</li>
+<li class="ltx_bibitem ltx_bib_article" id="bib.bib26">
+⟦<span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">X. Yin, X. Wang, L. Pan, L. Lin, X. Wan, and W. Y. Wang (2024)</span>
+Агент Гёделя: фреймворк самореферентного агента для рекурсивного самосовершенствования.
+
+Препринт arXiv: 2410.04444.
+
+Цитируется в: <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#S1.p2.1" title="1 Introduction ‣ Learning to Self-Evolve"><span class="ltx_text ltx_ref_tag">§1</span></a>,
+<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#S2.SS0.SSS0.Px2.p2.1" title="Test-time self-evolution. ‣ 2 Related Work ‣ Learning to Self-Evolve"><span class="ltx_text ltx_ref_tag">§2</span></a>,
+<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#S3.SS3.p1.1" title="3.3 Learning to Self-Evolve (LSE) ‣ 3 Method ‣ Learning to Self-Evolve"><span class="ltx_text ltx_ref_tag">§3.3</span></a>.
+
+</li>
+<li class="ltx_bibitem ltx_bib_inproceedings" id="bib.bib41">
+⟦<span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">W. Yuan, R. Y. Pang, K. Cho, X. Li, S. Sukhbaatar, J. Xu, and J. Weston (2024)</span>
+Самообучающиеся языковые модели.
+
+В материалах 41-й Международной конференции по машинному обучению,
+
+Цитируется по: <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#S2.SS0.SSS0.Px1.p1.1" title="Training-time self-evolution. ‣ 2 Related Work ‣ Learning to Self-Evolve"><span class="ltx_text ltx_ref_tag">§2</span></a>.
+
+</li>
+<li class="ltx_bibitem ltx_bib_article" id="bib.bib37">
+⟦<span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">M. Yuksekgonul, F. Bianchi, J. Boen, S. Liu, Z. Huang, C. Guestrin, and J. Zou (2024)</span>
+TextGrad: автоматическое «дифференцирование» посредством текста.
+
+arXiv preprint arXiv: 2406.07496.
+
+Цитируется в: <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#S1.p3.1" title="1 Introduction ‣ Learning to Self-Evolve"><span class="ltx_text ltx_ref_tag">§1</span></a>,
+<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#S2.SS0.SSS0.Px2.p2.1" title="Test-time self-evolution. ‣ 2 Related Work ‣ Learning to Self-Evolve"><span class="ltx_text ltx_ref_tag">§2</span></a>,
+<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#S4.I1.i2.p1.1" title="In Baselines. ‣ 4.1 Experimental Setup ‣ 4 Experiments ‣ Learning to Self-Evolve"><span class="ltx_text ltx_ref_tag">2nd item</span></a>.
+
+</li>
+<li class="ltx_bibitem ltx_bib_article" id="bib.bib25">
+⟦<span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">M. Yuksekgonul, D. Koceja, X. Li, F. Bianchi, J. McCaleb, X. Wang, J. Kautz, Y. Choi, J. Zou, C. Guestrin, and Y. Sun (2026)</span>
+Обучение открытию во время тестирования.
+
+arXiv preprint arXiv: 2601.16175.
+
+Цитируется в: <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#S1.p2.1" title="1 Introduction ‣ Learning to Self-Evolve"><span class="ltx_text ltx_ref_tag">§1</span></a>,
+<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#S2.SS0.SSS0.Px2.p1.1" title="Test-time self-evolution. ‣ 2 Related Work ‣ Learning to Self-Evolve"><span class="ltx_text ltx_ref_tag">§2</span></a>.
+
+</li>
+<li class="ltx_bibitem ltx_bib_inproceedings" id="bib.bib40">
+⟦<span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">E. Zelikman, Y. Wu, J. Mu, and N. Goodman (2022)</span>
+STaR: самообучение рассуждениям через рассуждения.
+
+В сборнике Достижения в системах обработки нейронной информации,
+
+Том 35.
+
+Цитируется в: <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#S2.SS0.SSS0.Px1.p1.1" title="Training-time self-evolution. ‣ 2 Related Work ‣ Learning to Self-Evolve"><span class="ltx_text ltx_ref_tag">§2</span></a>.
+
+</li>
+<li class="ltx_bibitem ltx_bib_article" id="bib.bib29">
+⟦<span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">G. Zhang, M. Fu, and S. Yan (2025a)</span>
+MemGen: плетение генеративной латентной памяти для саморазвивающихся агентов.
+
+arXiv preprint arXiv: 2509.24704.
+
+Цитируется в: <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#S1.p3.1" title="1 Introduction ‣ Learning to Self-Evolve"><span class="ltx_text ltx_ref_tag">§1</span></a>,
+<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#S2.SS0.SSS0.Px2.p2.1" title="Test-time self-evolution. ‣ 2 Related Work ‣ Learning to Self-Evolve"><span class="ltx_text ltx_ref_tag">§2</span></a>.
+
+</li>
+<li class="ltx_bibitem ltx_bib_article" id="bib.bib27">
+⟦<span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">J. Zhang, S. Hu, C. Lu, R. Lange, and J. Clune (2025b)</span>
+Машина Дарвина-Гёделя: бесконечная эволюция самосовершенствующихся агентов.
+
+arXiv preprint arXiv:2505.22954.
+
+Цитируется в: <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#S1.p2.1" title="1 Introduction ‣ Learning to Self-Evolve"><span class="ltx_text ltx_ref_tag">§1</span></a>,
+<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#S1.p3.1" title="1 Introduction ‣ Learning to Self-Evolve"><span class="ltx_text ltx_ref_tag">§1</span></a>,
+<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#S2.SS0.SSS0.Px2.p2.1" title="Test-time self-evolution. ‣ 2 Related Work ‣ Learning to Self-Evolve"><span class="ltx_text ltx_ref_tag">§2</span></a>,
+<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#S3.SS3.p1.1" title="3.3 Learning to Self-Evolve (LSE) ‣ 3 Method ‣ Learning to Self-Evolve"><span class="ltx_text ltx_ref_tag">§3.3</span></a>.
+
+</li>
+<li class="ltx_bibitem ltx_bib_article" id="bib.bib28">
+⟦<span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">Q. Zhang, C. Hu, S. Upasani, B. Ma, F. Hong, V. Kamanuru, J. Rainton, C. Wu, M. Ji, H. Li, U. Thakker, J. Zou, and K. Olukotun (2025c)</span>
+Агентная контекстная инженерия: развитие контекстов для самообучающихся языковых моделей.
+
+Препринт arXiv: 2510.04618.
+
+Цитируется в: <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#S1.p3.1" title="1 Introduction ‣ Learning to Self-Evolve"><span class="ltx_text ltx_ref_tag">§1</span></a>,
+<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#S2.SS0.SSS0.Px2.p2.1" title="Test-time self-evolution. ‣ 2 Related Work ‣ Learning to Self-Evolve"><span class="ltx_text ltx_ref_tag">§2</span></a>.
+
+</li>
+<li class="ltx_bibitem ltx_bib_inproceedings" id="bib.bib16">
+⟦<span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">A. Zhao, D. Huang, Q. Xu, M. Lin, Y. Liu, and G. Huang (2024)</span>
+ExpeL: LLM агенты являются эмпирическими обучающимися.
+
+В материалах конференции AAAI по искусственному интеллекту,
+
+Том 38.
+
+Цитируется: <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#S1.p3.1" title="1 Introduction ‣ Learning to Self-Evolve"><span class="ltx_text ltx_ref_tag">§1</span></a>,
+<a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#S2.SS0.SSS0.Px2.p2.1" title="Test-time self-evolution. ‣ 2 Related Work ‣ Learning to Self-Evolve"><span class="ltx_text ltx_ref_tag">§2</span></a>.
+
+</li>
+<li class="ltx_bibitem ltx_bib_article" id="bib.bib39">
+⟦<span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">A. Zhao, Y. Wu, Y. Yue, T. Wu, Q. Xu, Y. Yue, M. Lin, S. Wang, Q. Wu, Z. Zheng, and G. Huang (2025a)</span>
+Абсолютный ноль: усиленное рассуждение через самообучение без использования данных.
+
+arXiv препринт arXiv:2505.03335.
+
+Цитируется в: <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#S2.SS0.SSS0.Px1.p1.1" title="Training-time self-evolution. ‣ 2 Related Work ‣ Learning to Self-Evolve"><span class="ltx_text ltx_ref_tag">§2</span></a>.
+
+</li>
+<li class="ltx_bibitem ltx_bib_article" id="bib.bib42">
+⟦<span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">X. Zhao, Z. Kang, A. Feng, S. Levine, and D. Song (2025b)</span>
+Обучение рассуждению без внешних вознаграждений.
+
+Препринт arXiv: 2505.19590.
+
+Цитируется в: <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#S2.SS0.SSS0.Px1.p1.1" title="Training-time self-evolution. ‣ 2 Related Work ‣ Learning to Self-Evolve"><span class="ltx_text ltx_ref_tag">§2</span></a>⟧.
+
+</li>
+<li class="ltx_bibitem ltx_bib_article" id="bib.bib10">
+⟦<span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">Y. Zuo, J. Zhang, D. Yang, G. Chen, S. Li, H. Dong, M. Wang, and Z. Xu (2025)</span>
+TTRL: обучение с подкреплением во время тестирования.
+
+arXiv preprint arXiv:2504.16084.
+
+Цитируется в: <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#S2.SS0.SSS0.Px2.p1.1" title="Test-time self-evolution. ‣ 2 Related Work ‣ Learning to Self-Evolve"><span class="ltx_text ltx_ref_tag">§2</span></a>.
+
+</li>
+</ul>
+</section>
+<section class="ltx_appendix" id="A1">
+<h2 class="ltx_title ltx_title_appendix">
+<span class="ltx_tag ltx_tag_appendix">Appendix A </span>Детали обучения и оценки</h2>
+<section class="ltx_paragraph" id="A1.SS0.SSS0.Px1">
+<h4 class="ltx_title ltx_title_paragraph">Генерация данных.</h4>
+<div class="ltx_para ltx_noindent" id="A1.SS0.SSS0.Px1.p1">
+<p class="ltx_p" id="A1.SS0.SSS0.Px1.p1.1">Мы обучаем отдельную саморазвивающуюся стратегию для каждой предметной области (Text-to-SQL и QA), используя траектории эволюции, сгенерированные на основе соответствующего обучающего набора данных. Для каждой области мы выполняем 200 запусков генерации данных, каждый из которых содержит 20 раундов эволюции, что дает приблизительно 4000 узлов дерева для выборки во время RL обучения..</p>
+</div>
+</section>
+<section class="ltx_paragraph" id="A1.SS0.SSS0.Px2">
+<h4 class="ltx_title ltx_title_paragraph">Обучение с подкреплением.</h4>
+<div class="ltx_para ltx_noindent" id="A1.SS0.SSS0.Px2.p1">
+<p class="ltx_p" id="A1.SS0.SSS0.Px2.p1.1">Мы реализуем наш RL фреймворк, используя verl <cite class="ltx_cite ltx_citemacro_citep">(Sheng<span class="ltx_text ltx_bib_etal"> et al.</span>, <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#bib.bib43" title="HybridFlow: a flexible and efficient rlhf framework">2024</a>)</cite>. Мы обнаружили, что случайная выборка узлов из деревьев эволюции создает слабый обучающий сигнал на ранних этапах обучения. Вместо этого мы выстраиваем простую учебную программу, отдавая предпочтение выборке узлов с наибольшим потенциалом улучшения, который определяется как разница между производительностью узла и максимальной производительностью в его собственном дереве. Мы используем скорость обучения <math alttext="1\times 10^{-5}" class="ltx_Math" display="inline" id="A1.SS0.SSS0.Px2.p1.1.m1" intent=":literal"><semantics><mrow><mn>1</mn><mo lspace="0.222em" rspace="0.222em">×</mo><msup><mn>10</mn><mrow><mo>−</mo><mn>5</mn></mrow></msup></mrow><annotation encoding="application/x-tex">1\times 10^{-5}</annotation></semantics></math>, выбираем 32 узла на пакет и генерируем 4 развертывания на узел. Мы проводим on-policy обучение и не применяем KL регуляризацию. Мы обучаем модель в течение 4 эпох и выбираем лучшую контрольную точку на основе отдельного набора для разработки..</p>
+</div>
+</section>
+<section class="ltx_paragraph" id="A1.SS0.SSS0.Px3">
+<h4 class="ltx_title ltx_title_paragraph">Протокол оценки.</h4>
+<div class="ltx_para ltx_noindent" id="A1.SS0.SSS0.Px3.p1">
+<p class="ltx_p" id="A1.SS0.SSS0.Px3.p1.1">Для каждой предметной области мы фиксируем отложенную выборку <math alttext="D" class="ltx_Math" display="inline" id="A1.SS0.SSS0.Px3.p1.1.m1" intent=":literal"><semantics><mi>D</mi><annotation encoding="application/x-tex">D</annotation></semantics></math> в размере 50 задач. Эффективность на отложенной выборке рассчитывается как среднее значение по восьми генерациям. Мы проводим 25 раундов эволюции и фиксируем наилучший показатель эффективности на отложенной выборке, достигнутый каждым методом самоэволюции в процессе эволюции. В каждом раунде пакет из 10 задач выбирается с возвращением и передается модели действий. Случайное зерно фиксируется таким образом, чтобы все методы наблюдали одну и ту же последовательность пакетов задач..</p>
+</div>
+</section>
+<section class="ltx_paragraph" id="A1.SS0.SSS0.Px4">
+<h4 class="ltx_title ltx_title_paragraph">Размеры наборов данных.</h4>
+<div class="ltx_para ltx_noindent" id="A1.SS0.SSS0.Px4.p1">
+<p class="ltx_p" id="A1.SS0.SSS0.Px4.p1.1">В таблице <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#A1.T4" title="Table 4 ‣ Dataset sizes. ‣ Appendix A Training and Evaluation Details ‣ Learning to Self-Evolve"><span class="ltx_text ltx_ref_tag">4</span></a> приведено количество задач для оценки по каждой предметной области.</p>
+</div>
+<figure class="ltx_table" id="A1.T4">
+<figcaption class="ltx_caption ltx_centering">⟦<span class="ltx_tag ltx_tag_table">Table 4: </span>Количество задач для оценки по домену.</figcaption>
+<table class="ltx_tabular ltx_centering ltx_guessed_headers ltx_align_middle" id="A1.T4.1">
+<thead class="ltx_thead">
+<tr class="ltx_tr" id="A1.T4.1.1.1">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_column ltx_border_tt" id="A1.T4.1.1.1.1">Task</th>
+<th class="ltx_td ltx_align_left ltx_th ltx_th_column ltx_border_tt" id="A1.T4.1.1.1.2">Domain</th>
+<th class="ltx_td ltx_align_right ltx_th ltx_th_column ltx_border_tt" id="A1.T4.1.1.1.3"># Problems</th>
+</tr>
+</thead>
+<tbody class="ltx_tbody">
+<tr class="ltx_tr" id="A1.T4.1.2.1">
+<td class="ltx_td ltx_align_left ltx_border_t" id="A1.T4.1.2.1.1" rowspan="5"><span class="ltx_text" id="A1.T4.1.2.1.1.1">BIRD</span></td>
+<td class="ltx_td ltx_align_left ltx_border_t" id="A1.T4.1.2.1.2">Financial</td>
+<td class="ltx_td ltx_align_right ltx_border_t" id="A1.T4.1.2.1.3">106</td>
+</tr>
+<tr class="ltx_tr" id="A1.T4.1.3.2">
+<td class="ltx_td ltx_align_left" id="A1.T4.1.3.2.1">Toxicology</td>
+<td class="ltx_td ltx_align_right" id="A1.T4.1.3.2.2">145</td>
+</tr>
+<tr class="ltx_tr" id="A1.T4.1.4.3">
+<td class="ltx_td ltx_align_left" id="A1.T4.1.4.3.1">Card Games</td>
+<td class="ltx_td ltx_align_right" id="A1.T4.1.4.3.2">191</td>
+</tr>
+<tr class="ltx_tr" id="A1.T4.1.5.4">
+<td class="ltx_td ltx_align_left" id="A1.T4.1.5.4.1">Formula 1</td>
+<td class="ltx_td ltx_align_right" id="A1.T4.1.5.4.2">174</td>
+</tr>
+<tr class="ltx_tr" id="A1.T4.1.6.5">
+<td class="ltx_td ltx_align_left" id="A1.T4.1.6.5.1">Codebase</td>
+<td class="ltx_td ltx_align_right" id="A1.T4.1.6.5.2">186</td>
+</tr>
+<tr class="ltx_tr" id="A1.T4.1.7.6">
+<td class="ltx_td ltx_align_left ltx_border_bb ltx_border_t" id="A1.T4.1.7.6.1" rowspan="10"><span class="ltx_text" id="A1.T4.1.7.6.1.1">MMLU-Redux</span></td>
+<td class="ltx_td ltx_align_left ltx_border_t" id="A1.T4.1.7.6.2">Business Ethics</td>
+<td class="ltx_td ltx_align_right ltx_border_t" id="A1.T4.1.7.6.3">100</td>
+</tr>
+<tr class="ltx_tr" id="A1.T4.1.8.7">
+<td class="ltx_td ltx_align_left" id="A1.T4.1.8.7.1">Philosophy</td>
+<td class="ltx_td ltx_align_right" id="A1.T4.1.8.7.2">100</td>
+</tr>
+<tr class="ltx_tr" id="A1.T4.1.9.8">
+<td class="ltx_td ltx_align_left" id="A1.T4.1.9.8.1">Professional Accounting</td>
+<td class="ltx_td ltx_align_right" id="A1.T4.1.9.8.2">95</td>
+</tr>
+<tr class="ltx_tr" id="A1.T4.1.10.9">
+<td class="ltx_td ltx_align_left" id="A1.T4.1.10.9.1">Econometrics</td>
+<td class="ltx_td ltx_align_right" id="A1.T4.1.10.9.2">100</td>
+</tr>
+<tr class="ltx_tr" id="A1.T4.1.11.10">
+<td class="ltx_td ltx_align_left" id="A1.T4.1.11.10.1">Anatomy</td>
+<td class="ltx_td ltx_align_right" id="A1.T4.1.11.10.2">100</td>
+</tr>
+<tr class="ltx_tr" id="A1.T4.1.12.11">
+<td class="ltx_td ltx_align_left" id="A1.T4.1.12.11.1">Security Studies</td>
+<td class="ltx_td ltx_align_right" id="A1.T4.1.12.11.2">100</td>
+</tr>
+<tr class="ltx_tr" id="A1.T4.1.13.12">
+<td class="ltx_td ltx_align_left" id="A1.T4.1.13.12.1">Virology</td>
+<td class="ltx_td ltx_align_right" id="A1.T4.1.13.12.2">96</td>
+</tr>
+<tr class="ltx_tr" id="A1.T4.1.14.13">
+<td class="ltx_td ltx_align_left" id="A1.T4.1.14.13.1">Moral Scenarios</td>
+<td class="ltx_td ltx_align_right" id="A1.T4.1.14.13.2">100</td>
+</tr>
+<tr class="ltx_tr" id="A1.T4.1.15.14">
+<td class="ltx_td ltx_align_left" id="A1.T4.1.15.14.1">Global Facts</td>
+<td class="ltx_td ltx_align_right" id="A1.T4.1.15.14.2">96</td>
+</tr>
+<tr class="ltx_tr" id="A1.T4.1.16.15">
+<td class="ltx_td ltx_align_left ltx_border_bb" id="A1.T4.1.16.15.1">Professional Law</td>
+<td class="ltx_td ltx_align_right ltx_border_bb" id="A1.T4.1.16.15.2">100</td>
+</tr>
+</tbody>
+</table>
+</figure>
+<figure class="ltx_figure" id="A1.F4"><img alt="Refer to caption" class="ltx_graphics ltx_centering ltx_img_landscape" height="374" id="A1.F4.g1" src="./[2603.18620] Learning to Self-Evolve_files/x5.png" width="830"/>
+<figcaption class="ltx_caption ltx_centering">⟦<span class="ltx_tag ltx_tag_figure">Figure 4: </span>Абляция стратегии поиска на MMLU-Redux, дополняющая рисунок <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2603.18620v1#S4.F2.sf2" title="In Figure 2 ‣ 4.3 Analysis ‣ 4 Experiments ‣ Learning to Self-Evolve"><span class="ltx_text ltx_ref_tag">2(b)</span></a>. Оба варианта используют необученную Qwen3-4B-Instruct в качестве саморазвивающейся политики <math alttext="f_{\psi}" class="ltx_Math" display="inline" id="A1.F4.2.m1" intent=":literal"><semantics><msub><mi>f</mi><mi>ψ</mi></msub><annotation encoding="application/x-tex">f_{\psi}</annotation></semantics></math>. Древовидный поиск повышает среднюю точность с 69,0% до 71,2%%.</figcaption>
+</figure>
+</section>
+</section>
+<section class="ltx_appendix" id="A2">
+<h2 class="ltx_title ltx_title_appendix">
+<span class="ltx_tag ltx_tag_appendix">Appendix B </span>Промпты</h2>
+<div class="ltx_para ltx_noindent" id="A2.p1">
+<p class="ltx_p" id="A2.p1.3">Каждая задача использует три шаблона промптов: (1) системный промпт, который предоставляет модели действий <math alttext="\pi_{\theta}" class="ltx_Math" display="inline" id="A2.p1.1.m1" intent=":literal"><semantics><msub><mi>π</mi><mi>θ</mi></msub><annotation encoding="application/x-tex">\pi_{\theta}</annotation></semantics></math> контекст задачи и текущие инструкции, (2) сообщение пользователя, которое представляет каждый экземпляр проблемы, и (3) промпт самоэволюции, который получает саморазвивающаяся политика <math alttext="f_{\psi}" class="ltx_Math" display="inline" id="A2.p1.2.m2" intent=":literal"><semantics><msub><mi>f</mi><mi>ψ</mi></msub><annotation encoding="application/x-tex">f_{\psi}</annotation></semantics></math> для создания пересмотренной инструкции. Поле инструкции внутри системного промпта — это компонент, который <math alttext="f_{\psi}" class="ltx_Math" display="inline" id="A2.p1.3.m3" intent=":literal"><semantics><msub><mi>f</mi><mi>ψ</mi></msub><annotation encoding="application/x-tex">f_{\psi}</annotation></semantics></math> редактирует на каждом раунде эволюции. Ниже мы воспроизводим шаблоны для обеих задач.</p>
+</div>
+<section class="ltx_subsection" id="A2.SS1">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">B.1 </span>Текст-в-SQL</h3>
+<div class="ltx_para ltx_noindent ltx_framed ltx_framed_rectangle" id="A2.SS1.1.p1" style="--ltx-border-color:#000000;padding:9pt;border-width:0.4pt;">
+<p class="ltx_p" id="A2.SS1.1.p1.1">Системный промпт модели действий.</p>
+<pre class="ltx_verbatim ltx_font_typewriter" id="A2.SS1.1.p1.2">Task Overview:
+You are a data science expert. Below, you are provided with a
+database schema and a natural language question. Your task is to
+understand the schema and generate a valid SQL query to answer the
+question.
+
+Database Engine:
+SQLite
+
+Database Schema:
+{schema}
+This schema describes the database’s structure, including tables,
+columns, primary keys, foreign keys, and any relevant relationships
+or constraints.
+
+**Instructions**
+{instructions}
+</pre>
+<p class="ltx_p" id="A2.SS1.1.p1.3">Исходная инструкция: Верните только один корректный SQL-запрос SQLite в &lt;answer&gt;...&lt;/answer&gt;&gt;.</p>
+</div>
+<div class="ltx_para ltx_noindent ltx_framed ltx_framed_rectangle" id="A2.SS1.2.p1" style="--ltx-border-color:#000000;padding:9pt;border-width:0.4pt;">
+<p class="ltx_p" id="A2.SS1.2.p1.1">Сообщение пользователя модели действий.</p>
+<pre class="ltx_verbatim ltx_font_typewriter" id="A2.SS1.2.p1.2">Question:
+{question}
+
+**Instructions**
+{instructions}
+
+Follow the instructions and show your work. When you are ready,
+return the query output list in tags: &lt;answer&gt; ... &lt;/answer&gt;
+</pre>
+</div>
+<div class="ltx_para ltx_noindent ltx_framed ltx_framed_rectangle" id="A2.SS1.3.p1" style="--ltx-border-color:#000000;padding:9pt;border-width:0.4pt;">
+<p class="ltx_p" id="A2.SS1.3.p1.1">Саморазвивающаяся стратегия промпта.</p>
+<pre class="ltx_verbatim ltx_font_typewriter" id="A2.SS1.3.p1.2">You are an expert at designing text-to-SQL agents. The agent is
+running on a fixed database schema. Below is the current agent
+prompt and a summary of recent performance. Rewrite ONLY the
+instructions to improve execution accuracy while maintaining
+strict output format.
+
+Current prompt:
+{old_prompt}
+
+Evaluation summary over {n_problems} problems and the agent’s
+full thinking process:
+{summary}
+
+**How to write Instructions**
+- The agent will continue receive different user queries so don’t
+  make the instructions too specific to a single question.
+  Referring to the questions in the current summary with only the
+  question number is not helpful.
+- Keep it concise and practical.
+- You may include rules, heuristics, knowledge about the database,
+  low-level instructions/examples, high-level ideas/strategies,
+  pitfalls and any information that you think can make the agent
+  better.
+- Organize however you like (bullets, headings, checklists).
+- Be creative and think about the agent’s behavior across
+  iterations. Don’t be confined by what I told you.
+- Don’t change the output format, the agent should still return
+  the final SQL query in tags: &lt;answer&gt; ... &lt;/answer&gt;.
+
+Think step by step and show your work. Reason about the history
+of the model’s behavior across iterations.
+
+When you are ready, put your revised Instructions within
+&lt;prompt&gt;[your new instructions]&lt;/prompt&gt; tags.
+</pre>
+</div>
+</section>
+<section class="ltx_subsection" id="A2.SS2">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">B.2 </span>Ответы на вопросы</h3>
+<div class="ltx_para ltx_noindent ltx_framed ltx_framed_rectangle" id="A2.SS2.1.p1" style="--ltx-border-color:#000000;padding:9pt;border-width:0.4pt;">
+<p class="ltx_p" id="A2.SS2.1.p1.1">Системный промпт модели действий.</p>
+<pre class="ltx_verbatim ltx_font_typewriter" id="A2.SS2.1.p1.2">Task Overview:
+You are an expert taking a test. Below, you are provided with a
+question and a list of choices. Your task is to select the correct
+answer from the choices.
+
+**Instructions**
+{instructions}
+</pre>
+<p class="ltx_p" id="A2.SS2.1.p1.3">Исходная инструкция: Верните только букву правильного варианта (A, B, C или D) в &lt;answer&gt;...&lt;/answer&gt;&gt;.</p>
+</div>
+<div class="ltx_para ltx_noindent ltx_framed ltx_framed_rectangle" id="A2.SS2.2.p1" style="--ltx-border-color:#000000;padding:9pt;border-width:0.4pt;">
+<p class="ltx_p" id="A2.SS2.2.p1.1">Сообщение пользователя модели действий.</p>
+<pre class="ltx_verbatim ltx_font_typewriter" id="A2.SS2.2.p1.2">Question:
+{question}
+
+Choices:
+{choices}
+
+Follow the instructions and show your work. When you are ready,
+return the answer letter in tags: &lt;answer&gt; ... &lt;/answer&gt;
+</pre>
+</div>
+<div class="ltx_para ltx_noindent ltx_framed ltx_framed_rectangle" id="A2.SS2.3.p1" style="--ltx-border-color:#000000;padding:9pt;border-width:0.4pt;">
+<p class="ltx_p" id="A2.SS2.3.p1.1">Саморазвивающаяся стратегия промпта.</p>
+<pre class="ltx_verbatim ltx_font_typewriter" id="A2.SS2.3.p1.2">You are an expert at designing agents for solving multiple-choice
+questions that involve both factual knowledge and reasoning.
+Below is the current agent prompt and a summary of recent
+performance on a set of problems. Rewrite ONLY the instructions
+to improve accuracy while maintaining strict output format.
+
+Current prompt:
+{old_prompt}
+
+Evaluation summary over {n_problems} problems and the agent’s
+full thinking process:
+{summary}
+
+**How to write Instructions**
+- The agent will continue to receive different questions from the
+  same subjects. Don’t make the instructions too specific to a
+  single question.
+- Keep it concise and practical.
+- You may include rules, heuristics, strategies for multiple
+  choice questions (e.g., elimination, careful reading), knowledge
+  about the subjects (e.g., common misconceptions, important
+  facts, etc.), and any information that you think can make the
+  agent better.
+- Organize however you like (bullets, headings, checklists).
+- Be creative and think about the agent’s behavior across
+  iterations. Don’t be confined by what I told you.
+- Don’t change the output format, the agent should still return
+  the final answer letter in tags: &lt;answer&gt; ... &lt;/answer&gt;.
+
+Think step by step and show your work. Reason about the history
+of the model’s behavior across iterations.
+
+When you are ready, put your revised Instructions within
+&lt;prompt&gt;[your new instructions]&lt;/prompt&gt; tags.
+</pre>
+</div>
+</section>
+<section class="ltx_subsection" id="A2.SS3">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">B.3 </span>Примеры инструкций, найденные с помощью ⟦K0⟧</h3>
+<div class="ltx_para ltx_noindent" id="A2.SS3.p1">
+<p class="ltx_p" id="A2.SS3.p1.1">Ниже мы воспроизводим лучшие инструкции, обнаруженные саморазвивающейся стратегией, обученной на LSE, по одной для каждого домена задач. Эти инструкции заменяют исходную инструкцию в промпте модели действий после нескольких раундов эволюции, управляемой деревом..</p>
+</div>
+<div class="ltx_para ltx_noindent ltx_framed ltx_framed_rectangle" id="A2.SS3.1.p1" style="--ltx-border-color:#000000;padding:9pt;border-width:0.4pt;">
+<p class="ltx_p" id="A2.SS3.1.p1.1">Text-to-SQL: база данных кодовой базы BIRD.</p>
+<pre class="ltx_verbatim ltx_font_typewriter" id="A2.SS3.1.p1.2">1. Always return exactly one valid SQLite query in the format:
+   &lt;answer&gt;YOUR_SQL_QUERY_HERE&lt;/answer&gt;
+
+2. Carefully analyze the natural language question to identify:
+   - The target attribute (e.g., name, count, date, status)
+   - The relevant tables and their columns
+   - Any joins required to connect tables via foreign keys
+   - Any filters (e.g., equality, date ranges, null checks)
+
+3. Use only the provided schema. Do not assume columns or
+   tables that are not defined.
+
+4. When joining tables:
+   - Match foreign key references precisely
+     (e.g., posts.OwnerUserId -&gt; users.Id)
+   - Use explicit column aliases only if needed for clarity
+   - Ensure join conditions match the schema
+
+5. For date filtering:
+   - Use strftime(’%Y’, column) to extract year
+   - Never use YEAR() -- SQLite does not support it
+   - Match date format exactly (e.g., ’2014-04-23 20:29:39.0’)
+
+6. For conditional outputs (e.g., "well-finished"):
+   - Use CASE WHEN or IIF to map NULL / non-NULL values
+   - Match the definition in the question
+     (e.g., "not well-finished" = ClosedDate IS NULL)
+
+7. Common pitfalls to avoid:
+   - Misidentifying OwnerUserId vs. LastEditorUserId
+   - Incorrectly joining on UserId instead of Id
+   - Misspelling column names (e.g., CreaionDate)
+   - Forgetting required joins for user attributes
+   - Confusing UserDisplayName in comments with post ownership
+
+8. Always use subqueries for exact values (MIN, MAX):
+   - e.g., WHERE Age = (SELECT MIN(Age) FROM users)
+     instead of ORDER BY Age LIMIT 1
+
+9. For percentages or ratios, compute numerator and
+   denominator separately using subqueries. Use
+   CAST(... AS REAL) for floating-point division.
+
+10. Avoid redundant joins -- if a query can be answered
+    from a single table, do not introduce unnecessary joins.
+</pre>
+</div>
+<div class="ltx_para ltx_noindent ltx_framed ltx_framed_rectangle" id="A2.SS3.2.p1" style="--ltx-border-color:#000000;padding:9pt;border-width:0.4pt;">
+<p class="ltx_p" id="A2.SS3.2.p1.1">Ответы на вопросы: Анатомия в MMLU-Redux.</p>
+<pre class="ltx_verbatim ltx_font_typewriter" id="A2.SS3.2.p1.2">- Return only the letter of the correct choice (A, B, C,
+  or D) in &lt;answer&gt;...&lt;/answer&gt;.
+- Carefully analyze the question and all answer options
+  before selecting.
+- Use elimination to rule out clearly incorrect choices
+  based on factual knowledge or logical inconsistency.
+- For biological and anatomical questions, recall key
+  structures and their functions (e.g., fertilization
+  occurs in the fallopian tube, not the ovary or uterus;
+  the pituitary is the "master gland").
+- In neurology: upper motor neuron lesions cause spastic
+  paralysis; lower motor neuron lesions cause flaccid
+  paralysis; sympathetic pathways use noradrenaline.
+- In embryology, palatine shelf elevation is due to turgor
+  pressure from hydrophilic molecules, not directly from
+  tongue descent or brain flexure.
+- For spinal cord injuries, breathing is controlled by the
+  brainstem (medulla), not the cervical spinal cord.
+- Fracture types: closed = skin intact; greenstick = bent
+  but not displaced; open = skin broken; spiral = twisting.
+- In autonomic responses, sympathetic chain damage leads to
+  pupillary constriction and vasodilation (loss of
+  vasoconstriction), not increased sweating.
+- In Horner’s syndrome: miosis, facial vasodilation,
+  decreased lacrimation, and anhydrosis.
+- In cerebrovascular accidents, internal capsule lesions
+  cause contralateral spastic paralysis.
+- Prioritize accuracy over common assumptions -- especially
+  regarding directionality (contralateral vs ipsilateral),
+  timing (diastole vs systole), and structural relationships.
+- Be vigilant for common misconceptions used as distractors.
+- Do not over-rely on common associations; base decisions
+  on precise anatomical, physiological, or pathological facts.
+</pre>
+</div>
+</section>
+</section>
+</article>
+</div>
+<div class="ar5iv-footer"><a class="ar5iv-nav-button ar5iv-nav-button-prev" href="https://ar5iv.labs.arxiv.org/html/2603.18619">◄</a>
+<a class="ar5iv-home-button" href="https://ar5iv.labs.arxiv.org/"><img alt="ar5iv homepage" height="40" src="./[2603.18620] Learning to Self-Evolve_files/ar5iv.png"/></a>
+<a class="ar5iv-text-button" href="https://ar5iv.labs.arxiv.org/feeling_lucky">Ощущение<br/>удачливый?</a>
+<a aria-hidden="true" href="https://ar5iv.labs.arxiv.org/land_of_honey_and_milk" rel="nofollow" tabindex="-1"></a>
+<a class="ar5iv-text-button ar5iv-severity-warning" href="https://ar5iv.labs.arxiv.org/log/2603.18620">Конверсия<br/>отчет</a>
+<a class="ar5iv-text-button" href="https://github.com/dginev/ar5iv/issues/new?template=improve-article--arxiv-id-.md&amp;title=Improve+article+2603.18620" target="_blank">Отчет<br/>проблема</a>
+<a class="ar5iv-text-button arxiv-ui-theme" href="https://arxiv.org/abs/2603.18620">Просмотреть оригинал<br/>на arXiv</a><a class="ar5iv-nav-button ar5iv-nav-button-next" href="https://ar5iv.labs.arxiv.org/html/2603.18621">►</a>
+</div><footer class="ltx_page_footer">
+<a class="ar5iv-toggle-color-scheme" href="javascript:toggleColorScheme()" title="Toggle ar5iv color scheme"><span class="color-scheme-icon"></span></a>
+<a class="ar5iv-footer-button" href="https://arxiv.org/help/license" target="_blank">Авторское право</a>
+<a class="ar5iv-footer-button" href="https://arxiv.org/help/policies/privacy_policy" target="_blank">Политика конфиденциальности</a>
+<div class="ltx_page_logo">Сгенерировано в пн, 6 апр. 2026 г., 04:07:27 пользователем <a class="ltx_LaTeXML_logo" href="http://dlmf.nist.gov/LaTeXML/" target="_blank"><span style="letter-spacing:-0.2em; margin-right:0.1em;">L<span class="ltx_font_smallcaps" style="position:relative; bottom:2.2pt;">а</span>T<span class="ltx_font_smallcaps" style="font-size:120%;position:relative; bottom:-0.2ex;">e</span></span><span style="font-size:90%; position:relative; bottom:-0.2ex;">XML</span><img alt="Mascot Sammy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAAOCAYAAAD5YeaVAAAAAXNSR0IArs4c6QAAAAZiS0dEAP8A/wD/oL2nkwAAAAlwSFlzAAALEwAACxMBAJqcGAAAAAd0SU1FB9wKExQZLWTEaOUAAAAddEVYdENvbW1lbnQAQ3JlYXRlZCB3aXRoIFRoZSBHSU1Q72QlbgAAAdpJREFUKM9tkL+L2nAARz9fPZNCKFapUn8kyI0e4iRHSR1Kb8ng0lJw6FYHFwv2LwhOpcWxTjeUunYqOmqd6hEoRDhtDWdA8ApRYsSUCDHNt5ul13vz4w0vWCgUnnEc975arX6ORqN3VqtVZbfbTQC4uEHANM3jSqXymFI6yWazP2KxWAXAL9zCUa1Wy2tXVxheKA9YNoR8Pt+aTqe4FVVVvz05O6MBhqUIBGk8Hn8HAOVy+T+XLJfLS4ZhTiRJgqIoVBRFIoric47jPnmeB1mW/9rr9ZpSSn3Lsmir1fJZlqWlUonKsvwWwD8ymc/nXwVBeLjf7xEKhdBut9Hr9WgmkyGEkJwsy5eHG5vN5g0AKIoCAEgkEkin0wQAfN9/cXPdheu6P33fBwB4ngcAcByHJpPJl+fn54mD3Gg0NrquXxeLRQAAwzAYj8cwTZPwPH9/sVg8PXweDAauqqr2cDjEer1GJBLBZDJBs9mE4zjwfZ85lAGg2+06hmGgXq+j3+/DsixYlgVN03a9Xu8jgCNCyIegIAgx13Vfd7vdu+FweG8YRkjXdWy329+dTgeSJD3ieZ7RNO0VAXAPwDEAO5VKndi2fWrb9jWl9Esul6PZbDY9Go1OZ7PZ9z/lyuD3OozU2wAAAABJRU5ErkJggg=="/></a>
+</div></footer>
+</div>
+<script>
+      var canMathML = typeof(MathMLElement) == "function";
+      if (!canMathML) {
+        var body = document.querySelector("body");
+        body.firstElementChild.setAttribute('style', 'opacity: 0;');
+        var loading = document.createElement("div");
+        loading.setAttribute("id", "mathjax-loading-spinner");
+        var message = document.createElement("div");
+        message.setAttribute("id", "mathjax-loading-message");
+        message.innerText = "Typesetting Equations...";
+        body.prepend(loading);
+        body.prepend(message);
+
+        var el = document.createElement("script");
+        el.src = "https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js";
+        document.querySelector("head").appendChild(el);
+
+        window.MathJax = {
+          startup: {
+            pageReady: () => {
+              return MathJax.startup.defaultPageReady().then(() => {
+                body.removeChild(loading);
+                body.removeChild(message);
+                body.firstElementChild.removeAttribute('style');
+              }); } } };
+      }
+    </script>
+<script>
+    // Auxiliary function, building the preview feature when
+    // an inline citation is clicked
+    function clicked_cite(e) {
+      e.preventDefault();
+      let cite = this.closest('.ltx_cite');
+      let next = cite.nextSibling;
+      if (next && next.nodeType == Node.ELEMENT_NODE && next.getAttribute('class') == "ar5iv-bibitem-preview") {
+        next.remove();
+        return; }
+      // Before adding a preview modal,
+      // cleanup older previews, in case they're still open
+      document.querySelectorAll('span.ar5iv-bibitem-preview').forEach(function(node) {
+        node.remove();
+      })
+
+      // Create the preview
+      preview = document.createElement('span');
+      preview.setAttribute('class','ar5iv-bibitem-preview');
+      let target = document.getElementById(this.getAttribute('href').slice(1));
+      target.childNodes.forEach(function (child) {
+        preview.append(child.cloneNode(true));
+      });
+      let close_x = document.createElement('button');
+      close_x.setAttribute("aria-label","Close modal for bibliography item preview");
+      close_x.textContent = "×";
+      close_x.setAttribute('class', 'ar5iv-button-close-preview');
+      close_x.setAttribute('onclick','this.parentNode.remove()');
+      preview.append(close_x);
+      preview.querySelectorAll('.ltx_tag_bibitem').forEach(function(node) {
+        node.remove();
+      });
+      cite.parentNode.insertBefore(preview, cite.nextSibling);
+      return;
+    }
+    // Global Document initialization:
+    // - assign the preview feature to all inline citation links
+    document.querySelectorAll(".ltx_cite .ltx_ref").forEach(function (link) {
+      link.addEventListener("click", clicked_cite);
+    });
+    </script>
+</body></html>

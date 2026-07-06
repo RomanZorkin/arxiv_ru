@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+
+<!-- saved from url=(0046)https://ar5iv.labs.arxiv.org/html/2604.07590v2 -->
+<html data-theme="light" lang="en"><head><meta content="text/html; charset=utf-8" http-equiv="Content-Type"/>
+<title>[2604.07590] 1 Introduction</title><meta content="Retrieval-Augmented Generation (RAG) is widely used to ground large language models in external knowledge sources. However, when applied to heterogeneous corpora and multi-step queries, Naive RAG pipelines often degrad…" property="og:description"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<meta content="summary" name="twitter:card"/>
+<meta content="1 Introduction" name="twitter:title"/>
+<meta content="https://ar5iv.labs.arxiv.org/assets/ar5iv_card.png" name="twitter:image:src"/>
+<meta content="ar5iv logo" name="twitter:image:alt"/>
+<meta content="1 Introduction" property="og:title"/>
+<meta content="ar5iv" property="og:site_name"/>
+<meta content="https://ar5iv.labs.arxiv.org/assets/ar5iv_card.png" property="og:image"/>
+<meta content="article" property="og:type"/>
+<meta content="https://ar5iv.labs.arxiv.org/html/2604.07590" property="og:url"/>
+<link href="https://ar5iv.labs.arxiv.org/html/2604.07590" rel="canonical" target="_blank"/>
+<!--Generated on Tue May  5 22:38:01 2026 by LaTeXML (version 0.8.8) http://dlmf.nist.gov/LaTeXML/.-->
+<meta content="width=device-width, initial-scale=1, shrink-to-fit=no" name="viewport"/>
+<script>
+  function detectColorScheme(){
+    var theme="light";
+    var current_theme = localStorage.getItem("ar5iv_theme");
+    if(current_theme){
+      if(current_theme == "dark"){
+        theme = "dark";
+      } }
+    else if(!window.matchMedia) { return false; }
+    else if(window.matchMedia("(prefers-color-scheme: dark)").matches) {
+      theme = "dark"; }
+    if (theme=="dark") {
+      document.documentElement.setAttribute("data-theme", "dark");
+    } else {
+      document.documentElement.setAttribute("data-theme", "light"); } }
+
+  detectColorScheme();
+
+  function toggleColorScheme(){
+    var current_theme = localStorage.getItem("ar5iv_theme");
+    if (current_theme) {
+      if (current_theme == "light") {
+        localStorage.setItem("ar5iv_theme", "dark"); }
+      else {
+        localStorage.setItem("ar5iv_theme", "light"); } }
+    else {
+        localStorage.setItem("ar5iv_theme", "dark"); }
+    detectColorScheme(); }
+</script>
+<link href="./[2604.07590] 1 Introduction_files/ar5iv-fonts.0.8.4.css" media="all" rel="stylesheet"/><link href="./[2604.07590] 1 Introduction_files/ar5iv.0.8.5.css" media="all" rel="stylesheet"/><link href="./[2604.07590] 1 Introduction_files/ar5iv-site.0.2.2.css" media="all" rel="stylesheet"/>
+<meta content="extension" property="gosuslugi.plugin.extension.content"/></head>
+<body>
+<div class="ltx_page_main">
+<div class="ltx_page_content">
+<article class="ltx_document">
+<div class="ltx_abstract">
+<h6 class="ltx_title ltx_title_abstract">Аннотация</h6>
+<p class="ltx_p" id="id2.id1">Retrieval-Augmented Generation (RAG) широко используется для привязки LLM к внешним источникам знаний. Однако при применении к гетерогенным корпусам и многошаговым запросам конвейеры Naive RAG часто теряют в качестве из-за плоских представлений знаний и отсутствия явных рабочих процессов.
+В данной работе мы представляем DCD (Domain–Collection–Document) — предметно-ориентированный дизайн для структурирования знаний и управления обработкой запросов в RAG системах без модификации базовой языковой модели. Предложенный подход опирается на иерархическую декомпозицию информационного пространства и многоэтапную маршрутизацию на основе структурированных выходных данных модели, что позволяет постепенно ограничивать области поиска и генерации.
+Архитектура дополнена интеллектуальной нарезкой на фрагменты, гибридным поиском, а также интегрированными механизмами проверки и защитными барьерами генерации. Мы описываем архитектуру и рабочий процесс DCD, а также обсуждаем результаты оценки на синтетическом наборе данных, подчеркивая их влияние на устойчивость, фактическую точность и релевантность ответов в прикладных RAG сценариях..</p>
+</div>
+<div class="ltx_logical-block" id="id1">
+<div class="ltx_para" id="id1.p1">
+<p class="ltx_p ltx_align_center" id="id1.p1.1">DCD: Предметно-ориентированное проектирование для контролируемой генерации с дополнением поиском</p>
+<span class="ltx_rule ltx_align_center" style="width:100%;height:1.0pt;--ltx-bg-color:black;display:inline-block;"> </span>
+<p class="ltx_p ltx_align_center" id="id1.p1.2">Валерий Ковальский, Никита Белов, Никита Митейко, Игорь Решетников, Макс Максимов</p>
+</div>
+</div>
+<div class="ltx_para" id="p1">
+<p class="ltx_p ltx_align_center" id="p1.1">red_mad_robot</p>
+</div>
+<section class="ltx_section" id="S1">
+<h2 class="ltx_title ltx_title_section">
+<span class="ltx_tag ltx_tag_section">1 </span>Введение</h2>
+<div class="ltx_para" id="S1.p1">
+<p class="ltx_p" id="S1.p1.1">RAG получил широкое распространение как практический подход для интеграции языковых моделей с внешними источниками знаний <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2604.07590v2#my_anchor" title="Lewis, P. ‣ 10 References">Lewis et al., 2020</a>]. Даже базовые реализации Naive RAG могут эффективно решать широкий спектр прикладных задач, от обработки запросов в службе поддержки клиентов до анализа корпоративной документации <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2604.07590v2#Izacard" title="Izacard, G. ‣ 10 References">Izacard et al., 2021</a>⟧].</p>
+</div>
+<div class="ltx_para" id="S1.p2">
+<p class="ltx_p" id="S1.p2.1">Однако по мере роста объемов данных и усложнения пользовательских запросов ограничения стандартных конвейеров RAG становятся все более очевидными. В частности, линейная архитектура Naive RAG демонстрирует снижение производительности при выполнении многошаговых запросов, требующих последовательной интерпретации, поиска по нескольким фрагментам знаний и агрегирования результатов <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2604.07590v2#Wei" title="Wei, J. ‣ 10 References">Wei et al., 2023</a>]. Еще одной критической проблемой является чувствительность систем RAG к параметрам сегментации документов. Эти факторы ограничивают применимость Naive RAG в сценариях, требующих высокой точности и предсказуемого поведения..</p>
+</div>
+<div class="ltx_para" id="S1.p3">
+<p class="ltx_p" id="S1.p3.1">В данной работе мы рассматриваем архитектурный подход к организации знаний и рабочих процессов вокруг языковой модели, направленный на повышение точности и безопасности RAG систем без модификации самих моделей. Мы предлагаем DCD (Domain–Collection–Document), предметно-ориентированный дизайн, который вводит явную иерархию знаний и контролируемый рабочий процесс обработки запросов. Предложенный подход демонстрирует существенное улучшение качества ответов для многошаговых запросов, обеспечивая при этом воспроизводимость и управляемость в прикладных условиях..</p>
+</div>
+</section>
+<section class="ltx_section" id="S2">
+<h2 class="ltx_title ltx_title_section">
+<span class="ltx_tag ltx_tag_section">2 </span>Предварительные сведения</h2>
+<section class="ltx_subsection" id="S2.SS1">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">2.1 </span>Генерация с дополнением поиском</h3>
+<div class="ltx_para" id="S2.SS1.p1">
+<p class="ltx_p" id="S2.SS1.p1.1">Мы фокусируемся на повышении точности и устойчивости RAG систем в сценариях, включающих многошаговые запросы и гетерогенные корпуса знаний. В частности, мы рассматриваем архитектурные подходы, которые позволяют:</p>
+<ul class="ltx_itemize" id="S2.I1">
+<li class="ltx_item" id="S2.I1.i1" style="list-style-type:none;">
+⟦<span class="ltx_tag ltx_tag_item">•</span>
+
+ограничение пространства поиска релевантными подмножествами знаний,
+
+</li>
+<li class="ltx_item" id="S2.I1.i2" style="list-style-type:none;">
+⟦<span class="ltx_tag ltx_tag_item">•</span>
+
+явный контроль над рабочими процессами обработки запросов,
+
+</li>
+<li class="ltx_item" id="S2.I1.i3" style="list-style-type:none;">
+⟦<span class="ltx_tag ltx_tag_item">•</span>
+
+воспроизводимость и обеспечение качества генерируемых результатов.
+
+</li>
+</ul>
+</div>
+<div class="ltx_para" id="S2.SS1.p2">
+<p class="ltx_p" id="S2.SS1.p2.1">На протяжении всей этой работы Naive RAG относится к линейному конвейеру без явного структурирования знаний, декомпозиции запросов или многоэтапного контроля генерации. Мы намеренно фокусируемся не на модификации самой языковой модели, а на организации знаний и рабочих процессов вокруг нее..</p>
+</div>
+<div class="ltx_para" id="S2.SS1.p3">
+<p class="ltx_p" id="S2.SS1.p3.1">Во многих практических реализациях RAG поиск выполняется один раз в начале конвейера и остается неизменным на протяжении всего процесса генерации. Такая архитектура предполагает, что одного этапа поиска достаточно для получения всей информации, необходимой для ответа на запрос. Однако, когда корпус знаний содержит документы из нескольких семантических областей, поиск на основе сходства может возвращать фрагменты, которые являются локально релевантными, но принадлежат к разным контекстам знаний. В результате извлеченный контекст может содержать частично совместимые данные, вынуждая LLM согласовывать противоречивую информацию во время генерации <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2604.07590v2#Li" title="Li, Y. ‣ 10 References">Li et al., 2025</a>].</p>
+</div>
+<div class="ltx_para" id="S2.SS1.p4">
+<p class="ltx_p" id="S2.SS1.p4.1">Мы концептуализируем систему RAG как композицию следующих этапов:</p>
+<ul class="ltx_itemize" id="S2.I2">
+<li class="ltx_item" id="S2.I2.i1" style="list-style-type:none;">
+⟦<span class="ltx_tag ltx_tag_item">•</span>
+
+интерпретация запроса пользователя,
+
+</li>
+<li class="ltx_item" id="S2.I2.i2" style="list-style-type:none;">
+⟦<span class="ltx_tag ltx_tag_item">•</span>
+
+выбор релевантного подмножества знаний,
+
+</li>
+<li class="ltx_item" id="S2.I2.i3" style="list-style-type:none;">
+⟦<span class="ltx_tag ltx_tag_item">•</span>
+
+поиск и агрегация контекстной информации,
+
+</li>
+<li class="ltx_item" id="S2.I2.i4" style="list-style-type:none;">
+⟦<span class="ltx_tag ltx_tag_item">•</span>
+
+генерация ответа языковой моделью,
+
+</li>
+<li class="ltx_item" id="S2.I2.i5" style="list-style-type:none;">
+⟦<span class="ltx_tag ltx_tag_item">•</span>
+
+валидация и контроль качества выходных данных <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2604.07590v2#Guu" title="Guu ‣ 10 References">Guu et al., 2020</a>⟧].
+
+</li>
+</ul>
+</div>
+<div class="ltx_para" id="S2.SS1.p5">
+<p class="ltx_p" id="S2.SS1.p5.1">В стандартных реализациях эти этапы часто являются неявными или объединенными в один шаг. Напротив, наш подход рассматривает каждый этап как явный компонент рабочего процесса, обеспечивая детальный контроль и дополнительную проверку..</p>
+</div>
+</section>
+<section class="ltx_subsection" id="S2.SS2">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">2.2 </span>Разбиение на фрагменты</h3>
+<div class="ltx_para" id="S2.SS2.p1">
+<p class="ltx_p" id="S2.SS2.p1.1">Качество системы RAG в значительной степени зависит от стратегий сегментации документов. Распространенные подходы к разбиению на части включают сегментацию на основе абзацев, фрагменты фиксированной длины и методы скользящего окна <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2604.07590v2#Gao" title="Gao, L. ‣ 10 References">Gao et al., 2021</a>].
+В нашей реализации мы применяем стратегию сегментации со скользящим окном с перекрытием в диапазоне 5–10% от размера фрагмента. Перекрытие в 5% обычно достаточно для сохранения контекстуальной непрерывности между соседними фрагментами. Для документов, содержащих семантически схожие или повторяющиеся разделы, перекрытие увеличивается до 10% для более точного учета контекстуальных зависимостей..</p>
+</div>
+</section>
+<section class="ltx_subsection" id="S2.SS3">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">2.3 </span>Защитные механизмы</h3>
+<div class="ltx_para" id="S2.SS3.p1">
+<p class="ltx_p" id="S2.SS3.p1.1">Классические реализации RAG обычно полагаются на встроенные механизмы безопасности языковых моделей и лишены явных архитектурных процедур для проверки сгенерированных результатов <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2604.07590v2#Ji" title="Ji, Z. ‣ 10 References">Ji et al., 2023</a>]. В частности, они не предоставляют систематических средств для проверки соответствия между сгенерированными ответами и извлеченным контекстом или для отказа от генерации вне функциональной области системы [Lin et al., 2022].
+Наша система включает механизм защитных барьеров в сочетании с модулем предотвращения галлюцинаций. Этот механизм состоит из двух взаимосвязанных компонентов.
+Первый компонент анализирует запросы пользователей на наличие запрещенных тем, используя составной словарь, который включает как базовый набор стоп-слов, так и пользовательские элементы, определенные владельцем системы.
+Второй компонент анализирует сгенерированные результаты, обеспечивая отсутствие запрещенного контента и обнаруживая галлюцинации. Это достигается путем сравнения исходного запроса, извлеченного контекста и сгенерированного ответа, что позволяет заблаговременно выявлять отклонения в процессе генерации..</p>
+</div>
+</section>
+</section>
+<section class="ltx_section" id="S3">
+<h2 class="ltx_title ltx_title_section">
+<span class="ltx_tag ltx_tag_section">3 </span>Метод</h2>
+<section class="ltx_subsection" id="S3.SS1">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">3.1 </span>Ключевое допущение</h3>
+<div class="ltx_para" id="S3.SS1.p1">
+<p class="ltx_p" id="S3.SS1.p1.1">Центральное методологическое допущение данной работы заключается в том, что качество ответов значительно улучшается, когда поиск и генерация ограничены семантически однородными областями знаний — подмножеством корпуса, документы которого имеют общую тематическую направленность, терминологию и ожидаемое намерение пользователя, оставаясь при этом четко отличимыми от документов, принадлежащих другим областям <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2604.07590v2#Yao" title="Yao, S. ‣ 10 References">Yao et al., 2023</a>]. Внутри такой области документы затрагивают тесно связанные предметные сферы и поэтому при поиске конкурируют преимущественно с семантически релевантными источниками..</p>
+</div>
+<div class="ltx_para" id="S3.SS1.p2">
+<p class="ltx_p" id="S3.SS1.p2.1">Данное ограничение позволяет процессу поиска функционировать в рамках ограниченного семантического пространства, уменьшая помехи от нерелевантных документов и улучшая согласованность между извлеченными данными и информационной структурой запроса. Вместо работы с монолитным хранилищем документов мы предполагаем предварительную декомпозицию корпуса на независимые подпространства, внутри которых документы конкурируют только с семантически схожими источниками <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2604.07590v2#Khot" title="Khot, T. ‣ 10 References">Khot et al., 2023</a>].</p>
+</div>
+<div class="ltx_para" id="S3.SS1.p3">
+<p class="ltx_p" id="S3.SS1.p3.1">Эта проблема тесно связана с организацией самого пространства знаний. Когда поиск осуществляется по гетерогенному корпусу без явных семантических границ, документы из различных областей знаний конкурируют в рамках одного и того же поискового пространства. В таких условиях одной лишь близости эмбеддингов может быть недостаточно для отражения структурных зависимостей между фрагментами информации, необходимыми для ответа на запрос. В результате извлеченные данные могут быть релевантны по отдельности, но в совокупности недостаточны для последовательного логического вывода <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2604.07590v2#Li" title="Li, Y. ‣ 10 References">Li et al., 2025</a>].</p>
+</div>
+<div class="ltx_para" id="S3.SS1.p4">
+<p class="ltx_p" id="S3.SS1.p4.1">Исследования по поиску доказательств для длинных документов показывают, что стратегии поиска от общего к частному могут улучшить идентификацию релевантных доказательств по сравнению с плоским поиском на уровне фрагментов. В таких подходах сначала определяются структурные сегменты более высокого уровня, которые затем используются для управления детализированным выбором отрывков. Сужая пространство поиска до семантически связных областей документа, поисковые системы сохраняют глобальные контекстуальные связи и повышают надежность последующего QA <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2604.07590v2#Nair" title="Nair, I. ‣ 10 References">Nair et al., 2023</a>].</p>
+</div>
+<figure class="ltx_figure" id="S3.F1"><img alt="Refer to caption" class="ltx_graphics ltx_centering ltx_img_landscape" height="317" id="S3.F1.g1" src="./[2604.07590] 1 Introduction_files/pic_3.png" width="598"/>
+<figcaption class="ltx_caption ltx_centering">⟦<span class="ltx_tag ltx_tag_figure">Figure 1: </span>Разница между подходами RAG и DCD</figcaption>
+</figure>
+<div class="ltx_para" id="S3.SS1.p5">
+<p class="ltx_p" id="S3.SS1.p5.1">Предложенная архитектура DCD устраняет это ограничение посредством явной декомпозиции пространства знаний до этапа поиска. Ограничивая поиск семантически однородными областями, система снижает междоменные помехи и улучшает согласованность между извлеченным контекстом и структурой рассуждения запроса..</p>
+</div>
+</section>
+<section class="ltx_subsection" id="S3.SS2">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">3.2 </span>Экспериментальная проверка предположения</h3>
+<div class="ltx_para" id="S3.SS2.p1">
+<p class="ltx_p" id="S3.SS2.p1.1">Для проверки этого предположения мы провели эксперименты на синтетическом наборе данных, созданном для аппроксимации реальных сценариев RAG. Корпуса состоят из гетерогенных документов с различной структурой и семантической гранулярностью — условий, при которых конвейеры чаще всего деградируют из-за плоской организации знаний и нестабильного поиска..</p>
+</div>
+<div class="ltx_para" id="S3.SS2.p2">
+<p class="ltx_p" id="S3.SS2.p2.1">Все наборы данных были анонимизированы в целях конфиденциальности: идентификаторы клиентов и конфиденциальные метаданные были удалены. В статье описаны процедуры и наблюдаемые эффекты без раскрытия содержания документов.
+Помимо показателей качества, мы зафиксировали операционные характеристики конвейера, включая общее время оценки, среднее время отклика от начала до конца и время до получения первого токена, что позволило проанализировать компромисс между точностью и задержкой при повышенной сложности рабочего процесса..</p>
+</div>
+</section>
+</section>
+<section class="ltx_section" id="S4">
+<h2 class="ltx_title ltx_title_section">
+<span class="ltx_tag ltx_tag_section">4 </span>DCD: Домен–Коллекция–Документ</h2>
+<div class="ltx_para" id="S4.p1">
+<p class="ltx_p" id="S4.p1.1">Дизайн DCD (Domain–Collection–Document) — это подход к организации знаний в системах RAG посредством явной иерархической сегментации информационного пространства. Его основная цель заключается в минимизации перекрытия между областями знаний и предотвращении передачи нерелевантного контекста в языковую модель <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2604.07590v2#Makin" title="Makin, A. ‣ 10 References">Makin, 2024</a>].</p>
+</div>
+<div class="ltx_para" id="S4.p2">
+<p class="ltx_p" id="S4.p2.1">DCD структурирует данные на трех уровнях:</p>
+<ul class="ltx_itemize" id="S4.I1">
+<li class="ltx_item" id="S4.I1.i1" style="list-style-type:none;">
+⟦<span class="ltx_tag ltx_tag_item">•</span>
+
+Домен — предметная область высокого уровня,
+
+</li>
+<li class="ltx_item" id="S4.I1.i2" style="list-style-type:none;">
+⟦<span class="ltx_tag ltx_tag_item">•</span>
+
+Коллекция — тематически однородное подмножество внутри домена,
+
+</li>
+<li class="ltx_item" id="S4.I1.i3" style="list-style-type:none;">
+⟦<span class="ltx_tag ltx_tag_item">•</span>
+
+Документ — атомарная единица знаний с метаданными.
+
+</li>
+</ul>
+</div>
+<section class="ltx_subsection" id="S4.SS1">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">4.1 </span>Иерархические уровни</h3>
+<div class="ltx_para" id="S4.SS1.p1">
+<p class="ltx_p" id="S4.SS1.p1.1">Домен определяет границы поиска верхнего уровня и создается для минимизации семантического перекрытия с другими доменами.
+Коллекция представляет собой более узкий тематический срез внутри домена и дополнительно ограничивает пространство поиска. Примеры включают юридические документы, справочные материалы или пользовательские QA внутри одного домена.
+Документ является базовой единицей, используемой в процессе RAG. Документы дополняются метаданными и могут быть дополнительно сегментированы на фрагменты для извлечения контекста.
+Информационный поиск следует принципу «сверху вниз»: от домена к коллекции и к документу..</p>
+</div>
+<div class="ltx_para" id="S4.SS1.p2">
+<p class="ltx_p" id="S4.SS1.p2.1">Навигация по иерархии осуществляется с помощью DCD Router, который последовательно выбирает наиболее релевантный домен, коллекцию и документ для заданного запроса. На каждом уровне маршрутизация формулируется как задача выбора из ограниченного набора кандидатов <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2604.07590v2#Shazeer" title="Shazeer, N. ‣ 10 References">Shazeer et al., 2017</a>].
+Решения маршрутизатора формируются с использованием структурированных выводов LLM, что обеспечивает прозрачность, воспроизводимость и кэширование промежуточных результатов. Для повышения устойчивости на каждом уровне определены резервные элементы (основной домен, основная коллекция, основной документ)..</p>
+</div>
+<figure class="ltx_figure" id="S4.F2"><img alt="Refer to caption" class="ltx_graphics ltx_centering ltx_img_landscape" height="333" id="S4.F2.g1" src="./[2604.07590] 1 Introduction_files/pic_1.png" width="476"/>
+<figcaption class="ltx_caption ltx_centering">⟦<span class="ltx_tag ltx_tag_figure">Figure 2: </span>Разница между подходами RAG и DCD</figcaption>
+</figure>
+</section>
+<section class="ltx_subsection" id="S4.SS2">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">4.2 </span>Маршрутизатор DCD</h3>
+<div class="ltx_para" id="S4.SS2.p1">
+<p class="ltx_p" id="S4.SS2.p1.1">Функциональным ядром сегментации доменов является DCD Router, специализированный модуль, отвечающий за определение целевого сегмента знаний для извлечения. Как и большинство системных компонентов, он опирается на структурированные выходные данные языковой модели (JSON), что обеспечивает высокоточную обработку и прозрачность принятия решений <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2604.07590v2#OpenAI" title="OpenAI ‣ 10 References">OpenAI, 2024</a>].</p>
+</div>
+<div class="ltx_para" id="S4.SS2.p2">
+<p class="ltx_p" id="S4.SS2.p2.1">Первоначальная конфигурация включает определение структур доменов и коллекций, а также соответствующее распределение информационных активов. Документы сохраняют свои исходные заголовки, в то время как домены и коллекции получают идентификаторы, заданные вручную. При получении запроса пользователя система передает его вместе с реестром доступных доменов в LLM для определения наиболее релевантного домена. Эта процедура иерархически повторяется для коллекций и документов. Если LLM выдает некорректные результаты, резервные элементы на каждом уровне обеспечивают устойчивость системы и гарантируют получение ответа даже после нескольких неудачных попыток маршрутизации..</p>
+</div>
+<div class="ltx_para" id="S4.SS2.p3">
+<p class="ltx_p" id="S4.SS2.p3.1">Более высокие уровни иерархии описываются с помощью более богатых метаданных для уменьшения ошибок маршрутизации, поскольку ошибки на верхних уровнях могут распространяться вниз по потоку и ограничивать пространство поиска неверной семантической областью базы знаний. Предоставление более четких семантических описаний для доменов и коллекций повышает надежность первоначальных решений по маршрутизации и помогает поддерживать стабильную навигацию по иерархии.</p>
+</div>
+<div class="ltx_para" id="S4.SS2.p4">
+<p class="ltx_p" id="S4.SS2.p4.1">В настоящем исследовании точность маршрутизации на отдельных уровнях иерархии не оценивалась как отдельная метрика классификации. Вместо этого механизм маршрутизации рассматривается как часть общего конвейера поиска, а его эффективность отражается в поведении системы на последующих этапах, включая релевантность ответов, фактическую точность и полноту поиска..</p>
+</div>
+</section>
+<section class="ltx_subsection" id="S4.SS3">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">4.3 </span>Интеграция с конвейером RAG</h3>
+<div class="ltx_para" id="S4.SS3.p1">
+<p class="ltx_p" id="S4.SS3.p1.1">После выбора документа система извлекает релевантные фрагменты с помощью семантического и полнотекстового поиска, за которыми следуют дедупликация и переранжирование. Полученный контекст передается в LLM для генерации ответа..</p>
+</div>
+<div class="ltx_para" id="S4.SS3.p2">
+<p class="ltx_p" id="S4.SS3.p2.1">Ограничивая пространство поиска на начальном этапе, DCD снижает вероятность включения нерелевантного контекста и повышает устойчивость генерации при выполнении многошаговых запросов. В то время как Naive RAG использует линейный конвейер обработки — разбиение на фрагменты, эмбеддинг, поиск и генерацию, — DCD сохраняет аналогичный пользовательский интерфейс, но внедряет принципиально иную внутреннюю организацию, основанную на многоуровневой обработке..</p>
+</div>
+</section>
+<section class="ltx_subsection" id="S4.SS4">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">4.4 </span>Умное сегментирование</h3>
+<div class="ltx_para" id="S4.SS4.p1">
+<p class="ltx_p" id="S4.SS4.p1.1">Интеллектуальное сегментирование является неотъемлемым компонентом архитектуры DCD. Хотя DCD может функционировать с использованием классических методов сегментирования, выбранная стратегия обеспечила наиболее стабильное поведение в рамках предложенной архитектуры, поскольку она лучше сохраняет структурные свойства базовой базы знаний..</p>
+</div>
+<div class="ltx_para" id="S4.SS4.p2">
+<p class="ltx_p" id="S4.SS4.p2.1">В этом подходе документы сегментируются с использованием механизма скользящего окна с частичным перекрытием между соседними фрагментами. Такая стратегия сегментации сохраняет локальную семантическую непрерывность и снижает вероятность потери релевантной контекстной информации на границах фрагментов. В результате логически связанные утверждения, охватывающие несколько предложений или абзацев, остаются доступными при поиске, что особенно важно для запросов, требующих композиционного рассуждения..</p>
+</div>
+<figure class="ltx_figure" id="S4.F3"><img alt="Refer to caption" class="ltx_graphics ltx_centering ltx_img_landscape" height="222" id="S4.F3.g1" src="./[2604.07590] 1 Introduction_files/pic_2.png" width="598"/>
+<figcaption class="ltx_caption ltx_centering">⟦<span class="ltx_tag ltx_tag_figure">Figure 3: </span>Конвейер интеллектуальной сегментации</figcaption>
+</figure>
+<div class="ltx_para" id="S4.SS4.p3">
+<p class="ltx_p" id="S4.SS4.p3.1">Каждый фрагмент дополнительно обогащается метаданными на уровне чанков, полученными из структуры документа. Эти метаданные описывают положение фрагмента в иерархии документа и поддерживают ссылки на соответствующую сущность уровня документа. Такие структурные аннотации позволяют этапу поиска опираться не только на семантическое сходство, но и на контекстные взаимосвязи между фрагментами, происходящими из одного и того же документа или коллекции..</p>
+</div>
+<div class="ltx_para" id="S4.SS4.p4">
+<p class="ltx_p" id="S4.SS4.p4.1">Сочетание перекрывающейся сегментации и структурированных метаданных повышает согласованность извлечения фрагментов и снижает вероятность формирования ответов из семантически несвязанных контекстов. Такая архитектура позволяет конвейеру извлечения лучше соотносить выбранные доказательства с концептуальной структурой запроса и способствует более стабильной генерации ответов в рабочих процессах с использованием retrieval-augmented, что отражено в экспериментальной оценке, представленной далее в статье..</p>
+</div>
+</section>
+<section class="ltx_subsection" id="S4.SS5">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">4.5 </span>Быстрые защитные барьеры</h3>
+<div class="ltx_para" id="S4.SS5.p1">
+<p class="ltx_p" id="S4.SS5.p1.1">В дополнение к основному конвейеру поиска и генерации, система внедряет механизм быстрых защитных барьеров для предварительной проверки ответа. Система включает в себя механизм защитных барьеров в сочетании с предотвращением галлюцинаций и функцию быстрой предварительной проверки, которая оценивает ответы до завершения полной генерации <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2604.07590v2#Manakul" title="Manakul, P. ‣ 10 References">Manakul et al., 2023</a>].</p>
+</div>
+<div class="ltx_para" id="S4.SS5.p2">
+<p class="ltx_p" id="S4.SS5.p2.1">Рабочий процесс ограничителей выглядит следующим образом:</p>
+</div>
+<div class="ltx_para" id="S4.SS5.p3">
+<ul class="ltx_itemize" id="S4.I2">
+<li class="ltx_item" id="S4.I2.i1" style="list-style-type:none;">
+⟦<span class="ltx_tag ltx_tag_item">•</span>
+
+запрос пользователя проходит проверку на стоп-слова,
+
+</li>
+<li class="ltx_item" id="S4.I2.i2" style="list-style-type:none;">
+⟦<span class="ltx_tag ltx_tag_item">•</span>
+
+соответствующие запросы передаются в конвейер DCD RAG,
+
+</li>
+<li class="ltx_item" id="S4.I2.i3" style="list-style-type:none;">
+⟦<span class="ltx_tag ltx_tag_item">•</span>
+
+во время потоковой передачи ответа анализируются первые 150 токенов,
+
+</li>
+<li class="ltx_item" id="S4.I2.i4" style="list-style-type:none;">
+⟦<span class="ltx_tag ltx_tag_item">•</span>
+
+на основе запроса, контекста и частичного вывода система принимает решение о том, отобразить или заблокировать ответ.
+
+</li>
+</ul>
+</div>
+<div class="ltx_para" id="S4.SS5.p4">
+<p class="ltx_p" id="S4.SS5.p4.1">Этот механизм фильтрует неподдерживаемые запросы и проверяет сгенерированный контент параллельно с генерацией, избегая дополнительных задержек.</p>
+</div>
+</section>
+<section class="ltx_subsection" id="S4.SS6">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">4.6 </span>Сводка полноты системы</h3>
+<div class="ltx_para" id="S4.SS6.p1">
+<p class="ltx_p" id="S4.SS6.p1.1">Архитектура DCD демонстрирует значительные преимущества в адаптивности при обработке гетерогенных данных и структурно сложных запросов. Ее гибкость обеспечивает существенное повышение точности в многоуровневых сценариях работы со знаниями, интегрируя при этом критически важные этапы валидации и контроля, отсутствующие в системах Naive RAG.
+Хотя первоначальная конфигурация требует дополнительных усилий по настройке, эти затраты компенсируются превосходной производительностью и быстрой окупаемостью за счет повышения операционной эффективности..</p>
+</div>
+</section>
+</section>
+<section class="ltx_section" id="S5">
+<h2 class="ltx_title ltx_title_section">
+<span class="ltx_tag ltx_tag_section">5 </span>Метрики</h2>
+<div class="ltx_para" id="S5.p1">
+<p class="ltx_p" id="S5.p1.1">Для всесторонней оценки предложенного подхода DCD мы используем набор метрик, выходящий за рамки стандартных оценок. Оценка опирается на структурированную оценку качества генерации с использованием LLM в качестве эксперта <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2604.07590v2#Liu" title="Liu, Y. ‣ 10 References">Liu et al., 2023</a>].</p>
+</div>
+<section class="ltx_subsection" id="S5.SS1">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">5.1 </span>Строгая бинарная релевантность и полнота ответа</h3>
+<div class="ltx_para" id="S5.SS1.p1">
+<p class="ltx_p" id="S5.SS1.p1.1">⟦<math alttext="SBARC" class="ltx_Math" display="inline" id="S5.SS1.p1.1.m1" intent=":literal"><semantics><mrow><mi>S</mi><mo lspace="0em" rspace="0em">​</mo><mi>B</mi><mo lspace="0em" rspace="0em">​</mo><mi>A</mi><mo lspace="0em" rspace="0em">​</mo><mi>R</mi><mo lspace="0em" rspace="0em">​</mo><mi>C</mi></mrow><annotation encoding="application/x-tex">SBARC</annotation></semantics></math> — это строгая бинарная метрика, оценивающая, является ли ответ одновременно релевантным и полным по отношению к вопросу.</p>
+</div>
+<div class="ltx_para" id="S5.SS1.p2">
+<table class="ltx_equation ltx_eqn_table" id="S5.E1">
+<tbody><tr class="ltx_equation ltx_eqn_row ltx_align_baseline">
+<td class="ltx_eqn_cell ltx_eqn_center_padleft"></td>
+<td class="ltx_eqn_cell ltx_align_center"><math alttext="S(Q,A)=D(Q,A)\land P(Q,A)\land Sp(Q,A)\land\lnot V(A)" class="ltx_Math" display="block" id="S5.E1.m1" intent=":literal"><semantics><mrow><mrow><mi>S</mi><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><mi>Q</mi><mo>,</mo><mi>A</mi><mo stretchy="false">)</mo></mrow></mrow><mo>=</mo><mrow><mrow><mi>D</mi><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><mi>Q</mi><mo>,</mo><mi>A</mi><mo stretchy="false">)</mo></mrow></mrow><mo>∧</mo><mrow><mi>P</mi><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><mi>Q</mi><mo>,</mo><mi>A</mi><mo stretchy="false">)</mo></mrow></mrow><mo>∧</mo><mrow><mi>S</mi><mo lspace="0em" rspace="0em">​</mo><mi>p</mi><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><mi>Q</mi><mo>,</mo><mi>A</mi><mo stretchy="false">)</mo></mrow></mrow><mo>∧</mo><mrow><mo rspace="0.167em">¬</mo><mrow><mi>V</mi><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><mi>A</mi><mo stretchy="false">)</mo></mrow></mrow></mrow></mrow></mrow><annotation encoding="application/x-tex">S(Q,A)=D(Q,A)\land P(Q,A)\land Sp(Q,A)\land\lnot V(A)</annotation></semantics></math></td>
+<td class="ltx_eqn_cell ltx_eqn_center_padright"></td>
+<td class="ltx_eqn_cell ltx_eqn_eqno ltx_align_middle ltx_align_right" rowspan="1"><span class="ltx_tag ltx_tag_equation ltx_align_right">(1)</span></td>
+</tr></tbody>
+</table>
+</div>
+<div class="ltx_para" id="S5.SS1.p3">
+<p class="ltx_p" id="S5.SS1.p3.1">⟦<math alttext="Q,A" class="ltx_Math" display="inline" id="S5.SS1.p3.1.m1" intent=":literal"><semantics><mrow><mi>Q</mi><mo>,</mo><mi>A</mi></mrow><annotation encoding="application/x-tex">Q,A</annotation></semantics></math> — вопрос и ответ соответственно,</p>
+</div>
+<div class="ltx_para" id="S5.SS1.p4">
+<p class="ltx_p" id="S5.SS1.p4.1">⟦<math alttext="S(Q,A)" class="ltx_Math" display="inline" id="S5.SS1.p4.1.m1" intent=":literal"><semantics><mrow><mi>S</mi><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><mi>Q</mi><mo>,</mo><mi>A</mi><mo stretchy="false">)</mo></mrow></mrow><annotation encoding="application/x-tex">S(Q,A)</annotation></semantics></math> — бинарный вердикт вывода,</p>
+</div>
+<div class="ltx_para" id="S5.SS1.p5">
+<p class="ltx_p" id="S5.SS1.p5.1">⟦<math alttext="D(Q,A)" class="ltx_Math" display="inline" id="S5.SS1.p5.1.m1" intent=":literal"><semantics><mrow><mi>D</mi><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><mi>Q</mi><mo>,</mo><mi>A</mi><mo stretchy="false">)</mo></mrow></mrow><annotation encoding="application/x-tex">D(Q,A)</annotation></semantics></math> — критерий прямого ответа,</p>
+</div>
+<div class="ltx_para" id="S5.SS1.p6">
+<p class="ltx_p" id="S5.SS1.p6.1">⟦<math alttext="P(Q,A)" class="ltx_Math" display="inline" id="S5.SS1.p6.1.m1" intent=":literal"><semantics><mrow><mi>P</mi><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><mi>Q</mi><mo>,</mo><mi>A</mi><mo stretchy="false">)</mo></mrow></mrow><annotation encoding="application/x-tex">P(Q,A)</annotation></semantics></math> — критерий полноты,</p>
+</div>
+<div class="ltx_para" id="S5.SS1.p7">
+<p class="ltx_p" id="S5.SS1.p7.1">⟦<math alttext="Sp(Q,A)" class="ltx_Math" display="inline" id="S5.SS1.p7.1.m1" intent=":literal"><semantics><mrow><mi>S</mi><mo lspace="0em" rspace="0em">​</mo><mi>p</mi><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><mi>Q</mi><mo>,</mo><mi>A</mi><mo stretchy="false">)</mo></mrow></mrow><annotation encoding="application/x-tex">Sp(Q,A)</annotation></semantics></math> — критерий специфичности,</p>
+</div>
+<div class="ltx_para" id="S5.SS1.p8">
+<p class="ltx_p" id="S5.SS1.p8.1">⟦<math alttext="V(A)" class="ltx_Math" display="inline" id="S5.SS1.p8.1.m1" intent=":literal"><semantics><mrow><mi>V</mi><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><mi>A</mi><mo stretchy="false">)</mo></mrow></mrow><annotation encoding="application/x-tex">V(A)</annotation></semantics></math> — критерий неопределенности,</p>
+</div>
+<div class="ltx_para" id="S5.SS1.p9">
+<table class="ltx_equation ltx_eqn_table" id="S5.E2">
+<tbody><tr class="ltx_equation ltx_eqn_row ltx_align_baseline">
+<td class="ltx_eqn_cell ltx_eqn_center_padleft"></td>
+<td class="ltx_eqn_cell ltx_align_center"><math alttext="SB\ ARC=\frac{\sum_{i=1}^{N}S(Q,A_{i})}{N}" class="ltx_Math" display="block" id="S5.E2.m1" intent=":literal"><semantics><mrow><mrow><mi>S</mi><mo lspace="0em" rspace="0em">​</mo><mi>B</mi><mo lspace="0.500em" rspace="0em">​</mo><mi>A</mi><mo lspace="0em" rspace="0em">​</mo><mi>R</mi><mo lspace="0em" rspace="0em">​</mo><mi>C</mi></mrow><mo>=</mo><mfrac><mrow><msubsup><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>N</mi></msubsup><mrow><mi>S</mi><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><mi>Q</mi><mo>,</mo><msub><mi>A</mi><mi>i</mi></msub><mo stretchy="false">)</mo></mrow></mrow></mrow><mi>N</mi></mfrac></mrow><annotation encoding="application/x-tex">SB\ ARC=\frac{\sum_{i=1}^{N}S(Q,A_{i})}{N}</annotation></semantics></math></td>
+<td class="ltx_eqn_cell ltx_eqn_center_padright"></td>
+<td class="ltx_eqn_cell ltx_eqn_eqno ltx_align_middle ltx_align_right" rowspan="1"><span class="ltx_tag ltx_tag_equation ltx_align_right">(2)</span></td>
+</tr></tbody>
+</table>
+</div>
+<div class="ltx_para" id="S5.SS1.p10">
+<p class="ltx_p" id="S5.SS1.p10.1">⟦<math alttext="N" class="ltx_Math" display="inline" id="S5.SS1.p10.1.m1" intent=":literal"><semantics><mi>N</mi><annotation encoding="application/x-tex">N</annotation></semantics></math> — общее количество пар (вопрос, ответ) в наборе данных для оценки.</p>
+</div>
+</section>
+<section class="ltx_subsection" id="S5.SS2">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">5.2 </span>Строгий бинарный контекстный отзыв</h3>
+<div class="ltx_para" id="S5.SS2.p1">
+<p class="ltx_p" id="S5.SS2.p1.1">⟦<math alttext="SBCR" class="ltx_Math" display="inline" id="S5.SS2.p1.1.m1" intent=":literal"><semantics><mrow><mi>S</mi><mo lspace="0em" rspace="0em">​</mo><mi>B</mi><mo lspace="0em" rspace="0em">​</mo><mi>C</mi><mo lspace="0em" rspace="0em">​</mo><mi>R</mi></mrow><annotation encoding="application/x-tex">SBCR</annotation></semantics></math> оценивает, используется ли вся релевантная контекстная информация в ответе.</p>
+</div>
+<div class="ltx_para" id="S5.SS2.p2">
+<table class="ltx_equation ltx_eqn_table" id="S5.E3">
+<tbody><tr class="ltx_equation ltx_eqn_row ltx_align_baseline">
+<td class="ltx_eqn_cell ltx_eqn_center_padleft"></td>
+<td class="ltx_eqn_cell ltx_align_center"><math alttext="U(C,A)=\mathds{1}\bigl(F_{\text{used}}\equiv F_{\text{relevant}}\bigr)" class="ltx_Math" display="block" id="S5.E3.m1" intent=":literal"><semantics><mrow><mrow><mi>U</mi><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><mi>C</mi><mo>,</mo><mi>A</mi><mo stretchy="false">)</mo></mrow></mrow><mo>=</mo><mrow><mn>𝟙</mn><mo lspace="0em" rspace="0em">​</mo><mrow><mo maxsize="1.200em" minsize="1.200em">(</mo><mrow><msub><mi>F</mi><mtext>used</mtext></msub><mo>≡</mo><msub><mi>F</mi><mtext>relevant</mtext></msub></mrow><mo maxsize="1.200em" minsize="1.200em">)</mo></mrow></mrow></mrow><annotation encoding="application/x-tex">U(C,A)=\mathds{1}\bigl(F_{\text{used}}\equiv F_{\text{relevant}}\bigr)</annotation></semantics></math></td>
+<td class="ltx_eqn_cell ltx_eqn_center_padright"></td>
+<td class="ltx_eqn_cell ltx_eqn_eqno ltx_align_middle ltx_align_right" rowspan="1"><span class="ltx_tag ltx_tag_equation ltx_align_right">(3)</span></td>
+</tr></tbody>
+</table>
+</div>
+<div class="ltx_para" id="S5.SS2.p3">
+<p class="ltx_p" id="S5.SS2.p3.1">⟦<math alttext="C,A" class="ltx_Math" display="inline" id="S5.SS2.p3.1.m1" intent=":literal"><semantics><mrow><mi>C</mi><mo>,</mo><mi>A</mi></mrow><annotation encoding="application/x-tex">C,A</annotation></semantics></math> — контекст и ответ соответственно,</p>
+</div>
+<div class="ltx_para" id="S5.SS2.p4">
+<p class="ltx_p" id="S5.SS2.p4.1">⟦<math alttext="U(C,A)" class="ltx_Math" display="inline" id="S5.SS2.p4.1.m1" intent=":literal"><semantics><mrow><mi>U</mi><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><mi>C</mi><mo>,</mo><mi>A</mi><mo stretchy="false">)</mo></mrow></mrow><annotation encoding="application/x-tex">U(C,A)</annotation></semantics></math> — бинарный выходной вердикт,</p>
+</div>
+<div class="ltx_para" id="S5.SS2.p5">
+<p class="ltx_p" id="S5.SS2.p5.1">⟦<math alttext="F_{\text{relevant}}" class="ltx_Math" display="inline" id="S5.SS2.p5.1.m1" intent=":literal"><semantics><msub><mi>F</mi><mtext>relevant</mtext></msub><annotation encoding="application/x-tex">F_{\text{relevant}}</annotation></semantics></math> — множество всех релевантных фактов, присутствующих в контексте,</p>
+</div>
+<div class="ltx_para" id="S5.SS2.p6">
+<p class="ltx_p" id="S5.SS2.p6.1">⟦<math alttext="F_{\text{used}}" class="ltx_Math" display="inline" id="S5.SS2.p6.1.m1" intent=":literal"><semantics><msub><mi>F</mi><mtext>used</mtext></msub><annotation encoding="application/x-tex">F_{\text{used}}</annotation></semantics></math> — набор фактов из контекста, которые используются в ответе,</p>
+</div>
+<div class="ltx_para" id="S5.SS2.p7">
+<table class="ltx_equation ltx_eqn_table" id="S5.E4">
+<tbody><tr class="ltx_equation ltx_eqn_row ltx_align_baseline">
+<td class="ltx_eqn_cell ltx_eqn_center_padleft"></td>
+<td class="ltx_eqn_cell ltx_align_center"><math alttext="SB\,CR=\frac{\displaystyle\sum_{i=1}^{N}U(C_{i},A_{i})}{N}" class="ltx_Math" display="block" id="S5.E4.m1" intent=":literal"><semantics><mrow><mrow><mi>S</mi><mo lspace="0em" rspace="0em">​</mo><mi>B</mi><mo lspace="0.170em" rspace="0em">​</mo><mi>C</mi><mo lspace="0em" rspace="0em">​</mo><mi>R</mi></mrow><mo>=</mo><mfrac><mrow><mstyle displaystyle="true"><munderover><mo movablelimits="false">∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>N</mi></munderover></mstyle><mrow><mi>U</mi><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><msub><mi>C</mi><mi>i</mi></msub><mo>,</mo><msub><mi>A</mi><mi>i</mi></msub><mo stretchy="false">)</mo></mrow></mrow></mrow><mi>N</mi></mfrac></mrow><annotation encoding="application/x-tex">SB\,CR=\frac{\displaystyle\sum_{i=1}^{N}U(C_{i},A_{i})}{N}</annotation></semantics></math></td>
+<td class="ltx_eqn_cell ltx_eqn_center_padright"></td>
+<td class="ltx_eqn_cell ltx_eqn_eqno ltx_align_middle ltx_align_right" rowspan="1"><span class="ltx_tag ltx_tag_equation ltx_align_right">(4)</span></td>
+</tr></tbody>
+</table>
+</div>
+<div class="ltx_para" id="S5.SS2.p8">
+<p class="ltx_p" id="S5.SS2.p8.1">⟦<math alttext="N" class="ltx_Math" display="inline" id="S5.SS2.p8.1.m1" intent=":literal"><semantics><mi>N</mi><annotation encoding="application/x-tex">N</annotation></semantics></math> — общее количество пар (вопрос, ответ) в наборе данных для оценки.</p>
+</div>
+</section>
+<section class="ltx_subsection" id="S5.SS3">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">5.3 </span>Строгая бинарная фактическая точность</h3>
+<div class="ltx_para" id="S5.SS3.p1">
+<p class="ltx_p" id="S5.SS3.p1.1">⟦<math alttext="SBFA" class="ltx_Math" display="inline" id="S5.SS3.p1.1.m1" intent=":literal"><semantics><mrow><mi>S</mi><mo lspace="0em" rspace="0em">​</mo><mi>B</mi><mo lspace="0em" rspace="0em">​</mo><mi>F</mi><mo lspace="0em" rspace="0em">​</mo><mi>A</mi></mrow><annotation encoding="application/x-tex">SBFA</annotation></semantics></math> оценивает фактическую точность и отсутствие галлюцинаций.</p>
+<table class="ltx_equation ltx_eqn_table" id="S5.E5">
+<tbody><tr class="ltx_equation ltx_eqn_row ltx_align_baseline">
+<td class="ltx_eqn_cell ltx_eqn_center_padleft"></td>
+<td class="ltx_eqn_cell ltx_align_center"><math alttext="F(C,A)=\mathds{1}(\textit{S}(A,C)\land\lnot\textit{C}(A,C)\land\lnot\textit{H}(A,C))" class="ltx_Math" display="block" id="S5.E5.m1" intent=":literal"><semantics><mrow><mrow><mi>F</mi><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><mi>C</mi><mo>,</mo><mi>A</mi><mo stretchy="false">)</mo></mrow></mrow><mo>=</mo><mrow><mn>𝟙</mn><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><mrow><mrow><mtext class="ltx_mathvariant_italic">S</mtext><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><mi>A</mi><mo>,</mo><mi>C</mi><mo stretchy="false">)</mo></mrow></mrow><mo>∧</mo><mrow><mo rspace="0.167em">¬</mo><mrow><mtext class="ltx_mathvariant_italic">C</mtext><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><mi>A</mi><mo>,</mo><mi>C</mi><mo stretchy="false">)</mo></mrow></mrow></mrow><mo>∧</mo><mrow><mo rspace="0.167em">¬</mo><mrow><mtext class="ltx_mathvariant_italic">H</mtext><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><mi>A</mi><mo>,</mo><mi>C</mi><mo stretchy="false">)</mo></mrow></mrow></mrow></mrow><mo stretchy="false">)</mo></mrow></mrow></mrow><annotation encoding="application/x-tex">F(C,A)=\mathds{1}(\textit{S}(A,C)\land\lnot\textit{C}(A,C)\land\lnot\textit{H}(A,C))</annotation></semantics></math></td>
+<td class="ltx_eqn_cell ltx_eqn_center_padright"></td>
+<td class="ltx_eqn_cell ltx_eqn_eqno ltx_align_middle ltx_align_right" rowspan="1"><span class="ltx_tag ltx_tag_equation ltx_align_right">(5)</span></td>
+</tr></tbody>
+</table>
+</div>
+<div class="ltx_para" id="S5.SS3.p2">
+<p class="ltx_p" id="S5.SS3.p2.1">⟦<math alttext="C,A" class="ltx_Math" display="inline" id="S5.SS3.p2.1.m1" intent=":literal"><semantics><mrow><mi>C</mi><mo>,</mo><mi>A</mi></mrow><annotation encoding="application/x-tex">C,A</annotation></semantics></math> — контекст и ответ соответственно,</p>
+</div>
+<div class="ltx_para" id="S5.SS3.p3">
+<p class="ltx_p" id="S5.SS3.p3.1">⟦<math alttext="F(C,A)" class="ltx_Math" display="inline" id="S5.SS3.p3.1.m1" intent=":literal"><semantics><mrow><mi>F</mi><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><mi>C</mi><mo>,</mo><mi>A</mi><mo stretchy="false">)</mo></mrow></mrow><annotation encoding="application/x-tex">F(C,A)</annotation></semantics></math> — бинарный вердикт вывода,</p>
+</div>
+<div class="ltx_para" id="S5.SS3.p4">
+<p class="ltx_p" id="S5.SS3.p4.1">⟦<math alttext="Supported(C,A)" class="ltx_Math" display="inline" id="S5.SS3.p4.1.m1" intent=":literal"><semantics><mrow><mi>S</mi><mo lspace="0em" rspace="0em">​</mo><mi>u</mi><mo lspace="0em" rspace="0em">​</mo><mi>p</mi><mo lspace="0em" rspace="0em">​</mo><mi>p</mi><mo lspace="0em" rspace="0em">​</mo><mi>o</mi><mo lspace="0em" rspace="0em">​</mo><mi>r</mi><mo lspace="0em" rspace="0em">​</mo><mi>t</mi><mo lspace="0em" rspace="0em">​</mo><mi>e</mi><mo lspace="0em" rspace="0em">​</mo><mi>d</mi><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><mi>C</mi><mo>,</mo><mi>A</mi><mo stretchy="false">)</mo></mrow></mrow><annotation encoding="application/x-tex">Supported(C,A)</annotation></semantics></math> — все утверждения в ответе явно присутствуют в контексте или прямо вытекают из него,</p>
+</div>
+<div class="ltx_para" id="S5.SS3.p5">
+<p class="ltx_p" id="S5.SS3.p5.1">⟦<math alttext="\lnot\textit{Contradicts}(A,C)" class="ltx_Math" display="inline" id="S5.SS3.p5.1.m1" intent=":literal"><semantics><mrow><mo rspace="0.167em">¬</mo><mrow><mtext class="ltx_mathvariant_italic">Contradicts</mtext><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><mi>A</mi><mo>,</mo><mi>C</mi><mo stretchy="false">)</mo></mrow></mrow></mrow><annotation encoding="application/x-tex">\lnot\textit{Contradicts}(A,C)</annotation></semantics></math> — ответ не противоречит информации, содержащейся в контексте,</p>
+</div>
+<div class="ltx_para" id="S5.SS3.p6">
+<p class="ltx_p" id="S5.SS3.p6.1">⟦<math alttext="\lnot\textit{Hallucinates}(A,C)" class="ltx_Math" display="inline" id="S5.SS3.p6.1.m1" intent=":literal"><semantics><mrow><mo rspace="0.167em">¬</mo><mrow><mtext class="ltx_mathvariant_italic">Hallucinates</mtext><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><mi>A</mi><mo>,</mo><mi>C</mi><mo stretchy="false">)</mo></mrow></mrow></mrow><annotation encoding="application/x-tex">\lnot\textit{Hallucinates}(A,C)</annotation></semantics></math> — ответ не содержит информации, отсутствующей в контексте,</p>
+</div>
+<div class="ltx_para" id="S5.SS3.p7">
+<table class="ltx_equation ltx_eqn_table" id="S5.E6">
+<tbody><tr class="ltx_equation ltx_eqn_row ltx_align_baseline">
+<td class="ltx_eqn_cell ltx_eqn_center_padleft"></td>
+<td class="ltx_eqn_cell ltx_align_center"><math alttext="SB\,FA=\frac{\sum_{i=1}^{N}F(C_{i},A_{i})}{N}" class="ltx_Math" display="block" id="S5.E6.m1" intent=":literal"><semantics><mrow><mrow><mi>S</mi><mo lspace="0em" rspace="0em">​</mo><mi>B</mi><mo lspace="0.170em" rspace="0em">​</mo><mi>F</mi><mo lspace="0em" rspace="0em">​</mo><mi>A</mi></mrow><mo>=</mo><mfrac><mrow><msubsup><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>N</mi></msubsup><mrow><mi>F</mi><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><msub><mi>C</mi><mi>i</mi></msub><mo>,</mo><msub><mi>A</mi><mi>i</mi></msub><mo stretchy="false">)</mo></mrow></mrow></mrow><mi>N</mi></mfrac></mrow><annotation encoding="application/x-tex">SB\,FA=\frac{\sum_{i=1}^{N}F(C_{i},A_{i})}{N}</annotation></semantics></math></td>
+<td class="ltx_eqn_cell ltx_eqn_center_padright"></td>
+<td class="ltx_eqn_cell ltx_eqn_eqno ltx_align_middle ltx_align_right" rowspan="1"><span class="ltx_tag ltx_tag_equation ltx_align_right">(6)</span></td>
+</tr></tbody>
+</table>
+</div>
+<div class="ltx_para" id="S5.SS3.p8">
+<p class="ltx_p" id="S5.SS3.p8.1">⟦<math alttext="N" class="ltx_Math" display="inline" id="S5.SS3.p8.1.m1" intent=":literal"><semantics><mi>N</mi><annotation encoding="application/x-tex">N</annotation></semantics></math> — общее количество пар (вопрос, ответ) в наборе данных для оценки.</p>
+</div>
+</section>
+<section class="ltx_subsection" id="S5.SS4">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">5.4 </span>Оценка охвата поиска ⟦K0⟧)</h3>
+<div class="ltx_para" id="S5.SS4.p1">
+<p class="ltx_p" id="S5.SS4.p1.1">⟦<math alttext="RCS" class="ltx_Math" display="inline" id="S5.SS4.p1.1.m1" intent=":literal"><semantics><mrow><mi>R</mi><mo lspace="0em" rspace="0em">​</mo><mi>C</mi><mo lspace="0em" rspace="0em">​</mo><mi>S</mi></mrow><annotation encoding="application/x-tex">RCS</annotation></semantics></math> измеряет, насколько полно извлеченный контекст воспроизводит исходный (эталонный) контекст, и, следовательно, характеризует качество поискового механизма.</p>
+</div>
+<div class="ltx_para" id="S5.SS4.p2">
+<p class="ltx_p" id="S5.SS4.p2.3">Пусть <math alttext="C_{orig}" class="ltx_Math" display="inline" id="S5.SS4.p2.1.m1" intent=":literal"><semantics><msub><mi>C</mi><mrow><mi>o</mi><mo lspace="0em" rspace="0em">​</mo><mi>r</mi><mo lspace="0em" rspace="0em">​</mo><mi>i</mi><mo lspace="0em" rspace="0em">​</mo><mi>g</mi></mrow></msub><annotation encoding="application/x-tex">C_{orig}</annotation></semantics></math> — исходный контекст, а <math alttext="C_{retr}" class="ltx_Math" display="inline" id="S5.SS4.p2.2.m2" intent=":literal"><semantics><msub><mi>C</mi><mrow><mi>r</mi><mo lspace="0em" rspace="0em">​</mo><mi>e</mi><mo lspace="0em" rspace="0em">​</mo><mi>t</mi><mo lspace="0em" rspace="0em">​</mo><mi>r</mi></mrow></msub><annotation encoding="application/x-tex">C_{retr}</annotation></semantics></math> — контекст, извлеченный поисковым механизмом.
+Функция оценки <math alttext="S(C_{orig},C_{retr})" class="ltx_Math" display="inline" id="S5.SS4.p2.3.m3" intent=":literal"><semantics><mrow><mi>S</mi><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><msub><mi>C</mi><mrow><mi>o</mi><mo lspace="0em" rspace="0em">​</mo><mi>r</mi><mo lspace="0em" rspace="0em">​</mo><mi>i</mi><mo lspace="0em" rspace="0em">​</mo><mi>g</mi></mrow></msub><mo>,</mo><msub><mi>C</mi><mrow><mi>r</mi><mo lspace="0em" rspace="0em">​</mo><mi>e</mi><mo lspace="0em" rspace="0em">​</mo><mi>t</mi><mo lspace="0em" rspace="0em">​</mo><mi>r</mi></mrow></msub><mo stretchy="false">)</mo></mrow></mrow><annotation encoding="application/x-tex">S(C_{orig},C_{retr})</annotation></semantics></math> определяется следующим образом:</p>
+</div>
+<div class="ltx_para" id="S5.SS4.p3">
+<table class="ltx_equation ltx_eqn_table" id="S5.E7">
+<tbody><tr class="ltx_equation ltx_eqn_row ltx_align_baseline">
+<td class="ltx_eqn_cell ltx_eqn_center_padleft"></td>
+<td class="ltx_eqn_cell ltx_align_center"><math alttext="S(C_{orig},C_{retr})=\begin{cases}\text{0},&amp;\text{if }Cov(C_{orig},C_{retr})=none\\
+\text{1},&amp;\text{if }Cov(C_{orig},C_{retr})=partial\\
+\text{2},&amp;\text{if }Cov(C_{orig},C_{retr})=complete\\
+\end{cases}" class="ltx_Math" display="block" id="S5.E7.m1" intent=":literal"><semantics><mrow><mrow><mi>S</mi><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><msub><mi>C</mi><mrow><mi>o</mi><mo lspace="0em" rspace="0em">​</mo><mi>r</mi><mo lspace="0em" rspace="0em">​</mo><mi>i</mi><mo lspace="0em" rspace="0em">​</mo><mi>g</mi></mrow></msub><mo>,</mo><msub><mi>C</mi><mrow><mi>r</mi><mo lspace="0em" rspace="0em">​</mo><mi>e</mi><mo lspace="0em" rspace="0em">​</mo><mi>t</mi><mo lspace="0em" rspace="0em">​</mo><mi>r</mi></mrow></msub><mo stretchy="false">)</mo></mrow></mrow><mo>=</mo><mrow><mo>{</mo><mtable columnspacing="5pt" displaystyle="true" rowspacing="0pt"><mtr><mtd class="ltx_align_left" columnalign="left"><mrow><mtext>0</mtext><mo>,</mo></mrow></mtd><mtd class="ltx_align_left" columnalign="left"><mrow><mrow><mtext>if </mtext><mo lspace="0em" rspace="0em">​</mo><mi>C</mi><mo lspace="0em" rspace="0em">​</mo><mi>o</mi><mo lspace="0em" rspace="0em">​</mo><mi>v</mi><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><msub><mi>C</mi><mrow><mi>o</mi><mo lspace="0em" rspace="0em">​</mo><mi>r</mi><mo lspace="0em" rspace="0em">​</mo><mi>i</mi><mo lspace="0em" rspace="0em">​</mo><mi>g</mi></mrow></msub><mo>,</mo><msub><mi>C</mi><mrow><mi>r</mi><mo lspace="0em" rspace="0em">​</mo><mi>e</mi><mo lspace="0em" rspace="0em">​</mo><mi>t</mi><mo lspace="0em" rspace="0em">​</mo><mi>r</mi></mrow></msub><mo stretchy="false">)</mo></mrow></mrow><mo>=</mo><mrow><mi>n</mi><mo lspace="0em" rspace="0em">​</mo><mi>o</mi><mo lspace="0em" rspace="0em">​</mo><mi>n</mi><mo lspace="0em" rspace="0em">​</mo><mi>e</mi></mrow></mrow></mtd></mtr><mtr><mtd class="ltx_align_left" columnalign="left"><mrow><mtext>1</mtext><mo>,</mo></mrow></mtd><mtd class="ltx_align_left" columnalign="left"><mrow><mrow><mtext>if </mtext><mo lspace="0em" rspace="0em">​</mo><mi>C</mi><mo lspace="0em" rspace="0em">​</mo><mi>o</mi><mo lspace="0em" rspace="0em">​</mo><mi>v</mi><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><msub><mi>C</mi><mrow><mi>o</mi><mo lspace="0em" rspace="0em">​</mo><mi>r</mi><mo lspace="0em" rspace="0em">​</mo><mi>i</mi><mo lspace="0em" rspace="0em">​</mo><mi>g</mi></mrow></msub><mo>,</mo><msub><mi>C</mi><mrow><mi>r</mi><mo lspace="0em" rspace="0em">​</mo><mi>e</mi><mo lspace="0em" rspace="0em">​</mo><mi>t</mi><mo lspace="0em" rspace="0em">​</mo><mi>r</mi></mrow></msub><mo stretchy="false">)</mo></mrow></mrow><mo>=</mo><mrow><mi>p</mi><mo lspace="0em" rspace="0em">​</mo><mi>a</mi><mo lspace="0em" rspace="0em">​</mo><mi>r</mi><mo lspace="0em" rspace="0em">​</mo><mi>t</mi><mo lspace="0em" rspace="0em">​</mo><mi>i</mi><mo lspace="0em" rspace="0em">​</mo><mi>a</mi><mo lspace="0em" rspace="0em">​</mo><mi>l</mi></mrow></mrow></mtd></mtr><mtr><mtd class="ltx_align_left" columnalign="left"><mrow><mtext>2</mtext><mo>,</mo></mrow></mtd><mtd class="ltx_align_left" columnalign="left"><mrow><mrow><mtext>if </mtext><mo lspace="0em" rspace="0em">​</mo><mi>C</mi><mo lspace="0em" rspace="0em">​</mo><mi>o</mi><mo lspace="0em" rspace="0em">​</mo><mi>v</mi><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><msub><mi>C</mi><mrow><mi>o</mi><mo lspace="0em" rspace="0em">​</mo><mi>r</mi><mo lspace="0em" rspace="0em">​</mo><mi>i</mi><mo lspace="0em" rspace="0em">​</mo><mi>g</mi></mrow></msub><mo>,</mo><msub><mi>C</mi><mrow><mi>r</mi><mo lspace="0em" rspace="0em">​</mo><mi>e</mi><mo lspace="0em" rspace="0em">​</mo><mi>t</mi><mo lspace="0em" rspace="0em">​</mo><mi>r</mi></mrow></msub><mo stretchy="false">)</mo></mrow></mrow><mo>=</mo><mrow><mi>c</mi><mo lspace="0em" rspace="0em">​</mo><mi>o</mi><mo lspace="0em" rspace="0em">​</mo><mi>m</mi><mo lspace="0em" rspace="0em">​</mo><mi>p</mi><mo lspace="0em" rspace="0em">​</mo><mi>l</mi><mo lspace="0em" rspace="0em">​</mo><mi>e</mi><mo lspace="0em" rspace="0em">​</mo><mi>t</mi><mo lspace="0em" rspace="0em">​</mo><mi>e</mi></mrow></mrow></mtd></mtr></mtable></mrow></mrow><annotation encoding="application/x-tex">S(C_{orig},C_{retr})=\begin{cases}\text{0},&amp;\text{if }Cov(C_{orig},C_{retr})=none\\
+\text{1},&amp;\text{if }Cov(C_{orig},C_{retr})=partial\\
+\text{2},&amp;\text{if }Cov(C_{orig},C_{retr})=complete\\
+\end{cases}</annotation></semantics></math></td>
+<td class="ltx_eqn_cell ltx_eqn_center_padright"></td>
+<td class="ltx_eqn_cell ltx_eqn_eqno ltx_align_middle ltx_align_right" rowspan="1"><span class="ltx_tag ltx_tag_equation ltx_align_right">(7)</span></td>
+</tr></tbody>
+</table>
+</div>
+<div class="ltx_para" id="S5.SS4.p4">
+<p class="ltx_p" id="S5.SS4.p4.1">Здесь <math alttext="Coverage(S(C_{orig},C_{retr}))" class="ltx_Math" display="inline" id="S5.SS4.p4.1.m1" intent=":literal"><semantics><mrow><mi>C</mi><mo lspace="0em" rspace="0em">​</mo><mi>o</mi><mo lspace="0em" rspace="0em">​</mo><mi>v</mi><mo lspace="0em" rspace="0em">​</mo><mi>e</mi><mo lspace="0em" rspace="0em">​</mo><mi>r</mi><mo lspace="0em" rspace="0em">​</mo><mi>a</mi><mo lspace="0em" rspace="0em">​</mo><mi>g</mi><mo lspace="0em" rspace="0em">​</mo><mi>e</mi><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><mrow><mi>S</mi><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><msub><mi>C</mi><mrow><mi>o</mi><mo lspace="0em" rspace="0em">​</mo><mi>r</mi><mo lspace="0em" rspace="0em">​</mo><mi>i</mi><mo lspace="0em" rspace="0em">​</mo><mi>g</mi></mrow></msub><mo>,</mo><msub><mi>C</mi><mrow><mi>r</mi><mo lspace="0em" rspace="0em">​</mo><mi>e</mi><mo lspace="0em" rspace="0em">​</mo><mi>t</mi><mo lspace="0em" rspace="0em">​</mo><mi>r</mi></mrow></msub><mo stretchy="false">)</mo></mrow></mrow><mo stretchy="false">)</mo></mrow></mrow><annotation encoding="application/x-tex">Coverage(S(C_{orig},C_{retr}))</annotation></semantics></math> — это либо экспертная оценка, либо результат работы оценщика на базе LLM, который сравнивает два текста.</p>
+</div>
+<div class="ltx_para" id="S5.SS4.p5">
+<p class="ltx_p" id="S5.SS4.p5.3">⟦<math alttext="S=0" class="ltx_Math" display="inline" id="S5.SS4.p5.1.m1" intent=":literal"><semantics><mrow><mi>S</mi><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">S=0</annotation></semantics></math> — извлеченный контекст <math alttext="C_{retr}" class="ltx_Math" display="inline" id="S5.SS4.p5.2.m2" intent=":literal"><semantics><msub><mi>C</mi><mrow><mi>r</mi><mo lspace="0em" rspace="0em">​</mo><mi>e</mi><mo lspace="0em" rspace="0em">​</mo><mi>t</mi><mo lspace="0em" rspace="0em">​</mo><mi>r</mi></mrow></msub><annotation encoding="application/x-tex">C_{retr}</annotation></semantics></math> не содержит информации из исходного контекста <math alttext="C_{orig}" class="ltx_Math" display="inline" id="S5.SS4.p5.3.m3" intent=":literal"><semantics><msub><mi>C</mi><mrow><mi>o</mi><mo lspace="0em" rspace="0em">​</mo><mi>r</mi><mo lspace="0em" rspace="0em">​</mo><mi>i</mi><mo lspace="0em" rspace="0em">​</mo><mi>g</mi></mrow></msub><annotation encoding="application/x-tex">C_{orig}</annotation></semantics></math>,</p>
+</div>
+<div class="ltx_para" id="S5.SS4.p6">
+<p class="ltx_p" id="S5.SS4.p6.3">⟦<math alttext="S=1" class="ltx_Math" display="inline" id="S5.SS4.p6.1.m1" intent=":literal"><semantics><mrow><mi>S</mi><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">S=1</annotation></semantics></math> — извлеченный контекст <math alttext="C_{retr}" class="ltx_Math" display="inline" id="S5.SS4.p6.2.m2" intent=":literal"><semantics><msub><mi>C</mi><mrow><mi>r</mi><mo lspace="0em" rspace="0em">​</mo><mi>e</mi><mo lspace="0em" rspace="0em">​</mo><mi>t</mi><mo lspace="0em" rspace="0em">​</mo><mi>r</mi></mrow></msub><annotation encoding="application/x-tex">C_{retr}</annotation></semantics></math> содержит часть информации из <math alttext="C_{orig}" class="ltx_Math" display="inline" id="S5.SS4.p6.3.m3" intent=":literal"><semantics><msub><mi>C</mi><mrow><mi>o</mi><mo lspace="0em" rspace="0em">​</mo><mi>r</mi><mo lspace="0em" rspace="0em">​</mo><mi>i</mi><mo lspace="0em" rspace="0em">​</mo><mi>g</mi></mrow></msub><annotation encoding="application/x-tex">C_{orig}</annotation></semantics></math>, но не всю ее,</p>
+</div>
+<div class="ltx_para" id="S5.SS4.p7">
+<p class="ltx_p" id="S5.SS4.p7.3">⟦<math alttext="S=2" class="ltx_Math" display="inline" id="S5.SS4.p7.1.m1" intent=":literal"><semantics><mrow><mi>S</mi><mo>=</mo><mn>2</mn></mrow><annotation encoding="application/x-tex">S=2</annotation></semantics></math> — вся информация из исходного контекста <math alttext="C_{retr}" class="ltx_Math" display="inline" id="S5.SS4.p7.2.m2" intent=":literal"><semantics><msub><mi>C</mi><mrow><mi>r</mi><mo lspace="0em" rspace="0em">​</mo><mi>e</mi><mo lspace="0em" rspace="0em">​</mo><mi>t</mi><mo lspace="0em" rspace="0em">​</mo><mi>r</mi></mrow></msub><annotation encoding="application/x-tex">C_{retr}</annotation></semantics></math> присутствует в извлеченном контексте <math alttext="C_{orig}" class="ltx_Math" display="inline" id="S5.SS4.p7.3.m3" intent=":literal"><semantics><msub><mi>C</mi><mrow><mi>o</mi><mo lspace="0em" rspace="0em">​</mo><mi>r</mi><mo lspace="0em" rspace="0em">​</mo><mi>i</mi><mo lspace="0em" rspace="0em">​</mo><mi>g</mi></mrow></msub><annotation encoding="application/x-tex">C_{orig}</annotation></semantics></math>.</p>
+</div>
+<div class="ltx_para" id="S5.SS4.p8">
+<p class="ltx_p" id="S5.SS4.p8.1">Итоговое значение <math alttext="RCS" class="ltx_Math" display="inline" id="S5.SS4.p8.1.m1" intent=":literal"><semantics><mrow><mi>R</mi><mo lspace="0em" rspace="0em">​</mo><mi>C</mi><mo lspace="0em" rspace="0em">​</mo><mi>S</mi></mrow><annotation encoding="application/x-tex">RCS</annotation></semantics></math> для набора данных вычисляется как среднее арифметическое:</p>
+</div>
+<div class="ltx_para" id="S5.SS4.p9">
+<table class="ltx_equation ltx_eqn_table" id="S5.E8">
+<tbody><tr class="ltx_equation ltx_eqn_row ltx_align_baseline">
+<td class="ltx_eqn_cell ltx_eqn_center_padleft"></td>
+<td class="ltx_eqn_cell ltx_align_center"><math alttext="RCS=\frac{\sum_{i=1}^{N}S(C_{orig}^{i},C_{retr}^{i})}{N}" class="ltx_Math" display="block" id="S5.E8.m1" intent=":literal"><semantics><mrow><mrow><mi>R</mi><mo lspace="0em" rspace="0em">​</mo><mi>C</mi><mo lspace="0em" rspace="0em">​</mo><mi>S</mi></mrow><mo>=</mo><mfrac><mrow><msubsup><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>N</mi></msubsup><mrow><mi>S</mi><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><msubsup><mi>C</mi><mrow><mi>o</mi><mo lspace="0em" rspace="0em">​</mo><mi>r</mi><mo lspace="0em" rspace="0em">​</mo><mi>i</mi><mo lspace="0em" rspace="0em">​</mo><mi>g</mi></mrow><mi>i</mi></msubsup><mo>,</mo><msubsup><mi>C</mi><mrow><mi>r</mi><mo lspace="0em" rspace="0em">​</mo><mi>e</mi><mo lspace="0em" rspace="0em">​</mo><mi>t</mi><mo lspace="0em" rspace="0em">​</mo><mi>r</mi></mrow><mi>i</mi></msubsup><mo stretchy="false">)</mo></mrow></mrow></mrow><mi>N</mi></mfrac></mrow><annotation encoding="application/x-tex">RCS=\frac{\sum_{i=1}^{N}S(C_{orig}^{i},C_{retr}^{i})}{N}</annotation></semantics></math></td>
+<td class="ltx_eqn_cell ltx_eqn_center_padright"></td>
+<td class="ltx_eqn_cell ltx_eqn_eqno ltx_align_middle ltx_align_right" rowspan="1"><span class="ltx_tag ltx_tag_equation ltx_align_right">(8)</span></td>
+</tr></tbody>
+</table>
+</div>
+<div class="ltx_para" id="S5.SS4.p10">
+<p class="ltx_p" id="S5.SS4.p10.1">Где <math alttext="N" class="ltx_Math" display="inline" id="S5.SS4.p10.1.m1" intent=":literal"><semantics><mi>N</mi><annotation encoding="application/x-tex">N</annotation></semantics></math> — это общее количество запросов в оценочном наборе данных.</p>
+</div>
+</section>
+</section>
+<section class="ltx_section" id="S6">
+<h2 class="ltx_title ltx_title_section">
+<span class="ltx_tag ltx_tag_section">6 </span>Эксперимент</h2>
+<div class="ltx_para" id="S6.p1">
+<p class="ltx_p" id="S6.p1.1">Целью эксперимента была оценка эффективности подхода DCD по сравнению с базовым конвейером Naive RAG. Исследовательский процесс состоял из пяти последовательных этапов:</p>
+</div>
+<div class="ltx_para" id="S6.p2">
+<ol class="ltx_enumerate" id="S6.I1">
+<li class="ltx_item" id="S6.I1.i1" style="list-style-type:none;">
+⟦<span class="ltx_tag ltx_tag_item">1.</span>
+
+Генерация текстового набора данных
+
+</li>
+<li class="ltx_item" id="S6.I1.i2" style="list-style-type:none;">
+⟦<span class="ltx_tag ltx_tag_item">2.</span>
+
+Генерация оценочных данных (вопрос–ответ–контекст),
+
+</li>
+<li class="ltx_item" id="S6.I1.i3" style="list-style-type:none;">
+⟦<span class="ltx_tag ltx_tag_item">3.</span>
+
+Создание векторной базы данных,
+
+</li>
+<li class="ltx_item" id="S6.I1.i4" style="list-style-type:none;">
+⟦<span class="ltx_tag ltx_tag_item">4.</span>
+
+Вывод с использованием конвейеров DCD и Naive RAG,
+
+</li>
+<li class="ltx_item" id="S6.I1.i5" style="list-style-type:none;">
+⟦<span class="ltx_tag ltx_tag_item">5.</span>
+
+Вычисление метрик.
+
+</li>
+</ol>
+</div>
+<div class="ltx_para" id="S6.p3">
+<p class="ltx_p" id="S6.p3.1">На первом этапе был сгенерирован набор синтетических текстовых данных. Используя языковую модель gpt-oss-120b и набор предопределенных шаблонов, мы синтезировали тексты, описывающие различные домены. В качестве доменов использовались десять жилых комплексов. Внутри каждого домена было создано несколько коллекций документов, соответствующих различным разделам, таким как инфраструктура, безопасность и описание комплекса.
+Вариативность набора данных была достигнута за счет генерации на основе шаблонов семантически согласованных экземпляров промптов, где численные параметры и переменные систематически варьировались при сохранении одной и той же базовой модели рассуждений. Такой подход позволил нам сформировать корпус документов с контролируемой семантической структурой..</p>
+</div>
+<div class="ltx_para" id="S6.p4">
+<p class="ltx_p" id="S6.p4.1">На втором этапе для полученного корпуса документов были сгенерированы пары вопрос-ответ. С использованием языковой модели gpt-oss-120b для каждого документа были синтезированы релевантные вопросы, ответы и подтверждающий контекст. Полученный набор данных вопрос-ответ-контекст послужил эталонным множеством для оценки конвейеров поиска и генерации..</p>
+</div>
+<div class="ltx_para" id="S6.p5">
+<p class="ltx_p" id="S6.p5.1">Третий этап включал создание векторной базы данных. В качестве решения для хранения использовалась ChromaDB. Документы были разделены с помощью оконного разделителя с фиксированным размером окна 300 токенов и перекрытием 20%. Эмбеддинги фрагментов были сгенерированы с использованием модели эмбеддингов bge-m3..</p>
+</div>
+<div class="ltx_para" id="S6.p6">
+<p class="ltx_p" id="S6.p6.1">На четвертом этапе оба подхода были оценены. Для каждого запроса из оценочного набора данных система извлекала релевантный контекст и генерировала ответ с использованием LLM. Эмбеддинги запросов вычислялись с помощью bge-m3, в то время как генерация ответов выполнялась моделью qwen2.5-7b-instruct. Эта процедура выполнялась отдельно для конвейера DCD и конвейера Naive RAG..</p>
+</div>
+<div class="ltx_para" id="S6.p7">
+<p class="ltx_p" id="S6.p7.1">Наконец, мы вычислили метрики, описанные в разделе 5.</p>
+</div>
+<figure class="ltx_figure" id="S6.F4">
+<div class="ltx_flex_figure">
+<div class="ltx_flex_cell ltx_flex_size_2">
+<figure class="ltx_figure ltx_figure_panel ltx_minipage ltx_align_center ltx_align_middle" id="S6.F4.fig1" style="width:179.4pt;">
+<figcaption class="ltx_caption ltx_centering">⟦<span class="ltx_tag ltx_tag_figure">Table 1: </span>Экспериментальные результаты</figcaption>
+<table class="ltx_tabular ltx_centering ltx_guessed_headers ltx_align_middle" id="S6.F4.fig1.1">
+<thead class="ltx_thead">
+<tr class="ltx_tr" id="S6.F4.fig1.1.1.1">
+<th class="ltx_td ltx_align_justify ltx_th ltx_th_column ltx_border_ll ltx_border_t" id="S6.F4.fig1.1.1.1.1" style="padding-left:3.0pt;padding-right:3.0pt;">
+<span class="ltx_inline-block ltx_align_top" id="S6.F4.fig1.1.1.1.1.1">
+<span class="ltx_p" id="S6.F4.fig1.1.1.1.1.1.1"><span class="ltx_text ltx_font_bold" id="S6.F4.fig1.1.1.1.1.1.1.1" style="font-size:90%;">Metrics</span></span>
+</span>
+</th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_t" id="S6.F4.fig1.1.1.1.2" style="padding-left:3.0pt;padding-right:3.0pt;"><span class="ltx_text ltx_font_bold" id="S6.F4.fig1.1.1.1.2.1" style="font-size:90%;">DCD</span></th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_rr ltx_border_t" id="S6.F4.fig1.1.1.1.3" style="padding-left:3.0pt;padding-right:3.0pt;"><span class="ltx_text ltx_font_bold" id="S6.F4.fig1.1.1.1.3.1" style="font-size:90%;">Naive</span></th>
+</tr>
+</thead>
+<tbody class="ltx_tbody">
+<tr class="ltx_tr" id="S6.F4.fig1.1.2.1">
+<td class="ltx_td ltx_align_justify ltx_border_ll ltx_border_t" id="S6.F4.fig1.1.2.1.1" style="padding-left:3.0pt;padding-right:3.0pt;">
+<span class="ltx_inline-block ltx_align_top" id="S6.F4.fig1.1.2.1.1.1">
+<span class="ltx_p" id="S6.F4.fig1.1.2.1.1.1.1"><span class="ltx_text" id="S6.F4.fig1.1.2.1.1.1.1.1" style="font-size:90%;">Strict Binary Answer Relevance</span></span>
+</span>
+</td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S6.F4.fig1.1.2.1.2" style="padding-left:3.0pt;padding-right:3.0pt;"><span class="ltx_text" id="S6.F4.fig1.1.2.1.2.1" style="font-size:90%;">0.86</span></td>
+<td class="ltx_td ltx_align_center ltx_border_rr ltx_border_t" id="S6.F4.fig1.1.2.1.3" style="padding-left:3.0pt;padding-right:3.0pt;"><span class="ltx_text" id="S6.F4.fig1.1.2.1.3.1" style="font-size:90%;">0.87</span></td>
+</tr>
+<tr class="ltx_tr" id="S6.F4.fig1.1.3.2">
+<td class="ltx_td ltx_align_justify ltx_border_ll ltx_border_t" id="S6.F4.fig1.1.3.2.1" style="padding-left:3.0pt;padding-right:3.0pt;">
+<span class="ltx_inline-block ltx_align_top" id="S6.F4.fig1.1.3.2.1.1">
+<span class="ltx_p" id="S6.F4.fig1.1.3.2.1.1.1"><span class="ltx_text" id="S6.F4.fig1.1.3.2.1.1.1.1" style="font-size:90%;">Strict Binary Context Recall</span></span>
+</span>
+</td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S6.F4.fig1.1.3.2.2" style="padding-left:3.0pt;padding-right:3.0pt;"><span class="ltx_text" id="S6.F4.fig1.1.3.2.2.1" style="font-size:90%;">0.95</span></td>
+<td class="ltx_td ltx_align_center ltx_border_rr ltx_border_t" id="S6.F4.fig1.1.3.2.3" style="padding-left:3.0pt;padding-right:3.0pt;"><span class="ltx_text" id="S6.F4.fig1.1.3.2.3.1" style="font-size:90%;">0.59</span></td>
+</tr>
+<tr class="ltx_tr" id="S6.F4.fig1.1.4.3">
+<td class="ltx_td ltx_align_justify ltx_border_ll ltx_border_t" id="S6.F4.fig1.1.4.3.1" style="padding-left:3.0pt;padding-right:3.0pt;">
+<span class="ltx_inline-block ltx_align_top" id="S6.F4.fig1.1.4.3.1.1">
+<span class="ltx_p" id="S6.F4.fig1.1.4.3.1.1.1"><span class="ltx_text" id="S6.F4.fig1.1.4.3.1.1.1.1" style="font-size:90%;">Strict Binary Factual Accuracy</span></span>
+</span>
+</td>
+<td class="ltx_td ltx_align_center ltx_border_t" id="S6.F4.fig1.1.4.3.2" style="padding-left:3.0pt;padding-right:3.0pt;"><span class="ltx_text" id="S6.F4.fig1.1.4.3.2.1" style="font-size:90%;">0.89</span></td>
+<td class="ltx_td ltx_align_center ltx_border_rr ltx_border_t" id="S6.F4.fig1.1.4.3.3" style="padding-left:3.0pt;padding-right:3.0pt;"><span class="ltx_text" id="S6.F4.fig1.1.4.3.3.1" style="font-size:90%;">0.40</span></td>
+</tr>
+<tr class="ltx_tr" id="S6.F4.fig1.1.5.4">
+<td class="ltx_td ltx_align_justify ltx_border_b ltx_border_ll ltx_border_t" id="S6.F4.fig1.1.5.4.1" style="padding-left:3.0pt;padding-right:3.0pt;">
+<span class="ltx_inline-block ltx_align_top" id="S6.F4.fig1.1.5.4.1.1">
+<span class="ltx_p" id="S6.F4.fig1.1.5.4.1.1.1"><span class="ltx_text" id="S6.F4.fig1.1.5.4.1.1.1.1" style="font-size:90%;">Retrieval Coverage Score</span></span>
+</span>
+</td>
+<td class="ltx_td ltx_align_center ltx_border_b ltx_border_t" id="S6.F4.fig1.1.5.4.2" style="padding-left:3.0pt;padding-right:3.0pt;"><span class="ltx_text" id="S6.F4.fig1.1.5.4.2.1" style="font-size:90%;">1.76</span></td>
+<td class="ltx_td ltx_align_center ltx_border_b ltx_border_rr ltx_border_t" id="S6.F4.fig1.1.5.4.3" style="padding-left:3.0pt;padding-right:3.0pt;"><span class="ltx_text" id="S6.F4.fig1.1.5.4.3.1" style="font-size:90%;">1.28</span></td>
+</tr>
+</tbody>
+</table>
+</figure>
+</div>
+<div class="ltx_flex_cell ltx_flex_size_2">
+<figure class="ltx_figure ltx_figure_panel ltx_minipage ltx_align_center ltx_align_middle" id="S6.F4.1" style="width:155.2pt;"><img alt="Refer to caption" class="ltx_graphics ltx_centering ltx_img_landscape" height="411" id="S6.F4.1.g1" src="./[2604.07590] 1 Introduction_files/pic_4.png" width="598"/>
+<figcaption class="ltx_caption ltx_centering">⟦<span class="ltx_tag ltx_tag_figure">Figure 4: </span>Производительность модели</figcaption>
+</figure>
+</div>
+</div>
+</figure>
+<div class="ltx_para" id="S6.p8">
+<p class="ltx_p" id="S6.p8.1">Что касается качества генерации ответов, оба подхода продемонстрировали сопоставимые результаты. В то же время оценка retriever показывает явное преимущество DCD: предложенный подход обеспечивает более точное извлечение релевантного контекста. На наборе данных со структурой документов на основе шаблонов DCD значительно превосходит Naive RAG в извлечении релевантной информации..</p>
+</div>
+</section>
+<section class="ltx_section" id="S7">
+<h2 class="ltx_title ltx_title_section">
+<span class="ltx_tag ltx_tag_section">7 </span>Ограничения</h2>
+<section class="ltx_subsection" id="S7.SS1">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">7.1 </span>Сложность конфигурации</h3>
+<div class="ltx_para" id="S7.SS1.p1">
+<p class="ltx_p" id="S7.SS1.p1.1">Предложенный подход DCD вносит дополнительную сложность конфигурации по мере увеличения размера и гетерогенности базы знаний. Трудность поддержания корректной сегментации домена растет пропорционально количеству семантически несвязанных областей знаний <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2604.07590v2#Yao" title="Yao, S. ‣ 10 References">Yao et al., 2023</a>] — компромисс, часто наблюдаемый в системах, опирающихся на явную структуру рассуждений и контролируемые пространства поиска..</p>
+</div>
+</section>
+<section class="ltx_subsection" id="S7.SS2">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">7.2 </span>Полностью неструктурированные данные</h3>
+<div class="ltx_para" id="S7.SS2.p1">
+<p class="ltx_p" id="S7.SS2.p1.1">DCD предполагает наличие по меньшей мере минимальной семантической организации внутри корпуса знаний. При применении к полностью неструктурированным данным эффективность механизмов структурированного поиска и маршрутизации снижается, зачастую приближаясь к поведению продвинутых наивных RAG конвейеров <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2604.07590v2#Gao" title="Gao, L. ‣ 10 References">Gao et al., 2021</a>].</p>
+</div>
+</section>
+<section class="ltx_subsection" id="S7.SS3">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">7.3 </span>Вычислительные накладные расходы</h3>
+<div class="ltx_para" id="S7.SS3.p1">
+<p class="ltx_p" id="S7.SS3.p1.1">Важно учитывать специфику сгенерированного набора данных: все документы имеют шаблонную структуру, в которой тексты внутри каждого домена практически идентичны и различаются только конкретными значениями, такими как имена и числовые характеристики, при сохранении той же общей синтаксической и семантической структуры. <a class="ltx_ref" href="https://ar5iv.labs.arxiv.org/html/2604.07590v2#Shazeer" title="Shazeer, N. ‣ 10 References">Shazeer et al., 2017</a>].</p>
+</div>
+<div class="ltx_para" id="S7.SS3.p2">
+<p class="ltx_p" id="S7.SS3.p2.1">Для данного типа данных, характеризующегося высокой степенью контекстуального перекрытия, DCD предсказуемо демонстрирует более высокое качество поиска по сравнению с наивным подходом RAG..</p>
+</div>
+</section>
+<section class="ltx_subsection" id="S7.SS4">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">7.4 </span>Методология оценки</h3>
+<div class="ltx_para" id="S7.SS4.p1">
+<p class="ltx_p" id="S7.SS4.p1.1">Качество ответов в данном исследовании оценивалось с использованием подхода LLM-as-a-Judge с применением модели gpt-oss-120b. Судья оценивал сгенерированные ответы в соответствии с метриками оценки, определенными в Разделе 5, получая на вход запрос пользователя, извлеченный контекст и сгенерированный ответ. Промпты для оценки предписывали модели оценивать ответы согласно определениям метрик и формировать структурированное обоснование перед вынесением окончательного решения. Температура для этих оценок была установлена на 0 для обеспечения детерминированного выставления баллов..</p>
+</div>
+<div class="ltx_para" id="S7.SS4.p2">
+<p class="ltx_p" id="S7.SS4.p2.1">Качество поиска оценивалось отдельно с использованием Retrieval Coverage Score. В этих условиях судья сравнивал извлеченный контекст с эталонным контекстом и присваивал оценку по трехбалльной шкале от 0 до 2, отражающую, отсутствовала ли извлеченная информация, была ли она частично достаточной или полностью соответствовала эталонному контексту. Для этой оценки температура была установлена на уровне 0.1, чтобы допустить ограниченную вариативность в пояснительных рассуждениях..</p>
+</div>
+</section>
+</section>
+<section class="ltx_section" id="S8">
+<h2 class="ltx_title ltx_title_section">
+<span class="ltx_tag ltx_tag_section">8 </span>Заключение</h2>
+<div class="ltx_para" id="S8.p1">
+<p class="ltx_p" id="S8.p1.1">Мы представили DCD, архитектуру RAG, ориентированную на предметную область, основанную на явных иерархиях знаний и контролируемых многоэтапных рабочих процессах. Эксперименты на производственных данных демонстрируют устойчивое повышение качества для гетерогенных корпусов и многошаговых запросов при предсказуемых вычислительных затратах.
+Дальнейшая работа включает замену LLM общего назначения в задачах маршрутизации на специализированные легковесные модели и интеграцию механизмов обратной навигации с проверкой контекстной релевантности..</p>
+</div>
+</section>
+<section class="ltx_section" id="S9">
+<h2 class="ltx_title ltx_title_section">
+<span class="ltx_tag ltx_tag_section">9 </span>Ресурсы</h2>
+<div class="ltx_para" id="S9.p1">
+<p class="ltx_p" id="S9.p1.1">Набор данных: <a class="ltx_ref ltx_href" href="https://huggingface.co/datasets/redmadrobot-rnd/dcd" target="_blank" title="">Huggin Face</a></p>
+</div>
+<div class="ltx_para" id="S9.p2">
+<p class="ltx_p" id="S9.p2.1">Репозиторий кода: <a class="ltx_ref ltx_href" href="https://github.com/redmadrobot-rnd/dcd" target="_blank" title="">GitHub</a></p>
+</div>
+<div class="ltx_para" id="S9.p3">
+<p class="ltx_p" id="S9.p3.1">Оба ресурса поддерживаются командой исследований и разработок в области искусственного интеллекта в red_mad_robot.</p>
+</div>
+</section>
+<section class="ltx_section" id="S10">
+<h2 class="ltx_title ltx_title_section">
+<span class="ltx_tag ltx_tag_section">10 </span>Список литературы</h2>
+<div class="ltx_para ltx_noindent" id="S10.p1">
+<p class="ltx_p" id="S10.p1.1">Льюис, П., Перез, Э., Пиктус, А. и др. Генерация с дополнением поиском для NLP-задач, требующих интенсивного использования знаний. Достижения в системах обработки нейронной информации (NeurIPS), 2020.</p>
+</div>
+<div class="ltx_para ltx_noindent" id="S10.p2">
+<p class="ltx_p" id="S10.p2.1">Guu, K., Lee, K., Tung, Z., Pasupat, P., Chang, M.-W. REALM: Retrieval-Augmented Language Model Pre-Training. Международная конференция по машинному обучению (ICML), 2020.</p>
+</div>
+<div class="ltx_para ltx_noindent" id="S10.p3">
+<p class="ltx_p" id="S10.p3.1">Izacard, G., Grave, E. Использование поиска фрагментов текста с генеративными моделями для ответов на вопросы в открытых доменах. Европейское отделение ACL (EACL), 2021.</p>
+</div>
+<div class="ltx_para ltx_noindent" id="S10.p4">
+<p class="ltx_p" id="S10.p4.1">Хот, Т.
+Хот, Т., Сабхарвал, А., Кларк, П. Декомпозированное промптирование: модульный подход для решения сложных задач. Международная конференция по обучению представлениям (ICLR), 2023.</p>
+</div>
+<div class="ltx_para ltx_noindent" id="S10.p5">
+<p class="ltx_p" id="S10.p5.1">Вэй, Дж., Ван, С., Схурманс, Д. и др. Промпт-инжиниринг с цепочкой рассуждений вызывает способность к логическому выводу у LLM. NeurIPS, 2022.</p>
+</div>
+<div class="ltx_para ltx_noindent" id="S10.p6">
+<p class="ltx_p" id="S10.p6.1">Яо, С., Чжао, Дж., Ю, Д. и др. Древо мыслей: осознанное решение задач с помощью LLM. arXiv preprint arXiv:2305.10601, 2023.</p>
+</div>
+<div class="ltx_para ltx_noindent" id="S10.p7">
+<p class="ltx_p" id="S10.p7.1">Шейзер, Н., Мирхосейни, А., Мазярз, К. и др. Невероятно большие нейронные сети: разреженно-активируемый слой смеси экспертов. ICLR, 2017.</p>
+</div>
+<div class="ltx_para ltx_noindent" id="S10.p8">
+<p class="ltx_p" id="S10.p8.1">Структурированные выводы OpenAI в языковых моделях. Технический отчет / документация, 2024.</p>
+</div>
+<div class="ltx_para ltx_noindent" id="S10.p9">
+<p class="ltx_p" id="S10.p9.1">Гао, Л., Ма, С., Лин, Дж., Каллан, Дж. Точный Zero-Shot плотный поиск без меток релевантности. ACL, 2021.</p>
+</div>
+<div class="ltx_para ltx_noindent" id="S10.p10">
+<p class="ltx_p" id="S10.p10.1">Чжэн, Л., Цзян, В.-Л., Шэн, И. и др. Оценка LLM-as-a-Judge с помощью MT-Bench и Chatbot Arena. NeurIPS, 2023.</p>
+</div>
+<div class="ltx_para ltx_noindent" id="S10.p11">
+<p class="ltx_p" id="S10.p11.1">Джи, З., Ли, Н., Фриске, Р. и др. Обзор галлюцинаций в генерации естественного языка. ACM Computing Surveys, 2023.</p>
+</div>
+<div class="ltx_para ltx_noindent" id="S10.p12">
+<p class="ltx_p" id="S10.p12.1">Ли, Ю., Вэйчжи Чжан, Юйяо Ян и др. На пути к агентному RAG с глубоким рассуждением: обзор систем RAG-рассуждения в LLM. Препринт arXiv, 2025.</p>
+</div>
+<div class="ltx_para ltx_noindent" id="S10.p13">
+<p class="ltx_p" id="S10.p13.1">Лю, И.
+Итер, Д. и др. G-Eval: Оценка NLG с использованием GPT-4 с улучшенным человеческим выравниванием. Препринт arXiv arXiv:2303.16634, 2023.</p>
+</div>
+<div class="ltx_para ltx_noindent" id="S10.p14">
+<p class="ltx_p" id="S10.p14.1">Лю, И.
+Лин, С., Хилтон, Дж., Эванс, О. TruthfulQA: Измерение того, как модели имитируют человеческие заблуждения. ACL, 2022.</p>
+</div>
+<div class="ltx_para ltx_noindent" id="S10.p15">
+<p class="ltx_p" id="S10.p15.1">Manakul, P., Liusie, A., Gales, M. Manakul, P.. EMNLP, 2023.</p>
+</div>
+<div class="ltx_para ltx_noindent" id="S10.p16">
+<p class="ltx_p" id="S10.p16.1">Макин, А. Системы управления знаниями на основе онтологий, дополненные LLM. Препринт ResearchGate, 2024.</p>
+</div>
+<div class="ltx_para ltx_noindent" id="S10.p17">
+<p class="ltx_p" id="S10.p17.1">Наир, И. Сомасундарам, С., Саксена, А., Госвами, К. Углубленный анализ дискурсивной структуры с помощью LLM для ответов на вопросы по длинным документам. Препринт arXiv, 2023.</p>
+</div>
+</section>
+</article>
+</div>
+<div class="ar5iv-footer"><a class="ar5iv-nav-button ar5iv-nav-button-prev" href="https://ar5iv.labs.arxiv.org/html/2604.07588">◄</a>
+<a class="ar5iv-home-button" href="https://ar5iv.labs.arxiv.org/"><img alt="ar5iv homepage" height="40" src="./[2604.07590] 1 Introduction_files/ar5iv.png"/></a>
+<a class="ar5iv-text-button" href="https://ar5iv.labs.arxiv.org/feeling_lucky">Ощущение<br/>удачливый?</a>
+<a aria-hidden="true" href="https://ar5iv.labs.arxiv.org/land_of_honey_and_milk" rel="nofollow" tabindex="-1"></a>
+<a class="ar5iv-text-button ar5iv-severity-warning" href="https://ar5iv.labs.arxiv.org/log/2604.07590">Конверсия<br/>отчет</a>
+<a class="ar5iv-text-button" href="https://github.com/dginev/ar5iv/issues/new?template=improve-article--arxiv-id-.md&amp;title=Improve+article+2604.07590" target="_blank">Отчет<br/>проблема</a>
+<a class="ar5iv-text-button arxiv-ui-theme" href="https://arxiv.org/abs/2604.07590">Просмотреть оригинал<br/>на arXiv</a><a class="ar5iv-nav-button ar5iv-nav-button-next" href="https://ar5iv.labs.arxiv.org/html/2604.07591">►</a>
+</div><footer class="ltx_page_footer">
+<a class="ar5iv-toggle-color-scheme" href="javascript:toggleColorScheme()" title="Toggle ar5iv color scheme"><span class="color-scheme-icon"></span></a>
+<a class="ar5iv-footer-button" href="https://arxiv.org/help/license" target="_blank">Авторское право</a>
+<a class="ar5iv-footer-button" href="https://arxiv.org/help/policies/privacy_policy" target="_blank">Политика конфиденциальности</a>
+<div class="ltx_page_logo">Сгенерировано во вторник, 5 мая 2026 года, в 22:38:01 пользователем <a class="ltx_LaTeXML_logo" href="http://dlmf.nist.gov/LaTeXML/" target="_blank"><span style="letter-spacing:-0.2em; margin-right:0.1em;">L<span class="ltx_font_smallcaps" style="position:relative; bottom:2.2pt;">а</span>T<span class="ltx_font_smallcaps" style="font-size:120%;position:relative; bottom:-0.2ex;">e</span></span><span style="font-size:90%; position:relative; bottom:-0.2ex;">XML</span><img alt="Mascot Sammy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAAOCAYAAAD5YeaVAAAAAXNSR0IArs4c6QAAAAZiS0dEAP8A/wD/oL2nkwAAAAlwSFlzAAALEwAACxMBAJqcGAAAAAd0SU1FB9wKExQZLWTEaOUAAAAddEVYdENvbW1lbnQAQ3JlYXRlZCB3aXRoIFRoZSBHSU1Q72QlbgAAAdpJREFUKM9tkL+L2nAARz9fPZNCKFapUn8kyI0e4iRHSR1Kb8ng0lJw6FYHFwv2LwhOpcWxTjeUunYqOmqd6hEoRDhtDWdA8ApRYsSUCDHNt5ul13vz4w0vWCgUnnEc975arX6ORqN3VqtVZbfbTQC4uEHANM3jSqXymFI6yWazP2KxWAXAL9zCUa1Wy2tXVxheKA9YNoR8Pt+aTqe4FVVVvz05O6MBhqUIBGk8Hn8HAOVy+T+XLJfLS4ZhTiRJgqIoVBRFIoric47jPnmeB1mW/9rr9ZpSSn3Lsmir1fJZlqWlUonKsvwWwD8ymc/nXwVBeLjf7xEKhdBut9Hr9WgmkyGEkJwsy5eHG5vN5g0AKIoCAEgkEkin0wQAfN9/cXPdheu6P33fBwB4ngcAcByHJpPJl+fn54mD3Gg0NrquXxeLRQAAwzAYj8cwTZPwPH9/sVg8PXweDAauqqr2cDjEer1GJBLBZDJBs9mE4zjwfZ85lAGg2+06hmGgXq+j3+/DsixYlgVN03a9Xu8jgCNCyIegIAgx13Vfd7vdu+FweG8YRkjXdWy329+dTgeSJD3ieZ7RNO0VAXAPwDEAO5VKndi2fWrb9jWl9Esul6PZbDY9Go1OZ7PZ9z/lyuD3OozU2wAAAABJRU5ErkJggg=="/></a>
+</div></footer>
+</div>
+<script>
+      var canMathML = typeof(MathMLElement) == "function";
+      if (!canMathML) {
+        var body = document.querySelector("body");
+        body.firstElementChild.setAttribute('style', 'opacity: 0;');
+        var loading = document.createElement("div");
+        loading.setAttribute("id", "mathjax-loading-spinner");
+        var message = document.createElement("div");
+        message.setAttribute("id", "mathjax-loading-message");
+        message.innerText = "Typesetting Equations...";
+        body.prepend(loading);
+        body.prepend(message);
+
+        var el = document.createElement("script");
+        el.src = "https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js";
+        document.querySelector("head").appendChild(el);
+
+        window.MathJax = {
+          startup: {
+            pageReady: () => {
+              return MathJax.startup.defaultPageReady().then(() => {
+                body.removeChild(loading);
+                body.removeChild(message);
+                body.firstElementChild.removeAttribute('style');
+              }); } } };
+      }
+    </script>
+<script>
+    // Auxiliary function, building the preview feature when
+    // an inline citation is clicked
+    function clicked_cite(e) {
+      e.preventDefault();
+      let cite = this.closest('.ltx_cite');
+      let next = cite.nextSibling;
+      if (next && next.nodeType == Node.ELEMENT_NODE && next.getAttribute('class') == "ar5iv-bibitem-preview") {
+        next.remove();
+        return; }
+      // Before adding a preview modal,
+      // cleanup older previews, in case they're still open
+      document.querySelectorAll('span.ar5iv-bibitem-preview').forEach(function(node) {
+        node.remove();
+      })
+
+      // Create the preview
+      preview = document.createElement('span');
+      preview.setAttribute('class','ar5iv-bibitem-preview');
+      let target = document.getElementById(this.getAttribute('href').slice(1));
+      target.childNodes.forEach(function (child) {
+        preview.append(child.cloneNode(true));
+      });
+      let close_x = document.createElement('button');
+      close_x.setAttribute("aria-label","Close modal for bibliography item preview");
+      close_x.textContent = "×";
+      close_x.setAttribute('class', 'ar5iv-button-close-preview');
+      close_x.setAttribute('onclick','this.parentNode.remove()');
+      preview.append(close_x);
+      preview.querySelectorAll('.ltx_tag_bibitem').forEach(function(node) {
+        node.remove();
+      });
+      cite.parentNode.insertBefore(preview, cite.nextSibling);
+      return;
+    }
+    // Global Document initialization:
+    // - assign the preview feature to all inline citation links
+    document.querySelectorAll(".ltx_cite .ltx_ref").forEach(function (link) {
+      link.addEventListener("click", clicked_cite);
+    });
+    </script>
+</body></html>
