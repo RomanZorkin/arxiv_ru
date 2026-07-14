@@ -1,0 +1,739 @@
+{
+  "title": "[2605.07596] A Refined Generalization Analysis for Extreme Multi-class Supervised Contrastive Representation Learning",
+  "sections": [
+    {
+      "heading": "A Refined Generalization Analysis for Extreme Multi-class Supervised Contrastive Representation Learning",
+      "level": 1,
+      "content": [],
+      "children": [
+        {
+          "heading": "Abstract",
+          "level": 6,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "Contrastive Representation Learning (CRL) has achieved strong empirical success in multiple machine learning disciplines, yet its theoretical sample complexity remains poorly understood. Existing analyses usually assume that input tuples are identically and independently distributed, an assumption violated in most practical settings where contrastive tuples are constructed from a finite pool of labeled data, inducing dependencies among tuples. While one recent work analyzed this learning setting using U-Statistics to estimate the population risk, the techniques used therein require the risk of each class to concentrate uniformly, making excess risk bounds scale in the order of ρmin−1/2\\rho\\_{\\min}^{-{1}/{2}} where ρmin\\rho\\_{\\min} denotes the probability of the rarest class. Such a dependency can be overly pessimistic in the extreme multiclass settings where there are many tail classes which contribute minimally to the overall population risk. Our contributions are two-fold. Firstly, we improve upon the previous work and prove a bound with a sample complexity of the same order as the number of classes RR, regardless of the distribution over classes. Furthermore, we formulate a different estimator that captures the concentration of the risk across classes, enabling sharper bounds in extreme multi-class learning scenarios, especially where class distributions are long-tailed. Under mild assumptions on the class distributions, the resulting sample complexity is 𝒪​(k)\\mathcal{{O}}(k) where kk is the number of samples per tuple."
+            },
+            {
+              "type": "formula",
+              "text": "ρmin−1/2\\rho_{\\min}^{-{1}/{2}}"
+            },
+            {
+              "type": "formula",
+              "text": "ρmin\\rho_{\\min}"
+            },
+            {
+              "type": "formula",
+              "text": "RR"
+            },
+            {
+              "type": "formula",
+              "text": "𝒪​(k)\\mathcal{{O}}(k)"
+            },
+            {
+              "type": "formula",
+              "text": "kk"
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "1 Introduction",
+          "level": 2,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "The performance of machine learning models depends critically on data representation. In multi-class classification, effective representations typically promote intra-class compactness and inter-class separability. Contrastive Representation Learning (CRL) has therefore become a popular approach for learning structured representations from raw data prior to downstream tasks. Despite its empirical success, theoretical understanding of CRL is still in the early stage. Existing analyses of excess risk bounds, such as article:arora19 and article:lei2023, commonly assume that unlabeled input (k+2)(k+2)-tuples are drawn i.i.d. from an unknown distribution. While analytically convenient, this assumption may not reflect practical CRL pipelines. In many real-world implementations, contrastive tuples are constructed from a finite pool of labeled examples (article:sohn2016; article:khosla2020; article:dejiao2021), leading to repeated use of data points across tuples, thereby violating the independence assumption."
+            },
+            {
+              "type": "formula",
+              "text": "(k+2)(k+2)"
+            },
+            {
+              "type": "paragraph",
+              "text": "To explicitly model tuple dependencies in supervised CRL, article:hieu2025 introduced a U-statistic based estimator that decomposes the population risk into a sum of class-wise risks then estimates each component independently (cf. Eqn. (LABEL:eq:hieu\\_ledent\\_estimator)). While this formulation is natural and effective when the number of classes is moderate, it implicitly ties the overall sample complexity to the worst class-wise estimation error. In particular, their analysis requires all class-wise risk estimators to concentrate simultaneously, leading to a sample complexity that scales with ρmin−1\\rho\\_{\\min}^{-1} where ρmin\\rho\\_{\\min} denotes the rarest class probability. As a consequence, the bound becomes overly pessimistic in regimes with many classes, where ρmin\\rho\\_{\\min} is necessarily small, and reduces to a dependence on the number of classes RR only in the restrictive case of perfectly balanced class distributions."
+            },
+            {
+              "type": "formula",
+              "text": "ρmin−1\\rho_{\\min}^{-1}"
+            },
+            {
+              "type": "formula",
+              "text": "ρmin\\rho_{\\min}"
+            },
+            {
+              "type": "formula",
+              "text": "ρmin\\rho_{\\min}"
+            },
+            {
+              "type": "formula",
+              "text": "RR"
+            },
+            {
+              "type": "paragraph",
+              "text": "Our first contribution relaxes this worst-case requirement by allowing heterogeneous accuracy across class-wise estimators. Intuitively, classes with negligible contribution to the population risk need not be estimated with the same precision as dominant ones. This eliminates the parasitic dependence on ρmin\\rho\\_{\\min} and yields bounds that depend on RR irrespective of the class distribution. Nevertheless, even this scale remains pessimistic in extreme multi-class settings where RR is very large, and it stands in contrast with classical results on excess risk bounds for kk-tuple learning where sample complexity depends only on the tuple size kk (article:clemencon2008; journal:clemencon2016). This mismatch suggests that controlling class-wise estimators, even in aggregate, is fundamentally sub-optimal. We therefore introduce an entirely different U-Statistic formulation (cf. Eqn. (LABEL:eq:natural\\_estimator)) that enforces joint concentration across classes. The resulting sample complexity scales as k​(1−τ)2k(1-\\tau)^{2}, where τ\\tau is the overall class collision probability (see, for example, article:ash2022; article:awasthi2022 or article:arora19). Specifically, when negatives are sampled without excluding positive classes, τ\\tau represents the overall likelihood that there exists at least a positive-class sample among the selected negatives (cf. Eqn. (LABEL:eq:collision\\_probability)). In extreme multi-class regime, τ→0\\tau\\to 0, recovering a dependency on kk alone and aligning with established results on tuple-learning."
+            },
+            {
+              "type": "formula",
+              "text": "ρmin\\rho_{\\min}"
+            },
+            {
+              "type": "formula",
+              "text": "RR"
+            },
+            {
+              "type": "formula",
+              "text": "RR"
+            },
+            {
+              "type": "formula",
+              "text": "kk"
+            },
+            {
+              "type": "formula",
+              "text": "kk"
+            },
+            {
+              "type": "formula",
+              "text": "k​(1−τ)2k(1-\\tau)^{2}"
+            },
+            {
+              "type": "formula",
+              "text": "τ\\tau"
+            },
+            {
+              "type": "formula",
+              "text": "τ\\tau"
+            },
+            {
+              "type": "formula",
+              "text": "τ→0\\tau\\to 0"
+            },
+            {
+              "type": "formula",
+              "text": "kk"
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "2 Related Work",
+          "level": 2,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "Empirical Minimization of U-Statistics: U-Statistics were introduced by article:hoeffding1948 for parameters estimation using symmetric kernels. Later, the concentration properties of U-Statistics were analyzed rigorously by article:ginezinn1984 and article:arconesgine1993, laying the foundation for works in statistical learning theory where losses rely on two or more samples. Concentration inequalities for U-Statistics have been utilized in multiple machine learning disciplines, including ranking (article:clemencon2008), metric learning (article:Cao2016; article:jin2009), pairwise learning (article:yleiregularizedpairwise2018; article:yleiledent2020), clustering (article:liliu2021) and self-supervised learning (article:haochen2021)."
+            },
+            {
+              "type": "paragraph",
+              "text": "Generalization under the i.i.d. Tuples Regime: The i.i.d. tuple framework was introduced by article:arora19, who formalized unsupervised risk for contrastive learning. Ignoring the dependency on the function class, their excess risk bounds scale as 𝒪​(k/N)\\mathcal{O}(\\sqrt{{k}/{\\mathrm{N}}}) where kk denotes the number of negative samples and N{\\mathrm{N}} is the number of i.i.d. tuples available to the learner. Using tools such as worst-case Rademacher complexity and fat-shattering dimension, article:lei2023 subsequently improved this dependence to 𝒪~​(1/N)\\widetilde{\\mathcal{O}}(\\sqrt{{1}/{\\mathrm{N}}}). We note that in these works, ‘sample complexity’ is expressed in terms of the number N\\mathrm{N} of required (k+2)(k+2)-*tuples* (with each tuple being one ‘sample’), while in our work, it refers to the number NN of required *labeled data points* which are subsequently used to form collision-free tuples. Hence a sample complexity of 𝒪~​(k)\\widetilde{\\mathcal{O}}(k) in the supervised CRL formulation is comparable to a sample complexity of 𝒪~​(1)\\widetilde{\\mathcal{O}}(1) in i.i.d. tuples regime. Indeed, this is what can be expected from a Hoeffding-type argument in the pure tuple-wise learning (without constraints on collisions), since 𝒪​(N/k)\\mathcal{O}({N}/{k}) tuples can be formed with NN samples. Subsequently, the work of article:arora19 was extended to other CRL settings such as adversarial CRL (article:xinandwei2023; article:ghanooni2024), PAC-Bayes analysis and deep CRL (article:nozawa2020; article:nozawa2021; article:alves2024; article:hieu2024). Apart from generalization, prior works inspired by the i.i.d. regime also investigates other angles of contrastive learning theory such as the role of negative samples (article:ash2022; article:awasthi2022; bao2022surrogate), mitigating spurious features in CRL (article:ghanooni2025), and the effect of the unsupervised risk on downstream tasks (article:arora19; article:chuang2020; article:liliu2021; bao2022surrogate; article:huang2023; cui2025inclusive; article:cui2025)."
+            },
+            {
+              "type": "formula",
+              "text": "𝒪​(k/N)\\mathcal{O}(\\sqrt{{k}/{\\mathrm{N}}})"
+            },
+            {
+              "type": "formula",
+              "text": "kk"
+            },
+            {
+              "type": "formula",
+              "text": "N{\\mathrm{N}}"
+            },
+            {
+              "type": "formula",
+              "text": "𝒪~​(1/N)\\widetilde{\\mathcal{O}}(\\sqrt{{1}/{\\mathrm{N}}})"
+            },
+            {
+              "type": "formula",
+              "text": "N\\mathrm{N}"
+            },
+            {
+              "type": "formula",
+              "text": "(k+2)(k+2)"
+            },
+            {
+              "type": "formula",
+              "text": "NN"
+            },
+            {
+              "type": "formula",
+              "text": "𝒪~​(k)\\widetilde{\\mathcal{O}}(k)"
+            },
+            {
+              "type": "formula",
+              "text": "𝒪~​(1)\\widetilde{\\mathcal{O}}(1)"
+            },
+            {
+              "type": "formula",
+              "text": "𝒪​(N/k)\\mathcal{O}({N}/{k})"
+            },
+            {
+              "type": "formula",
+              "text": "NN"
+            },
+            {
+              "type": "paragraph",
+              "text": "Theoretical Analysis for SS-CRL: A strong body of work inspired by article:arora19 explores generalization and other theoretical aspects of self-supervised CRL. For example, article:wang2022 proposed augmentation overlap theory, suggesting that aggressive data augmentation can implicitly improve intra-class compactness. Along similar lines, article:cui2025 study how augmentation affects downstream performance by relating the supervised risk to the empirical self-supervised risk (over a set of i.i.d. tuples) and the expected same-class or same-instance augmentation distance. cui2025inclusive provide both theoretical and practical insights on a variant of supervised CRL with non-collided i.i.d. tuples with label noise. article:huang2023 studied the effect of the self-supervised risk on classification by bounding the error rate of nearest-neighbor classifiers built on top of representation functions using misalignment probability. article:nozawa2021 provided a theoretical explanation for why using many negative samples improves downstream performance. In article:haochen2021, the authors established guarantees for the excess contrastive risk for loss functions in two arguments constructed from fixed pool of unlabeled samples via independent augmentation of both samples. Whilst this involves a second order U-statistic, this work makes no constraint on the valid pairs/tuples in terms of class-collision, making the concentration of the unsupervised risk straightforward: the core contribution instead lies in the relationship between the contrastive risk and the classification risk of a linear probe under structural assumptions on the informativeness of the data-augmentation generation. Their framework was later extended to other generalization analyses for variants of SS-CRL including domain adaptation (article:shen2022), weakly-supervised learning (article:cui2023), multi-modal learning (article:zhang2023multimodal)."
+            },
+            {
+              "type": "paragraph",
+              "text": "Generalization in Supervised CRL: article:hieu2025 explored the CRL setting where input tuples are selected from a finite pool of labeled samples. In this regime, the authors proposed a U-Statistic formulation that estimates each class-wise contrastive risk separately. In their analysis, all class-wise estimators are required to concentrate with equal accuracy, leading to a dependency on ρmin\\rho\\_{\\min}, the smallest class probability. For their estimator, we achieve a dependency of RR instead. We also achieve a faster rate of kk by constructing a radically different estimator and analysis."
+            },
+            {
+              "type": "formula",
+              "text": "ρmin\\rho_{\\min}"
+            },
+            {
+              "type": "formula",
+              "text": "RR"
+            },
+            {
+              "type": "formula",
+              "text": "kk"
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "3 Preliminaries",
+          "level": 2,
+          "content": [],
+          "children": [
+            {
+              "heading": "3.1 Definitions and Notations",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "Let 𝒳\\mathcal{X} be the input space and [R]={1,…,R}[R]=\\{1,\\dots,R\\} be a labels set. We are given a (labeled) dataset S={Xj}j=1N∼𝒟¯⊗NS=\\left\\{X\\_{j}\\right\\}\\_{j=1}^{N}\\sim\\mathcal{\\bar{D}}^{\\otimes N} where 𝒟¯:=∑r=1Rρr​𝒟r\\mathcal{\\bar{D}}:=\\sum\\_{r=1}^{R}\\rho\\_{r}\\mathcal{D}\\_{r} is a mixture of distributions with ρ1,…,ρR\\rho\\_{1},\\dots,\\rho\\_{R} representing class probabilities and 𝒟r\\mathcal{D}\\_{r} being the class-conditional distributions over 𝒳\\mathcal{X}. In supervised CRL, we aim to estimate a risk associated to some contrastive loss function using the available labeled data points. Specifically, for a certain representation function f∈ℱf\\in\\mathcal{F} where ℱ\\mathcal{F} is a prefixed class of functions (e.g. neural networks, linear maps, etc.), we define ℓϕ,f:𝒳k+2→ℝ+\\ell\\_{\\phi,f}:\\mathcal{X}^{k+2}\\to\\mathbb{R}\\_{+} as a tuple-wise loss evaluated on the representations produced by ff as follows:"
+                },
+                {
+                  "type": "formula",
+                  "text": "𝒳\\mathcal{X}"
+                },
+                {
+                  "type": "formula",
+                  "text": "[R]={1,…,R}[R]=\\{1,\\dots,R\\}"
+                },
+                {
+                  "type": "formula",
+                  "text": "S={Xj}j=1N∼𝒟¯⊗NS=\\left\\{X_{j}\\right\\}_{j=1}^{N}\\sim\\mathcal{\\bar{D}}^{\\otimes N}"
+                },
+                {
+                  "type": "formula",
+                  "text": "𝒟¯:=∑r=1Rρr​𝒟r\\mathcal{\\bar{D}}:=\\sum_{r=1}^{R}\\rho_{r}\\mathcal{D}_{r}"
+                },
+                {
+                  "type": "formula",
+                  "text": "ρ1,…,ρR\\rho_{1},\\dots,\\rho_{R}"
+                },
+                {
+                  "type": "formula",
+                  "text": "𝒟r\\mathcal{D}_{r}"
+                },
+                {
+                  "type": "formula",
+                  "text": "𝒳\\mathcal{X}"
+                },
+                {
+                  "type": "formula",
+                  "text": "f∈ℱf\\in\\mathcal{F}"
+                },
+                {
+                  "type": "formula",
+                  "text": "ℱ\\mathcal{F}"
+                },
+                {
+                  "type": "formula",
+                  "text": "ℓϕ,f:𝒳k+2→ℝ+\\ell_{\\phi,f}:\\mathcal{X}^{k+2}\\to\\mathbb{R}_{+}"
+                },
+                {
+                  "type": "formula",
+                  "text": "ff"
+                },
+                {
+                  "type": "table",
+                  "text": "| | | | | | --- | --- | --- | --- | | | ℓϕ,f​(X,X+,{Xi−}i=1k)=\\displaystyle\\ell\\_{\\phi,f}\\left(X,X^{+},\\left\\{X\\_{i}^{-}\\right\\}\\_{i=1}^{k}\\right)= | | (1) | | | | | | --- | --- | --- | | | ϕ​({f​(X)⊤​[f​(X+)−f​(Xi−)]}i=1k),\\displaystyle\\qquad\\qquad\\phi\\Big(\\Big\\{f(X)^{\\top}\\left[f(X^{+})-f(X\\_{i}^{-})\\right]\\Big\\}\\_{i=1}^{k}\\Big), | |"
+                },
+                {
+                  "type": "formula",
+                  "text": "ℓϕ,f​(X,X+,{Xi−}i=1k)=\\displaystyle\\ell_{\\phi,f}\\left(X,X^{+},\\left\\{X_{i}^{-}\\right\\}_{i=1}^{k}\\right)="
+                },
+                {
+                  "type": "formula",
+                  "text": "ϕ​({f​(X)⊤​[f​(X+)−f​(Xi−)]}i=1k),\\displaystyle\\qquad\\qquad\\phi\\Big(\\Big\\{f(X)^{\\top}\\left[f(X^{+})-f(X_{i}^{-})\\right]\\Big\\}_{i=1}^{k}\\Big),"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "where k⩾1k\\geqslant 1 is the number of negative samples and ϕ:ℝk→ℝ+\\phi:\\mathbb{R}^{k}\\to\\mathbb{R}\\_{+} is a vector function often referred to as the contrastive loss. For example, if we use the logistic loss (article:sohn2016) for training, then for all kk-dimensional vectors 𝐯=(v1,…,vk)⊤{\\bf v}=(v\\_{1},\\dots,v\\_{k})^{\\top}, we have ϕ​(𝐯):=ln⁡(1+∑i=1ke−vi)\\phi({\\bf v}):=\\ln\\Big(1+\\sum\\_{i=1}^{k}e^{-v\\_{i}}\\Big). In this paper, we are interested in bounding the uniform excess risk (over a class of representation functions) associated to the contrastive risk defined as follows."
+                },
+                {
+                  "type": "formula",
+                  "text": "k⩾1k\\geqslant 1"
+                },
+                {
+                  "type": "formula",
+                  "text": "ϕ:ℝk→ℝ+\\phi:\\mathbb{R}^{k}\\to\\mathbb{R}_{+}"
+                },
+                {
+                  "type": "formula",
+                  "text": "kk"
+                },
+                {
+                  "type": "formula",
+                  "text": "𝐯=(v1,…,vk)⊤{\\bf v}=(v_{1},\\dots,v_{k})^{\\top}"
+                },
+                {
+                  "type": "formula",
+                  "text": "ϕ​(𝐯):=ln⁡(1+∑i=1ke−vi)\\phi({\\bf v}):=\\ln\\Big(1+\\sum_{i=1}^{k}e^{-v_{i}}\\Big)"
+                }
+              ],
+              "children": [
+                {
+                  "heading": "Definition 3.1 (Population Contrastive Risk).",
+                  "level": 6,
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "text": "Let f∈ℱf\\in\\mathcal{F} be a representation function and ϕ:ℝk→ℝ+\\phi:\\mathbb{R}^{k}\\to\\mathbb{R}\\_{+} be a contrastive loss (where k⩾1k\\geqslant 1 is the number of negative samples). Then, the contrastive risk of ff, denoted Lϕ​(f)\\mathrm{L}\\_{\\phi}(f), is defined as:"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "f∈ℱf\\in\\mathcal{F}"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "ϕ:ℝk→ℝ+\\phi:\\mathbb{R}^{k}\\to\\mathbb{R}_{+}"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "k⩾1k\\geqslant 1"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "ff"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "Lϕ​(f)\\mathrm{L}_{\\phi}(f)"
+                    },
+                    {
+                      "type": "table",
+                      "text": "| | | | | | | --- | --- | --- | --- | --- | | | | Lϕ​(f)=\\displaystyle\\mathrm{L}\\_{\\phi}(f)= | | (2) | | | | | | | --- | --- | --- | --- | | | | 𝔼r∼ρ​𝔼X,X+∼𝒟r⊗2{Xi−}i=1k∼𝒟¯r⊗k​[ℓϕ,f​(X,X+,{Xi−}i=1k)],\\displaystyle\\underset{r\\sim\\rho}{\\mathbb{E}}\\underset{\\begin{subarray}{c}X,X^{+}\\sim\\mathcal{D}\\_{r}^{\\otimes 2}\\\\ \\left\\{X\\_{i}^{-}\\right\\}\\_{i=1}^{k}\\sim\\mathcal{\\bar{D}}\\_{r}^{\\otimes k}\\end{subarray}}{\\mathbb{E}}\\left[\\ell\\_{\\phi,f}\\left(X,X^{+},\\left\\{X\\_{i}^{-}\\right\\}\\_{i=1}^{k}\\right)\\right], | |"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "Lϕ​(f)=\\displaystyle\\mathrm{L}_{\\phi}(f)="
+                    },
+                    {
+                      "type": "formula",
+                      "text": "𝔼r∼ρ​𝔼X,X+∼𝒟r⊗2{Xi−}i=1k∼𝒟¯r⊗k​[ℓϕ,f​(X,X+,{Xi−}i=1k)],\\displaystyle\\underset{r\\sim\\rho}{\\mathbb{E}}\\underset{\\begin{subarray}{c}X,X^{+}\\sim\\mathcal{D}_{r}^{\\otimes 2}\\\\ \\left\\{X_{i}^{-}\\right\\}_{i=1}^{k}\\sim\\mathcal{\\bar{D}}_{r}^{\\otimes k}\\end{subarray}}{\\mathbb{E}}\\left[\\ell_{\\phi,f}\\left(X,X^{+},\\left\\{X_{i}^{-}\\right\\}_{i=1}^{k}\\right)\\right],"
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "where ρ\\rho is the discrete distribution over the classes that assigns probability ρr\\rho\\_{r} to class rr for all r∈[R]r\\in[R] and 𝒟¯r\\mathcal{\\bar{D}}\\_{r} is a distribution over 𝒳\\mathcal{X} defined by the following mixture:"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "ρ\\rho"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "ρr\\rho_{r}"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "rr"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "r∈[R]r\\in[R]"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "𝒟¯r\\mathcal{\\bar{D}}_{r}"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "𝒳\\mathcal{X}"
+                    },
+                    {
+                      "type": "table",
+                      "text": "| | | | | | --- | --- | --- | --- | | | 𝒟¯r:=11−ρr​∑q≠rρq​𝒟q,\\displaystyle\\mathcal{\\bar{D}}\\_{r}:=\\frac{1}{1-\\rho\\_{r}}\\sum\\_{q\\neq r}\\rho\\_{q}\\mathcal{D}\\_{q}, | | (3) |"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "𝒟¯r:=11−ρr​∑q≠rρq​𝒟q,\\displaystyle\\mathcal{\\bar{D}}_{r}:=\\frac{1}{1-\\rho_{r}}\\sum_{q\\neq r}\\rho_{q}\\mathcal{D}_{q},"
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "which is the re-normalized mixture of class-conditional distributions excluding class rr, i.e., the distribution of negative samples when anchor-positive pairs come from class rr."
+                    },
+                    {
+                      "type": "formula",
+                      "text": "rr"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "rr"
+                    }
+                  ],
+                  "children": []
+                },
+                {
+                  "heading": "Remark 3.2.",
+                  "level": 6,
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "text": "The definition in Eqn. ([2](https://ar5iv.labs.arxiv.org/html/2605.07596#S3.E2 \"Equation 2 ‣ Definition 3.1 (Population Contrastive Risk). ‣ 3.1 Definitions and Notations ‣ 3 Preliminaries ‣ A Refined Generalization Analysis for Extreme Multi-class Supervised Contrastive Representation Learning\")) differs from the definition of negative distribution used in article:arora19. Our formulation forbids negative samples {Xi−}i=1k\\left\\{X\\_{i}^{-}\\right\\}\\_{i=1}^{k} from sharing classes with the anchor–positive pair (X,X+)(X,X^{+}), whereas article:arora19 allow such class collisions by drawing negatives i.i.d. from the full mixture 𝒟¯\\bar{\\mathcal{D}} rather than 𝒟¯r\\bar{\\mathcal{D}}\\_{r}. In the self-supervised case (article:chen2020; He\\_2020\\_CVPR; Caron20; article:cui2025), class-collision is often unavoidable since the labels are not available to prevent it. On the other hand, in supervised CRL, it is natural to avoid class-collision, as it has been shown to improve performance (article:khosla2020; article:chuang2020; article:robinson2021; chen2022incrementalfalsenegativedetection; article:huynh2022). Therefore, it is the primary setting we investigate. However, we also provide excess risk guarantee (Thm. LABEL:thm:concentration\\_of\\_bar\\_Uomega) for the collision-allowed risk in article:arora19 although this result mostly serves as a intermediary step to provide excess risk guarantees for the desired risk Lϕ\\mathrm{L}\\_{\\phi}."
+                    },
+                    {
+                      "type": "formula",
+                      "text": "{Xi−}i=1k\\left\\{X_{i}^{-}\\right\\}_{i=1}^{k}"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "(X,X+)(X,X^{+})"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "𝒟¯\\bar{\\mathcal{D}}"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "𝒟¯r\\bar{\\mathcal{D}}_{r}"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "Lϕ\\mathrm{L}_{\\phi}"
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "Notations: Throughout this manuscript, we use 𝔼X∼μ​[⋅]{\\mathbb{E}}\\_{X\\sim\\mu}[\\cdot] to denote the population expectation over some distribution μ\\mu or simply 𝔼​[⋅]\\mathbb{E}[\\cdot] when the distribution is obvious in given context. Additionally, we use 𝔼^V​[⋅]\\widehat{\\mathbb{E}}\\_{V}[\\cdot] or 𝔼^v∼V​[⋅]\\widehat{\\mathbb{E}}\\_{v\\sim V}[\\cdot] to denote the empirical average over elements vv of some set VV. For example, 𝔼^V​[g]=𝔼^v∼V​[g​(v)]:=1|V|​∑v∈Vg​(v)\\widehat{\\mathbb{E}}\\_{V}[g]=\\widehat{\\mathbb{E}}\\_{v\\sim V}[g(v)]:=\\frac{1}{|V|}\\sum\\_{v\\in V}g(v). For each r∈[R]r\\in[R], we also denote Sr⊆SS\\_{r}\\subseteq S as the set of labeled data points belonging to class rr, Nr:=|Sr|N\\_{r}:=|S\\_{r}| and ρ^r:=NrN\\widehat{\\rho}\\_{r}:=\\frac{N\\_{r}}{N}. Finally, we assume that the contrastive loss is uniformly bounded, i.e., |ℓϕ,f|⩽ℬ|\\ell\\_{\\phi,f}|\\leqslant\\mathcal{B} for all f∈ℱf\\in\\mathcal{F} for some ℬ∈ℝ+\\mathcal{B}\\in\\mathbb{R}\\_{+}. For the reader’s convenience, we provide an exhaustive list of notations in the appendix (Table LABEL:tab:notations)."
+                    },
+                    {
+                      "type": "formula",
+                      "text": "𝔼X∼μ​[⋅]{\\mathbb{E}}_{X\\sim\\mu}[\\cdot]"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "μ\\mu"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "𝔼​[⋅]\\mathbb{E}[\\cdot]"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "𝔼^V​[⋅]\\widehat{\\mathbb{E}}_{V}[\\cdot]"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "𝔼^v∼V​[⋅]\\widehat{\\mathbb{E}}_{v\\sim V}[\\cdot]"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "vv"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "VV"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "𝔼^V​[g]=𝔼^v∼V​[g​(v)]:=1|V|​∑v∈Vg​(v)\\widehat{\\mathbb{E}}_{V}[g]=\\widehat{\\mathbb{E}}_{v\\sim V}[g(v)]:=\\frac{1}{|V|}\\sum_{v\\in V}g(v)"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "r∈[R]r\\in[R]"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "Sr⊆SS_{r}\\subseteq S"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "rr"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "Nr:=|Sr|N_{r}:=|S_{r}|"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "ρ^r:=NrN\\widehat{\\rho}_{r}:=\\frac{N_{r}}{N}"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "|ℓϕ,f|⩽ℬ|\\ell_{\\phi,f}|\\leqslant\\mathcal{B}"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "f∈ℱf\\in\\mathcal{F}"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "ℬ∈ℝ+\\mathcal{B}\\in\\mathbb{R}_{+}"
+                    }
+                  ],
+                  "children": []
+                }
+              ]
+            },
+            {
+              "heading": "3.2 Contributions",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "In this work, we are interested in formulating estimators for the class-collision free population risk defined in Eqn. ([2](https://ar5iv.labs.arxiv.org/html/2605.07596#S3.E2 \"Equation 2 ‣ Definition 3.1 (Population Contrastive Risk). ‣ 3.1 Definitions and Notations ‣ 3 Preliminaries ‣ A Refined Generalization Analysis for Extreme Multi-class Supervised Contrastive Representation Learning\")) and bounding the corresponding uniform excess risk. Our contributions can be summarized as follows:"
+                },
+                {
+                  "type": "list",
+                  "text": "1. (i) We provide a refined excess risk guarantee for the U-Statistic estimator proposed in article:hieu2025 by completely removing the dependency on ρmin−1\\rho\\_{\\min}^{-1}, the rarest class probability, from the sample complexity. By imposing non-uniform accuracy for the concentration of each class-wise U-Statistic, we prove that the sample complexity of their estimator scales linearly with RR, the number of classes, regardless of the class distribution’s structure. 2. (ii) We propose a different U-Statistic formula inspired by de-biasing the population unsupervised risk used by previous works in the i.i.d. tuples regime (article:arora19; article:lei2023) in which class-collision is arbitrarily allowed. Specifically, we decompose the desired collision-free risk into a combination of risks conditioned on at least one and zero collided negative samples (Eqn. (LABEL:eq:decomposed\\_population\\_contrastive\\_risk)). Then, we approximate each component separately to formulate the final estimator. 3. (iii) We prove that the proposed U-Statistic in this work yields a sample complexity that scales with k​(1−τ)2k(1-\\tau)^{2} where τ\\tau is the population class-collision probability (Eqn. (LABEL:eq:collision\\_probability)). In typical extreme multi-class scenarios where all class probabilities are small, the collision probability τ\\tau is approximately zero and the sample complexity recovers the 𝒪​(k)\\mathcal{{O}}(k) rate. Therefore, this type of bound is particularly useful for large multi-class representation learning problems where RR is significantly larger than kk. Furthermore, for certain long-tailed imbalanced class distributions, we have 1−τ∈Ω​(1)1-\\tau\\in\\Omega(1) with high probability. Therefore, the dominant dependency on kk remains unchanged."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "We provide a refined excess risk guarantee for the U-Statistic estimator proposed in article:hieu2025 by completely removing the dependency on ρmin−1\\rho\\_{\\min}^{-1}, the rarest class probability, from the sample complexity. By imposing non-uniform accuracy for the concentration of each class-wise U-Statistic, we prove that the sample complexity of their estimator scales linearly with RR, the number of classes, regardless of the class distribution’s structure."
+                },
+                {
+                  "type": "formula",
+                  "text": "ρmin−1\\rho_{\\min}^{-1}"
+                },
+                {
+                  "type": "formula",
+                  "text": "RR"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "We propose a different U-Statistic formula inspired by de-biasing the population unsupervised risk used by previous works in the i.i.d. tuples regime (article:arora19; article:lei2023) in which class-collision is arbitrarily allowed. Specifically, we decompose the desired collision-free risk into a combination of risks conditioned on at least one and zero collided negative samples (Eqn. (LABEL:eq:decomposed\\_population\\_contrastive\\_risk)). Then, we approximate each component separately to formulate the final estimator."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "We prove that the proposed U-Statistic in this work yields a sample complexity that scales with k​(1−τ)2k(1-\\tau)^{2} where τ\\tau is the population class-collision probability (Eqn. (LABEL:eq:collision\\_probability)). In typical extreme multi-class scenarios where all class probabilities are small, the collision probability τ\\tau is approximately zero and the sample complexity recovers the 𝒪​(k)\\mathcal{{O}}(k) rate. Therefore, this type of bound is particularly useful for large multi-class representation learning problems where RR is significantly larger than kk. Furthermore, for certain long-tailed imbalanced class distributions, we have 1−τ∈Ω​(1)1-\\tau\\in\\Omega(1) with high probability. Therefore, the dominant dependency on kk remains unchanged."
+                },
+                {
+                  "type": "formula",
+                  "text": "k​(1−τ)2k(1-\\tau)^{2}"
+                },
+                {
+                  "type": "formula",
+                  "text": "τ\\tau"
+                },
+                {
+                  "type": "formula",
+                  "text": "τ\\tau"
+                },
+                {
+                  "type": "formula",
+                  "text": "𝒪​(k)\\mathcal{{O}}(k)"
+                },
+                {
+                  "type": "formula",
+                  "text": "RR"
+                },
+                {
+                  "type": "formula",
+                  "text": "kk"
+                },
+                {
+                  "type": "formula",
+                  "text": "1−τ∈Ω​(1)1-\\tau\\in\\Omega(1)"
+                },
+                {
+                  "type": "formula",
+                  "text": "kk"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "An outline of our main results (summarized in sample complexities) with comparison to prior works is provided in Table [3.2](https://ar5iv.labs.arxiv.org/html/2605.07596#S3.SS2 \"3.2 Contributions ‣ 3 Preliminaries ‣ A Refined Generalization Analysis for Extreme Multi-class Supervised Contrastive Representation Learning\"). Additionally, we also provide a more thorough summary of the literature in Appendix LABEL:sec:summary\\_of\\_literature. Furthermore, in Appendix LABEL:sec:proof\\_discussion, we provide a brief discussion on the differences between our analysis and previous works, as well as the additional technical difficulties involved."
+                },
+                {
+                  "type": "formula",
+                  "text": "ℬ=1\\mathcal{B}=1"
+                },
+                {
+                  "type": "formula",
+                  "text": "ℭN2\\mathfrak{C}^{2}_{N}"
+                },
+                {
+                  "type": "formula",
+                  "text": "RR"
+                },
+                {
+                  "type": "formula",
+                  "text": "kk"
+                },
+                {
+                  "type": "formula",
+                  "text": "1/(1−τ){1}/{(1-\\tau)}"
+                },
+                {
+                  "type": "formula",
+                  "text": "Δ\\Delta"
+                },
+                {
+                  "type": "formula",
+                  "text": "ℒ\\mathcal{L}"
+                },
+                {
+                  "type": "formula",
+                  "text": "ℋ\\mathcal{H}"
+                },
+                {
+                  "type": "formula",
+                  "text": "ℭN​(ℋ)\\mathfrak{C}_{N}(\\mathcal{H})"
+                },
+                {
+                  "type": "formula",
+                  "text": "𝒪~​[(W)12]\\mathcal{\\widetilde{O}}[(W)^{\\frac{1}{2}}]"
+                },
+                {
+                  "type": "formula",
+                  "text": "WW"
+                },
+                {
+                  "type": "formula",
+                  "text": "𝒪~\\widetilde{\\mathcal{O}}"
+                },
+                {
+                  "type": "formula",
+                  "text": "ℒ\\mathcal{L}"
+                },
+                {
+                  "type": "formula",
+                  "text": "WW"
+                },
+                {
+                  "type": "formula",
+                  "text": "γk\\gamma_{k}"
+                },
+                {
+                  "type": "table",
+                  "text": "| | | | | | | --- | --- | --- | --- | --- | | Reference | Est. | Default | γk∈Ω​(1)\\gamma\\_{k}\\in\\Omega(1) | Relevant quantity | | article:hieu2025 | UNhlU\\_{N}^{\\mathrm{hl}} | [ℭN2​(ℋ)+1]​max⁡[ρmin−1,(1−ρmax)−1][\\mathfrak{C}^{2}\\_{N}(\\mathcal{H})+1]\\max\\left[\\rho\\_{\\min}^{-1},(1-\\rho\\_{\\max})^{-1}\\right] | | ρmin:=minr∈[R]⁡ρr\\rho\\_{\\min}:=\\min\\_{r\\in[R]}\\rho\\_{r} ρmax:=maxr∈[R]⁡ρr\\rho\\_{\\max}:=\\max\\_{r\\in[R]}\\rho\\_{r} | | This Work | UNhlU\\_{N}^{\\mathrm{hl}} | ℭN2​(ℋ)​[θ^k+2​R+(1−θ^k+2)2​k]+\\mathfrak{C}^{2}\\_{N}(\\mathcal{H})[\\widehat{\\theta}\\_{k+2}R+(1-\\widehat{\\theta}\\_{k+2})^{2}k]\\ + [R+k2][R+k^{2}] (Theorem LABEL:thm:refined\\_hieu\\_ledent\\_general/LABEL:thm:refined\\_hieu\\_ledent\\_general\\_appendix) | ℭN2​(ℋ)​R+\\mathfrak{C}^{2}\\_{N}(\\mathcal{H})R\\ + [R+k2][R+k^{2}] (Theorem LABEL:thm:refined\\_hieu\\_ledent\\_small\\_probabilities) | θ^k+2:=ℙρ​[ρr⩽2k+2]\\widehat{\\theta}\\_{k+2}:={\\mathbb{P}\\_{\\rho}}\\big[\\rho\\_{r}\\leqslant\\frac{2}{k+2}\\big] | | This Work | | | | |"
+                },
+                {
+                  "type": "formula",
+                  "text": "γk∈Ω​(1)\\gamma_{k}\\in\\Omega(1)"
+                },
+                {
+                  "type": "formula",
+                  "text": "UNhlU_{N}^{\\mathrm{hl}}"
+                },
+                {
+                  "type": "formula",
+                  "text": "[ℭN2​(ℋ)+1]​max⁡[ρmin−1,(1−ρmax)−1][\\mathfrak{C}^{2}_{N}(\\mathcal{H})+1]\\max\\left[\\rho_{\\min}^{-1},(1-\\rho_{\\max})^{-1}\\right]"
+                },
+                {
+                  "type": "formula",
+                  "text": "ρmin:=minr∈[R]⁡ρr\\rho_{\\min}:=\\min_{r\\in[R]}\\rho_{r}"
+                },
+                {
+                  "type": "formula",
+                  "text": "ρmax:=maxr∈[R]⁡ρr\\rho_{\\max}:=\\max_{r\\in[R]}\\rho_{r}"
+                },
+                {
+                  "type": "formula",
+                  "text": "UNhlU_{N}^{\\mathrm{hl}}"
+                },
+                {
+                  "type": "formula",
+                  "text": "ℭN2​(ℋ)​[θ^k+2​R+(1−θ^k+2)2​k]+\\mathfrak{C}^{2}_{N}(\\mathcal{H})[\\widehat{\\theta}_{k+2}R+(1-\\widehat{\\theta}_{k+2})^{2}k]\\ +"
+                },
+                {
+                  "type": "formula",
+                  "text": "[R+k2][R+k^{2}]"
+                },
+                {
+                  "type": "formula",
+                  "text": "ℭN2​(ℋ)​R+\\mathfrak{C}^{2}_{N}(\\mathcal{H})R\\ +"
+                },
+                {
+                  "type": "formula",
+                  "text": "[R+k2][R+k^{2}]"
+                },
+                {
+                  "type": "formula",
+                  "text": "θ^k+2:=ℙρ​[ρr⩽2k+2]\\widehat{\\theta}_{k+2}:={\\mathbb{P}_{\\rho}}\\big[\\rho_{r}\\leqslant\\frac{2}{k+2}\\big]"
+                }
+              ],
+              "children": []
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "chunks": [
+    {
+      "heading_path": [
+        "A Refined Generalization Analysis for Extreme Multi-class Supervised Contrastive Representation Learning"
+      ],
+      "text": "# A Refined Generalization Analysis for Extreme Multi-class Supervised Contrastive Representation Learning"
+    },
+    {
+      "heading_path": [
+        "A Refined Generalization Analysis for Extreme Multi-class Supervised Contrastive Representation Learning",
+        "Abstract"
+      ],
+      "text": "###### Abstract\n\nContrastive Representation Learning (CRL) has achieved strong empirical success in multiple machine learning disciplines, yet its theoretical sample complexity remains poorly understood. Existing analyses usually assume that input tuples are identically and independently distributed, an assumption violated in most practical settings where contrastive tuples are constructed from a finite pool of labeled data, inducing dependencies among tuples. While one recent work analyzed this learning setting using U-Statistics to estimate the population risk, the techniques used therein require the risk of each class to concentrate uniformly, making excess risk bounds scale in the order of ρmin−1/2\\rho\\_{\\min}^{-{1}/{2}} where ρmin\\rho\\_{\\min} denotes the probability of the rarest class. Such a dependency can be overly pessimistic in the extreme multiclass settings where there are many tail classes which contribute minimally to the overall population risk. Our contributions are two-fold. Firstly, we improve upon the previous work and prove a bound with a sample complexity of the same order as the number of classes RR, regardless of the distribution over classes. Furthermore, we formulate a different estimator that captures the concentration of the risk across classes, enabling sharper bounds in extreme multi-class learning scenarios, especially where class distributions are long-tailed. Under mild assumptions on the class distributions, the resulting sample complexity is 𝒪​(k)\\mathcal{{O}}(k) where kk is the number of samples per tuple.\n\nρmin−1/2\\rho_{\\min}^{-{1}/{2}}\n\nρmin\\rho_{\\min}\n\nRR\n\n𝒪​(k)\\mathcal{{O}}(k)\n\nkk"
+    },
+    {
+      "heading_path": [
+        "A Refined Generalization Analysis for Extreme Multi-class Supervised Contrastive Representation Learning",
+        "1 Introduction"
+      ],
+      "text": "## 1 Introduction\n\nThe performance of machine learning models depends critically on data representation. In multi-class classification, effective representations typically promote intra-class compactness and inter-class separability. Contrastive Representation Learning (CRL) has therefore become a popular approach for learning structured representations from raw data prior to downstream tasks. Despite its empirical success, theoretical understanding of CRL is still in the early stage. Existing analyses of excess risk bounds, such as article:arora19 and article:lei2023, commonly assume that unlabeled input (k+2)(k+2)-tuples are drawn i.i.d. from an unknown distribution. While analytically convenient, this assumption may not reflect practical CRL pipelines. In many real-world implementations, contrastive tuples are constructed from a finite pool of labeled examples (article:sohn2016; article:khosla2020; article:dejiao2021), leading to repeated use of data points across tuples, thereby violating the independence assumption.\n\n(k+2)(k+2)\n\nTo explicitly model tuple dependencies in supervised CRL, article:hieu2025 introduced a U-statistic based estimator that decomposes the population risk into a sum of class-wise risks then estimates each component independently (cf. Eqn. (LABEL:eq:hieu\\_ledent\\_estimator)). While this formulation is natural and effective when the number of classes is moderate, it implicitly ties the overall sample complexity to the worst class-wise estimation error. In particular, their analysis requires all class-wise risk estimators to concentrate simultaneously, leading to a sample complexity that scales with ρmin−1\\rho\\_{\\min}^{-1} where ρmin\\rho\\_{\\min} denotes the rarest class probability. As a consequence, the bound becomes overly pessimistic in regimes with many classes, where ρmin\\rho\\_{\\min} is necessarily small, and reduces to a dependence on the number of classes RR only in the restrictive case of perfectly balanced class distributions.\n\nρmin−1\\rho_{\\min}^{-1}\n\nρmin\\rho_{\\min}\n\nρmin\\rho_{\\min}\n\nRR\n\nOur first contribution relaxes this worst-case requirement by allowing heterogeneous accuracy across class-wise estimators. Intuitively, classes with negligible contribution to the population risk need not be estimated with the same precision as dominant ones. This eliminates the parasitic dependence on ρmin\\rho\\_{\\min} and yields bounds that depend on RR irrespective of the class distribution. Nevertheless, even this scale remains pessimistic in extreme multi-class settings where RR is very large, and it stands in contrast with classical results on excess risk bounds for kk-tuple learning where sample complexity depends only on the tuple size kk (article:clemencon2008; journal:clemencon2016). This mismatch suggests that controlling class-wise estimators, even in aggregate, is fundamentally sub-optimal. We therefore introduce an entirely different U-Statistic formulation (cf. Eqn. (LABEL:eq:natural\\_estimator)) that enforces joint concentration across classes. The resulting sample complexity scales as k​(1−τ)2k(1-\\tau)^{2}, where τ\\tau is the overall class collision probability (see, for example, article:ash2022; article:awasthi2022 or article:arora19). Specifically, when negatives are sampled without excluding positive classes, τ\\tau represents the overall likelihood that there exists at least a positive-class sample among the selected negatives (cf. Eqn. (LABEL:eq:collision\\_probability)). In extreme multi-class regime, τ→0\\tau\\to 0, recovering a dependency on kk alone and aligning with established results on tuple-learning.\n\nρmin\\rho_{\\min}\n\nRR\n\nRR\n\nkk\n\nkk\n\nk​(1−τ)2k(1-\\tau)^{2}\n\nτ\\tau\n\nτ\\tau\n\nτ→0\\tau\\to 0\n\nkk"
+    },
+    {
+      "heading_path": [
+        "A Refined Generalization Analysis for Extreme Multi-class Supervised Contrastive Representation Learning",
+        "2 Related Work"
+      ],
+      "text": "## 2 Related Work\n\nEmpirical Minimization of U-Statistics: U-Statistics were introduced by article:hoeffding1948 for parameters estimation using symmetric kernels. Later, the concentration properties of U-Statistics were analyzed rigorously by article:ginezinn1984 and article:arconesgine1993, laying the foundation for works in statistical learning theory where losses rely on two or more samples. Concentration inequalities for U-Statistics have been utilized in multiple machine learning disciplines, including ranking (article:clemencon2008), metric learning (article:Cao2016; article:jin2009), pairwise learning (article:yleiregularizedpairwise2018; article:yleiledent2020), clustering (article:liliu2021) and self-supervised learning (article:haochen2021).\n\nGeneralization under the i.i.d. Tuples Regime: The i.i.d. tuple framework was introduced by article:arora19, who formalized unsupervised risk for contrastive learning. Ignoring the dependency on the function class, their excess risk bounds scale as 𝒪​(k/N)\\mathcal{O}(\\sqrt{{k}/{\\mathrm{N}}}) where kk denotes the number of negative samples and N{\\mathrm{N}} is the number of i.i.d. tuples available to the learner. Using tools such as worst-case Rademacher complexity and fat-shattering dimension, article:lei2023 subsequently improved this dependence to 𝒪~​(1/N)\\widetilde{\\mathcal{O}}(\\sqrt{{1}/{\\mathrm{N}}}). We note that in these works, ‘sample complexity’ is expressed in terms of the number N\\mathrm{N} of required (k+2)(k+2)-*tuples* (with each tuple being one ‘sample’), while in our work, it refers to the number NN of required *labeled data points* which are subsequently used to form collision-free tuples. Hence a sample complexity of 𝒪~​(k)\\widetilde{\\mathcal{O}}(k) in the supervised CRL formulation is comparable to a sample complexity of 𝒪~​(1)\\widetilde{\\mathcal{O}}(1) in i.i.d. tuples regime. Indeed, this is what can be expected from a Hoeffding-type argument in the pure tuple-wise learning (without constraints on collisions), since 𝒪​(N/k)\\mathcal{O}({N}/{k}) tuples can be formed with NN samples. Subsequently, the work of article:arora19 was extended to other CRL settings such as adversarial CRL (article:xinandwei2023; article:ghanooni2024), PAC-Bayes analysis and deep CRL (article:nozawa2020; article:nozawa2021; article:alves2024; article:hieu2024). Apart from generalization, prior works inspired by the i.i.d. regime also investigates other angles of contrastive learning theory such as the role of negative samples (article:ash2022; article:awasthi2022; bao2022surrogate), mitigating spurious features in CRL (article:ghanooni2025), and the effect of the unsupervised risk on downstream tasks (article:arora19; article:chuang2020; article:liliu2021; bao2022surrogate; article:huang2023; cui2025inclusive; article:cui2025).\n\n𝒪​(k/N)\\mathcal{O}(\\sqrt{{k}/{\\mathrm{N}}})\n\nkk\n\nN{\\mathrm{N}}\n\n𝒪~​(1/N)\\widetilde{\\mathcal{O}}(\\sqrt{{1}/{\\mathrm{N}}})\n\nN\\mathrm{N}\n\n(k+2)(k+2)\n\nNN\n\n𝒪~​(k)\\widetilde{\\mathcal{O}}(k)\n\n𝒪~​(1)\\widetilde{\\mathcal{O}}(1)\n\n𝒪​(N/k)\\mathcal{O}({N}/{k})\n\nNN\n\nTheoretical Analysis for SS-CRL: A strong body of work inspired by article:arora19 explores generalization and other theoretical aspects of self-supervised CRL. For example, article:wang2022 proposed augmentation overlap theory, suggesting that aggressive data augmentation can implicitly improve intra-class compactness. Along similar lines, article:cui2025 study how augmentation affects downstream performance by relating the supervised risk to the empirical self-supervised risk (over a set of i.i.d. tuples) and the expected same-class or same-instance augmentation distance. cui2025inclusive provide both theoretical and practical insights on a variant of supervised CRL with non-collided i.i.d. tuples with label noise. article:huang2023 studied the effect of the self-supervised risk on classification by bounding the error rate of nearest-neighbor classifiers built on top of representation functions using misalignment probability. article:nozawa2021 provided a theoretical explanation for why using many negative samples improves downstream performance. In article:haochen2021, the authors established guarantees for the excess contrastive risk for loss functions in two arguments constructed from fixed pool of unlabeled samples via independent augmentation of both samples. Whilst this involves a second order U-statistic, this work makes no constraint on the valid pairs/tuples in terms of class-collision, making the concentration of the unsupervised risk straightforward: the core contribution instead lies in the relationship between the contrastive risk and the classification risk of a linear probe under structural assumptions on the informativeness of the data-augmentation generation. Their framework was later extended to other generalization analyses for variants of SS-CRL including domain adaptation (article:shen2022), weakly-supervised learning (article:cui2023), multi-modal learning (article:zhang2023multimodal).\n\nGeneralization in Supervised CRL: article:hieu2025 explored the CRL setting where input tuples are selected from a finite pool of labeled samples. In this regime, the authors proposed a U-Statistic formulation that estimates each class-wise contrastive risk separately. In their analysis, all class-wise estimators are required to concentrate with equal accuracy, leading to a dependency on ρmin\\rho\\_{\\min}, the smallest class probability. For their estimator, we achieve a dependency of RR instead. We also achieve a faster rate of kk by constructing a radically different estimator and analysis.\n\nρmin\\rho_{\\min}\n\nRR\n\nkk"
+    },
+    {
+      "heading_path": [
+        "A Refined Generalization Analysis for Extreme Multi-class Supervised Contrastive Representation Learning",
+        "3 Preliminaries"
+      ],
+      "text": "## 3 Preliminaries"
+    },
+    {
+      "heading_path": [
+        "A Refined Generalization Analysis for Extreme Multi-class Supervised Contrastive Representation Learning",
+        "3 Preliminaries",
+        "3.1 Definitions and Notations"
+      ],
+      "text": "### 3.1 Definitions and Notations\n\nLet 𝒳\\mathcal{X} be the input space and [R]={1,…,R}[R]=\\{1,\\dots,R\\} be a labels set. We are given a (labeled) dataset S={Xj}j=1N∼𝒟¯⊗NS=\\left\\{X\\_{j}\\right\\}\\_{j=1}^{N}\\sim\\mathcal{\\bar{D}}^{\\otimes N} where 𝒟¯:=∑r=1Rρr​𝒟r\\mathcal{\\bar{D}}:=\\sum\\_{r=1}^{R}\\rho\\_{r}\\mathcal{D}\\_{r} is a mixture of distributions with ρ1,…,ρR\\rho\\_{1},\\dots,\\rho\\_{R} representing class probabilities and 𝒟r\\mathcal{D}\\_{r} being the class-conditional distributions over 𝒳\\mathcal{X}. In supervised CRL, we aim to estimate a risk associated to some contrastive loss function using the available labeled data points. Specifically, for a certain representation function f∈ℱf\\in\\mathcal{F} where ℱ\\mathcal{F} is a prefixed class of functions (e.g. neural networks, linear maps, etc.), we define ℓϕ,f:𝒳k+2→ℝ+\\ell\\_{\\phi,f}:\\mathcal{X}^{k+2}\\to\\mathbb{R}\\_{+} as a tuple-wise loss evaluated on the representations produced by ff as follows:\n\n𝒳\\mathcal{X}\n\n[R]={1,…,R}[R]=\\{1,\\dots,R\\}\n\nS={Xj}j=1N∼𝒟¯⊗NS=\\left\\{X_{j}\\right\\}_{j=1}^{N}\\sim\\mathcal{\\bar{D}}^{\\otimes N}\n\n𝒟¯:=∑r=1Rρr​𝒟r\\mathcal{\\bar{D}}:=\\sum_{r=1}^{R}\\rho_{r}\\mathcal{D}_{r}\n\nρ1,…,ρR\\rho_{1},\\dots,\\rho_{R}\n\n𝒟r\\mathcal{D}_{r}\n\n𝒳\\mathcal{X}\n\nf∈ℱf\\in\\mathcal{F}\n\nℱ\\mathcal{F}\n\nℓϕ,f:𝒳k+2→ℝ+\\ell_{\\phi,f}:\\mathcal{X}^{k+2}\\to\\mathbb{R}_{+}\n\nff\n\n| | | | | | --- | --- | --- | --- | | | ℓϕ,f​(X,X+,{Xi−}i=1k)=\\displaystyle\\ell\\_{\\phi,f}\\left(X,X^{+},\\left\\{X\\_{i}^{-}\\right\\}\\_{i=1}^{k}\\right)= | | (1) | | | | | | --- | --- | --- | | | ϕ​({f​(X)⊤​[f​(X+)−f​(Xi−)]}i=1k),\\displaystyle\\qquad\\qquad\\phi\\Big(\\Big\\{f(X)^{\\top}\\left[f(X^{+})-f(X\\_{i}^{-})\\right]\\Big\\}\\_{i=1}^{k}\\Big), | |\n\nℓϕ,f​(X,X+,{Xi−}i=1k)=\\displaystyle\\ell_{\\phi,f}\\left(X,X^{+},\\left\\{X_{i}^{-}\\right\\}_{i=1}^{k}\\right)=\n\nϕ​({f​(X)⊤​[f​(X+)−f​(Xi−)]}i=1k),\\displaystyle\\qquad\\qquad\\phi\\Big(\\Big\\{f(X)^{\\top}\\left[f(X^{+})-f(X_{i}^{-})\\right]\\Big\\}_{i=1}^{k}\\Big),\n\nwhere k⩾1k\\geqslant 1 is the number of negative samples and ϕ:ℝk→ℝ+\\phi:\\mathbb{R}^{k}\\to\\mathbb{R}\\_{+} is a vector function often referred to as the contrastive loss. For example, if we use the logistic loss (article:sohn2016) for training, then for all kk-dimensional vectors 𝐯=(v1,…,vk)⊤{\\bf v}=(v\\_{1},\\dots,v\\_{k})^{\\top}, we have ϕ​(𝐯):=ln⁡(1+∑i=1ke−vi)\\phi({\\bf v}):=\\ln\\Big(1+\\sum\\_{i=1}^{k}e^{-v\\_{i}}\\Big). In this paper, we are interested in bounding the uniform excess risk (over a class of representation functions) associated to the contrastive risk defined as follows.\n\nk⩾1k\\geqslant 1\n\nϕ:ℝk→ℝ+\\phi:\\mathbb{R}^{k}\\to\\mathbb{R}_{+}\n\nkk\n\n𝐯=(v1,…,vk)⊤{\\bf v}=(v_{1},\\dots,v_{k})^{\\top}\n\nϕ​(𝐯):=ln⁡(1+∑i=1ke−vi)\\phi({\\bf v}):=\\ln\\Big(1+\\sum_{i=1}^{k}e^{-v_{i}}\\Big)"
+    },
+    {
+      "heading_path": [
+        "A Refined Generalization Analysis for Extreme Multi-class Supervised Contrastive Representation Learning",
+        "3 Preliminaries",
+        "3.1 Definitions and Notations",
+        "Definition 3.1 (Population Contrastive Risk)."
+      ],
+      "text": "###### Definition 3.1 (Population Contrastive Risk).\n\nLet f∈ℱf\\in\\mathcal{F} be a representation function and ϕ:ℝk→ℝ+\\phi:\\mathbb{R}^{k}\\to\\mathbb{R}\\_{+} be a contrastive loss (where k⩾1k\\geqslant 1 is the number of negative samples). Then, the contrastive risk of ff, denoted Lϕ​(f)\\mathrm{L}\\_{\\phi}(f), is defined as:\n\nf∈ℱf\\in\\mathcal{F}\n\nϕ:ℝk→ℝ+\\phi:\\mathbb{R}^{k}\\to\\mathbb{R}_{+}\n\nk⩾1k\\geqslant 1\n\nff\n\nLϕ​(f)\\mathrm{L}_{\\phi}(f)\n\n| | | | | | | --- | --- | --- | --- | --- | | | | Lϕ​(f)=\\displaystyle\\mathrm{L}\\_{\\phi}(f)= | | (2) | | | | | | | --- | --- | --- | --- | | | | 𝔼r∼ρ​𝔼X,X+∼𝒟r⊗2{Xi−}i=1k∼𝒟¯r⊗k​[ℓϕ,f​(X,X+,{Xi−}i=1k)],\\displaystyle\\underset{r\\sim\\rho}{\\mathbb{E}}\\underset{\\begin{subarray}{c}X,X^{+}\\sim\\mathcal{D}\\_{r}^{\\otimes 2}\\\\ \\left\\{X\\_{i}^{-}\\right\\}\\_{i=1}^{k}\\sim\\mathcal{\\bar{D}}\\_{r}^{\\otimes k}\\end{subarray}}{\\mathbb{E}}\\left[\\ell\\_{\\phi,f}\\left(X,X^{+},\\left\\{X\\_{i}^{-}\\right\\}\\_{i=1}^{k}\\right)\\right], | |\n\nLϕ​(f)=\\displaystyle\\mathrm{L}_{\\phi}(f)=\n\n𝔼r∼ρ​𝔼X,X+∼𝒟r⊗2{Xi−}i=1k∼𝒟¯r⊗k​[ℓϕ,f​(X,X+,{Xi−}i=1k)],\\displaystyle\\underset{r\\sim\\rho}{\\mathbb{E}}\\underset{\\begin{subarray}{c}X,X^{+}\\sim\\mathcal{D}_{r}^{\\otimes 2}\\\\ \\left\\{X_{i}^{-}\\right\\}_{i=1}^{k}\\sim\\mathcal{\\bar{D}}_{r}^{\\otimes k}\\end{subarray}}{\\mathbb{E}}\\left[\\ell_{\\phi,f}\\left(X,X^{+},\\left\\{X_{i}^{-}\\right\\}_{i=1}^{k}\\right)\\right],\n\nwhere ρ\\rho is the discrete distribution over the classes that assigns probability ρr\\rho\\_{r} to class rr for all r∈[R]r\\in[R] and 𝒟¯r\\mathcal{\\bar{D}}\\_{r} is a distribution over 𝒳\\mathcal{X} defined by the following mixture:\n\nρ\\rho\n\nρr\\rho_{r}\n\nrr\n\nr∈[R]r\\in[R]\n\n𝒟¯r\\mathcal{\\bar{D}}_{r}\n\n𝒳\\mathcal{X}\n\n| | | | | | --- | --- | --- | --- | | | 𝒟¯r:=11−ρr​∑q≠rρq​𝒟q,\\displaystyle\\mathcal{\\bar{D}}\\_{r}:=\\frac{1}{1-\\rho\\_{r}}\\sum\\_{q\\neq r}\\rho\\_{q}\\mathcal{D}\\_{q}, | | (3) |\n\n𝒟¯r:=11−ρr​∑q≠rρq​𝒟q,\\displaystyle\\mathcal{\\bar{D}}_{r}:=\\frac{1}{1-\\rho_{r}}\\sum_{q\\neq r}\\rho_{q}\\mathcal{D}_{q},\n\nwhich is the re-normalized mixture of class-conditional distributions excluding class rr, i.e., the distribution of negative samples when anchor-positive pairs come from class rr.\n\nrr\n\nrr"
+    },
+    {
+      "heading_path": [
+        "A Refined Generalization Analysis for Extreme Multi-class Supervised Contrastive Representation Learning",
+        "3 Preliminaries",
+        "3.1 Definitions and Notations",
+        "Remark 3.2."
+      ],
+      "text": "###### Remark 3.2.\n\nThe definition in Eqn. ([2](https://ar5iv.labs.arxiv.org/html/2605.07596#S3.E2 \"Equation 2 ‣ Definition 3.1 (Population Contrastive Risk). ‣ 3.1 Definitions and Notations ‣ 3 Preliminaries ‣ A Refined Generalization Analysis for Extreme Multi-class Supervised Contrastive Representation Learning\")) differs from the definition of negative distribution used in article:arora19. Our formulation forbids negative samples {Xi−}i=1k\\left\\{X\\_{i}^{-}\\right\\}\\_{i=1}^{k} from sharing classes with the anchor–positive pair (X,X+)(X,X^{+}), whereas article:arora19 allow such class collisions by drawing negatives i.i.d. from the full mixture 𝒟¯\\bar{\\mathcal{D}} rather than 𝒟¯r\\bar{\\mathcal{D}}\\_{r}. In the self-supervised case (article:chen2020; He\\_2020\\_CVPR; Caron20; article:cui2025), class-collision is often unavoidable since the labels are not available to prevent it. On the other hand, in supervised CRL, it is natural to avoid class-collision, as it has been shown to improve performance (article:khosla2020; article:chuang2020; article:robinson2021; chen2022incrementalfalsenegativedetection; article:huynh2022). Therefore, it is the primary setting we investigate. However, we also provide excess risk guarantee (Thm. LABEL:thm:concentration\\_of\\_bar\\_Uomega) for the collision-allowed risk in article:arora19 although this result mostly serves as a intermediary step to provide excess risk guarantees for the desired risk Lϕ\\mathrm{L}\\_{\\phi}.\n\n{Xi−}i=1k\\left\\{X_{i}^{-}\\right\\}_{i=1}^{k}\n\n(X,X+)(X,X^{+})\n\n𝒟¯\\bar{\\mathcal{D}}\n\n𝒟¯r\\bar{\\mathcal{D}}_{r}\n\nLϕ\\mathrm{L}_{\\phi}\n\nNotations: Throughout this manuscript, we use 𝔼X∼μ​[⋅]{\\mathbb{E}}\\_{X\\sim\\mu}[\\cdot] to denote the population expectation over some distribution μ\\mu or simply 𝔼​[⋅]\\mathbb{E}[\\cdot] when the distribution is obvious in given context. Additionally, we use 𝔼^V​[⋅]\\widehat{\\mathbb{E}}\\_{V}[\\cdot] or 𝔼^v∼V​[⋅]\\widehat{\\mathbb{E}}\\_{v\\sim V}[\\cdot] to denote the empirical average over elements vv of some set VV. For example, 𝔼^V​[g]=𝔼^v∼V​[g​(v)]:=1|V|​∑v∈Vg​(v)\\widehat{\\mathbb{E}}\\_{V}[g]=\\widehat{\\mathbb{E}}\\_{v\\sim V}[g(v)]:=\\frac{1}{|V|}\\sum\\_{v\\in V}g(v). For each r∈[R]r\\in[R], we also denote Sr⊆SS\\_{r}\\subseteq S as the set of labeled data points belonging to class rr, Nr:=|Sr|N\\_{r}:=|S\\_{r}| and ρ^r:=NrN\\widehat{\\rho}\\_{r}:=\\frac{N\\_{r}}{N}. Finally, we assume that the contrastive loss is uniformly bounded, i.e., |ℓϕ,f|⩽ℬ|\\ell\\_{\\phi,f}|\\leqslant\\mathcal{B} for all f∈ℱf\\in\\mathcal{F} for some ℬ∈ℝ+\\mathcal{B}\\in\\mathbb{R}\\_{+}. For the reader’s convenience, we provide an exhaustive list of notations in the appendix (Table LABEL:tab:notations).\n\n𝔼X∼μ​[⋅]{\\mathbb{E}}_{X\\sim\\mu}[\\cdot]\n\nμ\\mu\n\n𝔼​[⋅]\\mathbb{E}[\\cdot]\n\n𝔼^V​[⋅]\\widehat{\\mathbb{E}}_{V}[\\cdot]\n\n𝔼^v∼V​[⋅]\\widehat{\\mathbb{E}}_{v\\sim V}[\\cdot]\n\nvv\n\nVV\n\n𝔼^V​[g]=𝔼^v∼V​[g​(v)]:=1|V|​∑v∈Vg​(v)\\widehat{\\mathbb{E}}_{V}[g]=\\widehat{\\mathbb{E}}_{v\\sim V}[g(v)]:=\\frac{1}{|V|}\\sum_{v\\in V}g(v)\n\nr∈[R]r\\in[R]\n\nSr⊆SS_{r}\\subseteq S\n\nrr\n\nNr:=|Sr|N_{r}:=|S_{r}|\n\nρ^r:=NrN\\widehat{\\rho}_{r}:=\\frac{N_{r}}{N}\n\n|ℓϕ,f|⩽ℬ|\\ell_{\\phi,f}|\\leqslant\\mathcal{B}\n\nf∈ℱf\\in\\mathcal{F}\n\nℬ∈ℝ+\\mathcal{B}\\in\\mathbb{R}_{+}"
+    },
+    {
+      "heading_path": [
+        "A Refined Generalization Analysis for Extreme Multi-class Supervised Contrastive Representation Learning",
+        "3 Preliminaries",
+        "3.2 Contributions"
+      ],
+      "text": "### 3.2 Contributions\n\nIn this work, we are interested in formulating estimators for the class-collision free population risk defined in Eqn. ([2](https://ar5iv.labs.arxiv.org/html/2605.07596#S3.E2 \"Equation 2 ‣ Definition 3.1 (Population Contrastive Risk). ‣ 3.1 Definitions and Notations ‣ 3 Preliminaries ‣ A Refined Generalization Analysis for Extreme Multi-class Supervised Contrastive Representation Learning\")) and bounding the corresponding uniform excess risk. Our contributions can be summarized as follows:\n\n1. (i) We provide a refined excess risk guarantee for the U-Statistic estimator proposed in article:hieu2025 by completely removing the dependency on ρmin−1\\rho\\_{\\min}^{-1}, the rarest class probability, from the sample complexity. By imposing non-uniform accuracy for the concentration of each class-wise U-Statistic, we prove that the sample complexity of their estimator scales linearly with RR, the number of classes, regardless of the class distribution’s structure. 2. (ii) We propose a different U-Statistic formula inspired by de-biasing the population unsupervised risk used by previous works in the i.i.d. tuples regime (article:arora19; article:lei2023) in which class-collision is arbitrarily allowed. Specifically, we decompose the desired collision-free risk into a combination of risks conditioned on at least one and zero collided negative samples (Eqn. (LABEL:eq:decomposed\\_population\\_contrastive\\_risk)). Then, we approximate each component separately to formulate the final estimator. 3. (iii) We prove that the proposed U-Statistic in this work yields a sample complexity that scales with k​(1−τ)2k(1-\\tau)^{2} where τ\\tau is the population class-collision probability (Eqn. (LABEL:eq:collision\\_probability)). In typical extreme multi-class scenarios where all class probabilities are small, the collision probability τ\\tau is approximately zero and the sample complexity recovers the 𝒪​(k)\\mathcal{{O}}(k) rate. Therefore, this type of bound is particularly useful for large multi-class representation learning problems where RR is significantly larger than kk. Furthermore, for certain long-tailed imbalanced class distributions, we have 1−τ∈Ω​(1)1-\\tau\\in\\Omega(1) with high probability. Therefore, the dominant dependency on kk remains unchanged.\n\nWe provide a refined excess risk guarantee for the U-Statistic estimator proposed in article:hieu2025 by completely removing the dependency on ρmin−1\\rho\\_{\\min}^{-1}, the rarest class probability, from the sample complexity. By imposing non-uniform accuracy for the concentration of each class-wise U-Statistic, we prove that the sample complexity of their estimator scales linearly with RR, the number of classes, regardless of the class distribution’s structure.\n\nρmin−1\\rho_{\\min}^{-1}\n\nRR\n\nWe propose a different U-Statistic formula inspired by de-biasing the population unsupervised risk used by previous works in the i.i.d. tuples regime (article:arora19; article:lei2023) in which class-collision is arbitrarily allowed. Specifically, we decompose the desired collision-free risk into a combination of risks conditioned on at least one and zero collided negative samples (Eqn. (LABEL:eq:decomposed\\_population\\_contrastive\\_risk)). Then, we approximate each component separately to formulate the final estimator.\n\nWe prove that the proposed U-Statistic in this work yields a sample complexity that scales with k​(1−τ)2k(1-\\tau)^{2} where τ\\tau is the population class-collision probability (Eqn. (LABEL:eq:collision\\_probability)). In typical extreme multi-class scenarios where all class probabilities are small, the collision probability τ\\tau is approximately zero and the sample complexity recovers the 𝒪​(k)\\mathcal{{O}}(k) rate. Therefore, this type of bound is particularly useful for large multi-class representation learning problems where RR is significantly larger than kk. Furthermore, for certain long-tailed imbalanced class distributions, we have 1−τ∈Ω​(1)1-\\tau\\in\\Omega(1) with high probability. Therefore, the dominant dependency on kk remains unchanged.\n\nk​(1−τ)2k(1-\\tau)^{2}\n\nτ\\tau\n\nτ\\tau\n\n𝒪​(k)\\mathcal{{O}}(k)\n\nRR\n\nkk\n\n1−τ∈Ω​(1)1-\\tau\\in\\Omega(1)\n\nkk\n\nAn outline of our main results (summarized in sample complexities) with comparison to prior works is provided in Table [3.2](https://ar5iv.labs.arxiv.org/html/2605.07596#S3.SS2 \"3.2 Contributions ‣ 3 Preliminaries ‣ A Refined Generalization Analysis for Extreme Multi-class Supervised Contrastive Representation Learning\"). Additionally, we also provide a more thorough summary of the literature in Appendix LABEL:sec:summary\\_of\\_literature. Furthermore, in Appendix LABEL:sec:proof\\_discussion, we provide a brief discussion on the differences between our analysis and previous works, as well as the additional technical difficulties involved.\n\nℬ=1\\mathcal{B}=1\n\nℭN2\\mathfrak{C}^{2}_{N}\n\nRR\n\nkk\n\n1/(1−τ){1}/{(1-\\tau)}\n\nΔ\\Delta\n\nℒ\\mathcal{L}\n\nℋ\\mathcal{H}\n\nℭN​(ℋ)\\mathfrak{C}_{N}(\\mathcal{H})\n\n𝒪~​[(W)12]\\mathcal{\\widetilde{O}}[(W)^{\\frac{1}{2}}]\n\nWW\n\n𝒪~\\widetilde{\\mathcal{O}}\n\nℒ\\mathcal{L}\n\nWW\n\nγk\\gamma_{k}\n\n| | | | | | | --- | --- | --- | --- | --- | | Reference | Est. | Default | γk∈Ω​(1)\\gamma\\_{k}\\in\\Omega(1) | Relevant quantity | | article:hieu2025 | UNhlU\\_{N}^{\\mathrm{hl}} | [ℭN2​(ℋ)+1]​max⁡[ρmin−1,(1−ρmax)−1][\\mathfrak{C}^{2}\\_{N}(\\mathcal{H})+1]\\max\\left[\\rho\\_{\\min}^{-1},(1-\\rho\\_{\\max})^{-1}\\right] | | ρmin:=minr∈[R]⁡ρr\\rho\\_{\\min}:=\\min\\_{r\\in[R]}\\rho\\_{r} ρmax:=maxr∈[R]⁡ρr\\rho\\_{\\max}:=\\max\\_{r\\in[R]}\\rho\\_{r} | | This Work | UNhlU\\_{N}^{\\mathrm{hl}} | ℭN2​(ℋ)​[θ^k+2​R+(1−θ^k+2)2​k]+\\mathfrak{C}^{2}\\_{N}(\\mathcal{H})[\\widehat{\\theta}\\_{k+2}R+(1-\\widehat{\\theta}\\_{k+2})^{2}k]\\ + [R+k2][R+k^{2}] (Theorem LABEL:thm:refined\\_hieu\\_ledent\\_general/LABEL:thm:refined\\_hieu\\_ledent\\_general\\_appendix) | ℭN2​(ℋ)​R+\\mathfrak{C}^{2}\\_{N}(\\mathcal{H})R\\ + [R+k2][R+k^{2}] (Theorem LABEL:thm:refined\\_hieu\\_ledent\\_small\\_probabilities) | θ^k+2:=ℙρ​[ρr⩽2k+2]\\widehat{\\theta}\\_{k+2}:={\\mathbb{P}\\_{\\rho}}\\big[\\rho\\_{r}\\leqslant\\frac{2}{k+2}\\big] | | This Work | | | | |\n\nγk∈Ω​(1)\\gamma_{k}\\in\\Omega(1)\n\nUNhlU_{N}^{\\mathrm{hl}}\n\n[ℭN2​(ℋ)+1]​max⁡[ρmin−1,(1−ρmax)−1][\\mathfrak{C}^{2}_{N}(\\mathcal{H})+1]\\max\\left[\\rho_{\\min}^{-1},(1-\\rho_{\\max})^{-1}\\right]\n\nρmin:=minr∈[R]⁡ρr\\rho_{\\min}:=\\min_{r\\in[R]}\\rho_{r}\n\nρmax:=maxr∈[R]⁡ρr\\rho_{\\max}:=\\max_{r\\in[R]}\\rho_{r}\n\nUNhlU_{N}^{\\mathrm{hl}}\n\nℭN2​(ℋ)​[θ^k+2​R+(1−θ^k+2)2​k]+\\mathfrak{C}^{2}_{N}(\\mathcal{H})[\\widehat{\\theta}_{k+2}R+(1-\\widehat{\\theta}_{k+2})^{2}k]\\ +\n\n[R+k2][R+k^{2}]\n\nℭN2​(ℋ)​R+\\mathfrak{C}^{2}_{N}(\\mathcal{H})R\\ +\n\n[R+k2][R+k^{2}]\n\nθ^k+2:=ℙρ​[ρr⩽2k+2]\\widehat{\\theta}_{k+2}:={\\mathbb{P}_{\\rho}}\\big[\\rho_{r}\\leqslant\\frac{2}{k+2}\\big]"
+    }
+  ]
+}
