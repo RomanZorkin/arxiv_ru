@@ -190,7 +190,7 @@ AnomalyAgent — это обучающаяся без дообучения аг�
 
 |id статьи|Месяц публикации|Дата перевода| Тема статьи | Ручной контроль|
 |---|---|---|---|---|
-| [2512.10913](articles/2512.10913/README.md) | 12.2025 | 14.07.2026 | Обучение с подкреплением в процессе принятия финансовых решений: систематический обзор эффективности, проблем и стратегий реализации (`Reinforcement Learning in Financial Decision Making: A Systematic Review of Performance, Challenges, and Implementation Strategies`) ||
+| [2512.10913](articles/2512.10913/README.md) | 12.2025 | 14.07.2026 | Обучение с подкреплением в процессе принятия финансовых решений: систематический обзор эффективности, проблем и стратегий реализации (`Reinforcement Learning in Financial Decision Making: A Systematic Review of Performance, Challenges, and Implementation Strategies`) |✅|
 | [2605.07596](articles/2605.07596/README.md) | 05.2026 | 14.07.2026 | Уточненный анализ обобщения для экстремального многоклассового обучения контрастным представлениям с учителем (`A Refined Generalization Analysis for Extreme Multi-class Supervised Contrastive Representation Learning`) ||
 | [2605.30140](articles/2605.30140/README.md) | 05.2026 | 14.07.2026 | AnomalyAgent: Обучающие модели агентов без обучения для обнаружения аномалий в условиях нулевого/малого количества примеров ⟦K0⟧ (`AnomalyAgent: Training-Free Agentic Models for Zero-/Few-Shot Anomaly Detection`) ||
 | [2604.07590](articles/2604.07590/README.md) | 04.2026 | 06.07.2026 | DCD: предметно-ориентированное проектирование для контролируемой генерации с использованием расширенного поиска (`DCD: Domain-Oriented Design for Controlled Retrieval-Augmented Generation`) |✅|
