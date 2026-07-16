@@ -108,7 +108,7 @@ LLM должна начинать работу с этих файлов, а не
 
 ---
 
-### AnomalyAgent: Обучающие модели агентов без обучения для обнаружения аномалий в условиях нулевого/малого количества примеров ⟦K0⟧
+### AnomalyAgent: Обучающие модели агентов без обучения для обнаружения аномалий в условиях нулевого/малого количества примеров
 [2605.30140] дата публикации в arXiv - 05.2026  
 📅 дата перевода 14.07.2026  
 🏷 `Anomaly Detection` `Multimodal LLM` `Zero-shot Learning` `Few-shot Learning` `Agentic Framework` `Computer Vision` `Training-free`
@@ -191,8 +191,8 @@ AnomalyAgent — это обучающаяся без дообучения аг�
 |id статьи|Месяц публикации|Дата перевода| Тема статьи | Ручной контроль|
 |---|---|---|---|---|
 | [2512.10913](articles/2512.10913/README.md) | 12.2025 | 14.07.2026 | Обучение с подкреплением в процессе принятия финансовых решений: систематический обзор эффективности, проблем и стратегий реализации (`Reinforcement Learning in Financial Decision Making: A Systematic Review of Performance, Challenges, and Implementation Strategies`) |✅|
-| [2605.07596](articles/2605.07596/README.md) | 05.2026 | 14.07.2026 | Уточненный анализ обобщения для экстремального многоклассового обучения контрастным представлениям с учителем (`A Refined Generalization Analysis for Extreme Multi-class Supervised Contrastive Representation Learning`) ||
-| [2605.30140](articles/2605.30140/README.md) | 05.2026 | 14.07.2026 | AnomalyAgent: Обучающие модели агентов без обучения для обнаружения аномалий в условиях нулевого/малого количества примеров ⟦K0⟧ (`AnomalyAgent: Training-Free Agentic Models for Zero-/Few-Shot Anomaly Detection`) ||
+| [2605.07596](articles/2605.07596/README.md) | 05.2026 | 14.07.2026 | Уточненный анализ обобщения для экстремального многоклассового обучения контрастным представлениям с учителем (`A Refined Generalization Analysis for Extreme Multi-class Supervised Contrastive Representation Learning`) |✅|
+| [2605.30140](articles/2605.30140/README.md) | 05.2026 | 14.07.2026 | AnomalyAgent: Обучающие модели агентов без обучения для обнаружения аномалий в условиях нулевого/малого количества примеров(`AnomalyAgent: Training-Free Agentic Models for Zero-/Few-Shot Anomaly Detection`) ||
 | [2604.07590](articles/2604.07590/README.md) | 04.2026 | 06.07.2026 | DCD: предметно-ориентированное проектирование для контролируемой генерации с использованием расширенного поиска (`DCD: Domain-Oriented Design for Controlled Retrieval-Augmented Generation`) |✅|
 | [2306.10561](articles/2306.10561/README.md) | 06.2023 | 06.07.2026 | Распознавание места на основе LiDAR для автономного вождения: обзор (`LiDAR-Based Place Recognition For Autonomous Driving: A Survey`) |✅|
 | [2601.16967](articles/2601.16967/README.md) | 01.2026 | 06.07.2026 | Обеспечение устойчивости медицинского оборудования в условиях ограниченных ресурсов: диагностическая и вспомогательная платформа на базе ИИ для биомедицинских техников (`Empowering Medical Equipment Sustainability in Low-Resource Settings: An AI-Powered Diagnostic and Support Platform for Biomedical Technicians`) ||
