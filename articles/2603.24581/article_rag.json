@@ -1,0 +1,1882 @@
+{
+  "title": "[2603.24581] Latent-WAM: Latent World Action Modeling for End-to-End Autonomous Driving",
+  "sections": [
+    {
+      "heading": "Latent-WAM: Latent World Action Modeling for End-to-End Autonomous Driving",
+      "level": 1,
+      "content": [],
+      "children": [
+        {
+          "heading": "Abstract",
+          "level": 6,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "We introduce Latent-WAM, an efficient end-to-end autonomous driving framework that achieves strong trajectory planning through spatially-aware and dynamics-informed latent world representations. Existing world-model-based planners suffer from inadequately compressed representations, limited spatial understanding, and underutilized temporal dynamics, resulting in sub-optimal planning under constrained data and compute budgets. Latent-WAM addresses these limitations with two core modules: a Spatial-Aware Compressive World Encoder (SCWE) that distills geometric knowledge from a foundation model and compresses multi-view images into compact scene tokens via learnable queries, and a Dynamic Latent World Model (DLWM) that employs a causal Transformer to autoregressively predict future world status conditioned on historical visual and motion representations. Extensive experiments on NAVSIM v2 and HUGSIM demonstrate new state-of-the-art results: 89.3 EPDMS on NAVSIM v2 and 28.9 HD-Score on HUGSIM, surpassing the best prior perception-free method by 3.2 EPDMS with significantly less training data and a compact 104M-parameter model."
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "1 Introduction",
+          "level": 2,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "End-to-end autonomous driving has attracted considerable attention due to its data-driven nature and scalability. Prior methods integrate perception and prediction into a unified differentiable network, extracting planning-relevant representations for end-to-end trajectory prediction [hu2023uniad, jiang2023vad]. However, these methods generally rely on complex auxiliary task designs and perception annotations, limiting the further scaling of end-to-end driving algorithms."
+            },
+            {
+              "type": "paragraph",
+              "text": "Recently, world-model-based approaches learn scene representations through temporal self-supervised learning, providing dense supervision while reducing the dependence on perception labels. These methods can be broadly categorized into two groups. The first group [zhang2025epona, li2025drivevla-w0] learns driving planning through explicit video generation. However, video generation incurs substantial computational overhead, and the learned intermediate representations tend to focus on visual details irrelevant to planning. The second group learns planning-relevant representations through implicit future latent prediction [li2024law, zheng2025world4drive]. Although the latent representations are relatively lightweight and capture dynamic information via temporal self-supervision, they still suffer from insufficient representation quality. Specifically: (1) the latent representations remain inadequately compressed; (2) they lack spatial understanding or rely on external depth estimation models at inference time, introducing additional latency; and (3) historical and dynamic information are underutilized, as these methods merely predict the T+1T{+}1 representation from the TT-th frame. As illustrated in [Fig.˜1](https://ar5iv.labs.arxiv.org/html/2603.24581v1#S1.F1 \"In 1 Introduction ‣ Latent-WAM: Latent World Action Modeling for End-to-End Autonomous Driving\"), these limitations lead to sub-optimal planning performance."
+            },
+            {
+              "type": "formula",
+              "text": "T+1T{+}1"
+            },
+            {
+              "type": "formula",
+              "text": "TT"
+            },
+            {
+              "type": "paragraph",
+              "text": "To address these issues, we propose Latent-WAM, which comprises a Spatial-Aware Compressive World Encoder (SCWE) and a Dynamic Latent World Model (DLWM), targeting the two most planning-relevant understanding tasks—spatial and dynamic understanding—to achieve highly compressed driving world representations with improved planning performance. Specifically, SCWE distills knowledge from a geometric foundation model into the vision backbone and employs learnable queries to extract spatially-informed tokens from the enriched features, achieving high compression of scene information. DLWM adopts a causal Transformer for world modeling, predicting future world status conditioned on the ego vehicle’s historical world status, including compressed visual and motion representations. Through self-supervised visual prediction and supervised motion prediction, the world status representations acquire dynamic understanding capabilities relevant to planning. Finally, a lightweight trajectory decoder generates the planned trajectory from the world status representations."
+            },
+            {
+              "type": "paragraph",
+              "text": "We extensively evaluate Latent-WAM on NAVSIM v2 [cao2025navsimv2] and HUGSIM [zhou2024hugsim]. Latent-WAM achieves 89.3 EPDMS on NAVSIM v2, 45.9 RC and 28.9 HD-score on HUGSIM, establishing new state-of-the-art results. Under the perception-free setting, our method outperforms previous approaches by 3.2 EPDMS. Notably, attention map visualization reveals that our world representations are highly focused on spatial structures and driving intent, demonstrating the effectiveness of our approach for planning-centric representation learning. Our contributions are summarized as follows:"
+            },
+            {
+              "type": "list",
+              "text": "* • We propose Spatial-Aware Compressive World Encoder, a novel scene compression method that distills geometric knowledge into the vision backbone to extract highly compressed, spatially-aware visual representations. * • We propose Dynamic Latent World Model, a novel world modeling approach that leverages a causal Transformer to jointly learn visual and motion dynamics, building representations with dynamic scene understanding. * • Our method achieves new state-of-the-art results on both NAVSIM v2 and HUGSIM, outperforming prior perception-free method [li2025drivevla-w0] by 3.2 EPDMS."
+            },
+            {
+              "type": "paragraph",
+              "text": "We propose Spatial-Aware Compressive World Encoder, a novel scene compression method that distills geometric knowledge into the vision backbone to extract highly compressed, spatially-aware visual representations."
+            },
+            {
+              "type": "paragraph",
+              "text": "We propose Dynamic Latent World Model, a novel world modeling approach that leverages a causal Transformer to jointly learn visual and motion dynamics, building representations with dynamic scene understanding."
+            },
+            {
+              "type": "paragraph",
+              "text": "Our method achieves new state-of-the-art results on both NAVSIM v2 and HUGSIM, outperforming prior perception-free method [li2025drivevla-w0] by 3.2 EPDMS."
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "2 Related Works",
+          "level": 2,
+          "content": [],
+          "children": [
+            {
+              "heading": "2.1 Scene Representation in End-to-End Autonomous Driving",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "End-to-end autonomous driving directly optimizes trajectory planning, making the intermediate scene representation critical to overall performance. Early works [hu2023uniad, transfuser] adopt dense BEV layouts supervised by semantic maps and occupancy labels. Subsequent methods [jiang2023vad, chen2024vadv2, sun2024sparsedrive, jia2025drivetransformer] shift towards lightweight vectorized or sparse representations for improved efficiency. Recent efforts leverage VLMs [tian2024token, pan2024vlp, Hegde2025DistillingML] for richer semantic information, or employ latent world models [li2024law, zheng2025world4drive] and video generation [xia2025drivelaw] for scene representation. However, these methods often exhibit weak 3D spatial understanding and rely on cumbersome representations. We address these issues by distilling geometric knowledge into the vision backbone for stronger spatial understanding, while compressing scene information into a compact set of tokens via learnable queries."
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "2.2 World Models for Autonomous Driving",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "World models have been widely adopted in autonomous driving for environment representation and future state prediction. One line of work applies video generation models [Hu2023GAIA1AG, wang2023drivedreamer, zhao2024drivedreamer-2, chen2024driveworld, wang2023driving-wm, gao2024vista, guo2024dist4d] to construct pixel-level driving world representations, while 3D world models based on occupancy and point clouds [zheng2023occworld, zhang2024copilotd, zyrianov2025lidardm, dang2025sparseworld] enforce geometric constraints in 3D space, with subsequent works [li2024uniscene, li2025scaling] unifying 2D and 3D modeling. Building on these capabilities, some approaches [yang2024drivearena, li2025omninwm] use world models as closed-loop simulators, while others [zhang2025epona, li2025drivevla-w0, xia2025drivelaw, li2024law, zheng2025world4drive] directly leverage them for planning. To reduce computational overhead, LAW [li2024law], World4Drive [zheng2025world4drive], and Drive-JEPA [wang2026drivejepa] perform trajectory planning in the latent space. Our method similarly adopts a latent world model, but further incorporates ego status to guide future predictions and 3D-RoPE to enhance spatio-temporal tracking."
+                }
+              ],
+              "children": []
+            }
+          ]
+        },
+        {
+          "heading": "3 Method",
+          "level": 2,
+          "content": [],
+          "children": [
+            {
+              "heading": "3.1 Overall",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "The overall architecture of Latent-WAM is illustrated in [Fig.˜2](https://ar5iv.labs.arxiv.org/html/2603.24581v1#S3.F2 \"In 3.1 Overall ‣ 3 Method ‣ Latent-WAM: Latent World Action Modeling for End-to-End Autonomous Driving\"), consisting of three core modules: 1) Spatial-Aware Compressive World Encoder([Sec.˜3.2](https://ar5iv.labs.arxiv.org/html/2603.24581v1#S3.SS2 \"3.2 Spatial-Aware Compressive World Encoder ‣ 3 Method ‣ Latent-WAM: Latent World Action Modeling for End-to-End Autonomous Driving\")), which uses learnable queries and a vision encoder to compress images into compact scene tokens and a geometric foundation model is used to distill geometric perception ability into the encoder to improve spatial understanding, 2) Dynamic Latent World Model ([Sec.˜3.3](https://ar5iv.labs.arxiv.org/html/2603.24581v1#S3.SS3 \"3.3 Dynamic Latent World Model ‣ 3 Method ‣ Latent-WAM: Latent World Action Modeling for End-to-End Autonomous Driving\")), a causal transformer decoder that models world transition dynamics by autoregressively predicting future world status conditioned on historical scene representations and ego status, and 3) Trajectory Decoder([Sec.˜3.4](https://ar5iv.labs.arxiv.org/html/2603.24581v1#S3.SS4 \"3.4 Trajectory Planning ‣ 3 Method ‣ Latent-WAM: Latent World Action Modeling for End-to-End Autonomous Driving\")), which forecasts trajectories over a 4-second horizon from world status representations. The SCWE and DLWM jointly optimize the vision backbone. Geometric distillation enhances spatial understanding, while self-supervised learning improves temporal dynamics modeling. This design achieves strong planning performance at inference time without extra computational cost from auxiliary modules."
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "3.2 Spatial-Aware Compressive World Encoder",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "To model long-horizon world state transition, world status representations need to be sufficiently lightweight while compressing rich scene information. Different from prior methods that rely on extensive visual information, we use only a small set of learnable queries that fully interact with image patch tokens from the inputs, compressing rich world perception information into the latent space. In addition, to enhance the spatial understanding of the vision backbone, we use a geometric foundation model WorldMirror [liu2025worldmirror] to inject geometric awareness into the backbone through distillation."
+                }
+              ],
+              "children": [
+                {
+                  "heading": "3.2.1 Scene Compression.",
+                  "level": 4,
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "text": "We use a set of compact scene tokens to compress the heavy vision tokens from multi-view images, forming a foundational component of world status representations."
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "Given sequential multi-view images I∈ℝ𝐓×𝐌×H×W×3I\\in\\mathbb{R}^{\\mathbf{T}\\times\\mathbf{M}\\times H\\times W\\times 3} as input, we first embed them into image patch tokens X∈ℝ𝐓×𝐌×𝐒×DeX\\in\\mathbb{R}^{\\mathbf{T}\\times\\mathbf{M}\\times\\mathbf{S}\\times D\\_{e}}, where 𝐓,𝐌,𝐒\\mathbf{T},\\mathbf{M},\\mathbf{S} denote the temporal horizon, number of cameras, and number of image patches, respectively. A set of scene queries Qscene∈ℝ𝐓×𝐌×𝐍×DeQ\\_{\\text{scene}}\\in\\mathbb{R}^{\\mathbf{T}\\times\\mathbf{M}\\times\\mathbf{N}\\times D\\_{e}} are randomly initialized and concatenated with XX. The concatenated features are fed into a DINO encoder ℰ\\mathcal{E} containing an MLP that project to DlD\\_{l}-dimensional latent space, yielding frame-wise and view-specific scene representations Q^scene∈ℝ𝐓×𝐌×𝐍×Dl\\hat{Q}\\_{\\text{scene}}\\in\\mathbb{R}^{\\mathbf{T}\\times\\mathbf{M}\\times\\mathbf{N}\\times D\\_{l}} and image tokens X^∈ℝ𝐓×𝐌×𝐒×Dl\\hat{X}\\in\\mathbb{R}^{\\mathbf{T}\\times\\mathbf{M}\\times\\mathbf{S}\\times D\\_{l}}:"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "I∈ℝ𝐓×𝐌×H×W×3I\\in\\mathbb{R}^{\\mathbf{T}\\times\\mathbf{M}\\times H\\times W\\times 3}"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "X∈ℝ𝐓×𝐌×𝐒×DeX\\in\\mathbb{R}^{\\mathbf{T}\\times\\mathbf{M}\\times\\mathbf{S}\\times D_{e}}"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "𝐓,𝐌,𝐒\\mathbf{T},\\mathbf{M},\\mathbf{S}"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "Qscene∈ℝ𝐓×𝐌×𝐍×DeQ_{\\text{scene}}\\in\\mathbb{R}^{\\mathbf{T}\\times\\mathbf{M}\\times\\mathbf{N}\\times D_{e}}"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "XX"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "ℰ\\mathcal{E}"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "DlD_{l}"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "Q^scene∈ℝ𝐓×𝐌×𝐍×Dl\\hat{Q}_{\\text{scene}}\\in\\mathbb{R}^{\\mathbf{T}\\times\\mathbf{M}\\times\\mathbf{N}\\times D_{l}}"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "X^∈ℝ𝐓×𝐌×𝐒×Dl\\hat{X}\\in\\mathbb{R}^{\\mathbf{T}\\times\\mathbf{M}\\times\\mathbf{S}\\times D_{l}}"
+                    },
+                    {
+                      "type": "table",
+                      "text": "| | | | | | --- | --- | --- | --- | | | Q^scene,X^=ℰ​([Qscene;X])\\displaystyle\\hat{Q}\\_{\\text{scene}},\\hat{X}=\\mathcal{E}\\left(\\left[Q\\_{\\text{scene}};X\\right]\\right) | | (1) |"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "Q^scene,X^=ℰ​([Qscene;X])\\displaystyle\\hat{Q}_{\\text{scene}},\\hat{X}=\\mathcal{E}\\left(\\left[Q_{\\text{scene}};X\\right]\\right)"
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "where 𝐍\\mathbf{N} is the number of scene query tokens, DeD\\_{e} the encoder dimension, and DlD\\_{l} the latent dimension."
+                    },
+                    {
+                      "type": "formula",
+                      "text": "𝐍\\mathbf{N}"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "DeD_{e}"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "DlD_{l}"
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "By integrating scene queries with raw image tokens, extensive visual information from numerous image patch tokens is efficiently compressed into a compact set of tokens, significantly reducing computational overhead for subsequent long-term world model training and trajectory planning."
+                    }
+                  ],
+                  "children": []
+                },
+                {
+                  "heading": "3.2.2 Geometric Alignment.",
+                  "level": 4,
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "text": "To distill the spatial understanding capabilities of geometric foundation models into the DINO encoder, we employ the image patch tokens output by the SCWE as carriers for receiving dense spatial-semantic information from geometric features."
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "Multi-view images across consecutive frames II are additionally fed into a geometric foundation model fgf\\_{g}, producing patch-level geometric features fg​(I)∈ℝT×M×S×Dgf\\_{g}(I)\\in\\mathbb{R}^{\\textbf{T}\\times\\textbf{M}\\times\\textbf{S}\\times D\\_{g}}. The DINO backbone outputs X^\\hat{X} are subsequently projected via a geometric projector ϕ\\phi, yielding ϕ​(X^)∈ℝT×M×S×Dg\\phi(\\hat{X})\\in\\mathbb{R}^{\\textbf{T}\\times\\textbf{M}\\times\\textbf{S}\\times D\\_{g}}. Both fg​(I)f\\_{g}(I) and ϕ​(X^)\\phi(\\hat{X}) are first normalized using LayerNorm, then we compute their cosine similarity loss:"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "II"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "fgf_{g}"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "fg​(I)∈ℝT×M×S×Dgf_{g}(I)\\in\\mathbb{R}^{\\textbf{T}\\times\\textbf{M}\\times\\textbf{S}\\times D_{g}}"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "X^\\hat{X}"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "ϕ\\phi"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "ϕ​(X^)∈ℝT×M×S×Dg\\phi(\\hat{X})\\in\\mathbb{R}^{\\textbf{T}\\times\\textbf{M}\\times\\textbf{S}\\times D_{g}}"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "fg​(I)f_{g}(I)"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "ϕ​(X^)\\phi(\\hat{X})"
+                    },
+                    {
+                      "type": "table",
+                      "text": "| | | | | | --- | --- | --- | --- | | | ℒalign=1−cos​(LN​(ϕ​(X^)),LN​(fg​(I)))\\displaystyle\\mathcal{L}\\_{\\text{align}}=1-\\text{cos}\\left(\\text{LN}(\\phi(\\hat{X})),\\text{LN}(f\\_{g}(I))\\right) | | (2) |"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "ℒalign=1−cos​(LN​(ϕ​(X^)),LN​(fg​(I)))\\displaystyle\\mathcal{L}_{\\text{align}}=1-\\text{cos}\\left(\\text{LN}(\\phi(\\hat{X})),\\text{LN}(f_{g}(I))\\right)"
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "where cos⁡(⋅,⋅)\\cos(\\cdot,\\cdot) denotes cosine similarity and LN​(⋅)\\text{LN}(\\cdot) denotes LayerNorm."
+                    },
+                    {
+                      "type": "formula",
+                      "text": "cos⁡(⋅,⋅)\\cos(\\cdot,\\cdot)"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "LN​(⋅)\\text{LN}(\\cdot)"
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "Notably, since fgf\\_{g} remains frozen throughout training, the geometric features can be pre-computed and offline-cached, enabling direct loading during training without incurring repeated inference costs or GPU memory overhead. This design substantially reduces training time and computational expenses."
+                    },
+                    {
+                      "type": "formula",
+                      "text": "fgf_{g}"
+                    }
+                  ],
+                  "children": []
+                }
+              ]
+            },
+            {
+              "heading": "3.3 Dynamic Latent World Model",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "In this section, we propose a Dynamic Latent World Model(DLWM). By predicting future world status representations causally in the latent space, the backbone obtains temporal dynamics modeling capabilities through a self-supervised training paradigm under the perception-free setting."
+                }
+              ],
+              "children": [
+                {
+                  "heading": "3.3.1 World latent status aggregation.",
+                  "level": 4,
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "text": "The per-camera scene tokens Q^scene\\hat{Q}\\_{\\text{scene}} only capture isolated view-specific information, which is insufficient for holistic world modeling. To enable effective future prediction and trajectory planning, we aggregate these tokens and integrate with ego status to construct unified frame-wise world status representations. The ego status across consecutive frames, which include driving commands, velocity, and acceleration, is encoded by an ego status encoder (a single-layer MLP) into ego status embeddings Sego∈ℝT×DlS\\_{\\text{ego}}\\in\\mathbb{R}^{\\textbf{T}\\times D\\_{l}}. The scene tokens Q^scene\\hat{Q}\\_{\\text{scene}} from the SCWE and the ego status embeddings SegoS\\_{\\text{ego}} collectively constitute the frame-wise world latent state."
+                    },
+                    {
+                      "type": "formula",
+                      "text": "Q^scene\\hat{Q}_{\\text{scene}}"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "Sego∈ℝT×DlS_{\\text{ego}}\\in\\mathbb{R}^{\\textbf{T}\\times D_{l}}"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "Q^scene\\hat{Q}_{\\text{scene}}"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "SegoS_{\\text{ego}}"
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "Specifically, scene tokens from different cameras are aggregated to form a holistic perception representation of the surrounding environment, which is subsequently concatenated with SegoS\\_{\\text{ego}} encoding the ego status, yielding a unified Scene-Ego world status representation Sworld∈ℝT×(M×N+1)×DlS\\_{\\text{world}}\\in\\mathbb{R}^{\\textbf{T}\\times(\\textbf{M}\\times\\textbf{N}+1)\\times D\\_{l}}. This representation serves as the foundation for subsequent future world status prediction within the world model and trajectory planning."
+                    },
+                    {
+                      "type": "formula",
+                      "text": "SegoS_{\\text{ego}}"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "Sworld∈ℝT×(M×N+1)×DlS_{\\text{world}}\\in\\mathbb{R}^{\\textbf{T}\\times(\\textbf{M}\\times\\textbf{N}+1)\\times D_{l}}"
+                    }
+                  ],
+                  "children": []
+                },
+                {
+                  "heading": "3.3.2 Causal world model prediction.",
+                  "level": 4,
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "text": "We formulate world state transition dynamics modeling as an autoregressive prediction problem, where all future frame world status predictions are conditioned on historical world status representations, encompassing holistic scene representations and ego status. This unified autoregressive framework enables a natural training strategy: treating the alternating Scene-Ego world status token sequence SworldiS\\_{\\text{world}}^{i} as frame-wise blocks and adopting the standard next-token prediction to train the world model."
+                    },
+                    {
+                      "type": "formula",
+                      "text": "SworldiS_{\\text{world}}^{i}"
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "In detail, we randomly initialize a set of learnable future world status queries Qfuture∈ℝ(T−1)×(M×N+1)×DlQ\\_{\\text{future}}\\in\\mathbb{R}^{(\\textbf{T}-1)\\times(\\textbf{M}\\times\\textbf{N}+1)\\times D\\_{l}}, with Sworldi,i∈{1,…,T−1}S\\_{\\text{world}}^{i},i\\in\\{1,\\ldots,T-1\\} forming the key-value cache K​Vfuture∈ℝ(T−1)×(M×N+1)×DlKV\\_{\\text{future}}\\in\\mathbb{R}^{(\\textbf{T}-1)\\times(\\textbf{M}\\times\\textbf{N}+1)\\times D\\_{l}}. The DLWM adopts a standard Transformer decoder incorporating Rotary Position Embedding, producing future world status predictions Sfuture∈ℝ(T−1)×(M×N+1)×DlS\\_{\\text{future}}\\in\\mathbb{R}^{(\\textbf{T}-1)\\times(\\textbf{M}\\times\\textbf{N}+1)\\times D\\_{l}}. Formally,"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "Qfuture∈ℝ(T−1)×(M×N+1)×DlQ_{\\text{future}}\\in\\mathbb{R}^{(\\textbf{T}-1)\\times(\\textbf{M}\\times\\textbf{N}+1)\\times D_{l}}"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "Sworldi,i∈{1,…,T−1}S_{\\text{world}}^{i},i\\in\\{1,\\ldots,T-1\\}"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "K​Vfuture∈ℝ(T−1)×(M×N+1)×DlKV_{\\text{future}}\\in\\mathbb{R}^{(\\textbf{T}-1)\\times(\\textbf{M}\\times\\textbf{N}+1)\\times D_{l}}"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "Sfuture∈ℝ(T−1)×(M×N+1)×DlS_{\\text{future}}\\in\\mathbb{R}^{(\\textbf{T}-1)\\times(\\textbf{M}\\times\\textbf{N}+1)\\times D_{l}}"
+                    },
+                    {
+                      "type": "table",
+                      "text": "| | | | | | --- | --- | --- | --- | | | Sfuture=DLWM​(Qfuture,K​Vfuture)\\displaystyle S\\_{\\text{future}}=\\text{DLWM}(Q\\_{\\text{future}},KV\\_{\\text{future}}) | | (3) |"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "Sfuture=DLWM​(Qfuture,K​Vfuture)\\displaystyle S_{\\text{future}}=\\text{DLWM}(Q_{\\text{future}},KV_{\\text{future}})"
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "The ground truth SfutureGTS\\_{\\text{future}}^{\\text{GT}} is generated by a target encoder, which is a frozen copy of the SCWE updated via Exponential Moving Average (EMA) to provide stable supervision signals."
+                    },
+                    {
+                      "type": "formula",
+                      "text": "SfutureGTS_{\\text{future}}^{\\text{GT}}"
+                    }
+                  ],
+                  "children": []
+                },
+                {
+                  "heading": "3.3.3 Teacher Forcing Attention Mask.",
+                  "level": 4,
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "text": "Given a Scene-Ego interleaved token sequence, the world model predicts each future token by attending to all historical tokens. We adopt teacher forcing during training: ground truth tokens serve as context for predicting subsequent tokens, preventing error accumulation across timesteps."
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "Causal prediction is implemented via frame-wise attention masks, as shown in [Fig.˜3](https://ar5iv.labs.arxiv.org/html/2603.24581v1#S3.F3 \"In 3.3.3 Teacher Forcing Attention Mask. ‣ 3.3 Dynamic Latent World Model ‣ 3 Method ‣ Latent-WAM: Latent World Action Modeling for End-to-End Autonomous Driving\"). Within each frame block, tokens attend bidirectionally to each other. Cross-frame, each token can only attend to tokens appearing earlier in the sequence, enforcing temporal causality. This frame-wise attention design enables parallel prediction of all future world status while maintaining causal consistency, significantly improving training speed and efficiency."
+                    }
+                  ],
+                  "children": []
+                },
+                {
+                  "heading": "3.3.4 3D-RoPE.",
+                  "level": 4,
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "text": "Although SworldS\\_{\\text{world}} contains world status representations across multiple timestamps and camera views, the query vectors QfutureQ\\_{\\text{future}} and context features K​VfutureKV\\_{\\text{future}} do not explicitly carry temporal or spatial position information. To enable the model to distinguish temporal and spatial relationships among tokens, we inject spatio-temporal position information into multi-head attention via 3D-RoPE, which differentiates tokens across timesteps, camera views, and positions within long sequences."
+                    },
+                    {
+                      "type": "formula",
+                      "text": "SworldS_{\\text{world}}"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "QfutureQ_{\\text{future}}"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "K​VfutureKV_{\\text{future}}"
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "In practice, we split the head dimension DhD\\_{h} into three parts to encode temporal coordinate tt, camera index mm, and token index nn into QfutureQ\\_{\\text{future}} and K​VfutureKV\\_{\\text{future}}. We use absolute position indices to encode all three coordinates: temporal dimension with frequency 50, camera index with frequency 10, and token index with frequency 100."
+                    },
+                    {
+                      "type": "formula",
+                      "text": "DhD_{h}"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "tt"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "mm"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "nn"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "QfutureQ_{\\text{future}}"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "K​VfutureKV_{\\text{future}}"
+                    }
+                  ],
+                  "children": []
+                },
+                {
+                  "heading": "3.3.5 Ego status supervision.",
+                  "level": 4,
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "text": "The world status representation SworldS\\_{\\text{world}} contains both scene tokens and ego status embeddings. During world model prediction, ego status guides the evolution of scene representations as well as itself. Therefore, accurate prediction of ego status is crucial for modeling world dynamics. To provide precise guidance for the transition of world state, we introduce ego status supervision built upon the self-supervised future status prediction."
+                    },
+                    {
+                      "type": "formula",
+                      "text": "SworldS_{\\text{world}}"
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "We extract ego status embeddings Segoi′S\\_{\\text{ego}}^{i^{\\prime}} from the predicted future world status SfutureS\\_{\\text{future}}, where i′∈{2,…,T}i^{\\prime}\\in\\{2,\\ldots,T\\}. These embeddings are then fed into three separate MLPs: a driving command decoder DcmdD\\_{\\text{cmd}}, a velocity decoder DvD\\_{v}, and an acceleration decoder DaD\\_{a}, producing predictions Cpred∈ℝ(T−1)×4C\\_{\\text{pred}}\\in\\mathbb{R}^{(\\textbf{T}-1)\\times 4}, Vpred∈ℝ(T−1)×2V\\_{\\text{pred}}\\in\\mathbb{R}^{(\\textbf{T}-1)\\times 2}, and Apred∈ℝ(T−1)×2A\\_{\\text{pred}}\\in\\mathbb{R}^{(\\textbf{T}-1)\\times 2}, respectively. Formally:"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "Segoi′S_{\\text{ego}}^{i^{\\prime}}"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "SfutureS_{\\text{future}}"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "i′∈{2,…,T}i^{\\prime}\\in\\{2,\\ldots,T\\}"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "DcmdD_{\\text{cmd}}"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "DvD_{v}"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "DaD_{a}"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "Cpred∈ℝ(T−1)×4C_{\\text{pred}}\\in\\mathbb{R}^{(\\textbf{T}-1)\\times 4}"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "Vpred∈ℝ(T−1)×2V_{\\text{pred}}\\in\\mathbb{R}^{(\\textbf{T}-1)\\times 2}"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "Apred∈ℝ(T−1)×2A_{\\text{pred}}\\in\\mathbb{R}^{(\\textbf{T}-1)\\times 2}"
+                    },
+                    {
+                      "type": "table",
+                      "text": "| | | | | | --- | --- | --- | --- | | | Cpred=Softmax​(Dcmd​(Sego′)),Vpred=Dv​(Sego′),Apred=Da​(Sego′).\\displaystyle C\\_{\\text{pred}}=\\text{Softmax}(D\\_{\\text{cmd}}(S\\_{\\text{ego}}^{{}^{\\prime}})),\\ V\\_{\\text{pred}}=D\\_{v}(S\\_{\\text{ego}}^{{}^{\\prime}}),\\ A\\_{\\text{pred}}=D\\_{a}(S\\_{\\text{ego}}^{{}^{\\prime}}). | | (4) |"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "Cpred=Softmax​(Dcmd​(Sego′)),Vpred=Dv​(Sego′),Apred=Da​(Sego′).\\displaystyle C_{\\text{pred}}=\\text{Softmax}(D_{\\text{cmd}}(S_{\\text{ego}}^{{}^{\\prime}})),\\ V_{\\text{pred}}=D_{v}(S_{\\text{ego}}^{{}^{\\prime}}),\\ A_{\\text{pred}}=D_{a}(S_{\\text{ego}}^{{}^{\\prime}})."
+                    }
+                  ],
+                  "children": []
+                }
+              ]
+            },
+            {
+              "heading": "3.4 Trajectory Planning",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "We employ a trajectory decoder DτD\\_{\\tau} to planning, which generates trajectories corresponding to different driving intentions based on the control commands. A set of randomly initialized learnable trajectory queries Qτ∈ℝK×np×DlQ\\_{\\tau}\\in\\mathbb{R}^{K\\times n\\_{p}\\times D\\_{l}} is fed into the trajectory decoder along with the current world status representation Sw​o​r​l​dtS\\_{world}^{t} of the driving scenario. After processing, the trajectory tokens are decoded via a lightweight MLP into KK candidate trajectories. Finally, conditioned on the driving command CC at the current timestep tt, the corresponding candidate trajectory is selected as the final trajectory τ\\tau. Formally,"
+                },
+                {
+                  "type": "formula",
+                  "text": "DτD_{\\tau}"
+                },
+                {
+                  "type": "formula",
+                  "text": "Qτ∈ℝK×np×DlQ_{\\tau}\\in\\mathbb{R}^{K\\times n_{p}\\times D_{l}}"
+                },
+                {
+                  "type": "formula",
+                  "text": "Sw​o​r​l​dtS_{world}^{t}"
+                },
+                {
+                  "type": "formula",
+                  "text": "KK"
+                },
+                {
+                  "type": "formula",
+                  "text": "CC"
+                },
+                {
+                  "type": "formula",
+                  "text": "tt"
+                },
+                {
+                  "type": "formula",
+                  "text": "τ\\tau"
+                },
+                {
+                  "type": "table",
+                  "text": "| | | | | | --- | --- | --- | --- | | | τ=Dτ​(Qτ,Sw​o​r​l​dt,C)\\displaystyle\\tau=D\\_{\\tau}(Q\\_{\\tau},S\\_{world}^{t},C) | | (5) |"
+                },
+                {
+                  "type": "formula",
+                  "text": "τ=Dτ​(Qτ,Sw​o​r​l​dt,C)\\displaystyle\\tau=D_{\\tau}(Q_{\\tau},S_{world}^{t},C)"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Each decoded candidate trajectory τi\\tau\\_{i} is a sequence of npn\\_{p} poses spanning from the current timestep tt to a future time t+Tt+T, where TT represents the total prediction horizon. Each pose is represented as (x,y,θ)∈ℝ3(x,y,\\theta)\\in\\mathbb{R}^{3}, yielding complete trajectories in ℝnp×3\\mathbb{R}^{n\\_{p}\\times 3}, where xx and yy correspond to longitudinal and lateral displacements, respectively, with θ\\theta denoting the heading angle. All quantities are referenced to the ego vehicle’s local coordinate system at timestep tt. The time interval between consecutive predicted poses is assumed to be uniform."
+                },
+                {
+                  "type": "formula",
+                  "text": "τi\\tau_{i}"
+                },
+                {
+                  "type": "formula",
+                  "text": "npn_{p}"
+                },
+                {
+                  "type": "formula",
+                  "text": "tt"
+                },
+                {
+                  "type": "formula",
+                  "text": "t+Tt+T"
+                },
+                {
+                  "type": "formula",
+                  "text": "TT"
+                },
+                {
+                  "type": "formula",
+                  "text": "(x,y,θ)∈ℝ3(x,y,\\theta)\\in\\mathbb{R}^{3}"
+                },
+                {
+                  "type": "formula",
+                  "text": "ℝnp×3\\mathbb{R}^{n_{p}\\times 3}"
+                },
+                {
+                  "type": "formula",
+                  "text": "xx"
+                },
+                {
+                  "type": "formula",
+                  "text": "yy"
+                },
+                {
+                  "type": "formula",
+                  "text": "θ\\theta"
+                },
+                {
+                  "type": "formula",
+                  "text": "tt"
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "3.5 Training and Inference",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "Training Objective. Following prior work, we employ L1L\\_{1} loss ℒt​r​a​j\\mathcal{L}\\_{traj} to optimize the generated multi-candidate trajectories by imitating expert trajectories. Geometric alignment computes cosine similarity loss ℒa​l​i​g​n\\mathcal{L}\\_{align} on normalized features, maximizing cosine similarity to distill spatial understanding capability. For the world model, we use MSE loss ℒw​m\\mathcal{L}\\_{wm} to optimize the prediction of future world state. Future ego status requires supervision over driving command, velocity, and acceleration, including ℒc​m​d=CrossEntropy​(Cp​r​e​d,Cg​t)\\mathcal{L}\\_{cmd}=\\text{CrossEntropy}(C\\_{pred},C\\_{gt}), ℒv=MSE​(Vp​r​e​d,Vg​t)\\mathcal{L}\\_{v}=\\text{MSE}(V\\_{pred},V\\_{gt}) and ℒa=MSE​(Ap​r​e​d,Ag​t)\\mathcal{L}\\_{a}=\\text{MSE}(A\\_{pred},A\\_{gt}). The total loss for ego status is ℒe​g​o=ℒc​m​d+ℒv+ℒa\\mathcal{L}\\_{ego}=\\mathcal{L}\\_{cmd}+\\mathcal{L}\\_{v}+\\mathcal{L}\\_{a}. The final loss for end-to-end training is:"
+                },
+                {
+                  "type": "formula",
+                  "text": "L1L_{1}"
+                },
+                {
+                  "type": "formula",
+                  "text": "ℒt​r​a​j\\mathcal{L}_{traj}"
+                },
+                {
+                  "type": "formula",
+                  "text": "ℒa​l​i​g​n\\mathcal{L}_{align}"
+                },
+                {
+                  "type": "formula",
+                  "text": "ℒw​m\\mathcal{L}_{wm}"
+                },
+                {
+                  "type": "formula",
+                  "text": "ℒc​m​d=CrossEntropy​(Cp​r​e​d,Cg​t)\\mathcal{L}_{cmd}=\\text{CrossEntropy}(C_{pred},C_{gt})"
+                },
+                {
+                  "type": "formula",
+                  "text": "ℒv=MSE​(Vp​r​e​d,Vg​t)\\mathcal{L}_{v}=\\text{MSE}(V_{pred},V_{gt})"
+                },
+                {
+                  "type": "formula",
+                  "text": "ℒa=MSE​(Ap​r​e​d,Ag​t)\\mathcal{L}_{a}=\\text{MSE}(A_{pred},A_{gt})"
+                },
+                {
+                  "type": "formula",
+                  "text": "ℒe​g​o=ℒc​m​d+ℒv+ℒa\\mathcal{L}_{ego}=\\mathcal{L}_{cmd}+\\mathcal{L}_{v}+\\mathcal{L}_{a}"
+                },
+                {
+                  "type": "table",
+                  "text": "| | | | | | --- | --- | --- | --- | | | ℒ=ℒt​r​a​j+α​ℒa​l​i​g​n+β​ℒw​m+γ​ℒe​g​o\\displaystyle\\mathcal{L}=\\mathcal{L}\\_{traj}+\\alpha\\mathcal{L}\\_{align}+\\beta\\mathcal{L}\\_{wm}+\\gamma\\mathcal{L}\\_{ego} | | (6) |"
+                },
+                {
+                  "type": "formula",
+                  "text": "ℒ=ℒt​r​a​j+α​ℒa​l​i​g​n+β​ℒw​m+γ​ℒe​g​o\\displaystyle\\mathcal{L}=\\mathcal{L}_{traj}+\\alpha\\mathcal{L}_{align}+\\beta\\mathcal{L}_{wm}+\\gamma\\mathcal{L}_{ego}"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "where α=0.1\\alpha=0.1, β=0.2\\beta=0.2, and γ=0.1\\gamma=0.1."
+                },
+                {
+                  "type": "formula",
+                  "text": "α=0.1\\alpha=0.1"
+                },
+                {
+                  "type": "formula",
+                  "text": "β=0.2\\beta=0.2"
+                },
+                {
+                  "type": "formula",
+                  "text": "γ=0.1\\gamma=0.1"
+                }
+              ],
+              "children": [
+                {
+                  "heading": "3.5.1 Inference.",
+                  "level": 4,
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "text": "During inference, only the Spatial-Aware Compressive Encoder and Trajectory Decoder is required, without any additional modules that would introduce inference latency."
+                    }
+                  ],
+                  "children": []
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "heading": "4 Experiment",
+          "level": 2,
+          "content": [],
+          "children": [
+            {
+              "heading": "4.1 Implementation Details",
+              "level": 3,
+              "content": [],
+              "children": [
+                {
+                  "heading": "4.1.1 Architecture.",
+                  "level": 4,
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "text": "We adopt DINOv2-Base [oquab2023dinov2] as our vision encoder (86.6M parameters), which constitutes the foundation of the Spatial-Aware Compressive World Encoder (SCWE) and produces patch tokens of dimension De=768D\\_{e}=768. We employ N=16N=16 learnable scene queries with dimension DeD\\_{e}, projected to latent space Dl=256D\\_{l}=256 via an MLP. We set the temporal horizon to T=4T=4 frames and adopt three camera views—left, front, and right. Each view is resized to 224×448224\\times 448 before feeding into the World Encoder. Notably, the geometric foundation model we employ is WorldMirror [liu2025worldmirror], a feed-forward model built upon VGGT [wang2025vggt]. The dimension of ground-truth geometric feature map is Dg=2048D\\_{g}=2048."
+                    },
+                    {
+                      "type": "formula",
+                      "text": "De=768D_{e}=768"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "N=16N=16"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "DeD_{e}"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "Dl=256D_{l}=256"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "T=4T=4"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "224×448224\\times 448"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "Dg=2048D_{g}=2048"
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "For the DLWM, we design a causal transformer decoder with 3D-RoPE for position embedding. The trajectory decoder follows a standard transformer architecture. Both DLWM and trajectory decoder comprise 4 layers with 8 attention heads, hidden dimension 256, and FFN dimension 1024. To provide ground truth world status representations for self-supervised training, we additionally introduce a frozen SCWE updated via Exponential Moving Average (EMA), maintaining complete architectural symmetry with the online encoder."
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "The model contains 104M parameters at inference time. During training, an additional EMA encoder is introduced for self-supervised learning, bringing the total to 191M, of which only 104M are trainable."
+                    }
+                  ],
+                  "children": []
+                },
+                {
+                  "heading": "4.1.2 Training Configuration.",
+                  "level": 4,
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "text": "Latent-WMA is trained on 32 A100 GPUs for 100 epochs with a total batch size of 512, taking approximately two days. We employ the AdamW [loshchilov2019adamw] optimizer with a learning rate of 2×10−42\\times 10^{-4} and weight decay 0.05. The training schedule incorporates linear warm-up over the first 10% steps, followed by cosine annealing scheduling to 1×10−61\\times 10^{-6} after reaching the peak. BF16 mixed-precision training is applied to reduce memory footprint."
+                    },
+                    {
+                      "type": "formula",
+                      "text": "2×10−42\\times 10^{-4}"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "1×10−61\\times 10^{-6}"
+                    }
+                  ],
+                  "children": []
+                }
+              ]
+            },
+            {
+              "heading": "4.2 Benchmarks & Main Results",
+              "level": 3,
+              "content": [],
+              "children": [
+                {
+                  "heading": "4.2.1 NAVSIM.",
+                  "level": 4,
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "text": "NAVSIM [im2024navsim] is a real-world autonomous driving dataset built upon OpenScene [openscene2023] and nuPlan [nuplan], comprising 103k training and 12k evaluation scenarios. NAVSIM v1 evaluates closed-loop planning using the Predictive Driver Model Score (PDMS), which aggregates No at-fault Collisions (NC), Drivable Area Compliance (DAC), Time to Collision (TTC), Ego Progress (EP), and Comfort (C). NAVSIM v2 [cao2025navsimv2] extends PDMS to EPDMS with additional metrics for rule compliance—Driving Direction Compliance (DDC), Traffic Light Compliance (TLC), Lane Keeping (LK)—and refines Comfort into History Comfort (HC) and Extended Comfort (EC)."
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "The results on NAVSIM v2 are shown in [Tab.˜1](https://ar5iv.labs.arxiv.org/html/2603.24581v1#S4.T1 \"In 4.2.1 NAVSIM. ‣ 4.2 Benchmarks & Main Results ‣ 4 Experiment ‣ Latent-WAM: Latent World Action Modeling for End-to-End Autonomous Driving\"). Latent-WMA achieves the highest EPDMS among all methods, including those relying on perception annotations. Our method demonstrates strong rule compliance, with DDC, TLC and LK ranking among the top. Compared to Drive-JEPA [wang2026drivejepa], which additionally relies on perception annotations, our perception-free approach is slightly behind in safety metrics but achieves substantially better EC. Our EP (87.7) is slightly lower than Epona (88.6), likely because our safety-aware planning favors maintaining safer distances over aggressive ego progress."
+                    },
+                    {
+                      "type": "table",
+                      "text": "| | | | | | | | | | | | | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | | Method | NC↑\\uparrow | DAC↑\\uparrow | DDC↑\\uparrow | TLC↑\\uparrow | EP↑\\uparrow | TTC↑\\uparrow | LK↑\\uparrow | HC↑\\uparrow | EC↑\\uparrow | EPDMS↑\\uparrow | | Perception-based Methods | | | | | | | | | | | | TransFuser [transfuser] | 96.9 | 89.9 | 97.8 | 99.7 | 87.1 | 95.4 | 92.7 | 98.3 | 87.2 | 76.7 | | DriveSuprim [yao2025drivesuprim] | 97.5 | 96.5 | 99.4 | 99.6 | 88.4 | 96.6 | 95.5 | 98.3 | 77.0 | 83.1 | | ReCogDrive [li2025recogdrive] | 98.3 | 95.2 | 99.5 | 99.8 | 87.1 | 97.5 | 96.6 | 98.3 | 86.5 | 83.6 | | DiffusionDrive [diffdrive] | 98.2 | 95.9 | 99.4 | 99.8 | 87.5 | 97.3 | 96.8 | 98.3 | 87.7 | 84.5 | | WorldRFT[yang2025worldrft] | 97.8 | 96.5 | 99.5 | 99.8 | 88.5 | 97.0 | 97.4 | 98.1 | 69.1 | 86.7 | | Drive-JEPA† [wang2026drivejepa] | 98.4 | 98.6 | 99.1 | 99.8 | 88.4 | 97.8 | 97.6 | 97.9 | 84.8 | 87.8 | | Perception-free Methods | | | | | | | | | | | | World4Drive [zheng2025world4drive] | 97.8 | 96.3 | 99.4 | 99.8 | 88.3 | 97.1 | 97.7 | 98.0 | 53.9 | 84.8 | | Epona [zhang2025epona] | 97.1 | 95.7 | 99.3 | 99.7 | 88.6 | 96.3 | 97.0 | 98.0 | 67.8 | 85.1 | | DriveVLA-W0 [li2025drivevla-w0] | 98.5 | 99.1 | 98.0 | 99.7 | 86.4 | 98.1 | 93.2 | 97.9 | 58.9 | 86.1 | | Ours | 98.1 | 97.3 | 99.6 | 99.8 | 87.7 | 97.3 | 97.6 | 98.1 | 87.3 | 89.3 |"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "↑\\uparrow"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "↑\\uparrow"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "↑\\uparrow"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "↑\\uparrow"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "↑\\uparrow"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "↑\\uparrow"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "↑\\uparrow"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "↑\\uparrow"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "↑\\uparrow"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "↑\\uparrow"
+                    }
+                  ],
+                  "children": []
+                },
+                {
+                  "heading": "4.2.2 HUGSIM.",
+                  "level": 4,
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "text": "For closed-loop evaluation, we employ HUGSIM [zhou2024hugsim], a benchmark with scenarios from KITTI-360 [kitti360], nuScenes [nuscenes], PandaSet [pandaset], and Waymo [waymo]. These scenarios are reconstructed as photorealistic 3D environments where the planner controls the ego vehicle through RGB cameras with dynamically adjusted viewpoints."
+                    },
+                    {
+                      "type": "table",
+                      "text": "| | | | | | | | | | | | | | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | | Method | | RC↑\\uparrow | | | | | HD-Score↑\\uparrow | | | | | | | E | M | H | X | Avg. | E | M | H | X | Avg. | | UniAD | [hu2023uniad] | 58.6 | 41.2 | 40.4 | 26.0 | 40.6 | 48.7 | 29.5 | 27.3 | 14.3 | 28.9 | | VAD | [jiang2023vad] | 38.7 | 27.0 | 25.5 | 23.0 | 27.9 | 24.3 | 09.9 | 10.4 | 08.2 | 12.3 | | LTF | [chitta2022transfuser] | 68.4 | 40.7 | 36.9 | 25.5 | 41.4 | 52.8 | 24.6 | 19.8 | 08.1 | 24.8 | | GTRS-Dense | [li2025gtrs] | 64.2 | 50.0 | 20.7 | 22.3 | 38.0 | 55.5 | 39.0 | 11.7 | 14.3 | 28.6 | | Ours | | 84.2 | 42.5 | 30.6 | 35.5 | 45.9 | 72.5 | 24.0 | 12.2 | 18.1 | 28.9 | | E: Easy, M: Medium, H: Hard, X: Extreme | | | | | | | | | | | | | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "↑\\uparrow"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "↑\\uparrow"
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "[Tab.˜2](https://ar5iv.labs.arxiv.org/html/2603.24581v1#S4.T2 \"In 4.2.2 HUGSIM. ‣ 4.2 Benchmarks & Main Results ‣ 4 Experiment ‣ Latent-WAM: Latent World Action Modeling for End-to-End Autonomous Driving\") presents results on the pre-challenge HUGSIM test set, which contains 436 scenarios across four difficulty levels. Following the zero-shot protocol, we evaluate using Road Completion (RC) and the HUGSIM Driving Score (HD-Score)—the latter combining RC with averaged NC, DAC, TTC, and comfort metrics. We evaluate Latent-WMA in a zero-shot setting on HUGSIM: the model is trained exclusively on NAVSIM without any fine-tuning, yet achieves 45.9 RC and 28.9 HD-Score, ranking first in RC and matching the best HD-Score among all baselines."
+                    }
+                  ],
+                  "children": []
+                }
+              ]
+            },
+            {
+              "heading": "4.3 Ablation Study",
+              "level": 3,
+              "content": [
+                {
+                  "type": "table",
+                  "text": "| | | | | | | --- | --- | --- | --- | --- | | Scene Representation | | Dynamic World Modeling | | EPDMS↑\\uparrow | | Compression | Geometry | World Model | Ego Status | | ✗ | ✗ | ✗ | ✗ | 87.9 | | ✓ | ✗ | ✗ | ✗ | 87.7−0.2\\mathrlap{{}\\_{{\\color[rgb]{0.82421875,0,0}\\definecolor[named]{pgfstrokecolor}{rgb}{0.82421875,0,0}-0.2}}} | | ✓ | ✗ | ✓ | ✗ | 88.0+0.1\\mathrlap{{}\\_{{\\color[rgb]{0,0.5703125,0}\\definecolor[named]{pgfstrokecolor}{rgb}{0,0.5703125,0}+0.1}}} | | ✓ | ✗ | ✓ | ✓ | 88.3+0.4\\mathrlap{{}\\_{{\\color[rgb]{0,0.5703125,0}\\definecolor[named]{pgfstrokecolor}{rgb}{0,0.5703125,0}+0.4}}} | | ✓ | ✓ | ✗ | ✗ | 88.6+0.7\\mathrlap{{}\\_{{\\color[rgb]{0,0.5703125,0}\\definecolor[named]{pgfstrokecolor}{rgb}{0,0.5703125,0}+0.7}}} | | ✓ | ✓ | ✓ | ✗ | 89.0+1.1\\mathrlap{{}\\_{{\\color[rgb]{0,0.5703125,0}\\definecolor[named]{pgfstrokecolor}{rgb}{0,0.5703125,0}+1.1}}} | | ✓ | ✓ | ✓ | ✓ | 89.3+1.4\\mathrlap{{}\\_{{\\color[rgb]{0,0.5703125,0}\\definecolor[named]{pgfstrokecolor}{rgb}{0,0.5703125,0}+1.4}}} |"
+                },
+                {
+                  "type": "formula",
+                  "text": "↑\\uparrow"
+                },
+                {
+                  "type": "formula",
+                  "text": "−0.2\\mathrlap{{}_{{\\color[rgb]{0.82421875,0,0}\\definecolor[named]{pgfstrokecolor}{rgb}{0.82421875,0,0}-0.2}}}"
+                },
+                {
+                  "type": "formula",
+                  "text": "+0.1\\mathrlap{{}_{{\\color[rgb]{0,0.5703125,0}\\definecolor[named]{pgfstrokecolor}{rgb}{0,0.5703125,0}+0.1}}}"
+                },
+                {
+                  "type": "formula",
+                  "text": "+0.4\\mathrlap{{}_{{\\color[rgb]{0,0.5703125,0}\\definecolor[named]{pgfstrokecolor}{rgb}{0,0.5703125,0}+0.4}}}"
+                },
+                {
+                  "type": "formula",
+                  "text": "+0.7\\mathrlap{{}_{{\\color[rgb]{0,0.5703125,0}\\definecolor[named]{pgfstrokecolor}{rgb}{0,0.5703125,0}+0.7}}}"
+                },
+                {
+                  "type": "formula",
+                  "text": "+1.1\\mathrlap{{}_{{\\color[rgb]{0,0.5703125,0}\\definecolor[named]{pgfstrokecolor}{rgb}{0,0.5703125,0}+1.1}}}"
+                },
+                {
+                  "type": "formula",
+                  "text": "+1.4\\mathrlap{{}_{{\\color[rgb]{0,0.5703125,0}\\definecolor[named]{pgfstrokecolor}{rgb}{0,0.5703125,0}+1.4}}}"
+                }
+              ],
+              "children": [
+                {
+                  "heading": "4.3.1 Effectiveness of Each Component.",
+                  "level": 4,
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "text": "We conduct progressive ablation experiments by gradually adding modules to the baseline, as shown in [Tab.˜3](https://ar5iv.labs.arxiv.org/html/2603.24581v1#S4.T3 \"In 4.3 Ablation Study ‣ 4 Experiment ‣ Latent-WAM: Latent World Action Modeling for End-to-End Autonomous Driving\")."
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "Scene Representation. The baseline directly feeds image patch tokens to the trajectory decoder, achieving 87.9 EPDMS. To enable long-horizon prediction in the world model, we compress image patches into compact scene tokens, incurring only a negligible performance drop (↓0.2\\downarrow 0.2). Injecting geometric information boosts performance to 88.6, demonstrating that geometric perception is crucial for accurate trajectory planning."
+                    },
+                    {
+                      "type": "formula",
+                      "text": "↓0.2\\downarrow 0.2"
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "Dynamic World Modeling. Building upon compressed scene tokens, the DLWM improves performance from 87.7 to 88.0 by capturing future dynamics. Adding ego status further increases the score to 88.3, indicating that self-state awareness benefits planning. With geometric information, the world model further reaches 89.0. The full model combining all components achieves 89.3, showing that all modules contribute synergistically."
+                    }
+                  ],
+                  "children": []
+                },
+                {
+                  "heading": "4.3.2 Impact of Geometric Information.",
+                  "level": 4,
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "text": "We compare different approaches to incorporate geometric information, as shown in [Tab.˜5](https://ar5iv.labs.arxiv.org/html/2603.24581v1#S4.T5 \"In 4.3.3 Vision Backbone for Geometric Distillation. ‣ 4.3 Ablation Study ‣ 4 Experiment ‣ Latent-WAM: Latent World Action Modeling for End-to-End Autonomous Driving\")."
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "Without geometric information, the full model (with compression, world model, and ego status) achieves 88.3 EPDMS. Directly concatenating frozen geometry features as key-value inputs surprisingly degrades performance to 88.0, likely due to misalignment between frozen features and the planning objective, introducing conflicting signals."
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "In contrast, distilling geometric knowledge into the vision backbone improves performance to 89.3. End-to-end fine-tuning enables the model to learn spatial-aware representations inherently aligned with downstream planning, leading to substantial gains over both alternatives."
+                    }
+                  ],
+                  "children": []
+                },
+                {
+                  "heading": "4.3.3 Vision Backbone for Geometric Distillation.",
+                  "level": 4,
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "text": "We compare different backbone scales and fine-tuning strategies for geometric distillation, as shown in [Tab.˜5](https://ar5iv.labs.arxiv.org/html/2603.24581v1#S4.T5 \"In 4.3.3 Vision Backbone for Geometric Distillation. ‣ 4.3 Ablation Study ‣ 4 Experiment ‣ Latent-WAM: Latent World Action Modeling for End-to-End Autonomous Driving\")."
+                    },
+                    {
+                      "type": "table",
+                      "text": "| Geometric Information | EPDMS↑\\uparrow | | --- | --- | | w/o Geometric feature | 88.3 | | Concatenation | 88.0 | | Distillation | 89.3 |"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "↑\\uparrow"
+                    },
+                    {
+                      "type": "table",
+                      "text": "| DINO Backbone | EPDMS↑\\uparrow | | --- | --- | | Small | 86.3 | | Base | 89.3 | | Small-LoRA | 84.7 | | Base-LoRA | 68.5 |"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "↑\\uparrow"
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "Backbone Scale. DINO-Small achieves 86.3 EPDMS but remains suboptimal due to insufficient parameter capacity for high-dimensional geometric features. DINO-Base with full fine-tuning achieves the best performance (89.3), indicating that sufficient backbone capacity is essential for effective distillation."
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "Training Strategy. Parameter-efficient fine-tuning via LoRA leads to severe degradation and unstable training for both DINO-Small-LoRA (84.7) and DINO-Base-LoRA (68.5). LoRA’s low-rank constraints are inadequate for distilling high-dimensional geometric features, which require full parameter updates. Notably, DINO-Base-LoRA degrades more severely than DINO-Small-LoRA, as the larger model has more parameters frozen under LoRA, amplifying the mismatch between the low-rank update subspace and the high-dimensional distillation target."
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "In summary, effective geometric distillation requires both sufficient model capacity and full fine-tuning flexibility."
+                    }
+                  ],
+                  "children": []
+                },
+                {
+                  "heading": "4.3.4 World Model Prediction Temporal Stride.",
+                  "level": 4,
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "text": "We investigate the effect of prediction temporal stride in the DLWM, as shown in [Tab.˜6](https://ar5iv.labs.arxiv.org/html/2603.24581v1#S4.T6 \"In 4.3.4 World Model Prediction Temporal Stride. ‣ 4.3 Ablation Study ‣ 4 Experiment ‣ Latent-WAM: Latent World Action Modeling for End-to-End Autonomous Driving\")."
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "Predicting only the final frame (0→80\\rightarrow 8) achieves 88.4 EPDMS. Incorporating historical frames and intermediate future predictions with stride 4 (−3→0→4→8-3\\rightarrow 0\\rightarrow 4\\rightarrow 8) improves performance to 89.3, as multi-step prediction provides richer supervision for representation learning."
+                    },
+                    {
+                      "type": "formula",
+                      "text": "0→80\\rightarrow 8"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "−3→0→4→8-3\\rightarrow 0\\rightarrow 4\\rightarrow 8"
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "Further increasing density to stride 2 (−3→−2→⋯→8-3\\rightarrow-2\\rightarrow\\cdots\\rightarrow 8) yields 89.1, providing no further improvement over stride 4. Since all configurations predict up to the same horizon (8 frames), denser sampling does not extend the temporal reasoning range. Meanwhile, adjacent frames in driving scenes exhibit high similarity, providing limited additional learning signal. Moreover, optimizing a larger number of prediction targets may be less effective under the dense supervision setting. Additionally, denser prediction incurs higher computational overhead and longer training time."
+                    },
+                    {
+                      "type": "formula",
+                      "text": "−3→−2→⋯→8-3\\rightarrow-2\\rightarrow\\cdots\\rightarrow 8"
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "We conclude that moderate prediction density balances supervision effectiveness and optimization efficiency."
+                    },
+                    {
+                      "type": "table",
+                      "text": "| Prediction Temporal Stride | EPDMS↑\\uparrow | | --- | --- | | 0→80\\rightarrow 8 | 88.4 | | −3→0→4→8-3\\rightarrow 0\\rightarrow 4\\rightarrow 8 | 89.3 | | −3→−2→−1→0→2→4→6→8-3\\rightarrow-2\\rightarrow-1\\rightarrow 0\\rightarrow 2\\rightarrow 4\\rightarrow 6\\rightarrow 8 | 89.1 |"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "↑\\uparrow"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "0→80\\rightarrow 8"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "−3→0→4→8-3\\rightarrow 0\\rightarrow 4\\rightarrow 8"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "−3→−2→−1→0→2→4→6→8-3\\rightarrow-2\\rightarrow-1\\rightarrow 0\\rightarrow 2\\rightarrow 4\\rightarrow 6\\rightarrow 8"
+                    }
+                  ],
+                  "children": []
+                },
+                {
+                  "heading": "4.3.5 Qualitative Analysis.",
+                  "level": 4,
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "text": "In this section, we qualitatively evaluate Latent-WMA on NAVSIM, analyzing both the trajectory planning performance and the spatial understanding capabilities of the World Encoder after geometric distillation."
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "Trajectory Comparison. As shown in [Fig.˜4](https://ar5iv.labs.arxiv.org/html/2603.24581v1#S4.F4 \"In 4.3.5 Qualitative Analysis. ‣ 4.3 Ablation Study ‣ 4 Experiment ‣ Latent-WAM: Latent World Action Modeling for End-to-End Autonomous Driving\"), we compare predicted trajectories of different world-model-based methods (green: human trajectories, yellow: prediction). Our method better aligns with the human trajectories and maintains safer distances from other vehicles. In contrast, Epona [zhang2025epona] produces relatively inferior trajectories, and World4Drive [zheng2025world4drive] yields acceptable but sub-optimal paths."
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "Spatial Understanding. To investigate how geometric distillation enhances spatial understanding, we visualize the cross-attention maps between scene tokens and image patches in [Fig.˜5](https://ar5iv.labs.arxiv.org/html/2603.24581v1#S4.F5 \"In 4.3.5 Qualitative Analysis. ‣ 4.3 Ablation Study ‣ 4 Experiment ‣ Latent-WAM: Latent World Action Modeling for End-to-End Autonomous Driving\")."
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "Compared to the baseline that only compresses images into scene tokens without geometric distillation, our model exhibits significantly more focused attention patterns, concentrating on lane markings, scene structures, and drivable areas critical for trajectory planning. The baseline, in contrast, produces scattered attention that allocates substantial weights to irrelevant background regions (*e.g*., sky, distant buildings), suggesting that without geometric supervision, compressed scene tokens tend to encode noisy information that interferes with downstream planning."
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "Furthermore, our attention maps demonstrate stronger alignment with the underlying geometric structure. While the baseline exhibits loose and diffuse attention regions, our World Encoder produces compact patterns that tightly follow geometric boundaries—such as lane markings and open spaces adjacent to obstacles."
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "We also visualize attention maps under different driving intentions, including going straight, turning right, and turning left. The attention distribution is strongly correlated with the driving intent: the model predominantly attends to regions along the intended direction, while areas deviating from the planned trajectory receive minimal attention. This intent-aware behavior demonstrates that our World Encoder learns to selectively focus on task-relevant spatial information conditioned on the driving context."
+                    }
+                  ],
+                  "children": []
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "heading": "5 Conclusion",
+          "level": 2,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "We presented Latent-WAM, an end-to-end autonomous driving framework that builds compact, planning-relevant world representations via spatial-aware compression and dynamic latent modeling. The Spatial-Aware Compressive World Encoder distills geometric knowledge from a foundation model into the vision backbone, compressing multi-view images into a small set of spatially-informed scene tokens. The Dynamic Latent World Model leverages a causal Transformer with 3D-RoPE to autoregressively predict future world status, acquiring dynamic understanding through self-supervised visual and supervised motion prediction. Latent-WAM achieves new state-of-the-art results on both NAVSIM v2 (89.3 EPDMS) and HUGSIM (45.9 RC and 28.9 HD-Score) with significantly less training data and fewer parameters than competing methods."
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "References",
+          "level": 2,
+          "content": [],
+          "children": []
+        },
+        {
+          "heading": "Supplementary Materials",
+          "level": 2,
+          "content": [],
+          "children": []
+        },
+        {
+          "heading": "A. Metrics",
+          "level": 2,
+          "content": [],
+          "children": [
+            {
+              "heading": "A.1. NAVSIM",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "NAVSIM v2 [cao2025navsimv2] extends the PDMS metric from NAVSIM v1 [im2024navsim] to the Extended PDMS (EPDMS):"
+                },
+                {
+                  "type": "table",
+                  "text": "| | | | | | --- | --- | --- | --- | | | EPDMS=NC×DAC×DDC×TLC×5×(EP+TTC)+2×(LK+HC+EC)16\\text{EPDMS}=\\text{NC}\\times\\text{DAC}\\times\\text{DDC}\\times\\text{TLC}\\times\\frac{5\\times(\\text{EP}+\\text{TTC})+2\\times(\\text{LK}+\\text{HC}+\\text{EC})}{16} | | (7) |"
+                },
+                {
+                  "type": "formula",
+                  "text": "EPDMS=NC×DAC×DDC×TLC×5×(EP+TTC)+2×(LK+HC+EC)16\\text{EPDMS}=\\text{NC}\\times\\text{DAC}\\times\\text{DDC}\\times\\text{TLC}\\times\\frac{5\\times(\\text{EP}+\\text{TTC})+2\\times(\\text{LK}+\\text{HC}+\\text{EC})}{16}"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "where NC, DAC, DDC, TLC, EP, TTC, LK, HC, and EC denote No at-fault Collision, Drivable Area Compliance, Driving Direction Compliance, Traffic Light Compliance, Ego Progress, Time to Collision, Lane Keeping, History Comfort, and Extended Comfort, respectively. Among these, DDC, TLC, LK, HC, and EC are newly introduced in NAVSIM v2."
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "A.2. HUGSIM",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "The HUGSIM [zhou2024hugsim] Driving Score (HD-Score) at timestamp tt is computed as the product of driving policy items and a weighted average of contributory items:"
+                },
+                {
+                  "type": "formula",
+                  "text": "tt"
+                },
+                {
+                  "type": "table",
+                  "text": "| | | | | | --- | --- | --- | --- | | | HD-Scoret=NC×DAC×5×TTC+2×COM7\\text{HD-Score}\\_{t}=\\text{NC}\\times\\text{DAC}\\times\\frac{5\\times\\text{TTC}+2\\times\\text{COM}}{7} | | (8) |"
+                },
+                {
+                  "type": "formula",
+                  "text": "HD-Scoret=NC×DAC×5×TTC+2×COM7\\text{HD-Score}_{t}=\\text{NC}\\times\\text{DAC}\\times\\frac{5\\times\\text{TTC}+2\\times\\text{COM}}{7}"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "where NC, DAC, TTC, and COM denote No at-fault Collision, Drivable Area Compliance, Time to Collision, and Ego Comfort, respectively. These metrics follow the same definitions as used in NAVSIM v1."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "The final HD-Score averages per-frame scores across all timestamps and scales by the route completion score Rc∈[0,1]R\\_{c}\\in[0,1]:"
+                },
+                {
+                  "type": "formula",
+                  "text": "Rc∈[0,1]R_{c}\\in[0,1]"
+                },
+                {
+                  "type": "table",
+                  "text": "| | | | | | --- | --- | --- | --- | | | HD-Score=Rc×1T​∑t=0THD-Scoret\\text{HD-Score}=R\\_{c}\\times\\frac{1}{T}\\sum\\_{t=0}^{T}\\text{HD-Score}\\_{t} | | (9) |"
+                },
+                {
+                  "type": "formula",
+                  "text": "HD-Score=Rc×1T​∑t=0THD-Scoret\\text{HD-Score}=R_{c}\\times\\frac{1}{T}\\sum_{t=0}^{T}\\text{HD-Score}_{t}"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Notably, NC and TTC account for collisions with static background entities (e.g., buildings, fences, vegetation) using semantic segmentation."
+                }
+              ],
+              "children": []
+            }
+          ]
+        },
+        {
+          "heading": "B. Data Processing Pipeline",
+          "level": 2,
+          "content": [],
+          "children": [
+            {
+              "heading": "B.1. Image Preprocessing",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "We utilize three camera views (left, front, right) as input. Each image undergoes a two-stage preprocessing pipeline: resizing followed by center cropping. Specifically, the original 1920×10801920\\times 1080 images are first resized to 455×256455\\times 256, then center-cropped to the final resolution of 448×224448\\times 224, yielding an aspect ratio of 2:1."
+                },
+                {
+                  "type": "formula",
+                  "text": "1920×10801920\\times 1080"
+                },
+                {
+                  "type": "formula",
+                  "text": "455×256455\\times 256"
+                },
+                {
+                  "type": "formula",
+                  "text": "448×224448\\times 224"
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "B.2. Camera Intrinsic Adjustment",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "When applying geometric feature extraction to images, the camera intrinsic matrix must be adjusted accordingly to maintain geometric consistency. Given the original intrinsic matrix 𝐊\\mathbf{K}:"
+                },
+                {
+                  "type": "formula",
+                  "text": "𝐊\\mathbf{K}"
+                },
+                {
+                  "type": "table",
+                  "text": "| | | | | | --- | --- | --- | --- | | | 𝐊=[fx0cx0fycy001],\\mathbf{K}=\\begin{bmatrix}f\\_{x}\\quad&0\\quad&c\\_{x}\\\\ 0\\quad&f\\_{y}\\quad&c\\_{y}\\\\ 0\\quad&0\\quad&1\\end{bmatrix}, | | (10) |"
+                },
+                {
+                  "type": "formula",
+                  "text": "𝐊=[fx0cx0fycy001],\\mathbf{K}=\\begin{bmatrix}f_{x}\\quad&0\\quad&c_{x}\\\\ 0\\quad&f_{y}\\quad&c_{y}\\\\ 0\\quad&0\\quad&1\\end{bmatrix},"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "where fxf\\_{x} and fyf\\_{y} denote the focal lengths along the xx and yy axes, and (cx,cy)(c\\_{x},c\\_{y}) represents the principal point. After resizing from (Worig,Horig)(W\\_{\\text{orig}},H\\_{\\text{orig}}) to (Wresize,Hresize)(W\\_{\\text{resize}},H\\_{\\text{resize}}), the scale factors are computed as:"
+                },
+                {
+                  "type": "formula",
+                  "text": "fxf_{x}"
+                },
+                {
+                  "type": "formula",
+                  "text": "fyf_{y}"
+                },
+                {
+                  "type": "formula",
+                  "text": "xx"
+                },
+                {
+                  "type": "formula",
+                  "text": "yy"
+                },
+                {
+                  "type": "formula",
+                  "text": "(cx,cy)(c_{x},c_{y})"
+                },
+                {
+                  "type": "formula",
+                  "text": "(Worig,Horig)(W_{\\text{orig}},H_{\\text{orig}})"
+                },
+                {
+                  "type": "formula",
+                  "text": "(Wresize,Hresize)(W_{\\text{resize}},H_{\\text{resize}})"
+                },
+                {
+                  "type": "table",
+                  "text": "| | | | | | --- | --- | --- | --- | | | sx=WresizeWorig,sy=HresizeHorig.s\\_{x}=\\frac{W\\_{\\text{resize}}}{W\\_{\\text{orig}}},\\quad s\\_{y}=\\frac{H\\_{\\text{resize}}}{H\\_{\\text{orig}}}. | | (11) |"
+                },
+                {
+                  "type": "formula",
+                  "text": "sx=WresizeWorig,sy=HresizeHorig.s_{x}=\\frac{W_{\\text{resize}}}{W_{\\text{orig}}},\\quad s_{y}=\\frac{H_{\\text{resize}}}{H_{\\text{orig}}}."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "For center cropping to (Wcrop,Hcrop)(W\\_{\\text{crop}},H\\_{\\text{crop}}), the crop offsets are:"
+                },
+                {
+                  "type": "formula",
+                  "text": "(Wcrop,Hcrop)(W_{\\text{crop}},H_{\\text{crop}})"
+                },
+                {
+                  "type": "table",
+                  "text": "| | | | | | --- | --- | --- | --- | | | Δx=Wresize−Wcrop2,Δy=Hresize−Hcrop2.\\Delta\\_{x}=\\frac{W\\_{\\text{resize}}-W\\_{\\text{crop}}}{2},\\quad\\Delta\\_{y}=\\frac{H\\_{\\text{resize}}-H\\_{\\text{crop}}}{2}. | | (12) |"
+                },
+                {
+                  "type": "formula",
+                  "text": "Δx=Wresize−Wcrop2,Δy=Hresize−Hcrop2.\\Delta_{x}=\\frac{W_{\\text{resize}}-W_{\\text{crop}}}{2},\\quad\\Delta_{y}=\\frac{H_{\\text{resize}}-H_{\\text{crop}}}{2}."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "The adjusted intrinsic parameters are then:"
+                },
+                {
+                  "type": "table",
+                  "text": "| | | | | | --- | --- | --- | --- | | | fx′=fx⋅sx,fy′=fy⋅sy,cx′=cx⋅sx−Δx,cy′=cy⋅sy−Δy,f^{\\prime}\\_{x}=f\\_{x}\\cdot s\\_{x},\\quad f^{\\prime}\\_{y}=f\\_{y}\\cdot s\\_{y},\\quad c^{\\prime}\\_{x}=c\\_{x}\\cdot s\\_{x}-\\Delta\\_{x},\\quad c^{\\prime}\\_{y}=c\\_{y}\\cdot s\\_{y}-\\Delta\\_{y}, | | (13) |"
+                },
+                {
+                  "type": "formula",
+                  "text": "fx′=fx⋅sx,fy′=fy⋅sy,cx′=cx⋅sx−Δx,cy′=cy⋅sy−Δy,f^{\\prime}_{x}=f_{x}\\cdot s_{x},\\quad f^{\\prime}_{y}=f_{y}\\cdot s_{y},\\quad c^{\\prime}_{x}=c_{x}\\cdot s_{x}-\\Delta_{x},\\quad c^{\\prime}_{y}=c_{y}\\cdot s_{y}-\\Delta_{y},"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "yielding the adjusted intrinsic matrix 𝐊′\\mathbf{K}^{\\prime}:"
+                },
+                {
+                  "type": "formula",
+                  "text": "𝐊′\\mathbf{K}^{\\prime}"
+                },
+                {
+                  "type": "table",
+                  "text": "| | | | | | --- | --- | --- | --- | | | 𝐊′=[fx′0cx′0fy′cy′001].\\mathbf{K}^{\\prime}=\\begin{bmatrix}f^{\\prime}\\_{x}\\quad&0\\quad&c^{\\prime}\\_{x}\\\\ 0\\quad&f^{\\prime}\\_{y}\\quad&c^{\\prime}\\_{y}\\\\ 0\\quad&0\\quad&1\\end{bmatrix}. | | (14) |"
+                },
+                {
+                  "type": "formula",
+                  "text": "𝐊′=[fx′0cx′0fy′cy′001].\\mathbf{K}^{\\prime}=\\begin{bmatrix}f^{\\prime}_{x}\\quad&0\\quad&c^{\\prime}_{x}\\\\ 0\\quad&f^{\\prime}_{y}\\quad&c^{\\prime}_{y}\\\\ 0\\quad&0\\quad&1\\end{bmatrix}."
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "B.3. Camera Extrinsic Transformation",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "The camera extrinsic matrix represents the transformation from camera coordinates to world (LiDAR) coordinates. We construct the camera-to-world matrix 𝐓c→w∈ℝ4×4\\mathbf{T}\\_{c\\to w}\\in\\mathbb{R}^{4\\times 4} as:"
+                },
+                {
+                  "type": "formula",
+                  "text": "𝐓c→w∈ℝ4×4\\mathbf{T}_{c\\to w}\\in\\mathbb{R}^{4\\times 4}"
+                },
+                {
+                  "type": "table",
+                  "text": "| | | | | | --- | --- | --- | --- | | | 𝐓c→w=[𝐑c→w𝐭c→w𝟎⊤1],\\mathbf{T}\\_{c\\to w}=\\begin{bmatrix}\\mathbf{R}\\_{c\\to w}\\quad&\\mathbf{t}\\_{c\\to w}\\\\ \\mathbf{0}^{\\top}\\quad&1\\end{bmatrix}, | | (15) |"
+                },
+                {
+                  "type": "formula",
+                  "text": "𝐓c→w=[𝐑c→w𝐭c→w𝟎⊤1],\\mathbf{T}_{c\\to w}=\\begin{bmatrix}\\mathbf{R}_{c\\to w}\\quad&\\mathbf{t}_{c\\to w}\\\\ \\mathbf{0}^{\\top}\\quad&1\\end{bmatrix},"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "where 𝐑c→w∈ℝ3×3\\mathbf{R}\\_{c\\to w}\\in\\mathbb{R}^{3\\times 3} is the rotation matrix and 𝐭c→w∈ℝ3\\mathbf{t}\\_{c\\to w}\\in\\mathbb{R}^{3} is the translation vector. The world-to-camera matrix 𝐓w→c\\mathbf{T}\\_{w\\to c} used for 3D-to-2D projection is obtained by matrix inversion:"
+                },
+                {
+                  "type": "formula",
+                  "text": "𝐑c→w∈ℝ3×3\\mathbf{R}_{c\\to w}\\in\\mathbb{R}^{3\\times 3}"
+                },
+                {
+                  "type": "formula",
+                  "text": "𝐭c→w∈ℝ3\\mathbf{t}_{c\\to w}\\in\\mathbb{R}^{3}"
+                },
+                {
+                  "type": "formula",
+                  "text": "𝐓w→c\\mathbf{T}_{w\\to c}"
+                },
+                {
+                  "type": "table",
+                  "text": "| | | | | | --- | --- | --- | --- | | | 𝐓w→c=𝐓c→w−1.\\mathbf{T}\\_{w\\to c}=\\mathbf{T}\\_{c\\to w}^{-1}. | | (16) |"
+                },
+                {
+                  "type": "formula",
+                  "text": "𝐓w→c=𝐓c→w−1.\\mathbf{T}_{w\\to c}=\\mathbf{T}_{c\\to w}^{-1}."
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "B.4. Geometric Feature Extraction",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "Following the geometric alignment formulation in the Method section, we extract patch-level geometric features fg​(I)∈ℝT×M×S×Dgf\\_{g}(I)\\in\\mathbb{R}^{T\\times M\\times S\\times D\\_{g}} from multi-view images using the frozen geometric foundation model WorldMirror [liu2025worldmirror] as fgf\\_{g}, where TT denotes the number of temporal frames, MM denotes the number of camera views, SS denotes the number of patch tokens per view, and Dg=2048D\\_{g}=2048 denotes the geometric feature dimension."
+                },
+                {
+                  "type": "formula",
+                  "text": "fg​(I)∈ℝT×M×S×Dgf_{g}(I)\\in\\mathbb{R}^{T\\times M\\times S\\times D_{g}}"
+                },
+                {
+                  "type": "formula",
+                  "text": "fgf_{g}"
+                },
+                {
+                  "type": "formula",
+                  "text": "TT"
+                },
+                {
+                  "type": "formula",
+                  "text": "MM"
+                },
+                {
+                  "type": "formula",
+                  "text": "SS"
+                },
+                {
+                  "type": "formula",
+                  "text": "Dg=2048D_{g}=2048"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Camera Prior Extraction. Given multi-view images 𝐈∈ℝM×3×H×W\\mathbf{I}\\in\\mathbb{R}^{M\\times 3\\times H\\times W} along with their camera intrinsics 𝐊∈ℝM×3×3\\mathbf{K}\\in\\mathbb{R}^{M\\times 3\\times 3} and extrinsics 𝐓∈ℝM×4×4\\mathbf{T}\\in\\mathbb{R}^{M\\times 4\\times 4}, the geometric foundation model first encodes these inputs into spatial-geometric priors 𝒫\\mathcal{P} that encapsulate camera poses, depth estimates, and intrinsic parameters:"
+                },
+                {
+                  "type": "formula",
+                  "text": "𝐈∈ℝM×3×H×W\\mathbf{I}\\in\\mathbb{R}^{M\\times 3\\times H\\times W}"
+                },
+                {
+                  "type": "formula",
+                  "text": "𝐊∈ℝM×3×3\\mathbf{K}\\in\\mathbb{R}^{M\\times 3\\times 3}"
+                },
+                {
+                  "type": "formula",
+                  "text": "𝐓∈ℝM×4×4\\mathbf{T}\\in\\mathbb{R}^{M\\times 4\\times 4}"
+                },
+                {
+                  "type": "formula",
+                  "text": "𝒫\\mathcal{P}"
+                },
+                {
+                  "type": "table",
+                  "text": "| | | | | | --- | --- | --- | --- | | | 𝒫=fprior​(𝐈,𝐊,𝐓).\\mathcal{P}=f\\_{\\text{prior}}\\left(\\mathbf{I},\\mathbf{K},\\mathbf{T}\\right). | | (17) |"
+                },
+                {
+                  "type": "formula",
+                  "text": "𝒫=fprior​(𝐈,𝐊,𝐓).\\mathcal{P}=f_{\\text{prior}}\\left(\\mathbf{I},\\mathbf{K},\\mathbf{T}\\right)."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Geometric Feature Encoding. The visual geometry transformer then processes the images conditioned on these priors. Following the model’s conditional design, we utilize camera pose and intrinsic information (indicated by condition flags 𝐜=[1,0,1]\\mathbf{c}=[1,0,1] for camera pose, depth, and intrinsics respectively) while excluding depth supervision:"
+                },
+                {
+                  "type": "formula",
+                  "text": "𝐜=[1,0,1]\\mathbf{c}=[1,0,1]"
+                },
+                {
+                  "type": "table",
+                  "text": "| | | | | | --- | --- | --- | --- | | | fg​(I)=WorldMirror​(𝐈,𝒫;𝐜).f\\_{g}(I)=\\text{WorldMirror}\\left(\\mathbf{I},\\mathcal{P};\\mathbf{c}\\right). | | (18) |"
+                },
+                {
+                  "type": "formula",
+                  "text": "fg​(I)=WorldMirror​(𝐈,𝒫;𝐜).f_{g}(I)=\\text{WorldMirror}\\left(\\mathbf{I},\\mathcal{P};\\mathbf{c}\\right)."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Since fgf\\_{g} remains frozen throughout training, we pre-compute and offline-cache fg​(I)f\\_{g}(I) for all training samples, enabling direct loading during training without repeated inference costs. This design substantially reduces training time and GPU memory overhead."
+                },
+                {
+                  "type": "formula",
+                  "text": "fgf_{g}"
+                },
+                {
+                  "type": "formula",
+                  "text": "fg​(I)f_{g}(I)"
+                }
+              ],
+              "children": []
+            }
+          ]
+        },
+        {
+          "heading": "C. Inference Latency",
+          "level": 2,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "We measured the inference latency per module of Latent-WMA on a single A100 GPU for a single batch. The inference latency of each module is shown in [Tab.˜7](https://ar5iv.labs.arxiv.org/html/2603.24581v1#Pt0.Ax3.T7 \"In C. Inference Latency ‣ Latent-WAM: Latent World Action Modeling for End-to-End Autonomous Driving\"). Latency was evaluated after three warm-up iterations, with the final number averaged over 10 forward passes."
+            },
+            {
+              "type": "table",
+              "text": "| Module | Parameters | | Memory Usage | | Latency | | --- | --- | --- | --- | --- | --- | | World Encoder | 86.6M | | — | | 100ms | | Trajectory Decoder | 8.4M | | — | | 6ms | | All modules | 104M | | 1.1GB | | 107ms |"
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "D. More Visulization",
+          "level": 2,
+          "content": [],
+          "children": [
+            {
+              "heading": "D.1. Trajectory Planning",
+              "level": 3,
+              "content": [],
+              "children": []
+            },
+            {
+              "heading": "D.2. Attention Map",
+              "level": 3,
+              "content": [],
+              "children": [
+                {
+                  "heading": "0..0.1 C.3. HUGSIM",
+                  "level": 4,
+                  "content": [],
+                  "children": []
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "chunks": [
+    {
+      "heading_path": [
+        "Latent-WAM: Latent World Action Modeling for End-to-End Autonomous Driving"
+      ],
+      "text": "# Latent-WAM: Latent World Action Modeling for End-to-End Autonomous Driving"
+    },
+    {
+      "heading_path": [
+        "Latent-WAM: Latent World Action Modeling for End-to-End Autonomous Driving",
+        "Abstract"
+      ],
+      "text": "###### Abstract\n\nWe introduce Latent-WAM, an efficient end-to-end autonomous driving framework that achieves strong trajectory planning through spatially-aware and dynamics-informed latent world representations. Existing world-model-based planners suffer from inadequately compressed representations, limited spatial understanding, and underutilized temporal dynamics, resulting in sub-optimal planning under constrained data and compute budgets. Latent-WAM addresses these limitations with two core modules: a Spatial-Aware Compressive World Encoder (SCWE) that distills geometric knowledge from a foundation model and compresses multi-view images into compact scene tokens via learnable queries, and a Dynamic Latent World Model (DLWM) that employs a causal Transformer to autoregressively predict future world status conditioned on historical visual and motion representations. Extensive experiments on NAVSIM v2 and HUGSIM demonstrate new state-of-the-art results: 89.3 EPDMS on NAVSIM v2 and 28.9 HD-Score on HUGSIM, surpassing the best prior perception-free method by 3.2 EPDMS with significantly less training data and a compact 104M-parameter model."
+    },
+    {
+      "heading_path": [
+        "Latent-WAM: Latent World Action Modeling for End-to-End Autonomous Driving",
+        "1 Introduction"
+      ],
+      "text": "## 1 Introduction\n\nEnd-to-end autonomous driving has attracted considerable attention due to its data-driven nature and scalability. Prior methods integrate perception and prediction into a unified differentiable network, extracting planning-relevant representations for end-to-end trajectory prediction [hu2023uniad, jiang2023vad]. However, these methods generally rely on complex auxiliary task designs and perception annotations, limiting the further scaling of end-to-end driving algorithms.\n\nRecently, world-model-based approaches learn scene representations through temporal self-supervised learning, providing dense supervision while reducing the dependence on perception labels. These methods can be broadly categorized into two groups. The first group [zhang2025epona, li2025drivevla-w0] learns driving planning through explicit video generation. However, video generation incurs substantial computational overhead, and the learned intermediate representations tend to focus on visual details irrelevant to planning. The second group learns planning-relevant representations through implicit future latent prediction [li2024law, zheng2025world4drive]. Although the latent representations are relatively lightweight and capture dynamic information via temporal self-supervision, they still suffer from insufficient representation quality. Specifically: (1) the latent representations remain inadequately compressed; (2) they lack spatial understanding or rely on external depth estimation models at inference time, introducing additional latency; and (3) historical and dynamic information are underutilized, as these methods merely predict the T+1T{+}1 representation from the TT-th frame. As illustrated in [Fig.˜1](https://ar5iv.labs.arxiv.org/html/2603.24581v1#S1.F1 \"In 1 Introduction ‣ Latent-WAM: Latent World Action Modeling for End-to-End Autonomous Driving\"), these limitations lead to sub-optimal planning performance.\n\nT+1T{+}1\n\nTT\n\nTo address these issues, we propose Latent-WAM, which comprises a Spatial-Aware Compressive World Encoder (SCWE) and a Dynamic Latent World Model (DLWM), targeting the two most planning-relevant understanding tasks—spatial and dynamic understanding—to achieve highly compressed driving world representations with improved planning performance. Specifically, SCWE distills knowledge from a geometric foundation model into the vision backbone and employs learnable queries to extract spatially-informed tokens from the enriched features, achieving high compression of scene information. DLWM adopts a causal Transformer for world modeling, predicting future world status conditioned on the ego vehicle’s historical world status, including compressed visual and motion representations. Through self-supervised visual prediction and supervised motion prediction, the world status representations acquire dynamic understanding capabilities relevant to planning. Finally, a lightweight trajectory decoder generates the planned trajectory from the world status representations.\n\nWe extensively evaluate Latent-WAM on NAVSIM v2 [cao2025navsimv2] and HUGSIM [zhou2024hugsim]. Latent-WAM achieves 89.3 EPDMS on NAVSIM v2, 45.9 RC and 28.9 HD-score on HUGSIM, establishing new state-of-the-art results. Under the perception-free setting, our method outperforms previous approaches by 3.2 EPDMS. Notably, attention map visualization reveals that our world representations are highly focused on spatial structures and driving intent, demonstrating the effectiveness of our approach for planning-centric representation learning. Our contributions are summarized as follows:\n\n* • We propose Spatial-Aware Compressive World Encoder, a novel scene compression method that distills geometric knowledge into the vision backbone to extract highly compressed, spatially-aware visual representations. * • We propose Dynamic Latent World Model, a novel world modeling approach that leverages a causal Transformer to jointly learn visual and motion dynamics, building representations with dynamic scene understanding. * • Our method achieves new state-of-the-art results on both NAVSIM v2 and HUGSIM, outperforming prior perception-free method [li2025drivevla-w0] by 3.2 EPDMS.\n\nWe propose Spatial-Aware Compressive World Encoder, a novel scene compression method that distills geometric knowledge into the vision backbone to extract highly compressed, spatially-aware visual representations.\n\nWe propose Dynamic Latent World Model, a novel world modeling approach that leverages a causal Transformer to jointly learn visual and motion dynamics, building representations with dynamic scene understanding.\n\nOur method achieves new state-of-the-art results on both NAVSIM v2 and HUGSIM, outperforming prior perception-free method [li2025drivevla-w0] by 3.2 EPDMS."
+    },
+    {
+      "heading_path": [
+        "Latent-WAM: Latent World Action Modeling for End-to-End Autonomous Driving",
+        "2 Related Works"
+      ],
+      "text": "## 2 Related Works"
+    },
+    {
+      "heading_path": [
+        "Latent-WAM: Latent World Action Modeling for End-to-End Autonomous Driving",
+        "2 Related Works",
+        "2.1 Scene Representation in End-to-End Autonomous Driving"
+      ],
+      "text": "### 2.1 Scene Representation in End-to-End Autonomous Driving\n\nEnd-to-end autonomous driving directly optimizes trajectory planning, making the intermediate scene representation critical to overall performance. Early works [hu2023uniad, transfuser] adopt dense BEV layouts supervised by semantic maps and occupancy labels. Subsequent methods [jiang2023vad, chen2024vadv2, sun2024sparsedrive, jia2025drivetransformer] shift towards lightweight vectorized or sparse representations for improved efficiency. Recent efforts leverage VLMs [tian2024token, pan2024vlp, Hegde2025DistillingML] for richer semantic information, or employ latent world models [li2024law, zheng2025world4drive] and video generation [xia2025drivelaw] for scene representation. However, these methods often exhibit weak 3D spatial understanding and rely on cumbersome representations. We address these issues by distilling geometric knowledge into the vision backbone for stronger spatial understanding, while compressing scene information into a compact set of tokens via learnable queries."
+    },
+    {
+      "heading_path": [
+        "Latent-WAM: Latent World Action Modeling for End-to-End Autonomous Driving",
+        "2 Related Works",
+        "2.2 World Models for Autonomous Driving"
+      ],
+      "text": "### 2.2 World Models for Autonomous Driving\n\nWorld models have been widely adopted in autonomous driving for environment representation and future state prediction. One line of work applies video generation models [Hu2023GAIA1AG, wang2023drivedreamer, zhao2024drivedreamer-2, chen2024driveworld, wang2023driving-wm, gao2024vista, guo2024dist4d] to construct pixel-level driving world representations, while 3D world models based on occupancy and point clouds [zheng2023occworld, zhang2024copilotd, zyrianov2025lidardm, dang2025sparseworld] enforce geometric constraints in 3D space, with subsequent works [li2024uniscene, li2025scaling] unifying 2D and 3D modeling. Building on these capabilities, some approaches [yang2024drivearena, li2025omninwm] use world models as closed-loop simulators, while others [zhang2025epona, li2025drivevla-w0, xia2025drivelaw, li2024law, zheng2025world4drive] directly leverage them for planning. To reduce computational overhead, LAW [li2024law], World4Drive [zheng2025world4drive], and Drive-JEPA [wang2026drivejepa] perform trajectory planning in the latent space. Our method similarly adopts a latent world model, but further incorporates ego status to guide future predictions and 3D-RoPE to enhance spatio-temporal tracking."
+    },
+    {
+      "heading_path": [
+        "Latent-WAM: Latent World Action Modeling for End-to-End Autonomous Driving",
+        "3 Method"
+      ],
+      "text": "## 3 Method"
+    },
+    {
+      "heading_path": [
+        "Latent-WAM: Latent World Action Modeling for End-to-End Autonomous Driving",
+        "3 Method",
+        "3.1 Overall"
+      ],
+      "text": "### 3.1 Overall\n\nThe overall architecture of Latent-WAM is illustrated in [Fig.˜2](https://ar5iv.labs.arxiv.org/html/2603.24581v1#S3.F2 \"In 3.1 Overall ‣ 3 Method ‣ Latent-WAM: Latent World Action Modeling for End-to-End Autonomous Driving\"), consisting of three core modules: 1) Spatial-Aware Compressive World Encoder([Sec.˜3.2](https://ar5iv.labs.arxiv.org/html/2603.24581v1#S3.SS2 \"3.2 Spatial-Aware Compressive World Encoder ‣ 3 Method ‣ Latent-WAM: Latent World Action Modeling for End-to-End Autonomous Driving\")), which uses learnable queries and a vision encoder to compress images into compact scene tokens and a geometric foundation model is used to distill geometric perception ability into the encoder to improve spatial understanding, 2) Dynamic Latent World Model ([Sec.˜3.3](https://ar5iv.labs.arxiv.org/html/2603.24581v1#S3.SS3 \"3.3 Dynamic Latent World Model ‣ 3 Method ‣ Latent-WAM: Latent World Action Modeling for End-to-End Autonomous Driving\")), a causal transformer decoder that models world transition dynamics by autoregressively predicting future world status conditioned on historical scene representations and ego status, and 3) Trajectory Decoder([Sec.˜3.4](https://ar5iv.labs.arxiv.org/html/2603.24581v1#S3.SS4 \"3.4 Trajectory Planning ‣ 3 Method ‣ Latent-WAM: Latent World Action Modeling for End-to-End Autonomous Driving\")), which forecasts trajectories over a 4-second horizon from world status representations. The SCWE and DLWM jointly optimize the vision backbone. Geometric distillation enhances spatial understanding, while self-supervised learning improves temporal dynamics modeling. This design achieves strong planning performance at inference time without extra computational cost from auxiliary modules."
+    },
+    {
+      "heading_path": [
+        "Latent-WAM: Latent World Action Modeling for End-to-End Autonomous Driving",
+        "3 Method",
+        "3.2 Spatial-Aware Compressive World Encoder"
+      ],
+      "text": "### 3.2 Spatial-Aware Compressive World Encoder\n\nTo model long-horizon world state transition, world status representations need to be sufficiently lightweight while compressing rich scene information. Different from prior methods that rely on extensive visual information, we use only a small set of learnable queries that fully interact with image patch tokens from the inputs, compressing rich world perception information into the latent space. In addition, to enhance the spatial understanding of the vision backbone, we use a geometric foundation model WorldMirror [liu2025worldmirror] to inject geometric awareness into the backbone through distillation."
+    },
+    {
+      "heading_path": [
+        "Latent-WAM: Latent World Action Modeling for End-to-End Autonomous Driving",
+        "3 Method",
+        "3.2 Spatial-Aware Compressive World Encoder",
+        "3.2.1 Scene Compression."
+      ],
+      "text": "#### 3.2.1 Scene Compression.\n\nWe use a set of compact scene tokens to compress the heavy vision tokens from multi-view images, forming a foundational component of world status representations.\n\nGiven sequential multi-view images I∈ℝ𝐓×𝐌×H×W×3I\\in\\mathbb{R}^{\\mathbf{T}\\times\\mathbf{M}\\times H\\times W\\times 3} as input, we first embed them into image patch tokens X∈ℝ𝐓×𝐌×𝐒×DeX\\in\\mathbb{R}^{\\mathbf{T}\\times\\mathbf{M}\\times\\mathbf{S}\\times D\\_{e}}, where 𝐓,𝐌,𝐒\\mathbf{T},\\mathbf{M},\\mathbf{S} denote the temporal horizon, number of cameras, and number of image patches, respectively. A set of scene queries Qscene∈ℝ𝐓×𝐌×𝐍×DeQ\\_{\\text{scene}}\\in\\mathbb{R}^{\\mathbf{T}\\times\\mathbf{M}\\times\\mathbf{N}\\times D\\_{e}} are randomly initialized and concatenated with XX. The concatenated features are fed into a DINO encoder ℰ\\mathcal{E} containing an MLP that project to DlD\\_{l}-dimensional latent space, yielding frame-wise and view-specific scene representations Q^scene∈ℝ𝐓×𝐌×𝐍×Dl\\hat{Q}\\_{\\text{scene}}\\in\\mathbb{R}^{\\mathbf{T}\\times\\mathbf{M}\\times\\mathbf{N}\\times D\\_{l}} and image tokens X^∈ℝ𝐓×𝐌×𝐒×Dl\\hat{X}\\in\\mathbb{R}^{\\mathbf{T}\\times\\mathbf{M}\\times\\mathbf{S}\\times D\\_{l}}:\n\nI∈ℝ𝐓×𝐌×H×W×3I\\in\\mathbb{R}^{\\mathbf{T}\\times\\mathbf{M}\\times H\\times W\\times 3}\n\nX∈ℝ𝐓×𝐌×𝐒×DeX\\in\\mathbb{R}^{\\mathbf{T}\\times\\mathbf{M}\\times\\mathbf{S}\\times D_{e}}\n\n𝐓,𝐌,𝐒\\mathbf{T},\\mathbf{M},\\mathbf{S}\n\nQscene∈ℝ𝐓×𝐌×𝐍×DeQ_{\\text{scene}}\\in\\mathbb{R}^{\\mathbf{T}\\times\\mathbf{M}\\times\\mathbf{N}\\times D_{e}}\n\nXX\n\nℰ\\mathcal{E}\n\nDlD_{l}\n\nQ^scene∈ℝ𝐓×𝐌×𝐍×Dl\\hat{Q}_{\\text{scene}}\\in\\mathbb{R}^{\\mathbf{T}\\times\\mathbf{M}\\times\\mathbf{N}\\times D_{l}}\n\nX^∈ℝ𝐓×𝐌×𝐒×Dl\\hat{X}\\in\\mathbb{R}^{\\mathbf{T}\\times\\mathbf{M}\\times\\mathbf{S}\\times D_{l}}\n\n| | | | | | --- | --- | --- | --- | | | Q^scene,X^=ℰ​([Qscene;X])\\displaystyle\\hat{Q}\\_{\\text{scene}},\\hat{X}=\\mathcal{E}\\left(\\left[Q\\_{\\text{scene}};X\\right]\\right) | | (1) |\n\nQ^scene,X^=ℰ​([Qscene;X])\\displaystyle\\hat{Q}_{\\text{scene}},\\hat{X}=\\mathcal{E}\\left(\\left[Q_{\\text{scene}};X\\right]\\right)\n\nwhere 𝐍\\mathbf{N} is the number of scene query tokens, DeD\\_{e} the encoder dimension, and DlD\\_{l} the latent dimension.\n\n𝐍\\mathbf{N}\n\nDeD_{e}\n\nDlD_{l}\n\nBy integrating scene queries with raw image tokens, extensive visual information from numerous image patch tokens is efficiently compressed into a compact set of tokens, significantly reducing computational overhead for subsequent long-term world model training and trajectory planning."
+    },
+    {
+      "heading_path": [
+        "Latent-WAM: Latent World Action Modeling for End-to-End Autonomous Driving",
+        "3 Method",
+        "3.2 Spatial-Aware Compressive World Encoder",
+        "3.2.2 Geometric Alignment."
+      ],
+      "text": "#### 3.2.2 Geometric Alignment.\n\nTo distill the spatial understanding capabilities of geometric foundation models into the DINO encoder, we employ the image patch tokens output by the SCWE as carriers for receiving dense spatial-semantic information from geometric features.\n\nMulti-view images across consecutive frames II are additionally fed into a geometric foundation model fgf\\_{g}, producing patch-level geometric features fg​(I)∈ℝT×M×S×Dgf\\_{g}(I)\\in\\mathbb{R}^{\\textbf{T}\\times\\textbf{M}\\times\\textbf{S}\\times D\\_{g}}. The DINO backbone outputs X^\\hat{X} are subsequently projected via a geometric projector ϕ\\phi, yielding ϕ​(X^)∈ℝT×M×S×Dg\\phi(\\hat{X})\\in\\mathbb{R}^{\\textbf{T}\\times\\textbf{M}\\times\\textbf{S}\\times D\\_{g}}. Both fg​(I)f\\_{g}(I) and ϕ​(X^)\\phi(\\hat{X}) are first normalized using LayerNorm, then we compute their cosine similarity loss:\n\nII\n\nfgf_{g}\n\nfg​(I)∈ℝT×M×S×Dgf_{g}(I)\\in\\mathbb{R}^{\\textbf{T}\\times\\textbf{M}\\times\\textbf{S}\\times D_{g}}\n\nX^\\hat{X}\n\nϕ\\phi\n\nϕ​(X^)∈ℝT×M×S×Dg\\phi(\\hat{X})\\in\\mathbb{R}^{\\textbf{T}\\times\\textbf{M}\\times\\textbf{S}\\times D_{g}}\n\nfg​(I)f_{g}(I)\n\nϕ​(X^)\\phi(\\hat{X})\n\n| | | | | | --- | --- | --- | --- | | | ℒalign=1−cos​(LN​(ϕ​(X^)),LN​(fg​(I)))\\displaystyle\\mathcal{L}\\_{\\text{align}}=1-\\text{cos}\\left(\\text{LN}(\\phi(\\hat{X})),\\text{LN}(f\\_{g}(I))\\right) | | (2) |\n\nℒalign=1−cos​(LN​(ϕ​(X^)),LN​(fg​(I)))\\displaystyle\\mathcal{L}_{\\text{align}}=1-\\text{cos}\\left(\\text{LN}(\\phi(\\hat{X})),\\text{LN}(f_{g}(I))\\right)\n\nwhere cos⁡(⋅,⋅)\\cos(\\cdot,\\cdot) denotes cosine similarity and LN​(⋅)\\text{LN}(\\cdot) denotes LayerNorm.\n\ncos⁡(⋅,⋅)\\cos(\\cdot,\\cdot)\n\nLN​(⋅)\\text{LN}(\\cdot)\n\nNotably, since fgf\\_{g} remains frozen throughout training, the geometric features can be pre-computed and offline-cached, enabling direct loading during training without incurring repeated inference costs or GPU memory overhead. This design substantially reduces training time and computational expenses.\n\nfgf_{g}"
+    },
+    {
+      "heading_path": [
+        "Latent-WAM: Latent World Action Modeling for End-to-End Autonomous Driving",
+        "3 Method",
+        "3.3 Dynamic Latent World Model"
+      ],
+      "text": "### 3.3 Dynamic Latent World Model\n\nIn this section, we propose a Dynamic Latent World Model(DLWM). By predicting future world status representations causally in the latent space, the backbone obtains temporal dynamics modeling capabilities through a self-supervised training paradigm under the perception-free setting."
+    },
+    {
+      "heading_path": [
+        "Latent-WAM: Latent World Action Modeling for End-to-End Autonomous Driving",
+        "3 Method",
+        "3.3 Dynamic Latent World Model",
+        "3.3.1 World latent status aggregation."
+      ],
+      "text": "#### 3.3.1 World latent status aggregation.\n\nThe per-camera scene tokens Q^scene\\hat{Q}\\_{\\text{scene}} only capture isolated view-specific information, which is insufficient for holistic world modeling. To enable effective future prediction and trajectory planning, we aggregate these tokens and integrate with ego status to construct unified frame-wise world status representations. The ego status across consecutive frames, which include driving commands, velocity, and acceleration, is encoded by an ego status encoder (a single-layer MLP) into ego status embeddings Sego∈ℝT×DlS\\_{\\text{ego}}\\in\\mathbb{R}^{\\textbf{T}\\times D\\_{l}}. The scene tokens Q^scene\\hat{Q}\\_{\\text{scene}} from the SCWE and the ego status embeddings SegoS\\_{\\text{ego}} collectively constitute the frame-wise world latent state.\n\nQ^scene\\hat{Q}_{\\text{scene}}\n\nSego∈ℝT×DlS_{\\text{ego}}\\in\\mathbb{R}^{\\textbf{T}\\times D_{l}}\n\nQ^scene\\hat{Q}_{\\text{scene}}\n\nSegoS_{\\text{ego}}\n\nSpecifically, scene tokens from different cameras are aggregated to form a holistic perception representation of the surrounding environment, which is subsequently concatenated with SegoS\\_{\\text{ego}} encoding the ego status, yielding a unified Scene-Ego world status representation Sworld∈ℝT×(M×N+1)×DlS\\_{\\text{world}}\\in\\mathbb{R}^{\\textbf{T}\\times(\\textbf{M}\\times\\textbf{N}+1)\\times D\\_{l}}. This representation serves as the foundation for subsequent future world status prediction within the world model and trajectory planning.\n\nSegoS_{\\text{ego}}\n\nSworld∈ℝT×(M×N+1)×DlS_{\\text{world}}\\in\\mathbb{R}^{\\textbf{T}\\times(\\textbf{M}\\times\\textbf{N}+1)\\times D_{l}}"
+    },
+    {
+      "heading_path": [
+        "Latent-WAM: Latent World Action Modeling for End-to-End Autonomous Driving",
+        "3 Method",
+        "3.3 Dynamic Latent World Model",
+        "3.3.2 Causal world model prediction."
+      ],
+      "text": "#### 3.3.2 Causal world model prediction.\n\nWe formulate world state transition dynamics modeling as an autoregressive prediction problem, where all future frame world status predictions are conditioned on historical world status representations, encompassing holistic scene representations and ego status. This unified autoregressive framework enables a natural training strategy: treating the alternating Scene-Ego world status token sequence SworldiS\\_{\\text{world}}^{i} as frame-wise blocks and adopting the standard next-token prediction to train the world model.\n\nSworldiS_{\\text{world}}^{i}\n\nIn detail, we randomly initialize a set of learnable future world status queries Qfuture∈ℝ(T−1)×(M×N+1)×DlQ\\_{\\text{future}}\\in\\mathbb{R}^{(\\textbf{T}-1)\\times(\\textbf{M}\\times\\textbf{N}+1)\\times D\\_{l}}, with Sworldi,i∈{1,…,T−1}S\\_{\\text{world}}^{i},i\\in\\{1,\\ldots,T-1\\} forming the key-value cache K​Vfuture∈ℝ(T−1)×(M×N+1)×DlKV\\_{\\text{future}}\\in\\mathbb{R}^{(\\textbf{T}-1)\\times(\\textbf{M}\\times\\textbf{N}+1)\\times D\\_{l}}. The DLWM adopts a standard Transformer decoder incorporating Rotary Position Embedding, producing future world status predictions Sfuture∈ℝ(T−1)×(M×N+1)×DlS\\_{\\text{future}}\\in\\mathbb{R}^{(\\textbf{T}-1)\\times(\\textbf{M}\\times\\textbf{N}+1)\\times D\\_{l}}. Formally,\n\nQfuture∈ℝ(T−1)×(M×N+1)×DlQ_{\\text{future}}\\in\\mathbb{R}^{(\\textbf{T}-1)\\times(\\textbf{M}\\times\\textbf{N}+1)\\times D_{l}}\n\nSworldi,i∈{1,…,T−1}S_{\\text{world}}^{i},i\\in\\{1,\\ldots,T-1\\}\n\nK​Vfuture∈ℝ(T−1)×(M×N+1)×DlKV_{\\text{future}}\\in\\mathbb{R}^{(\\textbf{T}-1)\\times(\\textbf{M}\\times\\textbf{N}+1)\\times D_{l}}\n\nSfuture∈ℝ(T−1)×(M×N+1)×DlS_{\\text{future}}\\in\\mathbb{R}^{(\\textbf{T}-1)\\times(\\textbf{M}\\times\\textbf{N}+1)\\times D_{l}}\n\n| | | | | | --- | --- | --- | --- | | | Sfuture=DLWM​(Qfuture,K​Vfuture)\\displaystyle S\\_{\\text{future}}=\\text{DLWM}(Q\\_{\\text{future}},KV\\_{\\text{future}}) | | (3) |\n\nSfuture=DLWM​(Qfuture,K​Vfuture)\\displaystyle S_{\\text{future}}=\\text{DLWM}(Q_{\\text{future}},KV_{\\text{future}})\n\nThe ground truth SfutureGTS\\_{\\text{future}}^{\\text{GT}} is generated by a target encoder, which is a frozen copy of the SCWE updated via Exponential Moving Average (EMA) to provide stable supervision signals.\n\nSfutureGTS_{\\text{future}}^{\\text{GT}}"
+    },
+    {
+      "heading_path": [
+        "Latent-WAM: Latent World Action Modeling for End-to-End Autonomous Driving",
+        "3 Method",
+        "3.3 Dynamic Latent World Model",
+        "3.3.3 Teacher Forcing Attention Mask."
+      ],
+      "text": "#### 3.3.3 Teacher Forcing Attention Mask.\n\nGiven a Scene-Ego interleaved token sequence, the world model predicts each future token by attending to all historical tokens. We adopt teacher forcing during training: ground truth tokens serve as context for predicting subsequent tokens, preventing error accumulation across timesteps.\n\nCausal prediction is implemented via frame-wise attention masks, as shown in [Fig.˜3](https://ar5iv.labs.arxiv.org/html/2603.24581v1#S3.F3 \"In 3.3.3 Teacher Forcing Attention Mask. ‣ 3.3 Dynamic Latent World Model ‣ 3 Method ‣ Latent-WAM: Latent World Action Modeling for End-to-End Autonomous Driving\"). Within each frame block, tokens attend bidirectionally to each other. Cross-frame, each token can only attend to tokens appearing earlier in the sequence, enforcing temporal causality. This frame-wise attention design enables parallel prediction of all future world status while maintaining causal consistency, significantly improving training speed and efficiency."
+    },
+    {
+      "heading_path": [
+        "Latent-WAM: Latent World Action Modeling for End-to-End Autonomous Driving",
+        "3 Method",
+        "3.3 Dynamic Latent World Model",
+        "3.3.4 3D-RoPE."
+      ],
+      "text": "#### 3.3.4 3D-RoPE.\n\nAlthough SworldS\\_{\\text{world}} contains world status representations across multiple timestamps and camera views, the query vectors QfutureQ\\_{\\text{future}} and context features K​VfutureKV\\_{\\text{future}} do not explicitly carry temporal or spatial position information. To enable the model to distinguish temporal and spatial relationships among tokens, we inject spatio-temporal position information into multi-head attention via 3D-RoPE, which differentiates tokens across timesteps, camera views, and positions within long sequences.\n\nSworldS_{\\text{world}}\n\nQfutureQ_{\\text{future}}\n\nK​VfutureKV_{\\text{future}}\n\nIn practice, we split the head dimension DhD\\_{h} into three parts to encode temporal coordinate tt, camera index mm, and token index nn into QfutureQ\\_{\\text{future}} and K​VfutureKV\\_{\\text{future}}. We use absolute position indices to encode all three coordinates: temporal dimension with frequency 50, camera index with frequency 10, and token index with frequency 100.\n\nDhD_{h}\n\ntt\n\nmm\n\nnn\n\nQfutureQ_{\\text{future}}\n\nK​VfutureKV_{\\text{future}}"
+    },
+    {
+      "heading_path": [
+        "Latent-WAM: Latent World Action Modeling for End-to-End Autonomous Driving",
+        "3 Method",
+        "3.3 Dynamic Latent World Model",
+        "3.3.5 Ego status supervision."
+      ],
+      "text": "#### 3.3.5 Ego status supervision.\n\nThe world status representation SworldS\\_{\\text{world}} contains both scene tokens and ego status embeddings. During world model prediction, ego status guides the evolution of scene representations as well as itself. Therefore, accurate prediction of ego status is crucial for modeling world dynamics. To provide precise guidance for the transition of world state, we introduce ego status supervision built upon the self-supervised future status prediction.\n\nSworldS_{\\text{world}}\n\nWe extract ego status embeddings Segoi′S\\_{\\text{ego}}^{i^{\\prime}} from the predicted future world status SfutureS\\_{\\text{future}}, where i′∈{2,…,T}i^{\\prime}\\in\\{2,\\ldots,T\\}. These embeddings are then fed into three separate MLPs: a driving command decoder DcmdD\\_{\\text{cmd}}, a velocity decoder DvD\\_{v}, and an acceleration decoder DaD\\_{a}, producing predictions Cpred∈ℝ(T−1)×4C\\_{\\text{pred}}\\in\\mathbb{R}^{(\\textbf{T}-1)\\times 4}, Vpred∈ℝ(T−1)×2V\\_{\\text{pred}}\\in\\mathbb{R}^{(\\textbf{T}-1)\\times 2}, and Apred∈ℝ(T−1)×2A\\_{\\text{pred}}\\in\\mathbb{R}^{(\\textbf{T}-1)\\times 2}, respectively. Formally:\n\nSegoi′S_{\\text{ego}}^{i^{\\prime}}\n\nSfutureS_{\\text{future}}\n\ni′∈{2,…,T}i^{\\prime}\\in\\{2,\\ldots,T\\}\n\nDcmdD_{\\text{cmd}}\n\nDvD_{v}\n\nDaD_{a}\n\nCpred∈ℝ(T−1)×4C_{\\text{pred}}\\in\\mathbb{R}^{(\\textbf{T}-1)\\times 4}\n\nVpred∈ℝ(T−1)×2V_{\\text{pred}}\\in\\mathbb{R}^{(\\textbf{T}-1)\\times 2}\n\nApred∈ℝ(T−1)×2A_{\\text{pred}}\\in\\mathbb{R}^{(\\textbf{T}-1)\\times 2}\n\n| | | | | | --- | --- | --- | --- | | | Cpred=Softmax​(Dcmd​(Sego′)),Vpred=Dv​(Sego′),Apred=Da​(Sego′).\\displaystyle C\\_{\\text{pred}}=\\text{Softmax}(D\\_{\\text{cmd}}(S\\_{\\text{ego}}^{{}^{\\prime}})),\\ V\\_{\\text{pred}}=D\\_{v}(S\\_{\\text{ego}}^{{}^{\\prime}}),\\ A\\_{\\text{pred}}=D\\_{a}(S\\_{\\text{ego}}^{{}^{\\prime}}). | | (4) |\n\nCpred=Softmax​(Dcmd​(Sego′)),Vpred=Dv​(Sego′),Apred=Da​(Sego′).\\displaystyle C_{\\text{pred}}=\\text{Softmax}(D_{\\text{cmd}}(S_{\\text{ego}}^{{}^{\\prime}})),\\ V_{\\text{pred}}=D_{v}(S_{\\text{ego}}^{{}^{\\prime}}),\\ A_{\\text{pred}}=D_{a}(S_{\\text{ego}}^{{}^{\\prime}})."
+    },
+    {
+      "heading_path": [
+        "Latent-WAM: Latent World Action Modeling for End-to-End Autonomous Driving",
+        "3 Method",
+        "3.4 Trajectory Planning"
+      ],
+      "text": "### 3.4 Trajectory Planning\n\nWe employ a trajectory decoder DτD\\_{\\tau} to planning, which generates trajectories corresponding to different driving intentions based on the control commands. A set of randomly initialized learnable trajectory queries Qτ∈ℝK×np×DlQ\\_{\\tau}\\in\\mathbb{R}^{K\\times n\\_{p}\\times D\\_{l}} is fed into the trajectory decoder along with the current world status representation Sw​o​r​l​dtS\\_{world}^{t} of the driving scenario. After processing, the trajectory tokens are decoded via a lightweight MLP into KK candidate trajectories. Finally, conditioned on the driving command CC at the current timestep tt, the corresponding candidate trajectory is selected as the final trajectory τ\\tau. Formally,\n\nDτD_{\\tau}\n\nQτ∈ℝK×np×DlQ_{\\tau}\\in\\mathbb{R}^{K\\times n_{p}\\times D_{l}}\n\nSw​o​r​l​dtS_{world}^{t}\n\nKK\n\nCC\n\ntt\n\nτ\\tau\n\n| | | | | | --- | --- | --- | --- | | | τ=Dτ​(Qτ,Sw​o​r​l​dt,C)\\displaystyle\\tau=D\\_{\\tau}(Q\\_{\\tau},S\\_{world}^{t},C) | | (5) |\n\nτ=Dτ​(Qτ,Sw​o​r​l​dt,C)\\displaystyle\\tau=D_{\\tau}(Q_{\\tau},S_{world}^{t},C)\n\nEach decoded candidate trajectory τi\\tau\\_{i} is a sequence of npn\\_{p} poses spanning from the current timestep tt to a future time t+Tt+T, where TT represents the total prediction horizon. Each pose is represented as (x,y,θ)∈ℝ3(x,y,\\theta)\\in\\mathbb{R}^{3}, yielding complete trajectories in ℝnp×3\\mathbb{R}^{n\\_{p}\\times 3}, where xx and yy correspond to longitudinal and lateral displacements, respectively, with θ\\theta denoting the heading angle. All quantities are referenced to the ego vehicle’s local coordinate system at timestep tt. The time interval between consecutive predicted poses is assumed to be uniform.\n\nτi\\tau_{i}\n\nnpn_{p}\n\ntt\n\nt+Tt+T\n\nTT\n\n(x,y,θ)∈ℝ3(x,y,\\theta)\\in\\mathbb{R}^{3}\n\nℝnp×3\\mathbb{R}^{n_{p}\\times 3}\n\nxx\n\nyy\n\nθ\\theta\n\ntt"
+    },
+    {
+      "heading_path": [
+        "Latent-WAM: Latent World Action Modeling for End-to-End Autonomous Driving",
+        "3 Method",
+        "3.5 Training and Inference"
+      ],
+      "text": "### 3.5 Training and Inference\n\nTraining Objective. Following prior work, we employ L1L\\_{1} loss ℒt​r​a​j\\mathcal{L}\\_{traj} to optimize the generated multi-candidate trajectories by imitating expert trajectories. Geometric alignment computes cosine similarity loss ℒa​l​i​g​n\\mathcal{L}\\_{align} on normalized features, maximizing cosine similarity to distill spatial understanding capability. For the world model, we use MSE loss ℒw​m\\mathcal{L}\\_{wm} to optimize the prediction of future world state. Future ego status requires supervision over driving command, velocity, and acceleration, including ℒc​m​d=CrossEntropy​(Cp​r​e​d,Cg​t)\\mathcal{L}\\_{cmd}=\\text{CrossEntropy}(C\\_{pred},C\\_{gt}), ℒv=MSE​(Vp​r​e​d,Vg​t)\\mathcal{L}\\_{v}=\\text{MSE}(V\\_{pred},V\\_{gt}) and ℒa=MSE​(Ap​r​e​d,Ag​t)\\mathcal{L}\\_{a}=\\text{MSE}(A\\_{pred},A\\_{gt}). The total loss for ego status is ℒe​g​o=ℒc​m​d+ℒv+ℒa\\mathcal{L}\\_{ego}=\\mathcal{L}\\_{cmd}+\\mathcal{L}\\_{v}+\\mathcal{L}\\_{a}. The final loss for end-to-end training is:\n\nL1L_{1}\n\nℒt​r​a​j\\mathcal{L}_{traj}\n\nℒa​l​i​g​n\\mathcal{L}_{align}\n\nℒw​m\\mathcal{L}_{wm}\n\nℒc​m​d=CrossEntropy​(Cp​r​e​d,Cg​t)\\mathcal{L}_{cmd}=\\text{CrossEntropy}(C_{pred},C_{gt})\n\nℒv=MSE​(Vp​r​e​d,Vg​t)\\mathcal{L}_{v}=\\text{MSE}(V_{pred},V_{gt})\n\nℒa=MSE​(Ap​r​e​d,Ag​t)\\mathcal{L}_{a}=\\text{MSE}(A_{pred},A_{gt})\n\nℒe​g​o=ℒc​m​d+ℒv+ℒa\\mathcal{L}_{ego}=\\mathcal{L}_{cmd}+\\mathcal{L}_{v}+\\mathcal{L}_{a}\n\n| | | | | | --- | --- | --- | --- | | | ℒ=ℒt​r​a​j+α​ℒa​l​i​g​n+β​ℒw​m+γ​ℒe​g​o\\displaystyle\\mathcal{L}=\\mathcal{L}\\_{traj}+\\alpha\\mathcal{L}\\_{align}+\\beta\\mathcal{L}\\_{wm}+\\gamma\\mathcal{L}\\_{ego} | | (6) |\n\nℒ=ℒt​r​a​j+α​ℒa​l​i​g​n+β​ℒw​m+γ​ℒe​g​o\\displaystyle\\mathcal{L}=\\mathcal{L}_{traj}+\\alpha\\mathcal{L}_{align}+\\beta\\mathcal{L}_{wm}+\\gamma\\mathcal{L}_{ego}\n\nwhere α=0.1\\alpha=0.1, β=0.2\\beta=0.2, and γ=0.1\\gamma=0.1.\n\nα=0.1\\alpha=0.1\n\nβ=0.2\\beta=0.2\n\nγ=0.1\\gamma=0.1"
+    },
+    {
+      "heading_path": [
+        "Latent-WAM: Latent World Action Modeling for End-to-End Autonomous Driving",
+        "3 Method",
+        "3.5 Training and Inference",
+        "3.5.1 Inference."
+      ],
+      "text": "#### 3.5.1 Inference.\n\nDuring inference, only the Spatial-Aware Compressive Encoder and Trajectory Decoder is required, without any additional modules that would introduce inference latency."
+    },
+    {
+      "heading_path": [
+        "Latent-WAM: Latent World Action Modeling for End-to-End Autonomous Driving",
+        "4 Experiment"
+      ],
+      "text": "## 4 Experiment"
+    },
+    {
+      "heading_path": [
+        "Latent-WAM: Latent World Action Modeling for End-to-End Autonomous Driving",
+        "4 Experiment",
+        "4.1 Implementation Details"
+      ],
+      "text": "### 4.1 Implementation Details"
+    },
+    {
+      "heading_path": [
+        "Latent-WAM: Latent World Action Modeling for End-to-End Autonomous Driving",
+        "4 Experiment",
+        "4.1 Implementation Details",
+        "4.1.1 Architecture."
+      ],
+      "text": "#### 4.1.1 Architecture.\n\nWe adopt DINOv2-Base [oquab2023dinov2] as our vision encoder (86.6M parameters), which constitutes the foundation of the Spatial-Aware Compressive World Encoder (SCWE) and produces patch tokens of dimension De=768D\\_{e}=768. We employ N=16N=16 learnable scene queries with dimension DeD\\_{e}, projected to latent space Dl=256D\\_{l}=256 via an MLP. We set the temporal horizon to T=4T=4 frames and adopt three camera views—left, front, and right. Each view is resized to 224×448224\\times 448 before feeding into the World Encoder. Notably, the geometric foundation model we employ is WorldMirror [liu2025worldmirror], a feed-forward model built upon VGGT [wang2025vggt]. The dimension of ground-truth geometric feature map is Dg=2048D\\_{g}=2048.\n\nDe=768D_{e}=768\n\nN=16N=16\n\nDeD_{e}\n\nDl=256D_{l}=256\n\nT=4T=4\n\n224×448224\\times 448\n\nDg=2048D_{g}=2048\n\nFor the DLWM, we design a causal transformer decoder with 3D-RoPE for position embedding. The trajectory decoder follows a standard transformer architecture. Both DLWM and trajectory decoder comprise 4 layers with 8 attention heads, hidden dimension 256, and FFN dimension 1024. To provide ground truth world status representations for self-supervised training, we additionally introduce a frozen SCWE updated via Exponential Moving Average (EMA), maintaining complete architectural symmetry with the online encoder.\n\nThe model contains 104M parameters at inference time. During training, an additional EMA encoder is introduced for self-supervised learning, bringing the total to 191M, of which only 104M are trainable."
+    },
+    {
+      "heading_path": [
+        "Latent-WAM: Latent World Action Modeling for End-to-End Autonomous Driving",
+        "4 Experiment",
+        "4.1 Implementation Details",
+        "4.1.2 Training Configuration."
+      ],
+      "text": "#### 4.1.2 Training Configuration.\n\nLatent-WMA is trained on 32 A100 GPUs for 100 epochs with a total batch size of 512, taking approximately two days. We employ the AdamW [loshchilov2019adamw] optimizer with a learning rate of 2×10−42\\times 10^{-4} and weight decay 0.05. The training schedule incorporates linear warm-up over the first 10% steps, followed by cosine annealing scheduling to 1×10−61\\times 10^{-6} after reaching the peak. BF16 mixed-precision training is applied to reduce memory footprint.\n\n2×10−42\\times 10^{-4}\n\n1×10−61\\times 10^{-6}"
+    },
+    {
+      "heading_path": [
+        "Latent-WAM: Latent World Action Modeling for End-to-End Autonomous Driving",
+        "4 Experiment",
+        "4.2 Benchmarks & Main Results"
+      ],
+      "text": "### 4.2 Benchmarks & Main Results"
+    },
+    {
+      "heading_path": [
+        "Latent-WAM: Latent World Action Modeling for End-to-End Autonomous Driving",
+        "4 Experiment",
+        "4.2 Benchmarks & Main Results",
+        "4.2.1 NAVSIM."
+      ],
+      "text": "#### 4.2.1 NAVSIM.\n\nNAVSIM [im2024navsim] is a real-world autonomous driving dataset built upon OpenScene [openscene2023] and nuPlan [nuplan], comprising 103k training and 12k evaluation scenarios. NAVSIM v1 evaluates closed-loop planning using the Predictive Driver Model Score (PDMS), which aggregates No at-fault Collisions (NC), Drivable Area Compliance (DAC), Time to Collision (TTC), Ego Progress (EP), and Comfort (C). NAVSIM v2 [cao2025navsimv2] extends PDMS to EPDMS with additional metrics for rule compliance—Driving Direction Compliance (DDC), Traffic Light Compliance (TLC), Lane Keeping (LK)—and refines Comfort into History Comfort (HC) and Extended Comfort (EC).\n\nThe results on NAVSIM v2 are shown in [Tab.˜1](https://ar5iv.labs.arxiv.org/html/2603.24581v1#S4.T1 \"In 4.2.1 NAVSIM. ‣ 4.2 Benchmarks & Main Results ‣ 4 Experiment ‣ Latent-WAM: Latent World Action Modeling for End-to-End Autonomous Driving\"). Latent-WMA achieves the highest EPDMS among all methods, including those relying on perception annotations. Our method demonstrates strong rule compliance, with DDC, TLC and LK ranking among the top. Compared to Drive-JEPA [wang2026drivejepa], which additionally relies on perception annotations, our perception-free approach is slightly behind in safety metrics but achieves substantially better EC. Our EP (87.7) is slightly lower than Epona (88.6), likely because our safety-aware planning favors maintaining safer distances over aggressive ego progress.\n\n| | | | | | | | | | | | | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | | Method | NC↑\\uparrow | DAC↑\\uparrow | DDC↑\\uparrow | TLC↑\\uparrow | EP↑\\uparrow | TTC↑\\uparrow | LK↑\\uparrow | HC↑\\uparrow | EC↑\\uparrow | EPDMS↑\\uparrow | | Perception-based Methods | | | | | | | | | | | | TransFuser [transfuser] | 96.9 | 89.9 | 97.8 | 99.7 | 87.1 | 95.4 | 92.7 | 98.3 | 87.2 | 76.7 | | DriveSuprim [yao2025drivesuprim] | 97.5 | 96.5 | 99.4 | 99.6 | 88.4 | 96.6 | 95.5 | 98.3 | 77.0 | 83.1 | | ReCogDrive [li2025recogdrive] | 98.3 | 95.2 | 99.5 | 99.8 | 87.1 | 97.5 | 96.6 | 98.3 | 86.5 | 83.6 | | DiffusionDrive [diffdrive] | 98.2 | 95.9 | 99.4 | 99.8 | 87.5 | 97.3 | 96.8 | 98.3 | 87.7 | 84.5 | | WorldRFT[yang2025worldrft] | 97.8 | 96.5 | 99.5 | 99.8 | 88.5 | 97.0 | 97.4 | 98.1 | 69.1 | 86.7 | | Drive-JEPA† [wang2026drivejepa] | 98.4 | 98.6 | 99.1 | 99.8 | 88.4 | 97.8 | 97.6 | 97.9 | 84.8 | 87.8 | | Perception-free Methods | | | | | | | | | | | | World4Drive [zheng2025world4drive] | 97.8 | 96.3 | 99.4 | 99.8 | 88.3 | 97.1 | 97.7 | 98.0 | 53.9 | 84.8 | | Epona [zhang2025epona] | 97.1 | 95.7 | 99.3 | 99.7 | 88.6 | 96.3 | 97.0 | 98.0 | 67.8 | 85.1 | | DriveVLA-W0 [li2025drivevla-w0] | 98.5 | 99.1 | 98.0 | 99.7 | 86.4 | 98.1 | 93.2 | 97.9 | 58.9 | 86.1 | | Ours | 98.1 | 97.3 | 99.6 | 99.8 | 87.7 | 97.3 | 97.6 | 98.1 | 87.3 | 89.3 |\n\n↑\\uparrow\n\n↑\\uparrow\n\n↑\\uparrow\n\n↑\\uparrow\n\n↑\\uparrow\n\n↑\\uparrow\n\n↑\\uparrow\n\n↑\\uparrow\n\n↑\\uparrow\n\n↑\\uparrow"
+    },
+    {
+      "heading_path": [
+        "Latent-WAM: Latent World Action Modeling for End-to-End Autonomous Driving",
+        "4 Experiment",
+        "4.2 Benchmarks & Main Results",
+        "4.2.2 HUGSIM."
+      ],
+      "text": "#### 4.2.2 HUGSIM.\n\nFor closed-loop evaluation, we employ HUGSIM [zhou2024hugsim], a benchmark with scenarios from KITTI-360 [kitti360], nuScenes [nuscenes], PandaSet [pandaset], and Waymo [waymo]. These scenarios are reconstructed as photorealistic 3D environments where the planner controls the ego vehicle through RGB cameras with dynamically adjusted viewpoints.\n\n| | | | | | | | | | | | | | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | | Method | | RC↑\\uparrow | | | | | HD-Score↑\\uparrow | | | | | | | E | M | H | X | Avg. | E | M | H | X | Avg. | | UniAD | [hu2023uniad] | 58.6 | 41.2 | 40.4 | 26.0 | 40.6 | 48.7 | 29.5 | 27.3 | 14.3 | 28.9 | | VAD | [jiang2023vad] | 38.7 | 27.0 | 25.5 | 23.0 | 27.9 | 24.3 | 09.9 | 10.4 | 08.2 | 12.3 | | LTF | [chitta2022transfuser] | 68.4 | 40.7 | 36.9 | 25.5 | 41.4 | 52.8 | 24.6 | 19.8 | 08.1 | 24.8 | | GTRS-Dense | [li2025gtrs] | 64.2 | 50.0 | 20.7 | 22.3 | 38.0 | 55.5 | 39.0 | 11.7 | 14.3 | 28.6 | | Ours | | 84.2 | 42.5 | 30.6 | 35.5 | 45.9 | 72.5 | 24.0 | 12.2 | 18.1 | 28.9 | | E: Easy, M: Medium, H: Hard, X: Extreme | | | | | | | | | | | | | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |\n\n↑\\uparrow\n\n↑\\uparrow\n\n[Tab.˜2](https://ar5iv.labs.arxiv.org/html/2603.24581v1#S4.T2 \"In 4.2.2 HUGSIM. ‣ 4.2 Benchmarks & Main Results ‣ 4 Experiment ‣ Latent-WAM: Latent World Action Modeling for End-to-End Autonomous Driving\") presents results on the pre-challenge HUGSIM test set, which contains 436 scenarios across four difficulty levels. Following the zero-shot protocol, we evaluate using Road Completion (RC) and the HUGSIM Driving Score (HD-Score)—the latter combining RC with averaged NC, DAC, TTC, and comfort metrics. We evaluate Latent-WMA in a zero-shot setting on HUGSIM: the model is trained exclusively on NAVSIM without any fine-tuning, yet achieves 45.9 RC and 28.9 HD-Score, ranking first in RC and matching the best HD-Score among all baselines."
+    },
+    {
+      "heading_path": [
+        "Latent-WAM: Latent World Action Modeling for End-to-End Autonomous Driving",
+        "4 Experiment",
+        "4.3 Ablation Study"
+      ],
+      "text": "### 4.3 Ablation Study\n\n| | | | | | | --- | --- | --- | --- | --- | | Scene Representation | | Dynamic World Modeling | | EPDMS↑\\uparrow | | Compression | Geometry | World Model | Ego Status | | ✗ | ✗ | ✗ | ✗ | 87.9 | | ✓ | ✗ | ✗ | ✗ | 87.7−0.2\\mathrlap{{}\\_{{\\color[rgb]{0.82421875,0,0}\\definecolor[named]{pgfstrokecolor}{rgb}{0.82421875,0,0}-0.2}}} | | ✓ | ✗ | ✓ | ✗ | 88.0+0.1\\mathrlap{{}\\_{{\\color[rgb]{0,0.5703125,0}\\definecolor[named]{pgfstrokecolor}{rgb}{0,0.5703125,0}+0.1}}} | | ✓ | ✗ | ✓ | ✓ | 88.3+0.4\\mathrlap{{}\\_{{\\color[rgb]{0,0.5703125,0}\\definecolor[named]{pgfstrokecolor}{rgb}{0,0.5703125,0}+0.4}}} | | ✓ | ✓ | ✗ | ✗ | 88.6+0.7\\mathrlap{{}\\_{{\\color[rgb]{0,0.5703125,0}\\definecolor[named]{pgfstrokecolor}{rgb}{0,0.5703125,0}+0.7}}} | | ✓ | ✓ | ✓ | ✗ | 89.0+1.1\\mathrlap{{}\\_{{\\color[rgb]{0,0.5703125,0}\\definecolor[named]{pgfstrokecolor}{rgb}{0,0.5703125,0}+1.1}}} | | ✓ | ✓ | ✓ | ✓ | 89.3+1.4\\mathrlap{{}\\_{{\\color[rgb]{0,0.5703125,0}\\definecolor[named]{pgfstrokecolor}{rgb}{0,0.5703125,0}+1.4}}} |\n\n↑\\uparrow\n\n−0.2\\mathrlap{{}_{{\\color[rgb]{0.82421875,0,0}\\definecolor[named]{pgfstrokecolor}{rgb}{0.82421875,0,0}-0.2}}}\n\n+0.1\\mathrlap{{}_{{\\color[rgb]{0,0.5703125,0}\\definecolor[named]{pgfstrokecolor}{rgb}{0,0.5703125,0}+0.1}}}\n\n+0.4\\mathrlap{{}_{{\\color[rgb]{0,0.5703125,0}\\definecolor[named]{pgfstrokecolor}{rgb}{0,0.5703125,0}+0.4}}}\n\n+0.7\\mathrlap{{}_{{\\color[rgb]{0,0.5703125,0}\\definecolor[named]{pgfstrokecolor}{rgb}{0,0.5703125,0}+0.7}}}\n\n+1.1\\mathrlap{{}_{{\\color[rgb]{0,0.5703125,0}\\definecolor[named]{pgfstrokecolor}{rgb}{0,0.5703125,0}+1.1}}}\n\n+1.4\\mathrlap{{}_{{\\color[rgb]{0,0.5703125,0}\\definecolor[named]{pgfstrokecolor}{rgb}{0,0.5703125,0}+1.4}}}"
+    },
+    {
+      "heading_path": [
+        "Latent-WAM: Latent World Action Modeling for End-to-End Autonomous Driving",
+        "4 Experiment",
+        "4.3 Ablation Study",
+        "4.3.1 Effectiveness of Each Component."
+      ],
+      "text": "#### 4.3.1 Effectiveness of Each Component.\n\nWe conduct progressive ablation experiments by gradually adding modules to the baseline, as shown in [Tab.˜3](https://ar5iv.labs.arxiv.org/html/2603.24581v1#S4.T3 \"In 4.3 Ablation Study ‣ 4 Experiment ‣ Latent-WAM: Latent World Action Modeling for End-to-End Autonomous Driving\").\n\nScene Representation. The baseline directly feeds image patch tokens to the trajectory decoder, achieving 87.9 EPDMS. To enable long-horizon prediction in the world model, we compress image patches into compact scene tokens, incurring only a negligible performance drop (↓0.2\\downarrow 0.2). Injecting geometric information boosts performance to 88.6, demonstrating that geometric perception is crucial for accurate trajectory planning.\n\n↓0.2\\downarrow 0.2\n\nDynamic World Modeling. Building upon compressed scene tokens, the DLWM improves performance from 87.7 to 88.0 by capturing future dynamics. Adding ego status further increases the score to 88.3, indicating that self-state awareness benefits planning. With geometric information, the world model further reaches 89.0. The full model combining all components achieves 89.3, showing that all modules contribute synergistically."
+    },
+    {
+      "heading_path": [
+        "Latent-WAM: Latent World Action Modeling for End-to-End Autonomous Driving",
+        "4 Experiment",
+        "4.3 Ablation Study",
+        "4.3.2 Impact of Geometric Information."
+      ],
+      "text": "#### 4.3.2 Impact of Geometric Information.\n\nWe compare different approaches to incorporate geometric information, as shown in [Tab.˜5](https://ar5iv.labs.arxiv.org/html/2603.24581v1#S4.T5 \"In 4.3.3 Vision Backbone for Geometric Distillation. ‣ 4.3 Ablation Study ‣ 4 Experiment ‣ Latent-WAM: Latent World Action Modeling for End-to-End Autonomous Driving\").\n\nWithout geometric information, the full model (with compression, world model, and ego status) achieves 88.3 EPDMS. Directly concatenating frozen geometry features as key-value inputs surprisingly degrades performance to 88.0, likely due to misalignment between frozen features and the planning objective, introducing conflicting signals.\n\nIn contrast, distilling geometric knowledge into the vision backbone improves performance to 89.3. End-to-end fine-tuning enables the model to learn spatial-aware representations inherently aligned with downstream planning, leading to substantial gains over both alternatives."
+    },
+    {
+      "heading_path": [
+        "Latent-WAM: Latent World Action Modeling for End-to-End Autonomous Driving",
+        "4 Experiment",
+        "4.3 Ablation Study",
+        "4.3.3 Vision Backbone for Geometric Distillation."
+      ],
+      "text": "#### 4.3.3 Vision Backbone for Geometric Distillation.\n\nWe compare different backbone scales and fine-tuning strategies for geometric distillation, as shown in [Tab.˜5](https://ar5iv.labs.arxiv.org/html/2603.24581v1#S4.T5 \"In 4.3.3 Vision Backbone for Geometric Distillation. ‣ 4.3 Ablation Study ‣ 4 Experiment ‣ Latent-WAM: Latent World Action Modeling for End-to-End Autonomous Driving\").\n\n| Geometric Information | EPDMS↑\\uparrow | | --- | --- | | w/o Geometric feature | 88.3 | | Concatenation | 88.0 | | Distillation | 89.3 |\n\n↑\\uparrow\n\n| DINO Backbone | EPDMS↑\\uparrow | | --- | --- | | Small | 86.3 | | Base | 89.3 | | Small-LoRA | 84.7 | | Base-LoRA | 68.5 |\n\n↑\\uparrow\n\nBackbone Scale. DINO-Small achieves 86.3 EPDMS but remains suboptimal due to insufficient parameter capacity for high-dimensional geometric features. DINO-Base with full fine-tuning achieves the best performance (89.3), indicating that sufficient backbone capacity is essential for effective distillation.\n\nTraining Strategy. Parameter-efficient fine-tuning via LoRA leads to severe degradation and unstable training for both DINO-Small-LoRA (84.7) and DINO-Base-LoRA (68.5). LoRA’s low-rank constraints are inadequate for distilling high-dimensional geometric features, which require full parameter updates. Notably, DINO-Base-LoRA degrades more severely than DINO-Small-LoRA, as the larger model has more parameters frozen under LoRA, amplifying the mismatch between the low-rank update subspace and the high-dimensional distillation target.\n\nIn summary, effective geometric distillation requires both sufficient model capacity and full fine-tuning flexibility."
+    },
+    {
+      "heading_path": [
+        "Latent-WAM: Latent World Action Modeling for End-to-End Autonomous Driving",
+        "4 Experiment",
+        "4.3 Ablation Study",
+        "4.3.4 World Model Prediction Temporal Stride."
+      ],
+      "text": "#### 4.3.4 World Model Prediction Temporal Stride.\n\nWe investigate the effect of prediction temporal stride in the DLWM, as shown in [Tab.˜6](https://ar5iv.labs.arxiv.org/html/2603.24581v1#S4.T6 \"In 4.3.4 World Model Prediction Temporal Stride. ‣ 4.3 Ablation Study ‣ 4 Experiment ‣ Latent-WAM: Latent World Action Modeling for End-to-End Autonomous Driving\").\n\nPredicting only the final frame (0→80\\rightarrow 8) achieves 88.4 EPDMS. Incorporating historical frames and intermediate future predictions with stride 4 (−3→0→4→8-3\\rightarrow 0\\rightarrow 4\\rightarrow 8) improves performance to 89.3, as multi-step prediction provides richer supervision for representation learning.\n\n0→80\\rightarrow 8\n\n−3→0→4→8-3\\rightarrow 0\\rightarrow 4\\rightarrow 8\n\nFurther increasing density to stride 2 (−3→−2→⋯→8-3\\rightarrow-2\\rightarrow\\cdots\\rightarrow 8) yields 89.1, providing no further improvement over stride 4. Since all configurations predict up to the same horizon (8 frames), denser sampling does not extend the temporal reasoning range. Meanwhile, adjacent frames in driving scenes exhibit high similarity, providing limited additional learning signal. Moreover, optimizing a larger number of prediction targets may be less effective under the dense supervision setting. Additionally, denser prediction incurs higher computational overhead and longer training time.\n\n−3→−2→⋯→8-3\\rightarrow-2\\rightarrow\\cdots\\rightarrow 8\n\nWe conclude that moderate prediction density balances supervision effectiveness and optimization efficiency.\n\n| Prediction Temporal Stride | EPDMS↑\\uparrow | | --- | --- | | 0→80\\rightarrow 8 | 88.4 | | −3→0→4→8-3\\rightarrow 0\\rightarrow 4\\rightarrow 8 | 89.3 | | −3→−2→−1→0→2→4→6→8-3\\rightarrow-2\\rightarrow-1\\rightarrow 0\\rightarrow 2\\rightarrow 4\\rightarrow 6\\rightarrow 8 | 89.1 |\n\n↑\\uparrow\n\n0→80\\rightarrow 8\n\n−3→0→4→8-3\\rightarrow 0\\rightarrow 4\\rightarrow 8\n\n−3→−2→−1→0→2→4→6→8-3\\rightarrow-2\\rightarrow-1\\rightarrow 0\\rightarrow 2\\rightarrow 4\\rightarrow 6\\rightarrow 8"
+    },
+    {
+      "heading_path": [
+        "Latent-WAM: Latent World Action Modeling for End-to-End Autonomous Driving",
+        "4 Experiment",
+        "4.3 Ablation Study",
+        "4.3.5 Qualitative Analysis."
+      ],
+      "text": "#### 4.3.5 Qualitative Analysis.\n\nIn this section, we qualitatively evaluate Latent-WMA on NAVSIM, analyzing both the trajectory planning performance and the spatial understanding capabilities of the World Encoder after geometric distillation.\n\nTrajectory Comparison. As shown in [Fig.˜4](https://ar5iv.labs.arxiv.org/html/2603.24581v1#S4.F4 \"In 4.3.5 Qualitative Analysis. ‣ 4.3 Ablation Study ‣ 4 Experiment ‣ Latent-WAM: Latent World Action Modeling for End-to-End Autonomous Driving\"), we compare predicted trajectories of different world-model-based methods (green: human trajectories, yellow: prediction). Our method better aligns with the human trajectories and maintains safer distances from other vehicles. In contrast, Epona [zhang2025epona] produces relatively inferior trajectories, and World4Drive [zheng2025world4drive] yields acceptable but sub-optimal paths.\n\nSpatial Understanding. To investigate how geometric distillation enhances spatial understanding, we visualize the cross-attention maps between scene tokens and image patches in [Fig.˜5](https://ar5iv.labs.arxiv.org/html/2603.24581v1#S4.F5 \"In 4.3.5 Qualitative Analysis. ‣ 4.3 Ablation Study ‣ 4 Experiment ‣ Latent-WAM: Latent World Action Modeling for End-to-End Autonomous Driving\").\n\nCompared to the baseline that only compresses images into scene tokens without geometric distillation, our model exhibits significantly more focused attention patterns, concentrating on lane markings, scene structures, and drivable areas critical for trajectory planning. The baseline, in contrast, produces scattered attention that allocates substantial weights to irrelevant background regions (*e.g*., sky, distant buildings), suggesting that without geometric supervision, compressed scene tokens tend to encode noisy information that interferes with downstream planning.\n\nFurthermore, our attention maps demonstrate stronger alignment with the underlying geometric structure. While the baseline exhibits loose and diffuse attention regions, our World Encoder produces compact patterns that tightly follow geometric boundaries—such as lane markings and open spaces adjacent to obstacles.\n\nWe also visualize attention maps under different driving intentions, including going straight, turning right, and turning left. The attention distribution is strongly correlated with the driving intent: the model predominantly attends to regions along the intended direction, while areas deviating from the planned trajectory receive minimal attention. This intent-aware behavior demonstrates that our World Encoder learns to selectively focus on task-relevant spatial information conditioned on the driving context."
+    },
+    {
+      "heading_path": [
+        "Latent-WAM: Latent World Action Modeling for End-to-End Autonomous Driving",
+        "5 Conclusion"
+      ],
+      "text": "## 5 Conclusion\n\nWe presented Latent-WAM, an end-to-end autonomous driving framework that builds compact, planning-relevant world representations via spatial-aware compression and dynamic latent modeling. The Spatial-Aware Compressive World Encoder distills geometric knowledge from a foundation model into the vision backbone, compressing multi-view images into a small set of spatially-informed scene tokens. The Dynamic Latent World Model leverages a causal Transformer with 3D-RoPE to autoregressively predict future world status, acquiring dynamic understanding through self-supervised visual and supervised motion prediction. Latent-WAM achieves new state-of-the-art results on both NAVSIM v2 (89.3 EPDMS) and HUGSIM (45.9 RC and 28.9 HD-Score) with significantly less training data and fewer parameters than competing methods."
+    },
+    {
+      "heading_path": [
+        "Latent-WAM: Latent World Action Modeling for End-to-End Autonomous Driving",
+        "References"
+      ],
+      "text": "## References"
+    },
+    {
+      "heading_path": [
+        "Latent-WAM: Latent World Action Modeling for End-to-End Autonomous Driving",
+        "Supplementary Materials"
+      ],
+      "text": "## Supplementary Materials"
+    },
+    {
+      "heading_path": [
+        "Latent-WAM: Latent World Action Modeling for End-to-End Autonomous Driving",
+        "A. Metrics"
+      ],
+      "text": "## A. Metrics"
+    },
+    {
+      "heading_path": [
+        "Latent-WAM: Latent World Action Modeling for End-to-End Autonomous Driving",
+        "A. Metrics",
+        "A.1. NAVSIM"
+      ],
+      "text": "### A.1. NAVSIM\n\nNAVSIM v2 [cao2025navsimv2] extends the PDMS metric from NAVSIM v1 [im2024navsim] to the Extended PDMS (EPDMS):\n\n| | | | | | --- | --- | --- | --- | | | EPDMS=NC×DAC×DDC×TLC×5×(EP+TTC)+2×(LK+HC+EC)16\\text{EPDMS}=\\text{NC}\\times\\text{DAC}\\times\\text{DDC}\\times\\text{TLC}\\times\\frac{5\\times(\\text{EP}+\\text{TTC})+2\\times(\\text{LK}+\\text{HC}+\\text{EC})}{16} | | (7) |\n\nEPDMS=NC×DAC×DDC×TLC×5×(EP+TTC)+2×(LK+HC+EC)16\\text{EPDMS}=\\text{NC}\\times\\text{DAC}\\times\\text{DDC}\\times\\text{TLC}\\times\\frac{5\\times(\\text{EP}+\\text{TTC})+2\\times(\\text{LK}+\\text{HC}+\\text{EC})}{16}\n\nwhere NC, DAC, DDC, TLC, EP, TTC, LK, HC, and EC denote No at-fault Collision, Drivable Area Compliance, Driving Direction Compliance, Traffic Light Compliance, Ego Progress, Time to Collision, Lane Keeping, History Comfort, and Extended Comfort, respectively. Among these, DDC, TLC, LK, HC, and EC are newly introduced in NAVSIM v2."
+    },
+    {
+      "heading_path": [
+        "Latent-WAM: Latent World Action Modeling for End-to-End Autonomous Driving",
+        "A. Metrics",
+        "A.2. HUGSIM"
+      ],
+      "text": "### A.2. HUGSIM\n\nThe HUGSIM [zhou2024hugsim] Driving Score (HD-Score) at timestamp tt is computed as the product of driving policy items and a weighted average of contributory items:\n\ntt\n\n| | | | | | --- | --- | --- | --- | | | HD-Scoret=NC×DAC×5×TTC+2×COM7\\text{HD-Score}\\_{t}=\\text{NC}\\times\\text{DAC}\\times\\frac{5\\times\\text{TTC}+2\\times\\text{COM}}{7} | | (8) |\n\nHD-Scoret=NC×DAC×5×TTC+2×COM7\\text{HD-Score}_{t}=\\text{NC}\\times\\text{DAC}\\times\\frac{5\\times\\text{TTC}+2\\times\\text{COM}}{7}\n\nwhere NC, DAC, TTC, and COM denote No at-fault Collision, Drivable Area Compliance, Time to Collision, and Ego Comfort, respectively. These metrics follow the same definitions as used in NAVSIM v1.\n\nThe final HD-Score averages per-frame scores across all timestamps and scales by the route completion score Rc∈[0,1]R\\_{c}\\in[0,1]:\n\nRc∈[0,1]R_{c}\\in[0,1]\n\n| | | | | | --- | --- | --- | --- | | | HD-Score=Rc×1T​∑t=0THD-Scoret\\text{HD-Score}=R\\_{c}\\times\\frac{1}{T}\\sum\\_{t=0}^{T}\\text{HD-Score}\\_{t} | | (9) |\n\nHD-Score=Rc×1T​∑t=0THD-Scoret\\text{HD-Score}=R_{c}\\times\\frac{1}{T}\\sum_{t=0}^{T}\\text{HD-Score}_{t}\n\nNotably, NC and TTC account for collisions with static background entities (e.g., buildings, fences, vegetation) using semantic segmentation."
+    },
+    {
+      "heading_path": [
+        "Latent-WAM: Latent World Action Modeling for End-to-End Autonomous Driving",
+        "B. Data Processing Pipeline"
+      ],
+      "text": "## B. Data Processing Pipeline"
+    },
+    {
+      "heading_path": [
+        "Latent-WAM: Latent World Action Modeling for End-to-End Autonomous Driving",
+        "B. Data Processing Pipeline",
+        "B.1. Image Preprocessing"
+      ],
+      "text": "### B.1. Image Preprocessing\n\nWe utilize three camera views (left, front, right) as input. Each image undergoes a two-stage preprocessing pipeline: resizing followed by center cropping. Specifically, the original 1920×10801920\\times 1080 images are first resized to 455×256455\\times 256, then center-cropped to the final resolution of 448×224448\\times 224, yielding an aspect ratio of 2:1.\n\n1920×10801920\\times 1080\n\n455×256455\\times 256\n\n448×224448\\times 224"
+    },
+    {
+      "heading_path": [
+        "Latent-WAM: Latent World Action Modeling for End-to-End Autonomous Driving",
+        "B. Data Processing Pipeline",
+        "B.2. Camera Intrinsic Adjustment"
+      ],
+      "text": "### B.2. Camera Intrinsic Adjustment\n\nWhen applying geometric feature extraction to images, the camera intrinsic matrix must be adjusted accordingly to maintain geometric consistency. Given the original intrinsic matrix 𝐊\\mathbf{K}:\n\n𝐊\\mathbf{K}\n\n| | | | | | --- | --- | --- | --- | | | 𝐊=[fx0cx0fycy001],\\mathbf{K}=\\begin{bmatrix}f\\_{x}\\quad&0\\quad&c\\_{x}\\\\ 0\\quad&f\\_{y}\\quad&c\\_{y}\\\\ 0\\quad&0\\quad&1\\end{bmatrix}, | | (10) |\n\n𝐊=[fx0cx0fycy001],\\mathbf{K}=\\begin{bmatrix}f_{x}\\quad&0\\quad&c_{x}\\\\ 0\\quad&f_{y}\\quad&c_{y}\\\\ 0\\quad&0\\quad&1\\end{bmatrix},\n\nwhere fxf\\_{x} and fyf\\_{y} denote the focal lengths along the xx and yy axes, and (cx,cy)(c\\_{x},c\\_{y}) represents the principal point. After resizing from (Worig,Horig)(W\\_{\\text{orig}},H\\_{\\text{orig}}) to (Wresize,Hresize)(W\\_{\\text{resize}},H\\_{\\text{resize}}), the scale factors are computed as:\n\nfxf_{x}\n\nfyf_{y}\n\nxx\n\nyy\n\n(cx,cy)(c_{x},c_{y})\n\n(Worig,Horig)(W_{\\text{orig}},H_{\\text{orig}})\n\n(Wresize,Hresize)(W_{\\text{resize}},H_{\\text{resize}})\n\n| | | | | | --- | --- | --- | --- | | | sx=WresizeWorig,sy=HresizeHorig.s\\_{x}=\\frac{W\\_{\\text{resize}}}{W\\_{\\text{orig}}},\\quad s\\_{y}=\\frac{H\\_{\\text{resize}}}{H\\_{\\text{orig}}}. | | (11) |\n\nsx=WresizeWorig,sy=HresizeHorig.s_{x}=\\frac{W_{\\text{resize}}}{W_{\\text{orig}}},\\quad s_{y}=\\frac{H_{\\text{resize}}}{H_{\\text{orig}}}.\n\nFor center cropping to (Wcrop,Hcrop)(W\\_{\\text{crop}},H\\_{\\text{crop}}), the crop offsets are:\n\n(Wcrop,Hcrop)(W_{\\text{crop}},H_{\\text{crop}})\n\n| | | | | | --- | --- | --- | --- | | | Δx=Wresize−Wcrop2,Δy=Hresize−Hcrop2.\\Delta\\_{x}=\\frac{W\\_{\\text{resize}}-W\\_{\\text{crop}}}{2},\\quad\\Delta\\_{y}=\\frac{H\\_{\\text{resize}}-H\\_{\\text{crop}}}{2}. | | (12) |\n\nΔx=Wresize−Wcrop2,Δy=Hresize−Hcrop2.\\Delta_{x}=\\frac{W_{\\text{resize}}-W_{\\text{crop}}}{2},\\quad\\Delta_{y}=\\frac{H_{\\text{resize}}-H_{\\text{crop}}}{2}.\n\nThe adjusted intrinsic parameters are then:\n\n| | | | | | --- | --- | --- | --- | | | fx′=fx⋅sx,fy′=fy⋅sy,cx′=cx⋅sx−Δx,cy′=cy⋅sy−Δy,f^{\\prime}\\_{x}=f\\_{x}\\cdot s\\_{x},\\quad f^{\\prime}\\_{y}=f\\_{y}\\cdot s\\_{y},\\quad c^{\\prime}\\_{x}=c\\_{x}\\cdot s\\_{x}-\\Delta\\_{x},\\quad c^{\\prime}\\_{y}=c\\_{y}\\cdot s\\_{y}-\\Delta\\_{y}, | | (13) |\n\nfx′=fx⋅sx,fy′=fy⋅sy,cx′=cx⋅sx−Δx,cy′=cy⋅sy−Δy,f^{\\prime}_{x}=f_{x}\\cdot s_{x},\\quad f^{\\prime}_{y}=f_{y}\\cdot s_{y},\\quad c^{\\prime}_{x}=c_{x}\\cdot s_{x}-\\Delta_{x},\\quad c^{\\prime}_{y}=c_{y}\\cdot s_{y}-\\Delta_{y},\n\nyielding the adjusted intrinsic matrix 𝐊′\\mathbf{K}^{\\prime}:\n\n𝐊′\\mathbf{K}^{\\prime}\n\n| | | | | | --- | --- | --- | --- | | | 𝐊′=[fx′0cx′0fy′cy′001].\\mathbf{K}^{\\prime}=\\begin{bmatrix}f^{\\prime}\\_{x}\\quad&0\\quad&c^{\\prime}\\_{x}\\\\ 0\\quad&f^{\\prime}\\_{y}\\quad&c^{\\prime}\\_{y}\\\\ 0\\quad&0\\quad&1\\end{bmatrix}. | | (14) |\n\n𝐊′=[fx′0cx′0fy′cy′001].\\mathbf{K}^{\\prime}=\\begin{bmatrix}f^{\\prime}_{x}\\quad&0\\quad&c^{\\prime}_{x}\\\\ 0\\quad&f^{\\prime}_{y}\\quad&c^{\\prime}_{y}\\\\ 0\\quad&0\\quad&1\\end{bmatrix}."
+    },
+    {
+      "heading_path": [
+        "Latent-WAM: Latent World Action Modeling for End-to-End Autonomous Driving",
+        "B. Data Processing Pipeline",
+        "B.3. Camera Extrinsic Transformation"
+      ],
+      "text": "### B.3. Camera Extrinsic Transformation\n\nThe camera extrinsic matrix represents the transformation from camera coordinates to world (LiDAR) coordinates. We construct the camera-to-world matrix 𝐓c→w∈ℝ4×4\\mathbf{T}\\_{c\\to w}\\in\\mathbb{R}^{4\\times 4} as:\n\n𝐓c→w∈ℝ4×4\\mathbf{T}_{c\\to w}\\in\\mathbb{R}^{4\\times 4}\n\n| | | | | | --- | --- | --- | --- | | | 𝐓c→w=[𝐑c→w𝐭c→w𝟎⊤1],\\mathbf{T}\\_{c\\to w}=\\begin{bmatrix}\\mathbf{R}\\_{c\\to w}\\quad&\\mathbf{t}\\_{c\\to w}\\\\ \\mathbf{0}^{\\top}\\quad&1\\end{bmatrix}, | | (15) |\n\n𝐓c→w=[𝐑c→w𝐭c→w𝟎⊤1],\\mathbf{T}_{c\\to w}=\\begin{bmatrix}\\mathbf{R}_{c\\to w}\\quad&\\mathbf{t}_{c\\to w}\\\\ \\mathbf{0}^{\\top}\\quad&1\\end{bmatrix},\n\nwhere 𝐑c→w∈ℝ3×3\\mathbf{R}\\_{c\\to w}\\in\\mathbb{R}^{3\\times 3} is the rotation matrix and 𝐭c→w∈ℝ3\\mathbf{t}\\_{c\\to w}\\in\\mathbb{R}^{3} is the translation vector. The world-to-camera matrix 𝐓w→c\\mathbf{T}\\_{w\\to c} used for 3D-to-2D projection is obtained by matrix inversion:\n\n𝐑c→w∈ℝ3×3\\mathbf{R}_{c\\to w}\\in\\mathbb{R}^{3\\times 3}\n\n𝐭c→w∈ℝ3\\mathbf{t}_{c\\to w}\\in\\mathbb{R}^{3}\n\n𝐓w→c\\mathbf{T}_{w\\to c}\n\n| | | | | | --- | --- | --- | --- | | | 𝐓w→c=𝐓c→w−1.\\mathbf{T}\\_{w\\to c}=\\mathbf{T}\\_{c\\to w}^{-1}. | | (16) |\n\n𝐓w→c=𝐓c→w−1.\\mathbf{T}_{w\\to c}=\\mathbf{T}_{c\\to w}^{-1}."
+    },
+    {
+      "heading_path": [
+        "Latent-WAM: Latent World Action Modeling for End-to-End Autonomous Driving",
+        "B. Data Processing Pipeline",
+        "B.4. Geometric Feature Extraction"
+      ],
+      "text": "### B.4. Geometric Feature Extraction\n\nFollowing the geometric alignment formulation in the Method section, we extract patch-level geometric features fg​(I)∈ℝT×M×S×Dgf\\_{g}(I)\\in\\mathbb{R}^{T\\times M\\times S\\times D\\_{g}} from multi-view images using the frozen geometric foundation model WorldMirror [liu2025worldmirror] as fgf\\_{g}, where TT denotes the number of temporal frames, MM denotes the number of camera views, SS denotes the number of patch tokens per view, and Dg=2048D\\_{g}=2048 denotes the geometric feature dimension.\n\nfg​(I)∈ℝT×M×S×Dgf_{g}(I)\\in\\mathbb{R}^{T\\times M\\times S\\times D_{g}}\n\nfgf_{g}\n\nTT\n\nMM\n\nSS\n\nDg=2048D_{g}=2048\n\nCamera Prior Extraction. Given multi-view images 𝐈∈ℝM×3×H×W\\mathbf{I}\\in\\mathbb{R}^{M\\times 3\\times H\\times W} along with their camera intrinsics 𝐊∈ℝM×3×3\\mathbf{K}\\in\\mathbb{R}^{M\\times 3\\times 3} and extrinsics 𝐓∈ℝM×4×4\\mathbf{T}\\in\\mathbb{R}^{M\\times 4\\times 4}, the geometric foundation model first encodes these inputs into spatial-geometric priors 𝒫\\mathcal{P} that encapsulate camera poses, depth estimates, and intrinsic parameters:\n\n𝐈∈ℝM×3×H×W\\mathbf{I}\\in\\mathbb{R}^{M\\times 3\\times H\\times W}\n\n𝐊∈ℝM×3×3\\mathbf{K}\\in\\mathbb{R}^{M\\times 3\\times 3}\n\n𝐓∈ℝM×4×4\\mathbf{T}\\in\\mathbb{R}^{M\\times 4\\times 4}\n\n𝒫\\mathcal{P}\n\n| | | | | | --- | --- | --- | --- | | | 𝒫=fprior​(𝐈,𝐊,𝐓).\\mathcal{P}=f\\_{\\text{prior}}\\left(\\mathbf{I},\\mathbf{K},\\mathbf{T}\\right). | | (17) |\n\n𝒫=fprior​(𝐈,𝐊,𝐓).\\mathcal{P}=f_{\\text{prior}}\\left(\\mathbf{I},\\mathbf{K},\\mathbf{T}\\right).\n\nGeometric Feature Encoding. The visual geometry transformer then processes the images conditioned on these priors. Following the model’s conditional design, we utilize camera pose and intrinsic information (indicated by condition flags 𝐜=[1,0,1]\\mathbf{c}=[1,0,1] for camera pose, depth, and intrinsics respectively) while excluding depth supervision:\n\n𝐜=[1,0,1]\\mathbf{c}=[1,0,1]\n\n| | | | | | --- | --- | --- | --- | | | fg​(I)=WorldMirror​(𝐈,𝒫;𝐜).f\\_{g}(I)=\\text{WorldMirror}\\left(\\mathbf{I},\\mathcal{P};\\mathbf{c}\\right). | | (18) |\n\nfg​(I)=WorldMirror​(𝐈,𝒫;𝐜).f_{g}(I)=\\text{WorldMirror}\\left(\\mathbf{I},\\mathcal{P};\\mathbf{c}\\right).\n\nSince fgf\\_{g} remains frozen throughout training, we pre-compute and offline-cache fg​(I)f\\_{g}(I) for all training samples, enabling direct loading during training without repeated inference costs. This design substantially reduces training time and GPU memory overhead.\n\nfgf_{g}\n\nfg​(I)f_{g}(I)"
+    },
+    {
+      "heading_path": [
+        "Latent-WAM: Latent World Action Modeling for End-to-End Autonomous Driving",
+        "C. Inference Latency"
+      ],
+      "text": "## C. Inference Latency\n\nWe measured the inference latency per module of Latent-WMA on a single A100 GPU for a single batch. The inference latency of each module is shown in [Tab.˜7](https://ar5iv.labs.arxiv.org/html/2603.24581v1#Pt0.Ax3.T7 \"In C. Inference Latency ‣ Latent-WAM: Latent World Action Modeling for End-to-End Autonomous Driving\"). Latency was evaluated after three warm-up iterations, with the final number averaged over 10 forward passes.\n\n| Module | Parameters | | Memory Usage | | Latency | | --- | --- | --- | --- | --- | --- | | World Encoder | 86.6M | | — | | 100ms | | Trajectory Decoder | 8.4M | | — | | 6ms | | All modules | 104M | | 1.1GB | | 107ms |"
+    },
+    {
+      "heading_path": [
+        "Latent-WAM: Latent World Action Modeling for End-to-End Autonomous Driving",
+        "D. More Visulization"
+      ],
+      "text": "## D. More Visulization"
+    },
+    {
+      "heading_path": [
+        "Latent-WAM: Latent World Action Modeling for End-to-End Autonomous Driving",
+        "D. More Visulization",
+        "D.1. Trajectory Planning"
+      ],
+      "text": "### D.1. Trajectory Planning"
+    },
+    {
+      "heading_path": [
+        "Latent-WAM: Latent World Action Modeling for End-to-End Autonomous Driving",
+        "D. More Visulization",
+        "D.2. Attention Map"
+      ],
+      "text": "### D.2. Attention Map"
+    },
+    {
+      "heading_path": [
+        "Latent-WAM: Latent World Action Modeling for End-to-End Autonomous Driving",
+        "D. More Visulization",
+        "D.2. Attention Map",
+        "0..0.1 C.3. HUGSIM"
+      ],
+      "text": "#### 0..0.1 C.3. HUGSIM"
+    }
+  ]
+}

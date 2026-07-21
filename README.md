@@ -80,104 +80,75 @@ LLM должна начинать работу с этих файлов, а не
 > Новые переводы и разборы arXiv-статей
 ---
 
-### Обучение с подкреплением в процессе принятия финансовых решений: систематический обзор эффективности, проблем и стратегий реализации
-[2512.10913] дата публикации в arXiv - 12.2025  
-📅 дата перевода 14.07.2026  
-🏷 `Reinforcement Learning` `Financial Markets` `Algorithmic Trading` `Portfolio Optimization` `Market Making` `Systematic Review` `Quantitative Finance`
+### Latent-WAM: Моделирование скрытого мира для автономного вождения
+[2603.24581] дата публикации в arXiv - 03.2026  
+📅 дата перевода 18.07.2026  
+🏷 `autonomous driving` `world models` `trajectory planning` `latent representation` `geometric distillation` `end-to-end learning` `computer vision`
 
-Данный обзор 167 исследований (2017–2025) показывает, что успех обучения с подкреплением (RL) в финансах зависит скорее от качества реализации, доменной экспертизы и предобработки данных, чем от сложности алгоритмов. Авторы предлагают унифицированную структуру для решения проблем интерпретируемости, надежности и развертывания RL-систем.
+Latent-WAM — это эффективная система сквозного автономного вождения, использующая сжатые пространственно-осведомленные представления мира. Метод достигает новых SOTA-результатов на бенчмарках NAVSIM v2 и HUGSIM, превосходя существующие подходы при меньших вычислительных затратах.
 
-- [📖 Русская HTML версия](https://romanzorkin.github.io/arxiv_ru/articles/2512.10913/2512.10913_ru.html)
-- [📄 Оригинальная статья](https://arxiv.org/abs/2512.10913)
-- [🧠 Summary / README](articles/2512.10913/README.md)
-- [⚙ Metadata](articles/2512.10913/metadata.json)
-
----
-
-### Уточненный анализ обобщения для экстремального многоклассового обучения контрастным представлениям с учителем
-[2605.07596] дата публикации в arXiv - 05.2026  
-📅 дата перевода 14.07.2026  
-🏷 `Contrastive Learning` `Statistical Learning Theory` `U-Statistics` `Extreme Classification` `Generalization Bounds` `Sample Complexity` `Representation Learning`
-
-Статья предлагает теоретический анализ обобщающей способности в обучении контрастивных представлений (CRL) с использованием U-статистик. Авторы устраняют зависимость сложности выборки от вероятности редких классов, обеспечивая масштабируемость для задач с экстремально большим числом классов.
-
-- [📖 Русская HTML версия](https://romanzorkin.github.io/arxiv_ru/articles/2605.07596/2605.07596_ru.html)
-- [📄 Оригинальная статья](https://arxiv.org/abs/2605.07596)
-- [🧠 Summary / README](articles/2605.07596/README.md)
-- [⚙ Metadata](articles/2605.07596/metadata.json)
+- [📖 Русская HTML версия](https://romanzorkin.github.io/arxiv_ru/articles/2603.24581/2603.24581_ru.html)
+- [📄 Оригинальная статья](https://arxiv.org/abs/2603.24581)
+- [🧠 Summary / README](articles/2603.24581/README.md)
+- [⚙ Metadata](articles/2603.24581/metadata.json)
 
 ---
 
-### AnomalyAgent: Обучающие модели агентов без обучения для обнаружения аномалий в условиях нулевого/малого количества примеров
-[2605.30140] дата публикации в arXiv - 05.2026  
-📅 дата перевода 14.07.2026  
-🏷 `Anomaly Detection` `Multimodal LLM` `Zero-shot Learning` `Few-shot Learning` `Agentic Framework` `Computer Vision` `Training-free`
+### Физическая состязательная одежда для обхода детекторов видимого и теплового диапазонов через неперекрывающиеся RGB-T паттерны
+[2605.04675] дата публикации в arXiv - 05.2026  
+📅 дата перевода 18.07.2026  
+🏷 `Adversarial Attacks` `RGB-T Detection` `Physical Security` `Computer Vision` `Multimodal Fusion` `3D Modeling` `Robustness`
 
-AnomalyAgent — это обучающаяся без дообучения агентная система, использующая MLLM для обнаружения аномалий через планирование, использование инструментов и рефлексию. Она превосходит существующие методы за счет глубокого контекстного анализа и самокалибровки по примерам.
+Авторы представляют метод создания состязательной одежды с неперекрывающимися RGB-T паттернами (NORP), позволяющий эффективно обходить мультимодальные детекторы объектов. Метод использует 3D-моделирование и оптимизацию для обеспечения устойчивости атак в реальных условиях.
 
-- [📖 Русская HTML версия](https://romanzorkin.github.io/arxiv_ru/articles/2605.30140/2605.30140_ru.html)
-- [📄 Оригинальная статья](https://arxiv.org/abs/2605.30140)
-- [🧠 Summary / README](articles/2605.30140/README.md)
-- [⚙ Metadata](articles/2605.30140/metadata.json)
-
----
-
-### DCD: предметно-ориентированное проектирование для контролируемой генерации с использованием расширенного поиска
-[2604.07590] дата публикации в arXiv - 04.2026  
-📅 дата перевода 06.07.2026  
-🏷 `Retrieval Augmented Generation` `Knowledge Hierarchy` `Domain Oriented Design` `Multi Stage Routing` `Information Retrieval` `LLM Guardrails` `Semantic Search`
-
-Авторы представляют DCD (Domain–Collection–Document) — архитектурный подход к RAG, который структурирует знания иерархически и использует многоэтапную маршрутизацию запросов. Это повышает точность поиска и надежность генерации без необходимости дообучения языковой модели.
-
-- [📖 Русская HTML версия](https://romanzorkin.github.io/arxiv_ru/articles/2604.07590/2604.07590_ru.html)
-- [📄 Оригинальная статья](https://arxiv.org/abs/2604.07590)
-- [🧠 Summary / README](articles/2604.07590/README.md)
-- [⚙ Metadata](articles/2604.07590/metadata.json)
+- [📖 Русская HTML версия](https://romanzorkin.github.io/arxiv_ru/articles/2605.04675/2605.04675_ru.html)
+- [📄 Оригинальная статья](https://arxiv.org/abs/2605.04675)
+- [🧠 Summary / README](articles/2605.04675/README.md)
+- [⚙ Metadata](articles/2605.04675/metadata.json)
 
 ---
 
-### Распознавание места на основе LiDAR для автономного вождения: обзор
-[2306.10561] дата публикации в arXiv - 06.2023  
-📅 дата перевода 06.07.2026  
-🏷 `LiDAR` `Place Recognition` `Autonomous Driving` `SLAM` `Point Cloud` `Deep Learning` `Robotics`
+### AdvScene: Переосмысление оценки состязательных патчей через устойчивость сцены
+[2605.30578] дата публикации в arXiv - 05.2026  
+📅 дата перевода 21.07.2026  
+🏷 `Adversarial Machine Learning` `3D Gaussian Splatting` `Scene Robustness` `Physical Attacks` `Computer Vision` `Operational Envelope` `Neural Rendering`
 
-Данная статья представляет собой первый систематический обзор методов распознавания мест (LPR) с использованием 3D LiDAR для автономных транспортных средств. Авторы классифицируют существующие подходы, анализируют их архитектуры, ограничения и предоставляют сравнительный анализ на основе открытых наборов данных.
+AdvScene — это фреймворк для оценки устойчивости состязательных патчей в реконструированных 3D-сценах. Он измеряет «операционный конверт» атаки, учитывая изменения ракурса, дистанции и контекста, что позволяет точнее оценить реальный риск, чем традиционные методы.
 
-- [📖 Русская HTML версия](https://romanzorkin.github.io/arxiv_ru/articles/2306.10561/2306.10561_ru.html)
-- [📄 Оригинальная статья](https://arxiv.org/abs/2306.10561)
-- [🧠 Summary / README](articles/2306.10561/README.md)
-- [⚙ Metadata](articles/2306.10561/metadata.json)
-
----
-
-### Обеспечение устойчивости медицинского оборудования в условиях ограниченных ресурсов: диагностическая и вспомогательная платформа на базе ИИ для биомедицинских техников
-[2601.16967] дата публикации в arXiv - 01.2026  
-📅 дата перевода 06.07.2026  
-🏷 `Medical Equipment Maintenance` `RAG Architecture` `LLM Applications` `Low Resource Settings` `Healthcare Sustainability` `Biomedical Engineering` `Diagnostic Support`
-
-Авторы представляют INGENZI Tech — ИИ-платформу на базе RAG для поддержки биомедицинских техников в странах с низким уровнем дохода. Система предоставляет пошаговые инструкции по ремонту оборудования, снижая время простоя медицинской техники.
-
-- [📖 Русская HTML версия](https://romanzorkin.github.io/arxiv_ru/articles/2601.16967/2601.16967_ru.html)
-- [📄 Оригинальная статья](https://arxiv.org/abs/2601.16967)
-- [🧠 Summary / README](articles/2601.16967/README.md)
-- [⚙ Metadata](articles/2601.16967/metadata.json)
+- [📖 Русская HTML версия](https://romanzorkin.github.io/arxiv_ru/articles/2605.30578/2605.30578_ru.html)
+- [📄 Оригинальная статья](https://arxiv.org/abs/2605.30578)
+- [🧠 Summary / README](articles/2605.30578/README.md)
+- [⚙ Metadata](articles/2605.30578/metadata.json)
 
 ---
 
-### Искусственный интеллект должен внедрить специализацию посредством сверхчеловеческого адаптивного интеллекта
-[2602.23643] дата публикации в arXiv - 02.2026  
-📅 дата перевода 06.07.2026  
-🏷 `Artificial Intelligence` `AGI` `Specialization` `Adaptability` `Machine Learning` `Research Methodology` `Superhuman Intelligence`
+### Структурированный состязательный камуфляж на основе диаграмм Вороного
+[2606.17711] дата публикации в arXiv - 06.2026  
+📅 дата перевода 18.07.2026  
+🏷 `Adversarial Attacks` `Object Detection` `Voronoi Diagrams` `Camouflage` `Computer Vision` `Robustness` `Security`
 
-Авторы критикуют концепцию AGI как фундаментально ошибочную и антропоцентричную. Вместо стремления к универсальности предлагается концепция сверхчеловеческого адаптивного интеллекта (SAI), сфокусированная на скорости обучения и эффективности решения важных задач, выходящих за рамки человеческих возможностей.
+Авторы предлагают метод генерации состязательного камуфляжа, оптимизирующий положение опорных точек диаграмм Вороного при фиксированной цветовой палитре. Это создает визуально естественные, структурированные паттерны, эффективно снижающие точность детекторов объектов.
 
-- [📖 Русская HTML версия](https://romanzorkin.github.io/arxiv_ru/articles/2602.23643/2602.23643_ru.html)
-- [📄 Оригинальная статья](https://arxiv.org/abs/2602.23643)
-- [🧠 Summary / README](articles/2602.23643/README.md)
-- [⚙ Metadata](articles/2602.23643/metadata.json)
+- [📖 Русская HTML версия](https://romanzorkin.github.io/arxiv_ru/articles/2606.17711/2606.17711_ru.html)
+- [📄 Оригинальная статья](https://arxiv.org/abs/2606.17711)
+- [🧠 Summary / README](articles/2606.17711/README.md)
+- [⚙ Metadata](articles/2606.17711/metadata.json)
 
 ---
 
+### VFACamou: Камуфляж, основанный на данных о местоположении противника, для адаптации к окружающей среде и физического уклонения.
+[2606.19736] дата публикации в arXiv - 06.2026  
+📅 дата перевода 18.07.2026  
+🏷 `Adversarial Attacks` `Computer Vision` `Object Detection` `Physical Camouflage` `UAV Surveillance` `Deep Learning` `Robustness`
+
+VFACamou — это фреймворк для генерации носимой одежды с состязательными узорами, которые скрывают людей от детекторов объектов в условиях БПЛА-разведки. Метод обеспечивает устойчивость к изменениям ракурса, освещения и деформации тела, сохраняя при этом визуальную естественность.
+
+- [📖 Русская HTML версия](https://romanzorkin.github.io/arxiv_ru/articles/2606.19736/2606.19736_ru.html)
+- [📄 Оригинальная статья](https://arxiv.org/abs/2606.19736)
+- [🧠 Summary / README](articles/2606.19736/README.md)
+- [⚙ Metadata](articles/2606.19736/metadata.json)
+
+---
 
 
 ## О проекте
@@ -190,6 +161,11 @@ AnomalyAgent — это обучающаяся без дообучения аг�
 
 |id статьи|Месяц публикации|Дата перевода| Тема статьи | Ручной контроль|
 |---|---|---|---|---|
+| [2603.24581](articles/2603.24581/README.md) | 03.2026 | 18.07.2026 | Latent-WAM: Моделирование скрытого мира для автономного вождения (`Latent-WAM: Latent World Action Modeling for End-to-End Autonomous Driving`) ||
+| [2605.04675](articles/2605.04675/README.md) | 05.2026 | 18.07.2026 | Физическая состязательная одежда для обхода детекторов видимого и теплового диапазонов через неперекрывающиеся RGB-T паттерны (`Physical Adversarial Clothing Evades Visible-Thermal Detectors via Non-Overlapping RGB-T Pattern`) ||
+| [2605.30578](articles/2605.30578/README.md) | 05.2026 | 21.07.2026 | AdvScene: Переосмысление оценки состязательных патчей через устойчивость сцены (`AdvScene: Rethinking Adversarial Patch Evaluation Through Scene Robustness`) ||
+| [2606.17711](articles/2606.17711/README.md) | 06.2026 | 18.07.2026 | Структурированный состязательный камуфляж на основе диаграмм Вороного (`Structured Adversarial Camouflage via Voronoi Diagrams`) ||
+| [2606.19736](articles/2606.19736/README.md) | 06.2026 | 18.07.2026 | VFACamou: Камуфляж, основанный на данных о местоположении противника, для адаптации к окружающей среде и физического уклонения. (`VFACamou: View-Fused Adversarial Camouflage for Environment-Adaptive Physical Evasion`) ||
 | [2512.10913](articles/2512.10913/README.md) | 12.2025 | 14.07.2026 | Обучение с подкреплением в процессе принятия финансовых решений: систематический обзор эффективности, проблем и стратегий реализации (`Reinforcement Learning in Financial Decision Making: A Systematic Review of Performance, Challenges, and Implementation Strategies`) |✅|
 | [2605.07596](articles/2605.07596/README.md) | 05.2026 | 14.07.2026 | Уточненный анализ обобщения для экстремального многоклассового обучения контрастным представлениям с учителем (`A Refined Generalization Analysis for Extreme Multi-class Supervised Contrastive Representation Learning`) |✅|
 | [2605.30140](articles/2605.30140/README.md) | 05.2026 | 14.07.2026 | AnomalyAgent: Обучающие модели агентов без обучения для обнаружения аномалий в условиях нулевого/малого количества примеров(`AnomalyAgent: Training-Free Agentic Models for Zero-/Few-Shot Anomaly Detection`) |✅|
@@ -197,7 +173,7 @@ AnomalyAgent — это обучающаяся без дообучения аг�
 | [2306.10561](articles/2306.10561/README.md) | 06.2023 | 06.07.2026 | Распознавание места на основе LiDAR для автономного вождения: обзор (`LiDAR-Based Place Recognition For Autonomous Driving: A Survey`) |✅|
 | [2601.16967](articles/2601.16967/README.md) | 01.2026 | 06.07.2026 | Обеспечение устойчивости медицинского оборудования в условиях ограниченных ресурсов: диагностическая и вспомогательная платформа на базе ИИ для биомедицинских техников (`Empowering Medical Equipment Sustainability in Low-Resource Settings: An AI-Powered Diagnostic and Support Platform for Biomedical Technicians`) |✅|
 | [2602.23643](articles/2602.23643/README.md) | 02.2026 | 06.07.2026 | Искусственный интеллект должен внедрить специализацию посредством сверхчеловеческого адаптивного интеллекта (`AI Must Embrace Specialization via Superhuman Adaptable Intelligence`) |✅|
-| [2603.18620](articles/2603.18620/README.md) | 03.2026 | 06.07.2026 | Обучение саморазвитию (`Learning to Self-Evolve`) ||
+| [2603.18620](articles/2603.18620/README.md) | 03.2026 | 06.07.2026 | Обучение саморазвитию (`Learning to Self-Evolve`) |✅|
 | [2605.31500](articles/2605.31500/README.md) | 05.2026 | 06.07.2026 | Об эффективном масштабировании GNN через реализации слоев с учетом ввода и вывода (`On Efficient Scaling of GNNs via IO-Aware Layers Implementations`) ||
 | [2606.27282](articles/2606.27282/README.md) | 06.2026 | 06.07.2026 | Насколько хороши линейные модели для прогнозирования временных рядов? (`How Good Can Linear Models Be for Time-Series Forecasting?`) ||
 | [2405.19699](articles/2405.19699/README.md) | 05.2024 | 27.06.2026 | Справедливость в найме с применением ИИ: проблемы, показатели, методы и будущие направления (`Fairness in AI-Driven Recruitment: Challenges, Metrics, Methods, and Future Directions`) ||

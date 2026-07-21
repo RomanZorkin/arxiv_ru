@@ -1,0 +1,1199 @@
+<!DOCTYPE html>
+<!-- saved from url=(0046)https://ar5iv.labs.arxiv.org/html/2606.17711v1 -->
+<html prefix="dcterms: http://purl.org/dc/terms/" lang="en" data-theme="light"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<title>[2606.17711] Structured Adversarial Camouflage via Voronoi Diagrams</title><meta property="og:description" content="Pixel-wise adversarial patches are computationally heavy and often visually
+detectable, limiting utility in security-critical systems. We present
+adversarial Voronoi camouflage that optimizes only seed-point locations
+…">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Structured Adversarial Camouflage via Voronoi Diagrams">
+<meta name="twitter:image:src" content="https://ar5iv.labs.arxiv.org/assets/ar5iv_card.png">
+<meta name="twitter:image:alt" content="ar5iv logo">
+<meta property="og:title" content="Structured Adversarial Camouflage via Voronoi Diagrams">
+<meta property="og:site_name" content="ar5iv">
+<meta property="og:image" content="https://ar5iv.labs.arxiv.org/assets/ar5iv_card.png">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://ar5iv.labs.arxiv.org/html/2606.17711">
+<link rel="canonical" target="_blank" href="https://ar5iv.labs.arxiv.org/html/2606.17711">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+<script>
+  function detectColorScheme(){
+    var theme="light";
+    var current_theme = localStorage.getItem("ar5iv_theme");
+    if(current_theme){
+      if(current_theme == "dark"){
+        theme = "dark";
+      } }
+    else if(!window.matchMedia) { return false; }
+    else if(window.matchMedia("(prefers-color-scheme: dark)").matches) {
+      theme = "dark"; }
+    if (theme=="dark") {
+      document.documentElement.setAttribute("data-theme", "dark");
+    } else {
+      document.documentElement.setAttribute("data-theme", "light"); } }
+
+  detectColorScheme();
+
+  function toggleColorScheme(){
+    var current_theme = localStorage.getItem("ar5iv_theme");
+    if (current_theme) {
+      if (current_theme == "light") {
+        localStorage.setItem("ar5iv_theme", "dark"); }
+      else {
+        localStorage.setItem("ar5iv_theme", "light"); } }
+    else {
+        localStorage.setItem("ar5iv_theme", "dark"); }
+    detectColorScheme(); }
+</script>
+<link media="all" rel="stylesheet" href="./[2606.17711] Structured Adversarial Camouflage via Voronoi Diagrams_files/ar5iv-fonts.0.9.0.css"><link media="all" rel="stylesheet" href="./[2606.17711] Structured Adversarial Camouflage via Voronoi Diagrams_files/ar5iv.0.9.0.css"><link media="all" rel="stylesheet" href="./[2606.17711] Structured Adversarial Camouflage via Voronoi Diagrams_files/ar5iv-site.0.2.2.css">
+<meta content="extension" property="gosuslugi.plugin.extension.content"></head>
+<body>
+<div class="ltx_page_main">
+<div class="ltx_page_content">
+<article class="ltx_document ltx_authors_1line">
+<h1 class="ltx_title ltx_title_document">Structured Adversarial Camouflage via Voronoi Diagrams</h1>
+<div class="ltx_authors">
+<span class="ltx_creator ltx_role_author">
+<span class="ltx_personname">Jens Bayer
+</span><span class="ltx_author_notes"><span class="ltx_author_notes_content">
+<span class="ltx_contact ltx_role_affiliation"><span class="ltx_contact_name">Affiliation:&nbsp;</span> Fraunhofer IOSB and Fraunhofer Center for Machine Learning,
+</span></span></span></span>
+<span class="ltx_author_before">  </span><span class="ltx_creator ltx_role_author">
+<span class="ltx_personname">Stefan Becker
+</span><span class="ltx_author_notes"><span class="ltx_author_notes_content">
+<span class="ltx_contact ltx_role_affiliation"><span class="ltx_contact_name">Affiliation:&nbsp;</span> Karlsruhe Institute of Technology
+</span></span></span></span>
+<span class="ltx_author_before">  </span><span class="ltx_creator ltx_role_author">
+<span class="ltx_personname">David Münch
+</span></span>
+<span class="ltx_author_before">  </span><span class="ltx_creator ltx_role_author">
+<span class="ltx_personname">Michael Arens
+</span></span>
+<span class="ltx_author_before">  </span><span class="ltx_creator ltx_role_author">
+<span class="ltx_personname">Jürgen Beyerer
+</span><span class="ltx_author_notes"><span class="ltx_author_notes_content">
+<span class="ltx_contact ltx_role_affiliation"><span class="ltx_contact_name">Affiliation:&nbsp;</span> Fraunhofer IOSB and Fraunhofer Center for Machine Learning,
+</span></span></span></span></div>
+
+<div id="abstract1" class="ltx_abstract"><h6 class="ltx_title ltx_title_abstract">Abstract</h6>
+    
+<p id="abstract1.1" class="ltx_p">Pixel-wise adversarial patches are computationally heavy and often visually
+detectable, limiting utility in security-critical systems. We present
+adversarial Voronoi camouflage that optimizes only seed-point locations
+under fixed, printable palettes using a soft assignment, producing
+structured, splinter camouflage-like patterns without additional
+regularization. Evaluated on person detection with COCO-style
+AP@[.5:.95], naive placement (Inria <math id="abstract1.m1" class="ltx_Math" alttext="\rightarrow" display="inline" intent=":literal"><semantics><mo stretchy="false">→</mo><annotation encoding="application/x-tex">\rightarrow</annotation></semantics></math> COCO) performs
+comparable bad, while garment-level application via segmentation mask
+(3DPeople) results in a significant AP drop. The attack transfers to
+out-of-domain backgrounds and across detector families
+(YOLOv9/10/11/12), indicating robustness in black-box settings.
+Repainting with different palettes largely nullifies the effect, and
+single-color tweaks show limited tolerance (<math id="abstract1.m2" class="ltx_Math" alttext="\leq" display="inline" intent=":literal"><semantics><mo>≤</mo><annotation encoding="application/x-tex">\leq</annotation></semantics></math>0.17), highlighting a
+structure–palette coupling. The parameter-efficient,
+palette-constrained design improves visual plausibility while degrading
+real-time detector performance. Physical validation and color
+calibration are left for future work.
+<br class="ltx_break">Code: <a target="_blank" href="https://github.com/JensBayer/Voronoi" title="" class="ltx_ref ltx_url ltx_font_typewriter">https://github.com/JensBayer/Voronoi</a>
+<br class="ltx_break">
+<br class="ltx_break">This paper was originally presented at the International Conference on
+Military Communication and Information Systems (ICMCIS), organized by
+the Information Systems Technology (IST) Scientific and Technical
+Committee, IST-224-RSY – the ICMCIS, held in Bath, United Kingdom,
+12-13 May 2026.</p>
+  
+</div>
+<section id="S1" class="ltx_section">
+<h2 class="ltx_title ltx_title_section"><span class="ltx_tag ltx_tag_section">1 </span>Introduction</h2>
+
+<div id="S1.p1" class="ltx_para ltx_noindent">
+<p id="S1.p1.1" class="ltx_p">Modern reconnaissance and surveillance architectures in defense increasingly
+rely on deep-learning-based object detectors deployed on unmanned platforms,
+mobile systems, and fixed sensor networks. They often form the first stage of
+a chain, informing human operators or downstream decision components to the
+presence of personnel or materiel. Any systematic weakness of these models
+can therefore have a disproportionate operational impact. Prior work has shown
+that carefully crafted physical patterns on clothing, vehicles, or equipment can
+significantly reduce detection performance under realistic viewing
+conditions&nbsp;<cite class="ltx_cite ltx_citemacro_cite">[<a href="https://ar5iv.labs.arxiv.org/html/2606.17711v1#bib.bib3" title="" class="ltx_ref">3</a>, <a href="https://ar5iv.labs.arxiv.org/html/2606.17711v1#bib.bib16" title="" class="ltx_ref">16</a>, <a href="https://ar5iv.labs.arxiv.org/html/2606.17711v1#bib.bib17" title="" class="ltx_ref">17</a>, <a href="https://ar5iv.labs.arxiv.org/html/2606.17711v1#bib.bib18" title="" class="ltx_ref">18</a>, <a href="https://ar5iv.labs.arxiv.org/html/2606.17711v1#bib.bib5" title="" class="ltx_ref">5</a>, <a href="https://ar5iv.labs.arxiv.org/html/2606.17711v1#bib.bib6" title="" class="ltx_ref">6</a>, <a href="https://ar5iv.labs.arxiv.org/html/2606.17711v1#bib.bib19" title="" class="ltx_ref">19</a>]</cite>,
+making adversarial camouflage both a potential capability for friendly forces
+and a threat if exploited by adversaries. Nonetheless, many existing methods
+produce visually conspicuous patterns, deviate strongly from established
+camouflage styles, or rely on color choices that are difficult to realize with
+real pigments and textiles, which hampers technology transfer and robust
+testing.</p>
+</div>
+<div id="S1.p2" class="ltx_para ltx_noindent">
+<p id="S1.p2.1" class="ltx_p">The adversarial Voronoi patterns proposed in this work directly address these
+issues by providing a structured, palette-constrained parameterization that is
+much closer to current camouflage design practice. By optimizing only seed-point
+positions using fixed color palettes, we obtain splinter-like patterns that
+resemble naturalistic woodland, urban, or desert designs, yet measurably
+suppress person detections across a range of modern real-time detectors and
+backgrounds. This makes the approach attractive both as a building block for
+future physical decoys and as a digital red-team tool for defense stakeholders
+to probe the vulnerability of their detection pipelines. It also serves to
+inform the development of hardening strategies such as adversarial training or
+tailored data augmentation.</p>
+</div>
+<div id="S1.p3" class="ltx_para ltx_noindent">
+<p id="S1.p3.1" class="ltx_p">In summary, this work presents (1) a novel approach to generating adversarial
+patterns using Voronoi diagrams (see <a href="https://ar5iv.labs.arxiv.org/html/2606.17711v1#S1.F1" title="Figure 1 ‣ 1 Introduction ‣ Structured Adversarial Camouflage via Voronoi Diagrams" class="ltx_ref ltx_refmacro_autoref"><span class="ltx_text ltx_ref_tag">Figure&nbsp;1</span></a>), with a
+fixed, predefined color-palette of choice. The extensive evaluation covers a (2)
+garment-level application using segmentation masks
+(3DPeople&nbsp;<cite class="ltx_cite ltx_citemacro_cite">[<a href="https://ar5iv.labs.arxiv.org/html/2606.17711v1#bib.bib13" title="" class="ltx_ref">13</a>]</cite>) that verifies the effectiveness as a potential
+camouflage cloth pattern and (3) transferability across multiple backgrounds
+(BG-20k&nbsp;<cite class="ltx_cite ltx_citemacro_cite">[<a href="https://ar5iv.labs.arxiv.org/html/2606.17711v1#bib.bib9" title="" class="ltx_ref">9</a>]</cite>) as well as (4) transferability across YOLOv9/10/11/12.
+Moreover, an (5) analysis of color palette tolerance, including practical
+implications for real-world physical implementation, is given. We explicitly do
+not claim physical stealth; validating printability, color calibration, garment
+deformation, and human factors requires controlled, ethics-approved studies.</p>
+</div>
+<figure id="S1.F1" class="ltx_figure"><img src="./[2606.17711] Structured Adversarial Camouflage via Voronoi Diagrams_files/example.png" id="S1.F1.g1" class="ltx_graphics ltx_centering ltx_img_square" width="144" height="144" alt="Refer to caption">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure">Figure 1: </span>An optimized Voronoi patch with the corresponding seed points (red
+crosses). Due to the soft assignment, some cells are separated less
+sharply.</figcaption>
+</figure>
+</section>
+<section id="S2" class="ltx_section">
+<h2 class="ltx_title ltx_title_section"><span class="ltx_tag ltx_tag_section">2 </span>Related work</h2>
+
+<div id="S2.p1" class="ltx_para ltx_noindent">
+<p id="S2.p1.1" class="ltx_p">As the topic of adversarial attacks and robustness has gained increased interest
+recently, the amount of related work has also grown significantly. For a broader
+overview of adversarial attacks, we refer to&nbsp;<cite class="ltx_cite ltx_citemacro_cite">[<a href="https://ar5iv.labs.arxiv.org/html/2606.17711v1#bib.bib3" title="" class="ltx_ref">3</a>]</cite>
+and&nbsp;<cite class="ltx_cite ltx_citemacro_cite">[<a href="https://ar5iv.labs.arxiv.org/html/2606.17711v1#bib.bib16" title="" class="ltx_ref">16</a>]</cite> as these surveys cover related work that exceeds the topic of
+camouflaged adversarial attacks.</p>
+</div>
+<div id="S2.p2" class="ltx_para ltx_noindent">
+<p id="S2.p2.1" class="ltx_p">Wu et al.&nbsp;<cite class="ltx_cite ltx_citemacro_cite">[<a href="https://ar5iv.labs.arxiv.org/html/2606.17711v1#bib.bib17" title="" class="ltx_ref">17</a>]</cite> systematically investigate the transferability of
+adversarial attacks on different object detection frameworks. By training
+adversarial patches designed to suppress objectness scores, they demonstrate
+that these attacks can effectively transfer across various detectors and
+datasets, both digitally and physically. Their exploration of physical-world
+attacks using printed materials highlights the practical implications of such
+vulnerabilities. This aspect bridges the gap between theoretical findings and
+real-world applications, emphasizing the potential risks of adversarial attacks
+in the physical world.
+A further refinement of the generation of physical-world attacks is introduced
+by Xu et al.&nbsp;<cite class="ltx_cite ltx_citemacro_cite">[<a href="https://ar5iv.labs.arxiv.org/html/2606.17711v1#bib.bib18" title="" class="ltx_ref">18</a>]</cite> with their <em id="S2.p2.1.1" class="ltx_emph ltx_font_italic">adversarial T-shirts</em>. To tackle the
+problems of possible cloth deformations caused by a moving, non-rigid object,
+they use thin plate spline mapping during the optimization of the pattern.</p>
+</div>
+<div id="S2.p3" class="ltx_para ltx_noindent">
+<p id="S2.p3.1" class="ltx_p">Regarding adversarial camouflage patterns that are not visible to a human
+observer, Duan et al.&nbsp;<cite class="ltx_cite ltx_citemacro_cite">[<a href="https://ar5iv.labs.arxiv.org/html/2606.17711v1#bib.bib5" title="" class="ltx_ref">5</a>]</cite> introduce <em id="S2.p3.1.1" class="ltx_emph ltx_font_italic">AdvCam</em>. A highly stealthy yet
+effective method to hide adversarial patterns in the digital and physical
+world. The generated patterns successfully attack multiple classifiers.</p>
+</div>
+<div id="S2.p4" class="ltx_para ltx_noindent">
+<p id="S2.p4.1" class="ltx_p"><em id="S2.p4.1.1" class="ltx_emph ltx_font_italic">Dense Proposals Attack</em> (DPA)&nbsp;<cite class="ltx_cite ltx_citemacro_cite">[<a href="https://ar5iv.labs.arxiv.org/html/2606.17711v1#bib.bib6" title="" class="ltx_ref">6</a>]</cite> further advances the field by
+generating one-piece adversarial camouflages designed to be robust under various
+viewpoints and lighting conditions. The successful implementation of DPA on a 3D
+printed vehicle demonstrates its practical applicability. However, it is worth
+noting that the current camouflages generated by DPA have suspicious
+appearances, which could limit their effectiveness in real-world deployments.</p>
+</div>
+<div id="S2.p5" class="ltx_para ltx_noindent">
+<p id="S2.p5.1" class="ltx_p">The research has also extended these concepts into the domain of thermal
+infrared imaging with the development of infrared adversarial clothing using
+aerogel material&nbsp;<cite class="ltx_cite ltx_citemacro_cite">[<a href="https://ar5iv.labs.arxiv.org/html/2606.17711v1#bib.bib19" title="" class="ltx_ref">19</a>]</cite>. Zhu et al. optimize binary patterns that look
+similar to QR codes and can fool thermal infrared object detectors, even
+when worn by people moving dynamically.</p>
+</div>
+<div id="S2.p6" class="ltx_para ltx_noindent">
+<p id="S2.p6.1" class="ltx_p">An integration of military camouflage principles into patch-based attacks is
+presented by <cite class="ltx_cite ltx_citemacro_cite">[<a href="https://ar5iv.labs.arxiv.org/html/2606.17711v1#bib.bib8" title="" class="ltx_ref">8</a>]</cite>. The authors address the high human perceptibility
+by proposing a method that enhances the naturalistic appearance of the patches
+while maintaining their effectiveness in fooling object detectors.</p>
+</div>
+<div id="S2.p7" class="ltx_para ltx_noindent">
+<p id="S2.p7.1" class="ltx_p">Wang et al.&nbsp;<cite class="ltx_cite ltx_citemacro_cite">[<a href="https://ar5iv.labs.arxiv.org/html/2606.17711v1#bib.bib15" title="" class="ltx_ref">15</a>]</cite> combine findings from Xu et al.&nbsp;<cite class="ltx_cite ltx_citemacro_cite">[<a href="https://ar5iv.labs.arxiv.org/html/2606.17711v1#bib.bib18" title="" class="ltx_ref">18</a>]</cite> and
+Duan et al.&nbsp;<cite class="ltx_cite ltx_citemacro_cite">[<a href="https://ar5iv.labs.arxiv.org/html/2606.17711v1#bib.bib5" title="" class="ltx_ref">5</a>]</cite> to generate <em id="S2.p7.1.1" class="ltx_emph ltx_font_italic">Dual Attribute Adversarial
+Camouflage</em> (DAAC) for evading detection by both detectors and humans. They
+extract scene features from the set of a specific scene, including dominant
+colors and proportions, and uses these to generate digital camouflage and
+constrain the adversarial patch during training. The authors acknowledge
+challenges in implementing DAAC in practice, such as material constraints and
+environmental variations.</p>
+</div>
+<div id="S2.p8" class="ltx_para ltx_noindent">
+<p id="S2.p8.1" class="ltx_p">Most similar to our method is&nbsp;<cite class="ltx_cite ltx_citemacro_cite">[<a href="https://ar5iv.labs.arxiv.org/html/2606.17711v1#bib.bib12" title="" class="ltx_ref">12</a>]</cite>, where the authors use
+StyleGAN3&nbsp;<cite class="ltx_cite ltx_citemacro_cite">[<a href="https://ar5iv.labs.arxiv.org/html/2606.17711v1#bib.bib7" title="" class="ltx_ref">7</a>]</cite> as a pretrained texture generator to produce
+camouflage pattern. Once trained, the latent input variables of the generator
+are optimized in an adversarial fashion, causing a significant impact on the
+detector performance.</p>
+</div>
+<div id="S2.p9" class="ltx_para ltx_noindent">
+<p id="S2.p9.1" class="ltx_p">Recent work by Van der Burg et al.&nbsp;<cite class="ltx_cite ltx_citemacro_cite">[<a href="https://ar5iv.labs.arxiv.org/html/2606.17711v1#bib.bib14" title="" class="ltx_ref">14</a>]</cite> has explored the
+intersection of automated evaluation and human perception in camouflage
+effectiveness. They demonstrated that pre-trained CNNs, such as YOLO, can serve
+as proxies for human detection capabilities, providing an image-based measure of
+camouflage success. However, discrepancies emerged at close distances, where
+high-contrast or shape-breaking elements in the camouflage patterns
+significantly affected both human and model performance.</p>
+</div>
+<div id="S2.p10" class="ltx_para ltx_noindent">
+<p id="S2.p10.1" class="ltx_p">Building upon these foundations, this work introduces <em id="S2.p10.1.1" class="ltx_emph ltx_font_italic">adversarial Voronoi
+patches</em>. Instead of optimizing each pixel individually, we leverage the
+geometric structure of Voronoi diagrams by optimizing seed points with a fixed
+color palette. This approach offers several advantages over traditional
+pixelwise optimization techniques, e.g. inherently more structured adversarial
+patterns that are less likely to be detected by human observers, addressing the
+visual perceptibility limitations observed in previous studies.</p>
+</div>
+</section>
+<section id="S3" class="ltx_section">
+<h2 class="ltx_title ltx_title_section"><span class="ltx_tag ltx_tag_section">3 </span>Adversarial Voronoi Patches</h2>
+
+<div id="S3.p1" class="ltx_para ltx_noindent">
+<p id="S3.p1.1" class="ltx_p">We define a differentiable Voronoi pattern as follows: Given a set of seed
+points <math id="S3.p1.m1" class="ltx_Math" alttext="\mathcal{S}=\{s_{1},\ldots,s_{n}\}\subset\mathbb{R}^{2}" display="inline" intent=":literal"><semantics><mrow><mi class="ltx_font_mathcaligraphic">𝒮</mi><mo>=</mo><mrow><mo stretchy="false">{</mo><msub><mi>s</mi><mn>1</mn></msub><mo>,</mo><mi mathvariant="normal">…</mi><mo>,</mo><msub><mi>s</mi><mi>n</mi></msub><mo stretchy="false">}</mo></mrow><mo>⊂</mo><msup><mi>ℝ</mi><mn>2</mn></msup></mrow><annotation encoding="application/x-tex">\mathcal{S}=\{s_{1},\ldots,s_{n}\}\subset\mathbb{R}^{2}</annotation></semantics></math>, and a pixel grid <math id="S3.p1.m2" class="ltx_Math" alttext="\mathcal{I}=\{1,\ldots,H\}\times\{1,\ldots,W\}" display="inline" intent=":literal"><semantics><mrow><mi class="ltx_font_mathcaligraphic">ℐ</mi><mo>=</mo><mrow><mrow><mo stretchy="false">{</mo><mn>1</mn><mo>,</mo><mi mathvariant="normal">…</mi><mo>,</mo><mi>H</mi><mo rspace="0.055em" stretchy="false">}</mo></mrow><mo rspace="0.222em">×</mo><mrow><mo stretchy="false">{</mo><mn>1</mn><mo>,</mo><mi mathvariant="normal">…</mi><mo>,</mo><mi>W</mi><mo stretchy="false">}</mo></mrow></mrow></mrow><annotation encoding="application/x-tex">\mathcal{I}=\{1,\ldots,H\}\times\{1,\ldots,W\}</annotation></semantics></math>. Assign each seed a color <math id="S3.p1.m3" class="ltx_Math" alttext="\mathbf{c}_{i}\in[0,1]^{3}" display="inline" intent=":literal"><semantics><mrow><msub><mi>𝐜</mi><mi>i</mi></msub><mo>∈</mo><msup><mrow><mo stretchy="false">[</mo><mrow><mn>0</mn><mo>,</mo><mn>1</mn></mrow><mo stretchy="false">]</mo></mrow><mn>3</mn></msup></mrow><annotation encoding="application/x-tex">\mathbf{c}_{i}\in[0,1]^{3}</annotation></semantics></math>. For <math id="S3.p1.m4" class="ltx_Math" alttext="\mathbf{p}\in\mathcal{I}" display="inline" intent=":literal"><semantics><mrow><mi>𝐩</mi><mo>∈</mo><mi class="ltx_font_mathcaligraphic">ℐ</mi></mrow><annotation encoding="application/x-tex">\mathbf{p}\in\mathcal{I}</annotation></semantics></math> define distances
+<math id="S3.p1.m5" class="ltx_Math" alttext="\mathit{d}_{i}(\mathbf{p})=\|\mathbf{p}-s_{i}\|" display="inline" intent=":literal"><semantics><mrow><mrow><msub><mi>d</mi><mi>i</mi></msub><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><mi>𝐩</mi><mo stretchy="false">)</mo></mrow></mrow><mo>=</mo><mrow><mo stretchy="false">‖</mo><mrow><mi>𝐩</mi><mo>−</mo><msub><mi>s</mi><mi>i</mi></msub></mrow><mo stretchy="false">‖</mo></mrow></mrow><annotation encoding="application/x-tex">\mathit{d}_{i}(\mathbf{p})=\|\mathbf{p}-s_{i}\|</annotation></semantics></math>.
+We obtain a temperature-scaled softmin over distances</p>
+<table id="S3.E1" class="ltx_equation ltx_eqn_table">
+
+<tbody><tr class="ltx_equation ltx_eqn_row ltx_align_baseline">
+<td class="ltx_eqn_cell ltx_eqn_center_padleft"></td>
+<td class="ltx_eqn_cell ltx_align_center"><math id="S3.E1.m1" class="ltx_Math" alttext="w_{i}(\mathbf{p},\tau)=\frac{e^{\frac{-d_{i}(\mathbf{p})}{\tau}}}{\sum_{k=1}^{n}e^{\frac{-d_{k}(\mathbf{p})}{\tau}}}." display="block" intent=":literal"><semantics><mrow><mrow><mrow><msub><mi>w</mi><mi>i</mi></msub><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><mi>𝐩</mi><mo>,</mo><mi>τ</mi><mo stretchy="false">)</mo></mrow></mrow><mo>=</mo><mfrac><msup><mi>e</mi><mfrac><mrow><mo>−</mo><mrow><msub><mi>d</mi><mi>i</mi></msub><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><mi>𝐩</mi><mo stretchy="false">)</mo></mrow></mrow></mrow><mi>τ</mi></mfrac></msup><mrow><msubsup><mo>∑</mo><mrow><mi>k</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></msubsup><msup><mi>e</mi><mfrac><mrow><mo>−</mo><mrow><msub><mi>d</mi><mi>k</mi></msub><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><mi>𝐩</mi><mo stretchy="false">)</mo></mrow></mrow></mrow><mi>τ</mi></mfrac></msup></mrow></mfrac></mrow><mo lspace="0em">.</mo></mrow><annotation encoding="application/x-tex">w_{i}(\mathbf{p},\tau)=\frac{e^{\frac{-d_{i}(\mathbf{p})}{\tau}}}{\sum_{k=1}^{n}e^{\frac{-d_{k}(\mathbf{p})}{\tau}}}.</annotation></semantics></math></td>
+<td class="ltx_eqn_cell ltx_eqn_center_padright"></td>
+<td rowspan="1" class="ltx_eqn_cell ltx_eqn_eqno ltx_align_middle ltx_align_right"><span class="ltx_tag ltx_tag_equation ltx_align_right">(1)</span></td></tr></tbody>
+</table>
+<p id="S3.p1.2" class="ltx_p">As <math id="S3.p1.m6" class="ltx_Math" alttext="\tau\rightarrow 0" display="inline" intent=":literal"><semantics><mrow><mi>τ</mi><mo stretchy="false">→</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">\tau\rightarrow 0</annotation></semantics></math> this approaches a one-hot at <math id="S3.p1.m7" class="ltx_Math" alttext="\mathit{arg\,min}_{i}\,d_{i}(\mathbf{p})" display="inline" intent=":literal"><semantics><mrow><mi>𝑎𝑟𝑔</mi><mo lspace="0.170em" rspace="0em">​</mo><msub><mi>𝑚𝑖𝑛</mi><mi>i</mi></msub><mo lspace="0em" rspace="0em">​</mo><msub><mi>d</mi><mi>i</mi></msub><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><mi>𝐩</mi><mo stretchy="false">)</mo></mrow></mrow><annotation encoding="application/x-tex">\mathit{arg\,min}_{i}\,d_{i}(\mathbf{p})</annotation></semantics></math></p>
+</div>
+<div id="S3.p2" class="ltx_para ltx_noindent">
+<p id="S3.p2.1" class="ltx_p">The final Voronoi pattern is the convex combination</p>
+<table id="S3.E2" class="ltx_equation ltx_eqn_table">
+
+<tbody><tr class="ltx_equation ltx_eqn_row ltx_align_baseline">
+<td class="ltx_eqn_cell ltx_eqn_center_padleft"></td>
+<td class="ltx_eqn_cell ltx_align_center"><math id="S3.E2.m1" class="ltx_Math" alttext="\mathit{f}(\mathbf{p})=\sum_{i=1}^{n}w_{i}(\mathbf{p},\tau)\cdot\mathbf{c}_{i}." display="block" intent=":literal"><semantics><mrow><mrow><mrow><mi>f</mi><mo>⁡</mo><mrow><mo stretchy="false">(</mo><mi>𝐩</mi><mo stretchy="false">)</mo></mrow></mrow><mo rspace="0.111em">=</mo><mrow><mrow><munderover><mo movablelimits="false">∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><mrow><msub><mi>w</mi><mi>i</mi></msub><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><mi>𝐩</mi><mo>,</mo><mi>τ</mi><mo rspace="0.055em" stretchy="false">)</mo></mrow></mrow></mrow><mo rspace="0.222em">⋅</mo><msub><mi>𝐜</mi><mi>i</mi></msub></mrow></mrow><mo lspace="0em">.</mo></mrow><annotation encoding="application/x-tex">\mathit{f}(\mathbf{p})=\sum_{i=1}^{n}w_{i}(\mathbf{p},\tau)\cdot\mathbf{c}_{i}.</annotation></semantics></math></td>
+<td class="ltx_eqn_cell ltx_eqn_center_padright"></td>
+<td rowspan="1" class="ltx_eqn_cell ltx_eqn_eqno ltx_align_middle ltx_align_right"><span class="ltx_tag ltx_tag_equation ltx_align_right">(2)</span></td></tr></tbody>
+</table>
+<p id="S3.p2.2" class="ltx_p">After the pattern is generated, it is placed onto objects of interest, and
+the resulting image is propagated through an object detector. The prediction of
+the detector is then used to minimize the detector’s confidence for classes of
+interest present in the given image, resulting in the optimization of the seed
+points.</p>
+</div>
+</section>
+<section id="S4" class="ltx_section">
+<h2 class="ltx_title ltx_title_section"><span class="ltx_tag ltx_tag_section">4 </span>Experimental Setup</h2>
+
+<div id="S4.p1" class="ltx_para ltx_noindent">
+<p id="S4.p1.1" class="ltx_p">In total, five experiments are conducted, where each uses <span id="S4.p1.1.1" class="ltx_text ltx_inline-quote ltx_outerquote">“Person”</span> as
+the target class for the patches. The weights of the investigated detectors are
+the official pretrained weights, optimized with the COCO&nbsp;<cite class="ltx_cite ltx_citemacro_cite">[<a href="https://ar5iv.labs.arxiv.org/html/2606.17711v1#bib.bib10" title="" class="ltx_ref">10</a>]</cite> dataset.</p>
+</div>
+<div id="S4.p2" class="ltx_para ltx_noindent">
+<p id="S4.p2.1" class="ltx_p">Experiment 1 is a general investigation of whether adversarial Voronoi
+patches can be optimized to fool object detectors and how well they perform when
+optimized like regular adversarial patches. Since regular adversarial patches
+are allowed to freely optimize pixels, the expectation is that Voronoi
+patches perform comparatively poorly.
+For experiment 2, the performance of the patches is investigated when
+the optimization is performed using segmentation masks during training. The
+segmentation masks are used to replace the cloth of a depicted person with parts
+of the adversarial patch. As the segmented clothes cover a bigger part of a
+person, the patch should perform much better.
+The transferability of the generated patches regarding different object detectors
+is evaluated in experiment 3. Moreover, the segmentation information is
+used to place the person instances on different, out-of-domain backgrounds.
+Experiment 4 checks the transferability of the adversarially optimized structure
+by exchanging the color palettes of the trained patch set of experiment 2.
+In the final experiment 5, the generated patches from the first and second
+experiments are exchanged to investigate whether the different optimization
+methods result in different patch performances.</p>
+</div>
+<div id="S4.p3" class="ltx_para ltx_noindent">
+<p id="S4.p3.1" class="ltx_p">All generated patterns have 256 seed points, are randomly initialized in
+<math id="S4.p3.m1" class="ltx_Math" alttext="[0,1]^{2}" display="inline" intent=":literal"><semantics><msup><mrow><mo stretchy="false">[</mo><mrow><mn>0</mn><mo>,</mo><mn>1</mn></mrow><mo stretchy="false">]</mo></mrow><mn>2</mn></msup><annotation encoding="application/x-tex">[0,1]^{2}</annotation></semantics></math>, and use the temperature parameter <math id="S4.p3.m2" class="ltx_Math" alttext="\tau=0.001" display="inline" intent=":literal"><semantics><mrow><mi>τ</mi><mo>=</mo><mn>0.001</mn></mrow><annotation encoding="application/x-tex">\tau=0.001</annotation></semantics></math>. The width and
+height of the patterns are set to 256 pixels.</p>
+</div>
+<section id="S4.SS1" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection"><span class="ltx_tag ltx_tag_subsection">4.1 </span>Experiment 1: Naive Patches</h3>
+
+<div id="S4.SS1.p1" class="ltx_para ltx_noindent">
+<p id="S4.SS1.p1.1" class="ltx_p">The first experiment evaluates the performance of an adversarial Voronoi patch
+optimized in the same way as a regular adversarial patch is trained. During the
+optimization of a patch, it is naively placed inside the bounding box of
+objects of interest, and the detector’s <span id="S4.SS1.p1.1.1" class="ltx_text ltx_inline-quote ltx_outerquote">“objectness score”</span> is
+successively minimized. Since more recent YOLO variants no longer calculate
+objectness scores, the global maximum pre-logit class scores of both detection
+heads are selected instead. The augmentation pipeline includes a random resize
+<math id="S4.SS1.p1.m1" class="ltx_Math" alttext="[0.6,0.9]" display="inline" intent=":literal"><semantics><mrow><mo stretchy="false">[</mo><mn>0.6</mn><mo>,</mo><mn>0.9</mn><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">[0.6,0.9]</annotation></semantics></math>, random rotation <math id="S4.SS1.p1.m2" class="ltx_Math" alttext="[-$$,$$]" display="inline" intent=":literal"><semantics><mrow><mo stretchy="false">[</mo><mrow><mrow><mo lspace="0em">−</mo><mrow><mn>30</mn><mo lspace="0em" rspace="0em">​</mo><mi>°</mi></mrow></mrow><mo>,</mo><mrow><mn>30</mn><mo lspace="0em" rspace="0em">​</mo><mi>°</mi></mrow></mrow><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">[-$$,$$]</annotation></semantics></math>, color jitter, and random
+perspective. While a regular adversarial patch has two additional loss terms
+that punish the use of invalid pixel colors and smoothen the patch, the
+adversarial Voronoi patch has no such regularization terms.
+The experiment uses the InriaPerson&nbsp;<cite class="ltx_cite ltx_citemacro_cite">[<a href="https://ar5iv.labs.arxiv.org/html/2606.17711v1#bib.bib4" title="" class="ltx_ref">4</a>]</cite> dataset for training and the
+patches and the COCO&nbsp;<cite class="ltx_cite ltx_citemacro_cite">[<a href="https://ar5iv.labs.arxiv.org/html/2606.17711v1#bib.bib10" title="" class="ltx_ref">10</a>]</cite> dataset for the evaluation. While the former
+is a pure person dataset, the latter is a well-known benchmark dataset
+containing a vast amount of person instances.
+Patches are optimized over 100 epochs using the AdamW&nbsp;<cite class="ltx_cite ltx_citemacro_cite">[<a href="https://ar5iv.labs.arxiv.org/html/2606.17711v1#bib.bib11" title="" class="ltx_ref">11</a>]</cite>
+optimizer with an initial learning rate of 0.01 and a reduction of the learning
+rate by a factor of 10 every 25 epochs.</p>
+</div>
+</section>
+<section id="S4.SS2" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection"><span class="ltx_tag ltx_tag_subsection">4.2 </span>Experiment 2: Covering Clothes</h3>
+
+<div id="S4.SS2.p1" class="ltx_para ltx_noindent">
+<p id="S4.SS2.p1.1" class="ltx_p">In a subsequent experiment, the 3DPeople dataset&nbsp;<cite class="ltx_cite ltx_citemacro_cite">[<a href="https://ar5iv.labs.arxiv.org/html/2606.17711v1#bib.bib13" title="" class="ltx_ref">13</a>]</cite> is used to
+optimize Voronoi patches. This dataset includes synthetic 3D renderings of
+people in varied environments and provides the segmentation masks for each
+instance’s clothing. These masks are utilized to refine adversarial Voronoi
+patches, ensuring they cover the clothed regions of individuals instead of just
+placing them inside the bounding box of objects of interest (see
+<a href="https://ar5iv.labs.arxiv.org/html/2606.17711v1#S4.F2" title="Figure 2 ‣ 4.2 Experiment 2: Covering Clothes ‣ 4 Experimental Setup ‣ Structured Adversarial Camouflage via Voronoi Diagrams" class="ltx_ref ltx_refmacro_autoref"><span class="ltx_text ltx_ref_tag">Figure&nbsp;2</span></a>).
+Since the amount of images in the training set is larger, as in experiment 1,
+patches are optimized over 10 epochs. Again, AdamW is used with a learning rate
+of 0.001 and a reduction of the learning rate every three epochs by a factor of
+10.</p>
+</div>
+<figure id="S4.F2" class="ltx_figure">
+<div class="ltx_flex_figure">
+<div class="ltx_flex_cell ltx_flex_size_2"><img src="./[2606.17711] Structured Adversarial Camouflage via Voronoi Diagrams_files/inriaPerson.png" id="S4.F2.g1" class="ltx_graphics ltx_centering ltx_figure_panel ltx_img_square" width="168" height="168" alt="Refer to caption"></div><div class="ltx_flex_cell ltx_flex_size_2"><img src="./[2606.17711] Structured Adversarial Camouflage via Voronoi Diagrams_files/3dperson.png" id="S4.F2.g2" class="ltx_graphics ltx_centering ltx_figure_panel ltx_img_landscape" width="168" height="126" alt="Refer to caption"></div></div>
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure">Figure 2: </span>Example image of the InriaPerson dataset and the 3DPeople dataset.
+Due to the lack of cloth segmentation masks, the patches optimized with the
+InriaPerson dataset and COCO dataset are simply placed on objects of
+interest. For 3DPeople, the segmentation mask is used to cover the
+clothed parts of the person with the adversarial patch.</figcaption>
+</figure>
+</section>
+<section id="S4.SS3" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection"><span class="ltx_tag ltx_tag_subsection">4.3 </span>Experiment 3: Transferability</h3>
+
+<div id="S4.SS3.p1" class="ltx_para ltx_noindent">
+<p id="S4.SS3.p1.1" class="ltx_p">The third set of experiments examines the transferability of the generated
+patches of experiment 2 when they are used to attack other object detectors and
+different background images.
+For the change of the background image, the segmentation masks provided by the
+3DPeople dataset are used to cut out the person instances and place them onto
+center-cropped images of the BG-20k dataset&nbsp;<cite class="ltx_cite ltx_citemacro_cite">[<a href="https://ar5iv.labs.arxiv.org/html/2606.17711v1#bib.bib9" title="" class="ltx_ref">9</a>]</cite>. To reduce the
+cut-out effect, a small area around the border of the person and the background
+image is blurred with a Gaussian kernel.
+The transferability study conducted in this experiment should be interpreted
+with caution, as solely YOLOv10b is used to optimize the patches.</p>
+</div>
+</section>
+<section id="S4.SS4" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection"><span class="ltx_tag ltx_tag_subsection">4.4 </span>Experiment 4: Changes in the color palette</h3>
+
+<div id="S4.SS4.p1" class="ltx_para ltx_noindent">
+<p id="S4.SS4.p1.1" class="ltx_p">Since adversarial Voronoi patches are optimized using a fixed color palette, the
+palettes can be exchanged easily. The resulting patch retains the structure but
+changes the appearance due to the different color. The fourth experiment answers
+whether the optimized structure can be combined with a different color palette
+and thus also retain a degree of the adversarial property.</p>
+</div>
+</section>
+<section id="S4.SS5" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection"><span class="ltx_tag ltx_tag_subsection">4.5 </span>Experiment 5: Naive Patches for Clothes and Vice Versa</h3>
+
+<div id="S4.SS5.p1" class="ltx_para ltx_noindent">
+<p id="S4.SS5.p1.1" class="ltx_p">In a final experiment, the trained patches of experiment 1 and experiment 2
+are exchanged and evaluated in the corresponding different setting.</p>
+</div>
+</section>
+<section id="S4.SS6" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection"><span class="ltx_tag ltx_tag_subsection">4.6 </span>Real-time Object Detector</h3>
+
+<div id="S4.SS6.p1" class="ltx_para ltx_noindent">
+<p id="S4.SS6.p1.1" class="ltx_p">As YOLO detectors are a well-known and investigated real-time object detector
+family, the YOLOv10 detector is selected as the detector to be attacked. As
+shown by Bayer et al.&nbsp;<cite class="ltx_cite ltx_citemacro_cite">[<a href="https://ar5iv.labs.arxiv.org/html/2606.17711v1#bib.bib1" title="" class="ltx_ref">1</a>]</cite>, the transferability of a patch generated
+with the YOLOv10 architecture provides good transferability across various
+architectures. Moreover, the lightweight and fast YOLOv10b variant allows a
+faster and thus a more comprehensive evaluation. The missing non-maximum
+suppression in YOLOv10 results in the use of two detector heads during the
+detector training. While the one-to-many head is usually disabled during
+inference, the outputs of both of these heads are used during patch
+optimization.</p>
+</div>
+</section>
+<section id="S4.SS7" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection"><span class="ltx_tag ltx_tag_subsection">4.7 </span>Color Palettes</h3>
+
+<div id="S4.SS7.p1" class="ltx_para ltx_noindent">
+<p id="S4.SS7.p1.1" class="ltx_p">The color palettes used for the evaluation are adopted from <cite class="ltx_cite ltx_citemacro_cite">[<a href="https://ar5iv.labs.arxiv.org/html/2606.17711v1#bib.bib2" title="" class="ltx_ref">2</a>]</cite>.
+Of the 13 available palettes, a total of 5 are evaluated. The selected palettes
+are given in <a href="https://ar5iv.labs.arxiv.org/html/2606.17711v1#S4.F3" title="Figure 3 ‣ 4.7 Color Palettes ‣ 4 Experimental Setup ‣ Structured Adversarial Camouflage via Voronoi Diagrams" class="ltx_ref ltx_refmacro_autoref"><span class="ltx_text ltx_ref_tag">Figure&nbsp;3</span></a> and are randomly chosen. For each palette,
+three random Voronoi patches are generated that contain only colors of the
+respective palette. These patches are used in the different experiments as
+points of reference.</p>
+</div>
+<figure id="S4.F3" class="ltx_figure"><span class="ltx_inline-block"><svg id="S4.F3.pic1" class="ltx_picture ltx_centering" height="100.19" overflow="visible" version="1.1" viewBox="0 0 319.09 100.19" width="319.09"><g style="--ltx-stroke-color:#000000;--ltx-fill-color:#000000;" fill="#000000" stroke="#000000" stroke-width="0.4pt" transform="translate(0,100.19) matrix(1 0 0 -1 0 0) translate(114.09,0) translate(0,89.5)"><g style="--ltx-stroke-color:#000000;--ltx-fill-color:#000000;" fill="#000000" stroke="#000000" transform="matrix(1.0 0.0 0.0 1.0 -109.48 -3.38)"><foreignobject style="--ltx-fo-width:6.22em;--ltx-fo-height:0.68em;--ltx-fo-depth:0.19em;font-size:10pt;" height="12.15" overflow="visible" transform="matrix(1 0 0 -1 0 9.46)" width="86.06"><span class="ltx_foreignobject_container"><span class="ltx_foreignobject_content"><span id="S4.F3.pic1.1" class="ltx_text">Forest Spring:</span></span></span></foreignobject></g><g style="--ltx-fill-color:#376819;" fill="#376819"><path d="M 0 0 M 7.87 0 C 7.87 4.35 4.35 7.87 0 7.87 C -4.35 7.87 -7.87 4.35 -7.87 0 C -7.87 -4.35 -4.35 -7.87 0 -7.87 C 4.35 -7.87 7.87 -4.35 7.87 0 Z M 0 0"></path></g><g style="--ltx-fill-color:#234B0E;" fill="#234B0E"><path d="M 19.69 0 M 27.56 0 C 27.56 4.35 24.03 7.87 19.69 7.87 C 15.34 7.87 11.81 4.35 11.81 0 C 11.81 -4.35 15.34 -7.87 19.69 -7.87 C 24.03 -7.87 27.56 -4.35 27.56 0 Z M 19.69 0"></path></g><g style="--ltx-fill-color:#54842F;" fill="#54842F"><path d="M 39.37 0 M 47.24 0 C 47.24 4.35 43.72 7.87 39.37 7.87 C 35.02 7.87 31.5 4.35 31.5 0 C 31.5 -4.35 35.02 -7.87 39.37 -7.87 C 43.72 -7.87 47.24 -4.35 47.24 0 Z M 39.37 0"></path></g><g style="--ltx-fill-color:#80A554;" fill="#80A554"><path d="M 59.06 0 M 66.93 0 C 66.93 4.35 63.4 7.87 59.06 7.87 C 54.71 7.87 51.18 4.35 51.18 0 C 51.18 -4.35 54.71 -7.87 59.06 -7.87 C 63.4 -7.87 66.93 -4.35 66.93 0 Z M 59.06 0"></path></g><g style="--ltx-fill-color:#142F0A;" fill="#142F0A"><path d="M 78.74 0 M 86.61 0 C 86.61 4.35 83.09 7.87 78.74 7.87 C 74.39 7.87 70.87 4.35 70.87 0 C 70.87 -4.35 74.39 -7.87 78.74 -7.87 C 83.09 -7.87 86.61 -4.35 86.61 0 Z M 78.74 0"></path></g><g style="--ltx-fill-color:#B6D28F;" fill="#B6D28F"><path d="M 98.43 0 M 106.3 0 C 106.3 4.35 102.77 7.87 98.43 7.87 C 94.08 7.87 90.55 4.35 90.55 0 C 90.55 -4.35 94.08 -7.87 98.43 -7.87 C 102.77 -7.87 106.3 -4.35 106.3 0 Z M 98.43 0"></path></g><g style="--ltx-fill-color:#E5EFDC;" fill="#E5EFDC"><path d="M 118.11 0 M 125.98 0 C 125.98 4.35 122.46 7.87 118.11 7.87 C 113.76 7.87 110.24 4.35 110.24 0 C 110.24 -4.35 113.76 -7.87 118.11 -7.87 C 122.46 -7.87 125.98 -4.35 125.98 0 Z M 118.11 0"></path></g><g style="--ltx-fill-color:#0C1408;" fill="#0C1408"><path d="M 137.8 0 M 145.67 0 C 145.67 4.35 142.14 7.87 137.8 7.87 C 133.45 7.87 129.92 4.35 129.92 0 C 129.92 -4.35 133.45 -7.87 137.8 -7.87 C 142.14 -7.87 145.67 -4.35 145.67 0 Z M 137.8 0"></path></g><g style="--ltx-fill-color:#E7EFFF;" fill="#E7EFFF"><path d="M 157.48 0 M 165.35 0 C 165.35 4.35 161.83 7.87 157.48 7.87 C 153.13 7.87 149.61 4.35 149.61 0 C 149.61 -4.35 153.13 -7.87 157.48 -7.87 C 161.83 -7.87 165.35 -4.35 165.35 0 Z M 157.48 0"></path></g><g style="--ltx-fill-color:#F6FBEB;" fill="#F6FBEB"><path d="M 177.17 0 M 185.04 0 C 185.04 4.35 181.51 7.87 177.17 7.87 C 172.82 7.87 169.29 4.35 169.29 0 C 169.29 -4.35 172.82 -7.87 177.17 -7.87 C 181.51 -7.87 185.04 -4.35 185.04 0 Z M 177.17 0"></path></g><g style="--ltx-fill-color:#ECEEFF;" fill="#ECEEFF"><path d="M 196.85 0 M 204.72 0 C 204.72 4.35 201.2 7.87 196.85 7.87 C 192.5 7.87 188.98 4.35 188.98 0 C 188.98 -4.35 192.5 -7.87 196.85 -7.87 C 201.2 -7.87 204.72 -4.35 204.72 0 Z M 196.85 0"></path></g><g style="--ltx-stroke-color:#000000;--ltx-fill-color:#000000;" fill="#000000" stroke="#000000" transform="matrix(1.0 0.0 0.0 1.0 -73.85 -24.49)"><foreignobject style="--ltx-fo-width:3.56em;--ltx-fo-height:0.69em;--ltx-fo-depth:0em;font-size:10pt;" height="9.61" overflow="visible" transform="matrix(1 0 0 -1 0 9.61)" width="49.28"><span class="ltx_foreignobject_container"><span class="ltx_foreignobject_content"><span id="S4.F3.pic1.2" class="ltx_text">Coastal:</span></span></span></foreignobject></g><g style="--ltx-fill-color:#EBE8E2;" fill="#EBE8E2"><path d="M 0 -19.69 M 7.87 -19.69 C 7.87 -15.34 4.35 -11.81 0 -11.81 C -4.35 -11.81 -7.87 -15.34 -7.87 -19.69 C -7.87 -24.03 -4.35 -27.56 0 -27.56 C 4.35 -27.56 7.87 -24.03 7.87 -19.69 Z M 0 -19.69"></path></g><g style="--ltx-fill-color:#7A8A8F;" fill="#7A8A8F"><path d="M 19.69 -19.69 M 27.56 -19.69 C 27.56 -15.34 24.03 -11.81 19.69 -11.81 C 15.34 -11.81 11.81 -15.34 11.81 -19.69 C 11.81 -24.03 15.34 -27.56 19.69 -27.56 C 24.03 -27.56 27.56 -24.03 27.56 -19.69 Z M 19.69 -19.69"></path></g><g style="--ltx-fill-color:#A8B9C5;" fill="#A8B9C5"><path d="M 39.37 -19.69 M 47.24 -19.69 C 47.24 -15.34 43.72 -11.81 39.37 -11.81 C 35.02 -11.81 31.5 -15.34 31.5 -19.69 C 31.5 -24.03 35.02 -27.56 39.37 -27.56 C 43.72 -27.56 47.24 -24.03 47.24 -19.69 Z M 39.37 -19.69"></path></g><g style="--ltx-fill-color:#65584D;" fill="#65584D"><path d="M 59.06 -19.69 M 66.93 -19.69 C 66.93 -15.34 63.4 -11.81 59.06 -11.81 C 54.71 -11.81 51.18 -15.34 51.18 -19.69 C 51.18 -24.03 54.71 -27.56 59.06 -27.56 C 63.4 -27.56 66.93 -24.03 66.93 -19.69 Z M 59.06 -19.69"></path></g><g style="--ltx-fill-color:#C6B7A7;" fill="#C6B7A7"><path d="M 78.74 -19.69 M 86.61 -19.69 C 86.61 -15.34 83.09 -11.81 78.74 -11.81 C 74.39 -11.81 70.87 -15.34 70.87 -19.69 C 70.87 -24.03 74.39 -27.56 78.74 -27.56 C 83.09 -27.56 86.61 -24.03 86.61 -19.69 Z M 78.74 -19.69"></path></g><g style="--ltx-fill-color:#917663;" fill="#917663"><path d="M 98.43 -19.69 M 106.3 -19.69 C 106.3 -15.34 102.77 -11.81 98.43 -11.81 C 94.08 -11.81 90.55 -15.34 90.55 -19.69 C 90.55 -24.03 94.08 -27.56 98.43 -27.56 C 102.77 -27.56 106.3 -24.03 106.3 -19.69 Z M 98.43 -19.69"></path></g><g style="--ltx-fill-color:#97A78F;" fill="#97A78F"><path d="M 118.11 -19.69 M 125.98 -19.69 C 125.98 -15.34 122.46 -11.81 118.11 -11.81 C 113.76 -11.81 110.24 -15.34 110.24 -19.69 C 110.24 -24.03 113.76 -27.56 118.11 -27.56 C 122.46 -27.56 125.98 -24.03 125.98 -19.69 Z M 118.11 -19.69"></path></g><g style="--ltx-fill-color:#BBD5DE;" fill="#BBD5DE"><path d="M 137.8 -19.69 M 145.67 -19.69 C 145.67 -15.34 142.14 -11.81 137.8 -11.81 C 133.45 -11.81 129.92 -15.34 129.92 -19.69 C 129.92 -24.03 133.45 -27.56 137.8 -27.56 C 142.14 -27.56 145.67 -24.03 145.67 -19.69 Z M 137.8 -19.69"></path></g><g style="--ltx-fill-color:#FFFFFF;" fill="#FFFFFF"><path d="M 157.48 -19.69 M 165.35 -19.69 C 165.35 -15.34 161.83 -11.81 157.48 -11.81 C 153.13 -11.81 149.61 -15.34 149.61 -19.69 C 149.61 -24.03 153.13 -27.56 157.48 -27.56 C 161.83 -27.56 165.35 -24.03 165.35 -19.69 Z M 157.48 -19.69"></path></g><g style="--ltx-fill-color:#FFFFFF;" fill="#FFFFFF"><path d="M 177.17 -19.69 M 185.04 -19.69 C 185.04 -15.34 181.51 -11.81 177.17 -11.81 C 172.82 -11.81 169.29 -15.34 169.29 -19.69 C 169.29 -24.03 172.82 -27.56 177.17 -27.56 C 181.51 -27.56 185.04 -24.03 185.04 -19.69 Z M 177.17 -19.69"></path></g><g style="--ltx-fill-color:#DCF4FC;" fill="#DCF4FC"><path d="M 196.85 -19.69 M 204.72 -19.69 C 204.72 -15.34 201.2 -11.81 196.85 -11.81 C 192.5 -11.81 188.98 -15.34 188.98 -19.69 C 188.98 -24.03 192.5 -27.56 196.85 -27.56 C 201.2 -27.56 204.72 -24.03 204.72 -19.69 Z M 196.85 -19.69"></path></g><g style="--ltx-stroke-color:#000000;--ltx-fill-color:#000000;" fill="#000000" stroke="#000000" transform="matrix(1.0 0.0 0.0 1.0 -69.97 -44.17)"><foreignobject style="--ltx-fo-width:3.28em;--ltx-fo-height:0.69em;--ltx-fo-depth:0em;font-size:10pt;" height="9.61" overflow="visible" transform="matrix(1 0 0 -1 0 9.61)" width="45.39"><span class="ltx_foreignobject_container"><span class="ltx_foreignobject_content"><span id="S4.F3.pic1.3" class="ltx_text">Sahara:</span></span></span></foreignobject></g><g style="--ltx-fill-color:#D9A27B;" fill="#D9A27B"><path d="M 0 -39.37 M 7.87 -39.37 C 7.87 -35.02 4.35 -31.5 0 -31.5 C -4.35 -31.5 -7.87 -35.02 -7.87 -39.37 C -7.87 -43.72 -4.35 -47.24 0 -47.24 C 4.35 -47.24 7.87 -43.72 7.87 -39.37 Z M 0 -39.37"></path></g><g style="--ltx-fill-color:#95613E;" fill="#95613E"><path d="M 19.69 -39.37 M 27.56 -39.37 C 27.56 -35.02 24.03 -31.5 19.69 -31.5 C 15.34 -31.5 11.81 -35.02 11.81 -39.37 C 11.81 -43.72 15.34 -47.24 19.69 -47.24 C 24.03 -47.24 27.56 -43.72 27.56 -39.37 Z M 19.69 -39.37"></path></g><g style="--ltx-fill-color:#895332;" fill="#895332"><path d="M 39.37 -39.37 M 47.24 -39.37 C 47.24 -35.02 43.72 -31.5 39.37 -31.5 C 35.02 -31.5 31.5 -35.02 31.5 -39.37 C 31.5 -43.72 35.02 -47.24 39.37 -47.24 C 43.72 -47.24 47.24 -43.72 47.24 -39.37 Z M 39.37 -39.37"></path></g><g style="--ltx-fill-color:#9D6C4B;" fill="#9D6C4B"><path d="M 59.06 -39.37 M 66.93 -39.37 C 66.93 -35.02 63.4 -31.5 59.06 -31.5 C 54.71 -31.5 51.18 -35.02 51.18 -39.37 C 51.18 -43.72 54.71 -47.24 59.06 -47.24 C 63.4 -47.24 66.93 -43.72 66.93 -39.37 Z M 59.06 -39.37"></path></g><g style="--ltx-fill-color:#663415;" fill="#663415"><path d="M 78.74 -39.37 M 86.61 -39.37 C 86.61 -35.02 83.09 -31.5 78.74 -31.5 C 74.39 -31.5 70.87 -35.02 70.87 -39.37 C 70.87 -43.72 74.39 -47.24 78.74 -47.24 C 83.09 -47.24 86.61 -43.72 86.61 -39.37 Z M 78.74 -39.37"></path></g><g style="--ltx-fill-color:#794424;" fill="#794424"><path d="M 98.43 -39.37 M 106.3 -39.37 C 106.3 -35.02 102.77 -31.5 98.43 -31.5 C 94.08 -31.5 90.55 -35.02 90.55 -39.37 C 90.55 -43.72 94.08 -47.24 98.43 -47.24 C 102.77 -47.24 106.3 -43.72 106.3 -39.37 Z M 98.43 -39.37"></path></g><g style="--ltx-fill-color:#522607;" fill="#522607"><path d="M 118.11 -39.37 M 125.98 -39.37 C 125.98 -35.02 122.46 -31.5 118.11 -31.5 C 113.76 -31.5 110.24 -35.02 110.24 -39.37 C 110.24 -43.72 113.76 -47.24 118.11 -47.24 C 122.46 -47.24 125.98 -43.72 125.98 -39.37 Z M 118.11 -39.37"></path></g><g style="--ltx-fill-color:#AB7B60;" fill="#AB7B60"><path d="M 137.8 -39.37 M 145.67 -39.37 C 145.67 -35.02 142.14 -31.5 137.8 -31.5 C 133.45 -31.5 129.92 -35.02 129.92 -39.37 C 129.92 -43.72 133.45 -47.24 137.8 -47.24 C 142.14 -47.24 145.67 -43.72 145.67 -39.37 Z M 137.8 -39.37"></path></g><g style="--ltx-stroke-color:#000000;--ltx-fill-color:#000000;" fill="#000000" stroke="#000000" transform="matrix(1.0 0.0 0.0 1.0 -78.04 -63.86)"><foreignobject style="--ltx-fo-width:3.86em;--ltx-fo-height:0.69em;--ltx-fo-depth:0em;font-size:10pt;" height="9.61" overflow="visible" transform="matrix(1 0 0 -1 0 9.61)" width="53.47"><span class="ltx_foreignobject_container"><span class="ltx_foreignobject_content"><span id="S4.F3.pic1.4" class="ltx_text">Urban 1:</span></span></span></foreignobject></g><g style="--ltx-fill-color:#323B36;" fill="#323B36"><path d="M 0 -59.06 M 7.87 -59.06 C 7.87 -54.71 4.35 -51.18 0 -51.18 C -4.35 -51.18 -7.87 -54.71 -7.87 -59.06 C -7.87 -63.4 -4.35 -66.93 0 -66.93 C 4.35 -66.93 7.87 -63.4 7.87 -59.06 Z M 0 -59.06"></path></g><g style="--ltx-fill-color:#4D524D;" fill="#4D524D"><path d="M 19.69 -59.06 M 27.56 -59.06 C 27.56 -54.71 24.03 -51.18 19.69 -51.18 C 15.34 -51.18 11.81 -54.71 11.81 -59.06 C 11.81 -63.4 15.34 -66.93 19.69 -66.93 C 24.03 -66.93 27.56 -63.4 27.56 -59.06 Z M 19.69 -59.06"></path></g><g style="--ltx-fill-color:#B0A7A2;" fill="#B0A7A2"><path d="M 39.37 -59.06 M 47.24 -59.06 C 47.24 -54.71 43.72 -51.18 39.37 -51.18 C 35.02 -51.18 31.5 -54.71 31.5 -59.06 C 31.5 -63.4 35.02 -66.93 39.37 -66.93 C 43.72 -66.93 47.24 -63.4 47.24 -59.06 Z M 39.37 -59.06"></path></g><g style="--ltx-fill-color:#4D524D;" fill="#4D524D"><path d="M 59.06 -59.06 M 66.93 -59.06 C 66.93 -54.71 63.4 -51.18 59.06 -51.18 C 54.71 -51.18 51.18 -54.71 51.18 -59.06 C 51.18 -63.4 54.71 -66.93 59.06 -66.93 C 63.4 -66.93 66.93 -63.4 66.93 -59.06 Z M 59.06 -59.06"></path></g><g style="--ltx-fill-color:#EFE5E2;" fill="#EFE5E2"><path d="M 78.74 -59.06 M 86.61 -59.06 C 86.61 -54.71 83.09 -51.18 78.74 -51.18 C 74.39 -51.18 70.87 -54.71 70.87 -59.06 C 70.87 -63.4 74.39 -66.93 78.74 -66.93 C 83.09 -66.93 86.61 -63.4 86.61 -59.06 Z M 78.74 -59.06"></path></g><g style="--ltx-fill-color:#95140F;" fill="#95140F"><path d="M 98.43 -59.06 M 106.3 -59.06 C 106.3 -54.71 102.77 -51.18 98.43 -51.18 C 94.08 -51.18 90.55 -54.71 90.55 -59.06 C 90.55 -63.4 94.08 -66.93 98.43 -66.93 C 102.77 -66.93 106.3 -63.4 106.3 -59.06 Z M 98.43 -59.06"></path></g><g style="--ltx-fill-color:#6D513B;" fill="#6D513B"><path d="M 118.11 -59.06 M 125.98 -59.06 C 125.98 -54.71 122.46 -51.18 118.11 -51.18 C 113.76 -51.18 110.24 -54.71 110.24 -59.06 C 110.24 -63.4 113.76 -66.93 118.11 -66.93 C 122.46 -66.93 125.98 -63.4 125.98 -59.06 Z M 118.11 -59.06"></path></g><g style="--ltx-fill-color:#87979B;" fill="#87979B"><path d="M 137.8 -59.06 M 145.67 -59.06 C 145.67 -54.71 142.14 -51.18 137.8 -51.18 C 133.45 -51.18 129.92 -54.71 129.92 -59.06 C 129.92 -63.4 133.45 -66.93 137.8 -66.93 C 142.14 -66.93 145.67 -63.4 145.67 -59.06 Z M 137.8 -59.06"></path></g><g style="--ltx-stroke-color:#000000;--ltx-fill-color:#000000;" fill="#000000" stroke="#000000" transform="matrix(1.0 0.0 0.0 1.0 -73.77 -82.2)"><foreignobject style="--ltx-fo-width:3.58em;--ltx-fo-height:0.69em;--ltx-fo-depth:0.19em;font-size:10pt;" height="12.3" overflow="visible" transform="matrix(1 0 0 -1 0 9.61)" width="49.58"><span class="ltx_foreignobject_container"><span class="ltx_foreignobject_content"><span id="S4.F3.pic1.5" class="ltx_text">Night 1:</span></span></span></foreignobject></g><g style="--ltx-fill-color:#141213;" fill="#141213"><path d="M 0 -78.74 M 7.87 -78.74 C 7.87 -74.39 4.35 -70.87 0 -70.87 C -4.35 -70.87 -7.87 -74.39 -7.87 -78.74 C -7.87 -83.09 -4.35 -86.61 0 -86.61 C 4.35 -86.61 7.87 -83.09 7.87 -78.74 Z M 0 -78.74"></path></g><g style="--ltx-fill-color:#2C2730;" fill="#2C2730"><path d="M 19.69 -78.74 M 27.56 -78.74 C 27.56 -74.39 24.03 -70.87 19.69 -70.87 C 15.34 -70.87 11.81 -74.39 11.81 -78.74 C 11.81 -83.09 15.34 -86.61 19.69 -86.61 C 24.03 -86.61 27.56 -83.09 27.56 -78.74 Z M 19.69 -78.74"></path></g><g style="--ltx-fill-color:#312A40;" fill="#312A40"><path d="M 39.37 -78.74 M 47.24 -78.74 C 47.24 -74.39 43.72 -70.87 39.37 -70.87 C 35.02 -70.87 31.5 -74.39 31.5 -78.74 C 31.5 -83.09 35.02 -86.61 39.37 -86.61 C 43.72 -86.61 47.24 -83.09 47.24 -78.74 Z M 39.37 -78.74"></path></g><g style="--ltx-fill-color:#586BA3;" fill="#586BA3"><path d="M 59.06 -78.74 M 66.93 -78.74 C 66.93 -74.39 63.4 -70.87 59.06 -70.87 C 54.71 -70.87 51.18 -74.39 51.18 -78.74 C 51.18 -83.09 54.71 -86.61 59.06 -86.61 C 63.4 -86.61 66.93 -83.09 66.93 -78.74 Z M 59.06 -78.74"></path></g><g style="--ltx-fill-color:#4672A6;" fill="#4672A6"><path d="M 78.74 -78.74 M 86.61 -78.74 C 86.61 -74.39 83.09 -70.87 78.74 -70.87 C 74.39 -70.87 70.87 -74.39 70.87 -78.74 C 70.87 -83.09 74.39 -86.61 78.74 -86.61 C 83.09 -86.61 86.61 -83.09 86.61 -78.74 Z M 78.74 -78.74"></path></g><g style="--ltx-fill-color:#202006;" fill="#202006"><path d="M 98.43 -78.74 M 106.3 -78.74 C 106.3 -74.39 102.77 -70.87 98.43 -70.87 C 94.08 -70.87 90.55 -74.39 90.55 -78.74 C 90.55 -83.09 94.08 -86.61 98.43 -86.61 C 102.77 -86.61 106.3 -83.09 106.3 -78.74 Z M 98.43 -78.74"></path></g><g style="--ltx-fill-color:#9B9B3A;" fill="#9B9B3A"><path d="M 118.11 -78.74 M 125.98 -78.74 C 125.98 -74.39 122.46 -70.87 118.11 -70.87 C 113.76 -70.87 110.24 -74.39 110.24 -78.74 C 110.24 -83.09 113.76 -86.61 118.11 -86.61 C 122.46 -86.61 125.98 -83.09 125.98 -78.74 Z M 118.11 -78.74"></path></g><g style="--ltx-fill-color:#CBCBA5;" fill="#CBCBA5"><path d="M 137.8 -78.74 M 145.67 -78.74 C 145.67 -74.39 142.14 -70.87 137.8 -70.87 C 133.45 -70.87 129.92 -74.39 129.92 -78.74 C 129.92 -83.09 133.45 -86.61 137.8 -86.61 C 142.14 -86.61 145.67 -83.09 145.67 -78.74 Z M 137.8 -78.74"></path></g></g></svg></span>
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure">Figure 3: </span>Five of the thirteen available color palettes that are used for the
+evaluation. The color values are adopted from Camogen <cite class="ltx_cite ltx_citemacro_cite">[<a href="https://ar5iv.labs.arxiv.org/html/2606.17711v1#bib.bib2" title="" class="ltx_ref">2</a>]</cite>.</figcaption>
+</figure>
+</section>
+</section>
+<section id="S5" class="ltx_section">
+<h2 class="ltx_title ltx_title_section"><span class="ltx_tag ltx_tag_section">5 </span>Evaluation</h2>
+
+<div id="S5.p1" class="ltx_para ltx_noindent">
+<p id="S5.p1.1" class="ltx_p">The experiments use the average precision (AP) with multiple intersection over
+union thresholds (0.5 to 0.95 in steps of 0.05) to measure the change of the
+detector’s performance.
+In all following tables, <math id="S5.p1.m1" class="ltx_math_unparsed" alttext="\uparrow(\downarrow)" display="inline" intent=":literal"><semantics><mrow><mo stretchy="false">↑</mo><mrow><mo stretchy="false">(</mo><mo lspace="0em" rspace="0em" stretchy="false">↓</mo><mo stretchy="false">)</mo></mrow></mrow><annotation encoding="application/x-tex">\uparrow(\downarrow)</annotation></semantics></math> indicates whether a higher
+(lower) value is desired. <math id="S5.p1.m2" class="ltx_Math" alttext="\Delta" display="inline" intent=":literal"><semantics><mi mathvariant="normal">Δ</mi><annotation encoding="application/x-tex">\Delta</annotation></semantics></math> AP is the relative performance of a patch
+and is the difference between the achieved AP in the specific setting and the
+AP achieved with the reference patches in the same setting. If not stated
+otherwise, a reference patch shares the same parameterization (number of cells,
+color palette) but is not optimized.</p>
+</div>
+<section id="S5.SS1" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection"><span class="ltx_tag ltx_tag_subsection">5.1 </span>Experiment 1: Naive Patches</h3>
+
+<div id="S5.SS1.p1" class="ltx_para ltx_noindent">
+<p id="S5.SS1.p1.1" class="ltx_p">The expectation of the performance of adversarial Voronoi patches was met: in
+comparison to a regular adversarial patch, the damping of the patch performance
+compared to the reference patches is low (see <a href="https://ar5iv.labs.arxiv.org/html/2606.17711v1#S5.T1" title="Table 1 ‣ 5.1 Experiment 1: Naive Patches ‣ 5 Evaluation ‣ Structured Adversarial Camouflage via Voronoi Diagrams" class="ltx_ref ltx_refmacro_autoref"><span class="ltx_text ltx_ref_tag">Table&nbsp;1</span></a>). Yet,
+the lowering of the AP as a result of the optimization process affirms that
+Voronoi patches can contain an adversarial component.
+Surprisingly, the reference patches of all palettes result in a similar AP that
+differs after the third decimal place.
+The usage of the <em id="S5.SS1.p1.1.1" class="ltx_emph ltx_font_italic">Sahara</em> palette, which is also the palette with the least
+variant colors, results in patches that have the strongest adversarial
+component. The least adversarial effect is achieved with the <em id="S5.SS1.p1.1.2" class="ltx_emph ltx_font_italic">Forest
+Spring</em> palette.</p>
+</div>
+<figure id="S5.T1" class="ltx_table">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_table">Table 1: </span>Experiment 1: Patches are optimized with InriaPerson and evaluated
+on COCO. The reference AP is the performance of the detector when random
+Voronoi patterns of the same palette without any seed point optimization are
+used.</figcaption>
+<table id="S5.T1.1" class="ltx_tabular ltx_centering ltx_guessed_headers ltx_align_middle">
+<thead class="ltx_thead">
+<tr id="S5.T1.1.1" class="ltx_tr">
+<th id="S5.T1.1.1.1" class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_th_row ltx_border_tt">Palette</th>
+<th id="S5.T1.1.1.2" class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt">ref. AP</th>
+<th id="S5.T1.1.1.3" class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt">AP <math id="S5.T1.m1" class="ltx_Math" alttext="\downarrow" display="inline" intent=":literal"><semantics><mo stretchy="false">↓</mo><annotation encoding="application/x-tex">\downarrow</annotation></semantics></math></th>
+<th id="S5.T1.1.1.4" class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt"><math id="S5.T1.m2" class="ltx_Math" alttext="\Delta" display="inline" intent=":literal"><semantics><mi mathvariant="normal">Δ</mi><annotation encoding="application/x-tex">\Delta</annotation></semantics></math> AP <math id="S5.T1.m3" class="ltx_Math" alttext="\uparrow" display="inline" intent=":literal"><semantics><mo stretchy="false">↑</mo><annotation encoding="application/x-tex">\uparrow</annotation></semantics></math></th></tr>
+</thead>
+<tbody class="ltx_tbody">
+<tr id="S5.T1.1.2" class="ltx_tr">
+<th id="S5.T1.1.2.1" class="ltx_td ltx_align_center ltx_th ltx_th_row ltx_border_t">Forest Spring</th>
+<td id="S5.T1.1.2.2" class="ltx_td ltx_align_center ltx_border_t"><math id="S5.T1.m4" class="ltx_Math" alttext="0.45\pm 0.00" display="inline" intent=":literal"><semantics><mrow><mn>0.45</mn><mo>±</mo><mn>0.00</mn></mrow><annotation encoding="application/x-tex">0.45\pm 0.00</annotation></semantics></math></td>
+<td id="S5.T1.1.2.3" class="ltx_td ltx_align_center ltx_border_t"><math id="S5.T1.m5" class="ltx_Math" alttext="0.42\pm 0.01" display="inline" intent=":literal"><semantics><mrow><mn>0.42</mn><mo>±</mo><mn>0.01</mn></mrow><annotation encoding="application/x-tex">0.42\pm 0.01</annotation></semantics></math></td>
+<td id="S5.T1.1.2.4" class="ltx_td ltx_align_center ltx_border_t"><math id="S5.T1.m6" class="ltx_Math" alttext="0.02\pm 0.01" display="inline" intent=":literal"><semantics><mrow><mn>0.02</mn><mo>±</mo><mn>0.01</mn></mrow><annotation encoding="application/x-tex">0.02\pm 0.01</annotation></semantics></math></td></tr>
+<tr id="S5.T1.1.3" class="ltx_tr">
+<th id="S5.T1.1.3.1" class="ltx_td ltx_align_center ltx_th ltx_th_row">Coastal</th>
+<td id="S5.T1.1.3.2" class="ltx_td ltx_align_center"><math id="S5.T1.m7" class="ltx_Math" alttext="0.45\pm 0.00" display="inline" intent=":literal"><semantics><mrow><mn>0.45</mn><mo>±</mo><mn>0.00</mn></mrow><annotation encoding="application/x-tex">0.45\pm 0.00</annotation></semantics></math></td>
+<td id="S5.T1.1.3.3" class="ltx_td ltx_align_center"><math id="S5.T1.m8" class="ltx_Math" alttext="0.41\pm 0.00" display="inline" intent=":literal"><semantics><mrow><mn>0.41</mn><mo>±</mo><mn>0.00</mn></mrow><annotation encoding="application/x-tex">0.41\pm 0.00</annotation></semantics></math></td>
+<td id="S5.T1.1.3.4" class="ltx_td ltx_align_center"><math id="S5.T1.m9" class="ltx_Math" alttext="0.04\pm 0.00" display="inline" intent=":literal"><semantics><mrow><mn>0.04</mn><mo>±</mo><mn>0.00</mn></mrow><annotation encoding="application/x-tex">0.04\pm 0.00</annotation></semantics></math></td></tr>
+<tr id="S5.T1.1.4" class="ltx_tr">
+<th id="S5.T1.1.4.1" class="ltx_td ltx_align_center ltx_th ltx_th_row">Sahara</th>
+<td id="S5.T1.1.4.2" class="ltx_td ltx_align_center"><math id="S5.T1.m10" class="ltx_Math" alttext="0.45\pm 0.00" display="inline" intent=":literal"><semantics><mrow><mn>0.45</mn><mo>±</mo><mn>0.00</mn></mrow><annotation encoding="application/x-tex">0.45\pm 0.00</annotation></semantics></math></td>
+<td id="S5.T1.1.4.3" class="ltx_td ltx_align_center"><math id="S5.T1.m11" class="ltx_Math" alttext="\mathbf{0.39\pm 0.01}" display="inline" intent=":literal"><semantics><mrow><mn class="ltx_mathvariant_bold" mathvariant="bold">0.39</mn><mo>±</mo><mn class="ltx_mathvariant_bold" mathvariant="bold">0.01</mn></mrow><annotation encoding="application/x-tex">\mathbf{0.39\pm 0.01}</annotation></semantics></math></td>
+<td id="S5.T1.1.4.4" class="ltx_td ltx_align_center"><math id="S5.T1.m12" class="ltx_Math" alttext="\mathbf{0.06\pm 0.01}" display="inline" intent=":literal"><semantics><mrow><mn class="ltx_mathvariant_bold" mathvariant="bold">0.06</mn><mo>±</mo><mn class="ltx_mathvariant_bold" mathvariant="bold">0.01</mn></mrow><annotation encoding="application/x-tex">\mathbf{0.06\pm 0.01}</annotation></semantics></math></td></tr>
+<tr id="S5.T1.1.5" class="ltx_tr">
+<th id="S5.T1.1.5.1" class="ltx_td ltx_align_center ltx_th ltx_th_row">Urban 1</th>
+<td id="S5.T1.1.5.2" class="ltx_td ltx_align_center"><math id="S5.T1.m13" class="ltx_Math" alttext="0.45\pm 0.00" display="inline" intent=":literal"><semantics><mrow><mn>0.45</mn><mo>±</mo><mn>0.00</mn></mrow><annotation encoding="application/x-tex">0.45\pm 0.00</annotation></semantics></math></td>
+<td id="S5.T1.1.5.3" class="ltx_td ltx_align_center"><math id="S5.T1.m14" class="ltx_Math" alttext="0.42\pm 0.01" display="inline" intent=":literal"><semantics><mrow><mn>0.42</mn><mo>±</mo><mn>0.01</mn></mrow><annotation encoding="application/x-tex">0.42\pm 0.01</annotation></semantics></math></td>
+<td id="S5.T1.1.5.4" class="ltx_td ltx_align_center"><math id="S5.T1.m15" class="ltx_Math" alttext="0.03\pm 0.01" display="inline" intent=":literal"><semantics><mrow><mn>0.03</mn><mo>±</mo><mn>0.01</mn></mrow><annotation encoding="application/x-tex">0.03\pm 0.01</annotation></semantics></math></td></tr>
+<tr id="S5.T1.1.6" class="ltx_tr">
+<th id="S5.T1.1.6.1" class="ltx_td ltx_align_center ltx_th ltx_th_row ltx_border_bb">Night 1</th>
+<td id="S5.T1.1.6.2" class="ltx_td ltx_align_center ltx_border_bb"><math id="S5.T1.m16" class="ltx_Math" alttext="0.45\pm 0.00" display="inline" intent=":literal"><semantics><mrow><mn>0.45</mn><mo>±</mo><mn>0.00</mn></mrow><annotation encoding="application/x-tex">0.45\pm 0.00</annotation></semantics></math></td>
+<td id="S5.T1.1.6.3" class="ltx_td ltx_align_center ltx_border_bb"><math id="S5.T1.m17" class="ltx_Math" alttext="0.41\pm 0.01" display="inline" intent=":literal"><semantics><mrow><mn>0.41</mn><mo>±</mo><mn>0.01</mn></mrow><annotation encoding="application/x-tex">0.41\pm 0.01</annotation></semantics></math></td>
+<td id="S5.T1.1.6.4" class="ltx_td ltx_align_center ltx_border_bb"><math id="S5.T1.m18" class="ltx_Math" alttext="0.04\pm 0.01" display="inline" intent=":literal"><semantics><mrow><mn>0.04</mn><mo>±</mo><mn>0.01</mn></mrow><annotation encoding="application/x-tex">0.04\pm 0.01</annotation></semantics></math></td></tr>
+</tbody>
+</table>
+</figure>
+</section>
+<section id="S5.SS2" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection"><span class="ltx_tag ltx_tag_subsection">5.2 </span>Experiment 2: Covering Clothes</h3>
+
+<div id="S5.SS2.p1" class="ltx_para ltx_noindent">
+<p id="S5.SS2.p1.1" class="ltx_p">When the dataset and optimization strategy are changed, the performance of both
+the reference patches and optimized patches changes drastically (see
+<a href="https://ar5iv.labs.arxiv.org/html/2606.17711v1#S5.T2" title="Table 2 ‣ 5.2 Experiment 2: Covering Clothes ‣ 5 Evaluation ‣ Structured Adversarial Camouflage via Voronoi Diagrams" class="ltx_ref ltx_refmacro_autoref"><span class="ltx_text ltx_ref_tag">Table&nbsp;2</span></a>). The performance of the object detector when the
+reference patches are applied on the 3DPeople Dataset is much better compared
+to the COCO case. This could be due to the less disruptive application of the
+patches: For the 3DPeople dataset, the patch does not cover edges of objects of
+interest but is rather part of the object itself (see <a href="https://ar5iv.labs.arxiv.org/html/2606.17711v1#S4.F2" title="Figure 2 ‣ 4.2 Experiment 2: Covering Clothes ‣ 4 Experimental Setup ‣ Structured Adversarial Camouflage via Voronoi Diagrams" class="ltx_ref ltx_refmacro_autoref"><span class="ltx_text ltx_ref_tag">Figure&nbsp;2</span></a>).
+In experiment 1, the patches are applied more invasively. In addition, the
+adversarial structure covers a larger area of the person.
+The highest AP drop is recorded for <em id="S5.SS2.p1.1.1" class="ltx_emph ltx_font_italic">Night 1</em>, where the reference AP
+dropped from <math id="S5.SS2.p1.m1" class="ltx_Math" alttext="0.70\pm 0.01" display="inline" intent=":literal"><semantics><mrow><mn>0.70</mn><mo>±</mo><mn>0.01</mn></mrow><annotation encoding="application/x-tex">0.70\pm 0.01</annotation></semantics></math> to <math id="S5.SS2.p1.m2" class="ltx_Math" alttext="0.26\pm 0.03" display="inline" intent=":literal"><semantics><mrow><mn>0.26</mn><mo>±</mo><mn>0.03</mn></mrow><annotation encoding="application/x-tex">0.26\pm 0.03</annotation></semantics></math>. Furthermore, the AP of patches of
+all other palettes dropped significantly by at least <math id="S5.SS2.p1.m3" class="ltx_Math" alttext="0.32" display="inline" intent=":literal"><semantics><mn>0.32</mn><annotation encoding="application/x-tex">0.32</annotation></semantics></math>.
+Despite being able to detect persons <span id="S5.SS2.p1.1.2" class="ltx_text ltx_inline-quote ltx_outerquote">“wearing”</span> the reference patches
+easily, the detector performance breaks down when optimized patches are
+<span id="S5.SS2.p1.1.3" class="ltx_text ltx_inline-quote ltx_outerquote">“worn”</span>. This finding indicates the containment of an adversarial
+component in the presented Voronoi patches, thus making the presented system a
+valid consideration for future camouflage patterns.</p>
+</div>
+<figure id="S5.T2" class="ltx_table">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_table">Table 2: </span>Experiment 2: The reference AP is the performance of the detector
+when receiving a random Voronoi pattern of the same palette without any
+seed&nbsp;point optimization. The evaluation is performed using the test split
+with the original background images of the 3DPeople Dataset.</figcaption>
+<table id="S5.T2.1" class="ltx_tabular ltx_centering ltx_guessed_headers ltx_align_middle">
+<thead class="ltx_thead">
+<tr id="S5.T2.1.1" class="ltx_tr">
+<th id="S5.T2.1.1.1" class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_th_row ltx_border_tt">Palette</th>
+<th id="S5.T2.1.1.2" class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt">ref. AP</th>
+<th id="S5.T2.1.1.3" class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt">AP <math id="S5.T2.m1" class="ltx_Math" alttext="\downarrow" display="inline" intent=":literal"><semantics><mo stretchy="false">↓</mo><annotation encoding="application/x-tex">\downarrow</annotation></semantics></math></th>
+<th id="S5.T2.1.1.4" class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt"><math id="S5.T2.m2" class="ltx_Math" alttext="\Delta" display="inline" intent=":literal"><semantics><mi mathvariant="normal">Δ</mi><annotation encoding="application/x-tex">\Delta</annotation></semantics></math> AP <math id="S5.T2.m3" class="ltx_Math" alttext="\uparrow" display="inline" intent=":literal"><semantics><mo stretchy="false">↑</mo><annotation encoding="application/x-tex">\uparrow</annotation></semantics></math></th></tr>
+</thead>
+<tbody class="ltx_tbody">
+<tr id="S5.T2.1.2" class="ltx_tr">
+<th id="S5.T2.1.2.1" class="ltx_td ltx_align_center ltx_th ltx_th_row ltx_border_t">Forest Spring</th>
+<td id="S5.T2.1.2.2" class="ltx_td ltx_align_center ltx_border_t"><math id="S5.T2.m4" class="ltx_Math" alttext="0.60\pm 0.01" display="inline" intent=":literal"><semantics><mrow><mn>0.60</mn><mo>±</mo><mn>0.01</mn></mrow><annotation encoding="application/x-tex">0.60\pm 0.01</annotation></semantics></math></td>
+<td id="S5.T2.1.2.3" class="ltx_td ltx_align_center ltx_border_t"><math id="S5.T2.m5" class="ltx_Math" alttext="0.29\pm 0.01" display="inline" intent=":literal"><semantics><mrow><mn>0.29</mn><mo>±</mo><mn>0.01</mn></mrow><annotation encoding="application/x-tex">0.29\pm 0.01</annotation></semantics></math></td>
+<td id="S5.T2.1.2.4" class="ltx_td ltx_align_center ltx_border_t"><math id="S5.T2.m6" class="ltx_Math" alttext="0.32\pm 0.01" display="inline" intent=":literal"><semantics><mrow><mn>0.32</mn><mo>±</mo><mn>0.01</mn></mrow><annotation encoding="application/x-tex">0.32\pm 0.01</annotation></semantics></math></td></tr>
+<tr id="S5.T2.1.3" class="ltx_tr">
+<th id="S5.T2.1.3.1" class="ltx_td ltx_align_center ltx_th ltx_th_row">Coastal</th>
+<td id="S5.T2.1.3.2" class="ltx_td ltx_align_center"><math id="S5.T2.m7" class="ltx_Math" alttext="0.59\pm 0.03" display="inline" intent=":literal"><semantics><mrow><mn>0.59</mn><mo>±</mo><mn>0.03</mn></mrow><annotation encoding="application/x-tex">0.59\pm 0.03</annotation></semantics></math></td>
+<td id="S5.T2.1.3.3" class="ltx_td ltx_align_center"><math id="S5.T2.m8" class="ltx_Math" alttext="0.26\pm 0.03" display="inline" intent=":literal"><semantics><mrow><mn>0.26</mn><mo>±</mo><mn>0.03</mn></mrow><annotation encoding="application/x-tex">0.26\pm 0.03</annotation></semantics></math></td>
+<td id="S5.T2.1.3.4" class="ltx_td ltx_align_center"><math id="S5.T2.m9" class="ltx_Math" alttext="0.33\pm 0.00" display="inline" intent=":literal"><semantics><mrow><mn>0.33</mn><mo>±</mo><mn>0.00</mn></mrow><annotation encoding="application/x-tex">0.33\pm 0.00</annotation></semantics></math></td></tr>
+<tr id="S5.T2.1.4" class="ltx_tr">
+<th id="S5.T2.1.4.1" class="ltx_td ltx_align_center ltx_th ltx_th_row">Sahara</th>
+<td id="S5.T2.1.4.2" class="ltx_td ltx_align_center"><math id="S5.T2.m10" class="ltx_Math" alttext="0.61\pm 0.01" display="inline" intent=":literal"><semantics><mrow><mn>0.61</mn><mo>±</mo><mn>0.01</mn></mrow><annotation encoding="application/x-tex">0.61\pm 0.01</annotation></semantics></math></td>
+<td id="S5.T2.1.4.3" class="ltx_td ltx_align_center"><math id="S5.T2.m11" class="ltx_Math" alttext="0.26\pm 0.02" display="inline" intent=":literal"><semantics><mrow><mn>0.26</mn><mo>±</mo><mn>0.02</mn></mrow><annotation encoding="application/x-tex">0.26\pm 0.02</annotation></semantics></math></td>
+<td id="S5.T2.1.4.4" class="ltx_td ltx_align_center"><math id="S5.T2.m12" class="ltx_Math" alttext="0.34\pm 0.02" display="inline" intent=":literal"><semantics><mrow><mn>0.34</mn><mo>±</mo><mn>0.02</mn></mrow><annotation encoding="application/x-tex">0.34\pm 0.02</annotation></semantics></math></td></tr>
+<tr id="S5.T2.1.5" class="ltx_tr">
+<th id="S5.T2.1.5.1" class="ltx_td ltx_align_center ltx_th ltx_th_row">Urban 1</th>
+<td id="S5.T2.1.5.2" class="ltx_td ltx_align_center"><math id="S5.T2.m13" class="ltx_Math" alttext="0.65\pm 0.04" display="inline" intent=":literal"><semantics><mrow><mn>0.65</mn><mo>±</mo><mn>0.04</mn></mrow><annotation encoding="application/x-tex">0.65\pm 0.04</annotation></semantics></math></td>
+<td id="S5.T2.1.5.3" class="ltx_td ltx_align_center"><math id="S5.T2.m14" class="ltx_Math" alttext="0.29\pm 0.02" display="inline" intent=":literal"><semantics><mrow><mn>0.29</mn><mo>±</mo><mn>0.02</mn></mrow><annotation encoding="application/x-tex">0.29\pm 0.02</annotation></semantics></math></td>
+<td id="S5.T2.1.5.4" class="ltx_td ltx_align_center"><math id="S5.T2.m15" class="ltx_Math" alttext="0.36\pm 0.03" display="inline" intent=":literal"><semantics><mrow><mn>0.36</mn><mo>±</mo><mn>0.03</mn></mrow><annotation encoding="application/x-tex">0.36\pm 0.03</annotation></semantics></math></td></tr>
+<tr id="S5.T2.1.6" class="ltx_tr">
+<th id="S5.T2.1.6.1" class="ltx_td ltx_align_center ltx_th ltx_th_row ltx_border_bb">Night 1</th>
+<td id="S5.T2.1.6.2" class="ltx_td ltx_align_center ltx_border_bb"><math id="S5.T2.m16" class="ltx_Math" alttext="0.70\pm 0.01" display="inline" intent=":literal"><semantics><mrow><mn>0.70</mn><mo>±</mo><mn>0.01</mn></mrow><annotation encoding="application/x-tex">0.70\pm 0.01</annotation></semantics></math></td>
+<td id="S5.T2.1.6.3" class="ltx_td ltx_align_center ltx_border_bb"><math id="S5.T2.m17" class="ltx_Math" alttext="\mathbf{0.26\pm 0.03}" display="inline" intent=":literal"><semantics><mrow><mn class="ltx_mathvariant_bold" mathvariant="bold">0.26</mn><mo>±</mo><mn class="ltx_mathvariant_bold" mathvariant="bold">0.03</mn></mrow><annotation encoding="application/x-tex">\mathbf{0.26\pm 0.03}</annotation></semantics></math></td>
+<td id="S5.T2.1.6.4" class="ltx_td ltx_align_center ltx_border_bb"><math id="S5.T2.m18" class="ltx_Math" alttext="\mathbf{0.43\pm 0.03}" display="inline" intent=":literal"><semantics><mrow><mn class="ltx_mathvariant_bold" mathvariant="bold">0.43</mn><mo>±</mo><mn class="ltx_mathvariant_bold" mathvariant="bold">0.03</mn></mrow><annotation encoding="application/x-tex">\mathbf{0.43\pm 0.03}</annotation></semantics></math></td></tr>
+</tbody>
+</table>
+</figure>
+</section>
+<section id="S5.SS3" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection"><span class="ltx_tag ltx_tag_subsection">5.3 </span>Experiment 3: Transferability</h3>
+
+<section id="S5.SS3.SSS1" class="ltx_subsubsection">
+<h4 class="ltx_title ltx_title_subsubsection"><span class="ltx_tag ltx_tag_subsubsection">5.3.1 </span>Background Transferability</h4>
+
+<div id="S5.SS3.SSS1.p1" class="ltx_para ltx_noindent">
+<p id="S5.SS3.SSS1.p1.1" class="ltx_p"><a href="https://ar5iv.labs.arxiv.org/html/2606.17711v1#S5.T3" title="Table 3 ‣ 5.3.1 Background Transferability ‣ 5.3 Experiment 3: Transferability ‣ 5 Evaluation ‣ Structured Adversarial Camouflage via Voronoi Diagrams" class="ltx_ref ltx_refmacro_autoref"><span class="ltx_text ltx_ref_tag">Table&nbsp;3</span></a> shows the transferability capability of the generated
+patches of experiment 2 when using different background sceneries for the
+3DPeople dataset. Compared to the results of experiment 2, the changes of the
+backgrounds improve the AP for the reference patterns. A probable cause is the
+strong border that results from the cut-out process with the segmentation mask.
+The highest AP drop of <math id="S5.SS3.SSS1.p1.m1" class="ltx_Math" alttext="0.51" display="inline" intent=":literal"><semantics><mn>0.51</mn><annotation encoding="application/x-tex">0.51</annotation></semantics></math> is again recorded for <em id="S5.SS3.SSS1.p1.1.1" class="ltx_emph ltx_font_italic">Night 1</em>, followed by
+<em id="S5.SS3.SSS1.p1.1.2" class="ltx_emph ltx_font_italic">Urban 1</em> (<math id="S5.SS3.SSS1.p1.m2" class="ltx_Math" alttext="0.48" display="inline" intent=":literal"><semantics><mn>0.48</mn><annotation encoding="application/x-tex">0.48</annotation></semantics></math>) and <em id="S5.SS3.SSS1.p1.1.3" class="ltx_emph ltx_font_italic">Coastal</em> (<math id="S5.SS3.SSS1.p1.m3" class="ltx_Math" alttext="0.45" display="inline" intent=":literal"><semantics><mn>0.45</mn><annotation encoding="application/x-tex">0.45</annotation></semantics></math>).</p>
+</div>
+<figure id="S5.T3" class="ltx_table">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_table">Table 3: </span>Experiment 3.1: Background images are changed to images of
+the BG-20k dataset. The reference AP is the performance of the
+detector when receiving a random Voronoi pattern of the same palette without
+any seed&nbsp;point optimization.</figcaption>
+<table id="S5.T3.1" class="ltx_tabular ltx_centering ltx_guessed_headers ltx_align_middle">
+<thead class="ltx_thead">
+<tr id="S5.T3.1.1" class="ltx_tr">
+<th id="S5.T3.1.1.1" class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_th_row ltx_border_tt">Palette</th>
+<th id="S5.T3.1.1.2" class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt">ref. AP</th>
+<th id="S5.T3.1.1.3" class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt">AP <math id="S5.T3.m1" class="ltx_Math" alttext="\downarrow" display="inline" intent=":literal"><semantics><mo stretchy="false">↓</mo><annotation encoding="application/x-tex">\downarrow</annotation></semantics></math></th>
+<th id="S5.T3.1.1.4" class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt"><math id="S5.T3.m2" class="ltx_Math" alttext="\Delta" display="inline" intent=":literal"><semantics><mi mathvariant="normal">Δ</mi><annotation encoding="application/x-tex">\Delta</annotation></semantics></math> AP <math id="S5.T3.m3" class="ltx_Math" alttext="\uparrow" display="inline" intent=":literal"><semantics><mo stretchy="false">↑</mo><annotation encoding="application/x-tex">\uparrow</annotation></semantics></math></th></tr>
+</thead>
+<tbody class="ltx_tbody">
+<tr id="S5.T3.1.2" class="ltx_tr">
+<th id="S5.T3.1.2.1" class="ltx_td ltx_align_center ltx_th ltx_th_row ltx_border_t">Forest Spring</th>
+<td id="S5.T3.1.2.2" class="ltx_td ltx_align_center ltx_border_t"><math id="S5.T3.m4" class="ltx_Math" alttext="0.86\pm 0.01" display="inline" intent=":literal"><semantics><mrow><mn>0.86</mn><mo>±</mo><mn>0.01</mn></mrow><annotation encoding="application/x-tex">0.86\pm 0.01</annotation></semantics></math></td>
+<td id="S5.T3.1.2.3" class="ltx_td ltx_align_center ltx_border_t"><math id="S5.T3.m5" class="ltx_Math" alttext="0.47\pm 0.05" display="inline" intent=":literal"><semantics><mrow><mn>0.47</mn><mo>±</mo><mn>0.05</mn></mrow><annotation encoding="application/x-tex">0.47\pm 0.05</annotation></semantics></math></td>
+<td id="S5.T3.1.2.4" class="ltx_td ltx_align_center ltx_border_t"><math id="S5.T3.m6" class="ltx_Math" alttext="0.39\pm 0.00" display="inline" intent=":literal"><semantics><mrow><mn>0.39</mn><mo>±</mo><mn>0.00</mn></mrow><annotation encoding="application/x-tex">0.39\pm 0.00</annotation></semantics></math></td></tr>
+<tr id="S5.T3.1.3" class="ltx_tr">
+<th id="S5.T3.1.3.1" class="ltx_td ltx_align_center ltx_th ltx_th_row">Coastal</th>
+<td id="S5.T3.1.3.2" class="ltx_td ltx_align_center"><math id="S5.T3.m7" class="ltx_Math" alttext="0.88\pm 0.01" display="inline" intent=":literal"><semantics><mrow><mn>0.88</mn><mo>±</mo><mn>0.01</mn></mrow><annotation encoding="application/x-tex">0.88\pm 0.01</annotation></semantics></math></td>
+<td id="S5.T3.1.3.3" class="ltx_td ltx_align_center"><math id="S5.T3.m8" class="ltx_Math" alttext="0.43\pm 0.02" display="inline" intent=":literal"><semantics><mrow><mn>0.43</mn><mo>±</mo><mn>0.02</mn></mrow><annotation encoding="application/x-tex">0.43\pm 0.02</annotation></semantics></math></td>
+<td id="S5.T3.1.3.4" class="ltx_td ltx_align_center"><math id="S5.T3.m9" class="ltx_Math" alttext="0.45\pm 0.00" display="inline" intent=":literal"><semantics><mrow><mn>0.45</mn><mo>±</mo><mn>0.00</mn></mrow><annotation encoding="application/x-tex">0.45\pm 0.00</annotation></semantics></math></td></tr>
+<tr id="S5.T3.1.4" class="ltx_tr">
+<th id="S5.T3.1.4.1" class="ltx_td ltx_align_center ltx_th ltx_th_row">Sahara</th>
+<td id="S5.T3.1.4.2" class="ltx_td ltx_align_center"><math id="S5.T3.m10" class="ltx_Math" alttext="0.86\pm 0.02" display="inline" intent=":literal"><semantics><mrow><mn>0.86</mn><mo>±</mo><mn>0.02</mn></mrow><annotation encoding="application/x-tex">0.86\pm 0.02</annotation></semantics></math></td>
+<td id="S5.T3.1.4.3" class="ltx_td ltx_align_center"><math id="S5.T3.m11" class="ltx_Math" alttext="0.51\pm 0.01" display="inline" intent=":literal"><semantics><mrow><mn>0.51</mn><mo>±</mo><mn>0.01</mn></mrow><annotation encoding="application/x-tex">0.51\pm 0.01</annotation></semantics></math></td>
+<td id="S5.T3.1.4.4" class="ltx_td ltx_align_center"><math id="S5.T3.m12" class="ltx_Math" alttext="0.35\pm 0.00" display="inline" intent=":literal"><semantics><mrow><mn>0.35</mn><mo>±</mo><mn>0.00</mn></mrow><annotation encoding="application/x-tex">0.35\pm 0.00</annotation></semantics></math></td></tr>
+<tr id="S5.T3.1.5" class="ltx_tr">
+<th id="S5.T3.1.5.1" class="ltx_td ltx_align_center ltx_th ltx_th_row">Urban 1</th>
+<td id="S5.T3.1.5.2" class="ltx_td ltx_align_center"><math id="S5.T3.m13" class="ltx_Math" alttext="0.88\pm 0.01" display="inline" intent=":literal"><semantics><mrow><mn>0.88</mn><mo>±</mo><mn>0.01</mn></mrow><annotation encoding="application/x-tex">0.88\pm 0.01</annotation></semantics></math></td>
+<td id="S5.T3.1.5.3" class="ltx_td ltx_align_center"><math id="S5.T3.m14" class="ltx_Math" alttext="0.40\pm 0.03" display="inline" intent=":literal"><semantics><mrow><mn>0.40</mn><mo>±</mo><mn>0.03</mn></mrow><annotation encoding="application/x-tex">0.40\pm 0.03</annotation></semantics></math></td>
+<td id="S5.T3.1.5.4" class="ltx_td ltx_align_center"><math id="S5.T3.m15" class="ltx_Math" alttext="0.48\pm 0.00" display="inline" intent=":literal"><semantics><mrow><mn>0.48</mn><mo>±</mo><mn>0.00</mn></mrow><annotation encoding="application/x-tex">0.48\pm 0.00</annotation></semantics></math></td></tr>
+<tr id="S5.T3.1.6" class="ltx_tr">
+<th id="S5.T3.1.6.1" class="ltx_td ltx_align_center ltx_th ltx_th_row ltx_border_bb">Night 1</th>
+<td id="S5.T3.1.6.2" class="ltx_td ltx_align_center ltx_border_bb"><math id="S5.T3.m16" class="ltx_Math" alttext="0.89\pm 0.01" display="inline" intent=":literal"><semantics><mrow><mn>0.89</mn><mo>±</mo><mn>0.01</mn></mrow><annotation encoding="application/x-tex">0.89\pm 0.01</annotation></semantics></math></td>
+<td id="S5.T3.1.6.3" class="ltx_td ltx_align_center ltx_border_bb"><math id="S5.T3.m17" class="ltx_Math" alttext="\mathbf{0.38\pm 0.02}" display="inline" intent=":literal"><semantics><mrow><mn class="ltx_mathvariant_bold" mathvariant="bold">0.38</mn><mo>±</mo><mn class="ltx_mathvariant_bold" mathvariant="bold">0.02</mn></mrow><annotation encoding="application/x-tex">\mathbf{0.38\pm 0.02}</annotation></semantics></math></td>
+<td id="S5.T3.1.6.4" class="ltx_td ltx_align_center ltx_border_bb"><math id="S5.T3.m18" class="ltx_Math" alttext="\mathbf{0.51\pm 0.00}" display="inline" intent=":literal"><semantics><mrow><mn class="ltx_mathvariant_bold" mathvariant="bold">0.51</mn><mo>±</mo><mn class="ltx_mathvariant_bold" mathvariant="bold">0.00</mn></mrow><annotation encoding="application/x-tex">\mathbf{0.51\pm 0.00}</annotation></semantics></math></td></tr>
+</tbody>
+</table>
+</figure>
+</section>
+<section id="S5.SS3.SSS2" class="ltx_subsubsection">
+<h4 class="ltx_title ltx_title_subsubsection"><span class="ltx_tag ltx_tag_subsubsection">5.3.2 </span>Model Transferability</h4>
+
+<div id="S5.SS3.SSS2.p1" class="ltx_para ltx_noindent">
+<p id="S5.SS3.SSS2.p1.1" class="ltx_p">The model transferability for different detector architectures is shown in
+<a href="https://ar5iv.labs.arxiv.org/html/2606.17711v1#S5.F4" title="Figure 4 ‣ 5.3.2 Model Transferability ‣ 5.3 Experiment 3: Transferability ‣ 5 Evaluation ‣ Structured Adversarial Camouflage via Voronoi Diagrams" class="ltx_ref ltx_refmacro_autoref"><span class="ltx_text ltx_ref_tag">Figure&nbsp;4</span></a>. The given transferability matrix evaluates different
+YOLO architectures (y-axis) with the optimized patches of experiment 2 of the
+five selected palettes (x-axis). Each cell of the matrix is shaded according to
+the relative AP drop in respect to the performance the model achieves when
+evaluated with the respective reference patterns. The first column and last row
+are labeled with <math id="S5.SS3.SSS2.p1.m1" class="ltx_Math" alttext="\mu" display="inline" intent=":literal"><semantics><mi>μ</mi><annotation encoding="application/x-tex">\mu</annotation></semantics></math> and are the row-wise and column-wise means.
+The overall mean performance drop is about <math id="S5.SS3.SSS2.p1.m2" class="ltx_Math" alttext="0.37" display="inline" intent=":literal"><semantics><mn>0.37</mn><annotation encoding="application/x-tex">0.37</annotation></semantics></math>. The lowest mean performance
+drops are given by <em id="S5.SS3.SSS2.p1.1.1" class="ltx_emph ltx_font_italic">Sahara</em> (<math id="S5.SS3.SSS2.p1.m3" class="ltx_Math" alttext="0.33" display="inline" intent=":literal"><semantics><mn>0.33</mn><annotation encoding="application/x-tex">0.33</annotation></semantics></math>) and <em id="S5.SS3.SSS2.p1.1.2" class="ltx_emph ltx_font_italic">Urban 1</em> (<math id="S5.SS3.SSS2.p1.m4" class="ltx_Math" alttext="0.34" display="inline" intent=":literal"><semantics><mn>0.34</mn><annotation encoding="application/x-tex">0.34</annotation></semantics></math>) while
+<em id="S5.SS3.SSS2.p1.1.3" class="ltx_emph ltx_font_italic">Night 1</em> achieves the highest (<math id="S5.SS3.SSS2.p1.m5" class="ltx_Math" alttext="0.43" display="inline" intent=":literal"><semantics><mn>0.43</mn><annotation encoding="application/x-tex">0.43</annotation></semantics></math>) AP drop. The most robust model is
+YOLOv9e, with a mean AP drop of <math id="S5.SS3.SSS2.p1.m6" class="ltx_Math" alttext="0.18" display="inline" intent=":literal"><semantics><mn>0.18</mn><annotation encoding="application/x-tex">0.18</annotation></semantics></math> followed by YOLOv12n (<math id="S5.SS3.SSS2.p1.m7" class="ltx_Math" alttext="0.27" display="inline" intent=":literal"><semantics><mn>0.27</mn><annotation encoding="application/x-tex">0.27</annotation></semantics></math>). The least
+robust ones are YOLOv10s (<math id="S5.SS3.SSS2.p1.m8" class="ltx_Math" alttext="0.51" display="inline" intent=":literal"><semantics><mn>0.51</mn><annotation encoding="application/x-tex">0.51</annotation></semantics></math>) and YOLOv9s (<math id="S5.SS3.SSS2.p1.m9" class="ltx_Math" alttext="0.50" display="inline" intent=":literal"><semantics><mn>0.50</mn><annotation encoding="application/x-tex">0.50</annotation></semantics></math>). Other than expected, the
+performance drop of some smaller models is far less than the drop of some larger
+models. This counterintuitive observation can be explained by taking a look at
+the absolute values: the performance on the reference pattern
+differs for the smallest models of an architecture group by about 20 AP points
+in comparison to the largest. Consequently, the overall performance when attacked
+is also much lower.</p>
+</div>
+<figure id="S5.F4" class="ltx_figure"><img src="./[2606.17711] Structured Adversarial Camouflage via Voronoi Diagrams_files/experiment3.png" id="S5.F4.g1" class="ltx_graphics ltx_centering ltx_img_portrait" width="239" height="373" alt="Refer to caption">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure">Figure 4: </span>Experiment 3.2: The transferability matrix of different network
+architectures and the five selected palettes shows the impact of adversarial
+Voronoi patches in a black-box setting. The lighter the shade of a cell, the
+higher the AP drop is. The AP difference is calculated in respect to a set
+of three random initialized patterns of the respective palette. <math id="S5.F4.m2" class="ltx_Math" alttext="\mu" display="inline" intent=":literal"><semantics><mi>μ</mi><annotation encoding="application/x-tex">\mu</annotation></semantics></math>
+indicates the respective column and row mean value.</figcaption>
+</figure>
+</section>
+</section>
+<section id="S5.SS4" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection"><span class="ltx_tag ltx_tag_subsection">5.4 </span>Experiment 4: Changes in the color palette</h3>
+
+<section id="S5.SS4.SSS1" class="ltx_subsubsection">
+<h4 class="ltx_title ltx_title_subsubsection"><span class="ltx_tag ltx_tag_subsubsection">5.4.1 </span>Change the palette as a whole</h4>
+
+<div id="S5.SS4.SSS1.p1" class="ltx_para ltx_noindent">
+<p id="S5.SS4.SSS1.p1.1" class="ltx_p">Simply exchanging a single color palette with another palette for the patches
+trained in experiment 2 results in a significant loss of performance, as
+depicted in <a href="https://ar5iv.labs.arxiv.org/html/2606.17711v1#S5.F5" title="Figure 5 ‣ 5.4.1 Change the palette as a whole ‣ 5.4 Experiment 4: Changes in the color palette ‣ 5 Evaluation ‣ Structured Adversarial Camouflage via Voronoi Diagrams" class="ltx_ref ltx_refmacro_autoref"><span class="ltx_text ltx_ref_tag">Figure&nbsp;5</span></a>. Here, each row and column represents a
+single color palette. The palettes on the x-axis are the base palettes used to
+train the pattern. The different palettes used to exchange the colors are
+plotted on the y-axis. Again, the shade of a cell represents the change of the
+AP of the patches, but this time regarding the respective performance when
+the original palette is used to generate the patch.
+The main diagonal is equal to zero, as these patches will always achieve the
+same performance with their respective original palettes. By exchanging the
+colors with another palette, all patches lose their adversarial component and
+perform after the color swap similar to the set of reference patches.</p>
+</div>
+<figure id="S5.F5" class="ltx_figure"><img src="./[2606.17711] Structured Adversarial Camouflage via Voronoi Diagrams_files/experiment4a.png" id="S5.F5.g1" class="ltx_graphics ltx_centering ltx_img_square" width="191" height="163" alt="Refer to caption">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure">Figure 5: </span>Experiment 4.1: Patches are optimized with the palette at the
+x-axis and evaluated with colors of the palette given in the y-axis. The
+color of a cell represents the difference between the AP of the patch when
+the original palette is used and the AP when the respective repaint palette
+is used. The darker the shade, the better the set of patches perform.</figcaption>
+</figure>
+</section>
+<section id="S5.SS4.SSS2" class="ltx_subsubsection">
+<h4 class="ltx_title ltx_title_subsubsection"><span class="ltx_tag ltx_tag_subsubsection">5.4.2 </span>Impact of changes in a single palette color</h4>
+
+<div id="S5.SS4.SSS2.p1" class="ltx_para ltx_noindent">
+<p id="S5.SS4.SSS2.p1.1" class="ltx_p">Slightly changing a single color of a palette while fixing all the other colors
+is not as impactful as changing the whole palette. <a href="https://ar5iv.labs.arxiv.org/html/2606.17711v1#S5.F6" title="Figure 6 ‣ 5.4.2 Impact of changes in a single palette color ‣ 5.4 Experiment 4: Changes in the color palette ‣ 5 Evaluation ‣ Structured Adversarial Camouflage via Voronoi Diagrams" class="ltx_ref ltx_refmacro_autoref"><span class="ltx_text ltx_ref_tag">Figure&nbsp;6</span></a> contains
+three columns, where each column visualizes the impact of changes in hue, value,
+and saturation of colors of a palette given a specific patch.
+The radar plot depicts the hue space. The radius to the center point represents
+the relative change in the AP. Each colored area represents a single color of
+the palette. The straight line that shares the line style and color as an area
+represents the unaltered hue value of that color. For example, when following
+the straight green line clockwise (0x376819), one observes that a change of the
+color to a cyan color (at around <math id="S5.SS4.SSS2.p1.m1" class="ltx_Math" alttext="\pi" display="inline" intent=":literal"><semantics><mi>π</mi><annotation encoding="application/x-tex">\pi</annotation></semantics></math>) would increase the adversarial component
+of the pattern. If the hue value is shifted even more towards purple, the patch
+successively loses its adversarial component. This plot gives a hint on how high the
+tolerance should be if a pattern is to be realized in the physical world.
+The central plot provides information on how the shift in saturation of a certain
+color changes the performance of the patch. For example, the striped, dark
+green line (0x0c1408) barely changes as saturation increases. In the rightmost
+plot, where the influence of the value component is depicted, the dark green
+line (0x0c1408) behaves entirely differently. The change in the value lightens
+the color up to an almost lime green hue, and the patch AP increases about
+<math id="S5.SS4.SSS2.p1.m2" class="ltx_Math" alttext="0.17" display="inline" intent=":literal"><semantics><mn>0.17</mn><annotation encoding="application/x-tex">0.17</annotation></semantics></math> AP points.</p>
+</div>
+<figure id="S5.F6" class="ltx_figure">
+<div class="ltx_flex_figure">
+<div class="ltx_flex_cell ltx_flex_size_2"><object type="image/svg+xml" data="./[2606.17711] Structured Adversarial Camouflage via Voronoi Diagrams_files/experiment4brainbow_forestspring.svg" id="S5.F6.g1" class="ltx_graphics ltx_centering ltx_figure_panel ltx_img_square" width="144" height="127"></object></div><div class="ltx_flex_cell ltx_flex_size_2"><object type="image/svg+xml" data="./[2606.17711] Structured Adversarial Camouflage via Voronoi Diagrams_files/experiment4bsat_forestspring.svg" id="S5.F6.g2" class="ltx_graphics ltx_centering ltx_figure_panel ltx_img_landscape" width="144" height="79"></object></div><div class="ltx_flex_break"></div><div class="ltx_flex_cell ltx_flex_size_1"><object type="image/svg+xml" data="./[2606.17711] Structured Adversarial Camouflage via Voronoi Diagrams_files/experiment4bvalue_forestspring.svg" id="S5.F6.g3" class="ltx_graphics ltx_centering ltx_figure_panel ltx_img_landscape" width="144" height="79"></object></div></div>
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure">Figure 6: </span>Experiment 4.2.: Impact on the AP for changes in hue, value, and
+saturation using the forest spring palette on one of the previous
+optimized patches.</figcaption>
+</figure>
+</section>
+</section>
+<section id="S5.SS5" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection"><span class="ltx_tag ltx_tag_subsection">5.5 </span>Experiment 5</h3>
+
+<div id="S5.SS5.p1" class="ltx_para ltx_noindent">
+<p id="S5.SS5.p1.1" class="ltx_p">The last experiment evaluates the patches trained in experiment 1 the same way
+the patches of experiments 2 and 3 are evaluated, and vice versa.</p>
+</div>
+<div id="S5.SS5.p2" class="ltx_para ltx_noindent">
+<p id="S5.SS5.p2.1" class="ltx_p">When comparing <a href="https://ar5iv.labs.arxiv.org/html/2606.17711v1#S5.T4" title="Table 4 ‣ 5.5 Experiment 5 ‣ 5 Evaluation ‣ Structured Adversarial Camouflage via Voronoi Diagrams" class="ltx_ref ltx_refmacro_autoref"><span class="ltx_text ltx_ref_tag">Table&nbsp;4</span></a> with <a href="https://ar5iv.labs.arxiv.org/html/2606.17711v1#S5.T1" title="Table 1 ‣ 5.1 Experiment 1: Naive Patches ‣ 5 Evaluation ‣ Structured Adversarial Camouflage via Voronoi Diagrams" class="ltx_ref ltx_refmacro_autoref"><span class="ltx_text ltx_ref_tag">Table&nbsp;1</span></a>, the
+performance of the 3DPeople patches is slightly better than the patches
+optimized in experiment 1. Nonetheless, the overall performance is still low.
+This is also true for the performance of the patches that are optimized with
+InriaPerson and evaluated with the 3DPeople dataset (see
+<a href="https://ar5iv.labs.arxiv.org/html/2606.17711v1#S5.T5" title="Table 5 ‣ 5.5 Experiment 5 ‣ 5 Evaluation ‣ Structured Adversarial Camouflage via Voronoi Diagrams" class="ltx_ref ltx_refmacro_autoref"><span class="ltx_text ltx_ref_tag">Table&nbsp;5</span></a>). Unfortunately, the AP drop is much lower than the
+patches optimized on the 3DPeople dataset (see <a href="https://ar5iv.labs.arxiv.org/html/2606.17711v1#S5.T3" title="Table 3 ‣ 5.3.1 Background Transferability ‣ 5.3 Experiment 3: Transferability ‣ 5 Evaluation ‣ Structured Adversarial Camouflage via Voronoi Diagrams" class="ltx_ref ltx_refmacro_autoref"><span class="ltx_text ltx_ref_tag">Table&nbsp;3</span></a>). This
+could be due the reason, that InriaPerson contain much less images compared to
+3DPeople and thus can offer much less variation during the patch optimization.</p>
+</div>
+<figure id="S5.T4" class="ltx_table">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_table">Table 4: </span>Experiment 5.1: 3D People Patches evaluated with COCO. The reference
+AP is again the performance of the detector when receiving a random Voronoi
+pattern of the same palette without any seed&nbsp;point optimization.</figcaption>
+<table id="S5.T4.1" class="ltx_tabular ltx_centering ltx_guessed_headers ltx_align_middle">
+<thead class="ltx_thead">
+<tr id="S5.T4.1.1" class="ltx_tr">
+<th id="S5.T4.1.1.1" class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_th_row ltx_border_tt">Palette</th>
+<th id="S5.T4.1.1.2" class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt">ref. AP</th>
+<th id="S5.T4.1.1.3" class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt">AP <math id="S5.T4.m1" class="ltx_Math" alttext="\downarrow" display="inline" intent=":literal"><semantics><mo stretchy="false">↓</mo><annotation encoding="application/x-tex">\downarrow</annotation></semantics></math></th>
+<th id="S5.T4.1.1.4" class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt"><math id="S5.T4.m2" class="ltx_Math" alttext="\Delta" display="inline" intent=":literal"><semantics><mi mathvariant="normal">Δ</mi><annotation encoding="application/x-tex">\Delta</annotation></semantics></math> AP <math id="S5.T4.m3" class="ltx_Math" alttext="\uparrow" display="inline" intent=":literal"><semantics><mo stretchy="false">↑</mo><annotation encoding="application/x-tex">\uparrow</annotation></semantics></math></th></tr>
+</thead>
+<tbody class="ltx_tbody">
+<tr id="S5.T4.1.2" class="ltx_tr">
+<th id="S5.T4.1.2.1" class="ltx_td ltx_align_center ltx_th ltx_th_row ltx_border_t">Forest Spring</th>
+<td id="S5.T4.1.2.2" class="ltx_td ltx_align_center ltx_border_t"><math id="S5.T4.m4" class="ltx_Math" alttext="0.45\pm 0.00" display="inline" intent=":literal"><semantics><mrow><mn>0.45</mn><mo>±</mo><mn>0.00</mn></mrow><annotation encoding="application/x-tex">0.45\pm 0.00</annotation></semantics></math></td>
+<td id="S5.T4.1.2.3" class="ltx_td ltx_align_center ltx_border_t"><math id="S5.T4.m5" class="ltx_Math" alttext="\mathbf{0.38\pm 0.02}" display="inline" intent=":literal"><semantics><mrow><mn class="ltx_mathvariant_bold" mathvariant="bold">0.38</mn><mo>±</mo><mn class="ltx_mathvariant_bold" mathvariant="bold">0.02</mn></mrow><annotation encoding="application/x-tex">\mathbf{0.38\pm 0.02}</annotation></semantics></math></td>
+<td id="S5.T4.1.2.4" class="ltx_td ltx_align_center ltx_border_t"><math id="S5.T4.m6" class="ltx_Math" alttext="\mathbf{0.07\pm 0.02}" display="inline" intent=":literal"><semantics><mrow><mn class="ltx_mathvariant_bold" mathvariant="bold">0.07</mn><mo>±</mo><mn class="ltx_mathvariant_bold" mathvariant="bold">0.02</mn></mrow><annotation encoding="application/x-tex">\mathbf{0.07\pm 0.02}</annotation></semantics></math></td></tr>
+<tr id="S5.T4.1.3" class="ltx_tr">
+<th id="S5.T4.1.3.1" class="ltx_td ltx_align_center ltx_th ltx_th_row">Coastal</th>
+<td id="S5.T4.1.3.2" class="ltx_td ltx_align_center"><math id="S5.T4.m7" class="ltx_Math" alttext="0.45\pm 0.00" display="inline" intent=":literal"><semantics><mrow><mn>0.45</mn><mo>±</mo><mn>0.00</mn></mrow><annotation encoding="application/x-tex">0.45\pm 0.00</annotation></semantics></math></td>
+<td id="S5.T4.1.3.3" class="ltx_td ltx_align_center"><math id="S5.T4.m8" class="ltx_Math" alttext="0.39\pm 0.01" display="inline" intent=":literal"><semantics><mrow><mn>0.39</mn><mo>±</mo><mn>0.01</mn></mrow><annotation encoding="application/x-tex">0.39\pm 0.01</annotation></semantics></math></td>
+<td id="S5.T4.1.3.4" class="ltx_td ltx_align_center"><math id="S5.T4.m9" class="ltx_Math" alttext="0.06\pm 0.01" display="inline" intent=":literal"><semantics><mrow><mn>0.06</mn><mo>±</mo><mn>0.01</mn></mrow><annotation encoding="application/x-tex">0.06\pm 0.01</annotation></semantics></math></td></tr>
+<tr id="S5.T4.1.4" class="ltx_tr">
+<th id="S5.T4.1.4.1" class="ltx_td ltx_align_center ltx_th ltx_th_row">Sahara</th>
+<td id="S5.T4.1.4.2" class="ltx_td ltx_align_center"><math id="S5.T4.m10" class="ltx_Math" alttext="0.45\pm 0.00" display="inline" intent=":literal"><semantics><mrow><mn>0.45</mn><mo>±</mo><mn>0.00</mn></mrow><annotation encoding="application/x-tex">0.45\pm 0.00</annotation></semantics></math></td>
+<td id="S5.T4.1.4.3" class="ltx_td ltx_align_center"><math id="S5.T4.m11" class="ltx_Math" alttext="0.41\pm 0.01" display="inline" intent=":literal"><semantics><mrow><mn>0.41</mn><mo>±</mo><mn>0.01</mn></mrow><annotation encoding="application/x-tex">0.41\pm 0.01</annotation></semantics></math></td>
+<td id="S5.T4.1.4.4" class="ltx_td ltx_align_center"><math id="S5.T4.m12" class="ltx_Math" alttext="0.04\pm 0.01" display="inline" intent=":literal"><semantics><mrow><mn>0.04</mn><mo>±</mo><mn>0.01</mn></mrow><annotation encoding="application/x-tex">0.04\pm 0.01</annotation></semantics></math></td></tr>
+<tr id="S5.T4.1.5" class="ltx_tr">
+<th id="S5.T4.1.5.1" class="ltx_td ltx_align_center ltx_th ltx_th_row">Urban 1</th>
+<td id="S5.T4.1.5.2" class="ltx_td ltx_align_center"><math id="S5.T4.m13" class="ltx_Math" alttext="0.45\pm 0.00" display="inline" intent=":literal"><semantics><mrow><mn>0.45</mn><mo>±</mo><mn>0.00</mn></mrow><annotation encoding="application/x-tex">0.45\pm 0.00</annotation></semantics></math></td>
+<td id="S5.T4.1.5.3" class="ltx_td ltx_align_center"><math id="S5.T4.m14" class="ltx_Math" alttext="0.40\pm 0.01" display="inline" intent=":literal"><semantics><mrow><mn>0.40</mn><mo>±</mo><mn>0.01</mn></mrow><annotation encoding="application/x-tex">0.40\pm 0.01</annotation></semantics></math></td>
+<td id="S5.T4.1.5.4" class="ltx_td ltx_align_center"><math id="S5.T4.m15" class="ltx_Math" alttext="0.05\pm 0.01" display="inline" intent=":literal"><semantics><mrow><mn>0.05</mn><mo>±</mo><mn>0.01</mn></mrow><annotation encoding="application/x-tex">0.05\pm 0.01</annotation></semantics></math></td></tr>
+<tr id="S5.T4.1.6" class="ltx_tr">
+<th id="S5.T4.1.6.1" class="ltx_td ltx_align_center ltx_th ltx_th_row ltx_border_bb">Night 1</th>
+<td id="S5.T4.1.6.2" class="ltx_td ltx_align_center ltx_border_bb"><math id="S5.T4.m16" class="ltx_Math" alttext="0.45\pm 0.00" display="inline" intent=":literal"><semantics><mrow><mn>0.45</mn><mo>±</mo><mn>0.00</mn></mrow><annotation encoding="application/x-tex">0.45\pm 0.00</annotation></semantics></math></td>
+<td id="S5.T4.1.6.3" class="ltx_td ltx_align_center ltx_border_bb"><math id="S5.T4.m17" class="ltx_Math" alttext="0.41\pm 0.01" display="inline" intent=":literal"><semantics><mrow><mn>0.41</mn><mo>±</mo><mn>0.01</mn></mrow><annotation encoding="application/x-tex">0.41\pm 0.01</annotation></semantics></math></td>
+<td id="S5.T4.1.6.4" class="ltx_td ltx_align_center ltx_border_bb"><math id="S5.T4.m18" class="ltx_Math" alttext="0.04\pm 0.01" display="inline" intent=":literal"><semantics><mrow><mn>0.04</mn><mo>±</mo><mn>0.01</mn></mrow><annotation encoding="application/x-tex">0.04\pm 0.01</annotation></semantics></math></td></tr>
+</tbody>
+</table>
+</figure>
+<figure id="S5.T5" class="ltx_table">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_table">Table 5: </span>Experiment 5.2: InriaPerson Patches evaluated with the 3DPeople dataset. The reference
+AP is again the performance of the detector when receiving a random Voronoi
+pattern of the same palette without any seed&nbsp;point optimization.</figcaption>
+<table id="S5.T5.1" class="ltx_tabular ltx_centering ltx_guessed_headers ltx_align_middle">
+<thead class="ltx_thead">
+<tr id="S5.T5.1.1" class="ltx_tr">
+<th id="S5.T5.1.1.1" class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_th_row ltx_border_tt">Palette</th>
+<th id="S5.T5.1.1.2" class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt">ref. AP</th>
+<th id="S5.T5.1.1.3" class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt">AP <math id="S5.T5.m1" class="ltx_Math" alttext="\downarrow" display="inline" intent=":literal"><semantics><mo stretchy="false">↓</mo><annotation encoding="application/x-tex">\downarrow</annotation></semantics></math></th>
+<th id="S5.T5.1.1.4" class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt"><math id="S5.T5.m2" class="ltx_Math" alttext="\Delta" display="inline" intent=":literal"><semantics><mi mathvariant="normal">Δ</mi><annotation encoding="application/x-tex">\Delta</annotation></semantics></math> AP <math id="S5.T5.m3" class="ltx_Math" alttext="\uparrow" display="inline" intent=":literal"><semantics><mo stretchy="false">↑</mo><annotation encoding="application/x-tex">\uparrow</annotation></semantics></math></th></tr>
+</thead>
+<tbody class="ltx_tbody">
+<tr id="S5.T5.1.2" class="ltx_tr">
+<th id="S5.T5.1.2.1" class="ltx_td ltx_align_center ltx_th ltx_th_row ltx_border_t">Forest Spring</th>
+<td id="S5.T5.1.2.2" class="ltx_td ltx_align_center ltx_border_t"><math id="S5.T5.m4" class="ltx_Math" alttext="0.86\pm 0.01" display="inline" intent=":literal"><semantics><mrow><mn>0.86</mn><mo>±</mo><mn>0.01</mn></mrow><annotation encoding="application/x-tex">0.86\pm 0.01</annotation></semantics></math></td>
+<td id="S5.T5.1.2.3" class="ltx_td ltx_align_center ltx_border_t"><math id="S5.T5.m5" class="ltx_Math" alttext="0.80\pm 0.02" display="inline" intent=":literal"><semantics><mrow><mn>0.80</mn><mo>±</mo><mn>0.02</mn></mrow><annotation encoding="application/x-tex">0.80\pm 0.02</annotation></semantics></math></td>
+<td id="S5.T5.1.2.4" class="ltx_td ltx_align_center ltx_border_t"><math id="S5.T5.m6" class="ltx_Math" alttext="0.07\pm 0.02" display="inline" intent=":literal"><semantics><mrow><mn>0.07</mn><mo>±</mo><mn>0.02</mn></mrow><annotation encoding="application/x-tex">0.07\pm 0.02</annotation></semantics></math></td></tr>
+<tr id="S5.T5.1.3" class="ltx_tr">
+<th id="S5.T5.1.3.1" class="ltx_td ltx_align_center ltx_th ltx_th_row">Coastal</th>
+<td id="S5.T5.1.3.2" class="ltx_td ltx_align_center"><math id="S5.T5.m7" class="ltx_Math" alttext="0.88\pm 0.01" display="inline" intent=":literal"><semantics><mrow><mn>0.88</mn><mo>±</mo><mn>0.01</mn></mrow><annotation encoding="application/x-tex">0.88\pm 0.01</annotation></semantics></math></td>
+<td id="S5.T5.1.3.3" class="ltx_td ltx_align_center"><math id="S5.T5.m8" class="ltx_Math" alttext="\mathbf{0.79\pm 0.01}" display="inline" intent=":literal"><semantics><mrow><mn class="ltx_mathvariant_bold" mathvariant="bold">0.79</mn><mo>±</mo><mn class="ltx_mathvariant_bold" mathvariant="bold">0.01</mn></mrow><annotation encoding="application/x-tex">\mathbf{0.79\pm 0.01}</annotation></semantics></math></td>
+<td id="S5.T5.1.3.4" class="ltx_td ltx_align_center"><math id="S5.T5.m9" class="ltx_Math" alttext="\mathbf{0.08\pm 0.01}" display="inline" intent=":literal"><semantics><mrow><mn class="ltx_mathvariant_bold" mathvariant="bold">0.08</mn><mo>±</mo><mn class="ltx_mathvariant_bold" mathvariant="bold">0.01</mn></mrow><annotation encoding="application/x-tex">\mathbf{0.08\pm 0.01}</annotation></semantics></math></td></tr>
+<tr id="S5.T5.1.4" class="ltx_tr">
+<th id="S5.T5.1.4.1" class="ltx_td ltx_align_center ltx_th ltx_th_row">Sahara</th>
+<td id="S5.T5.1.4.2" class="ltx_td ltx_align_center"><math id="S5.T5.m10" class="ltx_Math" alttext="0.86\pm 0.02" display="inline" intent=":literal"><semantics><mrow><mn>0.86</mn><mo>±</mo><mn>0.02</mn></mrow><annotation encoding="application/x-tex">0.86\pm 0.02</annotation></semantics></math></td>
+<td id="S5.T5.1.4.3" class="ltx_td ltx_align_center"><math id="S5.T5.m11" class="ltx_Math" alttext="0.79\pm 0.02" display="inline" intent=":literal"><semantics><mrow><mn>0.79</mn><mo>±</mo><mn>0.02</mn></mrow><annotation encoding="application/x-tex">0.79\pm 0.02</annotation></semantics></math></td>
+<td id="S5.T5.1.4.4" class="ltx_td ltx_align_center"><math id="S5.T5.m12" class="ltx_Math" alttext="0.06\pm 0.02" display="inline" intent=":literal"><semantics><mrow><mn>0.06</mn><mo>±</mo><mn>0.02</mn></mrow><annotation encoding="application/x-tex">0.06\pm 0.02</annotation></semantics></math></td></tr>
+<tr id="S5.T5.1.5" class="ltx_tr">
+<th id="S5.T5.1.5.1" class="ltx_td ltx_align_center ltx_th ltx_th_row">Urban 1</th>
+<td id="S5.T5.1.5.2" class="ltx_td ltx_align_center"><math id="S5.T5.m13" class="ltx_Math" alttext="0.88\pm 0.01" display="inline" intent=":literal"><semantics><mrow><mn>0.88</mn><mo>±</mo><mn>0.01</mn></mrow><annotation encoding="application/x-tex">0.88\pm 0.01</annotation></semantics></math></td>
+<td id="S5.T5.1.5.3" class="ltx_td ltx_align_center"><math id="S5.T5.m14" class="ltx_Math" alttext="0.80\pm 0.03" display="inline" intent=":literal"><semantics><mrow><mn>0.80</mn><mo>±</mo><mn>0.03</mn></mrow><annotation encoding="application/x-tex">0.80\pm 0.03</annotation></semantics></math></td>
+<td id="S5.T5.1.5.4" class="ltx_td ltx_align_center"><math id="S5.T5.m15" class="ltx_Math" alttext="0.07\pm 0.03" display="inline" intent=":literal"><semantics><mrow><mn>0.07</mn><mo>±</mo><mn>0.03</mn></mrow><annotation encoding="application/x-tex">0.07\pm 0.03</annotation></semantics></math></td></tr>
+<tr id="S5.T5.1.6" class="ltx_tr">
+<th id="S5.T5.1.6.1" class="ltx_td ltx_align_center ltx_th ltx_th_row ltx_border_bb">Night 1</th>
+<td id="S5.T5.1.6.2" class="ltx_td ltx_align_center ltx_border_bb"><math id="S5.T5.m16" class="ltx_Math" alttext="0.89\pm 0.01" display="inline" intent=":literal"><semantics><mrow><mn>0.89</mn><mo>±</mo><mn>0.01</mn></mrow><annotation encoding="application/x-tex">0.89\pm 0.01</annotation></semantics></math></td>
+<td id="S5.T5.1.6.3" class="ltx_td ltx_align_center ltx_border_bb"><math id="S5.T5.m17" class="ltx_Math" alttext="0.81\pm 0.01" display="inline" intent=":literal"><semantics><mrow><mn>0.81</mn><mo>±</mo><mn>0.01</mn></mrow><annotation encoding="application/x-tex">0.81\pm 0.01</annotation></semantics></math></td>
+<td id="S5.T5.1.6.4" class="ltx_td ltx_align_center ltx_border_bb"><math id="S5.T5.m18" class="ltx_Math" alttext="0.08\pm 0.01" display="inline" intent=":literal"><semantics><mrow><mn>0.08</mn><mo>±</mo><mn>0.01</mn></mrow><annotation encoding="application/x-tex">0.08\pm 0.01</annotation></semantics></math></td></tr>
+</tbody>
+</table>
+</figure>
+</section>
+</section>
+<section id="S6" class="ltx_section">
+<h2 class="ltx_title ltx_title_section"><span class="ltx_tag ltx_tag_section">6 </span>Conclusion</h2>
+
+<div id="S6.p1" class="ltx_para ltx_noindent">
+<p id="S6.p1.1" class="ltx_p">This paper introduces adversarial Voronoi patches, a novel form of adversarial
+camouflage patterns that are not only indistinguishable from regular Voronoi
+patterns to a human observer but also fool object detectors. Instead of
+optimizing the patch itself, the proposed method optimizes positions of seed
+points that are used to generate a Voronoi pattern using a fixed color palette.
+The presented results strongly suggest that these patterns reduce a detector’s
+confidence significantly without the need of optimizing the pattern pixelwise.
+Moreover, the transferability of the adversarial characteristic of the patterns
+across multiple different architectures has also been shown.</p>
+</div>
+<div id="S6.p2" class="ltx_para ltx_noindent">
+<p id="S6.p2.1" class="ltx_p">The logical next step for the presented method is a realization and proof of
+concept in the physical world. In addition, the not yet thoroughly examined
+transferability across multiple datasets has also been taken into account.
+Especially since all evaluated datasets are COCO-esque in terms of displaying
+objects of interest considerably large and central in the image.</p>
+</div>
+<div id="S6.p3" class="ltx_para ltx_noindent">
+<p id="S6.p3.1" class="ltx_p">Future work should tackle these points and also consider extending the
+investigations to different procedural methods for generating adversarial
+camouflage patterns that resemble already used camouflage styles such as
+Flecktarn or Fractals. Furthermore, there should be a more elegant way of
+seamlessly lining up a patch instead of naive tiling. Hardening of the patterns
+as well as investigating their impact on the activation maps of the detector
+when present in the input data should be investigated as well.</p>
+</div>
+</section>
+<section id="Sx1" class="ltx_section">
+<h2 class="ltx_title ltx_title_section">Acknowledgments</h2>
+
+<div id="Sx1.p1" class="ltx_para ltx_noindent">
+<p id="Sx1.p1.1" class="ltx_p">This work was developed in Fraunhofer Cluster of Excellence <span id="Sx1.p1.1.1" class="ltx_text ltx_inline-quote ltx_outerquote">“Cognitive Internet Technologies”</span>.</p>
+</div>
+</section>
+<section id="bib" class="ltx_bibliography">
+<h2 class="ltx_title ltx_title_bibliography">References</h2>
+
+<ul class="ltx_biblist">
+<li id="bib.bib1" class="ltx_bibitem ltx_bib_inproceedings"><span class="ltx_tag ltx_bib_key ltx_role_refnum ltx_tag_bibitem">[1]</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">J. Bayer, S. Becker, D. Münch, and M. Arens</span><span class="ltx_text ltx_bib_year"> (2024)</span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">Network transferability of adversarial patches in real-time object detection</span>.
+</span>
+<span class="ltx_bibblock">In <span class="ltx_text ltx_bib_inbook">Artif. Intell. Secur. Def. Appl. II</span>,
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_editor">(H. Bouma, Y. Yitzhaky, R. Prabhu, and H. J. Kuijf Eds.)</span>,  <span class="ltx_text ltx_bib_publisher">SPIE</span>, <span class="ltx_text ltx_bib_pages">pp.&nbsp;33</span>.
+</span>
+<span class="ltx_bibblock">External Links: <span class="ltx_text ltx_bib_links"><a target="_blank" href="https://doi.org/10.1117/12.3031501" title="" class="ltx_ref doi ltx_bib_external">10.1117/12.3031501</a>,
+<span class="ltx_text isbn ltx_bib_external">9781510681200</span></span>
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="https://ar5iv.labs.arxiv.org/html/2606.17711v1#S4.SS6.p1.1" title="4.6 Real-time Object Detector ‣ 4 Experimental Setup ‣ Structured Adversarial Camouflage via Voronoi Diagrams" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§4.6</span></a>.
+</span></li>
+<li id="bib.bib2" class="ltx_bibitem ltx_bib_misc"><span class="ltx_tag ltx_bib_key ltx_role_refnum ltx_tag_bibitem">[2]</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">camogen</span>.
+</span>
+<span class="ltx_bibblock">Note: <span class="ltx_text ltx_bib_note">\urlhttp://www.happyponyland.net/camogen.php, Accessed: 2023-09-01</span>
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="https://ar5iv.labs.arxiv.org/html/2606.17711v1#S4.F3" title="In 4.7 Color Palettes ‣ 4 Experimental Setup ‣ Structured Adversarial Camouflage via Voronoi Diagrams" class="ltx_ref"><span class="ltx_text ltx_ref_tag">Figure 3</span></a>,
+<a href="https://ar5iv.labs.arxiv.org/html/2606.17711v1#S4.SS7.p1.1" title="4.7 Color Palettes ‣ 4 Experimental Setup ‣ Structured Adversarial Camouflage via Voronoi Diagrams" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§4.7</span></a>.
+</span></li>
+<li id="bib.bib3" class="ltx_bibitem ltx_bib_article"><span class="ltx_tag ltx_bib_key ltx_role_refnum ltx_tag_bibitem">[3]</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">A. Chakraborty, M. Alam, V. Dey, A. Chattopadhyay, and D. Mukhopadhyay</span><span class="ltx_text ltx_bib_year"> (2021)</span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">A survey on adversarial attacks and defences</span>.
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_journal">CAAI Trans. Intell. Technol.</span> <span class="ltx_text ltx_bib_volume">6</span> (<span class="ltx_text ltx_bib_number">1</span>), <span class="ltx_text ltx_bib_pages">pp.&nbsp;25–45</span>.
+</span>
+<span class="ltx_bibblock">External Links: <span class="ltx_text ltx_bib_links"><a target="_blank" href="https://doi.org/10.1049/cit2.12028" title="" class="ltx_ref doi ltx_bib_external">10.1049/cit2.12028</a>,
+<span class="ltx_text issn ltx_bib_external">24682322</span></span>
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="https://ar5iv.labs.arxiv.org/html/2606.17711v1#S1.p1.1" title="1 Introduction ‣ Structured Adversarial Camouflage via Voronoi Diagrams" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§1</span></a>,
+<a href="https://ar5iv.labs.arxiv.org/html/2606.17711v1#S2.p1.1" title="2 Related work ‣ Structured Adversarial Camouflage via Voronoi Diagrams" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§2</span></a>.
+</span></li>
+<li id="bib.bib4" class="ltx_bibitem ltx_bib_inproceedings"><span class="ltx_tag ltx_bib_key ltx_role_refnum ltx_tag_bibitem">[4]</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">N. Dalal and B. Triggs</span><span class="ltx_text ltx_bib_year"> (2005)</span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">Histograms of Oriented Gradients for Human Detection</span>.
+</span>
+<span class="ltx_bibblock">In <span class="ltx_text ltx_bib_inbook">CVPR</span>,
+</span>
+<span class="ltx_bibblock"> <span class="ltx_text ltx_bib_publisher">IEEE</span>, <span class="ltx_text ltx_bib_pages">pp.&nbsp;886–893</span>.
+</span>
+<span class="ltx_bibblock">External Links: <span class="ltx_text ltx_bib_links"><a target="_blank" href="https://doi.org/10.1109/CVPR.2005.177" title="" class="ltx_ref doi ltx_bib_external">10.1109/CVPR.2005.177</a>,
+<span class="ltx_text isbn ltx_bib_external">0-7695-2372-2</span>,
+<span class="ltx_text issn ltx_bib_external">2313433X</span></span>
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="https://ar5iv.labs.arxiv.org/html/2606.17711v1#S4.SS1.p1.1" title="4.1 Experiment 1: Naive Patches ‣ 4 Experimental Setup ‣ Structured Adversarial Camouflage via Voronoi Diagrams" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§4.1</span></a>.
+</span></li>
+<li id="bib.bib5" class="ltx_bibitem ltx_bib_inproceedings"><span class="ltx_tag ltx_bib_key ltx_role_refnum ltx_tag_bibitem">[5]</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">R. Duan, X. Ma, Y. Wang, J. Bailey, A. K. Qin, and Y. Yang</span><span class="ltx_text ltx_bib_year"> (2020)</span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">Adversarial Camouflage: Hiding Physical-World Attacks With Natural Styles</span>.
+</span>
+<span class="ltx_bibblock">In <span class="ltx_text ltx_bib_inbook">CVPR</span>,
+</span>
+<span class="ltx_bibblock"> <span class="ltx_text ltx_bib_publisher">IEEE</span>, <span class="ltx_text ltx_bib_pages">pp.&nbsp;997–1005</span>.
+</span>
+<span class="ltx_bibblock">External Links: <span class="ltx_text ltx_bib_links"><a target="_blank" href="https://doi.org/10.1109/CVPR42600.2020.00108" title="" class="ltx_ref doi ltx_bib_external">10.1109/CVPR42600.2020.00108</a>,
+<span class="ltx_text isbn ltx_bib_external">978-1-7281-7168-5</span></span>
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="https://ar5iv.labs.arxiv.org/html/2606.17711v1#S1.p1.1" title="1 Introduction ‣ Structured Adversarial Camouflage via Voronoi Diagrams" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§1</span></a>,
+<a href="https://ar5iv.labs.arxiv.org/html/2606.17711v1#S2.p3.1" title="2 Related work ‣ Structured Adversarial Camouflage via Voronoi Diagrams" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§2</span></a>,
+<a href="https://ar5iv.labs.arxiv.org/html/2606.17711v1#S2.p7.1" title="2 Related work ‣ Structured Adversarial Camouflage via Voronoi Diagrams" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§2</span></a>.
+</span></li>
+<li id="bib.bib6" class="ltx_bibitem ltx_bib_inproceedings"><span class="ltx_tag ltx_bib_key ltx_role_refnum ltx_tag_bibitem">[6]</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">Y. Duan, J. Chen, X. Zhou, J. Zou, Z. He, J. Zhang, W. Zhang, and Z. Pan</span><span class="ltx_text ltx_bib_year"> (2022)</span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">Learning Coated Adversarial Camouflages for Object Detectors</span>.
+</span>
+<span class="ltx_bibblock">In <span class="ltx_text ltx_bib_inbook">IJCAI</span>,
+</span>
+<span class="ltx_bibblock"> <span class="ltx_text ltx_bib_publisher">International Joint Conferences on Artificial Intelligence Organization</span>, <span class="ltx_text ltx_bib_pages">pp.&nbsp;891–897</span>.
+</span>
+<span class="ltx_bibblock">External Links: <span class="ltx_text ltx_bib_links"><a target="_blank" href="https://doi.org/10.24963/ijcai.2022/125" title="" class="ltx_ref doi ltx_bib_external">10.24963/ijcai.2022/125</a>,
+<span class="ltx_text isbn ltx_bib_external">978-1-956792-00-3</span></span>
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="https://ar5iv.labs.arxiv.org/html/2606.17711v1#S1.p1.1" title="1 Introduction ‣ Structured Adversarial Camouflage via Voronoi Diagrams" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§1</span></a>,
+<a href="https://ar5iv.labs.arxiv.org/html/2606.17711v1#S2.p4.1" title="2 Related work ‣ Structured Adversarial Camouflage via Voronoi Diagrams" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§2</span></a>.
+</span></li>
+<li id="bib.bib7" class="ltx_bibitem ltx_bib_article"><span class="ltx_tag ltx_bib_key ltx_role_refnum ltx_tag_bibitem">[7]</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">T. Karras, M. Aittala, S. Laine, E. Härkönen, J. Hellsten, J. Lehtinen, and T. Aila</span><span class="ltx_text ltx_bib_year"> (2021)</span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">Alias-free generative adversarial networks</span>.
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_journal">Advances in neural information processing systems</span> <span class="ltx_text ltx_bib_volume">34</span>, <span class="ltx_text ltx_bib_pages">pp.&nbsp;852–863</span>.
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="https://ar5iv.labs.arxiv.org/html/2606.17711v1#S2.p8.1" title="2 Related work ‣ Structured Adversarial Camouflage via Voronoi Diagrams" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§2</span></a>.
+</span></li>
+<li id="bib.bib8" class="ltx_bibitem ltx_bib_article"><span class="ltx_tag ltx_bib_key ltx_role_refnum ltx_tag_bibitem">[8]</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">J. Kim, H. Yang, and S. Oh</span><span class="ltx_text ltx_bib_year"> (2023)</span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">Camouflaged Adversarial Patch Attack on Object Detector</span>.
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_journal">KIMST</span> <span class="ltx_text ltx_bib_volume">26</span> (<span class="ltx_text ltx_bib_number">1</span>), <span class="ltx_text ltx_bib_pages">pp.&nbsp;44–53</span>.
+</span>
+<span class="ltx_bibblock">External Links: <span class="ltx_text ltx_bib_links"><a target="_blank" href="https://doi.org/10.9766/KIMST.2023.26.1.044" title="" class="ltx_ref doi ltx_bib_external">10.9766/KIMST.2023.26.1.044</a>,
+<span class="ltx_text issn ltx_bib_external">2636-0640</span></span>
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="https://ar5iv.labs.arxiv.org/html/2606.17711v1#S2.p6.1" title="2 Related work ‣ Structured Adversarial Camouflage via Voronoi Diagrams" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§2</span></a>.
+</span></li>
+<li id="bib.bib9" class="ltx_bibitem ltx_bib_article"><span class="ltx_tag ltx_bib_key ltx_role_refnum ltx_tag_bibitem">[9]</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">J. Li, J. Zhang, S. J. Maybank, and D. Tao</span><span class="ltx_text ltx_bib_year"> (2022)</span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">Bridging composite and real: towards end-to-end deep image matting</span>.
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_journal">IJCV</span> <span class="ltx_text ltx_bib_volume">130</span> (<span class="ltx_text ltx_bib_number">2</span>), <span class="ltx_text ltx_bib_pages">pp.&nbsp;246–266</span>.
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="https://ar5iv.labs.arxiv.org/html/2606.17711v1#S1.p3.1" title="1 Introduction ‣ Structured Adversarial Camouflage via Voronoi Diagrams" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§1</span></a>,
+<a href="https://ar5iv.labs.arxiv.org/html/2606.17711v1#S4.SS3.p1.1" title="4.3 Experiment 3: Transferability ‣ 4 Experimental Setup ‣ Structured Adversarial Camouflage via Voronoi Diagrams" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§4.3</span></a>.
+</span></li>
+<li id="bib.bib10" class="ltx_bibitem ltx_bib_article"><span class="ltx_tag ltx_bib_key ltx_role_refnum ltx_tag_bibitem">[10]</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">T. Y. Lin, M. Maire, S. Belongie, J. Hays, P. Perona, D. Ramanan, P. Dollár, and C. L. Zitnick</span><span class="ltx_text ltx_bib_year"> (2014)</span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">Microsoft COCO: Common objects in context</span>.
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_journal">LNCS</span> <span class="ltx_text ltx_bib_volume">8693 LNCS</span> (<span class="ltx_text ltx_bib_number">PART 5</span>), <span class="ltx_text ltx_bib_pages">pp.&nbsp;740–755</span>.
+</span>
+<span class="ltx_bibblock">External Links: <span class="ltx_text ltx_bib_links"><a target="_blank" href="https://doi.org/10.1007/978-3-319-10602-1%5F48" title="" class="ltx_ref doi ltx_bib_external">10.1007/978-3-319-10602-1_48</a>,
+<span class="ltx_text issn ltx_bib_external">16113349</span></span>
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="https://ar5iv.labs.arxiv.org/html/2606.17711v1#S4.SS1.p1.1" title="4.1 Experiment 1: Naive Patches ‣ 4 Experimental Setup ‣ Structured Adversarial Camouflage via Voronoi Diagrams" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§4.1</span></a>,
+<a href="https://ar5iv.labs.arxiv.org/html/2606.17711v1#S4.p1.1" title="4 Experimental Setup ‣ Structured Adversarial Camouflage via Voronoi Diagrams" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§4</span></a>.
+</span></li>
+<li id="bib.bib11" class="ltx_bibitem ltx_bib_article"><span class="ltx_tag ltx_bib_key ltx_role_refnum ltx_tag_bibitem">[11]</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">I. Loshchilov and F. Hutter</span><span class="ltx_text ltx_bib_year"> (2019)</span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">Decoupled weight decay regularization</span>.
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_journal">7th International Conference on Learning Representations, ICLR 2019</span>.
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="https://ar5iv.labs.arxiv.org/html/2606.17711v1#S4.SS1.p1.1" title="4.1 Experiment 1: Naive Patches ‣ 4 Experimental Setup ‣ Structured Adversarial Camouflage via Voronoi Diagrams" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§4.1</span></a>.
+</span></li>
+<li id="bib.bib12" class="ltx_bibitem ltx_bib_article"><span class="ltx_tag ltx_bib_key ltx_role_refnum ltx_tag_bibitem">[12]</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">Z. Peng, J. Chen, Z. Shi, and Z. Zou</span><span class="ltx_text ltx_bib_year"> (2025)</span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">Physical Adversarial Camouflage Generation in Optical Remote Sensing Images</span>.
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_journal">IEEE Transactions on Information Forensics and Security</span> <span class="ltx_text ltx_bib_volume">20</span>, <span class="ltx_text ltx_bib_pages">pp.&nbsp;6308–6323</span>.
+</span>
+<span class="ltx_bibblock">External Links: <span class="ltx_text ltx_bib_links"><a target="_blank" href="https://doi.org/10.1109/TIFS.2025.3581771" title="" class="ltx_ref doi ltx_bib_external">10.1109/TIFS.2025.3581771</a></span>
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="https://ar5iv.labs.arxiv.org/html/2606.17711v1#S2.p8.1" title="2 Related work ‣ Structured Adversarial Camouflage via Voronoi Diagrams" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§2</span></a>.
+</span></li>
+<li id="bib.bib13" class="ltx_bibitem ltx_bib_inproceedings"><span class="ltx_tag ltx_bib_key ltx_role_refnum ltx_tag_bibitem">[13]</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">A. Pumarola, J. Sanchez, G. Choi, A. Sanfeliu, and F. Moreno-Noguer</span><span class="ltx_text ltx_bib_year"> (2019)</span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">3DPeople: Modeling the Geometry of Dressed Humans</span>.
+</span>
+<span class="ltx_bibblock">In <span class="ltx_text ltx_bib_inbook">ICCV</span>,
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="https://ar5iv.labs.arxiv.org/html/2606.17711v1#S1.p3.1" title="1 Introduction ‣ Structured Adversarial Camouflage via Voronoi Diagrams" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§1</span></a>,
+<a href="https://ar5iv.labs.arxiv.org/html/2606.17711v1#S4.SS2.p1.1" title="4.2 Experiment 2: Covering Clothes ‣ 4 Experimental Setup ‣ Structured Adversarial Camouflage via Voronoi Diagrams" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§4.2</span></a>.
+</span></li>
+<li id="bib.bib14" class="ltx_bibitem ltx_bib_article"><span class="ltx_tag ltx_bib_key ltx_role_refnum ltx_tag_bibitem">[14]</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">E. Van der Burg, A. Toet, P. Perone, and M. A. Hogervorst</span><span class="ltx_text ltx_bib_year"> (2025)</span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">A Convolutional Neural Network as a Potential Tool for Camouflage Assessment</span>.
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_journal">Appl. Sci.</span> <span class="ltx_text ltx_bib_volume">15</span> (<span class="ltx_text ltx_bib_number">9</span>).
+</span>
+<span class="ltx_bibblock">External Links: <span class="ltx_text ltx_bib_links"><a target="_blank" href="https://doi.org/10.3390/app15095066" title="" class="ltx_ref doi ltx_bib_external">10.3390/app15095066</a>,
+<span class="ltx_text issn ltx_bib_external">20763417</span></span>
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="https://ar5iv.labs.arxiv.org/html/2606.17711v1#S2.p9.1" title="2 Related work ‣ Structured Adversarial Camouflage via Voronoi Diagrams" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§2</span></a>.
+</span></li>
+<li id="bib.bib15" class="ltx_bibitem ltx_bib_article"><span class="ltx_tag ltx_bib_key ltx_role_refnum ltx_tag_bibitem">[15]</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">Y. Wang, Z. Fang, Y. fei Zheng, Z. Yang, W. Tong, and T. yong Cao</span><span class="ltx_text ltx_bib_year"> (2023)</span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">Dual Attribute Adversarial Camouflage toward camouflaged object detection</span>.
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_journal">Defence Technology</span> <span class="ltx_text ltx_bib_volume">22</span>, <span class="ltx_text ltx_bib_pages">pp.&nbsp;166–175</span>.
+</span>
+<span class="ltx_bibblock">External Links: <span class="ltx_text ltx_bib_links"><a target="_blank" href="https://doi.org/10.1016/j.dt.2021.12.003" title="" class="ltx_ref doi ltx_bib_external">10.1016/j.dt.2021.12.003</a>,
+<span class="ltx_text issn ltx_bib_external">22149147</span></span>
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="https://ar5iv.labs.arxiv.org/html/2606.17711v1#S2.p7.1" title="2 Related work ‣ Structured Adversarial Camouflage via Voronoi Diagrams" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§2</span></a>.
+</span></li>
+<li id="bib.bib16" class="ltx_bibitem ltx_bib_article"><span class="ltx_tag ltx_bib_key ltx_role_refnum ltx_tag_bibitem">[16]</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">H. Wei, H. Tang, X. Jia, Z. Wang, H. Yu, Z. Li, S. Satoh, L. Van Gool, and Z. Wang</span><span class="ltx_text ltx_bib_year"> (2024)</span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">Physical Adversarial Attack Meets Computer Vision: A Decade Survey</span>.
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_journal">IEEE Trans. Pattern Anal. Mach. Intell.</span> <span class="ltx_text ltx_bib_volume">46</span> (<span class="ltx_text ltx_bib_number">12</span>), <span class="ltx_text ltx_bib_pages">pp.&nbsp;9797–9817</span>.
+</span>
+<span class="ltx_bibblock">External Links: <span class="ltx_text ltx_bib_links"><a target="_blank" href="https://doi.org/10.1109/TPAMI.2024.3430860" title="" class="ltx_ref doi ltx_bib_external">10.1109/TPAMI.2024.3430860</a>,
+<span class="ltx_text issn ltx_bib_external">19393539</span></span>
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="https://ar5iv.labs.arxiv.org/html/2606.17711v1#S1.p1.1" title="1 Introduction ‣ Structured Adversarial Camouflage via Voronoi Diagrams" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§1</span></a>,
+<a href="https://ar5iv.labs.arxiv.org/html/2606.17711v1#S2.p1.1" title="2 Related work ‣ Structured Adversarial Camouflage via Voronoi Diagrams" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§2</span></a>.
+</span></li>
+<li id="bib.bib17" class="ltx_bibitem ltx_bib_article"><span class="ltx_tag ltx_bib_key ltx_role_refnum ltx_tag_bibitem">[17]</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">Z. Wu, S. N. Lim, L. S. Davis, and T. Goldstein</span><span class="ltx_text ltx_bib_year"> (2020)</span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">Making an Invisibility Cloak: Real World Adversarial Attacks on Object Detectors</span>.
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_journal">Lect. Notes Comput. Sci.</span> <span class="ltx_text ltx_bib_volume">12349 LNCS</span>, <span class="ltx_text ltx_bib_pages">pp.&nbsp;1–17</span>.
+</span>
+<span class="ltx_bibblock">External Links: <span class="ltx_text ltx_bib_links"><a target="_blank" href="https://doi.org/10.1007/978-3-030-58548-8%5F1" title="" class="ltx_ref doi ltx_bib_external">10.1007/978-3-030-58548-8_1</a>,
+<span class="ltx_text isbn ltx_bib_external">9783030585471</span>,
+<span class="ltx_text issn ltx_bib_external">16113349</span></span>
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="https://ar5iv.labs.arxiv.org/html/2606.17711v1#S1.p1.1" title="1 Introduction ‣ Structured Adversarial Camouflage via Voronoi Diagrams" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§1</span></a>,
+<a href="https://ar5iv.labs.arxiv.org/html/2606.17711v1#S2.p2.1" title="2 Related work ‣ Structured Adversarial Camouflage via Voronoi Diagrams" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§2</span></a>.
+</span></li>
+<li id="bib.bib18" class="ltx_bibitem ltx_bib_article"><span class="ltx_tag ltx_bib_key ltx_role_refnum ltx_tag_bibitem">[18]</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">K. Xu, G. Zhang, S. Liu, Q. Fan, M. Sun, H. Chen, P. Y. Chen, Y. Wang, and X. Lin</span><span class="ltx_text ltx_bib_year"> (2020)</span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">Adversarial T-Shirt! Evading Person Detectors in a Physical World</span>.
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_journal">LNCS)</span> <span class="ltx_text ltx_bib_volume">12350 LNCS</span>, <span class="ltx_text ltx_bib_pages">pp.&nbsp;665–681</span>.
+</span>
+<span class="ltx_bibblock">External Links: <span class="ltx_text ltx_bib_links"><a target="_blank" href="https://doi.org/10.1007/978-3-030-58558-7%5F39" title="" class="ltx_ref doi ltx_bib_external">10.1007/978-3-030-58558-7_39</a>,
+<span class="ltx_text isbn ltx_bib_external">9783030585570</span>,
+<span class="ltx_text issn ltx_bib_external">16113349</span></span>
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="https://ar5iv.labs.arxiv.org/html/2606.17711v1#S1.p1.1" title="1 Introduction ‣ Structured Adversarial Camouflage via Voronoi Diagrams" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§1</span></a>,
+<a href="https://ar5iv.labs.arxiv.org/html/2606.17711v1#S2.p2.1" title="2 Related work ‣ Structured Adversarial Camouflage via Voronoi Diagrams" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§2</span></a>,
+<a href="https://ar5iv.labs.arxiv.org/html/2606.17711v1#S2.p7.1" title="2 Related work ‣ Structured Adversarial Camouflage via Voronoi Diagrams" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§2</span></a>.
+</span></li>
+<li id="bib.bib19" class="ltx_bibitem ltx_bib_inproceedings"><span class="ltx_tag ltx_bib_key ltx_role_refnum ltx_tag_bibitem">[19]</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">X. Zhu, Z. Hu, S. Huang, J. Li, and X. Hu</span><span class="ltx_text ltx_bib_year"> (2022)</span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">Infrared Invisible Clothing: Hiding from Infrared Detectors at Multiple Angles in Real World</span>.
+</span>
+<span class="ltx_bibblock">In <span class="ltx_text ltx_bib_inbook">CVPR</span>,
+</span>
+<span class="ltx_bibblock"> <span class="ltx_text ltx_bib_publisher">IEEE</span>, <span class="ltx_text ltx_bib_pages">pp.&nbsp;13307–13316</span>.
+</span>
+<span class="ltx_bibblock">External Links: <span class="ltx_text ltx_bib_links"><a target="_blank" href="https://doi.org/10.1109/CVPR52688.2022.01296" title="" class="ltx_ref doi ltx_bib_external">10.1109/CVPR52688.2022.01296</a>,
+<span class="ltx_text isbn ltx_bib_external">978-1-6654-6946-3</span></span>
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="https://ar5iv.labs.arxiv.org/html/2606.17711v1#S1.p1.1" title="1 Introduction ‣ Structured Adversarial Camouflage via Voronoi Diagrams" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§1</span></a>,
+<a href="https://ar5iv.labs.arxiv.org/html/2606.17711v1#S2.p5.1" title="2 Related work ‣ Structured Adversarial Camouflage via Voronoi Diagrams" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§2</span></a>.
+</span></li>
+</ul>
+</section><div class="ltx_rdf" about="" property="dcterms:creator" content="Jens Bayer, Stefan Becker, David M\&quot;unch, Michael Arens, J\&quot;urgen Beyerer"></div>
+<div class="ltx_rdf" about="" property="dcterms:subject" content="adversarial attacks, camouflage, adversarial pattern"></div>
+<div class="ltx_rdf" about="" property="dcterms:title" content="Structured Adversarial Camouflage via Voronoi Diagrams"></div>
+
+</article>
+</div>
+<div class="ar5iv-footer"><a href="https://ar5iv.labs.arxiv.org/html/2606.17710" class="ar5iv-nav-button ar5iv-nav-button-prev">◄</a>
+    <a class="ar5iv-home-button" href="https://ar5iv.labs.arxiv.org/"><img height="40" alt="ar5iv homepage" src="./[2606.17711] Structured Adversarial Camouflage via Voronoi Diagrams_files/ar5iv.png"></a>
+    <a href="https://ar5iv.labs.arxiv.org/feeling_lucky" class="ar5iv-text-button">Feeling<br>lucky?</a>
+    <a href="https://ar5iv.labs.arxiv.org/land_of_honey_and_milk" rel="nofollow" aria-hidden="true" tabindex="-1"></a>
+    <a href="https://ar5iv.labs.arxiv.org/log/2606.17711" class="ar5iv-text-button ar5iv-severity-ok">Conversion<br>report</a>
+    <a class="ar5iv-text-button" target="_blank" href="https://github.com/dginev/ar5iv/issues/new?template=improve-article--arxiv-id-.md&amp;title=Improve+article+2606.17711">Report<br>an issue</a>
+    <a href="https://arxiv.org/abs/2606.17711" class="ar5iv-text-button arxiv-ui-theme">View&nbsp;original<br>on&nbsp;arXiv</a><a href="https://ar5iv.labs.arxiv.org/html/2606.17712" class="ar5iv-nav-button ar5iv-nav-button-next">►</a>
+</div><footer class="ltx_page_footer">
+<a class="ar5iv-toggle-color-scheme" href="javascript:toggleColorScheme()" title="Toggle ar5iv color scheme"><span class="color-scheme-icon"></span></a>
+<a class="ar5iv-footer-button" href="https://arxiv.org/help/license" target="_blank">Copyright</a>
+<a class="ar5iv-footer-button" href="https://arxiv.org/help/policies/privacy_policy" target="_blank">Privacy Policy</a>
+
+<div class="ltx_page_logo">Generated  by <a target="_blank" href="http://dlmf.nist.gov/LaTeXML/" class="ltx_LaTeXML_logo"><span style="letter-spacing:-0.2em; margin-right:0.1em;">L<span class="ltx_font_smallcaps" style="position:relative; bottom:2.2pt;">a</span>T<span class="ltx_font_smallcaps" style="font-size:120%;position:relative; bottom:-0.2ex;">e</span></span><span style="font-size:90%; position:relative; bottom:-0.2ex;">XML</span><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAAOCAYAAAD5YeaVAAAAAXNSR0IArs4c6QAAAAZiS0dEAP8A/wD/oL2nkwAAAAlwSFlzAAALEwAACxMBAJqcGAAAAAd0SU1FB9wKExQZLWTEaOUAAAAddEVYdENvbW1lbnQAQ3JlYXRlZCB3aXRoIFRoZSBHSU1Q72QlbgAAAdpJREFUKM9tkL+L2nAARz9fPZNCKFapUn8kyI0e4iRHSR1Kb8ng0lJw6FYHFwv2LwhOpcWxTjeUunYqOmqd6hEoRDhtDWdA8ApRYsSUCDHNt5ul13vz4w0vWCgUnnEc975arX6ORqN3VqtVZbfbTQC4uEHANM3jSqXymFI6yWazP2KxWAXAL9zCUa1Wy2tXVxheKA9YNoR8Pt+aTqe4FVVVvz05O6MBhqUIBGk8Hn8HAOVy+T+XLJfLS4ZhTiRJgqIoVBRFIoric47jPnmeB1mW/9rr9ZpSSn3Lsmir1fJZlqWlUonKsvwWwD8ymc/nXwVBeLjf7xEKhdBut9Hr9WgmkyGEkJwsy5eHG5vN5g0AKIoCAEgkEkin0wQAfN9/cXPdheu6P33fBwB4ngcAcByHJpPJl+fn54mD3Gg0NrquXxeLRQAAwzAYj8cwTZPwPH9/sVg8PXweDAauqqr2cDjEer1GJBLBZDJBs9mE4zjwfZ85lAGg2+06hmGgXq+j3+/DsixYlgVN03a9Xu8jgCNCyIegIAgx13Vfd7vdu+FweG8YRkjXdWy329+dTgeSJD3ieZ7RNO0VAXAPwDEAO5VKndi2fWrb9jWl9Esul6PZbDY9Go1OZ7PZ9z/lyuD3OozU2wAAAABJRU5ErkJggg==" alt="Mascot Sammy"></a> (oxide)</div></footer>
+</div>
+
+    <script>
+      var canMathML = typeof(MathMLElement) == "function";
+      if (!canMathML) {
+        var body = document.querySelector("body");
+        body.firstElementChild.setAttribute('style', 'opacity: 0;');
+        var loading = document.createElement("div");
+        loading.setAttribute("id", "mathjax-loading-spinner");
+        var message = document.createElement("div");
+        message.setAttribute("id", "mathjax-loading-message");
+        message.innerText = "Typesetting Equations...";
+        body.prepend(loading);
+        body.prepend(message);
+
+        var el = document.createElement("script");
+        el.src = "https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js";
+        document.querySelector("head").appendChild(el);
+
+        window.MathJax = {
+          startup: {
+            pageReady: () => {
+              return MathJax.startup.defaultPageReady().then(() => {
+                body.removeChild(loading);
+                body.removeChild(message);
+                body.firstElementChild.removeAttribute('style');
+              }); } } };
+      }
+    </script>
+    <script>
+    // Auxiliary function, building the preview feature when
+    // an inline citation is clicked
+    function clicked_cite(e) {
+      e.preventDefault();
+      let cite = this.closest('.ltx_cite');
+      let next = cite.nextSibling;
+      if (next && next.nodeType == Node.ELEMENT_NODE && next.getAttribute('class') == "ar5iv-bibitem-preview") {
+        next.remove();
+        return; }
+      // Before adding a preview modal,
+      // cleanup older previews, in case they're still open
+      document.querySelectorAll('span.ar5iv-bibitem-preview').forEach(function(node) {
+        node.remove();
+      })
+
+      // Create the preview
+      preview = document.createElement('span');
+      preview.setAttribute('class','ar5iv-bibitem-preview');
+      let target = document.getElementById(this.getAttribute('href').slice(1));
+      target.childNodes.forEach(function (child) {
+        preview.append(child.cloneNode(true));
+      });
+      let close_x = document.createElement('button');
+      close_x.setAttribute("aria-label","Close modal for bibliography item preview");
+      close_x.textContent = "×";
+      close_x.setAttribute('class', 'ar5iv-button-close-preview');
+      close_x.setAttribute('onclick','this.parentNode.remove()');
+      preview.append(close_x);
+      preview.querySelectorAll('.ltx_tag_bibitem').forEach(function(node) {
+        node.remove();
+      });
+      cite.parentNode.insertBefore(preview, cite.nextSibling);
+      return;
+    }
+    // Global Document initialization:
+    // - assign the preview feature to all inline citation links
+    document.querySelectorAll(".ltx_cite .ltx_ref").forEach(function (link) {
+      link.addEventListener("click", clicked_cite);
+    });
+    </script>
+    
+
+</body></html>
