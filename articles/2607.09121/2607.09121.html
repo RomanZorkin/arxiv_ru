@@ -1,0 +1,1425 @@
+<!DOCTYPE html>
+<!-- saved from url=(0035)https://arxiv.org/html/2607.09121v1 -->
+<html lang="en" data-theme="light" data-reading-mode="disabled"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<title>Augmenting Fundamental Analysis with Large Language Models: A RAG-Based System for Generating Investor Briefs</title>
+<!--Generated on Fri Jul 10 06:06:55 2026 by LaTeXML (version 0.8.8) http://dlmf.nist.gov/LaTeXML/.-->
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<link rel="stylesheet" href="./Augmenting Fundamental Analysis with Large Language Models_ A RAG-Based System for Generating Investor Briefs_files/arxiv-html-papers-20260131.css" type="text/css">
+<script src="./Augmenting Fundamental Analysis with Large Language Models_ A RAG-Based System for Generating Investor Briefs_files/arxiv-html-papers-20260131.js"></script>
+<script>
+  // Restore the saved color scheme preference, or
+  // enact the browser preference if "automatic", 
+  // without expecting DOM load to have completed.
+  //
+  // Also restore any saved readingmode and ToC display preferences.
+  function initializeReadingPreferences() {
+    let saved_theme = localStorage.getItem("ar5iv_theme") || "automatic";
+    if (saved_theme === "automatic") {
+      if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
+        saved_theme = "dark";
+      }
+    }
+    if (saved_theme == "dark") {
+      document.documentElement.setAttribute("data-theme", "dark");
+    } else {
+      document.documentElement.setAttribute("data-theme", "light");
+    }
+
+    const tocDisplay = localStorage.getItem('arxiv_html_paper_toc_display');
+    if (tocDisplay) {
+      document.documentElement.setAttribute("data-toc-display", tocDisplay);
+    }
+    const readingMode = localStorage.getItem('arxiv_html_paper_reading_mode');
+    if (readingMode) {
+      document.documentElement.setAttribute("data-reading-mode", readingMode);
+    }
+    // Pre-apply spinout-banner dismissal here, before the banner paints, so it
+    // never flashes in only to be hidden later by the deferred arxiv-header.js.
+    // Key matches arxiv-header.js: "arxiv-banner-dismissed:" + data-banner-name.
+    if (localStorage.getItem('arxiv-banner-dismissed:spinout-nonprofit')) {
+      document.documentElement.setAttribute("data-banner-dismissed", "");
+    }
+  }
+  // Run as soon as JS starts, to minimize repainting
+  initializeReadingPreferences();
+</script>
+<link rel="apple-touch-icon" sizes="180x180" href="https://arxiv.org/static/browse/0.3.4/images/icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://arxiv.org/static/browse/0.3.4/images/icons/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="https://arxiv.org/static/browse/0.3.4/images/icons/favicon-16x16.png">
+<link rel="manifest" href="https://arxiv.org/static/browse/0.3.4/images/icons/site.webmanifest">
+<link rel="mask-icon" href="https://arxiv.org/static/browse/0.3.4/images/icons/safari-pinned-tab.svg" color="#5bbad5">
+<link rel="stylesheet" type="text/css" media="screen" href="./Augmenting Fundamental Analysis with Large Language Models_ A RAG-Based System for Generating Investor Briefs_files/utz6mli.css"><link rel="stylesheet" type="text/css" media="screen" href="./Augmenting Fundamental Analysis with Large Language Models_ A RAG-Based System for Generating Investor Briefs_files/arxiv-header-footer.css"><style>
+  /* Banner pre-dismissal (set above before paint -> no flash-then-hide) and
+     reading-mode chrome hiding. */
+  html[data-banner-dismissed] .ds-announcement { display: none; }
+  html[data-reading-mode="enabled"] .ds-announcement,
+  html[data-reading-mode="enabled"] .ds-site-footer { display: none; }
+  /* Keep the announcement text dark on the Open-Blue band in both colour themes
+     (otherwise it inherits the paper's warm-wash text in dark mode and washes out). */
+  .ds-announcement-text { color: var(--arxiv-ink, #1c1a17); }
+</style>
+<script defer="" src="./Augmenting Fundamental Analysis with Large Language Models_ A RAG-Based System for Generating Investor Briefs_files/arxiv-header.js"></script>
+<meta content="extension" property="gosuslugi.plugin.extension.content"></head>
+<body>
+<dialog id="modal-form" aria-labelledby="modal-title" closedby="any">
+  <form id="modal-form-content" method="dialog" enctype="multipart/form-data">
+    <header class="modal-header">
+      <h5 id="modal-title" class="modal-title">Report GitHub Issue</h5>
+      <button type="submit" formnovalidate="" class="modal-close" aria-label="Close">×</button>
+    </header>
+
+    <div class="modal-body">
+      <label for="form_title">Title:</label>
+      <input class="form-control" id="form_title" name="form_title" required="" placeholder="Enter title">
+
+      <p id="selectedTextModalDescription" hidden="">Content selection saved. Describe the issue below:</p>
+
+      <label for="description">Description:</label>
+      <textarea class="form-control" id="description" name="description" required="" maxlength="500" placeholder="500 characters maximum"></textarea>
+    </div>
+
+    <footer class="modal-footer">
+      <button type="submit" value="internal-report" class="sr-only modal-submit">Submit without GitHub</button>
+      <button type="submit" value="github-report" class="modal-submit">Submit in GitHub</button>
+    </footer>
+  </form>
+</dialog><div class="ds-announcement" id="announcement-banner" role="region" aria-label="Announcement" data-banner-name="spinout-nonprofit">
+    <img class="ds-announcement-glyph" src="./Augmenting Fundamental Analysis with Large Language Models_ A RAG-Based System for Generating Investor Briefs_files/smileybones-small.svg" alt="" aria-hidden="true">
+    <span class="ds-announcement-text">arXiv is now an independent nonprofit!</span>
+    <a class="ds-announcement-link" href="https://info.arxiv.org/about">Learn more</a>
+    <button type="button" class="ds-announcement-close" aria-label="Dismiss announcement">×</button>
+  </div>
+
+<header class="arxiv-html-header">
+  <div class="html-header-logo">
+    <a href="https://arxiv.org/"><img alt="arXiv logo" class="logo desktop-only" width="100" src="./Augmenting Fundamental Analysis with Large Language Models_ A RAG-Based System for Generating Investor Briefs_files/arxiv-logo-primary-light.svg">
+      <span class="sr-only">Back to arXiv</span>
+    </a>
+  </div>
+  <!--TOC, dark mode, links-->
+  <nav class="html-header-nav">
+    <a class="header-button hover-effect desktop-only" href="https://info.arxiv.org/about/accessible_HTML.html" target="_blank">Why HTML?</a>
+    <a class="header-button" title="Report an Issue" href="https://arxiv.org/html/2607.09121v1#" onclick="event.preventDefault(); showModalForm();">
+      <svg role="presentation" class="mobile-only toggle-icon" aria-hidden="true" height="1.25rem" viewBox="0 0 640 640">
+        <path d="M224 160C224 107 267 64 320 64C373 64 416 107 416 160L416 163.6C416 179.3 403.3 192 387.6 192L252.5 192C236.8 192 224.1 179.3 224.1 163.6L224.1 160zM569.6 172.8C580.2 186.9 577.3 207 563.2 217.6L465.4 290.9C470.7 299.8 474.7 309.6 477.2 320L576 320C593.7 320 608 334.3 608 352C608 369.7 593.7 384 576 384L480 384L480 416C480 418.6 479.9 421.3 479.8 423.9L563.2 486.4C577.3 497 580.2 517.1 569.6 531.2C559 545.3 538.9 548.2 524.8 537.6L461.7 490.3C438.5 534.5 395.2 566.5 344 574.2L344 344C344 330.7 333.3 320 320 320C306.7 320 296 330.7 296 344L296 574.2C244.8 566.5 201.5 534.5 178.3 490.3L115.2 537.6C101.1 548.2 81 545.3 70.4 531.2C59.8 517.1 62.7 497 76.8 486.4L160.2 423.9C160.1 421.3 160 418.7 160 416L160 384L64 384C46.3 384 32 369.7 32 352C32 334.3 46.3 320 64 320L162.8 320C165.3 309.6 169.3 299.8 174.6 290.9L76.8 217.6C62.7 207 59.8 186.9 70.4 172.8C81 158.7 101.1 155.8 115.2 166.4L224 248C236.3 242.9 249.8 240 264 240L376 240C390.2 240 403.7 242.8 416 248L524.8 166.4C538.9 155.8 559 158.7 569.6 172.8z"></path>
+      </svg>
+      <span class="desktop-only">Report Issue</span></a>
+    <!--back to abstract-->
+    <a class="header-button" title="Back to abstract page" aria-label="Back to abstract page" href="https://arxiv.org/abs/2607.09121v1">
+      <svg class="mobile-only toggle-icon" role="presentation" height="1.25rem" viewBox="0 0 512 512" fill="#ffffff" aria-hidden="true">
+        <path d="M502.6 278.6c12.5-12.5 12.5-32.8 0-45.3l-128-128c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L402.7 224 192 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l210.7 0-73.4 73.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0l128-128zM160 96c17.7 0 32-14.3 32-32s-14.3-32-32-32L96 32C43 32 0 75 0 128L0 384c0 53 43 96 96 96l64 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-64 0c-17.7 0-32-14.3-32-32l0-256c0-17.7 14.3-32 32-32l64 0z">
+        </path>
+      </svg>
+      <span class="desktop-only">Back to Abstract</span>
+    </a>
+    <!-- PDF download link -->
+    <a class="header-button" title="Download PDF" href="https://arxiv.org/pdf/2607.09121v1" target="_blank">
+      <svg class="mobile-only toggle-icon" role="presentation" height="1.25rem" viewBox="0 0 576 542">
+        <path d="M208 48L96 48c-8.8 0-16 7.2-16 16l0 384c0 8.8 7.2 16 16 16l80 0 0 48-80 0c-35.3 0-64-28.7-64-64L32 64C32 28.7 60.7 0 96 0L229.5 0c17 0 33.3 6.7 45.3 18.7L397.3 141.3c12 12 18.7 28.3 18.7 45.3l0 149.5-48 0 0-128-88 0c-39.8 0-72-32.2-72-72l0-88zM348.1 160L256 67.9 256 136c0 13.3 10.7 24 24 24l68.1 0zM240 380l32 0c33.1 0 60 26.9 60 60s-26.9 60-60 60l-12 0 0 28c0 11-9 20-20 20s-20-9-20-20l0-128c0-11 9-20 20-20zm32 80c11 0 20-9 20-20s-9-20-20-20l-12 0 0 40 12 0zm96-80l32 0c28.7 0 52 23.3 52 52l0 64c0 28.7-23.3 52-52 52l-32 0c-11 0-20-9-20-20l0-128c0-11 9-20 20-20zm32 128c6.6 0 12-5.4 12-12l0-64c0-6.6-5.4-12-12-12l-12 0 0 88 12 0zm76-108c0-11 9-20 20-20l48 0c11 0 20 9 20 20s-9 20-20 20l-28 0 0 24 28 0c11 0 20 9 20 20s-9 20-20 20l-28 0 0 44c0 11-9 20-20 20s-20-9-20-20l0-128z"></path>
+      </svg>
+      <span class="desktop-only">Download PDF</span></a>
+    <!-- navigational table of contents toggle -->
+    <a class="header-button toggle-icon" href="javascript:toggleNavTOC();" title="Toggle navigation" aria-label="Toggle navigation">
+      <svg height="1.25rem" role="presentation" viewBox="0 0 512 512">
+        <path d="M40 48C26.7 48 16 58.7 16 72v48c0 13.3 10.7 24 24 24H88c13.3 0 24-10.7 24-24V72c0-13.3-10.7-24-24-24H40zM192 64c-17.7 0-32 14.3-32 32s14.3 32 32 32H480c17.7 0 32-14.3 32-32s-14.3-32-32-32H192zm0 160c-17.7 0-32 14.3-32 32s14.3 32 32 32H480c17.7 0 32-14.3 32-32s-14.3-32-32-32H192zm0 160c-17.7 0-32 14.3-32 32s14.3 32 32 32H480c17.7 0 32-14.3 32-32s-14.3-32-32-32H192zM16 232v48c0 13.3 10.7 24 24 24H88c13.3 0 24-10.7 24-24V232c0-13.3-10.7-24-24-24H40c-13.3 0-24 10.7-24 24zM40 368c-13.3 0-24 10.7-24 24v48c0 13.3 10.7 24 24 24H88c13.3 0 24-10.7 24-24V392c0-13.3-10.7-24-24-24H40z">
+        </path>
+      </svg>
+    </a>
+    <!--- collapsable header / reading mode toggle -->
+    <a class="header-button toggle-icon" href="javascript:toggleReadingMode();" title="Disable reading mode, show header and footer">
+      <svg role="presentation" height="1.25rem" viewBox="0 0 448 512"><!--!Font Awesome Free v7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2026 Fonticons, Inc.-->
+        <path d="M32 32C14.3 32 0 46.3 0 64l0 96c0 17.7 14.3 32 32 32s32-14.3 32-32l0-64 64 0c17.7 0 32-14.3 32-32s-14.3-32-32-32L32 32zM64 352c0-17.7-14.3-32-32-32S0 334.3 0 352l0 96c0 17.7 14.3 32 32 32l96 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-64 0 0-64zM320 32c-17.7 0-32 14.3-32 32s14.3 32 32 32l64 0 0 64c0 17.7 14.3 32 32 32s32-14.3 32-32l0-96c0-17.7-14.3-32-32-32l-96 0zM448 352c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 64-64 0c-17.7 0-32 14.3-32 32s14.3 32 32 32l96 0c17.7 0 32-14.3 32-32l0-96z"></path>
+      </svg>
+    </a>
+    <!--- colored theme toggle -->
+    <button type="button" class="header-button color-tog" onclick="toggleColorScheme();" title="Toggle dark/light mode" aria-label="Toggle color scheme">
+      <span class="toggle-icon automatic-tog" aria-hidden="true">
+        <svg role="presentation" height="1.25rem" viewBox="0 0 24 24">
+          <path d="m14.3 16-.7-2h-3.2l-.7 2H7.8L11 7h2l3.2 9h-1.9M20 8.69V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12 20 8.69m-9.15 3.96h2.3L12 9l-1.15 3.65Z">
+          </path>
+        </svg>
+      </span>
+      <span class="toggle-icon light-tog" aria-hidden="true">
+        <svg role="presentation" height="1.25rem" viewBox="0 0 24 24">
+          <path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12 20 8.69Z">
+          </path>
+        </svg>
+      </span>
+      <span class="toggle-icon dark-tog" aria-hidden="true">
+        <svg role="presentation" height="1.25rem" viewBox="0 0 24 24">
+          <path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12c0-2.42-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12 20 8.69Z">
+          </path>
+        </svg>
+      </span>
+    </button>
+  </nav>
+</header><nav class="ltx_page_navbar">
+<nav class="ltx_TOC">
+<ol class="ltx_toclist">
+<li class="ltx_tocentry ltx_tocentry_abstract"><a href="https://arxiv.org/html/2607.09121v1#abstract1" title="In Augmenting Fundamental Analysis with Large Language Models: A RAG-Based System for Generating Investor Briefs" class="ltx_ref"><span class="ltx_text ltx_ref_title">Abstract</span></a></li>
+<li class="ltx_tocentry ltx_tocentry_section">
+<a href="https://arxiv.org/html/2607.09121v1#S1" title="In Augmenting Fundamental Analysis with Large Language Models: A RAG-Based System for Generating Investor Briefs" class="ltx_ref"><span class="ltx_text ltx_ref_title"><span class="ltx_tag ltx_tag_ref">1 </span>Introduction</span></a>
+<ol class="ltx_toclist ltx_toclist_section">
+<li class="ltx_tocentry ltx_tocentry_subsection"><a href="https://arxiv.org/html/2607.09121v1#S1.SS1" title="In 1 Introduction ‣ Augmenting Fundamental Analysis with Large Language Models: A RAG-Based System for Generating Investor Briefs" class="ltx_ref"><span class="ltx_text ltx_ref_title"><span class="ltx_tag ltx_tag_ref">1.1 </span>Literature Review</span></a></li>
+<li class="ltx_tocentry ltx_tocentry_subsection"><a href="https://arxiv.org/html/2607.09121v1#S1.SS2" title="In 1 Introduction ‣ Augmenting Fundamental Analysis with Large Language Models: A RAG-Based System for Generating Investor Briefs" class="ltx_ref"><span class="ltx_text ltx_ref_title"><span class="ltx_tag ltx_tag_ref">1.2 </span>Our Contribution</span></a></li>
+</ol>
+</li>
+<li class="ltx_tocentry ltx_tocentry_section">
+<a href="https://arxiv.org/html/2607.09121v1#S2" title="In Augmenting Fundamental Analysis with Large Language Models: A RAG-Based System for Generating Investor Briefs" class="ltx_ref"><span class="ltx_text ltx_ref_title"><span class="ltx_tag ltx_tag_ref">2 </span>Analysed data</span></a>
+<ol class="ltx_toclist ltx_toclist_section">
+<li class="ltx_tocentry ltx_tocentry_subsection"><a href="https://arxiv.org/html/2607.09121v1#S2.SS1" title="In 2 Analysed data ‣ Augmenting Fundamental Analysis with Large Language Models: A RAG-Based System for Generating Investor Briefs" class="ltx_ref"><span class="ltx_text ltx_ref_title"><span class="ltx_tag ltx_tag_ref">2.1 </span>Macroeconomic and Cyclical Data</span></a></li>
+<li class="ltx_tocentry ltx_tocentry_subsection">
+<a href="https://arxiv.org/html/2607.09121v1#S2.SS2" title="In 2 Analysed data ‣ Augmenting Fundamental Analysis with Large Language Models: A RAG-Based System for Generating Investor Briefs" class="ltx_ref"><span class="ltx_text ltx_ref_title"><span class="ltx_tag ltx_tag_ref">2.2 </span>Company-Specific Fundamental Data</span></a>
+<ol class="ltx_toclist ltx_toclist_subsection">
+<li class="ltx_tocentry ltx_tocentry_subsubsection"><a href="https://arxiv.org/html/2607.09121v1#S2.SS2.SSS1" title="In 2.2 Company-Specific Fundamental Data ‣ 2 Analysed data ‣ Augmenting Fundamental Analysis with Large Language Models: A RAG-Based System for Generating Investor Briefs" class="ltx_ref"><span class="ltx_text ltx_ref_title"><span class="ltx_tag ltx_tag_ref">2.2.1 </span>Qualitative and Operational Data</span></a></li>
+<li class="ltx_tocentry ltx_tocentry_subsubsection"><a href="https://arxiv.org/html/2607.09121v1#S2.SS2.SSS2" title="In 2.2 Company-Specific Fundamental Data ‣ 2 Analysed data ‣ Augmenting Fundamental Analysis with Large Language Models: A RAG-Based System for Generating Investor Briefs" class="ltx_ref"><span class="ltx_text ltx_ref_title"><span class="ltx_tag ltx_tag_ref">2.2.2 </span>Financial and Market Data</span></a></li>
+</ol>
+</li>
+</ol>
+</li>
+<li class="ltx_tocentry ltx_tocentry_section">
+<a href="https://arxiv.org/html/2607.09121v1#S3" title="In Augmenting Fundamental Analysis with Large Language Models: A RAG-Based System for Generating Investor Briefs" class="ltx_ref"><span class="ltx_text ltx_ref_title"><span class="ltx_tag ltx_tag_ref">3 </span>Examples of Briefs Produced for Investors</span></a>
+<ol class="ltx_toclist ltx_toclist_section">
+<li class="ltx_tocentry ltx_tocentry_subsection"><a href="https://arxiv.org/html/2607.09121v1#S3.SS1" title="In 3 Examples of Briefs Produced for Investors ‣ Augmenting Fundamental Analysis with Large Language Models: A RAG-Based System for Generating Investor Briefs" class="ltx_ref"><span class="ltx_text ltx_ref_title"><span class="ltx_tag ltx_tag_ref">3.1 </span>Tesla 15th November 2024 - Kitchin cycle analysis</span></a></li>
+<li class="ltx_tocentry ltx_tocentry_subsection">
+<a href="https://arxiv.org/html/2607.09121v1#S3.SS2" title="In 3 Examples of Briefs Produced for Investors ‣ Augmenting Fundamental Analysis with Large Language Models: A RAG-Based System for Generating Investor Briefs" class="ltx_ref"><span class="ltx_text ltx_ref_title"><span class="ltx_tag ltx_tag_ref">3.2 </span>NVIDIA 19th November 2024 - news analysis</span></a>
+<ol class="ltx_toclist ltx_toclist_subsection">
+<li class="ltx_tocentry ltx_tocentry_subsubsection"><a href="https://arxiv.org/html/2607.09121v1#S3.SS2.SSS1" title="In 3.2 NVIDIA 19th November 2024 - news analysis ‣ 3 Examples of Briefs Produced for Investors ‣ Augmenting Fundamental Analysis with Large Language Models: A RAG-Based System for Generating Investor Briefs" class="ltx_ref"><span class="ltx_text ltx_ref_title"><span class="ltx_tag ltx_tag_ref">3.2.1 </span>Ranking</span></a></li>
+<li class="ltx_tocentry ltx_tocentry_subsubsection"><a href="https://arxiv.org/html/2607.09121v1#S3.SS2.SSS2" title="In 3.2 NVIDIA 19th November 2024 - news analysis ‣ 3 Examples of Briefs Produced for Investors ‣ Augmenting Fundamental Analysis with Large Language Models: A RAG-Based System for Generating Investor Briefs" class="ltx_ref"><span class="ltx_text ltx_ref_title"><span class="ltx_tag ltx_tag_ref">3.2.2 </span>Ranked News Summaries (System Output)</span></a></li>
+<li class="ltx_tocentry ltx_tocentry_subsubsection"><a href="https://arxiv.org/html/2607.09121v1#S3.SS2.SSS3" title="In 3.2 NVIDIA 19th November 2024 - news analysis ‣ 3 Examples of Briefs Produced for Investors ‣ Augmenting Fundamental Analysis with Large Language Models: A RAG-Based System for Generating Investor Briefs" class="ltx_ref"><span class="ltx_text ltx_ref_title"><span class="ltx_tag ltx_tag_ref">3.2.3 </span>System Performance and Analysis</span></a></li>
+</ol>
+</li>
+<li class="ltx_tocentry ltx_tocentry_subsection">
+<a href="https://arxiv.org/html/2607.09121v1#S3.SS3" title="In 3 Examples of Briefs Produced for Investors ‣ Augmenting Fundamental Analysis with Large Language Models: A RAG-Based System for Generating Investor Briefs" class="ltx_ref"><span class="ltx_text ltx_ref_title"><span class="ltx_tag ltx_tag_ref">3.3 </span>Revenue Exposure and Geopolitical Risk: NVIDIA, Amazon, and Tesla - 22nd November 2024</span></a>
+<ol class="ltx_toclist ltx_toclist_subsection">
+<li class="ltx_tocentry ltx_tocentry_subsubsection"><a href="https://arxiv.org/html/2607.09121v1#S3.SS3.SSS1" title="In 3.3 Revenue Exposure and Geopolitical Risk: NVIDIA, Amazon, and Tesla - 22nd November 2024 ‣ 3 Examples of Briefs Produced for Investors ‣ Augmenting Fundamental Analysis with Large Language Models: A RAG-Based System for Generating Investor Briefs" class="ltx_ref"><span class="ltx_text ltx_ref_title"><span class="ltx_tag ltx_tag_ref">3.3.1 </span>NVIDIA</span></a></li>
+<li class="ltx_tocentry ltx_tocentry_subsubsection"><a href="https://arxiv.org/html/2607.09121v1#S3.SS3.SSS2" title="In 3.3 Revenue Exposure and Geopolitical Risk: NVIDIA, Amazon, and Tesla - 22nd November 2024 ‣ 3 Examples of Briefs Produced for Investors ‣ Augmenting Fundamental Analysis with Large Language Models: A RAG-Based System for Generating Investor Briefs" class="ltx_ref"><span class="ltx_text ltx_ref_title"><span class="ltx_tag ltx_tag_ref">3.3.2 </span>Amazon</span></a></li>
+<li class="ltx_tocentry ltx_tocentry_subsubsection"><a href="https://arxiv.org/html/2607.09121v1#S3.SS3.SSS3" title="In 3.3 Revenue Exposure and Geopolitical Risk: NVIDIA, Amazon, and Tesla - 22nd November 2024 ‣ 3 Examples of Briefs Produced for Investors ‣ Augmenting Fundamental Analysis with Large Language Models: A RAG-Based System for Generating Investor Briefs" class="ltx_ref"><span class="ltx_text ltx_ref_title"><span class="ltx_tag ltx_tag_ref">3.3.3 </span>Tesla</span></a></li>
+</ol>
+</li>
+<li class="ltx_tocentry ltx_tocentry_subsection"><a href="https://arxiv.org/html/2607.09121v1#S3.SS4" title="In 3 Examples of Briefs Produced for Investors ‣ Augmenting Fundamental Analysis with Large Language Models: A RAG-Based System for Generating Investor Briefs" class="ltx_ref"><span class="ltx_text ltx_ref_title"><span class="ltx_tag ltx_tag_ref">3.4 </span>Energy Fuels 29th November 2024 - Fundamental Analysis of a Small-Cap Uranium Company</span></a></li>
+<li class="ltx_tocentry ltx_tocentry_subsection">
+<a href="https://arxiv.org/html/2607.09121v1#S3.SS5" title="In 3 Examples of Briefs Produced for Investors ‣ Augmenting Fundamental Analysis with Large Language Models: A RAG-Based System for Generating Investor Briefs" class="ltx_ref"><span class="ltx_text ltx_ref_title"><span class="ltx_tag ltx_tag_ref">3.5 </span>Evaluating LLM Responses to Unforeseen Events: The Case of Martial Law in South Korea - 4th December 2024</span></a>
+<ol class="ltx_toclist ltx_toclist_subsection">
+<li class="ltx_tocentry ltx_tocentry_subsubsection"><a href="https://arxiv.org/html/2607.09121v1#S3.SS5.SSS1" title="In 3.5 Evaluating LLM Responses to Unforeseen Events: The Case of Martial Law in South Korea - 4th December 2024 ‣ 3 Examples of Briefs Produced for Investors ‣ Augmenting Fundamental Analysis with Large Language Models: A RAG-Based System for Generating Investor Briefs" class="ltx_ref"><span class="ltx_text ltx_ref_title"><span class="ltx_tag ltx_tag_ref">3.5.1 </span>Coinbase</span></a></li>
+<li class="ltx_tocentry ltx_tocentry_subsubsection"><a href="https://arxiv.org/html/2607.09121v1#S3.SS5.SSS2" title="In 3.5 Evaluating LLM Responses to Unforeseen Events: The Case of Martial Law in South Korea - 4th December 2024 ‣ 3 Examples of Briefs Produced for Investors ‣ Augmenting Fundamental Analysis with Large Language Models: A RAG-Based System for Generating Investor Briefs" class="ltx_ref"><span class="ltx_text ltx_ref_title"><span class="ltx_tag ltx_tag_ref">3.5.2 </span>NVIDIA</span></a></li>
+<li class="ltx_tocentry ltx_tocentry_subsubsection"><a href="https://arxiv.org/html/2607.09121v1#S3.SS5.SSS3" title="In 3.5 Evaluating LLM Responses to Unforeseen Events: The Case of Martial Law in South Korea - 4th December 2024 ‣ 3 Examples of Briefs Produced for Investors ‣ Augmenting Fundamental Analysis with Large Language Models: A RAG-Based System for Generating Investor Briefs" class="ltx_ref"><span class="ltx_text ltx_ref_title"><span class="ltx_tag ltx_tag_ref">3.5.3 </span>Lululemon</span></a></li>
+</ol>
+</li>
+<li class="ltx_tocentry ltx_tocentry_subsection"><a href="https://arxiv.org/html/2607.09121v1#S3.SS6" title="In 3 Examples of Briefs Produced for Investors ‣ Augmenting Fundamental Analysis with Large Language Models: A RAG-Based System for Generating Investor Briefs" class="ltx_ref"><span class="ltx_text ltx_ref_title"><span class="ltx_tag ltx_tag_ref">3.6 </span>Lululemon 6th December 2024 - clusterization of news articles</span></a></li>
+</ol>
+</li>
+<li class="ltx_tocentry ltx_tocentry_section">
+<a href="https://arxiv.org/html/2607.09121v1#S4" title="In Augmenting Fundamental Analysis with Large Language Models: A RAG-Based System for Generating Investor Briefs" class="ltx_ref"><span class="ltx_text ltx_ref_title"><span class="ltx_tag ltx_tag_ref">4 </span>User Feedback and Pilot Summary</span></a>
+<ol class="ltx_toclist ltx_toclist_section">
+<li class="ltx_tocentry ltx_tocentry_subsection"><a href="https://arxiv.org/html/2607.09121v1#S4.SS1" title="In 4 User Feedback and Pilot Summary ‣ Augmenting Fundamental Analysis with Large Language Models: A RAG-Based System for Generating Investor Briefs" class="ltx_ref"><span class="ltx_text ltx_ref_title"><span class="ltx_tag ltx_tag_ref">4.1 </span>Overall Reception and Key Strengths</span></a></li>
+<li class="ltx_tocentry ltx_tocentry_subsection"><a href="https://arxiv.org/html/2607.09121v1#S4.SS2" title="In 4 User Feedback and Pilot Summary ‣ Augmenting Fundamental Analysis with Large Language Models: A RAG-Based System for Generating Investor Briefs" class="ltx_ref"><span class="ltx_text ltx_ref_title"><span class="ltx_tag ltx_tag_ref">4.2 </span>Constructive Feedback and Areas for Improvement</span></a></li>
+<li class="ltx_tocentry ltx_tocentry_subsection"><a href="https://arxiv.org/html/2607.09121v1#S4.SS3" title="In 4 User Feedback and Pilot Summary ‣ Augmenting Fundamental Analysis with Large Language Models: A RAG-Based System for Generating Investor Briefs" class="ltx_ref"><span class="ltx_text ltx_ref_title"><span class="ltx_tag ltx_tag_ref">4.3 </span>Pilot Summary and Future Directions</span></a></li>
+</ol>
+</li>
+<li class="ltx_tocentry ltx_tocentry_section"><a href="https://arxiv.org/html/2607.09121v1#S5" title="In Augmenting Fundamental Analysis with Large Language Models: A RAG-Based System for Generating Investor Briefs" class="ltx_ref"><span class="ltx_text ltx_ref_title"><span class="ltx_tag ltx_tag_ref">5 </span>Conclusions</span></a></li>
+<li class="ltx_tocentry ltx_tocentry_bibliography"><a href="https://arxiv.org/html/2607.09121v1#bib" title="In Augmenting Fundamental Analysis with Large Language Models: A RAG-Based System for Generating Investor Briefs" class="ltx_ref"><span class="ltx_text ltx_ref_title">References</span></a></li>
+</ol></nav>
+</nav>
+<div class="ltx_page_main">
+<div id="infobox" class="infobox">
+  <a id="license-tr" href="https://info.arxiv.org/help/license/index.html#licenses-available">
+    License: arXiv.org perpetual non-exclusive license
+  </a>
+  <div id="watermark-tr">
+arXiv:2607.09121v1 [cs.CL] 10 Jul 2026</div>
+</div><div class="ltx_page_content">
+<article class="ltx_document ltx_authors_1line" lang="en">
+<h1 class="ltx_title ltx_title_document">Augmenting Fundamental Analysis with Large Language Models: A RAG-Based System for Generating Investor Briefs</h1>
+<div class="ltx_authors">
+<span class="ltx_creator ltx_role_author">
+<span class="ltx_personname">Bartosz Ziółko and Kacper Dobrzeniewski
+<br class="ltx_break">Faculty of Computer Science, AGH University of Krakow, Poland
+<br class="ltx_break">
+</span></span>
+</div>
+
+<div id="abstract1" class="ltx_abstract">
+<h6 class="ltx_title ltx_title_abstract">Abstract</h6>
+<p class="ltx_p"><span class="ltx_text">In this study, we examine the opportunities brought by Large Language Models (LLMs) to various aspects of fundamental analysis of companies based on their reports as well as data and documents describing macroeconomic situation like GDP and inflation changes as well as documents filled to the U.S. Securities and Exchange Commission (SEC) which can be found in EDGAR. We were preprocessing those data and than sending via API to gpt-4o model in a Retrieval-Augmented Generation (RAG) like regime. We prepared as well a document describing an exemplar investor knowledge based on Kitchin cycles. We were scanning data important for analysis of 9 companies for 4 weeks. Using LLM we were producing automatic briefs about them. They were sent to nine participants who are individual investors to evaluate usefulness of such approach to data analysis.</span></p>
+</div>
+<div id="p1" class="ltx_para">
+<p id="p1.1" class="ltx_p">Keywords: Natural Language Processing in Finance, investing, Large Language Models (LLM), Retrieval-Augmented Generation (RAG), Investor Decision Support Systems, Artificial Intelligence in Investment</p>
+</div>
+<div id="p2" class="ltx_para">
+<p id="p2.1" class="ltx_p">JEL codes: G11 (Portfolio Choice; Investment Decisions), G14 (Information and Market Efficiency; Event Studies), G17 (Financial Forecasting and Simulation), C45 (Neural Networks and Related Topics)</p>
+</div>
+<section id="S1" class="ltx_section">
+<h2 class="ltx_title ltx_title_section">
+<span class="ltx_tag ltx_tag_section">1 </span>Introduction</h2>
+
+<div id="S1.p1" class="ltx_para">
+<p id="S1.p1.1" class="ltx_p">Fundamental analysis, the cornerstone of investment strategies, traditionally relies on the in-depth evaluation of financial statements, industry reports, and macroeconomic indicators. This process, however, is time-consuming and requires analysts to process vast amounts of data, much of which is unstructured, such as the text from annual reports, earnings call transcripts, or documents filed with regulatory bodies like SEC via the EDGAR system. The rapid development in Natural Language Processing (NLP), and particularly the advent of LLMs, presents unprecedented opportunities to automate and deepen this process.</p>
+</div>
+<section id="S1.SS1" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">1.1 </span>Literature Review</h3>
+
+<div id="S1.SS1.p1" class="ltx_para">
+<p id="S1.SS1.p1.1" class="ltx_p">Early work on the application of NLP in finance primarily focused on sentiment analysis. The seminal study <cite class="ltx_cite ltx_citemacro_cite">Loughran and McDonald (<a href="https://arxiv.org/html/2607.09121v1#bib.bib1" title="When is a liability not a liability? textual analysis, dictionaries, and 10-Ks" class="ltx_ref">2011</a>)</cite> demonstrated that general-purpose sentiment dictionaries are inadequate for the specific language of finance, leading to the development of specialized lexicons. With the advent of the Transformer architecture and models like BERT <cite class="ltx_cite ltx_citemacro_cite">Devlin<span class="ltx_text ltx_bib_etal"> et al.</span> (<a href="https://arxiv.org/html/2607.09121v1#bib.bib2" title="BERT: pre-training of deep bidirectional transformers for language understanding" class="ltx_ref">2019</a>)</cite>, it became possible to create contextual models specifically pre-trained on financial corpora. An example is FinBERT <cite class="ltx_cite ltx_citemacro_cite">Araci (<a href="https://arxiv.org/html/2607.09121v1#bib.bib3" title="FinBERT: financial sentiment analysis with pre-trained language models" class="ltx_ref">2019</a>)</cite>, which significantly improved performance on sentiment classification tasks in financial texts.</p>
+</div>
+<div id="S1.SS1.p2" class="ltx_para">
+<p id="S1.SS1.p2.1" class="ltx_p">The current revolution in NLP is fundamentally built upon the Transformer architecture, introduced by <cite class="ltx_cite ltx_citemacro_cite">Vaswani<span class="ltx_text ltx_bib_etal"> et al.</span> (<a href="https://arxiv.org/html/2607.09121v1#bib.bib9" title="Attention is all you need" class="ltx_ref">2017</a>)</cite>. Its core innovation, the self-attention mechanism, allows models to weigh the importance of different words in the input data, enabling a more profound contextual understanding and parallel processing capabilities that were not feasible with previous sequential architectures like Recurrent Neural Networks (RNNs) or Long Short-Term Memory (LSTM). This architectural breakthrough paved the way for the development of modern LLMs. Today, the field continues to advance at a rapid pace, with leading research labs pushing the boundaries of model capabilities. For instance, OpenAI’s GPT-4o demonstrates a move towards natively multimodal models that can seamlessly process and reason across text, audio, and vision, increasing both efficiency and user interaction possibilities <cite class="ltx_cite ltx_citemacro_cite">OpenAI (<a href="https://arxiv.org/html/2607.09121v1#bib.bib10" title="GPT-4o" class="ltx_ref">2024</a>)</cite>.</p>
+</div>
+<div id="S1.SS1.p3" class="ltx_para">
+<p id="S1.SS1.p3.1" class="ltx_p">The emergence of large-scale generative models, such as those from the GPT family, has revolutionized the approach to text analysis. These models, with their ability to understand and generate text in a zero-shot or few-shot setting, can perform tasks far more complex than mere sentiment analysis. Research has shown their potential in forecasting financial markets. For instance, <cite class="ltx_cite ltx_citemacro_cite">Lopez-Lira and Tang (<a href="https://arxiv.org/html/2607.09121v1#bib.bib4" title="Can ChatGPT forecast stock price movements? return predictability and large language models" class="ltx_ref">2023</a>)</cite> showed that ChatGPT can predict the direction of stock price movements from news headlines, suggesting these models internalize complex relationships between information and market reactions. In a similar vein, <cite class="ltx_cite ltx_citemacro_cite">Itoh and Okada (<a href="https://arxiv.org/html/2607.09121v1#bib.bib7" title="The power of large language models: a ChatGPT-driven textual analysis of fundamental data" class="ltx_ref">2023</a>)</cite> explored the capabilities of ChatGPT for conducting textual analysis on fundamental data, further highlighting the potential of LLMs to automate and scale complex analytical tasks traditionally performed by humans.</p>
+</div>
+<div id="S1.SS1.p4" class="ltx_para">
+<p id="S1.SS1.p4.1" class="ltx_p">One of the key challenges in applying LLMs in high-precision domains like finance is ensuring factual fidelity and avoiding so-called ”hallucinations.” The RAG approach, proposed by <cite class="ltx_cite ltx_citemacro_cite">Lewis<span class="ltx_text ltx_bib_etal"> et al.</span> (<a href="https://arxiv.org/html/2607.09121v1#bib.bib5" title="Retrieval-augmented generation for knowledge-intensive NLP tasks" class="ltx_ref">2020</a>)</cite>, offers a solution to this challenge. It allows the model to ”ground” its responses in specific, provided source documents, significantly increasing the reliability of the generated content, a benefit further substantiated by research showing that retrieval augmentation actively reduces model hallucination in conversational contexts <cite class="ltx_cite ltx_citemacro_cite">Shuster<span class="ltx_text ltx_bib_etal"> et al.</span> (<a href="https://arxiv.org/html/2607.09121v1#bib.bib8" title="Retrieval Augmentation Reduces Hallucination in Conversation" class="ltx_ref">2021</a>)</cite>. Fundamentally, this process can be viewed as a practical implementation of controllable knowledge acquisition, where the LLM’s ”perception” of a situation is shaped by a curated set of inputs, a concept explored by <cite class="ltx_cite ltx_citemacro_cite">Rzepka and Okada (<a href="https://arxiv.org/html/2607.09121v1#bib.bib14" title="Simulating Perception With LLMs as Underpinnings for More Controllable Knowledge Acquisition" class="ltx_ref">2023</a>)</cite> as a cornerstone for building more reliable AI systems. Furthermore, the retrieval component of RAG can be enhanced beyond simple document fetching by employing structured knowledge bases, such as ontologies or knowledge graphs. This graph-based approach, as demonstrated by <cite class="ltx_cite ltx_citemacro_cite">Rzepka and Obayashi (<a href="https://arxiv.org/html/2607.09121v1#bib.bib13" title="Effectiveness of Security Export Control Ontology for Predicting Answer Type and Regulation Categories" class="ltx_ref">2023</a>)</cite> in the complex domain of security export controls, allows for more precise and context-aware information retrieval, paving the way for more sophisticated analytical systems. In parallel, to enhance analytical accuracy, models trained from scratch on financial data have also been developed, with a prime example being BloombergGPT <cite class="ltx_cite ltx_citemacro_cite">Wu<span class="ltx_text ltx_bib_etal"> et al.</span> (<a href="https://arxiv.org/html/2607.09121v1#bib.bib6" title="BloombergGPT: a large language model for finance" class="ltx_ref">2023</a>)</cite>, which demonstrated superior performance on a wide range of financial tasks compared to general-purpose models.</p>
+</div>
+</section>
+<section id="S1.SS2" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">1.2 </span>Our Contribution</h3>
+
+<div id="S1.SS2.p1" class="ltx_para">
+<p id="S1.SS2.p1.1" class="ltx_p">Despite this rapid progress, the majority of existing research focuses on evaluating LLMs in isolated, specific tasks, such as price prediction, sentiment analysis, or the summarization of single documents. However, there is a lack of comprehensive studies that evaluate integrated systems that combine the analysis of company documents with macroeconomic data into a coherent and automated analytical workflow. Furthermore, the evaluation of such systems rarely extends beyond academic metrics to include an assessment of their <span id="S1.SS2.p1.1.1" class="ltx_text ltx_font_bold">practical utility by end-users—individual investors</span>.</p>
+</div>
+<div id="S1.SS2.p2" class="ltx_para">
+<p id="S1.SS2.p2.1" class="ltx_p">Our work fills this gap by presenting a system based on the <math id="S1.SS2.p2.1.m1" class="ltx_Math" alttext="gpt-4o" display="inline" intent=":literal"><semantics><mrow><mrow><mi>g</mi><mo lspace="0em" rspace="0em">​</mo><mi>p</mi><mo lspace="0em" rspace="0em">​</mo><mi>t</mi></mrow><mo>−</mo><mrow><mn>4</mn><mo lspace="0em" rspace="0em">​</mo><mi>o</mi></mrow></mrow><annotation encoding="application/x-tex">gpt-4o</annotation></semantics></math> model within a RAG architecture. This system integrates data from diverse sources—company reports, macroeconomic data, and EDGAR filings—to generate synthetic analytical briefs. Additionally, the analytical context is enriched with expert knowledge regarding Kitchin business cycles. The key element of our study is the evaluation of the generated materials by a group of nine active individual investors, allowing for an assessment of the real-world value added by our approach in daily investment practice. This aligns with a growing body of research exploring how LLMs can be leveraged to systematically review and synthesize domain-specific knowledge, as demonstrated by <cite class="ltx_cite ltx_citemacro_cite">Laniewski and Ślepaczuk (<a href="https://arxiv.org/html/2607.09121v1#bib.bib12" title="Enhancing literature review with LLM and NLP methods. Algorithmic trading case" class="ltx_ref">2024</a>)</cite> in the context of algorithmic trading literature.</p>
+</div>
+</section>
+</section>
+<section id="S2" class="ltx_section">
+<h2 class="ltx_title ltx_title_section">
+<span class="ltx_tag ltx_tag_section">2 </span>Analysed data</h2>
+
+<div id="S2.p1" class="ltx_para">
+<p id="S2.p1.1" class="ltx_p">The selection of companies for this study was guided by a principle of <span id="S2.p1.1.1" class="ltx_text ltx_font_bold">maximum diversity</span> to create a robust and challenging test environment for our LLM-based analytical system. The final cohort of nine companies was compiled based on several criteria, including market capitalization, sector, public visibility, and direct input from study participants. Each of the nine participants had the opportunity to nominate one company, resulting in a unique and varied portfolio.</p>
+</div>
+<div id="S2.p2" class="ltx_para">
+<p id="S2.p2.1" class="ltx_p">The selected companies are: <span id="S2.p2.1.1" class="ltx_text ltx_font_bold">Lululemon (LULU), NVIDIA (NVDA), Energy Fuels (UUUU), Coinbase (COIN), Corebridge Financial (CRBG), Pinterest (PINS), Novavax (NVAX), Amazon (AMZN), and Tesla (TSLA)</span>.</p>
+</div>
+<div id="S2.p3" class="ltx_para">
+<p id="S2.p3.1" class="ltx_p">This selection methodology yielded a diverse set of firms, which serves the study’s purpose by:</p>
+<ul id="S2.I1" class="ltx_itemize">
+<li id="S2.I1.i1" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">•</span> 
+<div id="S2.I1.i1.p1" class="ltx_para">
+<p id="S2.I1.i1.p1.1" class="ltx_p"><span id="S2.I1.i1.p1.1.1" class="ltx_text ltx_font_bold">Covering multiple sectors:</span> The portfolio includes technology (NVDA, PINS, AMZN, TSLA), consumer discretionary (LULU), financials (COIN, CRBG), uranium mining (UUUU), and biotechnology (NVAX).</p>
+</div>
+</li>
+<li id="S2.I1.i2" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">•</span> 
+<div id="S2.I1.i2.p1" class="ltx_para">
+<p id="S2.I1.i2.p1.1" class="ltx_p"><span id="S2.I1.i2.p1.1.1" class="ltx_text ltx_font_bold">Mixing company sizes and profiles:</span> It features large-cap, high-publicity stocks (like AMZN, NVDA, TSLA) alongside smaller or less-followed companies (like UUUU, NVAX, CRBG).</p>
+</div>
+</li>
+<li id="S2.I1.i3" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">•</span> 
+<div id="S2.I1.i3.p1" class="ltx_para">
+<p id="S2.I1.i3.p1.1" class="ltx_p"><span id="S2.I1.i3.p1.1.1" class="ltx_text ltx_font_bold">Testing adaptability:</span> This diversity ensures that our system was not overfitted to a single industry’s jargon or reporting style and had to process a wide range of company-specific news, risks, and KPIs.</p>
+</div>
+</li>
+</ul>
+</div>
+<div id="S2.p4" class="ltx_para">
+<p id="S2.p4.1" class="ltx_p">For this cohort of companies, we collected a comprehensive dataset over a four-week period. The data were structured to provide our RAG-based system with a multilayered context, spanning from high-level economic trends down to company-specific operational details.</p>
+</div>
+<section id="S2.SS1" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">2.1 </span>Macroeconomic and Cyclical Data</h3>
+
+<div id="S2.SS1.p1" class="ltx_para">
+<p id="S2.SS1.p1.1" class="ltx_p">This category provides a broad economic context. It includes key indicators for the U.S. economy as well as established cyclical and seasonal heuristics. These data were primarily sourced from official statistical releases and economic research platforms.</p>
+<ul id="S2.I2" class="ltx_itemize">
+<li id="S2.I2.i1" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">•</span> 
+<div id="S2.I2.i1.p1" class="ltx_para">
+<p id="S2.I2.i1.p1.1" class="ltx_p"><span id="S2.I2.i1.p1.1.1" class="ltx_text ltx_font_bold">Economic Indicators:</span> US GDP, US Inflation (CPI), US Services and Manufacturing PMI, Unemployment Rate, and Non-Farm Payrolls (NFP).</p>
+</div>
+</li>
+<li id="S2.I2.i2" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">•</span> 
+<div id="S2.I2.i2.p1" class="ltx_para">
+<p id="S2.I2.i2.p1.1" class="ltx_p"><span id="S2.I2.i2.p1.1.1" class="ltx_text ltx_font_bold">Monetary Policy:</span> Current and forecasted Federal Reserve funds rate.</p>
+</div>
+</li>
+<li id="S2.I2.i3" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">•</span> 
+<div id="S2.I2.i3.p1" class="ltx_para">
+<p id="S2.I2.i3.p1.1" class="ltx_p"><span id="S2.I2.i3.p1.1.1" class="ltx_text ltx_font_bold">Cyclical Data:</span> Kitchin Cycle, industry-specific cycles, the Presidential cycle, and tax cycles.</p>
+</div>
+</li>
+<li id="S2.I2.i4" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">•</span> 
+<div id="S2.I2.i4.p1" class="ltx_para">
+<p id="S2.I2.i4.p1.1" class="ltx_p"><span id="S2.I2.i4.p1.1.1" class="ltx_text ltx_font_bold">Seasonal Heuristics:</span> The ”Sell in May and go away” anomaly.</p>
+</div>
+</li>
+</ul>
+</div>
+</section>
+<section id="S2.SS2" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">2.2 </span>Company-Specific Fundamental Data</h3>
+
+<div id="S2.SS2.p1" class="ltx_para">
+<p id="S2.SS2.p1.1" class="ltx_p">This category forms the core of our analysis, focusing on data extracted directly from company reports (e.g. 10-K and 10-Q filings from EDGAR), press releases, and financial market data providers. We divided this into qualitative and quantitative subcategories.</p>
+</div>
+<section id="S2.SS2.SSS1" class="ltx_subsubsection">
+<h4 class="ltx_title ltx_title_subsubsection">
+<span class="ltx_tag ltx_tag_subsubsection">2.2.1 </span>Qualitative and Operational Data</h4>
+
+<div id="S2.SS2.SSS1.p1" class="ltx_para">
+<p id="S2.SS2.SSS1.p1.1" class="ltx_p">These data are often textual and require interpretation, making them ideal candidates for analysis by our RAG-based system.</p>
+<ul id="S2.I3" class="ltx_itemize">
+<li id="S2.I3.i1" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">•</span> 
+<div id="S2.I3.i1.p1" class="ltx_para">
+<p id="S2.I3.i1.p1.1" class="ltx_p"><span id="S2.I3.i1.p1.1.1" class="ltx_text ltx_font_bold">Business Operations:</span> Significant geographic locations, key cost structures, and major customers.</p>
+</div>
+</li>
+<li id="S2.I3.i2" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">•</span> 
+<div id="S2.I3.i2.p1" class="ltx_para">
+<p id="S2.I3.i2.p1.1" class="ltx_p"><span id="S2.I3.i2.p1.1.1" class="ltx_text ltx_font_bold">Management &amp; Ownership:</span> Key shareholders, insider stock sales, and official management guidance or forecasts.</p>
+</div>
+</li>
+<li id="S2.I3.i3" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">•</span> 
+<div id="S2.I3.i3.p1" class="ltx_para">
+<p id="S2.I3.i3.p1.1" class="ltx_p"><span id="S2.I3.i3.p1.1.1" class="ltx_text ltx_font_bold">Company-Specific KPIs:</span> Industry-relevant Key Performance Indicators, such as:</p>
+<ul id="S2.I3.i3.I1" class="ltx_itemize">
+<li id="S2.I3.i3.I1.i1" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item"><span id="S2.I3.i3.I1.i1.1.1.1" class="ltx_text ltx_font_bold">–</span></span> 
+<div id="S2.I3.i3.I1.i1.p1" class="ltx_para">
+<p id="S2.I3.i3.I1.i1.p1.1" class="ltx_p">Comparable Sales, New Company-Operated Stores and Sale per <math id="S2.I3.i3.I1.i1.p1.1.m1" class="ltx_Math" alttext="m^{2}" display="inline" intent=":literal"><semantics><msup><mi>m</mi><mn>2</mn></msup><annotation encoding="application/x-tex">m^{2}</annotation></semantics></math> for a store (LULU),</p>
+</div>
+</li>
+<li id="S2.I3.i3.I1.i2" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item"><span id="S2.I3.i3.I1.i2.1.1.1" class="ltx_text ltx_font_bold">–</span></span> 
+<div id="S2.I3.i3.I1.i2.p1" class="ltx_para">
+<p id="S2.I3.i3.I1.i2.p1.1" class="ltx_p">Uranium spot price and Cameco and Kazatoprom production (UUUU),</p>
+</div>
+</li>
+<li id="S2.I3.i3.I1.i3" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item"><span id="S2.I3.i3.I1.i3.1.1.1" class="ltx_text ltx_font_bold">–</span></span> 
+<div id="S2.I3.i3.I1.i3.p1" class="ltx_para">
+<p id="S2.I3.i3.I1.i3.p1.1" class="ltx_p">Bitcoin price, transaction volume and dates of court cases against SEC (COIN),</p>
+</div>
+</li>
+<li id="S2.I3.i3.I1.i4" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item"><span id="S2.I3.i3.I1.i4.1.1.1" class="ltx_text ltx_font_bold">–</span></span> 
+<div id="S2.I3.i3.I1.i4.p1" class="ltx_para">
+<p id="S2.I3.i3.I1.i4.p1.1" class="ltx_p">Net Premiums Earned (NPE), Net Investment Income, Solvency Ratio, New Business Margin, Persistency Ratio and Claims Ratio (CRBG),</p>
+</div>
+</li>
+<li id="S2.I3.i3.I1.i5" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item"><span id="S2.I3.i3.I1.i5.1.1.1" class="ltx_text ltx_font_bold">–</span></span> 
+<div id="S2.I3.i3.I1.i5.p1" class="ltx_para">
+<p id="S2.I3.i3.I1.i5.p1.1" class="ltx_p">Revenue Per User ARPU (PINS),</p>
+</div>
+</li>
+<li id="S2.I3.i3.I1.i6" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item"><span id="S2.I3.i3.I1.i6.1.1.1" class="ltx_text ltx_font_bold">–</span></span> 
+<div id="S2.I3.i3.I1.i6.p1" class="ltx_para">
+<p id="S2.I3.i3.I1.i6.p1.1" class="ltx_p">Pipeline and Stage of Development, Cash-to-Operating Expenses Ratio and Price-to-sales (NVAX)</p>
+</div>
+</li>
+<li id="S2.I3.i3.I1.i7" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item"><span id="S2.I3.i3.I1.i7.1.1.1" class="ltx_text ltx_font_bold">–</span></span> 
+<div id="S2.I3.i3.I1.i7.p1" class="ltx_para">
+<p id="S2.I3.i3.I1.i7.p1.1" class="ltx_p">AWS revenue and growth, Inventory Turnover Ratio, Customer Retention and Churn Rate and Advertising Revenue Growth (AMZN)</p>
+</div>
+</li>
+<li id="S2.I3.i3.I1.i8" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item"><span id="S2.I3.i3.I1.i8.1.1.1" class="ltx_text ltx_font_bold">–</span></span> 
+<div id="S2.I3.i3.I1.i8.p1" class="ltx_para">
+<p id="S2.I3.i3.I1.i8.p1.1" class="ltx_p">Customer Retention and Churn Rate for FSD, production, delivery rate and revenue from energy sector (TSLA)</p>
+</div>
+</li>
+</ul>
+</div>
+</li>
+</ul>
+</div>
+</section>
+<section id="S2.SS2.SSS2" class="ltx_subsubsection">
+<h4 class="ltx_title ltx_title_subsubsection">
+<span class="ltx_tag ltx_tag_subsubsection">2.2.2 </span>Financial and Market Data</h4>
+
+<div id="S2.SS2.SSS2.p1" class="ltx_para">
+<p id="S2.SS2.SSS2.p1.1" class="ltx_p">This includes quantitative metrics that reflect the company’s financial health and market valuation.</p>
+<ul id="S2.I4" class="ltx_itemize">
+<li id="S2.I4.i1" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">•</span> 
+<div id="S2.I4.i1.p1" class="ltx_para">
+<p id="S2.I4.i1.p1.1" class="ltx_p"><span id="S2.I4.i1.p1.1.1" class="ltx_text ltx_font_bold">Valuation Metrics:</span> Price-to-Earnings (P/E) ratio and Forward P/E ratio.</p>
+</div>
+</li>
+<li id="S2.I4.i2" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">•</span> 
+<div id="S2.I4.i2.p1" class="ltx_para">
+<p id="S2.I4.i2.p1.1" class="ltx_p"><span id="S2.I4.i2.p1.1.1" class="ltx_text ltx_font_bold">Shareholder Returns:</span> Dividend payments and yield.</p>
+</div>
+</li>
+<li id="S2.I4.i3" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">•</span> 
+<div id="S2.I4.i3.p1" class="ltx_para">
+<p id="S2.I4.i3.p1.1" class="ltx_p"><span id="S2.I4.i3.p1.1.1" class="ltx_text ltx_font_bold">Market Sentiment:</span> Analyst recommendations.</p>
+</div>
+</li>
+<li id="S2.I4.i4" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">•</span> 
+<div id="S2.I4.i4.p1" class="ltx_para">
+<p id="S2.I4.i4.p1.1" class="ltx_p"><span id="S2.I4.i4.p1.1.1" class="ltx_text ltx_font_bold">Price Data:</span> Current stock price.</p>
+</div>
+</li>
+</ul>
+</div>
+</section>
+</section>
+</section>
+<section id="S3" class="ltx_section">
+<h2 class="ltx_title ltx_title_section">
+<span class="ltx_tag ltx_tag_section">3 </span>Examples of Briefs Produced for Investors</h2>
+
+<div id="S3.p1" class="ltx_para">
+<p id="S3.p1.1" class="ltx_p">To provide the nine participants with timely and relevant insights, our system generated analytical briefs throughout the four-week study period. The generation process was dynamic and designed to mimic the information flow an active investor might face. Each week, the conceptual focus of the reports was slightly adjusted to test different aspects of the system’s analytical capabilities.</p>
+</div>
+<div id="S3.p2" class="ltx_para">
+<p id="S3.p2.1" class="ltx_p">Our daily operational strategy was twofold. Firstly, we prioritized generating briefs for the 2-3 companies experiencing the most significant activity on a given day, triggered by new data releases, significant news events, or sharp price movements. Secondly, we ensured a balanced coverage across the entire portfolio, guaranteeing that each of the nine selected companies received at least one dedicated brief per week, even in the absence of major news. This dual approach allowed us to test the system’s reactivity to high-volume information flow as well as its ability to synthesize meaningful insights during quieter periods.</p>
+</div>
+<div id="S3.p3" class="ltx_para">
+<p id="S3.p3.1" class="ltx_p">In this section, we present a selection of these briefs to illustrate the system’s output. The examples have been chosen to demonstrate the variety of generated analyses, from event-driven reports to more routine weekly summaries. The biefs were originally produced in Polish apart from citition from news articles. We present translations.</p>
+</div>
+<section id="S3.SS1" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">3.1 </span>Tesla 15th November 2024 - Kitchin cycle analysis</h3>
+
+<div id="S3.SS1.p1" class="ltx_para">
+<p id="S3.SS1.p1.1" class="ltx_p">The generation of this brief for Tesla serves as a clear example of the system’s core capabilities, particularly its capacity to synthesize information from diverse, unrelated sources into a coherent investment thesis. We analyse its performance across several key dimensions central to our research:</p>
+</div>
+<div id="S3.SS1.p2" class="ltx_para">
+<ul id="S3.I1" class="ltx_itemize">
+<li id="S3.I1.i1" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">•</span> 
+<div id="S3.I1.i1.p1" class="ltx_para">
+<p id="S3.I1.i1.p1.1" class="ltx_p"><span id="S3.I1.i1.p1.1.1" class="ltx_text ltx_font_bold">Factual Grounding through RAG:</span> The system’s RAG architecture proved effective in grounding the output in verifiable facts. The LLM successfully extracted specific financial figures (revenue of $25.18 billion, P/E of 76.73) from their respective sources—a structured 10-Q report and a market data feed. Similarly, qualitative information, such as the names of insiders selling stock (Vaibhav Taneja, Kimbal Musk), was correctly identified, however it was preprocessed by us and it was not directly taken from unstructured SEC Form 4 filings. This demonstrates the model’s ability to retrieve and accurately represent data from a heterogeneous knowledge base, which was a primary goal of the study.</p>
+</div>
+</li>
+<li id="S3.I1.i2" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">•</span> 
+<div id="S3.I1.i2.p1" class="ltx_para">
+<p id="S3.I1.i2.p1.1" class="ltx_p"><span id="S3.I1.i2.p1.1.1" class="ltx_text ltx_font_bold">Cross-Domain Synthesis:</span> A key success was the system’s ability to connect macroeconomic context with company-specific analysis, a task central to fundamental investing. As instructed by the prompt, the system first executed a sub-task to determine the current economic phase. It correctly retrieved the latest PMI figures, interpreted their sub-50 values as indicative of a ”slowdown” consistent with the Kitchin cycle framework, and then applied this context to evaluate the sectors Tesla operates in (Consumer Discretionary, Technology). This multi-step reasoning, combining cyclical analysis with corporate data, showcases a level of synthesis that goes beyond simple summarization.</p>
+</div>
+</li>
+<li id="S3.I1.i3" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">•</span> 
+<div id="S3.I1.i3.p1" class="ltx_para">
+<p id="S3.I1.i3.p1.1" class="ltx_p"><span id="S3.I1.i3.p1.1.1" class="ltx_text ltx_font_bold">Systematic Application of Heuristics:</span> The generation of qualitative judgments, such as labeling Tesla’s financial position as ”strong,” was not left to the LLM’s unconstrained discretion. The prompt contained a predefined heuristic template (e.g., ”If revenue growth ¿ X% and debt/equity ratio ¡ Y%, describe the financial position as ’strong’”). This approach makes the analytical process more transparent, repeatable, and less susceptible to the LLM’s potential biases, which is a crucial aspect of building a reliable analytical tool.</p>
+</div>
+</li>
+<li id="S3.I1.i4" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">•</span> 
+<div id="S3.I1.i4.p1" class="ltx_para">
+<p id="S3.I1.i4.p1.1" class="ltx_p"><span id="S3.I1.i4.p1.1.1" class="ltx_text ltx_font_bold">Human-in-the-Loop:</span> This particular brief required minimal post-processing. The generated text was coherent and factually accurate. Human intervention was limited to a minor grammatical correction in the summary and ensuring the formatting was consistent, validating the system’s potential for a high degree of automation.</p>
+</div>
+</li>
+</ul>
+</div>
+<div id="S3.SS1.p3" class="ltx_para">
+<p id="S3.SS1.p3.1" class="ltx_p"><span id="S3.SS1.p3.1.1" class="ltx_text ltx_font_italic">Tesla is a leader in electric vehicle production and autonomous driving technology, as well as a manufacturer of batteries and energy storage systems. The company is investing heavily in the development of charging infrastructure and renewable energy production, including solar roofs. Tesla’s mission is to accelerate the transition to sustainable energy and transform the automotive industry toward electric power.</span></p>
+</div>
+<div id="S3.SS1.p4" class="ltx_para">
+<p id="S3.SS1.p4.1" class="ltx_p"><span id="S3.SS1.p4.1.1" class="ltx_text ltx_font_italic">### Reasons to buy TSLA stock:</span></p>
+</div>
+<div id="S3.SS1.p5" class="ltx_para">
+<p id="S3.SS1.p5.1" class="ltx_p"><span id="S3.SS1.p5.1.1" class="ltx_text ltx_font_italic">1. **Strong financial position**: Tesla demonstrates solid financial performance, with growing revenues and profits. In Q3 2024, Tesla achieved revenue of $25.18 billion, an 8% increase year-over-year. Net profit was $2.167 billion, also representing a 17% increase year-over-year. A strong cash position ($33.648 billion) and low debt (debt/equity ratio of 18%) are additional advantages.</span></p>
+</div>
+<div id="S3.SS1.p6" class="ltx_para">
+<p id="S3.SS1.p6.1" class="ltx_p"><span id="S3.SS1.p6.1.1" class="ltx_text ltx_font_italic">2. **Energy Segment Growth**: Tesla continues to expand its energy sector, achieving record gross margins in this segment. Energy revenue increased 52% year-over-year, demonstrating growth potential in this area.</span></p>
+</div>
+<div id="S3.SS1.p7" class="ltx_para">
+<p id="S3.SS1.p7.1" class="ltx_p"><span id="S3.SS1.p7.1.1" class="ltx_text ltx_font_italic">3. **Innovation and Technological Development**: Tesla is investing in AI and autonomous driving technologies, which could yield long-term benefits. Product developments like the Cybertruck and new vehicle models based on the next-generation platform also point to future growth.</span></p>
+</div>
+<div id="S3.SS1.p8" class="ltx_para">
+<p id="S3.SS1.p8.1" class="ltx_p"><span id="S3.SS1.p8.1.1" class="ltx_text ltx_font_italic">4. **Strategic Policy Approach**: Tesla could benefit from the planned elimination of tax breaks for electric vehicles in the US, which could harm competitors more than Tesla itself. Elon Musk believes that the elimination of tax breaks could benefit Tesla in the long term.</span></p>
+</div>
+<div id="S3.SS1.p9" class="ltx_para">
+<p id="S3.SS1.p9.1" class="ltx_p"><span id="S3.SS1.p9.1.1" class="ltx_text ltx_font_italic">### Arguments for selling TSLA stock:</span></p>
+</div>
+<div id="S3.SS1.p10" class="ltx_para">
+<p id="S3.SS1.p10.1" class="ltx_p"><span id="S3.SS1.p10.1.1" class="ltx_text ltx_font_italic">1. **High Valuation**: Tesla’s current P/E is 76.73, which may suggest the stock is overvalued, increasing the risk of a price correction.</span></p>
+</div>
+<div id="S3.SS1.p11" class="ltx_para">
+<p id="S3.SS1.p11.1" class="ltx_p"><span id="S3.SS1.p11.1.1" class="ltx_text ltx_font_italic">2. **Regulatory Uncertainty**: The Trump Administration’s planned elimination of tax breaks for electric vehicles could negatively impact Tesla’s sales in the short term, although it could harm competitors more in the long term.</span></p>
+</div>
+<div id="S3.SS1.p12" class="ltx_para">
+<p id="S3.SS1.p12.1" class="ltx_p"><span id="S3.SS1.p12.1.1" class="ltx_text ltx_font_italic">3. **Macroeconomic Changes**: Current data suggests the US economy is in a slowdown, which could negatively impact the consumer discretionary and technology sectors, which Tesla belongs to.</span></p>
+</div>
+<div id="S3.SS1.p13" class="ltx_para">
+<p id="S3.SS1.p13.1" class="ltx_p"><span id="S3.SS1.p13.1.1" class="ltx_text ltx_font_italic">4. **Insider Stock Sales**: Stock sales by key insiders, such as CFO Vaibhav Taneja and Kimbal Musk, could signal that company insiders anticipate potential difficulties or a price correction.</span></p>
+</div>
+<div id="S3.SS1.p14" class="ltx_para">
+<p id="S3.SS1.p14.1" class="ltx_p"><span id="S3.SS1.p14.1.1" class="ltx_text ltx_font_italic">### Economic Phase:
+Based on available data, we are currently in an economic slowdown phase. This is indicated by the Industrial PMI and ISM Manufacturing PMI falling below 50, suggesting an economic slowdown. During this phase, the energy, real estate, consumer staples, and utilities sectors are the best investments, while consumer discretionary and technology sectors may perform less well.</span></p>
+</div>
+<div id="S3.SS1.p15" class="ltx_para">
+<p id="S3.SS1.p15.1" class="ltx_p"><span id="S3.SS1.p15.1.1" class="ltx_text ltx_font_italic">### Summary:
+The decision to buy or sell Tesla stock should consider both the company’s strong financial fundamentals and innovative strength, as well as the potential risks associated with its high valuation and regulatory uncertainty. Investors should also consider the current macroeconomic conditions and the phase of the economic cycle we are in.</span></p>
+</div>
+</section>
+<section id="S3.SS2" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">3.2 </span>NVIDIA 19th November 2024 - news analysis</h3>
+
+<div id="S3.SS2.p1" class="ltx_para">
+<p id="S3.SS2.p1.1" class="ltx_p">This example demonstrates a different core capability of our system: the processing, summarization,
+and ranking of news articles based on the perspective of an investor observing the market.
+The input consisted of numerous articles concerning NVIDIA published on November 18 and 19. The first limitation of this study was the token limit imposed by OpenAI. The length of individual articles frequently exceeded the model’s capacity within a single prompt, effectively hindering the possibility of conducting a comprehensive analysis. Therefore, the experiment needed to be divided into phases. The initial step involved summarizing all the articles by the model. Subsequently, as the second step, these summaries were fed into a RAG prompt along with an instruction to rank them according to their level of importance (without additional context provided). The results strongly favored political content over economic content. Nonetheless, the objective of the study was to determine which articles are reliable as they have an impact on stock prices and could provide a basis for recommendations or serve as strong indications for the language model in RAG.</p>
+</div>
+<section id="S3.SS2.SSS1" class="ltx_subsubsection">
+<h4 class="ltx_title ltx_title_subsubsection">
+<span class="ltx_tag ltx_tag_subsubsection">3.2.1 </span>Ranking</h4>
+
+<div id="S3.SS2.SSS1.p1" class="ltx_para">
+<p id="S3.SS2.SSS1.p1.1" class="ltx_p">A necessary step in the methodology was to construct a ranking framework for the model. This framework prioritizes news sources according to the following descending order of importance:</p>
+<ol id="S3.I2" class="ltx_enumerate">
+<li id="S3.I2.i1" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">1.</span> 
+<div id="S3.I2.i1.p1" class="ltx_para">
+<p id="S3.I2.i1.p1.1" class="ltx_p">Corporate quarterly and annual reports.</p>
+</div>
+</li>
+<li id="S3.I2.i2" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">2.</span> 
+<div id="S3.I2.i2.p1" class="ltx_para">
+<p id="S3.I2.i2.p1.1" class="ltx_p">Decisions and announcements from central banks (e.g., the Federal Reserve).</p>
+</div>
+</li>
+<li id="S3.I2.i3" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">3.</span> 
+<div id="S3.I2.i3.p1" class="ltx_para">
+<p id="S3.I2.i3.p1.1" class="ltx_p">Macroeconomic data, including indicators on inflation, employment, and economic activity.</p>
+</div>
+</li>
+<li id="S3.I2.i4" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">4.</span> 
+<div id="S3.I2.i4.p1" class="ltx_para">
+<p id="S3.I2.i4.p1.1" class="ltx_p">Major corporate events such as mergers and acquisitions (M&amp;A), restructurings, strategic announcements, and changes in executive management.</p>
+</div>
+</li>
+<li id="S3.I2.i5" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">5.</span> 
+<div id="S3.I2.i5.p1" class="ltx_para">
+<p id="S3.I2.i5.p1.1" class="ltx_p">Insider trading activity and transactions by large institutional investors.</p>
+</div>
+</li>
+<li id="S3.I2.i6" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">6.</span> 
+<div id="S3.I2.i6.p1" class="ltx_para">
+<p id="S3.I2.i6.p1.1" class="ltx_p">Reports from competitors or other companies within the same industry sector.</p>
+</div>
+</li>
+<li id="S3.I2.i7" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">7.</span> 
+<div id="S3.I2.i7.p1" class="ltx_para">
+<p id="S3.I2.i7.p1.1" class="ltx_p">News articles, with a focus on their sentiment, novelty, and topicality.</p>
+</div>
+</li>
+<li id="S3.I2.i8" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">8.</span> 
+<div id="S3.I2.i8.p1" class="ltx_para">
+<p id="S3.I2.i8.p1.1" class="ltx_p">Analyst reports, including ratings and price targets.</p>
+</div>
+</li>
+</ol>
+<p id="S3.SS2.SSS1.p1.2" class="ltx_p">Another challenge was the number of news articles that focused on specific companies. The volume of articles narrowed the time horizon to a single day for the most popular companies, which significantly affected the organization of the news, effectively reversing the order of the aforementioned list, prioritize sentiment, novelty, ratings, and analysts. To balance this, the latest financial report of the respective company was recently added into the RAG, with the recommendation that data from this report be taken into account when compiling the list of news articles.</p>
+</div>
+</section>
+<section id="S3.SS2.SSS2" class="ltx_subsubsection">
+<h4 class="ltx_title ltx_title_subsubsection">
+<span class="ltx_tag ltx_tag_subsubsection">3.2.2 </span>Ranked News Summaries (System Output)</h4>
+
+<div id="S3.SS2.SSS2.p1" class="ltx_para">
+<p id="S3.SS2.SSS2.p1.1" class="ltx_p">Below is an example of summarized articles ranked by their significance to investors for the company NVIDIA on November 18 and November 19, up until the market opening hours:</p>
+<ol id="S3.I3" class="ltx_enumerate">
+<li id="S3.I3.i1" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">1.</span> 
+<div id="S3.I3.i1.p1" class="ltx_para">
+<p id="S3.I3.i1.p1.1" class="ltx_p"><span id="S3.I3.i1.p1.1.1" class="ltx_text ltx_font_italic">(Valuation Milestone): Prediction that NVIDIA may become the first company in the world to reach a valuation of $4 trillion, approaching this milestone with a current market capitalization of approximately $3.6 trillion. NVIDIA’s growth is driven by increasing demand for its graphics processors, particularly in the context of artificial intelligence, which may lead to further revenue and profit expansion.</span></p>
+</div>
+</li>
+<li id="S3.I3.i2" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">2.</span> 
+<div id="S3.I3.i2.p1" class="ltx_para">
+<p id="S3.I3.i2.p1.1" class="ltx_p"><span id="S3.I3.i2.p1.1.1" class="ltx_text ltx_font_italic">(Technical Risk): Reports on overheating issues affecting NVIDIA’s Blackwell chips, which have contributed to a decline in the company’s stock price ahead of the upcoming quarterly earnings report. Analysts suggest that, despite the potential loss of market share, NVIDIA may still strengthen its position in the AI sector.</span></p>
+</div>
+</li>
+<li id="S3.I3.i3" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">3.</span> 
+<div id="S3.I3.i3.p1" class="ltx_para">
+<p id="S3.I3.i3.p1.1" class="ltx_p"><span id="S3.I3.i3.p1.1.1" class="ltx_text ltx_font_italic">(Earnings Preview): Discussion of high expectations surrounding NVIDIA’s quarterly results, pointing to a potential stock price movement of nearly $300 billion. It also outlines reasons why investors might consider either buying or holding off on purchasing shares before the earnings announcement. While strong demand for NVIDIA’s products is noted, concerns about the new Blackwell chips could impact financial outcomes and market response.</span></p>
+</div>
+</li>
+<li id="S3.I3.i4" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">4.</span> 
+<div id="S3.I3.i4.p1" class="ltx_para">
+<p id="S3.I3.i4.p1.1" class="ltx_p"><span id="S3.I3.i4.p1.1.1" class="ltx_text ltx_font_italic">(Technical Risk - Confirmation): NVIDIA’s stock declined due to concerns about overheating in its Blackwell processors, potentially affecting the company’s ongoing development. Issues with the new AI chips may negatively influence investor confidence and NVIDIA’s future financial performance.</span></p>
+</div>
+</li>
+<li id="S3.I3.i5" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">5.</span> 
+<div id="S3.I3.i5.p1" class="ltx_para">
+<p id="S3.I3.i5.p1.1" class="ltx_p"><span id="S3.I3.i5.p1.1.1" class="ltx_text ltx_font_italic">(Bullish Counterpoint): The article predicts that NVIDIA’s shares will rise following the earnings announcement on November 20, primarily due to strong demand for the new Blackwell processors, upgraded profit forecasts by analysts, and expected increases in the company’s clients’ capital expenditures. These factors could significantly contribute to the growth of NVIDIA’s stock value in the coming weeks.</span></p>
+</div>
+</li>
+<li id="S3.I3.i6" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">6.</span> 
+<div id="S3.I3.i6.p1" class="ltx_para">
+<p id="S3.I3.i6.p1.1" class="ltx_p"><span id="S3.I3.i6.p1.1.1" class="ltx_text ltx_font_italic">(Geopolitical/Ecosystem): Reports on Nebius Group plans to launch its first cloud operations in the United States, which may boost the use of NVIDIA chips in AI, against the backdrop of rising geopolitical tensions related to the war in Ukraine affecting stock markets. In light of these tensions, investors are concerned about market stability, leading to declines in indices such as the Dow, S&amp;P 500, and Nasdaq.</span></p>
+</div>
+</li>
+<li id="S3.I3.i7" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">7.</span> 
+<div id="S3.I3.i7.p1" class="ltx_para">
+<p id="S3.I3.i7.p1.1" class="ltx_p"><span id="S3.I3.i7.p1.1.1" class="ltx_text ltx_font_italic">(Partnership News): Foxconn has partnered with NVIDIA to implement digital twin technology in its factories, aiming to streamline production processes and supply chain management while increasing the company’s resilience to disruptions. This partnership has the potential to revolutionize global manufacturing operations and enhance Foxconn’s competitiveness in global markets.</span></p>
+</div>
+</li>
+<li id="S3.I3.i8" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">8.</span> 
+<div id="S3.I3.i8.p1" class="ltx_para">
+<p id="S3.I3.i8.p1.1" class="ltx_p"><span id="S3.I3.i8.p1.1.1" class="ltx_text ltx_font_italic">(Analyst Commentary): Jim Cramer warns NVIDIA investors against overreacting to the latest Blackwell report, suggesting that the stock decline is natural and should not cause panic. He emphasizes that the company’s long-term fundamentals remain strong, which should reassure investors.</span></p>
+</div>
+</li>
+<li id="S3.I3.i9" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">9.</span> 
+<div id="S3.I3.i9.p1" class="ltx_para">
+<p id="S3.I3.i9.p1.1" class="ltx_p"><span id="S3.I3.i9.p1.1.1" class="ltx_text ltx_font_italic">(Investor View - Bullish): The article discusses Masayoshi Son’s views on NVIDIA Corporation, which he considers undervalued. According to Son, spending on artificial intelligence is expected to increase significantly over the coming years, benefiting NVIDIA’s GPU-related business. Furthermore, reports indicate growing investor interest in AI startups, which raised nearly $19 billion in funding in the third quarter of 2024.</span></p>
+</div>
+</li>
+<li id="S3.I3.i10" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">10.</span> 
+<div id="S3.I3.i10.p1" class="ltx_para">
+<p id="S3.I3.i10.p1.1" class="ltx_p"><span id="S3.I3.i10.p1.1.1" class="ltx_text ltx_font_italic">(Investor View - Bearish): Philippe Laffont, billionaire and founder of Coatue Management, sold 80% of his stake in NVIDIA, reallocating investments to Alibaba, which he considers undervalued in the AI context. Laffont sees Alibaba’s strong position in China’s e-commerce market and its expanding cloud segment as factors making the company an attractive investment.</span></p>
+</div>
+</li>
+<li id="S3.I3.i11" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">11.</span> 
+<div id="S3.I3.i11.p1" class="ltx_para">
+<p id="S3.I3.i11.p1.1" class="ltx_p"><span id="S3.I3.i11.p1.1.1" class="ltx_text ltx_font_italic">(Investor View - Bearish): The article covers the investment decisions of billionaire Stanley Druckenmiller, who sold all his shares in NVIDIA, considering their valuation too high, and invested in Broadcom, a company with growing potential in artificial intelligence. This indicates his belief in the future development of the AI market alongside a cautious approach to investing in highly valued stocks.</span></p>
+</div>
+</li>
+<li id="S3.I3.i12" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">12.</span> 
+<div id="S3.I3.i12.p1" class="ltx_para">
+<p id="S3.I3.i12.p1.1" class="ltx_p"><span id="S3.I3.i12.p1.1.1" class="ltx_text ltx_font_italic">(Competitor News): AMD announced a 4% workforce reduction affecting about 1,000 employees, despite achieving over one billion dollars in profit in the third quarter of 2023 and growth in the AI sector. This decision raises questions as to whether it is merely a resource cut or a sign of deeper financial issues within the company.</span></p>
+</div>
+</li>
+<li id="S3.I3.i13" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">13.</span> 
+<div id="S3.I3.i13.p1" class="ltx_para">
+<p id="S3.I3.i13.p1.1" class="ltx_p"><span id="S3.I3.i13.p1.1.1" class="ltx_text ltx_font_italic">(Supply Chain/Ecosystem): Samsung Electronics plans to secure orders from Qualcomm and NVIDIA for 2nm and 3nm processes, while simultaneously developing its own Exynos processors despite production performance challenges. The company is striving to increase self-sufficiency in application processor manufacturing, which could influence the future of its smartphone segment strategy.</span></p>
+</div>
+</li>
+</ol>
+</div>
+</section>
+<section id="S3.SS2.SSS3" class="ltx_subsubsection">
+<h4 class="ltx_title ltx_title_subsubsection">
+<span class="ltx_tag ltx_tag_subsubsection">3.2.3 </span>System Performance and Analysis</h4>
+
+<div id="S3.SS2.SSS3.p1" class="ltx_para">
+<p id="S3.SS2.SSS3.p1.1" class="ltx_p">This news-ranking task provides valuable insights into the LLM’s ability to reason under conditions of information overload and conflicting reports.</p>
+<ul id="S3.I4" class="ltx_itemize">
+<li id="S3.I4.i1" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">•</span> 
+<div id="S3.I4.i1.p1" class="ltx_para">
+<p id="S3.I4.i1.p1.1" class="ltx_p"><span id="S3.I4.i1.p1.1.1" class="ltx_text ltx_font_bold">Prioritization of Market-Moving Themes:</span> The system correctly identified the three dominant narratives for NVIDIA on this day: (1) the massive, forward-looking valuation potential, (2) the immediate, tangible risk of technical issues with a key new product (Blackwell), and (3) the imminent, high-impact binary event (the earnings report). These themes occupy the top 5 spots, demonstrating a sophisticated understanding of what truly matters to investors.</p>
+</div>
+</li>
+<li id="S3.I4.i2" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">•</span> 
+<div id="S3.I4.i2.p1" class="ltx_para">
+<p id="S3.I4.i2.p1.1" class="ltx_p"><span id="S3.I4.i2.p1.1.1" class="ltx_text ltx_font_bold">Identification of Conflicting Information:</span> The model did not simply rank all positive news first. It placed a negative report about overheating chips at #2, immediately after a positive report on valuation. This highlights the system’s ability to recognize the high significance of a potential risk, even amidst bullish long-term narratives. It also correctly clustered a bullish counterpoint on the same topic at rank #5.</p>
+</div>
+</li>
+<li id="S3.I4.i3" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">•</span> 
+<div id="S3.I4.i3.p1" class="ltx_para">
+<p id="S3.I4.i3.p1.1" class="ltx_p"><span id="S3.I4.i3.p1.1.1" class="ltx_text ltx_font_bold">Contextual Discounting of Information:</span> The ranking demonstrates a logical hierarchy. Direct news about NVIDIA’s valuation, products, and financials was ranked highest. Commentaries from individual analysts or investors (Cramer, Son, Laffont, Druckenmiller) were ranked in the middle tier. Broader ecosystem or competitor news (Foxconn, AMD, Samsung) was correctly placed at the bottom, recognized as relevant but less immediately impactful than core company issues. This shows the model successfully applied the nuanced ranking framework described in our methodology.</p>
+</div>
+</li>
+<li id="S3.I4.i4" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">•</span> 
+<div id="S3.I4.i4.p1" class="ltx_para">
+<p id="S3.I4.i4.p1.1" class="ltx_p"><span id="S3.I4.i4.p1.1.1" class="ltx_text ltx_font_bold">Challenge of Nuance:</span> While the ranking is logical, the model’s summaries do not fully capture the nuance of the bearish investor sentiment (Laffont, Druckenmiller). Both investors sold not because they believe NVIDIA is a bad company, but because of its high valuation—a crucial distinction. This highlights a limitation and an area for future improvement in prompting the model to extract not just the action (selling) but the detailed rationale behind it.</p>
+</div>
+</li>
+</ul>
+</div>
+</section>
+</section>
+<section id="S3.SS3" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">3.3 </span>Revenue Exposure and Geopolitical Risk: NVIDIA, Amazon, and Tesla - 22nd November 2024</h3>
+
+<div id="S3.SS3.p1" class="ltx_para">
+<p id="S3.SS3.p1.1" class="ltx_p">LLM models can also be used in the context of extracting data from attached text in RAG. An example of this could be research based on quarterly reports, focusing on the information they contain about risks, such as how the unavailability of the Chinese and Taiwanese markets could affect a given company. The following are examples for companies: NVIDIA, Amazon, and Tesla. All of this information is based on the quarterly Q3 2024 reports.</p>
+</div>
+<section id="S3.SS3.SSS1" class="ltx_subsubsection">
+<h4 class="ltx_title ltx_title_subsubsection">
+<span class="ltx_tag ltx_tag_subsubsection">3.3.1 </span>NVIDIA</h4>
+
+<div id="S3.SS3.SSS1.p1" class="ltx_para">
+<p id="S3.SS3.SSS1.p1.1" class="ltx_p"><span id="S3.SS3.SSS1.p1.1.1" class="ltx_text ltx_font_italic">Based on the provided financial data, NVIDIA’s revenue from China (including Hong Kong) and Taiwan for the nine months ending October 27, 2024, amounted to $11.574 billion and $15.266 billion, respectively. This represents a combined total of $26.84 billion out of $91.166 billion in total revenue for the same period. Consequently, should access to the Chinese and Taiwanese markets be disrupted due to war or sanctions, NVIDIA could potentially lose approximately 29.44% of its revenue, assuming no alternative markets or compensatory sales strategies are implemented. Such a disruption would likely have a significant impact on both the company’s production and sales, given the substantial contribution of these regions to its total revenue.</span></p>
+</div>
+<div id="S3.SS3.SSS1.p2" class="ltx_para">
+<p id="S3.SS3.SSS1.p2.1" class="ltx_p"><span id="S3.SS3.SSS1.p2.1.1" class="ltx_text ltx_font_bold ltx_font_italic">Revenue from China:<span id="S3.SS3.SSS1.p2.1.1.1" class="ltx_text ltx_font_medium">
+The report notes that NVIDIA’s Data Center segment revenue from China increased in the third quarter of fiscal year 2025 compared to the previous quarter. However, as a percentage of total Data Center revenue, it remained below the levels recorded prior to the implementation of export controls in October 2023. This suggests that China remains a significant market for NVIDIA’s Data Center products, although the exact share of revenue derived from China is not specified.</span></span></p>
+</div>
+<div id="S3.SS3.SSS1.p3" class="ltx_para">
+<p id="S3.SS3.SSS1.p3.1" class="ltx_p"><span id="S3.SS3.SSS1.p3.1.1" class="ltx_text ltx_font_bold ltx_font_italic">Export Controls and Licensing Requirements:<span id="S3.SS3.SSS1.p3.1.1.1" class="ltx_text ltx_font_medium">
+The text also addresses various export controls and licensing requirements imposed by the U.S. government, which restrict NVIDIA’s ability to sell certain advanced products in China. These limitations indicate that a portion of NVIDIA’s revenue is contingent on its capacity to export to the Chinese market. The imposed restrictions have already affected the company’s competitive positioning.</span></span></p>
+</div>
+<div id="S3.SS3.SSS1.p4" class="ltx_para">
+<p id="S3.SS3.SSS1.p4.1" class="ltx_p"><span id="S3.SS3.SSS1.p4.1.1" class="ltx_text ltx_font_bold ltx_font_italic">Geopolitical Risks:<span id="S3.SS3.SSS1.p4.1.1.1" class="ltx_text ltx_font_medium">
+The report emphasizes geopolitical tensions—particularly those involving Taiwan and China—as potential threats that could severely disrupt NVIDIA’s supply chain and revenue streams. Taiwan plays a critical role in NVIDIA’s supply chain, and any disruptions in this region may significantly affect the company’s manufacturing capabilities. The overall impact would likely be substantial, particularly in the Data Center segment and across the supply chain. However, the precise extent would depend on numerous factors, including the company’s ability to redirect sales and restructure its supply chain.</span></span></p>
+</div>
+</section>
+<section id="S3.SS3.SSS2" class="ltx_subsubsection">
+<h4 class="ltx_title ltx_title_subsubsection">
+<span class="ltx_tag ltx_tag_subsubsection">3.3.2 </span>Amazon</h4>
+
+<div id="S3.SS3.SSS2.p1" class="ltx_para">
+<p id="S3.SS3.SSS2.p1.1" class="ltx_p"><span id="S3.SS3.SSS2.p1.1.1" class="ltx_text ltx_font_italic">Amazon’s International segment accounted for 23% of its consolidated revenue in the third quarter of 2024. Should access to the Chinese and Taiwanese markets be lost due to war or sanctions, there could be a notable impact on Amazon’s international revenue. However, specific figures for revenue generated solely from China and Taiwan are not provided, making it impossible to determine the exact financial impact based solely on the available information. The total effect would depend on the proportion of international sales attributable to these two markets.</span></p>
+</div>
+</section>
+<section id="S3.SS3.SSS3" class="ltx_subsubsection">
+<h4 class="ltx_title ltx_title_subsubsection">
+<span class="ltx_tag ltx_tag_subsubsection">3.3.3 </span>Tesla</h4>
+
+<div id="S3.SS3.SSS3.p1" class="ltx_para">
+<p id="S3.SS3.SSS3.p1.1" class="ltx_p"><span id="S3.SS3.SSS3.p1.1.1" class="ltx_text ltx_font_italic">Tesla reported the following revenue from the Chinese market:</span></p>
+<ul id="S3.I5" class="ltx_itemize">
+<li id="S3.I5.i1" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">•</span> 
+<div id="S3.I5.i1.p1" class="ltx_para">
+<p id="S3.I5.i1.p1.1" class="ltx_p"><span id="S3.I5.i1.p1.1.1" class="ltx_text ltx_font_italic">Three months ending September 30, 2024: $5.665 billion</span></p>
+</div>
+</li>
+<li id="S3.I5.i2" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">•</span> 
+<div id="S3.I5.i2.p1" class="ltx_para">
+<p id="S3.I5.i2.p1.1" class="ltx_p"><span id="S3.I5.i2.p1.1.1" class="ltx_text ltx_font_italic">Nine months ending September 30, 2024: $14.893 billion</span></p>
+</div>
+</li>
+</ul>
+</div>
+<div id="S3.SS3.SSS3.p2" class="ltx_para">
+<p id="S3.SS3.SSS3.p2.1" class="ltx_p"><span id="S3.SS3.SSS3.p2.1.1" class="ltx_text ltx_font_italic">If access to the Chinese and Taiwanese markets were lost, Tesla would forgo this revenue. Since no specific figures for Taiwan are provided, it is assumed that any impact from that region is included within the ”Other international” category. Based on this assumption, the loss of the Chinese market would result in a revenue decline of approximately 20.7% for the nine-month period ending September 30, 2024 ($14.893 billion out of $71.983 billion in total revenue).</span></p>
+</div>
+<div id="S3.SS3.SSS3.p3" class="ltx_para">
+<p id="S3.SS3.SSS3.p3.1" class="ltx_p"><span id="S3.SS3.SSS3.p3.1.1" class="ltx_text ltx_font_italic">Moreover, production at the Gigafactory Shanghai - which manufactures Models 3 and Y - would also have to be suspended, which would affect Tesla’s global production capacity. However, the text does not provide detailed estimates regarding the production impact, and therefore a precise assessment cannot be made without further data.</span></p>
+</div>
+</section>
+</section>
+<section id="S3.SS4" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">3.4 </span>Energy Fuels 29th November 2024 - Fundamental Analysis of a Small-Cap Uranium Company</h3>
+
+<div id="S3.SS4.p1" class="ltx_para">
+<p id="S3.SS4.p1.1" class="ltx_p">The analysis of Energy Fuels showcases the system’s proficiency in several advanced tasks that go beyond simple news summarization and are critical for evaluating smaller companies where data is often less structured and more concentrated.</p>
+</div>
+<div id="S3.SS4.p2" class="ltx_para">
+<ul id="S3.I6" class="ltx_itemize">
+<li id="S3.I6.i1" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">•</span> 
+<div id="S3.I6.i1.p1" class="ltx_para">
+<p id="S3.I6.i1.p1.1" class="ltx_p"><span id="S3.I6.i1.p1.1.1" class="ltx_text ltx_font_bold">Deep Extraction from a Single Source:</span> Unlike the NVIDIA example which processed many articles, this brief was primarily derived from one key press release. The LLM demonstrated its ability to dissect a complex corporate document, correctly identifying and separating distinct positive developments (new uranium contracts, REE production milestones, the lifting of the Toliara project suspension) and structuring them into a coherent ”News Summary” and distinct ”Buy Reasons.”</p>
+</div>
+</li>
+<li id="S3.I6.i2" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">•</span> 
+<div id="S3.I6.i2.p1" class="ltx_para">
+<p id="S3.I6.i2.p1.1" class="ltx_p"><span id="S3.I6.i2.p1.1.1" class="ltx_text ltx_font_bold">Identification of Contradictory Signals:</span> A significant success of the system was its ability to maintain analytical balance. Despite the overwhelmingly positive operational news in the press release, the RAG process also retrieved the headline financial figure—a net loss of $12 million—from the attached financial statements. The system correctly flagged this as a primary ”Argument for Sale,” demonstrating its capacity to identify and present conflicting information, which is a hallmark of robust financial analysis.</p>
+</div>
+</li>
+<li id="S3.I6.i3" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">•</span> 
+<div id="S3.I6.i3.p1" class="ltx_para">
+<p id="S3.I6.i3.p1.1" class="ltx_p"><span id="S3.I6.i3.p1.1.1" class="ltx_text ltx_font_bold">Prompt-Guided Financial Calculation:</span> The ”Financial Analysis” subsection highlights a more advanced capability. The prompt contained instructions for the LLM to perform basic, yet insightful, calculations based on extracted data. The system correctly retrieved the cash position ($47.46M), market capitalization ($1.2B), and quarterly loss ($12M), and then successfully calculated the cash-to-capitalization ratio and a basic ”cash burn” runway (”survive for about four quarters”). This demonstrates a move from qualitative summarization to quantitative, heuristic-based analysis.</p>
+</div>
+</li>
+<li id="S3.I6.i4" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">•</span> 
+<div id="S3.I6.i4.p1" class="ltx_para">
+<p id="S3.I6.i4.p1.1" class="ltx_p"><span id="S3.I6.i4.p1.1.1" class="ltx_text ltx_font_bold">Nuanced Macroeconomic Application:</span> The system once again applied the macroeconomic framework, but with a specific nuance relevant to this company. It correctly identified that while a recessionary phase is generally negative, it can be beneficial for specific sectors like energy. Furthermore, it made a sophisticated connection between the macroeconomic trend of falling interest rates and the company’s specific financial state (no debt), correctly identifying this as a potential advantage.</p>
+</div>
+</li>
+<li id="S3.I6.i5" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">•</span> 
+<div id="S3.I6.i5.p1" class="ltx_para">
+<p id="S3.I6.i5.p1.1" class="ltx_p"><span id="S3.I6.i5.p1.1.1" class="ltx_text ltx_font_bold">Creative Synthesis in Titling:</span> The brief’s title—”UUUU: Uranium Turmoil and Rare Earth Opportunities - Is This Your Goldmine?”—was generated by a specific instruction in the prompt to create an engaging, journalistic-style headline. This showcases the model’s flexibility to adapt its output style, moving from purely technical prose to more creative and accessible language suitable for an investor audience.</p>
+</div>
+</li>
+</ul>
+</div>
+<div id="S3.SS4.p3" class="ltx_para">
+<p id="S3.SS4.p3.1" class="ltx_p"><span id="S3.SS4.p3.1.1" class="ltx_text ltx_font_italic">### Title: ”UUUU: Uranium Turmoil and Rare Earth Opportunities - Is This Your Goldmine?”</span></p>
+</div>
+<div id="S3.SS4.p4" class="ltx_para">
+<p id="S3.SS4.p4.1" class="ltx_p"><span id="S3.SS4.p4.1.1" class="ltx_text ltx_font_italic">Energy Fuels is an American company engaged in the mining and processing of uranium and vanadium, key raw materials for the nuclear energy industry. The company also has resources and technologies for the extraction of rare earth elements, which are used in advanced technology industries. Its operations are focused on the sustainable development of energy resources, primarily in the United States.</span></p>
+</div>
+<div id="S3.SS4.p5" class="ltx_para">
+<p id="S3.SS4.p5.1" class="ltx_p"><span id="S3.SS4.p5.1.1" class="ltx_text ltx_font_italic">### News Summary:
+Energy Fuels announced its Q3 2024 results, highlighting active uranium mining and processing operations and successes in rare earth element (REE) production. The company continues to build a REE supply chain hub in the US. Key achievements include a new uranium sales contract and the commencement of processing of a large uranium inventory at the White Mesa Mill. Additionally, the company has completed the acquisition of Base Resources, which is expected to accelerate the development of its heavy mineral sands and REE projects, including the Toliara project in Madagascar, following the lifting of the suspension by the Madagascar government.
+https://www.prnewswire.com/news-releases/madagascar-government-lifts-suspension-on-energy-fuels-toliara-critical-minerals-project-302318407.html</span></p>
+</div>
+<div id="S3.SS4.p6" class="ltx_para">
+<p id="S3.SS4.p6.1" class="ltx_p"><span id="S3.SS4.p6.1.1" class="ltx_text ltx_font_italic">### Buy Reasons:</span></p>
+</div>
+<div id="S3.SS4.p7" class="ltx_para">
+<p id="S3.SS4.p7.1" class="ltx_p"><span id="S3.SS4.p7.1.1" class="ltx_text ltx_font_italic">1. **Strong Financial Position**: Energy Fuels has a solid financial position with over $180 million in liquidity and no debt, providing stability in the face of changing market conditions.</span></p>
+</div>
+<div id="S3.SS4.p8" class="ltx_para">
+<p id="S3.SS4.p8.1" class="ltx_p"><span id="S3.SS4.p8.1.1" class="ltx_text ltx_font_italic">2. **Uranium as a Key Product**: The company has secured a new long-term contract for uranium supplies to the US, ensuring stable revenues in the coming years.</span></p>
+</div>
+<div id="S3.SS4.p9" class="ltx_para">
+<p id="S3.SS4.p9.1" class="ltx_p"><span id="S3.SS4.p9.1.1" class="ltx_text ltx_font_italic">3. **REE Development**: Energy Fuels has successfully launched an REE separation circuit, which could attract customers from the technology and defense industries.</span></p>
+</div>
+<div id="S3.SS4.p10" class="ltx_para">
+<p id="S3.SS4.p10.1" class="ltx_p"><span id="S3.SS4.p10.1.1" class="ltx_text ltx_font_italic">4. **Lift of the Toliara Project Suspension**: The Madagascar government’s decision to lift the suspension allows for the development of a project that could become a significant revenue source.</span></p>
+</div>
+<div id="S3.SS4.p11" class="ltx_para">
+<p id="S3.SS4.p11.1" class="ltx_p"><span id="S3.SS4.p11.1.1" class="ltx_text ltx_font_italic">5. **Projected REE Market Growth**: Growing demand for rare earth elements in the technology and automotive sectors supports the company’s long-term growth.</span></p>
+</div>
+<div id="S3.SS4.p12" class="ltx_para">
+<p id="S3.SS4.p12.1" class="ltx_p"><span id="S3.SS4.p12.1.1" class="ltx_text ltx_font_italic">### Arguments for Sale:</span></p>
+</div>
+<div id="S3.SS4.p13" class="ltx_para">
+<p id="S3.SS4.p13.1" class="ltx_p"><span id="S3.SS4.p13.1.1" class="ltx_text ltx_font_italic">1. **Financial Loss**: The company reported a net loss of $12 million, which may raise investor concerns about profitability.</span></p>
+</div>
+<div id="S3.SS4.p14" class="ltx_para">
+<p id="S3.SS4.p14.1" class="ltx_p"><span id="S3.SS4.p14.1.1" class="ltx_text ltx_font_italic">2. **High Operating Costs**: Mining and processing uranium and REE are expensive, and environmental regulations may increase costs.</span></p>
+</div>
+<div id="S3.SS4.p15" class="ltx_para">
+<p id="S3.SS4.p15.1" class="ltx_p"><span id="S3.SS4.p15.1.1" class="ltx_text ltx_font_italic">3. **Downward Uranium Price Trend**: Current uranium prices are trending downward, which could impact profit margins.</span></p>
+</div>
+<div id="S3.SS4.p16" class="ltx_para">
+<p id="S3.SS4.p16.1" class="ltx_p"><span id="S3.SS4.p16.1.1" class="ltx_text ltx_font_italic">4. **Macroeconomic Uncertainty**: Current economic conditions suggest a slowdown, which could impact commodity demand.</span></p>
+</div>
+<div id="S3.SS4.p17" class="ltx_para">
+<p id="S3.SS4.p17.1" class="ltx_p"><span id="S3.SS4.p17.1.1" class="ltx_text ltx_font_italic">### Financial Analysis:</span></p>
+</div>
+<div id="S3.SS4.p18" class="ltx_para">
+<p id="S3.SS4.p18.1" class="ltx_p"><span id="S3.SS4.p18.1.1" class="ltx_text ltx_font_italic">- **Cash vs. Capitalization**: Energy Fuels has $47.46 million in cash with a market capitalization of $1.2 billion, resulting in a cash-to-capitalization ratio of approximately 4%, which is rather low.</span></p>
+</div>
+<div id="S3.SS4.p19" class="ltx_para">
+<p id="S3.SS4.p19.1" class="ltx_p"><span id="S3.SS4.p19.1.1" class="ltx_text ltx_font_italic">- **Survival on a Loss**: With a quarterly loss of $12 million, the company could survive for about four quarters without additional financing.</span></p>
+</div>
+<div id="S3.SS4.p20" class="ltx_para">
+<p id="S3.SS4.p20.1" class="ltx_p"><span id="S3.SS4.p20.1.1" class="ltx_text ltx_font_italic">### Macroeconomic Impact:
+The current economic phase suggests a recession, which could boost investments in energy-related sectors such as uranium. Falling interest rates could also favor investments in debt-free companies like Energy Fuels.</span></p>
+</div>
+<div id="S3.SS4.p21" class="ltx_para">
+<p id="S3.SS4.p21.1" class="ltx_p"><span id="S3.SS4.p21.1.1" class="ltx_text ltx_font_italic">### Summary:
+Investing in Energy Fuels may be attractive to those who believe in the long-term growth of the REE market and the company’s financial stability, but potential risks related to operating costs and trends in uranium prices should be closely monitored.</span></p>
+</div>
+</section>
+<section id="S3.SS5" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">3.5 </span>Evaluating LLM Responses to Unforeseen Events: The Case of Martial Law in South Korea - 4th December 2024</h3>
+
+<div id="S3.SS5.p1" class="ltx_para">
+<p id="S3.SS5.p1.1" class="ltx_p">The study also examined how LLM responds to highly unexpected events that are difficult to predict and quantify in a quarterly report, specifically, the imposition of martial law in South Korea. To recall, martial law in South Korea was declared on December 3, 2024, at 10:27 p.m. local time, by President Yoon Suk-yeol during a live televised address. The state of martial law lasted approximately six hours and was lifted on 4 December 2024, at around 4:30 a.m., following a vote in the National Assembly. The following are examples for Coinbase, NVIDIA, and Lululemon.</p>
+</div>
+<section id="S3.SS5.SSS1" class="ltx_subsubsection">
+<h4 class="ltx_title ltx_title_subsubsection">
+<span class="ltx_tag ltx_tag_subsubsection">3.5.1 </span>Coinbase</h4>
+
+<div id="S3.SS5.SSS1.p1" class="ltx_para">
+<p id="S3.SS5.SSS1.p1.1" class="ltx_p"><span id="S3.SS5.SSS1.p1.1.1" class="ltx_text ltx_font_italic">The imposition of martial law in South Korea may significantly affect the operations of a publicly traded company, especially one engaged in international business and operating in highly regulated sectors such as cryptocurrencies, mobile technologies, or financial services.</span></p>
+</div>
+<div id="S3.SS5.SSS1.p2" class="ltx_para">
+<p id="S3.SS5.SSS1.p2.1" class="ltx_p"><span id="S3.SS5.SSS1.p2.1.1" class="ltx_text ltx_font_bold ltx_font_italic">Heightened Regulatory Risk:<span id="S3.SS5.SSS1.p2.1.1.1" class="ltx_text ltx_font_medium">
+Martial law may lead to stricter regulation and government oversight of business operations, particularly in areas related to anti-money laundering (AML), counter-terrorism financing, and compliance with international sanctions. The company may be required to rapidly adjust to new legal requirements, which could incur additional costs and expose it to legal risks.</span></span></p>
+</div>
+<div id="S3.SS5.SSS1.p3" class="ltx_para">
+<p id="S3.SS5.SSS1.p3.1" class="ltx_p"><span id="S3.SS5.SSS1.p3.1.1" class="ltx_text ltx_font_bold ltx_font_italic">Reputational Impact:<span id="S3.SS5.SSS1.p3.1.1.1" class="ltx_text ltx_font_medium">
+If the company is perceived to have connections to North Korea or other sanctioned entities, its reputation could suffer. Increased media and regulatory scrutiny can erode investor and customer confidence.</span></span></p>
+</div>
+<div id="S3.SS5.SSS1.p4" class="ltx_para">
+<p id="S3.SS5.SSS1.p4.1" class="ltx_p"><span id="S3.SS5.SSS1.p4.1.1" class="ltx_text ltx_font_bold ltx_font_italic">Financial Risk:<span id="S3.SS5.SSS1.p4.1.1.1" class="ltx_text ltx_font_medium">
+Potential sanctions or operational restrictions may impair the company’s ability to conduct business in specific regions, resulting in revenue loss. In addition, financial penalties for compliance violations could further burden the company’s balance sheet.</span></span></p>
+</div>
+<div id="S3.SS5.SSS1.p5" class="ltx_para">
+<p id="S3.SS5.SSS1.p5.1" class="ltx_p"><span id="S3.SS5.SSS1.p5.1.1" class="ltx_text ltx_font_bold ltx_font_italic">Stock Price Volatility<span id="S3.SS5.SSS1.p5.1.1.1" class="ltx_text ltx_font_medium">
+Depending on the perception of the investor of the regulatory and political risks, the company’s stock price could experience significant volatility. If risks are deemed high, the stock may decline. Conversely, if the company demonstrates effective risk management and operational adaptability, market response may be more favorable.</span></span></p>
+</div>
+<div id="S3.SS5.SSS1.p6" class="ltx_para">
+<p id="S3.SS5.SSS1.p6.1" class="ltx_p"><span id="S3.SS5.SSS1.p6.1.1" class="ltx_text ltx_font_italic">In summary, the imposition of martial law in South Korea could increase both regulatory and operational uncertainty for publicly traded companies, potentially reducing their market valuation unless effective risk mitigation strategies are deployed.</span></p>
+</div>
+</section>
+<section id="S3.SS5.SSS2" class="ltx_subsubsection">
+<h4 class="ltx_title ltx_title_subsubsection">
+<span class="ltx_tag ltx_tag_subsubsection">3.5.2 </span>NVIDIA</h4>
+
+<div id="S3.SS5.SSS2.p1" class="ltx_para">
+<p id="S3.SS5.SSS2.p1.1" class="ltx_p"><span id="S3.SS5.SSS2.p1.1.1" class="ltx_text ltx_font_italic">The introduction of martial law in South Korea could have a significant impact on the company’s operations. Political instability of this magnitude may elevate operational risks and investor concerns, potentially affecting the firm’s market valuation.</span></p>
+</div>
+<div id="S3.SS5.SSS2.p2" class="ltx_para">
+<p id="S3.SS5.SSS2.p2.1" class="ltx_p"><span id="S3.SS5.SSS2.p2.1.1" class="ltx_text ltx_font_bold ltx_font_italic">Increased Regulatory and Political Risk<span id="S3.SS5.SSS2.p2.1.1.1" class="ltx_text ltx_font_medium">
+Martial law may lead to the tightening of laws and regulations, increasing compliance costs, and the likelihood of violations that could result in both financial penalties and reputational damage.</span></span></p>
+</div>
+<div id="S3.SS5.SSS2.p3" class="ltx_para">
+<p id="S3.SS5.SSS2.p3.1" class="ltx_p"><span id="S3.SS5.SSS2.p3.1.1" class="ltx_text ltx_font_bold ltx_font_italic">Supply Chain Disruptions<span id="S3.SS5.SSS2.p3.1.1.1" class="ltx_text ltx_font_medium">
+If the company maintains suppliers or clients in South Korea, martial law could disrupt its supply chain. Such disruptions may cause delays in production and delivery, adversely impacting financial performance.</span></span></p>
+</div>
+<div id="S3.SS5.SSS2.p4" class="ltx_para">
+<p id="S3.SS5.SSS2.p4.1" class="ltx_p"><span id="S3.SS5.SSS2.p4.1.1" class="ltx_text ltx_font_bold ltx_font_italic">Investor Sentiment<span id="S3.SS5.SSS2.p4.1.1.1" class="ltx_text ltx_font_medium">
+Investors may view the company as a riskier investment due to the unstable political environment, potentially triggering a decline in share price.</span></span></p>
+</div>
+<div id="S3.SS5.SSS2.p5" class="ltx_para">
+<p id="S3.SS5.SSS2.p5.1" class="ltx_p"><span id="S3.SS5.SSS2.p5.1.1" class="ltx_text ltx_font_bold ltx_font_italic">Potential Sanctions and Trade Restrictions<span id="S3.SS5.SSS2.p5.1.1.1" class="ltx_text ltx_font_medium">
+Should the political situation escalate further, international sanctions or trade restrictions could be imposed, affecting the company’s ability to operate in global markets.</span></span></p>
+</div>
+<div id="S3.SS5.SSS2.p6" class="ltx_para">
+<p id="S3.SS5.SSS2.p6.1" class="ltx_p"><span id="S3.SS5.SSS2.p6.1.1" class="ltx_text ltx_font_italic">In conclusion, the imposition of martial law in South Korea is likely to negatively affect the company’s stock price due to heightened regulatory risks, supply chain challenges, and adverse investor sentiment.</span></p>
+</div>
+</section>
+<section id="S3.SS5.SSS3" class="ltx_subsubsection">
+<h4 class="ltx_title ltx_title_subsubsection">
+<span class="ltx_tag ltx_tag_subsubsection">3.5.3 </span>Lululemon</h4>
+
+<div id="S3.SS5.SSS3.p1" class="ltx_para">
+<p id="S3.SS5.SSS3.p1.1" class="ltx_p"><span id="S3.SS5.SSS3.p1.1.1" class="ltx_text ltx_font_italic">Martial law in South Korea could have a material effect on the operations and market valuation of publicly traded companies. In the case of the company analyzed in the report, which operates 19 retail stores in South Korea, such a political event could lead to store closures, supply chain interruptions, a decrease in foot traffic and general economic uncertainty in the region. These factors could result in a reduction in revenue and profits derived from the Korean market, potentially affecting the company’s stock price.</span></p>
+</div>
+<div id="S3.SS5.SSS3.p2" class="ltx_para">
+<p id="S3.SS5.SSS3.p2.1" class="ltx_p"><span id="S3.SS5.SSS3.p2.1.1" class="ltx_text ltx_font_italic">However, it is worth noting that the company operates 19 stores in South Korea out of a global total of 721, meaning Korean locations account for approximately 2.64% of its overall store count. Assuming revenue is roughly proportional to the number of stores, it may be inferred that the Korean market contributes a similar percentage to the company’s total revenue. Nevertheless, the actual impact may vary depending on local market conditions, brand popularity, and other region-specific factors.</span></p>
+</div>
+</section>
+</section>
+<section id="S3.SS6" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">3.6 </span>Lululemon 6th December 2024 - clusterization of news articles</h3>
+
+<div id="S3.SS6.p1" class="ltx_para">
+<p id="S3.SS6.p1.1" class="ltx_p">This example demonstrates a more advanced NLP task performed by our system: the automated clustering and thematic analysis of news articles following a major corporate event. In situations of high information volume, such as after a quarterly earnings release, merely summarizing or ranking articles can be insufficient. The goal here was to test the system’s ability to first identify the distinct underlying narratives present in the news flow, and then to represent each narrative both textually and visually.</p>
+</div>
+<div id="S3.SS6.p2" class="ltx_para">
+<p id="S3.SS6.p2.1" class="ltx_p">The system used LanceDB <cite class="ltx_cite ltx_citemacro_cite">She<span class="ltx_text ltx_bib_etal"> et al.</span> (<a href="https://arxiv.org/html/2607.09121v1#bib.bib16" title="LanceDB - Embracing Composability in the Storage Layer" class="ltx_ref">2024</a>)</cite> and K-means <cite class="ltx_cite ltx_citemacro_cite">MacQueen (<a href="https://arxiv.org/html/2607.09121v1#bib.bib15" title="Some methods for classification and analysis of multivariate observations" class="ltx_ref">1967</a>)</cite> algorithm to process all news articles about Lululemon published after its Q3 2024 earnings announcement. It grouped semantically similar articles into clusters, generated a summary for each cluster. We also created a visual ”word map” to highlight the core themes of each narrative using WordCloud library <cite class="ltx_cite ltx_citemacro_cite"><a href="https://arxiv.org/html/2607.09121v1#bib.bib17" title="word_cloud: A word cloud generator in Python" class="ltx_ref">Mueller </a></cite>.</p>
+</div>
+<div id="S3.SS6.p3" class="ltx_para">
+<p id="S3.SS6.p3.1" class="ltx_p">This clustering task reveals the system’s capability to move beyond linear analysis (ranking) to a more sophisticated, multi-faceted understanding of information landscapes.</p>
+</div>
+<div id="S3.SS6.p4" class="ltx_para">
+<ul id="S3.I7" class="ltx_itemize">
+<li id="S3.I7.i1" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">•</span> 
+<div id="S3.I7.i1.p1" class="ltx_para">
+<p id="S3.I7.i1.p1.1" class="ltx_p"><span id="S3.I7.i1.p1.1.1" class="ltx_text ltx_font_bold">Automated Narrative Identification:</span> The system successfully performed an unsupervised clustering task, identifying two primary, distinct narratives from the pool of post-earnings articles. This demonstrates an ability to discern not just what is being said, but the different angles from which the event is being reported. This is a significant step beyond simple sentiment analysis.</p>
+</div>
+</li>
+<li id="S3.I7.i2" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">•</span> 
+<div id="S3.I7.i2.p1" class="ltx_para">
+<p id="S3.I7.i2.p1.1" class="ltx_p"><span id="S3.I7.i2.p1.1.1" class="ltx_text ltx_font_bold">Cluster 1: The Factual, Data-Driven Narrative:</span> The first cluster (illustrated by Fig. <a href="https://arxiv.org/html/2607.09121v1#S3.F1" title="Figure 1 ‣ 3.6 Lululemon 6th December 2024 - clusterization of news articles ‣ 3 Examples of Briefs Produced for Investors ‣ Augmenting Fundamental Analysis with Large Language Models: A RAG-Based System for Generating Investor Briefs" class="ltx_ref"><span class="ltx_text ltx_ref_tag">1</span></a>) correctly grouped all articles focused on the direct, quantitative results of the earnings report. The LLM’s summary accurately extracted the key data points: the beat on revenue and EPS, the raised full-year forecast, and the specific counterpoint of slowing sales growth in North America. The word map for this cluster would visually reinforce the dominance of terms like ”revenue,” ”earnings,” ”beat,” ”forecast,” and ”North America.”</p>
+</div>
+</li>
+<li id="S3.I7.i3" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">•</span> 
+<div id="S3.I7.i3.p1" class="ltx_para">
+<p id="S3.I7.i3.p1.1" class="ltx_p"><span id="S3.I7.i3.p1.1.1" class="ltx_text ltx_font_bold">Cluster 2: The Forward-Looking, Strategic Narrative:</span> The second cluster (illustrated by Fig. <a href="https://arxiv.org/html/2607.09121v1#S3.F2" title="Figure 2 ‣ 3.6 Lululemon 6th December 2024 - clusterization of news articles ‣ 3 Examples of Briefs Produced for Investors ‣ Augmenting Fundamental Analysis with Large Language Models: A RAG-Based System for Generating Investor Briefs" class="ltx_ref"><span class="ltx_text ltx_ref_tag">2</span></a>) showcases a more nuanced capability. The system isolated a different type of article—one that placed the immediate results in a broader, forward-looking strategic context. It successfully extracted qualitative insights, such as the CFO’s description of the upcoming year as a ”transitional period” and the observation of a consumer shift towards ”value.” This demonstrates the system’s ability to separate tactical, data-driven reporting from strategic, forward-looking commentary.</p>
+</div>
+</li>
+<li id="S3.I7.i4" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">•</span> 
+<div id="S3.I7.i4.p1" class="ltx_para">
+<p id="S3.I7.i4.p1.1" class="ltx_p"><span id="S3.I7.i4.p1.1.1" class="ltx_text ltx_font_bold">Handling Irrelevant Data:</span> It is noteworthy that the source articles for the second cluster contained tangential information about other companies (e.g., Dollar General). The LLM’s summary correctly filtered out this irrelevant noise and focused only on the content pertinent to Lululemon, showcasing its robustness in real-world, imperfect data environments.</p>
+</div>
+</li>
+<li id="S3.I7.i5" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">•</span> 
+<div id="S3.I7.i5.p1" class="ltx_para">
+<p id="S3.I7.i5.p1.1" class="ltx_p"><span id="S3.I7.i5.p1.1.1" class="ltx_text ltx_font_bold">Data Visualization as a Synthesis Tool:</span> The generation of word maps is a key feature of this module. This visual output serves as an instant, intuitive summary of a cluster’s core themes. It allows an investor to grasp the essence of a narrative ”at a glance,” providing a powerful cognitive shortcut that complements the detailed textual summary. This highlights the system’s potential not just as an analytical engine, but also as a tool for effective information visualization.</p>
+</div>
+</li>
+</ul>
+</div>
+<div id="S3.SS6.p5" class="ltx_para">
+<p id="S3.SS6.p5.1" class="ltx_p"><span id="S3.SS6.p5.1.1" class="ltx_text ltx_font_italic">Lululemon Athletica is a global premium brand specializing in the production and sale of sportswear and accessories, particularly valued in the athleisure segment. The company stands out for its strong commitment to quality, innovative materials, and loyal customer base, which allows it to achieve high margins and dynamic sales growth. Strategic investments in e-commerce and international expansion, as well as the development of its men’s line and digital products, strengthen Lululemon’s position as a leader in the sportswear and lifestyle apparel sector.</span></p>
+</div>
+<div id="S3.SS6.p6" class="ltx_para">
+<p id="S3.SS6.p6.1" class="ltx_p"><span id="S3.SS6.p6.1.1" class="ltx_text ltx_font_italic">Lululemon (LULU) reported third quarter results after the closing bell on Thursday that beat on both the top and bottom lines, sending shares of the company higher in after-hours trade. Lululemon stock rose over 8% as the company also raised its full-year sales and profit forecasts for 2024. Still, sales growth in North America once again declined as the retailer grapples with concerns over increased competition heading into the critical holiday shopping season. Revenue came in at $2.40 billion, an increase from the $2.20 billion reported in the third quarter of 2023. Analysts polled by Bloomberg were expecting $2.36 billion after the retailer guided to sales between $2.34 billion and $2.37 billion. Earnings beat estimates of $2.75 a share to hit $2.87. This was also ahead of the $2.53 EPS the company reported in the year-ago period. The company guided to fourth quarter revenue of $3.48 billion-$3.51 billion, compared to consensus estimates of $3.5 billion. […]
+https://finance.yahoo.com/news/lululemon-stock-rises-on-profit-beat-as-company-boosts-full-year-outlook-211820899.html ilustrated by Fig. <a href="https://arxiv.org/html/2607.09121v1#S3.F1" title="Figure 1 ‣ 3.6 Lululemon 6th December 2024 - clusterization of news articles ‣ 3 Examples of Briefs Produced for Investors ‣ Augmenting Fundamental Analysis with Large Language Models: A RAG-Based System for Generating Investor Briefs" class="ltx_ref"><span class="ltx_text ltx_ref_tag">1</span></a></span></p>
+</div>
+<figure id="S3.F1" class="ltx_figure"><img src="./Augmenting Fundamental Analysis with Large Language Models_ A RAG-Based System for Generating Investor Briefs_files/LULUFigure_1.png" id="S3.F1.g1" class="ltx_graphics ltx_img_landscape" width="476" height="238" alt="Refer to caption">
+<figcaption class="ltx_caption"><span class="ltx_tag ltx_tag_figure">Figure 1: </span>Word map used in the brief representing a cluster of similar news articles about Lululemon on 5th and begining of 6th of December</figcaption>
+</figure>
+<div id="S3.SS6.p7" class="ltx_para">
+<p id="S3.SS6.p7.1" class="ltx_p"><span id="S3.SS6.p7.1.1" class="ltx_text ltx_font_italic">Investors are looking for evidence that the company’s product strategy and holiday momentum can drive a sustained recovery. This year and 2025 will be ‘transitional periods,’ said Finance Chief Paula Oyibo. Consumers continue to spend, Oyibo said, but ‘economic concerns are driving a greater focus on value.’ None of our picks is NVIDIA or Amazon or Tesla. Investors may wish to widen the aperture to find the best stocks for outsize earnings growth. Marvell Technology, Lululemon, Block, Amazon and Tesla have been highlighted in this Investment Ideas article. DG reports higher net sales and improved same-store sales in Q3. The company focuses on new store growth and upgrading mature stores for long-term growth. […]
+https://finance.yahoo.com/m/b39804b0-0d3e-3317-943b-0197e3e90ebe/lululemon%E2%80%99s-stock-has.html ilustrated by Fig. <a href="https://arxiv.org/html/2607.09121v1#S3.F2" title="Figure 2 ‣ 3.6 Lululemon 6th December 2024 - clusterization of news articles ‣ 3 Examples of Briefs Produced for Investors ‣ Augmenting Fundamental Analysis with Large Language Models: A RAG-Based System for Generating Investor Briefs" class="ltx_ref"><span class="ltx_text ltx_ref_tag">2</span></a></span></p>
+</div>
+<figure id="S3.F2" class="ltx_figure"><img src="./Augmenting Fundamental Analysis with Large Language Models_ A RAG-Based System for Generating Investor Briefs_files/LULUFigure_2.png" id="S3.F2.g1" class="ltx_graphics ltx_img_landscape" width="476" height="238" alt="Refer to caption">
+<figcaption class="ltx_caption"><span class="ltx_tag ltx_tag_figure">Figure 2: </span>Word map used in the brief representing a cluster of similar news articles about Lululemon on 5th and begining of 6th of December</figcaption>
+</figure>
+</section>
+</section>
+<section id="S4" class="ltx_section">
+<h2 class="ltx_title ltx_title_section">
+<span class="ltx_tag ltx_tag_section">4 </span>User Feedback and Pilot Summary</h2>
+
+<div id="S4.p1" class="ltx_para">
+<p id="S4.p1.1" class="ltx_p">Upon the conclusion of the four-week pilot study, feedback was solicited from the nine participants through a structured questionnaire and comment while the experiment was ongoing. The objective was to assess the perceived utility, clarity, and overall effectiveness of the LLM-generated briefs in their investment analysis workflow. The feedback received was generally positive and provided crucial insights for future development.</p>
+</div>
+<section id="S4.SS1" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">4.1 </span>Overall Reception and Key Strengths</h3>
+
+<div id="S4.SS1.p1" class="ltx_para">
+<p id="S4.SS1.p1.1" class="ltx_p">The primary value of the system, consistently highlighted by the participants, was its ability to **aggregate and synthesize vast amounts of information** from disparate sources. The briefs were noted for saving a significant amount of time typically spent on data gathering, allowing investors to focus more on interpretation and strategic decision-making. The dynamic, event-driven nature of the daily reports was particularly appreciated, as it allowed users to quickly catch up on the most important developments without having to monitor multiple news outlets.</p>
+</div>
+</section>
+<section id="S4.SS2" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">4.2 </span>Constructive Feedback and Areas for Improvement</h3>
+
+<div id="S4.SS2.p1" class="ltx_para">
+<p id="S4.SS2.p1.1" class="ltx_p">Alongside the positive reception, participants provided specific, constructive feedback that forms a clear roadmap for enhancing the system. The key themes that emerged were:</p>
+</div>
+<div id="S4.SS2.p2" class="ltx_para">
+<ul id="S4.I1" class="ltx_itemize">
+<li id="S4.I1.i1" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">•</span> 
+<div id="S4.I1.i1.p1" class="ltx_para">
+<p id="S4.I1.i1.p1.1" class="ltx_p"><span id="S4.I1.i1.p1.1.1" class="ltx_text ltx_font_bold">Enhancing Analytical Depth:</span> While the breadth of information was praised, some users pointed out areas where the analytical depth could be improved. For instance, specific feedback was given regarding the presentation of quantitative data, such as revenue forecasts for large-cap companies like Amazon (AMZN). This suggests that future iterations should focus on refining the modules responsible for financial projections to deliver more nuanced insights.</p>
+</div>
+</li>
+<li id="S4.I1.i2" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">•</span> 
+<div id="S4.I1.i2.p1" class="ltx_para">
+<p id="S4.I1.i2.p1.1" class="ltx_p"><span id="S4.I1.i2.p1.1.1" class="ltx_text ltx_font_bold">Customization of Delivery and Frequency:</span> A recurring theme was the desire for greater user control over the information flow. Participants expressed interest in personalizing the service, with questions such as, ”I am wondering how often the monitoring would arrive?”. This indicates a strong demand for features that would allow users to set their own preferences for the frequency, timing, and potentially even the specific content of the briefs.</p>
+</div>
+</li>
+</ul>
+</div>
+</section>
+<section id="S4.SS3" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">4.3 </span>Pilot Summary and Future Directions</h3>
+
+<div id="S4.SS3.p1" class="ltx_para">
+<p id="S4.SS3.p1.1" class="ltx_p">In summary, the pilot study successfully validated the core hypothesis: a RAG-based LLM system can serve as a valuable tool for individual investors by automating data collection and providing timely analytical summaries. The feedback confirms that the system’s main strength lies in its time-saving and information-aggregating capabilities.</p>
+</div>
+<div id="S4.SS3.p2" class="ltx_para">
+<p id="S4.SS3.p2.1" class="ltx_p">The constructive criticism received has been instrumental in defining the direction for future work. The next phase of development will focus on two key areas: (1) increasing the sophistication of the quantitative analysis modules to provide deeper, more actionable insights, and (2) building a user preference center to allow for the customization of brief frequency and content. These improvements will be crucial in transitioning the system from a successful proof-of-concept to a practical, indispensable tool for the modern investor.</p>
+</div>
+</section>
+</section>
+<section id="S5" class="ltx_section">
+<h2 class="ltx_title ltx_title_section">
+<span class="ltx_tag ltx_tag_section">5 </span>Conclusions</h2>
+
+<div id="S5.p1" class="ltx_para">
+<p id="S5.p1.1" class="ltx_p">This study investigated the practical application of a hybrid system, centered around an LLM in a RAG architecture, to augment the fundamental analysis workflow for individual investors. By generating daily analytical briefs for a diverse portfolio of nine companies, we have demonstrated that such a system can perform a wide range of complex tasks that go far beyond simple data summarization.</p>
+</div>
+<div id="S5.p2" class="ltx_para">
+<p id="S5.p2.1" class="ltx_p">Our findings indicate that an AI-augmented system can serve as a powerful co-pilot for investors. The key capabilities demonstrated throughout our four-week pilot study include:</p>
+<ul id="S5.I1" class="ltx_itemize">
+<li id="S5.I1.i1" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">•</span> 
+<div id="S5.I1.i1.p1" class="ltx_para">
+<p id="S5.I1.i1.p1.1" class="ltx_p"><span id="S5.I1.i1.p1.1.1" class="ltx_text ltx_font_bold">Cross-Domain Synthesis:</span> The system successfully integrated structured quantitative data from financial reports (e.g., Tesla’s 10-Q), unstructured real-time news, and high-level macroeconomic indicators (e.g., PMI data) into coherent, multi-layered analytical narratives.</p>
+</div>
+</li>
+<li id="S5.I1.i2" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">•</span> 
+<div id="S5.I1.i2.p1" class="ltx_para">
+<p id="S5.I1.i2.p1.1" class="ltx_p"><span id="S5.I1.i2.p1.1.1" class="ltx_text ltx_font_bold">Advanced Information Processing:</span> Beyond simple retrieval, the system demonstrated advanced capabilities such as the ranking of high-volume news flow by investor salience (NVIDIA), the thematic clustering of articles to identify distinct narratives (Lululemon), and the performance of prompt-guided quantitative analysis (Energy Fuels’ cash burn rate).</p>
+</div>
+</li>
+<li id="S5.I1.i3" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">•</span> 
+<div id="S5.I1.i3.p1" class="ltx_para">
+<p id="S5.I1.i3.p1.1" class="ltx_p"><span id="S5.I1.i3.p1.1.1" class="ltx_text ltx_font_bold">Qualitative Reasoning on Unforeseen Events:</span> The system proved capable of generating relevant, qualitative risk assessments in response to sudden, unpredictable ”black swan” events, as shown in the case of the declaration of martial law in South Korea. It was able to tailor its analysis to the specific business models of different companies (Coinbase, NVIDIA, Lululemon), showcasing a degree of situational reasoning.</p>
+</div>
+</li>
+<li id="S5.I1.i4" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">•</span> 
+<div id="S5.I1.i4.p1" class="ltx_para">
+<p id="S5.I1.i4.p1.1" class="ltx_p"><span id="S5.I1.i4.p1.1.1" class="ltx_text ltx_font_bold">Confirmed Practical Utility:</span> The feedback from our nine participants confirmed the primary hypothesis of the study. The briefs were consistently valued for their ability to save time and aggregate information, thereby allowing investors to focus on higher-level decision-making.</p>
+</div>
+</li>
+</ul>
+</div>
+<div id="S5.p3" class="ltx_para">
+<p id="S5.p3.1" class="ltx_p">The principal contribution of this work is the holistic, end-to-end demonstration and user-centric evaluation of a hybrid AI system for fundamental analysis. While much research focuses on isolated NLP tasks in finance, our study validates a complete workflow—from heterogeneous data ingestion to the generation of user-vetted analytical products. We also contribute a methodological blueprint that combines the strengths of LLMs for reasoning and synthesis with traditional machine learning (K-Means) and modern data infrastructure (vector databases) for specialized tasks.</p>
+</div>
+<div id="S5.p4" class="ltx_para">
+<p id="S5.p4.1" class="ltx_p">Despite the promising results, we acknowledge the limitations of this pilot study. The sample size of nine investors and nine companies over a four-week period means the findings are indicative rather than statistically generalizable. Furthermore, our evaluation focused on the perceived utility of the briefs, not on their direct impact on investment performance; a quantitative backtest of the system’s recommendations was outside the scope of this work as our system is being designed as brief generator and advisor, not investment decision system.</p>
+</div>
+<div id="S5.p5" class="ltx_para">
+<p id="S5.p5.1" class="ltx_p">In conclusion, as LLMs and related AI technologies continue to mature, their potential to democratize access to sophisticated financial analysis is immense. Our research suggests that hybrid systems, thoughtfully designed and grounded in real-world data, are poised to become indispensable tools for the next generation of investors.</p>
+</div>
+</section>
+<section id="bib" class="ltx_bibliography">
+<h2 class="ltx_title ltx_title_bibliography">References</h2>
+
+<ul id="bib.L1" class="ltx_biblist">
+<li id="bib.bib3" class="ltx_bibitem ltx_bib_misc">
+<span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">D. Araci (2019)</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">FinBERT: financial sentiment analysis with pre-trained language models</span>.
+</span>
+<span class="ltx_bibblock">External Links: <span class="ltx_text ltx_bib_links"><span class="ltx_text ltx_bib_external">1908.10063</span></span>
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="https://arxiv.org/html/2607.09121v1#S1.SS1.p1.1" title="1.1 Literature Review ‣ 1 Introduction ‣ Augmenting Fundamental Analysis with Large Language Models: A RAG-Based System for Generating Investor Briefs" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§1.1</span></a>.
+</span>
+</li>
+<li id="bib.bib2" class="ltx_bibitem ltx_bib_inproceedings">
+<span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">J. Devlin, M. Chang, K. Lee, and K. Toutanova (2019)</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">BERT: pre-training of deep bidirectional transformers for language understanding</span>.
+</span>
+<span class="ltx_bibblock">In <span class="ltx_text ltx_bib_inbook">Proceedings of the 2019 Conference of the North American Chapter of the Association for Computational Linguistics: Human Language Technologies, Volume 1 (Long and Short Papers)</span>,
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_pages"> pp.&nbsp;4171–4186</span>.
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="https://arxiv.org/html/2607.09121v1#S1.SS1.p1.1" title="1.1 Literature Review ‣ 1 Introduction ‣ Augmenting Fundamental Analysis with Large Language Models: A RAG-Based System for Generating Investor Briefs" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§1.1</span></a>.
+</span>
+</li>
+<li id="bib.bib7" class="ltx_bibitem ltx_bib_misc">
+<span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">S. Itoh and K. Okada (2023)</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">The power of large language models: a ChatGPT-driven textual analysis of fundamental data</span>.
+</span>
+<span class="ltx_bibblock">Note: <span class="ltx_text ltx_bib_note">Available at SSRN 4425952</span>
+</span>
+<span class="ltx_bibblock">External Links: <span class="ltx_text ltx_bib_links"><a href="https://dx.doi.org/10.2139/ssrn.4425952" title="" class="ltx_ref doi ltx_bib_external">Document</a></span>
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="https://arxiv.org/html/2607.09121v1#S1.SS1.p3.1" title="1.1 Literature Review ‣ 1 Introduction ‣ Augmenting Fundamental Analysis with Large Language Models: A RAG-Based System for Generating Investor Briefs" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§1.1</span></a>.
+</span>
+</li>
+<li id="bib.bib12" class="ltx_bibitem ltx_bib_misc">
+<span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">S. Laniewski and R. Ślepaczuk (2024)</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">Enhancing literature review with LLM and NLP methods. Algorithmic trading case</span>.
+</span>
+<span class="ltx_bibblock">External Links: <span class="ltx_text ltx_bib_links"><span class="ltx_text ltx_bib_external">2401.03370</span></span>
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="https://arxiv.org/html/2607.09121v1#S1.SS2.p2.1" title="1.2 Our Contribution ‣ 1 Introduction ‣ Augmenting Fundamental Analysis with Large Language Models: A RAG-Based System for Generating Investor Briefs" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§1.2</span></a>.
+</span>
+</li>
+<li id="bib.bib5" class="ltx_bibitem ltx_bib_inproceedings">
+<span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">P. Lewis, E. Perez, A. Piktus, F. Petroni, V. Karpukhin, N. Goyal, Y. Jui, H. Dwivedi-Yu, P. Stenetorp, S. Riedel, and D. Kiela (2020)</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">Retrieval-augmented generation for knowledge-intensive NLP tasks</span>.
+</span>
+<span class="ltx_bibblock">In <span class="ltx_text ltx_bib_inbook">Advances in Neural Information Processing Systems</span>,
+</span>
+<span class="ltx_bibblock">Vol. <span class="ltx_text ltx_bib_volume">33</span>, <span class="ltx_text ltx_bib_pages"> pp.&nbsp;9459–9474</span>.
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="https://arxiv.org/html/2607.09121v1#S1.SS1.p4.1" title="1.1 Literature Review ‣ 1 Introduction ‣ Augmenting Fundamental Analysis with Large Language Models: A RAG-Based System for Generating Investor Briefs" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§1.1</span></a>.
+</span>
+</li>
+<li id="bib.bib4" class="ltx_bibitem ltx_bib_misc">
+<span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">A. Lopez-Lira and Y. Tang (2023)</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">Can ChatGPT forecast stock price movements? return predictability and large language models</span>.
+</span>
+<span class="ltx_bibblock">External Links: <span class="ltx_text ltx_bib_links"><a href="https://dx.doi.org/10.2139/ssrn.4412788" title="" class="ltx_ref doi ltx_bib_external">Document</a></span>
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="https://arxiv.org/html/2607.09121v1#S1.SS1.p3.1" title="1.1 Literature Review ‣ 1 Introduction ‣ Augmenting Fundamental Analysis with Large Language Models: A RAG-Based System for Generating Investor Briefs" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§1.1</span></a>.
+</span>
+</li>
+<li id="bib.bib1" class="ltx_bibitem ltx_bib_article">
+<span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">T. Loughran and B. McDonald (2011)</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">When is a liability not a liability? textual analysis, dictionaries, and 10-Ks</span>.
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_journal">The Journal of Finance</span> <span class="ltx_text ltx_bib_volume">66</span> (<span class="ltx_text ltx_bib_number">1</span>), <span class="ltx_text ltx_bib_pages"> pp.&nbsp;35–65</span>.
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="https://arxiv.org/html/2607.09121v1#S1.SS1.p1.1" title="1.1 Literature Review ‣ 1 Introduction ‣ Augmenting Fundamental Analysis with Large Language Models: A RAG-Based System for Generating Investor Briefs" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§1.1</span></a>.
+</span>
+</li>
+<li id="bib.bib15" class="ltx_bibitem ltx_bib_inproceedings">
+<span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">J. B. MacQueen (1967)</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">Some methods for classification and analysis of multivariate observations</span>.
+</span>
+<span class="ltx_bibblock">In <span class="ltx_text ltx_bib_inbook">Proceedings of the Fifth Berkeley Symposium on Mathematical Statistics and Probability, Volume 1: Statistics</span>,
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_place">Berkeley, Calif.</span>, <span class="ltx_text ltx_bib_pages"> pp.&nbsp;281–297</span>.
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="https://arxiv.org/html/2607.09121v1#S3.SS6.p2.1" title="3.6 Lululemon 6th December 2024 - clusterization of news articles ‣ 3 Examples of Briefs Produced for Investors ‣ Augmenting Fundamental Analysis with Large Language Models: A RAG-Based System for Generating Investor Briefs" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§3.6</span></a>.
+</span>
+</li>
+<li id="bib.bib17" class="ltx_bibitem ltx_bib_misc">
+<span class="ltx_tag ltx_bib_key ltx_role_refnum ltx_tag_bibitem">[9]</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_author">A. Mueller</span>
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">word_cloud: A word cloud generator in Python</span>.
+</span>
+<span class="ltx_bibblock">Note: <span class="ltx_text ltx_bib_note"><a href="https://github.com/amueller/word_cloud" title="" class="ltx_ref ltx_url ltx_font_typewriter">https://github.com/amueller/word_cloud</a>Accessed: 2025-08-30</span>
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="https://arxiv.org/html/2607.09121v1#S3.SS6.p2.1" title="3.6 Lululemon 6th December 2024 - clusterization of news articles ‣ 3 Examples of Briefs Produced for Investors ‣ Augmenting Fundamental Analysis with Large Language Models: A RAG-Based System for Generating Investor Briefs" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§3.6</span></a>.
+</span>
+</li>
+<li id="bib.bib10" class="ltx_bibitem ltx_bib_misc">
+<span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">OpenAI (2024)</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">GPT-4o</span>.
+</span>
+<span class="ltx_bibblock">Note: <span class="ltx_text ltx_bib_note"><a href="https://openai.com/index/hello-gpt-4o/" title="" class="ltx_ref ltx_url ltx_font_typewriter">https://openai.com/index/hello-gpt-4o/</a>Accessed: 2025-07-30</span>
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="https://arxiv.org/html/2607.09121v1#S1.SS1.p2.1" title="1.1 Literature Review ‣ 1 Introduction ‣ Augmenting Fundamental Analysis with Large Language Models: A RAG-Based System for Generating Investor Briefs" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§1.1</span></a>.
+</span>
+</li>
+<li id="bib.bib13" class="ltx_bibitem ltx_bib_inproceedings">
+<span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">R. Rzepka and A. Obayashi (2023)</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">Effectiveness of Security Export Control Ontology for Predicting Answer Type and Regulation Categories</span>.
+</span>
+<span class="ltx_bibblock">In <span class="ltx_text ltx_bib_inbook">Proceedings of the 21st International Conference on Artificial Intelligence and Law (ICAIL 2023)</span>,
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_pages"> pp.&nbsp;253–257</span>.
+</span>
+<span class="ltx_bibblock">External Links: <span class="ltx_text ltx_bib_links"><a href="https://dx.doi.org/10.1145/3594536.3595152" title="" class="ltx_ref doi ltx_bib_external">Document</a></span>
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="https://arxiv.org/html/2607.09121v1#S1.SS1.p4.1" title="1.1 Literature Review ‣ 1 Introduction ‣ Augmenting Fundamental Analysis with Large Language Models: A RAG-Based System for Generating Investor Briefs" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§1.1</span></a>.
+</span>
+</li>
+<li id="bib.bib14" class="ltx_bibitem ltx_bib_inproceedings">
+<span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">R. Rzepka and K. Okada (2023)</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">Simulating Perception With LLMs as Underpinnings for More Controllable Knowledge Acquisition</span>.
+</span>
+<span class="ltx_bibblock">In <span class="ltx_text ltx_bib_inbook">Proceedings of the 2023 IEEE/SICE International Symposium on System Integration (SII)</span>,
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_pages"> pp.&nbsp;1–6</span>.
+</span>
+<span class="ltx_bibblock">External Links: <span class="ltx_text ltx_bib_links"><a href="https://dx.doi.org/10.1109/SII55687.2023.10050181" title="" class="ltx_ref doi ltx_bib_external">Document</a></span>
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="https://arxiv.org/html/2607.09121v1#S1.SS1.p4.1" title="1.1 Literature Review ‣ 1 Introduction ‣ Augmenting Fundamental Analysis with Large Language Models: A RAG-Based System for Generating Investor Briefs" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§1.1</span></a>.
+</span>
+</li>
+<li id="bib.bib16" class="ltx_bibitem ltx_bib_inproceedings">
+<span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">C. She, L. Brenecki, S. Maddali, T. Le, V. Vu, and A. Jain (2024)</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">LanceDB - Embracing Composability in the Storage Layer</span>.
+</span>
+<span class="ltx_bibblock">In <span class="ltx_text ltx_bib_inbook">Proceedings of the VLDB Endowment, Volume 17, No. 13</span>,
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_pages"> pp.&nbsp;3821–3824</span>.
+</span>
+<span class="ltx_bibblock">External Links: <span class="ltx_text ltx_bib_links"><a href="https://dx.doi.org/10.14778/3639368.3639393" title="" class="ltx_ref doi ltx_bib_external">Document</a></span>
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="https://arxiv.org/html/2607.09121v1#S3.SS6.p2.1" title="3.6 Lululemon 6th December 2024 - clusterization of news articles ‣ 3 Examples of Briefs Produced for Investors ‣ Augmenting Fundamental Analysis with Large Language Models: A RAG-Based System for Generating Investor Briefs" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§3.6</span></a>.
+</span>
+</li>
+<li id="bib.bib8" class="ltx_bibitem ltx_bib_misc">
+<span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">K. Shuster, S. Poff, M. Chen, D. Kiela, and J. Weston (2021)</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">Retrieval Augmentation Reduces Hallucination in Conversation</span>.
+</span>
+<span class="ltx_bibblock">External Links: <span class="ltx_text ltx_bib_links"><span class="ltx_text ltx_bib_external">2104.07567</span></span>
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="https://arxiv.org/html/2607.09121v1#S1.SS1.p4.1" title="1.1 Literature Review ‣ 1 Introduction ‣ Augmenting Fundamental Analysis with Large Language Models: A RAG-Based System for Generating Investor Briefs" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§1.1</span></a>.
+</span>
+</li>
+<li id="bib.bib9" class="ltx_bibitem ltx_bib_inproceedings">
+<span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">A. Vaswani, N. Shazeer, N. Parmar, J. Uszkoreit, L. Jones, A. N. Gomez, L. Kaiser, and I. Polosukhin (2017)</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">Attention is all you need</span>.
+</span>
+<span class="ltx_bibblock">In <span class="ltx_text ltx_bib_inbook">Advances in Neural Information Processing Systems 30 (NIPS 2017)</span>,
+</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_pages"> pp.&nbsp;5998–6008</span>.
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="https://arxiv.org/html/2607.09121v1#S1.SS1.p2.1" title="1.1 Literature Review ‣ 1 Introduction ‣ Augmenting Fundamental Analysis with Large Language Models: A RAG-Based System for Generating Investor Briefs" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§1.1</span></a>.
+</span>
+</li>
+<li id="bib.bib6" class="ltx_bibitem ltx_bib_misc">
+<span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">S. Wu, O. Irsoy, S. Lu, V. Dabravolski, M. Dredze, S. Gehrmann, P. Kambadur, D. Rosenberg, and J. Callan (2023)</span>
+<span class="ltx_bibblock"><span class="ltx_text ltx_bib_title">BloombergGPT: a large language model for finance</span>.
+</span>
+<span class="ltx_bibblock">External Links: <span class="ltx_text ltx_bib_links"><span class="ltx_text ltx_bib_external">2303.17564</span></span>
+</span>
+<span class="ltx_bibblock ltx_bib_cited">Cited by: <a href="https://arxiv.org/html/2607.09121v1#S1.SS1.p4.1" title="1.1 Literature Review ‣ 1 Introduction ‣ Augmenting Fundamental Analysis with Large Language Models: A RAG-Based System for Generating Investor Briefs" class="ltx_ref"><span class="ltx_text ltx_ref_tag">§1.1</span></a>.
+</span>
+</li>
+</ul>
+</section>
+</article>
+</div>
+</div>
+<footer class="arxiv-html-footer">
+  <div class="ltx_page_logo">
+    Experimental support, please
+    <a href="https://arxiv.org/html/2607.09121v1/__stdout.txt" class="ltx_ref" target="_blank" rel="nofollow">view the build logs</a>
+    for errors. Generated by
+    <a href="https://math.nist.gov/~BMiller/LaTeXML/" target="_blank" class="ltx_ref ltx_LaTeXML_logo">
+      <span style="letter-spacing: -0.2em; margin-right: 0.1em;">
+        L
+        <span style="font-size: 70%; position: relative; bottom: 2.2pt;">A</span>
+        T
+        <span style="position: relative; bottom: -0.4ex;">E</span>
+      </span>
+      <span class="ltx_font_smallcaps">xml</span>
+      <img alt="[LOGO]" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAAOCAYAAAD5YeaVAAAAAXNSR0IArs4c6QAAAAZiS0dEAP8A/wD/oL2nkwAAAAlwSFlzAAALEwAACxMBAJqcGAAAAAd0SU1FB9wKExQZLWTEaOUAAAAddEVYdENvbW1lbnQAQ3JlYXRlZCB3aXRoIFRoZSBHSU1Q72QlbgAAAdpJREFUKM9tkL+L2nAARz9fPZNCKFapUn8kyI0e4iRHSR1Kb8ng0lJw6FYHFwv2LwhOpcWxTjeUunYqOmqd6hEoRDhtDWdA8ApRYsSUCDHNt5ul13vz4w0vWCgUnnEc975arX6ORqN3VqtVZbfbTQC4uEHANM3jSqXymFI6yWazP2KxWAXAL9zCUa1Wy2tXVxheKA9YNoR8Pt+aTqe4FVVVvz05O6MBhqUIBGk8Hn8HAOVy+T+XLJfLS4ZhTiRJgqIoVBRFIoric47jPnmeB1mW/9rr9ZpSSn3Lsmir1fJZlqWlUonKsvwWwD8ymc/nXwVBeLjf7xEKhdBut9Hr9WgmkyGEkJwsy5eHG5vN5g0AKIoCAEgkEkin0wQAfN9/cXPdheu6P33fBwB4ngcAcByHJpPJl+fn54mD3Gg0NrquXxeLRQAAwzAYj8cwTZPwPH9/sVg8PXweDAauqqr2cDjEer1GJBLBZDJBs9mE4zjwfZ85lAGg2+06hmGgXq+j3+/DsixYlgVN03a9Xu8jgCNCyIegIAgx13Vfd7vdu+FweG8YRkjXdWy329+dTgeSJD3ieZ7RNO0VAXAPwDEAO5VKndi2fWrb9jWl9Esul6PZbDY9Go1OZ7PZ9z/lyuD3OozU2wAAAABJRU5ErkJggg==">
+    </a>.
+  </div>
+  <div class="keyboard-glossary">
+    <h2>Instructions for reporting errors</h2>
+    <p>We are continuing to improve HTML versions of papers, and your feedback helps enhance accessibility and mobile
+      support. To report errors in the HTML that will help us improve conversion and rendering, choose any of the
+      methods listed below:</p>
+    <ul>
+      <li>Click the "Report Issue" <span class="mobile-only">(<svg role="presentation" style="display: inline-block; vertical-align: middle; fill: var(--text-color);" aria-hidden="true" height="1em" viewBox="0 0 640 640">
+            <path d="M224 160C224 107 267 64 320 64C373 64 416 107 416 160L416 163.6C416 179.3 403.3 192 387.6 192L252.5 192C236.8 192 224.1 179.3 224.1 163.6L224.1 160zM569.6 172.8C580.2 186.9 577.3 207 563.2 217.6L465.4 290.9C470.7 299.8 474.7 309.6 477.2 320L576 320C593.7 320 608 334.3 608 352C608 369.7 593.7 384 576 384L480 384L480 416C480 418.6 479.9 421.3 479.8 423.9L563.2 486.4C577.3 497 580.2 517.1 569.6 531.2C559 545.3 538.9 548.2 524.8 537.6L461.7 490.3C438.5 534.5 395.2 566.5 344 574.2L344 344C344 330.7 333.3 320 320 320C306.7 320 296 330.7 296 344L296 574.2C244.8 566.5 201.5 534.5 178.3 490.3L115.2 537.6C101.1 548.2 81 545.3 70.4 531.2C59.8 517.1 62.7 497 76.8 486.4L160.2 423.9C160.1 421.3 160 418.7 160 416L160 384L64 384C46.3 384 32 369.7 32 352C32 334.3 46.3 320 64 320L162.8 320C165.3 309.6 169.3 299.8 174.6 290.9L76.8 217.6C62.7 207 59.8 186.9 70.4 172.8C81 158.7 101.1 155.8 115.2 166.4L224 248C236.3 242.9 249.8 240 264 240L376 240C390.2 240 403.7 242.8 416 248L524.8 166.4C538.9 155.8 559 158.7 569.6 172.8z"></path>
+          </svg>)</span> button, located in the page header.</li>
+    </ul>
+    <p><strong>Tip:</strong> You can select the relevant text first, to include it in your report.</p>
+    <p>Our team has already identified <a class="ltx_ref" href="https://github.com/arXiv/html_feedback/issues" target="_blank">the following issues</a>. We appreciate your time reviewing and reporting rendering errors we
+      may not have found yet. Your efforts will help us improve the HTML versions for all readers, because disability
+      should not be a barrier to accessing research. Thank you for your continued support in championing open access for
+      all.</p>
+    <p>Have a free development cycle? Help support accessibility at arXiv! Our collaborators at LaTeXML maintain a <a class="ltx_ref" href="https://github.com/brucemiller/LaTeXML/wiki/Porting-LaTeX-packages-for-LaTeXML" target="_blank">list of packages that need conversion</a>, and welcome <a class="ltx_ref" href="https://github.com/brucemiller/LaTeXML/issues" target="_blank">developer contributions</a>.</p>
+  </div>
+</footer><footer class="ds-site-footer">
+  <div class="ds-site-footer-grid">
+    <div class="ds-site-footer-main">
+      <div class="ds-site-footer-ack">
+        We gratefully acknowledge support from
+        our <strong>major funders</strong>,
+        <a href="https://info.arxiv.org/about/ourmembers.html"><strong>member institutions</strong></a><span class="ack-member-inline" hidden="">, <strong></strong></span>,
+        and all contributors.
+      </div>
+      <nav class="ds-site-footer-links" aria-label="Site navigation">
+        <a href="https://info.arxiv.org/about">About</a>
+        <span class="ds-site-footer-sep" aria-hidden="true">·</span>
+        <a href="https://info.arxiv.org/help">Help</a>
+        <span class="ds-site-footer-sep" aria-hidden="true">·</span>
+        <a href="https://info.arxiv.org/help/contact.html">Contact</a>
+        <span class="ds-site-footer-sep" aria-hidden="true">·</span>
+        <a href="https://info.arxiv.org/help/subscribe">Subscribe</a>
+        <span class="ds-site-footer-sep" aria-hidden="true">·</span>
+        <a href="https://info.arxiv.org/help/license/index.html">Copyright</a>
+        <span class="ds-site-footer-sep" aria-hidden="true">·</span>
+        <a href="https://info.arxiv.org/help/policies/privacy_policy.html">Privacy</a>
+        <span class="ds-site-footer-sep" aria-hidden="true">·</span>
+        <a href="https://info.arxiv.org/help/web_accessibility.html">Accessibility</a>
+        <span class="ds-site-footer-sep" aria-hidden="true">·</span>
+        <a href="https://status.arxiv.org/" target="_blank" rel="noopener noreferrer">Operational Status<span class="is-sr-only"> (opens in new tab)</span></a>
+      </nav>
+    </div>
+
+    <div class="ds-site-footer-funders" aria-label="Major funders">
+      <div class="ds-site-footer-funders-label">Major funding support from</div>
+      <div class="ds-site-footer-funders-logos">
+        <a class="ds-funder-link" href="https://www.simonsfoundation.org/" target="_blank" rel="noopener noreferrer">
+          <img class="ds-funder-logo" src="./Augmenting Fundamental Analysis with Large Language Models_ A RAG-Based System for Generating Investor Briefs_files/simons-foundation.png" alt="Simons Foundation">
+        </a>
+        <a class="ds-funder-link" href="https://www.sfi.org.bm/" target="_blank" rel="noopener noreferrer">
+          <img class="ds-funder-logo" src="./Augmenting Fundamental Analysis with Large Language Models_ A RAG-Based System for Generating Investor Briefs_files/simons-foundation-international.png" alt="Simons Foundation International">
+        </a>
+        <a class="ds-funder-link" href="https://www.schmidtsciences.org/" target="_blank" rel="noopener noreferrer">
+          <img class="ds-funder-logo" src="./Augmenting Fundamental Analysis with Large Language Models_ A RAG-Based System for Generating Investor Briefs_files/schmidt-sciences.png" alt="Schmidt Sciences">
+        </a>
+      </div>
+    </div>
+  </div>
+</footer><div id="fixed-buttons-container">
+  <a id="disable-reading-mode-btn" class="header-button" href="javascript:toggleReadingMode();" title="Disable reading mode, show header and footer">
+    <svg role="presentation" height="1.25rem" viewBox="0 0 448 512"><!--!Font Awesome Free v7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2026 Fonticons, Inc.-->
+      <path d="M0 96C0 78.3 14.3 64 32 64l384 0c17.7 0 32 14.3 32 32s-14.3 32-32 32L32 128C14.3 128 0 113.7 0 96zM0 256c0-17.7 14.3-32 32-32l384 0c17.7 0 32 14.3 32 32s-14.3 32-32 32L32 288c-17.7 0-32-14.3-32-32zM448 416c0 17.7-14.3 32-32 32L32 448c-17.7 0-32-14.3-32-32s14.3-32 32-32l384 0c17.7 0 32 14.3 32 32z"></path>
+    </svg>
+  </a>
+</div>
+
+</body></html>

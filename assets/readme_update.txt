@@ -1,81 +1,81 @@
 # Блок «Последние статьи»
 # Вставить в README.md после заголовка «# 🔥 Последние статьи»
 
-### Latent-WAM: Моделирование скрытого мира для автономного вождения
-[2603.24581] дата публикации в arXiv - 03.2026  
-📅 дата перевода 18.07.2026  
-🏷 `autonomous driving` `world models` `trajectory planning` `latent representation` `geometric distillation` `end-to-end learning` `computer vision`
+### Улучшение фундаментального анализа с помощью больших языковых моделей: RAG-система для создания инвестиционных отчетов
+[2607.09121] дата публикации в arXiv - 07.2026  
+📅 дата перевода 27.07.2026  
+🏷 `Financial Analysis` `Large Language Models` `Retrieval Augmented Generation` `Investor Support Systems` `Automated Reporting` `Fundamental Investing` `Decision Support`
 
-Latent-WAM — это эффективная система сквозного автономного вождения, использующая сжатые пространственно-осведомленные представления мира. Метод достигает новых SOTA-результатов на бенчмарках NAVSIM v2 и HUGSIM, превосходя существующие подходы при меньших вычислительных затратах.
+Авторы разработали RAG-систему на базе GPT-4o для автоматизации фундаментального анализа компаний. Система синтезирует финансовые отчеты, макроэкономические данные и новости, предоставляя инвесторам структурированные аналитические сводки.
 
-- [📖 Русская HTML версия](https://romanzorkin.github.io/arxiv_ru/articles/2603.24581/2603.24581_ru.html)
-- [📄 Оригинальная статья](https://arxiv.org/abs/2603.24581)
-- [🧠 Summary / README](articles/2603.24581/README.md)
-- [⚙ Metadata](articles/2603.24581/metadata.json)
-
----
-
-### Физическая состязательная одежда для обхода детекторов видимого и теплового диапазонов через неперекрывающиеся RGB-T паттерны
-[2605.04675] дата публикации в arXiv - 05.2026  
-📅 дата перевода 18.07.2026  
-🏷 `Adversarial Attacks` `RGB-T Detection` `Physical Security` `Computer Vision` `Multimodal Fusion` `3D Modeling` `Robustness`
-
-Авторы представляют метод создания состязательной одежды с неперекрывающимися RGB-T паттернами (NORP), позволяющий эффективно обходить мультимодальные детекторы объектов. Метод использует 3D-моделирование и оптимизацию для обеспечения устойчивости атак в реальных условиях.
-
-- [📖 Русская HTML версия](https://romanzorkin.github.io/arxiv_ru/articles/2605.04675/2605.04675_ru.html)
-- [📄 Оригинальная статья](https://arxiv.org/abs/2605.04675)
-- [🧠 Summary / README](articles/2605.04675/README.md)
-- [⚙ Metadata](articles/2605.04675/metadata.json)
+- [📖 Русская HTML версия](https://romanzorkin.github.io/arxiv_ru/articles/2607.09121/2607.09121_ru.html)
+- [📄 Оригинальная статья](https://arxiv.org/abs/2607.09121)
+- [🧠 Summary / README](articles/2607.09121/README.md)
+- [⚙ Metadata](articles/2607.09121/metadata.json)
 
 ---
 
-### AdvScene: Переосмысление оценки состязательных патчей через устойчивость сцены
-[2605.30578] дата публикации в arXiv - 05.2026  
-📅 дата перевода 21.07.2026  
-🏷 `Adversarial Machine Learning` `3D Gaussian Splatting` `Scene Robustness` `Physical Attacks` `Computer Vision` `Operational Envelope` `Neural Rendering`
+### Путь к саморазвивающимся клиническим системам: масштабирование медицинских агентов от помощи к автономии
+[2607.11175] дата публикации в arXiv - 07.2026  
+📅 дата перевода 27.07.2026  
+🏷 `Medical AI Agents` `Vision-Language Models` `Clinical Autonomy` `Self-Evolving Systems` `Agentic Benchmarks` `Clinical Workflow Automation` `Healthcare AI`
 
-AdvScene — это фреймворк для оценки устойчивости состязательных патчей в реконструированных 3D-сценах. Он измеряет «операционный конверт» атаки, учитывая изменения ракурса, дистанции и контекста, что позволяет точнее оценить реальный риск, чем традиционные методы.
+Статья представляет систематический обзор медицинских агентов, переходящих от пассивных моделей к автономным системам. Авторы вводят таксономию автономии и «масштабируемый позвоночник» (scaling spine), объединяющий архитектуру, когнитивные циклы и среду для создания саморазвивающихся клинических систем.
 
-- [📖 Русская HTML версия](https://romanzorkin.github.io/arxiv_ru/articles/2605.30578/2605.30578_ru.html)
-- [📄 Оригинальная статья](https://arxiv.org/abs/2605.30578)
-- [🧠 Summary / README](articles/2605.30578/README.md)
-- [⚙ Metadata](articles/2605.30578/metadata.json)
-
----
-
-### Структурированный состязательный камуфляж на основе диаграмм Вороного
-[2606.17711] дата публикации в arXiv - 06.2026  
-📅 дата перевода 18.07.2026  
-🏷 `Adversarial Attacks` `Object Detection` `Voronoi Diagrams` `Camouflage` `Computer Vision` `Robustness` `Security`
-
-Авторы предлагают метод генерации состязательного камуфляжа, оптимизирующий положение опорных точек диаграмм Вороного при фиксированной цветовой палитре. Это создает визуально естественные, структурированные паттерны, эффективно снижающие точность детекторов объектов.
-
-- [📖 Русская HTML версия](https://romanzorkin.github.io/arxiv_ru/articles/2606.17711/2606.17711_ru.html)
-- [📄 Оригинальная статья](https://arxiv.org/abs/2606.17711)
-- [🧠 Summary / README](articles/2606.17711/README.md)
-- [⚙ Metadata](articles/2606.17711/metadata.json)
+- [📖 Русская HTML версия](https://romanzorkin.github.io/arxiv_ru/articles/2607.11175/2607.11175_ru.html)
+- [📄 Оригинальная статья](https://arxiv.org/abs/2607.11175)
+- [🧠 Summary / README](articles/2607.11175/README.md)
+- [⚙ Metadata](articles/2607.11175/metadata.json)
 
 ---
 
-### VFACamou: Камуфляж, основанный на данных о местоположении противника, для адаптации к окружающей среде и физического уклонения.
-[2606.19736] дата публикации в arXiv - 06.2026  
-📅 дата перевода 18.07.2026  
-🏷 `Adversarial Attacks` `Computer Vision` `Object Detection` `Physical Camouflage` `UAV Surveillance` `Deep Learning` `Robustness`
+### Производительность передовых ИИ-моделей в бизнес-дисциплинах: бенчмарк на основе кейсов
+[2607.16057] дата публикации в arXiv - 07.2026  
+📅 дата перевода 27.07.2026  
+🏷 `LLM evaluation` `Business reasoning` `Knowledge work` `Benchmarking` `Analytical reasoning` `Case study method` `AI performance`
 
-VFACamou — это фреймворк для генерации носимой одежды с состязательными узорами, которые скрывают людей от детекторов объектов в условиях БПЛА-разведки. Метод обеспечивает устойчивость к изменениям ракурса, освещения и деформации тела, сохраняя при этом визуальную естественность.
+Авторы представляют BusinessCaseBench — новый бенчмарк для оценки аналитических способностей ИИ на основе 615 реальных бизнес-кейсов. Исследование показывает, что современные модели демонстрируют высокую эффективность в создании качественных аналитических черновиков, но часто не справляются с полным соответствием экспертным требованиям.
 
-- [📖 Русская HTML версия](https://romanzorkin.github.io/arxiv_ru/articles/2606.19736/2606.19736_ru.html)
-- [📄 Оригинальная статья](https://arxiv.org/abs/2606.19736)
-- [🧠 Summary / README](articles/2606.19736/README.md)
-- [⚙ Metadata](articles/2606.19736/metadata.json)
+- [📖 Русская HTML версия](https://romanzorkin.github.io/arxiv_ru/articles/2607.16057/2607.16057_ru.html)
+- [📄 Оригинальная статья](https://arxiv.org/abs/2607.16057)
+- [🧠 Summary / README](articles/2607.16057/README.md)
+- [⚙ Metadata](articles/2607.16057/metadata.json)
+
+---
+
+### Помощь в финансовом аудите с использованием обнаружения дезинформации и объяснений
+[2607.17797] дата публикации в arXiv - 07.2026  
+📅 дата перевода 27.07.2026  
+🏷 `Financial Auditing` `Misinformation Detection` `Explainable AI` `Anomaly Detection` `Financial Statements` `Unsupervised Learning` `Audit Assistance`
+
+Авторы представляют систему ИИ-помощи аудиторам, которая автоматически выявляет дезинформацию в финансовой отчетности и генерирует интерпретируемые объяснения. Метод использует обучение на больших корпусах отчетов и не требует ручной разметки данных.
+
+- [📖 Русская HTML версия](https://romanzorkin.github.io/arxiv_ru/articles/2607.17797/2607.17797_ru.html)
+- [📄 Оригинальная статья](https://arxiv.org/abs/2607.17797)
+- [🧠 Summary / README](articles/2607.17797/README.md)
+- [⚙ Metadata](articles/2607.17797/metadata.json)
+
+---
+
+### FORCE-Bench: Бенчмарк и набор инструментов для оценки агентных систем в корпоративных финансах
+[2607.19409] дата публикации в arXiv - 07.2026  
+📅 дата перевода 27.07.2026  
+🏷 `Agentic AI` `Enterprise Finance` `Benchmarking` `LLM Evaluation` `ERP Systems` `Tool Use` `Operational Finance`
+
+FORCE-Bench — это специализированный бенчмарк для оценки ИИ-агентов в операционных финансах. Он использует 251 экспертный запрос и рубрику из восьми метрик для проверки точности, обоснованности и качества работы агентов в условиях реальных ограничений по времени и доступу к данным.
+
+- [📖 Русская HTML версия](https://romanzorkin.github.io/arxiv_ru/articles/2607.19409/2607.19409_ru.html)
+- [📄 Оригинальная статья](https://arxiv.org/abs/2607.19409)
+- [🧠 Summary / README](articles/2607.19409/README.md)
+- [⚙ Metadata](articles/2607.19409/metadata.json)
 
 ---
 
 # Строки таблицы «Архив статей»
 # Вставить в README.md сразу после строки |---|---|---|---|---| (без пустой строки!)
 
-| [2603.24581](articles/2603.24581/README.md) | 03.2026 | 18.07.2026 | Latent-WAM: Моделирование скрытого мира для автономного вождения (`Latent-WAM: Latent World Action Modeling for End-to-End Autonomous Driving`) ||
-| [2605.04675](articles/2605.04675/README.md) | 05.2026 | 18.07.2026 | Физическая состязательная одежда для обхода детекторов видимого и теплового диапазонов через неперекрывающиеся RGB-T паттерны (`Physical Adversarial Clothing Evades Visible-Thermal Detectors via Non-Overlapping RGB-T Pattern`) ||
-| [2605.30578](articles/2605.30578/README.md) | 05.2026 | 21.07.2026 | AdvScene: Переосмысление оценки состязательных патчей через устойчивость сцены (`AdvScene: Rethinking Adversarial Patch Evaluation Through Scene Robustness`) ||
-| [2606.17711](articles/2606.17711/README.md) | 06.2026 | 18.07.2026 | Структурированный состязательный камуфляж на основе диаграмм Вороного (`Structured Adversarial Camouflage via Voronoi Diagrams`) ||
-| [2606.19736](articles/2606.19736/README.md) | 06.2026 | 18.07.2026 | VFACamou: Камуфляж, основанный на данных о местоположении противника, для адаптации к окружающей среде и физического уклонения. (`VFACamou: View-Fused Adversarial Camouflage for Environment-Adaptive Physical Evasion`) ||
+| [2607.09121](articles/2607.09121/README.md) | 07.2026 | 27.07.2026 | Улучшение фундаментального анализа с помощью больших языковых моделей: RAG-система для создания инвестиционных отчетов (`Augmenting Fundamental Analysis with Large Language Models: A RAG-Based System for Generating Investor Briefs`) ||
+| [2607.11175](articles/2607.11175/README.md) | 07.2026 | 27.07.2026 | Путь к саморазвивающимся клиническим системам: масштабирование медицинских агентов от помощи к автономии (`The Path to Self-Evolving Clinical Systems: Scaling Medical Agents from Assistance to Autonomy`) ||
+| [2607.16057](articles/2607.16057/README.md) | 07.2026 | 27.07.2026 | Производительность передовых ИИ-моделей в бизнес-дисциплинах: бенчмарк на основе кейсов (`Frontier AI performance across the business disciplines: a case-grounded benchmark of knowledge work and analytical reasoning`) ||
+| [2607.17797](articles/2607.17797/README.md) | 07.2026 | 27.07.2026 | Помощь в финансовом аудите с использованием обнаружения дезинформации и объяснений (`Financial Audit Assistance using Misinformation Detection and Explanation`) ||
+| [2607.19409](articles/2607.19409/README.md) | 07.2026 | 27.07.2026 | FORCE-Bench: Бенчмарк и набор инструментов для оценки агентных систем в корпоративных финансах (`FORCE-Bench: A Benchmark, Dataset, and Evaluation Harness for Agentic AI in Enterprise Finance`) ||

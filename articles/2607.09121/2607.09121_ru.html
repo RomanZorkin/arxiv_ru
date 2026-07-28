@@ -1,0 +1,1378 @@
+<!DOCTYPE html>
+
+<!-- saved from url=(0035)https://arxiv.org/html/2607.09121v1 -->
+<html data-reading-mode="disabled" data-theme="light" lang="en"><head><meta content="text/html; charset=utf-8" http-equiv="Content-Type"/>
+<title>Augmenting Fundamental Analysis with Large Language Models: A RAG-Based System for Generating Investor Briefs</title>
+<!--Generated on Fri Jul 10 06:06:55 2026 by LaTeXML (version 0.8.8) http://dlmf.nist.gov/LaTeXML/.-->
+<meta content="width=device-width, initial-scale=1, shrink-to-fit=no" name="viewport"/>
+<link href="https://arxiv.org/static/browse/0.3.4/css/arxiv-html-papers-20260131.css" rel="stylesheet" type="text/css"/>
+<script src="https://arxiv.org/static/browse/0.3.4/js/arxiv-html-papers-20260131.js"></script>
+<script>
+  // Restore the saved color scheme preference, or
+  // enact the browser preference if "automatic", 
+  // without expecting DOM load to have completed.
+  //
+  // Also restore any saved readingmode and ToC display preferences.
+  function initializeReadingPreferences() {
+    let saved_theme = localStorage.getItem("ar5iv_theme") || "automatic";
+    if (saved_theme === "automatic") {
+      if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
+        saved_theme = "dark";
+      }
+    }
+    if (saved_theme == "dark") {
+      document.documentElement.setAttribute("data-theme", "dark");
+    } else {
+      document.documentElement.setAttribute("data-theme", "light");
+    }
+
+    const tocDisplay = localStorage.getItem('arxiv_html_paper_toc_display');
+    if (tocDisplay) {
+      document.documentElement.setAttribute("data-toc-display", tocDisplay);
+    }
+    const readingMode = localStorage.getItem('arxiv_html_paper_reading_mode');
+    if (readingMode) {
+      document.documentElement.setAttribute("data-reading-mode", readingMode);
+    }
+    // Pre-apply spinout-banner dismissal here, before the banner paints, so it
+    // never flashes in only to be hidden later by the deferred arxiv-header.js.
+    // Key matches arxiv-header.js: "arxiv-banner-dismissed:" + data-banner-name.
+    if (localStorage.getItem('arxiv-banner-dismissed:spinout-nonprofit')) {
+      document.documentElement.setAttribute("data-banner-dismissed", "");
+    }
+  }
+  // Run as soon as JS starts, to minimize repainting
+  initializeReadingPreferences();
+</script>
+<link href="https://arxiv.org/static/browse/0.3.4/images/icons/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<link href="https://arxiv.org/static/browse/0.3.4/images/icons/favicon-32x32.png" rel="icon" sizes="32x32" type="image/png"/>
+<link href="https://arxiv.org/static/browse/0.3.4/images/icons/favicon-16x16.png" rel="icon" sizes="16x16" type="image/png"/>
+<link href="https://arxiv.org/static/browse/0.3.4/images/icons/site.webmanifest" rel="manifest"/>
+<link color="#5bbad5" href="https://arxiv.org/static/browse/0.3.4/images/icons/safari-pinned-tab.svg" rel="mask-icon"/>
+<link href="https://arxiv.org/static/browse/0.3.4//utz6mli.css" media="screen" rel="stylesheet" type="text/css"/><link href="https://arxiv.org/static/browse/0.3.4/css/arxiv-header-footer.css" media="screen" rel="stylesheet" type="text/css"/><style>
+  /* Banner pre-dismissal (set above before paint -> no flash-then-hide) and
+     reading-mode chrome hiding. */
+  html[data-banner-dismissed] .ds-announcement { display: none; }
+  html[data-reading-mode="enabled"] .ds-announcement,
+  html[data-reading-mode="enabled"] .ds-site-footer { display: none; }
+  /* Keep the announcement text dark on the Open-Blue band in both colour themes
+     (otherwise it inherits the paper's warm-wash text in dark mode and washes out). */
+  .ds-announcement-text { color: var(--arxiv-ink, #1c1a17); }
+</style>
+<script defer="" src="https://arxiv.org/static/browse/0.3.4/js/arxiv-header.js"></script>
+<meta content="extension" property="gosuslugi.plugin.extension.content"/></head>
+<body>
+<dialog aria-labelledby="modal-title" closedby="any" id="modal-form">
+<form enctype="multipart/form-data" id="modal-form-content" method="dialog">
+<header class="modal-header">
+<h5 class="modal-title" id="modal-title">Сообщить о проблеме на GitHub</h5>
+<button aria-label="Close" class="modal-close" formnovalidate="" type="submit">×</button>
+</header>
+<div class="modal-body">
+<label for="form_title">Заголовок:</label>
+<input class="form-control" id="form_title" name="form_title" placeholder="Enter title" required=""/>
+<p hidden="" id="selectedTextModalDescription">Выбор контента сохранен. Опишите проблему ниже:</p>
+<label for="description">Описание:</label>
+<textarea class="form-control" id="description" maxlength="500" name="description" placeholder="500 characters maximum" required=""></textarea>
+</div>
+<footer class="modal-footer">
+<button class="sr-only modal-submit" type="submit" value="internal-report">Отправить без GitHub</button>
+<button class="modal-submit" type="submit" value="github-report">Отправить в GitHub</button>
+</footer>
+</form>
+</dialog><div aria-label="Announcement" class="ds-announcement" data-banner-name="spinout-nonprofit" id="announcement-banner" role="region">
+<span class="ds-announcement-text">arXiv теперь является независимой некоммерческой организацией!</span>
+<a class="ds-announcement-link" href="https://info.arxiv.org/about">Узнать больше</a>
+<button aria-label="Dismiss announcement" class="ds-announcement-close" type="button">×</button>
+</div>
+<header class="arxiv-html-header">
+<div class="html-header-logo">
+<a href="https://arxiv.org/"><img alt="arXiv logo" class="logo desktop-only" src="./Augmenting Fundamental Analysis with Large Language Models_ A RAG-Based System for Generating Investor Briefs_files/arxiv-logo-primary-light.svg" width="100"/>
+<span class="sr-only">Назад к arXiv</span>
+</a>
+</div>
+Оглавление, темная тема, ссылки
+<nav class="html-header-nav">
+<a class="header-button hover-effect desktop-only" href="https://info.arxiv.org/about/accessible_HTML.html" target="_blank">Почему HTML?</a>
+<a class="header-button" href="https://arxiv.org/html/2607.09121v1#" onclick="event.preventDefault(); showModalForm();" title="Report an Issue">
+<svg aria-hidden="true" class="mobile-only toggle-icon" height="1.25rem" role="presentation" viewbox="0 0 640 640">
+<path d="M224 160C224 107 267 64 320 64C373 64 416 107 416 160L416 163.6C416 179.3 403.3 192 387.6 192L252.5 192C236.8 192 224.1 179.3 224.1 163.6L224.1 160zM569.6 172.8C580.2 186.9 577.3 207 563.2 217.6L465.4 290.9C470.7 299.8 474.7 309.6 477.2 320L576 320C593.7 320 608 334.3 608 352C608 369.7 593.7 384 576 384L480 384L480 416C480 418.6 479.9 421.3 479.8 423.9L563.2 486.4C577.3 497 580.2 517.1 569.6 531.2C559 545.3 538.9 548.2 524.8 537.6L461.7 490.3C438.5 534.5 395.2 566.5 344 574.2L344 344C344 330.7 333.3 320 320 320C306.7 320 296 330.7 296 344L296 574.2C244.8 566.5 201.5 534.5 178.3 490.3L115.2 537.6C101.1 548.2 81 545.3 70.4 531.2C59.8 517.1 62.7 497 76.8 486.4L160.2 423.9C160.1 421.3 160 418.7 160 416L160 384L64 384C46.3 384 32 369.7 32 352C32 334.3 46.3 320 64 320L162.8 320C165.3 309.6 169.3 299.8 174.6 290.9L76.8 217.6C62.7 207 59.8 186.9 70.4 172.8C81 158.7 101.1 155.8 115.2 166.4L224 248C236.3 242.9 249.8 240 264 240L376 240C390.2 240 403.7 242.8 416 248L524.8 166.4C538.9 155.8 559 158.7 569.6 172.8z"></path>
+</svg>
+<span class="desktop-only">Сообщить о проблеме</span></a>
+к аннотации
+<a aria-label="Back to abstract page" class="header-button" href="https://arxiv.org/abs/2607.09121v1" title="Back to abstract page">
+<svg aria-hidden="true" class="mobile-only toggle-icon" fill="#ffffff" height="1.25rem" role="presentation" viewbox="0 0 512 512">
+<path d="M502.6 278.6c12.5-12.5 12.5-32.8 0-45.3l-128-128c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L402.7 224 192 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l210.7 0-73.4 73.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0l128-128zM160 96c17.7 0 32-14.3 32-32s-14.3-32-32-32L96 32C43 32 0 75 0 128L0 384c0 53 43 96 96 96l64 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-64 0c-17.7 0-32-14.3-32-32l0-256c0-17.7 14.3-32 32-32l64 0z">
+</path>
+</svg>
+<span class="desktop-only">Назад к аннотации</span>
+</a>
+ Ссылка на скачивание PDF 
+<a class="header-button" href="https://arxiv.org/pdf/2607.09121v1" target="_blank" title="Download PDF">
+<svg class="mobile-only toggle-icon" height="1.25rem" role="presentation" viewbox="0 0 576 542">
+<path d="M208 48L96 48c-8.8 0-16 7.2-16 16l0 384c0 8.8 7.2 16 16 16l80 0 0 48-80 0c-35.3 0-64-28.7-64-64L32 64C32 28.7 60.7 0 96 0L229.5 0c17 0 33.3 6.7 45.3 18.7L397.3 141.3c12 12 18.7 28.3 18.7 45.3l0 149.5-48 0 0-128-88 0c-39.8 0-72-32.2-72-72l0-88zM348.1 160L256 67.9 256 136c0 13.3 10.7 24 24 24l68.1 0zM240 380l32 0c33.1 0 60 26.9 60 60s-26.9 60-60 60l-12 0 0 28c0 11-9 20-20 20s-20-9-20-20l0-128c0-11 9-20 20-20zm32 80c11 0 20-9 20-20s-9-20-20-20l-12 0 0 40 12 0zm96-80l32 0c28.7 0 52 23.3 52 52l0 64c0 28.7-23.3 52-52 52l-32 0c-11 0-20-9-20-20l0-128c0-11 9-20 20-20zm32 128c6.6 0 12-5.4 12-12l0-64c0-6.6-5.4-12-12-12l-12 0 0 88 12 0zm76-108c0-11 9-20 20-20l48 0c11 0 20 9 20 20s-9 20-20 20l-28 0 0 24 28 0c11 0 20 9 20 20s-9 20-20 20l-28 0 0 44c0 11-9 20-20 20s-20-9-20-20l0-128z"></path>
+</svg>
+<span class="desktop-only">Скачать PDF</span></a>
+ навигационное оглавление переключить 
+<a aria-label="Toggle navigation" class="header-button toggle-icon" href="javascript:toggleNavTOC();" title="Toggle navigation">
+<svg height="1.25rem" role="presentation" viewbox="0 0 512 512">
+<path d="M40 48C26.7 48 16 58.7 16 72v48c0 13.3 10.7 24 24 24H88c13.3 0 24-10.7 24-24V72c0-13.3-10.7-24-24-24H40zM192 64c-17.7 0-32 14.3-32 32s14.3 32 32 32H480c17.7 0 32-14.3 32-32s-14.3-32-32-32H192zm0 160c-17.7 0-32 14.3-32 32s14.3 32 32 32H480c17.7 0 32-14.3 32-32s-14.3-32-32-32H192zm0 160c-17.7 0-32 14.3-32 32s14.3 32 32 32H480c17.7 0 32-14.3 32-32s-14.3-32-32-32H192zM16 232v48c0 13.3 10.7 24 24 24H88c13.3 0 24-10.7 24-24V232c0-13.3-10.7-24-24-24H40c-13.3 0-24 10.7-24 24zM40 368c-13.3 0-24 10.7-24 24v48c0 13.3 10.7 24 24 24H88c13.3 0 24-10.7 24-24V392c0-13.3-10.7-24-24-24H40z">
+</path>
+</svg>
+</a>
+- сворачиваемый заголовок / переключатель режима чтения 
+<a class="header-button toggle-icon" href="javascript:toggleReadingMode();" title="Disable reading mode, show header and footer">
+<svg height="1.25rem" role="presentation" viewbox="0 0 448 512"><!--!Font Awesome Free v7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2026 Fonticons, Inc.-->
+<path d="M32 32C14.3 32 0 46.3 0 64l0 96c0 17.7 14.3 32 32 32s32-14.3 32-32l0-64 64 0c17.7 0 32-14.3 32-32s-14.3-32-32-32L32 32zM64 352c0-17.7-14.3-32-32-32S0 334.3 0 352l0 96c0 17.7 14.3 32 32 32l96 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-64 0 0-64zM320 32c-17.7 0-32 14.3-32 32s14.3 32 32 32l64 0 0 64c0 17.7 14.3 32 32 32s32-14.3 32-32l0-96c0-17.7-14.3-32-32-32l-96 0zM448 352c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 64-64 0c-17.7 0-32 14.3-32 32s14.3 32 32 32l96 0c17.7 0 32-14.3 32-32l0-96z"></path>
+</svg>
+</a>
+- переключатель цветовой темы 
+<button aria-label="Toggle color scheme" class="header-button color-tog" onclick="toggleColorScheme();" title="Toggle dark/light mode" type="button">
+<span aria-hidden="true" class="toggle-icon automatic-tog">
+<svg height="1.25rem" role="presentation" viewbox="0 0 24 24">
+<path d="m14.3 16-.7-2h-3.2l-.7 2H7.8L11 7h2l3.2 9h-1.9M20 8.69V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12 20 8.69m-9.15 3.96h2.3L12 9l-1.15 3.65Z">
+</path>
+</svg>
+</span>
+<span aria-hidden="true" class="toggle-icon light-tog">
+<svg height="1.25rem" role="presentation" viewbox="0 0 24 24">
+<path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12 20 8.69Z">
+</path>
+</svg>
+</span>
+<span aria-hidden="true" class="toggle-icon dark-tog">
+<svg height="1.25rem" role="presentation" viewbox="0 0 24 24">
+<path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12c0-2.42-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12 20 8.69Z">
+</path>
+</svg>
+</span>
+</button>
+</nav>
+</header><nav class="ltx_page_navbar">
+<nav class="ltx_TOC">
+<ol class="ltx_toclist">
+<li class="ltx_tocentry ltx_tocentry_abstract">⟦<a class="ltx_ref" href="https://arxiv.org/html/2607.09121v1#abstract1" title="In Augmenting Fundamental Analysis with Large Language Models: A RAG-Based System for Generating Investor Briefs"><span class="ltx_text ltx_ref_title">Abstract</span></a>⟧</li>
+<li class="ltx_tocentry ltx_tocentry_section">
+⟦<a class="ltx_ref" href="https://arxiv.org/html/2607.09121v1#S1" title="In Augmenting Fundamental Analysis with Large Language Models: A RAG-Based System for Generating Investor Briefs"><span class="ltx_text ltx_ref_title"><span class="ltx_tag ltx_tag_ref">1 </span>Introduction</span></a>
+
+<a class="ltx_ref" href="https://arxiv.org/html/2607.09121v1#S1.SS1" title="In 1 Introduction ‣ Augmenting Fundamental Analysis with Large Language Models: A RAG-Based System for Generating Investor Briefs"><span class="ltx_text ltx_ref_title"><span class="ltx_tag ltx_tag_ref">1.1 </span>Literature Review</span></a>
+<a class="ltx_ref" href="https://arxiv.org/html/2607.09121v1#S1.SS2" title="In 1 Introduction ‣ Augmenting Fundamental Analysis with Large Language Models: A RAG-Based System for Generating Investor Briefs"><span class="ltx_text ltx_ref_title"><span class="ltx_tag ltx_tag_ref">1.2 </span>Our Contribution</span></a>
+
+</li>
+<li class="ltx_tocentry ltx_tocentry_section">
+⟦<a class="ltx_ref" href="https://arxiv.org/html/2607.09121v1#S2" title="In Augmenting Fundamental Analysis with Large Language Models: A RAG-Based System for Generating Investor Briefs"><span class="ltx_text ltx_ref_title"><span class="ltx_tag ltx_tag_ref">2 </span>Analysed data</span></a>
+
+<a class="ltx_ref" href="https://arxiv.org/html/2607.09121v1#S2.SS1" title="In 2 Analysed data ‣ Augmenting Fundamental Analysis with Large Language Models: A RAG-Based System for Generating Investor Briefs"><span class="ltx_text ltx_ref_title"><span class="ltx_tag ltx_tag_ref">2.1 </span>Macroeconomic and Cyclical Data</span></a>
+
+<a class="ltx_ref" href="https://arxiv.org/html/2607.09121v1#S2.SS2" title="In 2 Analysed data ‣ Augmenting Fundamental Analysis with Large Language Models: A RAG-Based System for Generating Investor Briefs"><span class="ltx_text ltx_ref_title"><span class="ltx_tag ltx_tag_ref">2.2 </span>Company-Specific Fundamental Data</span></a>
+
+<a class="ltx_ref" href="https://arxiv.org/html/2607.09121v1#S2.SS2.SSS1" title="In 2.2 Company-Specific Fundamental Data ‣ 2 Analysed data ‣ Augmenting Fundamental Analysis with Large Language Models: A RAG-Based System for Generating Investor Briefs"><span class="ltx_text ltx_ref_title"><span class="ltx_tag ltx_tag_ref">2.2.1 </span>Qualitative and Operational Data</span></a>
+<a class="ltx_ref" href="https://arxiv.org/html/2607.09121v1#S2.SS2.SSS2" title="In 2.2 Company-Specific Fundamental Data ‣ 2 Analysed data ‣ Augmenting Fundamental Analysis with Large Language Models: A RAG-Based System for Generating Investor Briefs"><span class="ltx_text ltx_ref_title"><span class="ltx_tag ltx_tag_ref">2.2.2 </span>Financial and Market Data</span></a>
+
+
+
+</li>
+<li class="ltx_tocentry ltx_tocentry_section">
+⟦<a class="ltx_ref" href="https://arxiv.org/html/2607.09121v1#S3" title="In Augmenting Fundamental Analysis with Large Language Models: A RAG-Based System for Generating Investor Briefs"><span class="ltx_text ltx_ref_title"><span class="ltx_tag ltx_tag_ref">3 </span>Examples of Briefs Produced for Investors</span></a>
+
+<a class="ltx_ref" href="https://arxiv.org/html/2607.09121v1#S3.SS1" title="In 3 Examples of Briefs Produced for Investors ‣ Augmenting Fundamental Analysis with Large Language Models: A RAG-Based System for Generating Investor Briefs"><span class="ltx_text ltx_ref_title"><span class="ltx_tag ltx_tag_ref">3.1 </span>Tesla 15th November 2024 - Kitchin cycle analysis</span></a>
+
+<a class="ltx_ref" href="https://arxiv.org/html/2607.09121v1#S3.SS2" title="In 3 Examples of Briefs Produced for Investors ‣ Augmenting Fundamental Analysis with Large Language Models: A RAG-Based System for Generating Investor Briefs"><span class="ltx_text ltx_ref_title"><span class="ltx_tag ltx_tag_ref">3.2 </span>NVIDIA 19th November 2024 - news analysis</span></a>
+
+<a class="ltx_ref" href="https://arxiv.org/html/2607.09121v1#S3.SS2.SSS1" title="In 3.2 NVIDIA 19th November 2024 - news analysis ‣ 3 Examples of Briefs Produced for Investors ‣ Augmenting Fundamental Analysis with Large Language Models: A RAG-Based System for Generating Investor Briefs"><span class="ltx_text ltx_ref_title"><span class="ltx_tag ltx_tag_ref">3.2.1 </span>Ranking</span></a>
+<a class="ltx_ref" href="https://arxiv.org/html/2607.09121v1#S3.SS2.SSS2" title="In 3.2 NVIDIA 19th November 2024 - news analysis ‣ 3 Examples of Briefs Produced for Investors ‣ Augmenting Fundamental Analysis with Large Language Models: A RAG-Based System for Generating Investor Briefs"><span class="ltx_text ltx_ref_title"><span class="ltx_tag ltx_tag_ref">3.2.2 </span>Ranked News Summaries (System Output)</span></a>
+<a class="ltx_ref" href="https://arxiv.org/html/2607.09121v1#S3.SS2.SSS3" title="In 3.2 NVIDIA 19th November 2024 - news analysis ‣ 3 Examples of Briefs Produced for Investors ‣ Augmenting Fundamental Analysis with Large Language Models: A RAG-Based System for Generating Investor Briefs"><span class="ltx_text ltx_ref_title"><span class="ltx_tag ltx_tag_ref">3.2.3 </span>System Performance and Analysis</span></a>
+
+
+
+<a class="ltx_ref" href="https://arxiv.org/html/2607.09121v1#S3.SS3" title="In 3 Examples of Briefs Produced for Investors ‣ Augmenting Fundamental Analysis with Large Language Models: A RAG-Based System for Generating Investor Briefs"><span class="ltx_text ltx_ref_title"><span class="ltx_tag ltx_tag_ref">3.3 </span>Revenue Exposure and Geopolitical Risk: NVIDIA, Amazon, and Tesla - 22nd November 2024</span></a>
+
+<a class="ltx_ref" href="https://arxiv.org/html/2607.09121v1#S3.SS3.SSS1" title="In 3.3 Revenue Exposure and Geopolitical Risk: NVIDIA, Amazon, and Tesla - 22nd November 2024 ‣ 3 Examples of Briefs Produced for Investors ‣ Augmenting Fundamental Analysis with Large Language Models: A RAG-Based System for Generating Investor Briefs"><span class="ltx_text ltx_ref_title"><span class="ltx_tag ltx_tag_ref">3.3.1 </span>NVIDIA</span></a>
+<a class="ltx_ref" href="https://arxiv.org/html/2607.09121v1#S3.SS3.SSS2" title="In 3.3 Revenue Exposure and Geopolitical Risk: NVIDIA, Amazon, and Tesla - 22nd November 2024 ‣ 3 Examples of Briefs Produced for Investors ‣ Augmenting Fundamental Analysis with Large Language Models: A RAG-Based System for Generating Investor Briefs"><span class="ltx_text ltx_ref_title"><span class="ltx_tag ltx_tag_ref">3.3.2 </span>Amazon</span></a>
+<a class="ltx_ref" href="https://arxiv.org/html/2607.09121v1#S3.SS3.SSS3" title="In 3.3 Revenue Exposure and Geopolitical Risk: NVIDIA, Amazon, and Tesla - 22nd November 2024 ‣ 3 Examples of Briefs Produced for Investors ‣ Augmenting Fundamental Analysis with Large Language Models: A RAG-Based System for Generating Investor Briefs"><span class="ltx_text ltx_ref_title"><span class="ltx_tag ltx_tag_ref">3.3.3 </span>Tesla</span></a>
+
+
+<a class="ltx_ref" href="https://arxiv.org/html/2607.09121v1#S3.SS4" title="In 3 Examples of Briefs Produced for Investors ‣ Augmenting Fundamental Analysis with Large Language Models: A RAG-Based System for Generating Investor Briefs"><span class="ltx_text ltx_ref_title"><span class="ltx_tag ltx_tag_ref">3.4 </span>Energy Fuels 29th November 2024 - Fundamental Analysis of a Small-Cap Uranium Company</span></a>
+
+<a class="ltx_ref" href="https://arxiv.org/html/2607.09121v1#S3.SS5" title="In 3 Examples of Briefs Produced for Investors ‣ Augmenting Fundamental Analysis with Large Language Models: A RAG-Based System for Generating Investor Briefs"><span class="ltx_text ltx_ref_title"><span class="ltx_tag ltx_tag_ref">3.5 </span>Evaluating LLM Responses to Unforeseen Events: The Case of Martial Law in South Korea - 4th December 2024</span></a>
+
+<a class="ltx_ref" href="https://arxiv.org/html/2607.09121v1#S3.SS5.SSS1" title="In 3.5 Evaluating LLM Responses to Unforeseen Events: The Case of Martial Law in South Korea - 4th December 2024 ‣ 3 Examples of Briefs Produced for Investors ‣ Augmenting Fundamental Analysis with Large Language Models: A RAG-Based System for Generating Investor Briefs"><span class="ltx_text ltx_ref_title"><span class="ltx_tag ltx_tag_ref">3.5.1 </span>Coinbase</span></a>
+<a class="ltx_ref" href="https://arxiv.org/html/2607.09121v1#S3.SS5.SSS2" title="In 3.5 Evaluating LLM Responses to Unforeseen Events: The Case of Martial Law in South Korea - 4th December 2024 ‣ 3 Examples of Briefs Produced for Investors ‣ Augmenting Fundamental Analysis with Large Language Models: A RAG-Based System for Generating Investor Briefs"><span class="ltx_text ltx_ref_title"><span class="ltx_tag ltx_tag_ref">3.5.2 </span>NVIDIA</span></a>
+<a class="ltx_ref" href="https://arxiv.org/html/2607.09121v1#S3.SS5.SSS3" title="In 3.5 Evaluating LLM Responses to Unforeseen Events: The Case of Martial Law in South Korea - 4th December 2024 ‣ 3 Examples of Briefs Produced for Investors ‣ Augmenting Fundamental Analysis with Large Language Models: A RAG-Based System for Generating Investor Briefs"><span class="ltx_text ltx_ref_title"><span class="ltx_tag ltx_tag_ref">3.5.3 </span>Lululemon</span></a>
+
+
+<a class="ltx_ref" href="https://arxiv.org/html/2607.09121v1#S3.SS6" title="In 3 Examples of Briefs Produced for Investors ‣ Augmenting Fundamental Analysis with Large Language Models: A RAG-Based System for Generating Investor Briefs"><span class="ltx_text ltx_ref_title"><span class="ltx_tag ltx_tag_ref">3.6 </span>Lululemon 6th December 2024 - clusterization of news articles</span></a>
+
+</li>
+<li class="ltx_tocentry ltx_tocentry_section">
+⟦<a class="ltx_ref" href="https://arxiv.org/html/2607.09121v1#S4" title="In Augmenting Fundamental Analysis with Large Language Models: A RAG-Based System for Generating Investor Briefs"><span class="ltx_text ltx_ref_title"><span class="ltx_tag ltx_tag_ref">4 </span>User Feedback and Pilot Summary</span></a>
+
+<a class="ltx_ref" href="https://arxiv.org/html/2607.09121v1#S4.SS1" title="In 4 User Feedback and Pilot Summary ‣ Augmenting Fundamental Analysis with Large Language Models: A RAG-Based System for Generating Investor Briefs"><span class="ltx_text ltx_ref_title"><span class="ltx_tag ltx_tag_ref">4.1 </span>Overall Reception and Key Strengths</span></a>
+<a class="ltx_ref" href="https://arxiv.org/html/2607.09121v1#S4.SS2" title="In 4 User Feedback and Pilot Summary ‣ Augmenting Fundamental Analysis with Large Language Models: A RAG-Based System for Generating Investor Briefs"><span class="ltx_text ltx_ref_title"><span class="ltx_tag ltx_tag_ref">4.2 </span>Constructive Feedback and Areas for Improvement</span></a>
+<a class="ltx_ref" href="https://arxiv.org/html/2607.09121v1#S4.SS3" title="In 4 User Feedback and Pilot Summary ‣ Augmenting Fundamental Analysis with Large Language Models: A RAG-Based System for Generating Investor Briefs"><span class="ltx_text ltx_ref_title"><span class="ltx_tag ltx_tag_ref">4.3 </span>Pilot Summary and Future Directions</span></a>
+
+</li>
+<li class="ltx_tocentry ltx_tocentry_section">⟦<a class="ltx_ref" href="https://arxiv.org/html/2607.09121v1#S5" title="In Augmenting Fundamental Analysis with Large Language Models: A RAG-Based System for Generating Investor Briefs"><span class="ltx_text ltx_ref_title"><span class="ltx_tag ltx_tag_ref">5 </span>Conclusions</span></a>⟧</li>
+<li class="ltx_tocentry ltx_tocentry_bibliography">⟦<a class="ltx_ref" href="https://arxiv.org/html/2607.09121v1#bib" title="In Augmenting Fundamental Analysis with Large Language Models: A RAG-Based System for Generating Investor Briefs"><span class="ltx_text ltx_ref_title">References</span></a>⟧</li>
+</ol></nav>
+</nav>
+<div class="ltx_page_main">
+<div class="infobox" id="infobox">
+<a href="https://info.arxiv.org/help/license/index.html#licenses-available" id="license-tr">
+    Лицензия: бессрочная неисключительная лицензия arXiv.org
+  </a>
+<div id="watermark-tr">
+arXiv:2607.09121v1 [cs.CL] 10 июля 2026 г.</div>
+</div><div class="ltx_page_content">
+<article class="ltx_document ltx_authors_1line" lang="en">
+<h1 class="ltx_title ltx_title_document">Усиление фундаментального анализа с помощью LLM: система на основе RAG для подготовки аналитических записок для инвесторов</h1>
+<div class="ltx_authors">
+<span class="ltx_creator ltx_role_author">
+<span class="ltx_personname">Бартош Зюлко и Кацпер Добрженевский
+<br class="ltx_break"/>Факультет компьютерных наук, Университет науки и технологий имени Станислава Сташица в Кракове, Польша
+<br class="ltx_break"/>
+</span></span>
+</div>
+<div class="ltx_abstract" id="abstract1">
+<h6 class="ltx_title ltx_title_abstract">Аннотация</h6>
+<p class="ltx_p">В данном исследовании мы рассматриваем возможности, предоставляемые LLM для различных аспектов фундаментального анализа компаний на основе их отчетов, а также данных и документов, описывающих макроэкономическую ситуацию, таких как изменения ВВП и инфляции, и документов, подаваемых в Комиссию по ценным бумагам и биржам США (SEC), которые можно найти в EDGAR. Мы проводили предварительную обработку этих данных, а затем отправляли их через API в модель gpt-4o в режиме, подобном Retrieval-Augmented Generation (RAG). Мы также подготовили документ, описывающий пример базы знаний инвестора, основанной на циклах Китчина. Мы сканировали данные, важные для анализа 9 компаний в течение 4 недель. Используя LLM, мы создавали автоматические сводки о них. Они были отправлены девяти участникам, являющимся частными инвесторами, для оценки полезности такого подхода к анализу данных..</p>
+</div>
+<div class="ltx_para" id="p1">
+<p class="ltx_p" id="p1.1">Ключевые слова: обработка естественного языка в финансах, инвестирование, LLM, RAG, системы поддержки принятия инвестиционных решений, искусственный интеллект в инвестициях</p>
+</div>
+<div class="ltx_para" id="p2">
+<p class="ltx_p" id="p2.1">Коды JEL: G11 (Выбор портфеля; Инвестиционные решения), G14 (Информация и рыночная эффективность; Событийные исследования), G17 (Финансовое прогнозирование и моделирование), C45 (Нейронные сети и смежные темы))</p>
+</div>
+<section class="ltx_section" id="S1">
+<h2 class="ltx_title ltx_title_section">
+<span class="ltx_tag ltx_tag_section">1 </span>Введение</h2>
+<div class="ltx_para" id="S1.p1">
+<p class="ltx_p" id="S1.p1.1">Фундаментальный анализ, являющийся краеугольным камнем инвестиционных стратегий, традиционно опирается на углубленную оценку финансовой отчетности, отраслевых отчетов и макроэкономических показателей. Однако этот процесс требует много времени и обязывает аналитиков обрабатывать огромные объемы данных, большая часть которых является неструктурированной, например, текст из годовых отчетов, стенограммы телефонных конференций о доходах или документы, поданные в регулирующие органы, такие как SEC, через систему EDGAR. Стремительное развитие обработки естественного языка (NLP) и, в частности, появление LLM открывают беспрецедентные возможности для автоматизации и углубления этого процесса..</p>
+</div>
+<section class="ltx_subsection" id="S1.SS1">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">1.1 </span>Обзор литературы</h3>
+<div class="ltx_para" id="S1.SS1.p1">
+<p class="ltx_p" id="S1.SS1.p1.1">Ранние работы по применению NLP в финансах были сосредоточены преимущественно на анализе тональности. Фундаментальное исследование <cite class="ltx_cite ltx_citemacro_cite">Loughran and McDonald (<a class="ltx_ref" href="https://arxiv.org/html/2607.09121v1#bib.bib1" title="When is a liability not a liability? textual analysis, dictionaries, and 10-Ks">2011</a>)</cite> продемонстрировало, что словари тональности общего назначения не подходят для специфического финансового языка, что привело к разработке специализированных лексиконов. С появлением архитектуры transformers и таких моделей, как BERT <cite class="ltx_cite ltx_citemacro_cite">Devlin<span class="ltx_text ltx_bib_etal"> et al.</span> (<a class="ltx_ref" href="https://arxiv.org/html/2607.09121v1#bib.bib2" title="BERT: pre-training of deep bidirectional transformers for language understanding">2019</a>)</cite>, стало возможным создание контекстуальных моделей, предварительно обученных специально на финансовых корпусах. Примером является FinBERT <cite class="ltx_cite ltx_citemacro_cite">Araci (<a class="ltx_ref" href="https://arxiv.org/html/2607.09121v1#bib.bib3" title="FinBERT: financial sentiment analysis with pre-trained language models">2019</a>)</cite>, которая значительно улучшила показатели в задачах классификации тональности в финансовых текстах.</p>
+</div>
+<div class="ltx_para" id="S1.SS1.p2">
+<p class="ltx_p" id="S1.SS1.p2.1">Текущая революция в области NLP фундаментально построена на архитектуре Transformer, представленной <cite class="ltx_cite ltx_citemacro_cite">Vaswani<span class="ltx_text ltx_bib_etal"> et al.</span> (<a class="ltx_ref" href="https://arxiv.org/html/2607.09121v1#bib.bib9" title="Attention is all you need">2017</a>)</cite>. Ее ключевая инновация, механизм self-attention, позволяет моделям оценивать важность различных слов во входных данных, обеспечивая более глубокое контекстное понимание и возможности параллельной обработки, которые были невозможны при использовании предыдущих последовательных архитектур, таких как Recurrent Neural Networks (RNNs) или Long Short-Term Memory (LSTM). Этот архитектурный прорыв открыл путь к разработке современных LLMs. Сегодня эта область продолжает стремительно развиваться, а ведущие исследовательские лаборатории расширяют границы возможностей моделей. Например, GPT-4o от OpenAI демонстрирует переход к нативно мультимодальным моделям, которые могут беспрепятственно обрабатывать и анализировать текст, аудио и визуальные данные, повышая как эффективность, так и возможности взаимодействия с пользователем <cite class="ltx_cite ltx_citemacro_cite">OpenAI (<a class="ltx_ref" href="https://arxiv.org/html/2607.09121v1#bib.bib10" title="GPT-4o">2024</a>)</cite>.</p>
+</div>
+<div class="ltx_para" id="S1.SS1.p3">
+<p class="ltx_p" id="S1.SS1.p3.1">Появление крупномасштабных генеративных моделей, таких как модели семейства GPT, произвело революцию в подходе к анализу текста. Эти модели, благодаря своей способности понимать и генерировать текст в режиме zero-shot или few-shot, могут выполнять задачи, значительно более сложные, чем простой анализ тональности. Исследования показали их потенциал в прогнозировании финансовых рынков. Например, <cite class="ltx_cite ltx_citemacro_cite">Lopez-Lira and Tang (<a class="ltx_ref" href="https://arxiv.org/html/2607.09121v1#bib.bib4" title="Can ChatGPT forecast stock price movements? return predictability and large language models">2023</a>)</cite> показали, что ChatGPT может предсказывать направление движения цен на акции на основе заголовков новостей, что говорит о том, что эти модели усваивают сложные взаимосвязи между информацией и реакцией рынка. В аналогичном ключе <cite class="ltx_cite ltx_citemacro_cite">Itoh and Okada (<a class="ltx_ref" href="https://arxiv.org/html/2607.09121v1#bib.bib7" title="The power of large language models: a ChatGPT-driven textual analysis of fundamental data">2023</a>)</cite> исследовали возможности ChatGPT для проведения текстового анализа фундаментальных данных, дополнительно подчеркивая потенциал LLM для автоматизации и масштабирования сложных аналитических задач, традиционно выполняемых людьми..</p>
+</div>
+<div class="ltx_para" id="S1.SS1.p4">
+<p class="ltx_p" id="S1.SS1.p4.1">Одной из ключевых проблем при применении LLM в высокоточных областях, таких как финансы, является обеспечение фактической достоверности и предотвращение так называемых «галлюцинаций». Подход RAG, предложенный <cite class="ltx_cite ltx_citemacro_cite">Lewis<span class="ltx_text ltx_bib_etal"> et al.</span> (<a class="ltx_ref" href="https://arxiv.org/html/2607.09121v1#bib.bib5" title="Retrieval-augmented generation for knowledge-intensive NLP tasks">2020</a>)</cite>, предлагает решение этой задачи. Он позволяет модели «основывать» свои ответы на конкретных предоставленных исходных документах, значительно повышая надежность генерируемого контента — преимущество, дополнительно подтвержденное исследованиями, показывающими, что дополнение поиском активно снижает галлюцинации модели в контексте диалога <cite class="ltx_cite ltx_citemacro_cite">Shuster<span class="ltx_text ltx_bib_etal"> et al.</span> (<a class="ltx_ref" href="https://arxiv.org/html/2607.09121v1#bib.bib8" title="Retrieval Augmentation Reduces Hallucination in Conversation">2021</a>)</cite>. По сути, этот процесс можно рассматривать как практическую реализацию контролируемого получения знаний, где «восприятие» ситуации моделью LLM формируется на основе тщательно отобранного набора входных данных — концепция, исследованная <cite class="ltx_cite ltx_citemacro_cite">Rzepka and Okada (<a class="ltx_ref" href="https://arxiv.org/html/2607.09121v1#bib.bib14" title="Simulating Perception With LLMs as Underpinnings for More Controllable Knowledge Acquisition">2023</a>)</cite> как краеугольный камень для построения более надежных систем ИИ. Более того, компонент поиска в RAG может быть улучшен по сравнению с простым извлечением документов за счет использования структурированных баз знаний, таких как онтологии или графы знаний. Этот графовый подход, продемонстрированный <cite class="ltx_cite ltx_citemacro_cite">Rzepka and Obayashi (<a class="ltx_ref" href="https://arxiv.org/html/2607.09121v1#bib.bib13" title="Effectiveness of Security Export Control Ontology for Predicting Answer Type and Regulation Categories">2023</a>)</cite> в сложной области экспортного контроля безопасности, позволяет осуществлять более точный и контекстно-зависимый поиск информации, прокладывая путь к более сложным аналитическим системам. Параллельно, для повышения аналитической точности, были разработаны модели, обученные с нуля на финансовых данных, ярким примером которых является BloombergGPT <cite class="ltx_cite ltx_citemacro_cite">Wu<span class="ltx_text ltx_bib_etal"> et al.</span> (<a class="ltx_ref" href="https://arxiv.org/html/2607.09121v1#bib.bib6" title="BloombergGPT: a large language model for finance">2023</a>)</cite>, продемонстрировавшая превосходную производительность в широком спектре финансовых задач по сравнению с моделями общего назначения..</p>
+</div>
+</section>
+<section class="ltx_subsection" id="S1.SS2">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">1.2 </span>Наш вклад</h3>
+<div class="ltx_para" id="S1.SS2.p1">
+<p class="ltx_p" id="S1.SS2.p1.1">Несмотря на этот стремительный прогресс, большинство существующих исследований сосредоточено на оценке LLM в изолированных, специфических задачах, таких как прогнозирование цен, анализ тональности или обобщение отдельных документов. Однако ощущается нехватка комплексных исследований, оценивающих интегрированные системы, которые объединяют анализ корпоративной документации с макроэкономическими данными в связный и автоматизированный аналитический рабочий процесс. Более того, оценка таких систем редко выходит за рамки академических метрик и включает оценку их практической полезности конечными пользователями — частными инвесторами..</p>
+</div>
+<div class="ltx_para" id="S1.SS2.p2">
+<p class="ltx_p" id="S1.SS2.p2.1">Наша работа восполняет этот пробел, представляя систему на основе модели <math alttext="gpt-4o" class="ltx_Math" display="inline" id="S1.SS2.p2.1.m1" intent=":literal"><semantics><mrow><mrow><mi>g</mi><mo lspace="0em" rspace="0em">​</mo><mi>p</mi><mo lspace="0em" rspace="0em">​</mo><mi>t</mi></mrow><mo>−</mo><mrow><mn>4</mn><mo lspace="0em" rspace="0em">​</mo><mi>o</mi></mrow></mrow><annotation encoding="application/x-tex">gpt-4o</annotation></semantics></math> в рамках архитектуры RAG. Эта система объединяет данные из различных источников — отчетов компаний, макроэкономических показателей и документов EDGAR — для создания синтетических аналитических сводок. Кроме того, аналитический контекст дополняется экспертными знаниями о бизнес-циклах Китчина. Ключевым элементом нашего исследования является оценка подготовленных материалов группой из девяти активных частных инвесторов, что позволяет оценить реальную добавленную стоимость нашего подхода в повседневной инвестиционной практике. Это согласуется с растущим числом исследований, изучающих, как LLM могут быть использованы для систематического обзора и синтеза предметно-ориентированных знаний, что продемонстрировано <cite class="ltx_cite ltx_citemacro_cite">Laniewski and Ślepaczuk (<a class="ltx_ref" href="https://arxiv.org/html/2607.09121v1#bib.bib12" title="Enhancing literature review with LLM and NLP methods. Algorithmic trading case">2024</a>)</cite> в контексте литературы по алгоритмической торговле..</p>
+</div>
+</section>
+</section>
+<section class="ltx_section" id="S2">
+<h2 class="ltx_title ltx_title_section">
+<span class="ltx_tag ltx_tag_section">2 </span>Проанализированные данные</h2>
+<div class="ltx_para" id="S2.p1">
+<p class="ltx_p" id="S2.p1.1">Выбор компаний для данного исследования был продиктован принципом максимального разнообразия для создания надежной и сложной тестовой среды для нашей аналитической системы на базе LLM. Итоговая когорта из девяти компаний была сформирована на основе нескольких критериев, включая рыночную капитализацию, сектор, публичную известность и прямые предложения от участников исследования. Каждый из девяти участников имел возможность номинировать одну компанию, что привело к созданию уникального и разнообразного портфеля..</p>
+</div>
+<div class="ltx_para" id="S2.p2">
+<p class="ltx_p" id="S2.p2.1">Выбранные компании: Lululemon (LULU), NVIDIA (NVDA), Energy Fuels (UUUU), Coinbase (COIN), Corebridge Financial (CRBG), Pinterest (PINS), Novavax (NVAX), Amazon (AMZN) и Tesla (TSLA)).</p>
+</div>
+<div class="ltx_para" id="S2.p3">
+<p class="ltx_p" id="S2.p3.1">Данная методология отбора позволила сформировать разнообразный набор фирм, что отвечает целям исследования посредством:</p>
+<ul class="ltx_itemize" id="S2.I1">
+<li class="ltx_item" id="S2.I1.i1" style="list-style-type:none;">
+⟦<span class="ltx_tag ltx_tag_item">•</span>
+
+Охват нескольких секторов: портфель включает технологии (NVDA, PINS, AMZN, TSLA), товары циклического спроса (LULU), финансовый сектор (COIN, CRBG), добычу урана (UUUU) и биотехнологии (NVAX)).
+
+</li>
+<li class="ltx_item" id="S2.I1.i2" style="list-style-type:none;">
+⟦<span class="ltx_tag ltx_tag_item">•</span>
+
+Смешение размеров и профилей компаний: в нем представлены акции с большой капитализацией и высокой степенью публичности (такие как AMZN, NVDA, TSLA) наряду с более мелкими или менее отслеживаемыми компаниями (такими как UUUU, NVAX, CRBG)).
+
+</li>
+<li class="ltx_item" id="S2.I1.i3" style="list-style-type:none;">
+⟦<span class="ltx_tag ltx_tag_item">•</span>
+
+Проверка адаптивности: это разнообразие гарантирует, что наша система не была переобучена под жаргон или стиль отчетности одной конкретной отрасли и должна была обрабатывать широкий спектр специфических для компаний новостей, рисков и KPI..
+
+</li>
+</ul>
+</div>
+<div class="ltx_para" id="S2.p4">
+<p class="ltx_p" id="S2.p4.1">Для данной группы компаний мы собрали исчерпывающий набор данных за четырехнедельный период. Данные были структурированы таким образом, чтобы обеспечить нашу систему на базе RAG многоуровневым контекстом, охватывающим всё: от макроэкономических тенденций высокого уровня до операционных деталей конкретных компаний..</p>
+</div>
+<section class="ltx_subsection" id="S2.SS1">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">2.1 </span>Макроэкономические и циклические данные</h3>
+<div class="ltx_para" id="S2.SS1.p1">
+<p class="ltx_p" id="S2.SS1.p1.1">Данная категория обеспечивает широкий экономический контекст. Она включает ключевые показатели экономики США, а также устоявшиеся циклические и сезонные эвристики. Эти данные были преимущественно получены из официальных статистических публикаций и платформ экономических исследований..</p>
+<ul class="ltx_itemize" id="S2.I2">
+<li class="ltx_item" id="S2.I2.i1" style="list-style-type:none;">
+⟦<span class="ltx_tag ltx_tag_item">•</span>
+
+Экономические показатели: ВВП США, инфляция в США (ИПЦ), индекс деловой активности в сфере услуг и производственном секторе США (PMI), уровень безработицы и число занятых в несельскохозяйственном секторе (NFP)).
+
+</li>
+<li class="ltx_item" id="S2.I2.i2" style="list-style-type:none;">
+⟦<span class="ltx_tag ltx_tag_item">•</span>
+
+Денежно-кредитная политика: текущая и прогнозируемая ставка по федеральным фондам Федеральной резервной системы.
+
+</li>
+<li class="ltx_item" id="S2.I2.i3" style="list-style-type:none;">
+⟦<span class="ltx_tag ltx_tag_item">•</span>
+
+Циклические данные: цикл Китчина, отраслевые циклы, президентский цикл и налоговые циклы.
+
+</li>
+<li class="ltx_item" id="S2.I2.i4" style="list-style-type:none;">
+⟦<span class="ltx_tag ltx_tag_item">•</span>
+
+Сезонные эвристики: аномалия «Продавай в мае и уходи».
+
+</li>
+</ul>
+</div>
+</section>
+<section class="ltx_subsection" id="S2.SS2">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">2.2 </span>Фундаментальные данные конкретной компании</h3>
+<div class="ltx_para" id="S2.SS2.p1">
+<p class="ltx_p" id="S2.SS2.p1.1">Эта категория составляет основу нашего анализа, фокусируясь на данных, извлеченных непосредственно из отчетов компаний (например, формы 10-K и 10-Q из EDGAR), пресс-релизов и от поставщиков данных о финансовых рынках. Мы разделили ее на качественные и количественные подкатегории.</p>
+</div>
+<section class="ltx_subsubsection" id="S2.SS2.SSS1">
+<h4 class="ltx_title ltx_title_subsubsection">
+<span class="ltx_tag ltx_tag_subsubsection">2.2.1 </span>Качественные и операционные данные</h4>
+<div class="ltx_para" id="S2.SS2.SSS1.p1">
+<p class="ltx_p" id="S2.SS2.SSS1.p1.1">Эти данные зачастую являются текстовыми и требуют интерпретации, что делает их идеальными кандидатами для анализа с помощью нашей системы на основе RAG..</p>
+<ul class="ltx_itemize" id="S2.I3">
+<li class="ltx_item" id="S2.I3.i1" style="list-style-type:none;">
+⟦<span class="ltx_tag ltx_tag_item">•</span>
+
+Бизнес-операции: значимые географические локации, ключевые структуры затрат и основные клиенты.
+
+</li>
+<li class="ltx_item" id="S2.I3.i2" style="list-style-type:none;">
+⟦<span class="ltx_tag ltx_tag_item">•</span>
+
+Управление и структура собственности: ключевые акционеры, инсайдерские продажи акций, а также официальные прогнозы или рекомендации руководства.
+
+</li>
+<li class="ltx_item" id="S2.I3.i3" style="list-style-type:none;">
+⟦<span class="ltx_tag ltx_tag_item">•</span>
+
+Ключевые показатели эффективности конкретных компаний: отраслевые показатели эффективности, такие как:
+
+
+<span class="ltx_tag ltx_tag_item"><span class="ltx_text ltx_font_bold" id="S2.I3.i3.I1.i1.1.1.1">–</span></span>
+
+Сопоставимые продажи, количество новых магазинов под управлением компании и объем продаж на <math alttext="m^{2}" class="ltx_Math" display="inline" id="S2.I3.i3.I1.i1.p1.1.m1" intent=":literal"><semantics><msup><mi>m</mi><mn>2</mn></msup><annotation encoding="application/x-tex">m^{2}</annotation></semantics></math> для магазина (LULU),
+
+
+
+<span class="ltx_tag ltx_tag_item"><span class="ltx_text ltx_font_bold" id="S2.I3.i3.I1.i2.1.1.1">–</span></span>
+
+Спотовая цена на уран, а также объемы добычи компаний Cameco и Kazatoprom (UUUU),
+
+
+
+<span class="ltx_tag ltx_tag_item"><span class="ltx_text ltx_font_bold" id="S2.I3.i3.I1.i3.1.1.1">–</span></span>
+
+Цена биткоина, объем транзакций и даты судебных разбирательств с SEC (COIN),
+
+
+
+<span class="ltx_tag ltx_tag_item"><span class="ltx_text ltx_font_bold" id="S2.I3.i3.I1.i4.1.1.1">–</span></span>
+
+Чистые заработанные премии (NPE), чистый инвестиционный доход, коэффициент платежеспособности, маржа нового бизнеса, коэффициент удержания клиентов и коэффициент убыточности (CRBG),
+
+
+
+<span class="ltx_tag ltx_tag_item"><span class="ltx_text ltx_font_bold" id="S2.I3.i3.I1.i5.1.1.1">–</span></span>
+
+Выручка на одного пользователя ARPU (PINS),
+
+
+
+<span class="ltx_tag ltx_tag_item"><span class="ltx_text ltx_font_bold" id="S2.I3.i3.I1.i6.1.1.1">–</span></span>
+
+Портфель разработок и стадия их реализации, отношение денежных средств к операционным расходам и коэффициент цена/выручка (NVAX)
+
+
+
+<span class="ltx_tag ltx_tag_item"><span class="ltx_text ltx_font_bold" id="S2.I3.i3.I1.i7.1.1.1">–</span></span>
+
+Выручка и рост AWS, коэффициент оборачиваемости запасов, удержание клиентов и уровень оттока, а также рост рекламной выручки (AMZN)
+
+
+
+<span class="ltx_tag ltx_tag_item"><span class="ltx_text ltx_font_bold" id="S2.I3.i3.I1.i8.1.1.1">–</span></span>
+
+Удержание клиентов и уровень оттока для FSD, производство, темпы поставок и выручка от энергетического сектора (TSLA)
+
+
+
+
+</li>
+</ul>
+</div>
+</section>
+<section class="ltx_subsubsection" id="S2.SS2.SSS2">
+<h4 class="ltx_title ltx_title_subsubsection">
+<span class="ltx_tag ltx_tag_subsubsection">2.2.2 </span>Финансовые и рыночные данные</h4>
+<div class="ltx_para" id="S2.SS2.SSS2.p1">
+<p class="ltx_p" id="S2.SS2.SSS2.p1.1">Сюда входят количественные показатели, отражающие финансовое состояние и рыночную оценку компании.</p>
+<ul class="ltx_itemize" id="S2.I4">
+<li class="ltx_item" id="S2.I4.i1" style="list-style-type:none;">
+⟦<span class="ltx_tag ltx_tag_item">•</span>
+
+Показатели оценки: коэффициент цена/прибыль (P/E) и прогнозный коэффициент P/E.
+
+</li>
+<li class="ltx_item" id="S2.I4.i2" style="list-style-type:none;">
+⟦<span class="ltx_tag ltx_tag_item">•</span>
+
+Доходность акционеров: выплаты дивидендов и дивидендная доходность.
+
+</li>
+<li class="ltx_item" id="S2.I4.i3" style="list-style-type:none;">
+⟦<span class="ltx_tag ltx_tag_item">•</span>
+
+Рыночные настроения: рекомендации аналитиков.
+
+</li>
+<li class="ltx_item" id="S2.I4.i4" style="list-style-type:none;">
+⟦<span class="ltx_tag ltx_tag_item">•</span>
+
+Ценовые данные: Текущая цена акции.
+
+</li>
+</ul>
+</div>
+</section>
+</section>
+</section>
+<section class="ltx_section" id="S3">
+<h2 class="ltx_title ltx_title_section">
+<span class="ltx_tag ltx_tag_section">3 </span>Примеры аналитических записок, подготовленных для инвесторов</h2>
+<div class="ltx_para" id="S3.p1">
+<p class="ltx_p" id="S3.p1.1">Чтобы предоставить девяти участникам своевременные и актуальные аналитические данные, наша система формировала аналитические сводки на протяжении всего четырехнедельного периода исследования. Процесс генерации был динамическим и разработан таким образом, чтобы имитировать информационный поток, с которым может столкнуться активный инвестор. Каждую неделю концептуальная направленность отчетов слегка корректировалась для проверки различных аспектов аналитических возможностей системы..</p>
+</div>
+<div class="ltx_para" id="S3.p2">
+<p class="ltx_p" id="S3.p2.1">Наша ежедневная операционная стратегия была двоякой. Во-первых, мы отдавали приоритет созданию сводок для 2-3 компаний, демонстрирующих наиболее значительную активность в течение дня, что было вызвано публикацией новых данных, важными новостными событиями или резкими ценовыми колебаниями. Во-вторых, мы обеспечивали сбалансированное покрытие всего портфеля, гарантируя, что каждая из девяти выбранных компаний получала как минимум одну специализированную сводку в неделю, даже при отсутствии крупных новостей. Такой двойной подход позволил нам протестировать реактивность системы на высокоинтенсивные информационные потоки, а также ее способность синтезировать значимые выводы в более спокойные периоды..</p>
+</div>
+<div class="ltx_para" id="S3.p3">
+<p class="ltx_p" id="S3.p3.1">В этом разделе мы представляем подборку данных сводок, чтобы проиллюстрировать результаты работы системы. Примеры были выбраны для демонстрации разнообразия генерируемых аналитических материалов: от отчетов, основанных на конкретных событиях, до более рутинных еженедельных обзоров. Изначально сводки были подготовлены на польском языке, за исключением цитат из новостных статей. Мы представляем переводы.</p>
+</div>
+<section class="ltx_subsection" id="S3.SS1">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">3.1 </span>Tesla 15 ноября 2024 г. - анализ цикла Китчина</h3>
+<div class="ltx_para" id="S3.SS1.p1">
+<p class="ltx_p" id="S3.SS1.p1.1">Создание данного обзора для Tesla служит наглядным примером ключевых возможностей системы, в частности её способности синтезировать информацию из разрозненных, не связанных между собой источников в последовательный инвестиционный тезис. Мы анализируем её эффективность по нескольким ключевым параметрам, имеющим центральное значение для нашего исследования:</p>
+</div>
+<div class="ltx_para" id="S3.SS1.p2">
+<ul class="ltx_itemize" id="S3.I1">
+<li class="ltx_item" id="S3.I1.i1" style="list-style-type:none;">
+⟦<span class="ltx_tag ltx_tag_item">•</span>
+
+Фактологическое обоснование через RAG: Архитектура RAG системы доказала свою эффективность в обосновании выходных данных проверяемыми фактами. LLM успешно извлекла конкретные финансовые показатели (выручка 25,18 миллиарда долларов, P/E 76,73) из соответствующих источников — структурированного отчета 10-Q и ленты рыночных данных. Аналогичным образом, качественная информация, такая как имена инсайдеров, продающих акции (Вайбхав Танеджа, Кимбал Маск), была идентифицирована верно, однако она была предварительно обработана нами и не была взята напрямую из неструктурированных документов SEC Form 4. Это демонстрирует способность модели извлекать и точно представлять данные из гетерогенной базы знаний, что являлось основной целью исследования.
+
+</li>
+<li class="ltx_item" id="S3.I1.i2" style="list-style-type:none;">
+⟦<span class="ltx_tag ltx_tag_item">•</span>
+
+Междоменный синтез: Ключевым успехом стала способность системы связывать макроэкономический контекст с анализом конкретных компаний — задача, являющаяся центральной для фундаментального инвестирования. Согласно инструкции в промпте, система сначала выполнила подзадачу по определению текущей экономической фазы. Она корректно извлекла последние показатели PMI, интерпретировала их значения ниже 50 как индикатор «замедления», соответствующий циклической модели Китчина, а затем применила этот контекст для оценки секторов, в которых работает Tesla (потребительские товары циклического спроса, технологии). Это многошаговое рассуждение, объединяющее циклический анализ с корпоративными данными, демонстрирует уровень синтеза, выходящий за рамки простого обобщения..
+
+</li>
+<li class="ltx_item" id="S3.I1.i3" style="list-style-type:none;">
+⟦<span class="ltx_tag ltx_tag_item">•</span>
+
+Систематическое применение эвристик: Формирование качественных суждений, таких как определение финансового положения компании Tesla как «сильное», не было оставлено на усмотрение LLM без ограничений. Промпт содержал предопределенный эвристический шаблон (например, «Если рост выручки ¿ X% и отношение долга к собственному капиталу ¡ Y%, опишите финансовое положение как «сильное»»). Такой подход делает аналитический процесс более прозрачным, воспроизводимым и менее подверженным потенциальным искажениям LLM, что является важнейшим аспектом создания надежного аналитического инструмента.
+
+</li>
+<li class="ltx_item" id="S3.I1.i4" style="list-style-type:none;">
+⟦<span class="ltx_tag ltx_tag_item">•</span>
+
+Человек в контуре управления: Данный конкретный отчет потребовал минимальной постобработки. Сгенерированный текст был связным и фактически точным. Вмешательство человека ограничилось незначительной грамматической правкой в резюме и обеспечением единообразия форматирования, что подтверждает потенциал системы для высокой степени автоматизации.
+
+</li>
+</ul>
+</div>
+<div class="ltx_para" id="S3.SS1.p3">
+<p class="ltx_p" id="S3.SS1.p3.1">Tesla является лидером в производстве электромобилей и технологий автономного вождения, а также производителем аккумуляторов и систем хранения энергии. Компания вкладывает значительные средства в развитие зарядной инфраструктуры и производство возобновляемой энергии, включая солнечные крыши. Миссия Tesla заключается в ускорении перехода к устойчивой энергетике и трансформации автомобильной промышленности в сторону электрической тяги..</p>
+</div>
+<div class="ltx_para" id="S3.SS1.p4">
+<p class="ltx_p" id="S3.SS1.p4.1">### Причины для покупки акций TSLA:</p>
+</div>
+<div class="ltx_para" id="S3.SS1.p5">
+<p class="ltx_p" id="S3.SS1.p5.1">1. **Сильная финансовая позиция**: Tesla демонстрирует устойчивые финансовые показатели с растущей выручкой и прибылью. В третьем квартале 2024 года Tesla достигла выручки в размере 25,18 миллиарда долларов, что на 8% больше по сравнению с аналогичным периодом прошлого года. Чистая прибыль составила 2,167 миллиарда долларов, что также представляет собой рост на 17% в годовом исчислении. Значительный объем денежных средств (33,648 миллиарда долларов) и низкий уровень задолженности (отношение долга к собственному капиталу 18%) являются дополнительными преимуществами.</p>
+</div>
+<div class="ltx_para" id="S3.SS1.p6">
+<p class="ltx_p" id="S3.SS1.p6.1">2. **Рост энергетического сегмента**: Tesla продолжает расширять свой энергетический сектор, достигая рекордной валовой прибыли в этом сегменте. Выручка от энергетики увеличилась на 52% в годовом исчислении, что демонстрирует потенциал роста в этой области.</p>
+</div>
+<div class="ltx_para" id="S3.SS1.p7">
+<p class="ltx_p" id="S3.SS1.p7.1">3. **Инновации и технологическое развитие**: Tesla инвестирует в искусственный интеллект и технологии автономного вождения, что может принести долгосрочные выгоды. Разработка продуктов, таких как Cybertruck и новые модели транспортных средств на базе платформы следующего поколения, также указывает на будущий рост.</p>
+</div>
+<div class="ltx_para" id="S3.SS1.p8">
+<p class="ltx_p" id="S3.SS1.p8.1">4. **Стратегический политический подход**: Tesla может извлечь выгоду из планируемой отмены налоговых льгот на электромобили в США, что может нанести ущерб конкурентам в большей степени, чем самой Tesla. Илон Маск считает, что отмена налоговых льгот может пойти на пользу Tesla в долгосрочной перспективе.</p>
+</div>
+<div class="ltx_para" id="S3.SS1.p9">
+<p class="ltx_p" id="S3.SS1.p9.1">### Аргументы в пользу продажи акций TSLA:</p>
+</div>
+<div class="ltx_para" id="S3.SS1.p10">
+<p class="ltx_p" id="S3.SS1.p10.1">1. **Высокая оценка**: текущий показатель P/E компании Tesla составляет 76,73, что может указывать на переоцененность акций, повышая риск ценовой коррекции.</p>
+</div>
+<div class="ltx_para" id="S3.SS1.p11">
+<p class="ltx_p" id="S3.SS1.p11.1">2. **Регуляторная неопределенность**: Планируемая администрацией Трампа отмена налоговых льгот на электромобили может негативно повлиять на продажи Tesla в краткосрочной перспективе, хотя в долгосрочной перспективе это может нанести больший ущерб конкурентам..</p>
+</div>
+<div class="ltx_para" id="S3.SS1.p12">
+<p class="ltx_p" id="S3.SS1.p12.1">3. **Макроэкономические изменения**: Текущие данные свидетельствуют о замедлении экономики США, что может негативно отразиться на секторах потребительских товаров циклического спроса и технологий, к которым относится Tesla.</p>
+</div>
+<div class="ltx_para" id="S3.SS1.p13">
+<p class="ltx_p" id="S3.SS1.p13.1">4. **Продажи акций инсайдерами**: Продажи акций ключевыми инсайдерами, такими как финансовый директор Вайбхав Танеджа и Кимбал Маск, могут сигнализировать о том, что инсайдеры компании ожидают потенциальных трудностей или коррекции цены.</p>
+</div>
+<div class="ltx_para" id="S3.SS1.p14">
+<p class="ltx_p" id="S3.SS1.p14.1">### Экономическая фаза:
+На основе имеющихся данных, в настоящее время мы находимся в фазе экономического спада. Об этом свидетельствуют показатели промышленного PMI и производственного ISM PMI, опустившиеся ниже 50, что указывает на замедление экономики. В этой фазе наиболее выгодными инвестициями являются секторы энергетики, недвижимости, товаров повседневного спроса и коммунальных услуг, в то время как секторы потребительских товаров непервой необходимости и технологий могут показывать менее высокие результаты..</p>
+</div>
+<div class="ltx_para" id="S3.SS1.p15">
+<p class="ltx_p" id="S3.SS1.p15.1">### Резюме:
+Решение о покупке или продаже акций Tesla должно учитывать как сильные финансовые показатели и инновационный потенциал компании, так и потенциальные риски, связанные с ее высокой оценкой и регуляторной неопределенностью. Инвесторам также следует учитывать текущие макроэкономические условия и фазу экономического цикла, в которой мы находимся..</p>
+</div>
+</section>
+<section class="ltx_subsection" id="S3.SS2">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">3.2 </span>NVIDIA 19 ноября 2024 г. - анализ новостей</h3>
+<div class="ltx_para" id="S3.SS2.p1">
+<p class="ltx_p" id="S3.SS2.p1.1">Данный пример демонстрирует еще одну ключевую возможность нашей системы: обработку, аннотирование и ранжирование новостных статей с точки зрения инвестора, наблюдающего за рынком. Входные данные состояли из множества статей о NVIDIA, опубликованных 18 и 19 ноября. Первым ограничением данного исследования стал лимит токенов, установленный OpenAI. Объем отдельных статей зачастую превышал возможности модели в рамках одного запроса, что фактически препятствовало проведению всестороннего анализа. Поэтому эксперимент потребовалось разделить на этапы. На первом этапе модель выполнила аннотирование всех статей. Впоследствии, в качестве второго шага, эти аннотации были переданы в RAG-запрос вместе с инструкцией по их ранжированию в соответствии с уровнем важности (без предоставления дополнительного контекста). Результаты показали явное предпочтение политического контента экономическому. Тем не менее, целью исследования было определение того, какие статьи являются достоверными, поскольку они влияют на цены акций и могут служить основой для рекомендаций или выступать в качестве веских указаний для LLM в RAG..</p>
+</div>
+<section class="ltx_subsubsection" id="S3.SS2.SSS1">
+<h4 class="ltx_title ltx_title_subsubsection">
+<span class="ltx_tag ltx_tag_subsubsection">3.2.1 </span>Ранжирование</h4>
+<div class="ltx_para" id="S3.SS2.SSS1.p1">
+<p class="ltx_p" id="S3.SS2.SSS1.p1.1">Необходимым этапом методологии стало создание системы ранжирования для модели. Данная система расставляет приоритеты источников новостей в следующем порядке убывания значимости:</p>
+<ol class="ltx_enumerate" id="S3.I2">
+<li class="ltx_item" id="S3.I2.i1" style="list-style-type:none;">
+⟦<span class="ltx_tag ltx_tag_item">1.</span>
+
+Корпоративные квартальные и годовые отчеты.
+
+</li>
+<li class="ltx_item" id="S3.I2.i2" style="list-style-type:none;">
+⟦<span class="ltx_tag ltx_tag_item">2.</span>
+
+Решения и заявления центральных банков (например, Федеральной резервной системы).
+
+</li>
+<li class="ltx_item" id="S3.I2.i3" style="list-style-type:none;">
+⟦<span class="ltx_tag ltx_tag_item">3.</span>
+
+Макроэкономические данные, включая показатели инфляции, занятости и экономической активности.
+
+</li>
+<li class="ltx_item" id="S3.I2.i4" style="list-style-type:none;">
+⟦<span class="ltx_tag ltx_tag_item">4.</span>
+
+Крупные корпоративные события, такие как слияния и поглощения (M&amp;A), реструктуризации, стратегические объявления и изменения в составе высшего руководства.
+
+</li>
+<li class="ltx_item" id="S3.I2.i5" style="list-style-type:none;">
+⟦<span class="ltx_tag ltx_tag_item">5.</span>
+
+Инсайдерская торговая активность и транзакции крупных институциональных инвесторов.
+
+</li>
+<li class="ltx_item" id="S3.I2.i6" style="list-style-type:none;">
+⟦<span class="ltx_tag ltx_tag_item">6.</span>
+
+Отчеты конкурентов или других компаний в рамках того же сектора отрасли.
+
+</li>
+<li class="ltx_item" id="S3.I2.i7" style="list-style-type:none;">
+⟦<span class="ltx_tag ltx_tag_item">7.</span>
+
+Новостные статьи с акцентом на их тональность, новизну и актуальность.
+
+</li>
+<li class="ltx_item" id="S3.I2.i8" style="list-style-type:none;">
+⟦<span class="ltx_tag ltx_tag_item">8.</span>
+
+Аналитические отчеты, включая рейтинги и целевые цены.
+
+</li>
+</ol>
+<p class="ltx_p" id="S3.SS2.SSS1.p1.2">Еще одной проблемой стало количество новостных статей, посвященных конкретным компаниям. Объем статей сузил временной горизонт до одного дня для наиболее популярных компаний, что существенно повлияло на организацию новостей, фактически изменив порядок вышеупомянутого списка, отдавая приоритет тональности, новизне, рейтингам и аналитикам. Чтобы сбалансировать это, в RAG был недавно добавлен последний финансовый отчет соответствующей компании с рекомендацией учитывать данные из этого отчета при составлении списка новостных статей..</p>
+</div>
+</section>
+<section class="ltx_subsubsection" id="S3.SS2.SSS2">
+<h4 class="ltx_title ltx_title_subsubsection">
+<span class="ltx_tag ltx_tag_subsubsection">3.2.2 </span>Ранжированные сводки новостей (вывод системы ⟦K0⟧)</h4>
+<div class="ltx_para" id="S3.SS2.SSS2.p1">
+<p class="ltx_p" id="S3.SS2.SSS2.p1.1">Ниже представлен пример краткого изложения статей, ранжированных по их значимости для инвесторов компании NVIDIA за 18 и 19 ноября, вплоть до времени открытия рынка:</p>
+<ol class="ltx_enumerate" id="S3.I3">
+<li class="ltx_item" id="S3.I3.i1" style="list-style-type:none;">
+⟦<span class="ltx_tag ltx_tag_item">1.</span>
+
+(Веха оценки): Прогноз о том, что NVIDIA может стать первой компанией в мире, достигшей оценки в 4 триллиона долларов, приближаясь к этой вехе с текущей рыночной капитализацией около 3,6 триллиона долларов. Рост NVIDIA обусловлен растущим спросом на ее графические процессоры, особенно в контексте искусственного интеллекта, что может привести к дальнейшему увеличению выручки и прибыли..
+
+</li>
+<li class="ltx_item" id="S3.I3.i2" style="list-style-type:none;">
+⟦<span class="ltx_tag ltx_tag_item">2.</span>
+
+(Технический риск): Сообщения о проблемах с перегревом, затрагивающих чипы Blackwell компании NVIDIA, которые способствовали снижению курса акций компании в преддверии предстоящего квартального отчета о прибылях и убытках. Аналитики полагают, что, несмотря на потенциальную потерю доли рынка, NVIDIA все еще может укрепить свои позиции в секторе AI..
+
+</li>
+<li class="ltx_item" id="S3.I3.i3" style="list-style-type:none;">
+⟦<span class="ltx_tag ltx_tag_item">3.</span>
+
+(Анонс финансовых результатов): Обсуждение высоких ожиданий вокруг квартальных результатов NVIDIA, указывающее на потенциальное изменение рыночной капитализации почти на 300 миллиардов долларов. Также изложены причины, по которым инвесторы могут рассмотреть покупку или воздержание от приобретения акций до публикации отчетности. Несмотря на высокий спрос на продукцию NVIDIA, опасения относительно новых чипов Blackwell могут повлиять на финансовые показатели и реакцию рынка..
+
+</li>
+<li class="ltx_item" id="S3.I3.i4" style="list-style-type:none;">
+⟦<span class="ltx_tag ltx_tag_item">4.</span>
+
+(Технический риск — подтверждение): Акции NVIDIA снизились из-за опасений по поводу перегрева процессоров Blackwell, что потенциально может повлиять на текущие разработки компании. Проблемы с новыми AI чипами могут негативно сказаться на доверии инвесторов и будущих финансовых показателях NVIDIA..
+
+</li>
+<li class="ltx_item" id="S3.I3.i5" style="list-style-type:none;">
+⟦<span class="ltx_tag ltx_tag_item">5.</span>
+
+(Аргумент в пользу роста): В статье прогнозируется, что акции NVIDIA вырастут после публикации отчета о доходах 20 ноября, прежде всего из-за высокого спроса на новые процессоры Blackwell, повышения прогнозов прибыли аналитиками и ожидаемого увеличения капитальных затрат клиентов компании. Эти факторы могут внести значительный вклад в рост стоимости акций NVIDIA в ближайшие недели.
+
+</li>
+<li class="ltx_item" id="S3.I3.i6" style="list-style-type:none;">
+⟦<span class="ltx_tag ltx_tag_item">6.</span>
+
+(Геополитика/Экосистема): Отчеты о планах Nebius Group запустить свои первые облачные операции в Соединенных Штатах, что может стимулировать использование чипов NVIDIA в сфере AI на фоне растущей геополитической напряженности, связанной с войной на Украине, которая влияет на фондовые рынки. В свете этой напряженности инвесторы обеспокоены стабильностью рынка, что приводит к снижению таких индексов, как Dow, S&amp;P 500 и Nasdaq.
+
+</li>
+<li class="ltx_item" id="S3.I3.i7" style="list-style-type:none;">
+⟦<span class="ltx_tag ltx_tag_item">7.</span>
+
+(Новости о партнерстве): Компания Foxconn заключила партнерское соглашение с NVIDIA для внедрения технологии цифровых двойников на своих заводах, стремясь оптимизировать производственные процессы и управление цепочками поставок, одновременно повышая устойчивость компании к сбоям. Это партнерство обладает потенциалом произвести революцию в глобальных производственных операциях и укрепить конкурентоспособность Foxconn на мировых рынках..
+
+</li>
+<li class="ltx_item" id="S3.I3.i8" style="list-style-type:none;">
+⟦<span class="ltx_tag ltx_tag_item">8.</span>
+
+(Комментарий аналитика): Джим Крамер предостерегает инвесторов NVIDIA от чрезмерной реакции на последний отчет по Blackwell, предполагая, что снижение курса акций является естественным и не должно вызывать панику. Он подчеркивает, что долгосрочные фундаментальные показатели компании остаются сильными, что должно успокоить инвесторов.
+
+</li>
+<li class="ltx_item" id="S3.I3.i9" style="list-style-type:none;">
+⟦<span class="ltx_tag ltx_tag_item">9.</span>
+
+(Мнение инвестора — «бычий» настрой): В статье обсуждаются взгляды Масаёси Сона на корпорацию NVIDIA, которую он считает недооцененной. По словам Сона, ожидается, что расходы на искусственный интеллект значительно вырастут в ближайшие годы, что принесет пользу бизнесу NVIDIA, связанному с GPU. Кроме того, отчеты указывают на растущий интерес инвесторов к стартапам в области ИИ, которые привлекли почти 19 миллиардов долларов финансирования в третьем квартале 2024 года..
+
+</li>
+<li class="ltx_item" id="S3.I3.i10" style="list-style-type:none;">
+⟦<span class="ltx_tag ltx_tag_item">10.</span>
+
+(Взгляд инвестора — «медвежий»): Филипп Лаффон, миллиардер и основатель Coatue Management, продал 80% своей доли в NVIDIA, перераспределив инвестиции в Alibaba, которую он считает недооцененной в контексте AI. Лаффон рассматривает сильные позиции Alibaba на рынке электронной коммерции Китая и расширяющийся облачный сегмент как факторы, делающие компанию привлекательной для инвестиций..
+
+</li>
+<li class="ltx_item" id="S3.I3.i11" style="list-style-type:none;">
+⟦<span class="ltx_tag ltx_tag_item">11.</span>
+
+(Взгляд инвестора — «медвежий»): В статье рассматриваются инвестиционные решения миллиардера Стэнли Дракенмиллера, который продал все свои акции NVIDIA, посчитав их оценку слишком высокой, и инвестировал в Broadcom — компанию с растущим потенциалом в области искусственного интеллекта. Это свидетельствует о его вере в дальнейшее развитие рынка AI наряду с осторожным подходом к инвестированию в акции с высокой оценкой..
+
+</li>
+<li class="ltx_item" id="S3.I3.i12" style="list-style-type:none;">
+⟦<span class="ltx_tag ltx_tag_item">12.</span>
+
+(Новости конкурентов): Компания AMD объявила о сокращении штата на 4%, что затронет около 1000 сотрудников, несмотря на получение более одного миллиарда долларов прибыли в третьем квартале 2023 года и рост в секторе AI. Это решение вызывает вопросы о том, является ли оно простым сокращением ресурсов или признаком более глубоких финансовых проблем внутри компании.
+
+</li>
+<li class="ltx_item" id="S3.I3.i13" style="list-style-type:none;">
+⟦<span class="ltx_tag ltx_tag_item">13.</span>
+
+(Цепочка поставок/Экосистема): Samsung Electronics планирует получить заказы от Qualcomm и NVIDIA на 2-нм и 3-нм техпроцессы, одновременно разрабатывая собственные процессоры Exynos, несмотря на проблемы с производительностью производства. Компания стремится повысить уровень самообеспеченности в производстве прикладных процессоров, что может повлиять на будущую стратегию ее сегмента смартфонов..
+
+</li>
+</ol>
+</div>
+</section>
+<section class="ltx_subsubsection" id="S3.SS2.SSS3">
+<h4 class="ltx_title ltx_title_subsubsection">
+<span class="ltx_tag ltx_tag_subsubsection">3.2.3 </span>Производительность системы и анализ</h4>
+<div class="ltx_para" id="S3.SS2.SSS3.p1">
+<p class="ltx_p" id="S3.SS2.SSS3.p1.1">Эта задача ранжирования новостей дает ценную информацию о способности LLM рассуждать в условиях информационной перегрузки и противоречивых отчетов.</p>
+<ul class="ltx_itemize" id="S3.I4">
+<li class="ltx_item" id="S3.I4.i1" style="list-style-type:none;">
+⟦<span class="ltx_tag ltx_tag_item">•</span>
+
+Приоритизация тем, влияющих на рынок: система корректно определила три доминирующих нарратива для NVIDIA в этот день: (1) масштабный, ориентированный на будущее потенциал оценки, (2) непосредственный, ощутимый риск технических проблем с ключевым новым продуктом (Blackwell) и (3) предстоящее, высокозначимое бинарное событие (отчет о прибылях и убытках). Эти темы занимают первые 5 позиций, демонстрируя глубокое понимание того, что действительно важно для инвесторов..
+
+</li>
+<li class="ltx_item" id="S3.I4.i2" style="list-style-type:none;">
+⟦<span class="ltx_tag ltx_tag_item">•</span>
+
+Выявление противоречивой информации: Модель не просто ранжировала все позитивные новости в начале списка. Она поместила негативный отчет о перегреве чипов на позицию №2, сразу после позитивного отчета об оценке стоимости. Это подчеркивает способность системы распознавать высокую значимость потенциального риска даже на фоне оптимистичных долгосрочных прогнозов. Она также корректно сгруппировала оптимистичный контраргумент по той же теме на позиции №5.
+
+</li>
+<li class="ltx_item" id="S3.I4.i3" style="list-style-type:none;">
+⟦<span class="ltx_tag ltx_tag_item">•</span>
+
+Контекстуальное дисконтирование информации: ранжирование демонстрирует логическую иерархию. Прямые новости об оценке стоимости, продуктах и финансовых показателях NVIDIA получили наивысший приоритет. Комментарии отдельных аналитиков или инвесторов (Cramer, Son, Laffont, Druckenmiller) заняли средний уровень. Новости о более широкой экосистеме или конкурентах (Foxconn, AMD, Samsung) были закономерно помещены в нижнюю часть, так как они признаны значимыми, но менее важными в моменте по сравнению с ключевыми вопросами компании. Это показывает, что модель успешно применила детализированную структуру ранжирования, описанную в нашей методологии..
+
+</li>
+<li class="ltx_item" id="S3.I4.i4" style="list-style-type:none;">
+⟦<span class="ltx_tag ltx_tag_item">•</span>
+
+Проблема нюансов: хотя ранжирование логично, резюме модели не полностью отражают нюансы медвежьих настроений инвесторов (Laffont, Druckenmiller). Оба инвестора продали активы не потому, что считают NVIDIA плохой компанией, а из-за ее высокой оценки — это критически важное различие. Данный факт подчеркивает ограничение и область для будущего совершенствования промптинга модели, чтобы извлекать не только действие (продажу), но и подробное обоснование, стоящее за ним..
+
+</li>
+</ul>
+</div>
+</section>
+</section>
+<section class="ltx_subsection" id="S3.SS3">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">3.3 </span>Риск выручки и геополитический риск: NVIDIA, Amazon и Tesla — 22 ноября 2024 г.</h3>
+<div class="ltx_para" id="S3.SS3.p1">
+<p class="ltx_p" id="S3.SS3.p1.1">Модели LLM также могут быть использованы в контексте извлечения данных из приложенного текста в RAG. Примером этого могут служить исследования на основе квартальных отчетов, фокусирующиеся на содержащейся в них информации о рисках, например, о том, как недоступность рынков Китая и Тайваня может повлиять на конкретную компанию. Ниже приведены примеры для компаний: NVIDIA, Amazon и Tesla. Вся эта информация основана на квартальных отчетах за третий квартал 2024 года..</p>
+</div>
+<section class="ltx_subsubsection" id="S3.SS3.SSS1">
+<h4 class="ltx_title ltx_title_subsubsection">
+<span class="ltx_tag ltx_tag_subsubsection">3.3.1 </span>NVIDIA</h4>
+<div class="ltx_para" id="S3.SS3.SSS1.p1">
+<p class="ltx_p" id="S3.SS3.SSS1.p1.1">На основе предоставленных финансовых данных выручка NVIDIA от рынков Китая (включая Гонконг) и Тайваня за девять месяцев, закончившихся 27 октября 2024 года, составила 11,574 миллиарда долларов и 15,266 миллиарда долларов соответственно. Это составляет совокупный показатель в 26,84 миллиарда долларов из 91,166 миллиарда долларов общей выручки за тот же период. Следовательно, в случае нарушения доступа к китайскому и тайваньскому рынкам из-за военных действий или санкций, NVIDIA может потенциально потерять около 29,44% своей выручки, при условии, что не будут внедрены альтернативные рынки или компенсационные стратегии продаж. Подобный сбой, вероятно, окажет значительное влияние как на производство, так и на продажи компании, учитывая существенный вклад этих регионов в ее общую выручку..</p>
+</div>
+<div class="ltx_para" id="S3.SS3.SSS1.p2">
+<p class="ltx_p" id="S3.SS3.SSS1.p2.1">Выручка из Китая:
+В отчете отмечается, что выручка сегмента центров обработки данных NVIDIA из Китая увеличилась в третьем квартале 2025 финансового года по сравнению с предыдущим кварталом. Однако в процентном отношении к общей выручке центров обработки данных она осталась ниже уровней, зафиксированных до введения экспортного контроля в октябре 2023 года. Это свидетельствует о том, что Китай остается значимым рынком для продуктов центров обработки данных NVIDIA, хотя точная доля выручки, полученной из Китая, не указана..</p>
+</div>
+<div class="ltx_para" id="S3.SS3.SSS1.p3">
+<p class="ltx_p" id="S3.SS3.SSS1.p3.1">Экспортный контроль и лицензионные требования:
+В тексте также рассматриваются различные меры экспортного контроля и лицензионные требования, введенные правительством США, которые ограничивают способность NVIDIA продавать определенные передовые продукты в Китае. Эти ограничения указывают на то, что часть выручки NVIDIA зависит от ее возможности осуществлять экспорт на китайский рынок. Введенные ограничения уже повлияли на конкурентные позиции компании..</p>
+</div>
+<div class="ltx_para" id="S3.SS3.SSS1.p4">
+<p class="ltx_p" id="S3.SS3.SSS1.p4.1">Геополитические риски:
+В отчете подчеркивается, что геополитическая напряженность, особенно связанная с Тайванем и Китаем, представляет собой потенциальную угрозу, способную серьезно нарушить цепочку поставок и потоки доходов NVIDIA. Тайвань играет критически важную роль в цепочке поставок NVIDIA, и любые сбои в этом регионе могут существенно повлиять на производственные возможности компании. Общее воздействие, вероятно, будет значительным, особенно в сегменте центров обработки данных и во всей цепочке поставок. Однако точный масштаб будет зависеть от множества факторов, включая способность компании перенаправить продажи и реструктурировать свою цепочку поставок..</p>
+</div>
+</section>
+<section class="ltx_subsubsection" id="S3.SS3.SSS2">
+<h4 class="ltx_title ltx_title_subsubsection">
+<span class="ltx_tag ltx_tag_subsubsection">3.3.2 </span>Amazon</h4>
+<div class="ltx_para" id="S3.SS3.SSS2.p1">
+<p class="ltx_p" id="S3.SS3.SSS2.p1.1">Международный сегмент Amazon составил 23% от консолидированной выручки в третьем квартале 2024 года. В случае потери доступа к рынкам Китая и Тайваня из-за войны или санкций, это может оказать заметное влияние на международную выручку Amazon. Однако конкретные цифры по выручке, полученной исключительно от Китая и Тайваня, не предоставлены, что делает невозможным определение точного финансового воздействия, основываясь только на доступной информации. Общий эффект будет зависеть от доли международных продаж, приходящейся на эти два рынка..</p>
+</div>
+</section>
+<section class="ltx_subsubsection" id="S3.SS3.SSS3">
+<h4 class="ltx_title ltx_title_subsubsection">
+<span class="ltx_tag ltx_tag_subsubsection">3.3.3 </span>Tesla</h4>
+<div class="ltx_para" id="S3.SS3.SSS3.p1">
+<p class="ltx_p" id="S3.SS3.SSS3.p1.1">Компания Tesla сообщила о следующей выручке от рынка Китая:</p>
+<ul class="ltx_itemize" id="S3.I5">
+<li class="ltx_item" id="S3.I5.i1" style="list-style-type:none;">
+⟦<span class="ltx_tag ltx_tag_item">•</span>
+
+Три месяца, закончившиеся 30 сентября 2024 года: 5,665 миллиарда долларов
+
+</li>
+<li class="ltx_item" id="S3.I5.i2" style="list-style-type:none;">
+⟦<span class="ltx_tag ltx_tag_item">•</span>
+
+Девять месяцев, закончившихся 30 сентября 2024 года: 14,893 миллиарда долларов
+
+</li>
+</ul>
+</div>
+<div class="ltx_para" id="S3.SS3.SSS3.p2">
+<p class="ltx_p" id="S3.SS3.SSS3.p2.1">В случае потери доступа к китайскому и тайваньскому рынкам Tesla лишилась бы этой выручки. Поскольку конкретные цифры по Тайваню не предоставлены, предполагается, что любое влияние со стороны этого региона включено в категорию «Прочие международные». Исходя из этого допущения, потеря китайского рынка привела бы к снижению выручки примерно на 20,7% за девятимесячный период, закончившийся 30 сентября 2024 года (14,893 миллиарда долларов из 71,983 миллиарда долларов общей выручки).).</p>
+</div>
+<div class="ltx_para" id="S3.SS3.SSS3.p3">
+<p class="ltx_p" id="S3.SS3.SSS3.p3.1">Более того, производство на Гигафабрике в Шанхае, где выпускаются модели 3 и Y, также пришлось бы приостановить, что отразилось бы на глобальных производственных мощностях Tesla. Однако в тексте не приводятся подробные оценки относительно влияния на производство, и поэтому точная оценка не может быть сделана без дополнительных данных..</p>
+</div>
+</section>
+</section>
+<section class="ltx_subsection" id="S3.SS4">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">3.4 </span>Energy Fuels 29 ноября 2024 г. - Фундаментальный анализ урановой компании с малой капитализацией</h3>
+<div class="ltx_para" id="S3.SS4.p1">
+<p class="ltx_p" id="S3.SS4.p1.1">Анализ Energy Fuels демонстрирует мастерство системы в выполнении ряда сложных задач, которые выходят за рамки простого обобщения новостей и имеют решающее значение для оценки небольших компаний, где данные зачастую менее структурированы и более концентрированы..</p>
+</div>
+<div class="ltx_para" id="S3.SS4.p2">
+<ul class="ltx_itemize" id="S3.I6">
+<li class="ltx_item" id="S3.I6.i1" style="list-style-type:none;">
+⟦<span class="ltx_tag ltx_tag_item">•</span>
+
+Глубокое извлечение из одного источника: в отличие от примера NVIDIA, где обрабатывалось множество статей, этот краткий обзор был составлен преимущественно на основе одного ключевого пресс-релиза. LLM продемонстрировала способность анализировать сложный корпоративный документ, корректно выявляя и разделяя отдельные позитивные события (новые контракты на поставку урана, этапы производства редкоземельных элементов, снятие приостановки проекта Toliara) и структурируя их в связное «Краткое изложение новостей» и отдельные «Причины для покупки»..”
+
+</li>
+<li class="ltx_item" id="S3.I6.i2" style="list-style-type:none;">
+⟦<span class="ltx_tag ltx_tag_item">•</span>
+
+Выявление противоречивых сигналов: значительным успехом системы стала ее способность поддерживать аналитический баланс. Несмотря на преобладание сугубо позитивных операционных новостей в пресс-релизе, процесс RAG также извлек ключевой финансовый показатель — чистый убыток в размере 12 миллионов долларов — из приложенной финансовой отчетности. Система корректно отметила это как основной «Аргумент к продаже», продемонстрировав свою способность выявлять и представлять противоречивую информацию, что является отличительной чертой надежного финансового анализа..
+
+</li>
+<li class="ltx_item" id="S3.I6.i3" style="list-style-type:none;">
+⟦<span class="ltx_tag ltx_tag_item">•</span>
+
+Финансовые расчеты с использованием подсказок: подраздел «Финансовый анализ» подчеркивает более продвинутые возможности. Подсказка содержала инструкции для LLM по выполнению базовых, но информативных расчетов на основе извлеченных данных. Система корректно извлекла данные о денежной позиции ($47.46M), рыночной капитализации ($1.2B) и квартальном убытке ($12M), а затем успешно рассчитала отношение денежных средств к капитализации и базовый период «сжигания» денежных средств («просуществует около четырех кварталов»). Это демонстрирует переход от качественного обобщения к количественному анализу, основанному на эвристиках..
+
+</li>
+<li class="ltx_item" id="S3.I6.i4" style="list-style-type:none;">
+⟦<span class="ltx_tag ltx_tag_item">•</span>
+
+Нюансированное макроэкономическое применение: Система вновь применила макроэкономическую модель, но с учетом специфического нюанса, относящегося к данной компании. Она верно определила, что, хотя фаза рецессии в целом является негативной, она может быть выгодной для определенных секторов, таких как энергетика. Более того, система установила сложную взаимосвязь между макроэкономическим трендом снижения процентных ставок и конкретным финансовым состоянием компании (отсутствие долга), верно определив это как потенциальное преимущество..
+
+</li>
+<li class="ltx_item" id="S3.I6.i5" style="list-style-type:none;">
+⟦<span class="ltx_tag ltx_tag_item">•</span>
+
+Творческий синтез в заголовках: заголовок брифа — «UUUU: Урановые потрясения и возможности редкоземельных металлов — это ваша золотая жила?» — был сгенерирован на основе специальной инструкции в промпте по созданию привлекательного заголовка в журналистском стиле. Это демонстрирует гибкость LLM в адаптации стиля вывода, позволяя переходить от сугубо технической прозы к более творческому и доступному языку, подходящему для аудитории инвесторов..
+
+</li>
+</ul>
+</div>
+<div class="ltx_para" id="S3.SS4.p3">
+<p class="ltx_p" id="S3.SS4.p3.1">### Название: ”UUUU: Урановая турбулентность и возможности редкоземельных металлов — ваша ли это золотая жила?”</p>
+</div>
+<div class="ltx_para" id="S3.SS4.p4">
+<p class="ltx_p" id="S3.SS4.p4.1">Energy Fuels — американская компания, занимающаяся добычей и переработкой урана и ванадия, ключевого сырья для атомной энергетики. Компания также обладает ресурсами и технологиями для извлечения редкоземельных элементов, которые используются в высокотехнологичных отраслях промышленности. Ее деятельность сосредоточена на устойчивом развитии энергетических ресурсов, преимущественно в Соединенных Штатах..</p>
+</div>
+<div class="ltx_para" id="S3.SS4.p5">
+<p class="ltx_p" id="S3.SS4.p5.1">### Сводка новостей:
+Energy Fuels объявила результаты за третий квартал 2024 года, отметив активную добычу и переработку урана, а также успехи в производстве редкоземельных элементов. Компания продолжает создавать центр цепочки поставок редкоземельных элементов в США. Ключевые достижения включают новый контракт на продажу урана и начало переработки крупных запасов урана на предприятии White Mesa Mill. Кроме того, компания завершила приобретение Base Resources, что, как ожидается, ускорит развитие ее проектов по добыче тяжелых минеральных песков и редкоземельных элементов, включая проект Toliara на Мадагаскаре, после снятия приостановки правительством Мадагаскара.
+https://www.prnewswire.com/news-releases/madagascar-government-lifts-suspension-on-energy-fuels-toliara-critical-minerals-project-302318407.html</p>
+</div>
+<div class="ltx_para" id="S3.SS4.p6">
+<p class="ltx_p" id="S3.SS4.p6.1">### Основания для покупки:</p>
+</div>
+<div class="ltx_para" id="S3.SS4.p7">
+<p class="ltx_p" id="S3.SS4.p7.1">1. **Сильная финансовая позиция**: Energy Fuels обладает устойчивым финансовым положением с ликвидностью более 180 миллионов долларов и отсутствием задолженности, что обеспечивает стабильность в условиях меняющейся рыночной конъюнктуры.</p>
+</div>
+<div class="ltx_para" id="S3.SS4.p8">
+<p class="ltx_p" id="S3.SS4.p8.1">2. **Уран как ключевой продукт**: Компания заключила новый долгосрочный контракт на поставки урана в США, что обеспечивает стабильные доходы в ближайшие годы.</p>
+</div>
+<div class="ltx_para" id="S3.SS4.p9">
+<p class="ltx_p" id="S3.SS4.p9.1">3. **Развитие РЗЭ**: Компания Energy Fuels успешно запустила контур разделения РЗЭ, что может привлечь клиентов из технологического и оборонного секторов.</p>
+</div>
+<div class="ltx_para" id="S3.SS4.p10">
+<p class="ltx_p" id="S3.SS4.p10.1">4. **Отмена приостановки проекта Toliara**: Решение правительства Мадагаскара об отмене приостановки позволяет начать развитие проекта, который может стать значительным источником дохода.</p>
+</div>
+<div class="ltx_para" id="S3.SS4.p11">
+<p class="ltx_p" id="S3.SS4.p11.1">5. **Прогнозируемый рост рынка редкоземельных элементов**: Растущий спрос на редкоземельные элементы в технологическом и автомобильном секторах способствует долгосрочному росту компании.</p>
+</div>
+<div class="ltx_para" id="S3.SS4.p12">
+<p class="ltx_p" id="S3.SS4.p12.1">### Аргументы на продажу:</p>
+</div>
+<div class="ltx_para" id="S3.SS4.p13">
+<p class="ltx_p" id="S3.SS4.p13.1">1. **Финансовый убыток**: Компания сообщила о чистом убытке в размере 12 миллионов долларов, что может вызвать обеспокоенность инвесторов по поводу прибыльности.</p>
+</div>
+<div class="ltx_para" id="S3.SS4.p14">
+<p class="ltx_p" id="S3.SS4.p14.1">2. **Высокие операционные расходы**: Добыча и переработка урана и редкоземельных элементов требуют значительных затрат, а экологические нормы могут привести к их увеличению.</p>
+</div>
+<div class="ltx_para" id="S3.SS4.p15">
+<p class="ltx_p" id="S3.SS4.p15.1">3. **Нисходящий тренд цен на уран**: Текущие цены на уран имеют тенденцию к снижению, что может повлиять на размер прибыли.</p>
+</div>
+<div class="ltx_para" id="S3.SS4.p16">
+<p class="ltx_p" id="S3.SS4.p16.1">4. **Макроэкономическая неопределенность**: Текущие экономические условия указывают на замедление, что может повлиять на спрос на сырьевые товары.</p>
+</div>
+<div class="ltx_para" id="S3.SS4.p17">
+<p class="ltx_p" id="S3.SS4.p17.1">### Финансовый анализ:</p>
+</div>
+<div class="ltx_para" id="S3.SS4.p18">
+<p class="ltx_p" id="S3.SS4.p18.1">- **Денежные средства против капитализации**: Energy Fuels располагает 47,46 млн долларов США в денежных средствах при рыночной капитализации в 1,2 млрд долларов США, что дает отношение денежных средств к капитализации примерно 4%, что является довольно низким показателем.</p>
+</div>
+<div class="ltx_para" id="S3.SS4.p19">
+<p class="ltx_p" id="S3.SS4.p19.1">- **Выживаемость при убытках**: При квартальном убытке в 12 миллионов долларов компания могла бы просуществовать около четырех кварталов без дополнительного финансирования.</p>
+</div>
+<div class="ltx_para" id="S3.SS4.p20">
+<p class="ltx_p" id="S3.SS4.p20.1">### Макроэкономическое влияние:
+Текущая экономическая фаза указывает на рецессию, что может стимулировать инвестиции в энергетические секторы, такие как уран. Снижение процентных ставок также может способствовать инвестициям в компании без долговой нагрузки, такие как Energy Fuels.</p>
+</div>
+<div class="ltx_para" id="S3.SS4.p21">
+<p class="ltx_p" id="S3.SS4.p21.1">### Резюме:
+Инвестирование в Energy Fuels может быть привлекательным для тех, кто верит в долгосрочный рост рынка REE и финансовую устойчивость компании, однако потенциальные риски, связанные с операционными расходами и динамикой цен на уран, требуют тщательного мониторинга..</p>
+</div>
+</section>
+<section class="ltx_subsection" id="S3.SS5">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">3.5 </span>Оценка ответов LLM на непредвиденные события: случай введения военного положения в Южной Корее — 4 декабря 2024 г.</h3>
+<div class="ltx_para" id="S3.SS5.p1">
+<p class="ltx_p" id="S3.SS5.p1.1">В исследовании также рассматривалось, как LLM реагирует на крайне неожиданные события, которые трудно предсказать и количественно оценить в квартальном отчете, в частности, на введение военного положения в Южной Корее. Напомним, что военное положение в Южной Корее было объявлено 3 декабря 2024 года в 22:27 по местному времени президентом Юн Сок Ёлем во время прямого телевизионного обращения. Режим военного положения продлился около шести часов и был отменен 4 декабря 2024 года примерно в 4:30 утра после голосования в Национальной ассамблее. Ниже приведены примеры для Coinbase, NVIDIA и Lululemon.</p>
+</div>
+<section class="ltx_subsubsection" id="S3.SS5.SSS1">
+<h4 class="ltx_title ltx_title_subsubsection">
+<span class="ltx_tag ltx_tag_subsubsection">3.5.1 </span>Coinbase</h4>
+<div class="ltx_para" id="S3.SS5.SSS1.p1">
+<p class="ltx_p" id="S3.SS5.SSS1.p1.1">Введение военного положения в Южной Корее может существенно повлиять на деятельность публичной компании, особенно той, которая занимается международным бизнесом и работает в строго регулируемых секторах, таких как криптовалюты, мобильные технологии или финансовые услуги..</p>
+</div>
+<div class="ltx_para" id="S3.SS5.SSS1.p2">
+<p class="ltx_p" id="S3.SS5.SSS1.p2.1">Повышенный регуляторный риск:
+Военное положение может привести к ужесточению регулирования и государственного надзора за бизнес-операциями, особенно в сферах, связанных с противодействием отмыванию денег (AML), финансированием терроризма и соблюдением международных санкций. Компании может потребоваться оперативно адаптироваться к новым правовым требованиям, что может повлечь за собой дополнительные расходы и подвергнуть ее юридическим рискам..</p>
+</div>
+<div class="ltx_para" id="S3.SS5.SSS1.p3">
+<p class="ltx_p" id="S3.SS5.SSS1.p3.1">Репутационное воздействие:
+Если компанию воспринимают как имеющую связи с Северной Кореей или другими подсанкционными организациями, ее репутация может пострадать. Усиление внимания со стороны средств массовой информации и регулирующих органов может подорвать доверие инвесторов и клиентов..</p>
+</div>
+<div class="ltx_para" id="S3.SS5.SSS1.p4">
+<p class="ltx_p" id="S3.SS5.SSS1.p4.1">Финансовый риск:
+Потенциальные санкции или операционные ограничения могут подорвать способность компании вести бизнес в определенных регионах, что приведет к потере выручки. Кроме того, финансовые штрафы за нарушения нормативных требований могут дополнительно обременять баланс компании..</p>
+</div>
+<div class="ltx_para" id="S3.SS5.SSS1.p5">
+<p class="ltx_p" id="S3.SS5.SSS1.p5.1">Волатильность цен на акции
+В зависимости от восприятия инвестором регуляторных и политических рисков, цена акций компании может подвергаться значительной волатильности. Если риски оцениваются как высокие, стоимость акций может снизиться. И наоборот, если компания демонстрирует эффективное управление рисками и операционную адаптивность, реакция рынка может быть более благоприятной..</p>
+</div>
+<div class="ltx_para" id="S3.SS5.SSS1.p6">
+<p class="ltx_p" id="S3.SS5.SSS1.p6.1">Подводя итог, введение военного положения в Южной Корее может усилить как регуляторную, так и операционную неопределенность для публичных компаний, что потенциально приведет к снижению их рыночной оценки, если не будут внедрены эффективные стратегии по снижению рисков..</p>
+</div>
+</section>
+<section class="ltx_subsubsection" id="S3.SS5.SSS2">
+<h4 class="ltx_title ltx_title_subsubsection">
+<span class="ltx_tag ltx_tag_subsubsection">3.5.2 </span>NVIDIA</h4>
+<div class="ltx_para" id="S3.SS5.SSS2.p1">
+<p class="ltx_p" id="S3.SS5.SSS2.p1.1">Введение военного положения в Южной Корее может оказать существенное влияние на операционную деятельность компании. Политическая нестабильность такого масштаба способна повысить операционные риски и обеспокоенность инвесторов, что потенциально отразится на рыночной оценке фирмы..</p>
+</div>
+<div class="ltx_para" id="S3.SS5.SSS2.p2">
+<p class="ltx_p" id="S3.SS5.SSS2.p2.1">Повышение регуляторных и политических рисков
+Военное положение может привести к ужесточению законов и нормативных актов, увеличению затрат на соблюдение требований и вероятности нарушений, которые могут повлечь за собой как финансовые штрафы, так и репутационный ущерб.</p>
+</div>
+<div class="ltx_para" id="S3.SS5.SSS2.p3">
+<p class="ltx_p" id="S3.SS5.SSS2.p3.1">Сбои в цепочках поставок
+Если компания поддерживает отношения с поставщиками или клиентами в Южной Корее, введение военного положения может нарушить ее цепочку поставок. Подобные сбои могут привести к задержкам в производстве и поставках, негативно влияя на финансовые показатели..</p>
+</div>
+<div class="ltx_para" id="S3.SS5.SSS2.p4">
+<p class="ltx_p" id="S3.SS5.SSS2.p4.1">Инвесторские настроения
+Инвесторы могут рассматривать компанию как более рискованный объект для вложений из-за нестабильной политической обстановки, что потенциально может спровоцировать снижение цены акций.</p>
+</div>
+<div class="ltx_para" id="S3.SS5.SSS2.p5">
+<p class="ltx_p" id="S3.SS5.SSS2.p5.1">Потенциальные санкции и торговые ограничения
+В случае дальнейшей эскалации политической ситуации могут быть введены международные санкции или торговые ограничения, что повлияет на способность компании осуществлять деятельность на мировых рынках.</p>
+</div>
+<div class="ltx_para" id="S3.SS5.SSS2.p6">
+<p class="ltx_p" id="S3.SS5.SSS2.p6.1">В заключение, введение военного положения в Южной Корее, вероятно, негативно скажется на цене акций компании из-за повышенных регуляторных рисков, проблем с цепочками поставок и неблагоприятных настроений инвесторов..</p>
+</div>
+</section>
+<section class="ltx_subsubsection" id="S3.SS5.SSS3">
+<h4 class="ltx_title ltx_title_subsubsection">
+<span class="ltx_tag ltx_tag_subsubsection">3.5.3 </span>Lululemon</h4>
+<div class="ltx_para" id="S3.SS5.SSS3.p1">
+<p class="ltx_p" id="S3.SS5.SSS3.p1.1">Военное положение в Южной Корее может оказать существенное влияние на деятельность и рыночную оценку публичных компаний. В случае с компанией, проанализированной в отчете, которая управляет 19 розничными магазинами в Южной Корее, подобное политическое событие может привести к закрытию магазинов, перебоям в цепочках поставок, снижению посещаемости и общей экономической неопределенности в регионе. Эти факторы могут привести к сокращению выручки и прибыли, получаемых на корейском рынке, что потенциально отразится на цене акций компании..</p>
+</div>
+<div class="ltx_para" id="S3.SS5.SSS3.p2">
+<p class="ltx_p" id="S3.SS5.SSS3.p2.1">Однако стоит отметить, что компания управляет 19 магазинами в Южной Корее из общего числа 721 по всему миру, что означает, что на корейские точки приходится примерно 2,64% от общего количества магазинов. Предполагая, что выручка примерно пропорциональна количеству магазинов, можно сделать вывод, что корейский рынок вносит аналогичный процент в общую выручку компании. Тем не менее, фактическое влияние может варьироваться в зависимости от условий местного рынка, популярности бренда и других региональных факторов..</p>
+</div>
+</section>
+</section>
+<section class="ltx_subsection" id="S3.SS6">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">3.6 </span>Lululemon 6 декабря 2024 г. - кластеризация новостных статей</h3>
+<div class="ltx_para" id="S3.SS6.p1">
+<p class="ltx_p" id="S3.SS6.p1.1">Этот пример демонстрирует более сложную задачу NLP, выполняемую нашей системой: автоматизированную кластеризацию и тематический анализ новостных статей после крупного корпоративного события. В ситуациях с большим объемом информации, например, после публикации квартальной отчетности, простого обобщения или ранжирования статей может быть недостаточно. Цель здесь состояла в том, чтобы проверить способность системы сначала выявлять различные глубинные нарративы, присутствующие в потоке новостей, а затем представлять каждый нарратив как в текстовом, так и в визуальном виде..</p>
+</div>
+<div class="ltx_para" id="S3.SS6.p2">
+<p class="ltx_p" id="S3.SS6.p2.1">Система использовала LanceDB <cite class="ltx_cite ltx_citemacro_cite">She<span class="ltx_text ltx_bib_etal"> et al.</span> (<a class="ltx_ref" href="https://arxiv.org/html/2607.09121v1#bib.bib16" title="LanceDB - Embracing Composability in the Storage Layer">2024</a>)</cite> и алгоритм K-means <cite class="ltx_cite ltx_citemacro_cite">MacQueen (<a class="ltx_ref" href="https://arxiv.org/html/2607.09121v1#bib.bib15" title="Some methods for classification and analysis of multivariate observations">1967</a>)</cite> для обработки всех новостных статей о Lululemon, опубликованных после объявления финансовых результатов за третий квартал 2024 года. Она сгруппировала семантически схожие статьи в кластеры и создала краткое изложение для каждого из них. Мы также создали визуальную «карту слов», чтобы выделить основные темы каждого повествования с помощью библиотеки WordCloud <cite class="ltx_cite ltx_citemacro_cite"><a class="ltx_ref" href="https://arxiv.org/html/2607.09121v1#bib.bib17" title="word_cloud: A word cloud generator in Python">Mueller </a></cite>⟧.</p>
+</div>
+<div class="ltx_para" id="S3.SS6.p3">
+<p class="ltx_p" id="S3.SS6.p3.1">Эта задача кластеризации демонстрирует способность системы выходить за рамки линейного анализа (ранжирования) к более сложному, многогранному пониманию информационных ландшафтов.</p>
+</div>
+<div class="ltx_para" id="S3.SS6.p4">
+<ul class="ltx_itemize" id="S3.I7">
+<li class="ltx_item" id="S3.I7.i1" style="list-style-type:none;">
+⟦<span class="ltx_tag ltx_tag_item">•</span>
+
+Автоматизированная идентификация нарративов: система успешно выполнила задачу кластеризации без учителя, выделив два основных, различных нарратива из массива статей, опубликованных после отчетов о доходах. Это демонстрирует способность различать не только то, что говорится, но и различные углы зрения, под которыми освещается событие. Это значительный шаг вперед по сравнению с простым анализом тональности..
+
+</li>
+<li class="ltx_item" id="S3.I7.i2" style="list-style-type:none;">
+⟦<span class="ltx_tag ltx_tag_item">•</span>
+
+Кластер 1: Фактологическое, основанное на данных повествование: Первый кластер (проиллюстрированный на рис. <a class="ltx_ref" href="https://arxiv.org/html/2607.09121v1#S3.F1" title="Figure 1 ‣ 3.6 Lululemon 6th December 2024 - clusterization of news articles ‣ 3 Examples of Briefs Produced for Investors ‣ Augmenting Fundamental Analysis with Large Language Models: A RAG-Based System for Generating Investor Briefs"><span class="ltx_text ltx_ref_tag">1</span></a>) корректно сгруппировал все статьи, сосредоточенные на прямых количественных результатах отчета о прибылях и убытках. Резюме LLM точно извлекло ключевые показатели: превышение прогнозов по выручке и EPS, повышение годового прогноза и конкретный контраргумент в виде замедления роста продаж в Северной Америке. Карта слов для этого кластера визуально подчеркнула бы доминирование таких терминов, как «выручка», «прибыль», «превышение», «прогноз» и «Северная Америка»..”
+
+</li>
+<li class="ltx_item" id="S3.I7.i3" style="list-style-type:none;">
+⟦<span class="ltx_tag ltx_tag_item">•</span>
+
+Кластер 2: Перспективное стратегическое повествование: Второй кластер (проиллюстрированный на рис. <a class="ltx_ref" href="https://arxiv.org/html/2607.09121v1#S3.F2" title="Figure 2 ‣ 3.6 Lululemon 6th December 2024 - clusterization of news articles ‣ 3 Examples of Briefs Produced for Investors ‣ Augmenting Fundamental Analysis with Large Language Models: A RAG-Based System for Generating Investor Briefs"><span class="ltx_text ltx_ref_tag">2</span></a>) демонстрирует более тонкие возможности. Система выделила другой тип статьи — ту, которая помещает непосредственные результаты в более широкий, перспективный стратегический контекст. Она успешно извлекла качественные инсайты, такие как описание финансовым директором предстоящего года как «переходного периода» и наблюдение за сдвигом потребителей в сторону «ценности». Это демонстрирует способность системы отделять тактическую отчетность, основанную на данных, от стратегических, перспективных комментариев..
+
+</li>
+<li class="ltx_item" id="S3.I7.i4" style="list-style-type:none;">
+⟦<span class="ltx_tag ltx_tag_item">•</span>
+
+Обработка нерелевантных данных: Примечательно, что исходные статьи для второго кластера содержали косвенную информацию о других компаниях (например, Dollar General). Резюме, составленное LLM, корректно отфильтровало этот нерелевантный шум и сфокусировалось только на контенте, относящемся к Lululemon, что демонстрирует устойчивость модели в условиях реальных, несовершенных данных..
+
+</li>
+<li class="ltx_item" id="S3.I7.i5" style="list-style-type:none;">
+⟦<span class="ltx_tag ltx_tag_item">•</span>
+
+Визуализация данных как инструмент синтеза: создание тематических карт является ключевой функцией этого модуля. Такой визуальный результат служит мгновенным и интуитивно понятным резюме основных тем кластера. Это позволяет инвестору уловить суть повествования «с первого взгляда», обеспечивая эффективный когнитивный инструмент, который дополняет подробное текстовое резюме. Это подчеркивает потенциал системы не только как аналитического движка, но и как инструмента для эффективной визуализации информации..
+
+</li>
+</ul>
+</div>
+<div class="ltx_para" id="S3.SS6.p5">
+<p class="ltx_p" id="S3.SS6.p5.1">Lululemon Athletica — это глобальный премиальный бренд, специализирующийся на производстве и продаже спортивной одежды и аксессуаров, особенно высоко ценимый в сегменте одежды для активного отдыха. Компания выделяется своей приверженностью качеству, инновационным материалам и лояльной клиентской базой, что позволяет ей достигать высокой маржинальности и динамичного роста продаж. Стратегические инвестиции в электронную коммерцию и международную экспансию, а также развитие мужской линейки и цифровых продуктов укрепляют позиции Lululemon как лидера в секторе спортивной одежды и товаров для образа жизни..</p>
+</div>
+<div class="ltx_para" id="S3.SS6.p6">
+<p class="ltx_p" id="S3.SS6.p6.1">Компания Lululemon (LULU) представила результаты за третий квартал после закрытия торгов в четверг, которые превзошли ожидания как по выручке, так и по прибыли, что привело к росту акций компании на постмаркете. Акции Lululemon выросли более чем на 8%, поскольку компания также повысила свои прогнозы по продажам и прибыли на весь 2024 год. Тем не менее, темпы роста продаж в Северной Америке вновь снизились, так как ритейлер сталкивается с опасениями по поводу усиления конкуренции в преддверии критически важного сезона праздничных покупок. Выручка составила 2,40 миллиарда долларов, что выше показателя в 2,20 миллиарда долларов, зафиксированного в третьем квартале 2023 года. Аналитики, опрошенные Bloomberg, ожидали 2,36 миллиарда долларов после того, как ритейлер прогнозировал продажи в диапазоне от 2,34 до 2,37 миллиарда долларов. Прибыль превзошла оценки в 2,75 доллара на акцию, достигнув 2,87 доллара. Это также выше показателя EPS в 2,53 доллара, о котором компания сообщала в аналогичном периоде прошлого года. Компания прогнозирует выручку в четвертом квартале на уровне 3,48–3,51 миллиарда долларов по сравнению с консенсус-прогнозом в 3,5 миллиарда долларов. […]
+https://finance.yahoo.com/news/lululemon-stock-rises-on-profit-beat-as-company-boosts-full-year-outlook-211820899.html проиллюстрировано на рис. <a class="ltx_ref" href="https://arxiv.org/html/2607.09121v1#S3.F1" title="Figure 1 ‣ 3.6 Lululemon 6th December 2024 - clusterization of news articles ‣ 3 Examples of Briefs Produced for Investors ‣ Augmenting Fundamental Analysis with Large Language Models: A RAG-Based System for Generating Investor Briefs"><span class="ltx_text ltx_ref_tag">1</span></a>⟧</p>
+</div>
+<figure class="ltx_figure" id="S3.F1"><img alt="Refer to caption" class="ltx_graphics ltx_img_landscape" height="238" id="S3.F1.g1" src="./Augmenting Fundamental Analysis with Large Language Models_ A RAG-Based System for Generating Investor Briefs_files/LULUFigure_1.png" width="476"/>
+<figcaption class="ltx_caption">⟦<span class="ltx_tag ltx_tag_figure">Figure 1: </span>Карта слов, используемая в сводке, представляющая кластер похожих новостных статей о Lululemon за 5-е и начало 6-го декабря</figcaption>
+</figure>
+<div class="ltx_para" id="S3.SS6.p7">
+<p class="ltx_p" id="S3.SS6.p7.1">Инвесторы ищут доказательства того, что продуктовая стратегия компании и праздничная динамика могут способствовать устойчивому восстановлению. Этот год и 2025 год станут «переходными периодами», заявила финансовый директор Пола Ойибо. По словам Ойибо, потребители продолжают тратить средства, но «экономические опасения заставляют уделять больше внимания соотношению цены и качества». Ни один из наших выборов не является NVIDIA, Amazon или Tesla. Инвесторам, возможно, стоит расширить кругозор, чтобы найти лучшие акции для обеспечения сверхвысокого роста прибыли. В этой статье об инвестиционных идеях были выделены Marvell Technology, Lululemon, Block, Amazon и Tesla. DG сообщает о более высоких чистых продажах и улучшении сопоставимых продаж в третьем квартале. Компания фокусируется на открытии новых магазинов и модернизации существующих для обеспечения долгосрочного роста. […]
+https://finance.yahoo.com/m/b39804b0-0d3e-3317-943b-0197e3e90ebe/lululemon%E2%80%99s-stock-has.html проиллюстрировано на рис. <a class="ltx_ref" href="https://arxiv.org/html/2607.09121v1#S3.F2" title="Figure 2 ‣ 3.6 Lululemon 6th December 2024 - clusterization of news articles ‣ 3 Examples of Briefs Produced for Investors ‣ Augmenting Fundamental Analysis with Large Language Models: A RAG-Based System for Generating Investor Briefs"><span class="ltx_text ltx_ref_tag">2</span></a>⟧</p>
+</div>
+<figure class="ltx_figure" id="S3.F2"><img alt="Refer to caption" class="ltx_graphics ltx_img_landscape" height="238" id="S3.F2.g1" src="./Augmenting Fundamental Analysis with Large Language Models_ A RAG-Based System for Generating Investor Briefs_files/LULUFigure_2.png" width="476"/>
+<figcaption class="ltx_caption">⟦<span class="ltx_tag ltx_tag_figure">Figure 2: </span>Карта слов, используемая в сводке, представляющая кластер похожих новостных статей о Lululemon за 5-е и начало 6-го декабря</figcaption>
+</figure>
+</section>
+</section>
+<section class="ltx_section" id="S4">
+<h2 class="ltx_title ltx_title_section">
+<span class="ltx_tag ltx_tag_section">4 </span>Отзывы пользователей и краткий обзор пилотного проекта</h2>
+<div class="ltx_para" id="S4.p1">
+<p class="ltx_p" id="S4.p1.1">По завершении четырехнедельного пилотного исследования у девяти участников были запрошены отзывы посредством структурированной анкеты и комментариев, оставляемых во время проведения эксперимента. Цель состояла в том, чтобы оценить воспринимаемую полезность, ясность и общую эффективность сводок, созданных LLM, в их рабочем процессе инвестиционного анализа. Полученные отзывы были в целом положительными и предоставили важную информацию для дальнейшей разработки..</p>
+</div>
+<section class="ltx_subsection" id="S4.SS1">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">4.1 </span>Общее восприятие и ключевые преимущества</h3>
+<div class="ltx_para" id="S4.SS1.p1">
+<p class="ltx_p" id="S4.SS1.p1.1">Основная ценность системы, на которую неизменно указывали участники, заключалась в ее способности **агрегировать и синтезировать огромные объемы информации** из разрозненных источников. Было отмечено, что сводки позволяют значительно экономить время, обычно затрачиваемое на сбор данных, что дает инвесторам возможность больше сосредоточиться на интерпретации и принятии стратегических решений. Динамичный, событийный характер ежедневных отчетов был особенно высоко оценен, поскольку он позволял пользователям быстро узнавать о наиболее важных событиях без необходимости отслеживать множество новостных ресурсов..</p>
+</div>
+</section>
+<section class="ltx_subsection" id="S4.SS2">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">4.2 </span>Конструктивная обратная связь и области для улучшения</h3>
+<div class="ltx_para" id="S4.SS2.p1">
+<p class="ltx_p" id="S4.SS2.p1.1">Наряду с положительными отзывами участники предоставили конкретные конструктивные замечания, которые формируют четкий план по совершенствованию системы. Основными выявленными темами стали:</p>
+</div>
+<div class="ltx_para" id="S4.SS2.p2">
+<ul class="ltx_itemize" id="S4.I1">
+<li class="ltx_item" id="S4.I1.i1" style="list-style-type:none;">
+⟦<span class="ltx_tag ltx_tag_item">•</span>
+
+Повышение глубины анализа: хотя широта охвата информации получила положительную оценку, некоторые пользователи указали на аспекты, в которых аналитическая глубина может быть улучшена. Например, были получены конкретные отзывы относительно представления количественных данных, таких как прогнозы выручки для компаний с большой капитализацией, например Amazon (AMZN). Это говорит о том, что будущие итерации должны быть сосредоточены на доработке модулей, отвечающих за финансовое прогнозирование, для предоставления более детальных выводов..
+
+</li>
+<li class="ltx_item" id="S4.I1.i2" style="list-style-type:none;">
+⟦<span class="ltx_tag ltx_tag_item">•</span>
+
+Настройка доставки и периодичности: Повторяющейся темой стало желание пользователей получить больший контроль над потоком информации. Участники выразили заинтересованность в персонализации сервиса, задавая вопросы вроде: «Мне интересно, как часто будут приходить уведомления о мониторинге?». Это указывает на высокий спрос на функции, которые позволили бы пользователям самостоятельно устанавливать предпочтения в отношении частоты, времени и, возможно, даже конкретного содержания сводок..
+
+</li>
+</ul>
+</div>
+</section>
+<section class="ltx_subsection" id="S4.SS3">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">4.3 </span>Краткий обзор пилотного проекта и будущие направления</h3>
+<div class="ltx_para" id="S4.SS3.p1">
+<p class="ltx_p" id="S4.SS3.p1.1">Подводя итог, пилотное исследование успешно подтвердило основную гипотезу: RAG-система на базе LLM может служить ценным инструментом для индивидуальных инвесторов за счет автоматизации сбора данных и предоставления своевременных аналитических сводок. Обратная связь подтверждает, что главная сильная сторона системы заключается в ее способности экономить время и агрегировать информацию..</p>
+</div>
+<div class="ltx_para" id="S4.SS3.p2">
+<p class="ltx_p" id="S4.SS3.p2.1">Полученная конструктивная критика сыграла важную роль в определении направления для будущей работы. Следующий этап разработки будет сосредоточен на двух ключевых областях: (1) повышение сложности модулей количественного анализа для предоставления более глубоких и практически применимых выводов, и (2) создание центра пользовательских предпочтений, позволяющего настраивать частоту и содержание сводок. Эти улучшения станут решающими при переходе системы от успешного подтверждения концепции к практическому, незаменимому инструменту для современного инвестора..</p>
+</div>
+</section>
+</section>
+<section class="ltx_section" id="S5">
+<h2 class="ltx_title ltx_title_section">
+<span class="ltx_tag ltx_tag_section">5 </span>Заключение</h2>
+<div class="ltx_para" id="S5.p1">
+<p class="ltx_p" id="S5.p1.1">В данном исследовании изучалось практическое применение гибридной системы, основанной на LLM в архитектуре RAG, для расширения рабочего процесса фундаментального анализа для индивидуальных инвесторов. Создавая ежедневные аналитические сводки для диверсифицированного портфеля из девяти компаний, мы продемонстрировали, что такая система способна выполнять широкий спектр сложных задач, которые выходят далеко за рамки простого обобщения данных..</p>
+</div>
+<div class="ltx_para" id="S5.p2">
+<p class="ltx_p" id="S5.p2.1">Наши результаты показывают, что система с расширенными возможностями ИИ может служить мощным вторым пилотом для инвесторов. Ключевые возможности, продемонстрированные в ходе нашего четырехнедельного пилотного исследования, включают:</p>
+<ul class="ltx_itemize" id="S5.I1">
+<li class="ltx_item" id="S5.I1.i1" style="list-style-type:none;">
+⟦<span class="ltx_tag ltx_tag_item">•</span>
+
+Междоменная интеграция: система успешно объединила структурированные количественные данные из финансовых отчетов (например, 10-Q компании Tesla), неструктурированные новости в режиме реального времени и макроэкономические показатели высокого уровня (например, данные PMI) в связные многоуровневые аналитические повествования..
+
+</li>
+<li class="ltx_item" id="S5.I1.i2" style="list-style-type:none;">
+⟦<span class="ltx_tag ltx_tag_item">•</span>
+
+Расширенная обработка информации: помимо простого поиска, система продемонстрировала расширенные возможности, такие как ранжирование большого потока новостей по значимости для инвесторов (NVIDIA), тематическая кластеризация статей для выявления отдельных нарративов (Lululemon) и выполнение количественного анализа с помощью промптов (коэффициент сжигания денежных средств Energy Fuels)).
+
+</li>
+<li class="ltx_item" id="S5.I1.i3" style="list-style-type:none;">
+⟦<span class="ltx_tag ltx_tag_item">•</span>
+
+Качественное обоснование непредвиденных событий: Система доказала свою способность генерировать релевантные качественные оценки рисков в ответ на внезапные, непредсказуемые события типа «черный лебедь», что было продемонстрировано на примере введения военного положения в Южной Корее. Она смогла адаптировать свой анализ к специфическим бизнес-моделям различных компаний (Coinbase, NVIDIA, Lululemon), продемонстрировав определенный уровень ситуационного мышления..
+
+</li>
+<li class="ltx_item" id="S5.I1.i4" style="list-style-type:none;">
+⟦<span class="ltx_tag ltx_tag_item">•</span>
+
+Подтвержденная практическая полезность: Отзывы девяти наших участников подтвердили основную гипотезу исследования. Аналитические сводки неизменно ценились за их способность экономить время и агрегировать информацию, тем самым позволяя инвесторам сосредоточиться на принятии решений более высокого уровня..
+
+</li>
+</ul>
+</div>
+<div class="ltx_para" id="S5.p3">
+<p class="ltx_p" id="S5.p3.1">Основным вкладом данной работы является целостная, сквозная демонстрация и ориентированная на пользователя оценка гибридной системы искусственного интеллекта для фундаментального анализа. В то время как многие исследования сосредоточены на отдельных задачах NLP в финансовой сфере, наше исследование подтверждает работоспособность полного рабочего процесса — от сбора гетерогенных данных до генерации аналитических продуктов, проверенных пользователями. Мы также предлагаем методологический проект, который объединяет сильные стороны LLM для рассуждений и синтеза с традиционным машинным обучением (K-Means) и современной инфраструктурой данных (векторные базы данных) для специализированных задач..</p>
+</div>
+<div class="ltx_para" id="S5.p4">
+<p class="ltx_p" id="S5.p4.1">Несмотря на многообещающие результаты, мы признаем ограничения данного пилотного исследования. Размер выборки из девяти инвесторов и девяти компаний в течение четырехнедельного периода означает, что полученные данные являются скорее показательными, чем статистически обобщаемыми. Кроме того, наша оценка была сосредоточена на воспринимаемой полезности сводок, а не на их прямом влиянии на эффективность инвестиций; количественный бэктест рекомендаций системы выходил за рамки данной работы, поскольку наша система разрабатывается как генератор сводок и советник, а не как система принятия инвестиционных решений..</p>
+</div>
+<div class="ltx_para" id="S5.p5">
+<p class="ltx_p" id="S5.p5.1">В заключение, по мере того как LLM и связанные с ними технологии искусственного интеллекта продолжают развиваться, их потенциал в демократизации доступа к сложному финансовому анализу становится огромным. Наше исследование показывает, что гибридные системы, продуманно спроектированные и основанные на реальных данных, готовы стать незаменимыми инструментами для следующего поколения инвесторов..</p>
+</div>
+</section>
+<section class="ltx_bibliography" id="bib">
+<h2 class="ltx_title ltx_title_bibliography">Список литературы</h2>
+<ul class="ltx_biblist" id="bib.L1">
+<li class="ltx_bibitem ltx_bib_misc" id="bib.bib3">
+⟦<span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">D. Araci (2019)</span>
+FinBERT: анализ финансовых настроений с помощью предварительно обученных языковых моделей.
+
+Внешние ссылки: 1908.10063
+
+Цитируется: <a class="ltx_ref" href="https://arxiv.org/html/2607.09121v1#S1.SS1.p1.1" title="1.1 Literature Review ‣ 1 Introduction ‣ Augmenting Fundamental Analysis with Large Language Models: A RAG-Based System for Generating Investor Briefs"><span class="ltx_text ltx_ref_tag">§1.1</span></a>⟧.
+
+</li>
+<li class="ltx_bibitem ltx_bib_inproceedings" id="bib.bib2">
+⟦<span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">J. Devlin, M. Chang, K. Lee, and K. Toutanova (2019)</span>
+BERT: предварительное обучение глубоких двунаправленных transformers для понимания языка.
+
+В материалах конференции 2019 года Североамериканского отделения Ассоциации компьютерной лингвистики: Технологии человеческого языка, Том 1 (Длинные и короткие статьи),
+
+ стр. 4171–4186.
+
+Цитируется в: <a class="ltx_ref" href="https://arxiv.org/html/2607.09121v1#S1.SS1.p1.1" title="1.1 Literature Review ‣ 1 Introduction ‣ Augmenting Fundamental Analysis with Large Language Models: A RAG-Based System for Generating Investor Briefs"><span class="ltx_text ltx_ref_tag">§1.1</span></a>.
+
+</li>
+<li class="ltx_bibitem ltx_bib_misc" id="bib.bib7">
+⟦<span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">S. Itoh and K. Okada (2023)</span>
+Сила больших языковых моделей: текстовый анализ фундаментальных данных на базе ChatGPT.
+
+Примечание: Доступно на SSRN 4425952
+
+Внешние ссылки: <a class="ltx_ref doi ltx_bib_external" href="https://dx.doi.org/10.2139/ssrn.4425952" title="">Document</a>
+
+Цитируется: <a class="ltx_ref" href="https://arxiv.org/html/2607.09121v1#S1.SS1.p3.1" title="1.1 Literature Review ‣ 1 Introduction ‣ Augmenting Fundamental Analysis with Large Language Models: A RAG-Based System for Generating Investor Briefs"><span class="ltx_text ltx_ref_tag">§1.1</span></a>.
+
+</li>
+<li class="ltx_bibitem ltx_bib_misc" id="bib.bib12">
+⟦<span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">S. Laniewski and R. Ślepaczuk (2024)</span>
+Улучшение обзора литературы с помощью методов LLM и NLP. Кейс алгоритмической торговли.
+
+Внешние ссылки: 2401.03370
+
+Цитируется: <a class="ltx_ref" href="https://arxiv.org/html/2607.09121v1#S1.SS2.p2.1" title="1.2 Our Contribution ‣ 1 Introduction ‣ Augmenting Fundamental Analysis with Large Language Models: A RAG-Based System for Generating Investor Briefs"><span class="ltx_text ltx_ref_tag">§1.2</span></a>⟧.
+
+</li>
+<li class="ltx_bibitem ltx_bib_inproceedings" id="bib.bib5">
+⟦<span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">P. Lewis, E. Perez, A. Piktus, F. Petroni, V. Karpukhin, N. Goyal, Y. Jui, H. Dwivedi-Yu, P. Stenetorp, S. Riedel, and D. Kiela (2020)</span>
+Генерация с дополнением поиском для задач обработки естественного языка, требующих глубоких знаний.
+
+В сборнике Достижения в системах нейронной обработки информации,
+
+Том 33, стр. 9459–9474.
+
+Цитируется в: <a class="ltx_ref" href="https://arxiv.org/html/2607.09121v1#S1.SS1.p4.1" title="1.1 Literature Review ‣ 1 Introduction ‣ Augmenting Fundamental Analysis with Large Language Models: A RAG-Based System for Generating Investor Briefs"><span class="ltx_text ltx_ref_tag">§1.1</span></a>.
+
+</li>
+<li class="ltx_bibitem ltx_bib_misc" id="bib.bib4">
+⟦<span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">A. Lopez-Lira and Y. Tang (2023)</span>
+Может ли ChatGPT прогнозировать движение цен на акции? Предсказуемость доходности и LLM.
+
+Внешние ссылки: <a class="ltx_ref doi ltx_bib_external" href="https://dx.doi.org/10.2139/ssrn.4412788" title="">Document</a>
+
+Цитируется: <a class="ltx_ref" href="https://arxiv.org/html/2607.09121v1#S1.SS1.p3.1" title="1.1 Literature Review ‣ 1 Introduction ‣ Augmenting Fundamental Analysis with Large Language Models: A RAG-Based System for Generating Investor Briefs"><span class="ltx_text ltx_ref_tag">§1.1</span></a>⟧.
+
+</li>
+<li class="ltx_bibitem ltx_bib_article" id="bib.bib1">
+⟦<span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">T. Loughran and B. McDonald (2011)</span>
+Когда обязательство не является обязательством? текстовый анализ, словари и отчеты 10-K.
+
+The Journal of Finance 66 (1), стр. 35–65.
+
+Цитируется в: <a class="ltx_ref" href="https://arxiv.org/html/2607.09121v1#S1.SS1.p1.1" title="1.1 Literature Review ‣ 1 Introduction ‣ Augmenting Fundamental Analysis with Large Language Models: A RAG-Based System for Generating Investor Briefs"><span class="ltx_text ltx_ref_tag">§1.1</span></a>⟧.
+
+</li>
+<li class="ltx_bibitem ltx_bib_inproceedings" id="bib.bib15">
+⟦<span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">J. B. MacQueen (1967)</span>
+Некоторые методы классификации и анализа многомерных наблюдений.
+
+В сборнике трудов Пятого Берклиевского симпозиума по математической статистике и вероятности, Том 1: Статистика,
+
+Беркли, Калифорния, стр. 281–297.
+
+Цитируется в: <a class="ltx_ref" href="https://arxiv.org/html/2607.09121v1#S3.SS6.p2.1" title="3.6 Lululemon 6th December 2024 - clusterization of news articles ‣ 3 Examples of Briefs Produced for Investors ‣ Augmenting Fundamental Analysis with Large Language Models: A RAG-Based System for Generating Investor Briefs"><span class="ltx_text ltx_ref_tag">§3.6</span></a>⟧.
+
+</li>
+<li class="ltx_bibitem ltx_bib_misc" id="bib.bib17">
+⟦<span class="ltx_tag ltx_bib_key ltx_role_refnum ltx_tag_bibitem">[9]</span>
+А. Мюллер
+
+облако_слов: Генератор облака слов на языке Python.
+
+Примечание: <a class="ltx_ref ltx_url ltx_font_typewriter" href="https://github.com/amueller/word_cloud" title="">https://github.com/amueller/word_cloud</a>Дата обращения: 2025-08-30
+
+Цитируется в: <a class="ltx_ref" href="https://arxiv.org/html/2607.09121v1#S3.SS6.p2.1" title="3.6 Lululemon 6th December 2024 - clusterization of news articles ‣ 3 Examples of Briefs Produced for Investors ‣ Augmenting Fundamental Analysis with Large Language Models: A RAG-Based System for Generating Investor Briefs"><span class="ltx_text ltx_ref_tag">§3.6</span></a>.
+
+</li>
+<li class="ltx_bibitem ltx_bib_misc" id="bib.bib10">
+⟦<span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">OpenAI (2024)</span>
+GPT-4o.
+
+Примечание: <a class="ltx_ref ltx_url ltx_font_typewriter" href="https://openai.com/index/hello-gpt-4o/" title="">https://openai.com/index/hello-gpt-4o/</a>Дата обращения: 2025-07-30
+
+Цитируется: <a class="ltx_ref" href="https://arxiv.org/html/2607.09121v1#S1.SS1.p2.1" title="1.1 Literature Review ‣ 1 Introduction ‣ Augmenting Fundamental Analysis with Large Language Models: A RAG-Based System for Generating Investor Briefs"><span class="ltx_text ltx_ref_tag">§1.1</span></a>.
+
+</li>
+<li class="ltx_bibitem ltx_bib_inproceedings" id="bib.bib13">
+⟦<span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">R. Rzepka and A. Obayashi (2023)</span>
+Эффективность онтологии экспортного контроля безопасности для прогнозирования типа ответа и категорий регулирования.
+
+В материалах 21-й Международной конференции по искусственному интеллекту и праву (ICAIL 2023),
+
+ стр. 253–257.
+
+Внешние ссылки: <a class="ltx_ref doi ltx_bib_external" href="https://dx.doi.org/10.1145/3594536.3595152" title="">Document</a>
+
+Цитируется в: <a class="ltx_ref" href="https://arxiv.org/html/2607.09121v1#S1.SS1.p4.1" title="1.1 Literature Review ‣ 1 Introduction ‣ Augmenting Fundamental Analysis with Large Language Models: A RAG-Based System for Generating Investor Briefs"><span class="ltx_text ltx_ref_tag">§1.1</span></a>.
+
+</li>
+<li class="ltx_bibitem ltx_bib_inproceedings" id="bib.bib14">
+⟦<span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">R. Rzepka and K. Okada (2023)</span>
+Имитация восприятия с помощью LLM в качестве основы для более контролируемого получения знаний.
+
+В материалах Международного симпозиума IEEE/SICE по системной интеграции (SII) 2023 года,
+
+ стр. 1–6.
+
+Внешние ссылки: <a class="ltx_ref doi ltx_bib_external" href="https://dx.doi.org/10.1109/SII55687.2023.10050181" title="">Document</a>
+
+Цитируется: <a class="ltx_ref" href="https://arxiv.org/html/2607.09121v1#S1.SS1.p4.1" title="1.1 Literature Review ‣ 1 Introduction ‣ Augmenting Fundamental Analysis with Large Language Models: A RAG-Based System for Generating Investor Briefs"><span class="ltx_text ltx_ref_tag">§1.1</span></a>⟧.
+
+</li>
+<li class="ltx_bibitem ltx_bib_inproceedings" id="bib.bib16">
+⟦<span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">C. She, L. Brenecki, S. Maddali, T. Le, V. Vu, and A. Jain (2024)</span>
+LanceDB — внедрение компонуемости на уровне хранения данных.
+
+В материалах конференции VLDB Endowment, том 17, № 13,
+
+ стр. 3821–3824.
+
+Внешние ссылки: <a class="ltx_ref doi ltx_bib_external" href="https://dx.doi.org/10.14778/3639368.3639393" title="">Document</a>
+
+Цитируется в: <a class="ltx_ref" href="https://arxiv.org/html/2607.09121v1#S3.SS6.p2.1" title="3.6 Lululemon 6th December 2024 - clusterization of news articles ‣ 3 Examples of Briefs Produced for Investors ‣ Augmenting Fundamental Analysis with Large Language Models: A RAG-Based System for Generating Investor Briefs"><span class="ltx_text ltx_ref_tag">§3.6</span></a>.
+
+</li>
+<li class="ltx_bibitem ltx_bib_misc" id="bib.bib8">
+⟦<span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">K. Shuster, S. Poff, M. Chen, D. Kiela, and J. Weston (2021)</span>
+Поиск с дополнением снижает галлюцинации в диалоге.
+
+Внешние ссылки: 2104.07567
+
+Цитируется: <a class="ltx_ref" href="https://arxiv.org/html/2607.09121v1#S1.SS1.p4.1" title="1.1 Literature Review ‣ 1 Introduction ‣ Augmenting Fundamental Analysis with Large Language Models: A RAG-Based System for Generating Investor Briefs"><span class="ltx_text ltx_ref_tag">§1.1</span></a>.
+
+</li>
+<li class="ltx_bibitem ltx_bib_inproceedings" id="bib.bib9">
+⟦<span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">A. Vaswani, N. Shazeer, N. Parmar, J. Uszkoreit, L. Jones, A. N. Gomez, L. Kaiser, and I. Polosukhin (2017)</span>
+Внимание — это всё, что вам нужно.
+
+В сборнике Достижения в системах нейронной обработки информации 30 (NIPS 2017),
+
+ стр. 5998–6008.
+
+Цитируется в: <a class="ltx_ref" href="https://arxiv.org/html/2607.09121v1#S1.SS1.p2.1" title="1.1 Literature Review ‣ 1 Introduction ‣ Augmenting Fundamental Analysis with Large Language Models: A RAG-Based System for Generating Investor Briefs"><span class="ltx_text ltx_ref_tag">§1.1</span></a>⟧.
+
+</li>
+<li class="ltx_bibitem ltx_bib_misc" id="bib.bib6">
+⟦<span class="ltx_tag ltx_bib_author-year ltx_role_refnum ltx_tag_bibitem">S. Wu, O. Irsoy, S. Lu, V. Dabravolski, M. Dredze, S. Gehrmann, P. Kambadur, D. Rosenberg, and J. Callan (2023)</span>
+BloombergGPT: большая языковая модель для финансов.
+
+Внешние ссылки: 2303.17564
+
+Цитируется: <a class="ltx_ref" href="https://arxiv.org/html/2607.09121v1#S1.SS1.p4.1" title="1.1 Literature Review ‣ 1 Introduction ‣ Augmenting Fundamental Analysis with Large Language Models: A RAG-Based System for Generating Investor Briefs"><span class="ltx_text ltx_ref_tag">§1.1</span></a>.
+
+</li>
+</ul>
+</section>
+</article>
+</div>
+</div>
+<footer class="arxiv-html-footer">
+<div class="ltx_page_logo">
+    Экспериментальная поддержка, пожалуйста
+    <a class="ltx_ref" href="https://arxiv.org/html/2607.09121v1/__stdout.txt" rel="nofollow" target="_blank">view the build logs</a>
+    на наличие ошибок. Сгенерировано
+    <a class="ltx_ref ltx_LaTeXML_logo" href="https://math.nist.gov/~BMiller/LaTeXML/" target="_blank">
+<span style="letter-spacing: -0.2em; margin-right: 0.1em;">
+        L
+        <span style="font-size: 70%; position: relative; bottom: 2.2pt;">A</span>
+        T
+        <span style="position: relative; bottom: -0.4ex;">E</span>
+</span>
+<span class="ltx_font_smallcaps">xml</span>
+<img alt="[LOGO]" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAAOCAYAAAD5YeaVAAAAAXNSR0IArs4c6QAAAAZiS0dEAP8A/wD/oL2nkwAAAAlwSFlzAAALEwAACxMBAJqcGAAAAAd0SU1FB9wKExQZLWTEaOUAAAAddEVYdENvbW1lbnQAQ3JlYXRlZCB3aXRoIFRoZSBHSU1Q72QlbgAAAdpJREFUKM9tkL+L2nAARz9fPZNCKFapUn8kyI0e4iRHSR1Kb8ng0lJw6FYHFwv2LwhOpcWxTjeUunYqOmqd6hEoRDhtDWdA8ApRYsSUCDHNt5ul13vz4w0vWCgUnnEc975arX6ORqN3VqtVZbfbTQC4uEHANM3jSqXymFI6yWazP2KxWAXAL9zCUa1Wy2tXVxheKA9YNoR8Pt+aTqe4FVVVvz05O6MBhqUIBGk8Hn8HAOVy+T+XLJfLS4ZhTiRJgqIoVBRFIoric47jPnmeB1mW/9rr9ZpSSn3Lsmir1fJZlqWlUonKsvwWwD8ymc/nXwVBeLjf7xEKhdBut9Hr9WgmkyGEkJwsy5eHG5vN5g0AKIoCAEgkEkin0wQAfN9/cXPdheu6P33fBwB4ngcAcByHJpPJl+fn54mD3Gg0NrquXxeLRQAAwzAYj8cwTZPwPH9/sVg8PXweDAauqqr2cDjEer1GJBLBZDJBs9mE4zjwfZ85lAGg2+06hmGgXq+j3+/DsixYlgVN03a9Xu8jgCNCyIegIAgx13Vfd7vdu+FweG8YRkjXdWy329+dTgeSJD3ieZ7RNO0VAXAPwDEAO5VKndi2fWrb9jWl9Esul6PZbDY9Go1OZ7PZ9z/lyuD3OozU2wAAAABJRU5ErkJggg=="/>
+</a>.
+  </div>
+<div class="keyboard-glossary">
+<h2>Инструкции по сообщению об ошибках</h2>
+<p>Мы продолжаем улучшать версии статей в формате HTML, и ваши отзывы помогают повысить доступность и поддержку мобильных устройств. Чтобы сообщить об ошибках в HTML, которые помогут нам улучшить преобразование и отображение, выберите любой из перечисленных ниже способов:</p>
+<ul>
+<li>Нажмите кнопку "Report Issue" (<svg aria-hidden="true" height="1em" role="presentation" style="display: inline-block; vertical-align: middle; fill: var(--text-color);" viewbox="0 0 640 640">
+<path d="M224 160C224 107 267 64 320 64C373 64 416 107 416 160L416 163.6C416 179.3 403.3 192 387.6 192L252.5 192C236.8 192 224.1 179.3 224.1 163.6L224.1 160zM569.6 172.8C580.2 186.9 577.3 207 563.2 217.6L465.4 290.9C470.7 299.8 474.7 309.6 477.2 320L576 320C593.7 320 608 334.3 608 352C608 369.7 593.7 384 576 384L480 384L480 416C480 418.6 479.9 421.3 479.8 423.9L563.2 486.4C577.3 497 580.2 517.1 569.6 531.2C559 545.3 538.9 548.2 524.8 537.6L461.7 490.3C438.5 534.5 395.2 566.5 344 574.2L344 344C344 330.7 333.3 320 320 320C306.7 320 296 330.7 296 344L296 574.2C244.8 566.5 201.5 534.5 178.3 490.3L115.2 537.6C101.1 548.2 81 545.3 70.4 531.2C59.8 517.1 62.7 497 76.8 486.4L160.2 423.9C160.1 421.3 160 418.7 160 416L160 384L64 384C46.3 384 32 369.7 32 352C32 334.3 46.3 320 64 320L162.8 320C165.3 309.6 169.3 299.8 174.6 290.9L76.8 217.6C62.7 207 59.8 186.9 70.4 172.8C81 158.7 101.1 155.8 115.2 166.4L224 248C236.3 242.9 249.8 240 264 240L376 240C390.2 240 403.7 242.8 416 248L524.8 166.4C538.9 155.8 559 158.7 569.6 172.8z"></path>
+</svg>), расположенную в заголовке страницы.</li>
+</ul>
+<p>Совет: Вы можете сначала выделить соответствующий текст, чтобы включить его в свой отчет.</p>
+<p>Наша команда уже определила <a class="ltx_ref" href="https://github.com/arXiv/html_feedback/issues" target="_blank">the following issues</a>. Мы ценим ваше время, затраченное на проверку и сообщение об ошибках отображения, которые мы, возможно, еще не обнаружили. Ваши усилия помогут нам улучшить версии в формате HTML для всех читателей, поскольку инвалидность не должна быть препятствием для доступа к исследованиям. Благодарим вас за постоянную поддержку в продвижении открытого доступа для всех..</p>
+<p>Есть свободный цикл разработки? Помогите поддержать доступность на arXiv! Наши сотрудники в LaTeXML поддерживают <a class="ltx_ref" href="https://github.com/brucemiller/LaTeXML/wiki/Porting-LaTeX-packages-for-LaTeXML" target="_blank">list of packages that need conversion</a> и приветствуют <a class="ltx_ref" href="https://github.com/brucemiller/LaTeXML/issues" target="_blank">developer contributions</a>.</p>
+</div>
+</footer><footer class="ds-site-footer">
+<div class="ds-site-footer-grid">
+<div class="ds-site-footer-main">
+<div class="ds-site-footer-ack">
+        Мы выражаем признательность за поддержку со стороны наших <strong>основные инвесторы</strong>,
+        <a href="https://info.arxiv.org/about/ourmembers.html"><strong>члены организаций</strong></a><span class="ack-member-inline" hidden="">, <strong></strong></span>,
+        и все участники.
+      </div>
+<nav aria-label="Site navigation" class="ds-site-footer-links">
+<a href="https://info.arxiv.org/about">О нас</a>
+<span aria-hidden="true" class="ds-site-footer-sep">·</span>
+<a href="https://info.arxiv.org/help">Помощь</a>
+<span aria-hidden="true" class="ds-site-footer-sep">·</span>
+<a href="https://info.arxiv.org/help/contact.html">Контакт</a>
+<span aria-hidden="true" class="ds-site-footer-sep">·</span>
+<a href="https://info.arxiv.org/help/subscribe">Подписаться</a>
+<span aria-hidden="true" class="ds-site-footer-sep">·</span>
+<a href="https://info.arxiv.org/help/license/index.html">Авторское право</a>
+<span aria-hidden="true" class="ds-site-footer-sep">·</span>
+<a href="https://info.arxiv.org/help/policies/privacy_policy.html">Конфиденциальность</a>
+<span aria-hidden="true" class="ds-site-footer-sep">·</span>
+<a href="https://info.arxiv.org/help/web_accessibility.html">Доступность</a>
+<span aria-hidden="true" class="ds-site-footer-sep">·</span>
+<a href="https://status.arxiv.org/" rel="noopener noreferrer" target="_blank">Рабочий статус<span class="is-sr-only"> (открывается в новой вкладке)</span></a>
+</nav>
+</div>
+<div aria-label="Major funders" class="ds-site-footer-funders">
+<div class="ds-site-footer-funders-label">Основная финансовая поддержка от</div>
+<div class="ds-site-footer-funders-logos">
+<a class="ds-funder-link" href="https://www.simonsfoundation.org/" rel="noopener noreferrer" target="_blank">
+<img alt="Simons Foundation" class="ds-funder-logo" src="./Augmenting Fundamental Analysis with Large Language Models_ A RAG-Based System for Generating Investor Briefs_files/simons-foundation.png"/>
+</a>
+<a class="ds-funder-link" href="https://www.sfi.org.bm/" rel="noopener noreferrer" target="_blank">
+<img alt="Simons Foundation International" class="ds-funder-logo" src="./Augmenting Fundamental Analysis with Large Language Models_ A RAG-Based System for Generating Investor Briefs_files/simons-foundation-international.png"/>
+</a>
+<a class="ds-funder-link" href="https://www.schmidtsciences.org/" rel="noopener noreferrer" target="_blank">
+<img alt="Schmidt Sciences" class="ds-funder-logo" src="./Augmenting Fundamental Analysis with Large Language Models_ A RAG-Based System for Generating Investor Briefs_files/schmidt-sciences.png"/>
+</a>
+</div>
+</div>
+</div>
+</footer><div id="fixed-buttons-container">
+<a class="header-button" href="javascript:toggleReadingMode();" id="disable-reading-mode-btn" title="Disable reading mode, show header and footer">
+<svg height="1.25rem" role="presentation" viewbox="0 0 448 512"><!--!Font Awesome Free v7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2026 Fonticons, Inc.-->
+<path d="M0 96C0 78.3 14.3 64 32 64l384 0c17.7 0 32 14.3 32 32s-14.3 32-32 32L32 128C14.3 128 0 113.7 0 96zM0 256c0-17.7 14.3-32 32-32l384 0c17.7 0 32 14.3 32 32s-14.3 32-32 32L32 288c-17.7 0-32-14.3-32-32zM448 416c0 17.7-14.3 32-32 32L32 448c-17.7 0-32-14.3-32-32s14.3-32 32-32l384 0c17.7 0 32 14.3 32 32z"></path>
+</svg>
+</a>
+</div>
+</body></html>
