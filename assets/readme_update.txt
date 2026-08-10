@@ -1,66 +1,67 @@
 # Блок «Последние статьи»
 # Вставить в README.md после заголовка «# 🔥 Последние статьи»
 
-### Модели зрения-языка-действия для автономного вождения: прошлое, настоящее и будущее
-[2512.16760] дата публикации в arXiv - 12.2025  
-📅 дата перевода 04.08.2026  
-🏷 `Autonomous Driving` `Vision-Language-Action Models` `End-to-End Learning` `Multimodal Reasoning` `World Models` `Robotics` `Artificial Intelligence`
+### ResearchStudio-Idea: Набор навыков для генерации исследовательских идей на основе данных конференций
+[2607.04439] дата публикации в arXiv - 07.2026  
+📅 дата перевода 10.08.2026  
+🏷 `LLM` `Research Agents` `Ideation Patterns` `Scientific Discovery` `Machine Learning` `Automated Evaluation` `Evidence Grounding`
 
-Статья представляет структурированный обзор моделей зрения-языка-действия (VLA) в автономном вождении. Авторы классифицируют архитектуры на End-to-End и Dual-System, анализируют эволюцию от Vision-Action моделей к VLA и систематизируют современные датасеты и метрики для оценки безопасности и интерпретируемости систем.
+ResearchStudio-Idea — это набор из трех навыков (поиск литературы, проверка на новизну и генерация идей), который использует паттерны, извлеченные из 1947 работ конференций ICLR, ICML и NeurIPS, для создания проверяемых исследовательских предложений.
 
-- [📖 Русская HTML версия](https://romanzorkin.github.io/arxiv_ru/articles/2512.16760/2512.16760_ru.html)
-- [📄 Оригинальная статья](https://arxiv.org/abs/2512.16760)
-- [🧠 Summary / README](articles/2512.16760/README.md)
-- [⚙ Metadata](articles/2512.16760/metadata.json)
-
----
-
-### DriveLaW: Объединение планирования и генерации видео в латентном пространстве вождения
-[2512.23421] дата публикации в arXiv - 12.2025  
-📅 дата перевода 04.08.2026  
-🏷 `Autonomous Driving` `World Models` `Video Generation` `Motion Planning` `Diffusion Transformers` `Latent Representation` `End-to-End Learning`
-
-DriveLaW — это унифицированная модель мира, которая объединяет генерацию видео и планирование траекторий через общее латентное пространство. Метод использует представления из генератора видео для управления планировщиком, достигая рекордных показателей на бенчмарке NAVSIM.
-
-- [📖 Русская HTML версия](https://romanzorkin.github.io/arxiv_ru/articles/2512.23421/2512.23421_ru.html)
-- [📄 Оригинальная статья](https://arxiv.org/abs/2512.23421)
-- [🧠 Summary / README](articles/2512.23421/README.md)
-- [⚙ Metadata](articles/2512.23421/metadata.json)
+- [📖 Русская HTML версия](https://romanzorkin.github.io/arxiv_ru/articles/2607.04439/2607.04439_ru.html)
+- [📄 Оригинальная статья](https://arxiv.org/abs/2607.04439)
+- [🧠 Summary / README](articles/2607.04439/README.md)
+- [⚙ Metadata](articles/2607.04439/metadata.json)
 
 ---
 
-### Саморазвивающаяся мультиагентная сеть для предиктивного обслуживания в промышленном IoT
-[2602.16738] дата публикации в arXiv - 02.2026  
-📅 дата перевода 04.08.2026  
-🏷 `Industrial IoT` `Multi-Agent Systems` `Predictive Maintenance` `Reinforcement Learning` `Edge Computing` `Anomaly Detection` `Explainable AI`
+### Рекурсивное самосовершенствование ИИ: от ограниченного уточнения к автономным исследовательским циклам
+[2607.07663] дата публикации в arXiv - 07.2026  
+📅 дата перевода 10.08.2026  
+🏷 `Artificial Intelligence` `Recursive Self-Improvement` `Autonomous Agents` `Self-Evaluation` `AI Safety` `Research Automation` `Machine Learning`
 
-SEMAS — это иерархическая мультиагентная система для промышленного IoT, которая распределяет задачи между уровнями Edge, Fog и Cloud. Она использует обучение с подкреплением (PPO) для адаптивной настройки порогов обнаружения и LLM для интерпретируемых рекомендаций, обеспечивая работу в реальном времени.
+Статья систематизирует 1250 работ по самосовершенствованию ИИ, разделяя их на «ограниченное уточнение» и «открытое рекурсивное самосовершенствование». Авторы доказывают, что надежность любого цикла самообучения критически зависит от качества внешнего сигнала верификации, а текущие системы остаются зависимыми от человека в задачах постановки исследовательских целей.
 
-- [📖 Русская HTML версия](https://romanzorkin.github.io/arxiv_ru/articles/2602.16738/2602.16738_ru.html)
-- [📄 Оригинальная статья](https://arxiv.org/abs/2602.16738)
-- [🧠 Summary / README](articles/2602.16738/README.md)
-- [⚙ Metadata](articles/2602.16738/metadata.json)
+- [📖 Русская HTML версия](https://romanzorkin.github.io/arxiv_ru/articles/2607.07663/2607.07663_ru.html)
+- [📄 Оригинальная статья](https://arxiv.org/abs/2607.07663)
+- [🧠 Summary / README](articles/2607.07663/README.md)
+- [⚙ Metadata](articles/2607.07663/metadata.json)
 
 ---
 
-### Gmos: Сегментация движущихся объектов в 3D пространстве и времени
-[2605.30352] дата публикации в arXiv - 05.2026  
-📅 дата перевода 04.08.2026  
-🏷 `Computer Vision` `Video Segmentation` `3D Geometry` `Motion Analysis` `Deep Learning` `Real-time Inference` `Dataset Curation`
+### ClinFusion: Мультимодальная LLM-система для комплексного медицинского анализа
+[2607.24743] дата публикации в arXiv - 07.2026  
+📅 дата перевода 10.08.2026  
+🏷 `Medical Imaging` `Multimodal LLM` `Vision-Centric Architecture` `3D Medical Analysis` `Clinical Report Generation` `Instruction Following` `Agentic Workflow`
 
-Gmos — это фреймворк для сегментации движущихся объектов (MOS) в видео, который исключает необходимость в предварительных 2D-модальностях (оптический поток, траектории), используя 3D-геометрические признаки. Метод обеспечивает высокую точность и скорость, поддерживая онлайн-инференс.
+ClinFusion — это мультимодальная LLM-система для медицины, использующая композиционный визуальный энкодер для обработки 2D и 3D данных. Она превосходит существующие модели в диагностике и генерации отчетов, внедряя RoI-ориентированную оценку и агентные инструменты для повышения точности и проверяемости клинических решений.
 
-- [📖 Русская HTML версия](https://romanzorkin.github.io/arxiv_ru/articles/2605.30352/2605.30352_ru.html)
-- [📄 Оригинальная статья](https://arxiv.org/abs/2605.30352)
-- [🧠 Summary / README](articles/2605.30352/README.md)
-- [⚙ Metadata](articles/2605.30352/metadata.json)
+- [📖 Русская HTML версия](https://romanzorkin.github.io/arxiv_ru/articles/2607.24743/2607.24743_ru.html)
+- [📄 Оригинальная статья](https://arxiv.org/abs/2607.24743)
+- [🧠 Summary / README](articles/2607.24743/README.md)
+- [⚙ Metadata](articles/2607.24743/metadata.json)
+
+---
+
+### RSIBench-Data: Бенчмаркинг исследований в области данных для рекурсивного самосовершенствования
+[2607.25886] дата публикации в arXiv - 07.2026  
+📅 дата перевода 10.08.2026  
+🏷 `LLM Agents` `Recursive Self-Improvement` `Data-Centric AI` `Post-Training` `Automated Research` `Benchmarking` `AI Evaluation`
+
+RSIBench-Data — это контролируемый бенчмарк для оценки способности LLM-агентов автоматизировать исследования в области данных для дообучения моделей. Исследование показывает, что агенты способны находить улучшения, но им не хватает стабильности при использовании обратной связи для итеративного самосовершенствования.
+
+- [📖 Русская HTML версия](https://romanzorkin.github.io/arxiv_ru/articles/2607.25886/2607.25886_ru.html)
+- [📄 Оригинальная статья](https://arxiv.org/abs/2607.25886)
+- [🧠 Summary / README](articles/2607.25886/README.md)
+- [⚙ Metadata](articles/2607.25886/metadata.json)
 
 ---
 
 # Строки таблицы «Архив статей»
 # Вставить в README.md сразу после строки |---|---|---|---|---| (без пустой строки!)
 
-| [2512.16760](articles/2512.16760/README.md) | 12.2025 | 04.08.2026 | Модели зрения-языка-действия для автономного вождения: прошлое, настоящее и будущее (`Vision-Language-Action Models for Autonomous Driving: Past, Present, and Future`) ||
-| [2512.23421](articles/2512.23421/README.md) | 12.2025 | 04.08.2026 | DriveLaW: Объединение планирования и генерации видео в латентном пространстве вождения (`DriveLaW: Unifying Planning and Video Generation in a Latent Driving World`) ||
-| [2602.16738](articles/2602.16738/README.md) | 02.2026 | 04.08.2026 | Саморазвивающаяся мультиагентная сеть для предиктивного обслуживания в промышленном IoT (`Self-Evolving Multi-Agent Network for Industrial IoT Predictive Maintenance`) ||
-| [2605.30352](articles/2605.30352/README.md) | 05.2026 | 04.08.2026 | Gmos: Сегментация движущихся объектов в 3D пространстве и времени (`Gmos : Grounding Moving Object Segmentation in 3D Space and Time`) ||
+| [2607.04439](articles/2607.04439/README.md) | 07.2026 | 10.08.2026 | ResearchStudio-Idea: Набор навыков для генерации исследовательских идей на основе данных конференций (`ResearchStudio- I d e a : An Evidence-Grounded Research-Ideation Skill Suite from ML Conference Outcomes`) ||
+| [2607.07663](articles/2607.07663/README.md) | 07.2026 | 10.08.2026 | Рекурсивное самосовершенствование ИИ: от ограниченного уточнения к автономным исследовательским циклам (`Recursive Self-Improvement in AI: From Bounded Self-Refinement to
+Autonomous Research Loops`) ||
+| [2607.24743](articles/2607.24743/README.md) | 07.2026 | 10.08.2026 | ClinFusion: Мультимодальная LLM-система для комплексного медицинского анализа (`ClinFusion: A Vision-Centric Multimodal LLM System for Holistic Medical Understanding`) ||
+| [2607.25886](articles/2607.25886/README.md) | 07.2026 | 10.08.2026 | RSIBench-Data: Бенчмаркинг исследований в области данных для рекурсивного самосовершенствования (`RSIBench-Data: Benchmarking Data-Centric Research for Recursive Self-Improvement`) ||
