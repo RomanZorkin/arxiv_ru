@@ -1,0 +1,1562 @@
+{
+  "title": "[2405.08484] Universal replication of chaotic characteristics by classical and quantum machine learning",
+  "sections": [
+    {
+      "heading": "Universal replication of chaotic characteristics by classical and quantum machine learning",
+      "level": 1,
+      "content": [],
+      "children": [
+        {
+          "heading": "Abstract",
+          "level": 6,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "Replicating chaotic characteristics of non-linear dynamics by machine learning (ML) has recently drawn wide attentions. In this work, we propose that a ML model, trained to predict the state one-step-ahead from several latest historic states, can accurately replicate the bifurcation diagram and the Lyapunov exponents of discrete dynamic systems. The characteristics for different values of the hyper-parameters are captured universally by a single ML model, while the previous works considered training the ML model independently by fixing the hyper-parameters to be specific values. Our benchmarks on the one- and two-dimensional Logistic maps show that variational quantum circuit can reproduce the long-term characteristics with higher accuracy than the long short-term memory (a well-recognized classical ML model). Our work reveals an essential difference between the ML for the chaotic characteristics and that for standard tasks, from the perspective of the relation between performance and model complexity. Our results suggest that quantum circuit model exhibits potential advantages on mitigating over-fitting, achieving higher accuracy and stability."
+            },
+            {
+              "type": "paragraph",
+              "text": "Introduction.— To what extent can a machine learning (ML) model learn from the dynamical data of a chaotic system? Chaos refers to a seemingly disorderly but deterministic behavior of dynamic systems [Kantz and Schreiber 2004](https://ar5iv.labs.arxiv.org/html/2405.08484#bib.bib1); [Strogatz 2018](https://ar5iv.labs.arxiv.org/html/2405.08484#bib.bib2), which appears in a wide range of realistic scenarios that are deemed highly non-linear (such as population growth [May 1976](https://ar5iv.labs.arxiv.org/html/2405.08484#bib.bib3) and atmosphere [Lorenz 1963](https://ar5iv.labs.arxiv.org/html/2405.08484#bib.bib4)). A chaotic system possesses several exotic properties, including high sensitivity to the initial conditions and perturbations [Kantz and Schreiber 2004](https://ar5iv.labs.arxiv.org/html/2405.08484#bib.bib1); [Strogatz 2018](https://ar5iv.labs.arxiv.org/html/2405.08484#bib.bib2). This makes the time series prediction (TPS), particularly after a long-time evolution, almost infeasible."
+            },
+            {
+              "type": "paragraph",
+              "text": "ML has been demonstrated as a powerful approach for TPS. For instance, neural networks, such as the widely-recognized long short-term memory (LSTM) [Hochreiter and Schmidhuber 1997](https://ar5iv.labs.arxiv.org/html/2405.08484#bib.bib5); [Yu et al. 2019](https://ar5iv.labs.arxiv.org/html/2405.08484#bib.bib6) and the transformer models developed most recently [Vaswani et al. 2017](https://ar5iv.labs.arxiv.org/html/2405.08484#bib.bib7), exhibit excellent performances in, e.g., weather forecasting [Bi et al. 2023](https://ar5iv.labs.arxiv.org/html/2405.08484#bib.bib10); [Chen et al. 2023](https://ar5iv.labs.arxiv.org/html/2405.08484#bib.bib11). The ML-based TSP for chaotic systems involve two key issues: (i) short-term prediction of the system’s states [Pathak et al. 2018](https://ar5iv.labs.arxiv.org/html/2405.08484#bib.bib12); [Herzog et al. 2019](https://ar5iv.labs.arxiv.org/html/2405.08484#bib.bib13); [Borra et al. 2020](https://ar5iv.labs.arxiv.org/html/2405.08484#bib.bib14), and (ii) long-term prediction/replication of the statistical/ergodic dynamical behaviors [Pathak et al. 2017](https://ar5iv.labs.arxiv.org/html/2405.08484#bib.bib15); [Lu et al. 2018](https://ar5iv.labs.arxiv.org/html/2405.08484#bib.bib16); [Antonik et al. 2018](https://ar5iv.labs.arxiv.org/html/2405.08484#bib.bib17); [Fan et al. 2020](https://ar5iv.labs.arxiv.org/html/2405.08484#bib.bib18); [Sun et al. 2023](https://ar5iv.labs.arxiv.org/html/2405.08484#bib.bib19). Focusing on the second issue, the previous works mainly attempted to replicate by fixing the hyper-parameters of the dynamical system to be specific values (see, e.g., Refs. [Pathak et al. 2017](https://ar5iv.labs.arxiv.org/html/2405.08484#bib.bib15); [Lu et al. 2018](https://ar5iv.labs.arxiv.org/html/2405.08484#bib.bib16); [Antonik et al. 2018](https://ar5iv.labs.arxiv.org/html/2405.08484#bib.bib17)). It is of greater challenge and importance to use a single ML model for universally capturing the characteristics with the hyper-parameters varying in a non-trivial range, which remains an open issue."
+            },
+            {
+              "type": "formula",
+              "text": "μ\\mu"
+            },
+            {
+              "type": "paragraph",
+              "text": "In this work, we show that a ML model, which is trained to predict the state one-step-ahead from MM latest historic states, can replicate the long-term chaotic characteristics of discrete dynamical systems. We utilize both classical and quantum ML models, namely LSTM [Hochreiter and Schmidhuber 1997](https://ar5iv.labs.arxiv.org/html/2405.08484#bib.bib5); [Yu et al. 2019](https://ar5iv.labs.arxiv.org/html/2405.08484#bib.bib6) and variational quantum circuit [Peruzzo et al. 2014](https://ar5iv.labs.arxiv.org/html/2405.08484#bib.bib20); [Cerezo et al. 2021](https://ar5iv.labs.arxiv.org/html/2405.08484#bib.bib21) (specifically automatically-differentiable quantum circuit [Zhou et al. 2021](https://ar5iv.labs.arxiv.org/html/2405.08484#bib.bib22), ADQC in short), to learn the one- and two-dimensional Logistic maps [May 1976](https://ar5iv.labs.arxiv.org/html/2405.08484#bib.bib3); [Yuan et al. 1983](https://ar5iv.labs.arxiv.org/html/2405.08484#bib.bib23); [Ferretti and Rahman 1988](https://ar5iv.labs.arxiv.org/html/2405.08484#bib.bib24). The long-term characteristics, including bifurcation diagram and Lyapunov exponents, are simulated by iterating the ML map for sufficiently many steps. These characteristics, for which the hyper-parameter of the Logistic map varies from stable to chaotic regions, are well replicated by a single ML model."
+            },
+            {
+              "type": "formula",
+              "text": "MM"
+            },
+            {
+              "type": "paragraph",
+              "text": "Our results suggest that enhancing the model complexity generally shows no beneficial effects on improving the accuracy of replicating the long-term characteristics due to the high sensitivity to over-fitting. ADQC achieves remarkably higher accuracy and stability than LSTM, particularly for replicating the Lyapunov exponents. These results demonstrate the validity and potential advantage of quantum circuit models on mitigating over-fitting in replicating chaotic characteristics."
+            },
+            {
+              "type": "paragraph",
+              "text": "Classical and quantum machine learning for time series prediction.— A dynamical system can be generally written as a map xt+1=f⁡(xt)x\\_{t+1}=f(x\\_{t}), with xtx\\_{t} called the state of system at the (discrete) time tt. Here, we take the 1D Logistic chaotic map as an example, which is a fundamental nonlinear dynamical system (see the top-left panel of Fig. [1](https://ar5iv.labs.arxiv.org/html/2405.08484#S0.F1 \"Figure 1 ‣ Universal replication of chaotic characteristics by classical and quantum machine learning\")), with wide applications in understanding chaotic phenomena and generating random numbers [May 1976](https://ar5iv.labs.arxiv.org/html/2405.08484#bib.bib3). The map satisfies"
+            },
+            {
+              "type": "formula",
+              "text": "xt+1=f⁡(xt)x_{t+1}=f(x_{t})"
+            },
+            {
+              "type": "formula",
+              "text": "xtx_{t}"
+            },
+            {
+              "type": "formula",
+              "text": "tt"
+            },
+            {
+              "type": "table",
+              "text": "| | | | | | --- | --- | --- | --- | | | f⁡(xt,μ)=μ​xt​(1−xt),\\displaystyle f(x\\_{t};\\mu)=\\mu x\\_{t}(1-x\\_{t}), | | (1) |"
+            },
+            {
+              "type": "formula",
+              "text": "f⁡(xt,μ)=μ​xt​(1−xt),\\displaystyle f(x_{t};\\mu)=\\mu x_{t}(1-x_{t}),"
+            },
+            {
+              "type": "paragraph",
+              "text": "with 0≤μ≤40\\leq\\mu\\leq 4 the hyper-parameter."
+            },
+            {
+              "type": "formula",
+              "text": "0≤μ≤40\\leq\\mu\\leq 4"
+            },
+            {
+              "type": "paragraph",
+              "text": "A ML model is also essentially a map. Considering the prediction of the state one-step-ahead from the latest MM historic states, the ML map can be formally written as"
+            },
+            {
+              "type": "formula",
+              "text": "MM"
+            },
+            {
+              "type": "table",
+              "text": "| | | | | | --- | --- | --- | --- | | | y~=F⁡(x1,x2,…,xM,𝑾),\\tilde{y}=F(x\\_{1},x\\_{2},...,x\\_{M};\\boldsymbol{W}), | | (2) |"
+            },
+            {
+              "type": "formula",
+              "text": "y~=F⁡(x1,x2,…,xM,𝑾),\\tilde{y}=F(x_{1},x_{2},...,x_{M};\\boldsymbol{W}),"
+            },
+            {
+              "type": "paragraph",
+              "text": "with 𝑾\\boldsymbol{W} denoting all the variational parameters of the ML model. The time series generated by the dynamical system ff is used to train the ML model. Accordingly, a ML sample is a piece of the time series with the data of MM states, and the label of this sample is the ground truth of the state one-step-ahead given by ff, i.e., y=f⁡(xM)=xM+1y=f(x\\_{M})=x\\_{M+1}. A state in a sample is also called a feature in the language of ML."
+            },
+            {
+              "type": "formula",
+              "text": "𝑾\\boldsymbol{W}"
+            },
+            {
+              "type": "formula",
+              "text": "ff"
+            },
+            {
+              "type": "formula",
+              "text": "MM"
+            },
+            {
+              "type": "formula",
+              "text": "ff"
+            },
+            {
+              "type": "formula",
+              "text": "y=f⁡(xM)=xM+1y=f(x_{M})=x_{M+1}"
+            },
+            {
+              "type": "paragraph",
+              "text": "A ML model can be trained by minimizing the prediction error on the so-called training samples. We discretize the hyper-parameter μ\\mu into 50 different values in the range of 2<μ≤42<\\mu\\leq 4. For each value of μ\\mu, we generate 2000 samples as the training set, where each sample is obtained by iteratively implementing the dynamical map on a random state for (M−1)(M-1) times. The variational parameters are optimized by minimizing the root mean-square error (RMSE)"
+            },
+            {
+              "type": "formula",
+              "text": "μ\\mu"
+            },
+            {
+              "type": "formula",
+              "text": "2<μ≤42<\\mu\\leq 4"
+            },
+            {
+              "type": "formula",
+              "text": "μ\\mu"
+            },
+            {
+              "type": "formula",
+              "text": "(M−1)(M-1)"
+            },
+            {
+              "type": "table",
+              "text": "| | | | | | --- | --- | --- | --- | | | L=1N​∑n(y~[n]−y[n])2,\\displaystyle L=\\sqrt{\\frac{1}{N}\\sum\\_{n}{(\\tilde{y}^{[n]}-y^{[n]})}^{2},} | | (3) |"
+            },
+            {
+              "type": "formula",
+              "text": "L=1N​∑n(y~[n]−y[n])2,\\displaystyle L=\\sqrt{\\frac{1}{N}\\sum_{n}{(\\tilde{y}^{[n]}-y^{[n]})}^{2},}"
+            },
+            {
+              "type": "paragraph",
+              "text": "where y~[n]\\tilde{y}^{[n]} denotes the prediction of the ML model for the nn-th sample, y[n]y^{[n]} denotes the ground truth (the label of this sample), and the summation over nn goes through the whole training set. The gradient descent method is used to update variational parameters as 𝑾→𝑾−η​∂L∂𝑾\\boldsymbol{W}\\to\\boldsymbol{W}-\\eta\\frac{\\partial L}{\\partial\\boldsymbol{W}} with η\\eta a small positive constant known as the gradient step or learning rate."
+            },
+            {
+              "type": "formula",
+              "text": "y~[n]\\tilde{y}^{[n]}"
+            },
+            {
+              "type": "formula",
+              "text": "nn"
+            },
+            {
+              "type": "formula",
+              "text": "y[n]y^{[n]}"
+            },
+            {
+              "type": "formula",
+              "text": "nn"
+            },
+            {
+              "type": "formula",
+              "text": "𝑾→𝑾−η​∂L∂𝑾\\boldsymbol{W}\\to\\boldsymbol{W}-\\eta\\frac{\\partial L}{\\partial\\boldsymbol{W}}"
+            },
+            {
+              "type": "formula",
+              "text": "η\\eta"
+            },
+            {
+              "type": "paragraph",
+              "text": "We here consider LSTM and ADQC for ML. LSTM is a recognized classical ML model for TSP. It belongs to the variants of recursive neural networks [Lipton et al. 2015](https://ar5iv.labs.arxiv.org/html/2405.08484#bib.bib25); [Salehinejad et al. 2018](https://ar5iv.labs.arxiv.org/html/2405.08484#bib.bib26) and addresses the issues of vanishing and exploding gradients by introducing the so-called gate functions. ADQC belongs to the variational quantum circuits. Its main advantage is a universal parameterization way of the quantum gates, so that one does not need to specify the types (rotation, phase-shift, controlled-NOT, etc.) of gates but just design the structure of the circuit. We use the brick-wall structure as illustrated in bottom-left panel of Fig. [1](https://ar5iv.labs.arxiv.org/html/2405.08484#S0.F1 \"Figure 1 ‣ Universal replication of chaotic characteristics by classical and quantum machine learning\"). The prediction is obtained by measuring the last qubit of the quantum state after implementing the ADQC."
+            },
+            {
+              "type": "paragraph",
+              "text": "For universally replicating the characteristics of the dynamical system with varying hyper-parameter [say μ\\mu in Eq. ([1](https://ar5iv.labs.arxiv.org/html/2405.08484#S0.E1 \"In Universal replication of chaotic characteristics by classical and quantum machine learning\"))] using a single ML model, we propose to introduce a μ\\mu-tuned trainable pre-processing on the samples before inputting them to the ML model. Our idea is to map each feature (which is a scalar) to vector by a μ\\mu-tuned trainable map, say xt[n]→𝒗[n,t]=(v1[n,t],v2[n,t],⋯,vd[n,t])x^{[n]}\\_{t}\\to\\boldsymbol{v}^{[n,t]}=(v^{[n,t]}\\_{1},v^{[n,t]}\\_{2},\\cdots,v^{[n,t]}\\_{d}), with xt[n]x^{[n]}\\_{t} the tt-th feature of the nn-th sample and d=dim(𝒗[n,t])d=\\dim(\\boldsymbol{v}^{[n,t]}) a preset dimension. In this way, a sample is mapped to a set of vectors. Note that both LSTM and ADQC can take a set of vectors as input."
+            },
+            {
+              "type": "formula",
+              "text": "μ\\mu"
+            },
+            {
+              "type": "formula",
+              "text": "μ\\mu"
+            },
+            {
+              "type": "formula",
+              "text": "μ\\mu"
+            },
+            {
+              "type": "formula",
+              "text": "xt[n]→𝒗[n,t]=(v1[n,t],v2[n,t],⋯,vd[n,t])x^{[n]}_{t}\\to\\boldsymbol{v}^{[n,t]}=(v^{[n,t]}_{1},v^{[n,t]}_{2},\\cdots,v^{[n,t]}_{d})"
+            },
+            {
+              "type": "formula",
+              "text": "xt[n]x^{[n]}_{t}"
+            },
+            {
+              "type": "formula",
+              "text": "tt"
+            },
+            {
+              "type": "formula",
+              "text": "nn"
+            },
+            {
+              "type": "formula",
+              "text": "d=dim(𝒗[n,t])d=\\dim(\\boldsymbol{v}^{[n,t]})"
+            },
+            {
+              "type": "paragraph",
+              "text": "The pre-processing map also depends on some variational parameters that will be optimized in the training stage. We here define the pre-processing map as"
+            },
+            {
+              "type": "table",
+              "text": "| | | | | | --- | --- | --- | --- | | | vk[n,t]=∑i,jξi​(xt[n],θ)​ξj​(μ[n],θ)​Ti​j​k.\\displaystyle v^{[n,t]}\\_{k}=\\sum\\_{i,j}\\xi\\_{i}(x^{[n]}\\_{t};\\theta)\\xi\\_{j}(\\mu^{[n]};\\theta)T\\_{ijk}. | | (4) |"
+            },
+            {
+              "type": "formula",
+              "text": "vk[n,t]=∑i,jξi​(xt[n],θ)​ξj​(μ[n],θ)​Ti​j​k.\\displaystyle v^{[n,t]}_{k}=\\sum_{i,j}\\xi_{i}(x^{[n]}_{t};\\theta)\\xi_{j}(\\mu^{[n]};\\theta)T_{ijk}."
+            },
+            {
+              "type": "paragraph",
+              "text": "The (d×d×d)(d\\times d\\times d)-dimensional tensor 𝑻\\boldsymbol{T} will be optimized when training the ML model. The vectors 𝝃⁡(xt[n],θ)\\boldsymbol{\\xi}(x^{[n]}\\_{t};\\theta) and 𝝃⁡(μ[n],θ)\\boldsymbol{\\xi}(\\mu^{[n]};\\theta), which are both dd-dimensional, are obtained by the following map that transforms a scalar to a normalized vector [Stoudenmire and Schwab 2016](https://ar5iv.labs.arxiv.org/html/2405.08484#bib.bib27). For a given scalar (say aa), the jj-th elements of the resulting vector 𝝃⁡(a,θ)\\boldsymbol{\\xi}(a;\\theta) satisfies"
+            },
+            {
+              "type": "formula",
+              "text": "(d×d×d)(d\\times d\\times d)"
+            },
+            {
+              "type": "formula",
+              "text": "𝑻\\boldsymbol{T}"
+            },
+            {
+              "type": "formula",
+              "text": "𝝃⁡(xt[n],θ)\\boldsymbol{\\xi}(x^{[n]}_{t};\\theta)"
+            },
+            {
+              "type": "formula",
+              "text": "𝝃⁡(μ[n],θ)\\boldsymbol{\\xi}(\\mu^{[n]};\\theta)"
+            },
+            {
+              "type": "formula",
+              "text": "dd"
+            },
+            {
+              "type": "formula",
+              "text": "aa"
+            },
+            {
+              "type": "formula",
+              "text": "jj"
+            },
+            {
+              "type": "formula",
+              "text": "𝝃⁡(a,θ)\\boldsymbol{\\xi}(a;\\theta)"
+            },
+            {
+              "type": "table",
+              "text": "| | | | | | --- | --- | --- | --- | | | ξj(a;θ)=(d−1j−1)cos(θ​π2a)d−jsin(θ​π2a)j−1.\\xi\\_{j}(a;\\theta)=\\sqrt{\\binom{d-1}{j-1}}\\cos\\left(\\frac{\\theta\\pi}{2}a\\right)^{d-j}\\sin\\left(\\frac{\\theta\\pi}{2}a\\right)^{j-1}. | | (5) |"
+            },
+            {
+              "type": "paragraph",
+              "text": "The parameter θ\\theta will also be optimized (independently on μ\\mu and samples) in the training stage. Note since the training samples are obtained from the dynamics taking different values of μ\\mu, one should take μ[n]{\\mu}^{[n]} in Eq. ([4](https://ar5iv.labs.arxiv.org/html/2405.08484#S0.E4 \"In Universal replication of chaotic characteristics by classical and quantum machine learning\")) to be the corresponding value of μ\\mu for the nn-th sample."
+            },
+            {
+              "type": "formula",
+              "text": "θ\\theta"
+            },
+            {
+              "type": "formula",
+              "text": "μ\\mu"
+            },
+            {
+              "type": "formula",
+              "text": "μ\\mu"
+            },
+            {
+              "type": "formula",
+              "text": "μ[n]{\\mu}^{[n]}"
+            },
+            {
+              "type": "formula",
+              "text": "μ\\mu"
+            },
+            {
+              "type": "formula",
+              "text": "nn"
+            },
+            {
+              "type": "paragraph",
+              "text": "The pre-processing map can be generalized to the dynamical system that contains multiple variables and hyper-parameters. We can always use Eq. ([5](https://ar5iv.labs.arxiv.org/html/2405.08484#S0.E5 \"In Universal replication of chaotic characteristics by classical and quantum machine learning\")) and map these variables (hyper-parameters) to multiple dd-dimensional vectors. More details about the dataset and ML models, including pre-processing, forward and backward propagations, prediction, and settings of hyper-parameters can be found in the Appendices."
+            },
+            {
+              "type": "formula",
+              "text": "dd"
+            },
+            {
+              "type": "formula",
+              "text": "εR\\varepsilon_{R}"
+            },
+            {
+              "type": "formula",
+              "text": "tt"
+            },
+            {
+              "type": "formula",
+              "text": "μ=2.2,3.2,3.4\\mu=2.2,3.2,3.4"
+            },
+            {
+              "type": "formula",
+              "text": "3.923.92"
+            },
+            {
+              "type": "formula",
+              "text": "εR\\varepsilon_{R}"
+            },
+            {
+              "type": "formula",
+              "text": "μ=3.92\\mu=3.92"
+            },
+            {
+              "type": "formula",
+              "text": "η=0.44\\eta=0.44"
+            },
+            {
+              "type": "formula",
+              "text": "η\\eta"
+            },
+            {
+              "type": "formula",
+              "text": "μ\\mu"
+            },
+            {
+              "type": "paragraph",
+              "text": "Numerical results and discussions.— Fig. [2](https://ar5iv.labs.arxiv.org/html/2405.08484#S0.F2 \"Figure 2 ‣ Universal replication of chaotic characteristics by classical and quantum machine learning\") demonstrates the ability of LSTM and ADQC on the prediction of the states with different values of μ\\mu. In (a), we show the bifurcation diagrams obtained by ADQC and LSTM, which are consistent with the one given by the Logistic map (see the inset). Each data point in the diagrams is obtained by iterating the map (the Logistic map or those of the ML models) for more than 200 times (which is sufficiently large), starting from a random state. We take 500 random states for each value of μ\\mu, which are taken differently from those of the training samples. The dense of the data points is indicated by the darkness of the colors. Note we define the samples generated by these initial states as the testing set. Since these samples are not used to train the ML model, the testing set is used reveals the so-called generalization ability, which refers to the power of the ML model on dealing with the unlearned samples."
+            },
+            {
+              "type": "formula",
+              "text": "μ\\mu"
+            },
+            {
+              "type": "formula",
+              "text": "μ\\mu"
+            },
+            {
+              "type": "paragraph",
+              "text": "The similarity between two bifurcation diagrams can be characterized by the peak signal-to-noise ratios (PSNR) rPr\\_{\\text{P}}, which is widely used in the field of computer vision to characterize the similarity between two images [Kotevski and Mitrevski 2010](https://ar5iv.labs.arxiv.org/html/2405.08484#bib.bib29). We have rP=43.40r\\_{\\text{P}}=43.40 and 43.5843.58 by comparing the ground-truth diagram by Logistic map with the ones by LSTM and ADQC, respectively. Such a consistency between the bifurcation diagrams does not require to accurately predict the states, but requires the validity of accurately replicating the distribution of the states after long-term evolutions."
+            },
+            {
+              "type": "formula",
+              "text": "rPr_{\\text{P}}"
+            },
+            {
+              "type": "formula",
+              "text": "rP=43.40r_{\\text{P}}=43.40"
+            },
+            {
+              "type": "formula",
+              "text": "43.5843.58"
+            },
+            {
+              "type": "paragraph",
+              "text": "In Fig. [2](https://ar5iv.labs.arxiv.org/html/2405.08484#S0.F2 \"Figure 2 ‣ Universal replication of chaotic characteristics by classical and quantum machine learning\")(b), we show the relative error εR=1N​∑n=1N|(y~[n]−y[n])/y[n]|\\varepsilon\\_{\\text{R}}=\\frac{1}{N}\\sum\\_{n=1}^{N}\\left|(\\tilde{y}^{[n]}-y^{[n]})/y^{[n]}\\right| by ADQC versus the discrete time tt for different values of μ\\mu. Note the ML models are always trained to predict the state one-step-ahead. The summation in εR\\varepsilon\\_{\\text{R}} is over the testing test. Different values of μ\\mu are taken so that the system is in the converged (μ=2.2\\mu=2.2), bifurcation (μ=3.2\\mu=3.2), quadrifurcation (μ=3.4\\mu=3.4) and chaotic (μ=3.92\\mu=3.92) regions. The values of Lyapunov exponent (LE) [Parker and Chua 2012](https://ar5iv.labs.arxiv.org/html/2405.08484#bib.bib30); [Moon 2008](https://ar5iv.labs.arxiv.org/html/2405.08484#bib.bib31) are given in the legend, which is calculated as"
+            },
+            {
+              "type": "formula",
+              "text": "εR=1N​∑n=1N|(y~[n]−y[n])/y[n]|\\varepsilon_{\\text{R}}=\\frac{1}{N}\\sum_{n=1}^{N}\\left|(\\tilde{y}^{[n]}-y^{[n]})/y^{[n]}\\right|"
+            },
+            {
+              "type": "formula",
+              "text": "tt"
+            },
+            {
+              "type": "formula",
+              "text": "μ\\mu"
+            },
+            {
+              "type": "formula",
+              "text": "εR\\varepsilon_{\\text{R}}"
+            },
+            {
+              "type": "formula",
+              "text": "μ\\mu"
+            },
+            {
+              "type": "formula",
+              "text": "μ=2.2\\mu=2.2"
+            },
+            {
+              "type": "formula",
+              "text": "μ=3.2\\mu=3.2"
+            },
+            {
+              "type": "formula",
+              "text": "μ=3.4\\mu=3.4"
+            },
+            {
+              "type": "formula",
+              "text": "μ=3.92\\mu=3.92"
+            },
+            {
+              "type": "table",
+              "text": "| | | | | | --- | --- | --- | --- | | | λ=limT→∞1T​∑t=1Tln⁡|d​f​(x,μ)d​x|x=xt.\\displaystyle\\lambda=\\lim\\_{T\\rightarrow\\infty}\\frac{1}{T}\\sum\\_{t=1}^{T}\\ln\\left|\\frac{df(x;\\mu)}{dx}\\right|\\_{x=x\\_{t}}. | | (6) |"
+            },
+            {
+              "type": "formula",
+              "text": "λ=limT→∞1T​∑t=1Tln⁡|d​f​(x,μ)d​x|x=xt.\\displaystyle\\lambda=\\lim_{T\\rightarrow\\infty}\\frac{1}{T}\\sum_{t=1}^{T}\\ln\\left|\\frac{df(x;\\mu)}{dx}\\right|_{x=x_{t}}."
+            },
+            {
+              "type": "paragraph",
+              "text": "In our numerical simulations, we take T>200T>200, which is sufficiently large."
+            },
+            {
+              "type": "formula",
+              "text": "T>200T>200"
+            },
+            {
+              "type": "paragraph",
+              "text": "Our results suggest that for the state prediction in the converged and bifurcation regions (with negative LE), ADQC can well predict the system’s state after a long-time evolution, with the relative error εR∼O⁡(10−3)\\varepsilon\\_{\\text{R}}\\sim O(10^{-3}). When the system is in a chaotic region (with positive LE), previous work suggests that the state prediction is valid in a short duration characterized usually by the Lyapunov time TLE≡λ−1T\\_{\\text{LE}}\\equiv\\lambda^{-1} [Bezruchko and Smirnov 2010](https://ar5iv.labs.arxiv.org/html/2405.08484#bib.bib32). Our results show that εR\\varepsilon\\_{\\text{R}} grows exponentially with tt before it converges to O⁡(1)O(1), which obeys"
+            },
+            {
+              "type": "formula",
+              "text": "εR∼O⁡(10−3)\\varepsilon_{\\text{R}}\\sim O(10^{-3})"
+            },
+            {
+              "type": "formula",
+              "text": "TLE≡λ−1T_{\\text{LE}}\\equiv\\lambda^{-1}"
+            },
+            {
+              "type": "formula",
+              "text": "εR\\varepsilon_{\\text{R}}"
+            },
+            {
+              "type": "formula",
+              "text": "tt"
+            },
+            {
+              "type": "formula",
+              "text": "O⁡(1)O(1)"
+            },
+            {
+              "type": "table",
+              "text": "| | | | | | --- | --- | --- | --- | | | εR∼eη​t.\\displaystyle\\varepsilon\\_{\\text{R}}\\sim e^{\\eta t}. | | (7) |"
+            },
+            {
+              "type": "formula",
+              "text": "εR∼eη​t.\\displaystyle\\varepsilon_{\\text{R}}\\sim e^{\\eta t}."
+            },
+            {
+              "type": "paragraph",
+              "text": "The table in Fig. [2](https://ar5iv.labs.arxiv.org/html/2405.08484#S0.F2 \"Figure 2 ‣ Universal replication of chaotic characteristics by classical and quantum machine learning\")(b) shows the exponential index to be about η≈0.4+O⁡(10−1)\\eta\\approx 0.4+O(10^{-1}). Note the system is chaotic for 3.57<μ<43.57<\\mu<4 [Andrecut 1998](https://ar5iv.labs.arxiv.org/html/2405.08484#bib.bib28)."
+            },
+            {
+              "type": "formula",
+              "text": "η≈0.4+O⁡(10−1)\\eta\\approx 0.4+O(10^{-1})"
+            },
+            {
+              "type": "formula",
+              "text": "3.57<μ<43.57<\\mu<4"
+            },
+            {
+              "type": "paragraph",
+              "text": "The above results show the ability of the ML models on replicating the characteristics instead of predicting the states. Such an ability is further demonstrated by comparing the LE of the 1D Logistic map and the ML maps (the trained LSTM and ADQC), as shown in Fig. [3](https://ar5iv.labs.arxiv.org/html/2405.08484#S0.F3 \"Figure 3 ‣ Universal replication of chaotic characteristics by classical and quantum machine learning\") (a). The LE of the ML models is obtained by replacing the differential term in Eq. ([6](https://ar5iv.labs.arxiv.org/html/2405.08484#S0.E6 \"In Universal replication of chaotic characteristics by classical and quantum machine learning\")) by dF(xt−M+1,…,x;𝑾]/dxdF(x\\_{t-M+1},...,x;\\boldsymbol{W}]/dx at x=xtx=x\\_{t}."
+            },
+            {
+              "type": "formula",
+              "text": "x=xtx=x_{t}"
+            },
+            {
+              "type": "paragraph",
+              "text": "The LE’s with varying μ\\mu given by the LSTM and ADQC with the μ\\mu-tuned pre-processing (green and blue lines with symbols) are consistent with those given by the Logistic map (the ground truth shown by red solid line). As a comparison, much worse consistence is reached by the standard LSTM without the μ\\mu-tuned pre-processing (black dash-dot line). This is a demonstration of the improvement brought by our μ\\mu-tuned pre-processing. The two horizontal stripes indicate whether the μ\\mu-tuned LSTM and ADQC give the LE with correct (green) or incorrect (red) sign. Generally, the accuracy on replicating the LE’s sign is high. The incorrect signs appeal in the chaotic region."
+            },
+            {
+              "type": "formula",
+              "text": "μ\\mu"
+            },
+            {
+              "type": "formula",
+              "text": "μ\\mu"
+            },
+            {
+              "type": "formula",
+              "text": "μ\\mu"
+            },
+            {
+              "type": "formula",
+              "text": "μ\\mu"
+            },
+            {
+              "type": "formula",
+              "text": "μ\\mu"
+            },
+            {
+              "type": "paragraph",
+              "text": "Similar results are obtained for the two-dimensional (2D) Logistic map [see Fig. [3](https://ar5iv.labs.arxiv.org/html/2405.08484#S0.F3 \"Figure 3 ‣ Universal replication of chaotic characteristics by classical and quantum machine learning\") (b)], which represents a more intricate nonlinear system with richer dynamical behaviors by incorporating a linear coupling term [Yuan et al. 1983](https://ar5iv.labs.arxiv.org/html/2405.08484#bib.bib23); [Ferretti and Rahman 1988](https://ar5iv.labs.arxiv.org/html/2405.08484#bib.bib24). The two variables [xt,xt′][x\\_{t},x^{\\prime}\\_{t}] are mapped as"
+            },
+            {
+              "type": "formula",
+              "text": "[xt,xt′][x_{t},x^{\\prime}_{t}]"
+            },
+            {
+              "type": "table",
+              "text": "| | | | | --- | --- | --- | | | xt+1=4​μ1​xt​(1−xt)+β​xt′xt+1′=4​μ2​xt′​(1−xt′)+β​xt.\\displaystyle\\begin{array}[]{c}x\\_{t+1}=4\\mu\\_{1}x\\_{t}(1-x\\_{t})+\\beta x^{\\prime}\\_{t}\\\\ x^{\\prime}\\_{t+1}=4\\mu\\_{2}x^{\\prime}\\_{t}(1-x^{\\prime}\\_{t})+\\beta x\\_{t}\\end{array}. | |"
+            },
+            {
+              "type": "formula",
+              "text": "xt+1=4​μ1​xt​(1−xt)+β​xt′xt+1′=4​μ2​xt′​(1−xt′)+β​xt.\\displaystyle\\begin{array}[]{c}x_{t+1}=4\\mu_{1}x_{t}(1-x_{t})+\\beta x^{\\prime}_{t}\\\\ x^{\\prime}_{t+1}=4\\mu_{2}x^{\\prime}_{t}(1-x^{\\prime}_{t})+\\beta x_{t}\\end{array}."
+            },
+            {
+              "type": "paragraph",
+              "text": "We take μ1=μ2=μ\\mu\\_{1}=\\mu\\_{2}=\\mu and fix β=0.1\\beta=0.1 for simplicity. Two LE’s are defined. Obviously, replicating the LE’s of the 2D Logistic map is much more challenging than the 1D case. Consequently, the LSTM without the μ\\mu-tuned pre-processing becomes almost invalid. With the μ\\mu-tuned pre-processing, ADQC achieves higher accuracy than LSTM."
+            },
+            {
+              "type": "formula",
+              "text": "μ1=μ2=μ\\mu_{1}=\\mu_{2}=\\mu"
+            },
+            {
+              "type": "formula",
+              "text": "β=0.1\\beta=0.1"
+            },
+            {
+              "type": "formula",
+              "text": "μ\\mu"
+            },
+            {
+              "type": "formula",
+              "text": "μ\\mu"
+            },
+            {
+              "type": "formula",
+              "text": "LL"
+            },
+            {
+              "type": "formula",
+              "text": "LLEL_{\\text{LE}}"
+            },
+            {
+              "type": "formula",
+              "text": "LL"
+            },
+            {
+              "type": "formula",
+              "text": "LLEL_{\\text{LE}}"
+            },
+            {
+              "type": "formula",
+              "text": "dhd_{\\text{h}}"
+            },
+            {
+              "type": "formula",
+              "text": "NLN_{\\text{L}}"
+            },
+            {
+              "type": "paragraph",
+              "text": "A usual way to improve the performance of a ML model is to increase its complexity. However, such a way possibly fails in our case. Be noted that though the dynamical system may just contain a handful of hyper-parameters (say one parameter μ\\mu in the 1D Logistic map), leaning its dynamics is a big challenge, and the key factor to determine the performance of a ML model on replicating the long-term characteristics should not be its parameter complexity. We expect high sensitivity to the over-fitting issue."
+            },
+            {
+              "type": "formula",
+              "text": "μ\\mu"
+            },
+            {
+              "type": "paragraph",
+              "text": "Fig. [4](https://ar5iv.labs.arxiv.org/html/2405.08484#S0.F4 \"Figure 4 ‣ Universal replication of chaotic characteristics by classical and quantum machine learning\") supports such an expectation. Increasing the parameter complexity generally lowers the error on the short-term prediction (say predicting the state one-step ahead). For the 1D and 2D Logistic maps, Fig. [4](https://ar5iv.labs.arxiv.org/html/2405.08484#S0.F4 \"Figure 4 ‣ Universal replication of chaotic characteristics by classical and quantum machine learning\") (a) shows that the RMSE LL [Eq. ([3](https://ar5iv.labs.arxiv.org/html/2405.08484#S0.E3 \"In Universal replication of chaotic characteristics by classical and quantum machine learning\"))] obtained by LSTM decreases gradually from about 0.020.02 to 0.0040.004 when increasing the hidden dimension dhd\\_{\\text{h}} from 22 to 8080. Similar observation is obtained with ADQC, where LL decreases to about 0.0020.002 (for the 1D Logistic map) or 0.0040.004 (for the 2D Logistic map) by increasing the number of circuit layers to NL=8N\\_{\\text{L}}=8."
+            },
+            {
+              "type": "formula",
+              "text": "LL"
+            },
+            {
+              "type": "formula",
+              "text": "0.020.02"
+            },
+            {
+              "type": "formula",
+              "text": "0.0040.004"
+            },
+            {
+              "type": "formula",
+              "text": "dhd_{\\text{h}}"
+            },
+            {
+              "type": "formula",
+              "text": "22"
+            },
+            {
+              "type": "formula",
+              "text": "8080"
+            },
+            {
+              "type": "formula",
+              "text": "LL"
+            },
+            {
+              "type": "formula",
+              "text": "0.0020.002"
+            },
+            {
+              "type": "formula",
+              "text": "0.0040.004"
+            },
+            {
+              "type": "formula",
+              "text": "NL=8N_{\\text{L}}=8"
+            },
+            {
+              "type": "paragraph",
+              "text": "The RMSE of LE (denoted as LLEL\\_{\\text{LE}}) behaves differently from that of LL. LLEL\\_{\\text{LE}} is calculated in the same way as LL using the definition of RMSE [Eq. ([3](https://ar5iv.labs.arxiv.org/html/2405.08484#S0.E3 \"In Universal replication of chaotic characteristics by classical and quantum machine learning\"))]. For LSTM, the LLEL\\_{\\text{LE}} fluctuates approximately in the range of 0.005<LLE<0.0250.005<L\\_{\\text{LE}}<0.025. Increasing dhd\\_{\\text{h}} of LSTM cannot improve the accuracy on replicating LE. For ADQC, though we fail to see obvious drop of LLEL\\_{\\text{LE}} by increasing NLN\\_{\\text{L}}, LLEL\\_{\\text{LE}} varies much more smoothly approximately in the range of (0.002<LLE<0.0050.002<L\\_{\\text{LE}}<0.005), which is much lower than that of LSTM. Note all the data in Fig. [4](https://ar5iv.labs.arxiv.org/html/2405.08484#S0.F4 \"Figure 4 ‣ Universal replication of chaotic characteristics by classical and quantum machine learning\") are computed using the testing set."
+            },
+            {
+              "type": "formula",
+              "text": "LLEL_{\\text{LE}}"
+            },
+            {
+              "type": "formula",
+              "text": "LL"
+            },
+            {
+              "type": "formula",
+              "text": "LLEL_{\\text{LE}}"
+            },
+            {
+              "type": "formula",
+              "text": "LL"
+            },
+            {
+              "type": "formula",
+              "text": "LLEL_{\\text{LE}}"
+            },
+            {
+              "type": "formula",
+              "text": "0.005<LLE<0.0250.005<L_{\\text{LE}}<0.025"
+            },
+            {
+              "type": "formula",
+              "text": "dhd_{\\text{h}}"
+            },
+            {
+              "type": "formula",
+              "text": "LLEL_{\\text{LE}}"
+            },
+            {
+              "type": "formula",
+              "text": "NLN_{\\text{L}}"
+            },
+            {
+              "type": "formula",
+              "text": "LLEL_{\\text{LE}}"
+            },
+            {
+              "type": "formula",
+              "text": "0.002<LLE<0.0050.002<L_{\\text{LE}}<0.005"
+            },
+            {
+              "type": "paragraph",
+              "text": "Our results suggest that the key of improving the accuracy on the prediction of long-term dynamical characteristics is to developing ML models that better mitigate over-fitting. This is different from the ML tasks such as classification and short-term prediction, where the accuracy can be generally improved by enhancing the model complexity. Our work demonstrates the superior ability of variational quantum circuits on mitigating over-fitting, which is consistent with the previous investigations on different but relevant topics such as image generation [Han et al. 2018](https://ar5iv.labs.arxiv.org/html/2405.08484#bib.bib33); [Cheng et al. 2019](https://ar5iv.labs.arxiv.org/html/2405.08484#bib.bib34) and model compression [Gao et al. 2020](https://ar5iv.labs.arxiv.org/html/2405.08484#bib.bib35); [Qing et al. 2023](https://ar5iv.labs.arxiv.org/html/2405.08484#bib.bib36). In comparison, LSTM suffers from severe over-fitting issue, though it has been widely recognized as a powerful model with remarkable generalization ability and venial over-fitting issue when dealing with many other ML tasks."
+            },
+            {
+              "type": "paragraph",
+              "text": "Summary.— This work reveals the ability of machine learning (ML) models, which are trained to predict the state one-step-ahead from certain historic data, on replicating the long-term characteristics of discrete dynamical systems. In comparison with the previous works, the characteristics with varying values of hyper-parameters are replicated universally by a single ML model. Our results suggest high sensitivity to the over-fitting issue for the replication of the long-term dynamical characteristics. Taking the one- and two-dimensional Logistic maps as examples, the variational quantum circuit exhibits superior performance on replicating the bifurcation diagram and Lyapunov exponents. Our findings add to the potential advantages of quantum circuit models on achieving high accuracy and stability for the ML tasks that are sensitive to over-fitting."
+            },
+            {
+              "type": "paragraph",
+              "text": "Acknowledgment. SCB is grateful to Qing lv, Peng-Fei Zhou, Yong Qing, Zhang-Xu Chen, Guo-Dong Cheng, Ke Li, Rui Hong, Ying Lu, Yi-Cheng Tang, and Yu-Jia An for helpful discussions. This work was supported in part by NSFC (Grant No. 12004266), Beijing Natural Science Foundation (Grant No. 1232025), Tianjin Natural Science Foundation of China (Grant No. 20JCYBJC00500), and Academy for Multidisciplinary Studies, Capital Normal University."
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "Appendix A Details of dataset and pre-processing",
+          "level": 2,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "As an example, we consider the one-dimensional (1D) Logistic map f⁡(xt,μ)=μ​xt​(1−xt)f(x\\_{t};\\mu)=\\mu x\\_{t}(1-x\\_{t}). We take the hyper-parameter μ\\mu to vary from 22 to 44, and discretize to 5050 values with an interval of 0.040.04. For each value of μ\\mu, we randomly generate 3000 training samples and 500 testing samples. Each sample (say 𝒙[n]\\boldsymbol{x}^{[n]}) is generated by implementing the dynamical map ff on a randomly-taken initial state (say x1[n]x^{[n]}\\_{1}) for (M−1)(M-1) times. Therefore, a sample 𝒙[n]=(x1[n],⋯,xM[n])\\boldsymbol{x}^{[n]}=(x^{[n]}\\_{1},\\cdots,x^{[n]}\\_{M}) contains MM features with xt[n]=ft−1​(x1[n])x^{[n]}\\_{t}=f^{t-1}(x^{[n]}\\_{1}), where ft−1f^{t-1} means to implement ff for (t−1)(t-1) times."
+            },
+            {
+              "type": "formula",
+              "text": "f⁡(xt,μ)=μ​xt​(1−xt)f(x_{t};\\mu)=\\mu x_{t}(1-x_{t})"
+            },
+            {
+              "type": "formula",
+              "text": "μ\\mu"
+            },
+            {
+              "type": "formula",
+              "text": "22"
+            },
+            {
+              "type": "formula",
+              "text": "44"
+            },
+            {
+              "type": "formula",
+              "text": "5050"
+            },
+            {
+              "type": "formula",
+              "text": "0.040.04"
+            },
+            {
+              "type": "formula",
+              "text": "μ\\mu"
+            },
+            {
+              "type": "formula",
+              "text": "𝒙[n]\\boldsymbol{x}^{[n]}"
+            },
+            {
+              "type": "formula",
+              "text": "ff"
+            },
+            {
+              "type": "formula",
+              "text": "x1[n]x^{[n]}_{1}"
+            },
+            {
+              "type": "formula",
+              "text": "(M−1)(M-1)"
+            },
+            {
+              "type": "formula",
+              "text": "𝒙[n]=(x1[n],⋯,xM[n])\\boldsymbol{x}^{[n]}=(x^{[n]}_{1},\\cdots,x^{[n]}_{M})"
+            },
+            {
+              "type": "formula",
+              "text": "MM"
+            },
+            {
+              "type": "formula",
+              "text": "xt[n]=ft−1​(x1[n])x^{[n]}_{t}=f^{t-1}(x^{[n]}_{1})"
+            },
+            {
+              "type": "formula",
+              "text": "ft−1f^{t-1}"
+            },
+            {
+              "type": "formula",
+              "text": "ff"
+            },
+            {
+              "type": "formula",
+              "text": "(t−1)(t-1)"
+            },
+            {
+              "type": "paragraph",
+              "text": "The ML model is trained to predict the value of xM+1[n]=f⁡(xM(n),μ)x^{[n]}\\_{M+1}=f(x^{(n)}\\_{M};\\mu) from this sample. The ground truth of xM+1[n]x^{[n]}\\_{M+1} (generated by the dynamical system itself) is called the label of the nn-th sample. For different independent simulations, we randomly take 20002000 training samples from the training set for each value of μ\\mu to train the ML models. If not specified, we take M=8M=8, and all data such as the bifurcation diagram and the Lyapunov exponents in the main text are computed using the testing set."
+            },
+            {
+              "type": "formula",
+              "text": "xM+1[n]=f⁡(xM(n),μ)x^{[n]}_{M+1}=f(x^{(n)}_{M};\\mu)"
+            },
+            {
+              "type": "formula",
+              "text": "xM+1[n]x^{[n]}_{M+1}"
+            },
+            {
+              "type": "formula",
+              "text": "nn"
+            },
+            {
+              "type": "formula",
+              "text": "20002000"
+            },
+            {
+              "type": "formula",
+              "text": "μ\\mu"
+            },
+            {
+              "type": "formula",
+              "text": "M=8M=8"
+            },
+            {
+              "type": "paragraph",
+              "text": "A μ\\mu-tuned pre-processing is introduced to map each sample to a set of vectors. Specifically, the tt-th feature of the nn-th sample xt[n]x^{[n]}\\_{t} is mapped to a vector 𝒗[n,t]\\boldsymbol{v}^{[n,t]} as xt[n]→𝒗[n,t]=(v1[n,t],v2[n,t],⋯,vd[n,t])x^{[n]}\\_{t}\\to\\boldsymbol{v}^{[n,t]}=(v^{[n,t]}\\_{1},v^{[n,t]}\\_{2},\\cdots,v^{[n,t]}\\_{d}), where the dimension d=dim(𝒗[n,t])d=\\dim(\\boldsymbol{v}^{[n,t]}) is a preset hyper-parameter. Consequently, a sample is mapped to MM vectors."
+            },
+            {
+              "type": "formula",
+              "text": "μ\\mu"
+            },
+            {
+              "type": "formula",
+              "text": "tt"
+            },
+            {
+              "type": "formula",
+              "text": "nn"
+            },
+            {
+              "type": "formula",
+              "text": "xt[n]x^{[n]}_{t}"
+            },
+            {
+              "type": "formula",
+              "text": "𝒗[n,t]\\boldsymbol{v}^{[n,t]}"
+            },
+            {
+              "type": "formula",
+              "text": "xt[n]→𝒗[n,t]=(v1[n,t],v2[n,t],⋯,vd[n,t])x^{[n]}_{t}\\to\\boldsymbol{v}^{[n,t]}=(v^{[n,t]}_{1},v^{[n,t]}_{2},\\cdots,v^{[n,t]}_{d})"
+            },
+            {
+              "type": "formula",
+              "text": "d=dim(𝒗[n,t])d=\\dim(\\boldsymbol{v}^{[n,t]})"
+            },
+            {
+              "type": "formula",
+              "text": "MM"
+            },
+            {
+              "type": "paragraph",
+              "text": "We define the pre-processing map to depend on μ\\mu and some variational parameters that will be optimized in the training stage. Here, the pre-processing map [also see Eq. (4) of the main text] is defined as"
+            },
+            {
+              "type": "formula",
+              "text": "μ\\mu"
+            },
+            {
+              "type": "table",
+              "text": "| | | | | | --- | --- | --- | --- | | | vk[n,t]=∑i,jξi​(xt[n],θ)​ξj​(μ[n],θ)​Ti​j​k.\\displaystyle v^{[n,t]}\\_{k}=\\sum\\_{i,j}\\xi\\_{i}(x^{[n]}\\_{t};\\theta)\\xi\\_{j}(\\mu^{[n]};\\theta)T\\_{ijk}. | | (11) |"
+            },
+            {
+              "type": "formula",
+              "text": "vk[n,t]=∑i,jξi​(xt[n],θ)​ξj​(μ[n],θ)​Ti​j​k.\\displaystyle v^{[n,t]}_{k}=\\sum_{i,j}\\xi_{i}(x^{[n]}_{t};\\theta)\\xi_{j}(\\mu^{[n]};\\theta)T_{ijk}."
+            },
+            {
+              "type": "paragraph",
+              "text": "The (d×d×d)(d\\times d\\times d)-dimensional tensor 𝑻\\boldsymbol{T} and scalar θ\\theta are the variational parameters that are optimized in the training stage. The vectors 𝝃⁡(xt[n],θ)\\boldsymbol{\\xi}(x^{[n]}\\_{t};\\theta) and 𝝃⁡(μ[n],θ)\\boldsymbol{\\xi}(\\mu^{[n]};\\theta), which are both dd-dimensional, are obtained by the following map that transforms a scalar to a normalized vector [also see Eq. (5) of the main text]. For a given scalar (say aa), the jj-th elements of the resulting vector 𝝃⁡(a,θ)\\boldsymbol{\\xi}(a;\\theta) satisfies"
+            },
+            {
+              "type": "formula",
+              "text": "(d×d×d)(d\\times d\\times d)"
+            },
+            {
+              "type": "formula",
+              "text": "𝑻\\boldsymbol{T}"
+            },
+            {
+              "type": "formula",
+              "text": "θ\\theta"
+            },
+            {
+              "type": "formula",
+              "text": "𝝃⁡(xt[n],θ)\\boldsymbol{\\xi}(x^{[n]}_{t};\\theta)"
+            },
+            {
+              "type": "formula",
+              "text": "𝝃⁡(μ[n],θ)\\boldsymbol{\\xi}(\\mu^{[n]};\\theta)"
+            },
+            {
+              "type": "formula",
+              "text": "dd"
+            },
+            {
+              "type": "formula",
+              "text": "aa"
+            },
+            {
+              "type": "formula",
+              "text": "jj"
+            },
+            {
+              "type": "formula",
+              "text": "𝝃⁡(a,θ)\\boldsymbol{\\xi}(a;\\theta)"
+            },
+            {
+              "type": "table",
+              "text": "| | | | | | --- | --- | --- | --- | | | ξj(a;θ)=(d−1j−1)cos(θ​π2a)d−jsin(θ​π2a)j−1.\\xi\\_{j}(a;\\theta)=\\sqrt{\\binom{d-1}{j-1}}\\cos\\left(\\frac{\\theta\\pi}{2}a\\right)^{d-j}\\sin\\left(\\frac{\\theta\\pi}{2}a\\right)^{j-1}. | | (12) |"
+            },
+            {
+              "type": "paragraph",
+              "text": "Since we train a ML model with different values of μ\\mu, one should take μ[n]{\\mu}^{[n]} to be the corresponding value of μ\\mu for the nn-th sample."
+            },
+            {
+              "type": "formula",
+              "text": "μ\\mu"
+            },
+            {
+              "type": "formula",
+              "text": "μ[n]{\\mu}^{[n]}"
+            },
+            {
+              "type": "formula",
+              "text": "μ\\mu"
+            },
+            {
+              "type": "formula",
+              "text": "nn"
+            },
+            {
+              "type": "paragraph",
+              "text": "For the 2D logistic map, we take the hyper-parameter μ\\mu to be the discrete values from 0.510.51 to 0.90.9 with an interval of 0.010.01. For each value of μ\\mu, we randomly generate 3000 training samples and 500 testing samples. Since it contains two variables (xtx\\_{t} and xt′x^{\\prime}\\_{t}), we define the nn-th sample as (x1[n],x1′[n],⋯,xM[n],xM′[n])(x^{[n]}\\_{1},x^{\\prime[n]}\\_{1},\\cdots,x^{[n]}\\_{M},x^{\\prime[n]}\\_{M}), and take M=4M=4 in our simulations. The pre-processing map is applied similarly to transform the features in a sample to 2​M2M vectors."
+            },
+            {
+              "type": "formula",
+              "text": "μ\\mu"
+            },
+            {
+              "type": "formula",
+              "text": "0.510.51"
+            },
+            {
+              "type": "formula",
+              "text": "0.90.9"
+            },
+            {
+              "type": "formula",
+              "text": "0.010.01"
+            },
+            {
+              "type": "formula",
+              "text": "μ\\mu"
+            },
+            {
+              "type": "formula",
+              "text": "xtx_{t}"
+            },
+            {
+              "type": "formula",
+              "text": "xt′x^{\\prime}_{t}"
+            },
+            {
+              "type": "formula",
+              "text": "nn"
+            },
+            {
+              "type": "formula",
+              "text": "(x1[n],x1′[n],⋯,xM[n],xM′[n])(x^{[n]}_{1},x^{\\prime[n]}_{1},\\cdots,x^{[n]}_{M},x^{\\prime[n]}_{M})"
+            },
+            {
+              "type": "formula",
+              "text": "M=4M=4"
+            },
+            {
+              "type": "formula",
+              "text": "2​M2M"
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "Appendix B Automatically-differentiable quantum circuit for time series prediction",
+          "level": 2,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "The input of an automatically-differentiable quantum circuit (ADQC) [Zhou et al. 2021](https://ar5iv.labs.arxiv.org/html/2405.08484#bib.bib22) is usually a MM-qubit quantum state. With the pre-processing explained above, one maps a sample to a set of vectors, namely from (x1[n],⋯,xM[n])(x^{[n]}\\_{1},\\cdots,x^{[n]}\\_{M}) to (𝒗[n,1],⋯,𝒗[n,M])(\\boldsymbol{v}^{[n,1]},\\cdots,\\boldsymbol{v}^{[n,M]}). These vectors are subsequently mapped to a product state as"
+            },
+            {
+              "type": "formula",
+              "text": "MM"
+            },
+            {
+              "type": "formula",
+              "text": "(x1[n],⋯,xM[n])(x^{[n]}_{1},\\cdots,x^{[n]}_{M})"
+            },
+            {
+              "type": "formula",
+              "text": "(𝒗[n,1],⋯,𝒗[n,M])(\\boldsymbol{v}^{[n,1]},\\cdots,\\boldsymbol{v}^{[n,M]})"
+            },
+            {
+              "type": "table",
+              "text": "| | | | | | --- | --- | --- | --- | | | 𝝍[n]=∏⊗t=1M𝒗[n,t].\\displaystyle\\boldsymbol{\\psi}^{[n]}=\\prod\\_{\\otimes t=1}^{M}\\boldsymbol{v}^{[n,t]}. | | (13) |"
+            },
+            {
+              "type": "formula",
+              "text": "𝝍[n]=∏⊗t=1M𝒗[n,t].\\displaystyle\\boldsymbol{\\psi}^{[n]}=\\prod_{\\otimes t=1}^{M}\\boldsymbol{v}^{[n,t]}."
+            },
+            {
+              "type": "paragraph",
+              "text": "In other words, the elements of 𝝍[n]\\boldsymbol{\\psi}^{[n]} satisfies ψs1,⋯,sM[n]=∏t=1Mvst[n,t]\\psi^{[n]}\\_{s\\_{1},\\cdots,s\\_{M}}=\\prod\\_{t=1}^{M}v^{[n,t]}\\_{s\\_{t}}."
+            },
+            {
+              "type": "formula",
+              "text": "𝝍[n]\\boldsymbol{\\psi}^{[n]}"
+            },
+            {
+              "type": "formula",
+              "text": "ψs1,⋯,sM[n]=∏t=1Mvst[n,t]\\psi^{[n]}_{s_{1},\\cdots,s_{M}}=\\prod_{t=1}^{M}v^{[n,t]}_{s_{t}}"
+            },
+            {
+              "type": "paragraph",
+              "text": "The ADQC represents a unitary transformation (denoted as U^\\hat{U}) that maps the input state to the final state that is usually entangled. Formally, we have 𝚿[n]=U^​𝝍[n]\\boldsymbol{\\Psi}^{[n]}=\\hat{U}\\boldsymbol{\\psi}^{[n]} for the state corresponding to the sample 𝒙[n]\\boldsymbol{x}^{[n]}, where U^\\hat{U} can be regarded as a (dM×dM)(d^{M}\\times d^{M})-dimensional unitary matrix. For a variational quantum circuit including ADQC, U^\\hat{U} is written as the product of multiple local gates. As illustrated in the bottom-left panel of Fig. 1 of the main text, we here choose the gates to be two-body, which are (d2×d2)(d^{2}\\times d^{2})-dimensional unitary matrices (denoted as {G^[g]}\\{\\hat{G}^{[g]}\\} for g=1,⋯,NGg=1,\\cdots,N\\_{\\text{G}}, with NGN\\_{\\text{G}} the total number of gates)."
+            },
+            {
+              "type": "formula",
+              "text": "U^\\hat{U}"
+            },
+            {
+              "type": "formula",
+              "text": "𝚿[n]=U^​𝝍[n]\\boldsymbol{\\Psi}^{[n]}=\\hat{U}\\boldsymbol{\\psi}^{[n]}"
+            },
+            {
+              "type": "formula",
+              "text": "𝒙[n]\\boldsymbol{x}^{[n]}"
+            },
+            {
+              "type": "formula",
+              "text": "U^\\hat{U}"
+            },
+            {
+              "type": "formula",
+              "text": "(dM×dM)(d^{M}\\times d^{M})"
+            },
+            {
+              "type": "formula",
+              "text": "U^\\hat{U}"
+            },
+            {
+              "type": "formula",
+              "text": "(d2×d2)(d^{2}\\times d^{2})"
+            },
+            {
+              "type": "formula",
+              "text": "{G^[g]}\\{\\hat{G}^{[g]}\\}"
+            },
+            {
+              "type": "formula",
+              "text": "g=1,⋯,NGg=1,\\cdots,N_{\\text{G}}"
+            },
+            {
+              "type": "formula",
+              "text": "NGN_{\\text{G}}"
+            },
+            {
+              "type": "paragraph",
+              "text": "For the 1D Logistic map, the prediction from ADQC is given by the measurement on the final state 𝚿[n]\\boldsymbol{\\Psi}^{[n]}, satisfying"
+            },
+            {
+              "type": "formula",
+              "text": "𝚿[n]\\boldsymbol{\\Psi}^{[n]}"
+            },
+            {
+              "type": "table",
+              "text": "| | | | | | --- | --- | --- | --- | | | y~[n]=|Ψs1,⋯,sM−1,0[n]|2.\\displaystyle\\tilde{y}^{[n]}=|\\Psi^{[n]}\\_{s\\_{1},\\cdots,s\\_{M-1},0}|^{2}. | | (14) |"
+            },
+            {
+              "type": "formula",
+              "text": "y~[n]=|Ψs1,⋯,sM−1,0[n]|2.\\displaystyle\\tilde{y}^{[n]}=|\\Psi^{[n]}_{s_{1},\\cdots,s_{M-1},0}|^{2}."
+            },
+            {
+              "type": "paragraph",
+              "text": "In the quantum language, y~[n]\\tilde{y}^{[n]} is the probability of projecting the last qubit to the spin-up state. For the 1D Logistic map, the predictions of the two variables are defined as"
+            },
+            {
+              "type": "formula",
+              "text": "y~[n]\\tilde{y}^{[n]}"
+            },
+            {
+              "type": "table",
+              "text": "| | | | | | | | --- | --- | --- | --- | --- | --- | | | y~[n]\\displaystyle\\tilde{y}^{[n]} | =\\displaystyle= | |Ψs1,⋯,sM−2,sM−1,0[n]|2,\\displaystyle|\\Psi^{[n]}\\_{s\\_{1},\\cdots,s\\_{M-2},s\\_{M-1},0}|^{2}, | | (15) | | | | | | | | | --- | --- | --- | --- | --- | --- | | | y~[n]\\displaystyle\\tilde{y}^{[n]} | =\\displaystyle= | |Ψs1,⋯,sM−2,0,sM[n]|2.\\displaystyle|\\Psi^{[n]}\\_{s\\_{1},\\cdots,s\\_{M-2},0,s\\_{M}}|^{2}. | | (16) |"
+            },
+            {
+              "type": "formula",
+              "text": "y~[n]\\displaystyle\\tilde{y}^{[n]}"
+            },
+            {
+              "type": "formula",
+              "text": "=\\displaystyle="
+            },
+            {
+              "type": "formula",
+              "text": "|Ψs1,⋯,sM−2,sM−1,0[n]|2,\\displaystyle|\\Psi^{[n]}_{s_{1},\\cdots,s_{M-2},s_{M-1},0}|^{2},"
+            },
+            {
+              "type": "formula",
+              "text": "y~[n]\\displaystyle\\tilde{y}^{[n]}"
+            },
+            {
+              "type": "formula",
+              "text": "=\\displaystyle="
+            },
+            {
+              "type": "formula",
+              "text": "|Ψs1,⋯,sM−2,0,sM[n]|2.\\displaystyle|\\Psi^{[n]}_{s_{1},\\cdots,s_{M-2},0,s_{M}}|^{2}."
+            },
+            {
+              "type": "paragraph",
+              "text": "These are the probabilities of projecting the penultimate and last qubits to the spin-up state, respectively."
+            },
+            {
+              "type": "paragraph",
+              "text": "For the ADQC, each unitary gate is parameterized by a (d2×d2)(d^{2}\\times d^{2})-dimensional matrix named as latent gates (denoted as {𝑮[g]}\\{\\boldsymbol{G}^{[g]}\\}). In other words, the latent gates are the variational parameters of the ADQC. To satisfy the unitary condition of {𝑮[g]}\\{\\boldsymbol{G}^{[g]}\\}, the latent gates are mapped to unitary gates by singular value decomposition (SVD) as"
+            },
+            {
+              "type": "formula",
+              "text": "(d2×d2)(d^{2}\\times d^{2})"
+            },
+            {
+              "type": "formula",
+              "text": "{𝑮[g]}\\{\\boldsymbol{G}^{[g]}\\}"
+            },
+            {
+              "type": "formula",
+              "text": "{𝑮[g]}\\{\\boldsymbol{G}^{[g]}\\}"
+            },
+            {
+              "type": "table",
+              "text": "| | | | | | --- | --- | --- | --- | | | 𝑮[g]→SVD𝑼[g]Λ[g]𝑽[g]†,\\displaystyle\\boldsymbol{G}^{[g]}\\overset{\\text{SVD}}{\\to}\\boldsymbol{U}^{[g]}\\Lambda^{[g]}\\boldsymbol{V}^{[g]\\dagger}, | | (17) | | | | | | | --- | --- | --- | --- | | | 𝑼[g]𝑽[g]†→G^[g].\\displaystyle\\boldsymbol{U}^{[g]}\\boldsymbol{V}^{[g]\\dagger}\\to\\hat{G}^{[g]}. | | (18) |"
+            },
+            {
+              "type": "paragraph",
+              "text": "A main advantage of ADQC is that any unitary gate can be parameterized in the same way by a matrix (latent gate) of the same dimensions. Therefore, we only need to specify the structure of the circuit, such as the dimensions of the gates (e.g., the number of spins that one gate acts on and the number of levels for each spin) and how they are connected to each other. For other variational quantum circuit models, one has to additionally specify the types of gates (such as rotational and phase-shift gates). Different types of gates are parameterized in different ways [Gill et al. 2022](https://ar5iv.labs.arxiv.org/html/2405.08484#bib.bib37)."
+            },
+            {
+              "type": "paragraph",
+              "text": "The latent gates (and all other variational parameters) are updated by the gradient decent method in the training stages, as 𝑮[g]→𝑮[g]−η​∂L∂𝑮[g]\\boldsymbol{G}^{[g]}\\to\\boldsymbol{G}^{[g]}-\\eta\\frac{\\partial L}{\\partial\\boldsymbol{G}^{[g]}} with η\\eta the learning rate. We choose LL to be the root mean-square error (see Eq. (3) of the main text). As the map from latent gates to unitary gates is differentiable, one can use the standard back propagation technique in ML to obtain the gradients."
+            },
+            {
+              "type": "formula",
+              "text": "𝑮[g]→𝑮[g]−η​∂L∂𝑮[g]\\boldsymbol{G}^{[g]}\\to\\boldsymbol{G}^{[g]}-\\eta\\frac{\\partial L}{\\partial\\boldsymbol{G}^{[g]}}"
+            },
+            {
+              "type": "formula",
+              "text": "η\\eta"
+            },
+            {
+              "type": "formula",
+              "text": "LL"
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "Appendix C Lyapunov exponent",
+          "level": 2,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "The Lyapunov exponent (LE) [Parker and Chua 2012](https://ar5iv.labs.arxiv.org/html/2405.08484#bib.bib30); [Moon 2008](https://ar5iv.labs.arxiv.org/html/2405.08484#bib.bib31) is an important measure to describe the chaotic nature of a dynamical system. It reflects the exponential growth rate of small perturbations in the system, quantifying the sensitivity to initial conditions and the amplification of uncertainties."
+            },
+            {
+              "type": "paragraph",
+              "text": "Consider a discrete dynamical system with one variable xt+1=f⁡(xt)x\\_{t+1}=f(x\\_{t}) (such as the one-dimensional Logistic map). One can assume an exponential form for the difference between the states with and without a perturbation ε\\varepsilon on the initial state, where one has"
+            },
+            {
+              "type": "formula",
+              "text": "xt+1=f⁡(xt)x_{t+1}=f(x_{t})"
+            },
+            {
+              "type": "formula",
+              "text": "ε\\varepsilon"
+            },
+            {
+              "type": "table",
+              "text": "| | | | | | --- | --- | --- | --- | | | ε​eT​λ​(x0)=|fT​(x0+ε)−fT​(x0)|,\\displaystyle\\varepsilon e^{T\\lambda(x\\_{0})}=|f^{T}(x\\_{0}+\\varepsilon)-f^{T}(x\\_{0})|, | | (19) |"
+            },
+            {
+              "type": "formula",
+              "text": "ε​eT​λ​(x0)=|fT​(x0+ε)−fT​(x0)|,\\displaystyle\\varepsilon e^{T\\lambda(x_{0})}=|f^{T}(x_{0}+\\varepsilon)-f^{T}(x_{0})|,"
+            },
+            {
+              "type": "paragraph",
+              "text": "where fTf^{T} means to recursively implement the map ff for TT times. LE is defined as the exponential index λ\\lambda in the limit of ε→0\\varepsilon\\rightarrow 0 and T→∞T\\to\\infty. In practical simulations, LE can be calculated as"
+            },
+            {
+              "type": "formula",
+              "text": "fTf^{T}"
+            },
+            {
+              "type": "formula",
+              "text": "ff"
+            },
+            {
+              "type": "formula",
+              "text": "TT"
+            },
+            {
+              "type": "formula",
+              "text": "λ\\lambda"
+            },
+            {
+              "type": "formula",
+              "text": "ε→0\\varepsilon\\rightarrow 0"
+            },
+            {
+              "type": "formula",
+              "text": "T→∞T\\to\\infty"
+            },
+            {
+              "type": "table",
+              "text": "| | | | | | --- | --- | --- | --- | | | λ=1T​∑t=1Tln⁡|d​f​(x,μ)d​x|x=xt,\\displaystyle\\lambda=\\frac{1}{T}\\sum\\_{t=1}^{T}\\ln\\left|\\frac{df(x;\\mu)}{dx}\\right|\\_{x=x\\_{t}}, | | (20) |"
+            },
+            {
+              "type": "formula",
+              "text": "λ=1T​∑t=1Tln⁡|d​f​(x,μ)d​x|x=xt,\\displaystyle\\lambda=\\frac{1}{T}\\sum_{t=1}^{T}\\ln\\left|\\frac{df(x;\\mu)}{dx}\\right|_{x=x_{t}},"
+            },
+            {
+              "type": "paragraph",
+              "text": "by taking a sufficiently large TT. In this work, we take T=264T=264."
+            },
+            {
+              "type": "formula",
+              "text": "TT"
+            },
+            {
+              "type": "formula",
+              "text": "T=264T=264"
+            },
+            {
+              "type": "paragraph",
+              "text": "For the 2D case, we employ the QR decomposition method [Geist et al. 1990](https://ar5iv.labs.arxiv.org/html/2405.08484#bib.bib38); [McDonald and Higham 2001](https://ar5iv.labs.arxiv.org/html/2405.08484#bib.bib39) to compute the LE’s. Consider a map with two variables (xt,xt′)(x\\_{t},x^{\\prime}\\_{t}). The map 𝒇\\boldsymbol{f} (which has two components) can be generally written as xt+1=f1​(xt,xt′)x\\_{t+1}=f\\_{1}(x\\_{t},x^{\\prime}\\_{t}) and xt+1′=f2​(xt,xt′)x^{\\prime}\\_{t+1}=f\\_{2}(x\\_{t},x^{\\prime}\\_{t}). The Jacobi matrix at the discrete time tt is defined as"
+            },
+            {
+              "type": "formula",
+              "text": "(xt,xt′)(x_{t},x^{\\prime}_{t})"
+            },
+            {
+              "type": "formula",
+              "text": "𝒇\\boldsymbol{f}"
+            },
+            {
+              "type": "formula",
+              "text": "xt+1=f1​(xt,xt′)x_{t+1}=f_{1}(x_{t},x^{\\prime}_{t})"
+            },
+            {
+              "type": "formula",
+              "text": "xt+1′=f2​(xt,xt′)x^{\\prime}_{t+1}=f_{2}(x_{t},x^{\\prime}_{t})"
+            },
+            {
+              "type": "formula",
+              "text": "tt"
+            },
+            {
+              "type": "table",
+              "text": "| | | | | --- | --- | --- | | | 𝑱(t)=(∂f1​(x,x′)∂x∂f1​(x,x′)∂x′∂f2​(x,x′)∂x∂f2​(x,x′)∂x′)x=xt,x′=xt′.\\displaystyle\\boldsymbol{J}^{(t)}=\\left(\\begin{array}[]{cc}\\scalebox{1}{$\\dfrac{\\partial f\\_{1}(x,x^{\\prime})}{\\partial x}$}&\\scalebox{1}{$\\dfrac{\\partial f\\_{1}(x,x^{\\prime})}{\\partial x^{\\prime}}$}\\\\ \\scalebox{1}{$\\dfrac{\\partial f\\_{2}(x,x^{\\prime})}{\\partial x}$}&\\scalebox{1}{$\\dfrac{\\partial f\\_{2}(x,x^{\\prime})}{\\partial x^{\\prime}}$}\\end{array}\\right)\\_{x=x\\_{t},x^{\\prime}=x^{\\prime}\\_{t}}. | |"
+            },
+            {
+              "type": "formula",
+              "text": "𝑱(t)=(∂f1​(x,x′)∂x∂f1​(x,x′)∂x′∂f2​(x,x′)∂x∂f2​(x,x′)∂x′)x=xt,x′=xt′.\\displaystyle\\boldsymbol{J}^{(t)}=\\left(\\begin{array}[]{cc}\\scalebox{1}{$\\dfrac{\\partial f_{1}(x,x^{\\prime})}{\\partial x}$}&\\scalebox{1}{$\\dfrac{\\partial f_{1}(x,x^{\\prime})}{\\partial x^{\\prime}}$}\\\\ \\scalebox{1}{$\\dfrac{\\partial f_{2}(x,x^{\\prime})}{\\partial x}$}&\\scalebox{1}{$\\dfrac{\\partial f_{2}(x,x^{\\prime})}{\\partial x^{\\prime}}$}\\end{array}\\right)_{x=x_{t},x^{\\prime}=x^{\\prime}_{t}}."
+            },
+            {
+              "type": "paragraph",
+              "text": "The two LE’s can be calculates as"
+            },
+            {
+              "type": "table",
+              "text": "| | | | | | --- | --- | --- | --- | | | λk=1T​∑t=1Tln⁡|Rk,k(t)|,\\displaystyle\\lambda\\_{k}=\\frac{1}{T}\\sum\\_{t=1}^{T}\\ln\\left|R^{(t)}\\_{k,k}\\right|, | | (24) |"
+            },
+            {
+              "type": "formula",
+              "text": "λk=1T​∑t=1Tln⁡|Rk,k(t)|,\\displaystyle\\lambda_{k}=\\frac{1}{T}\\sum_{t=1}^{T}\\ln\\left|R^{(t)}_{k,k}\\right|,"
+            },
+            {
+              "type": "paragraph",
+              "text": "with k=1k=1 or 22, and the (2×2)(2\\times 2) matrix 𝑹(t)\\boldsymbol{R}^{(t)} obtained by implementing QR decomposition 𝑱(t)→𝑸(t)​𝑹(t)\\boldsymbol{J}^{(t)}\\to\\boldsymbol{Q}^{(t)}\\boldsymbol{R}^{(t)}. We still take T=264T=264 in our simulations, which is sufficiently large."
+            },
+            {
+              "type": "formula",
+              "text": "k=1k=1"
+            },
+            {
+              "type": "formula",
+              "text": "22"
+            },
+            {
+              "type": "formula",
+              "text": "(2×2)(2\\times 2)"
+            },
+            {
+              "type": "formula",
+              "text": "𝑹(t)\\boldsymbol{R}^{(t)}"
+            },
+            {
+              "type": "formula",
+              "text": "𝑱(t)→𝑸(t)​𝑹(t)\\boldsymbol{J}^{(t)}\\to\\boldsymbol{Q}^{(t)}\\boldsymbol{R}^{(t)}"
+            },
+            {
+              "type": "formula",
+              "text": "T=264T=264"
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "Appendix D Peak signal-to-noise ratios",
+          "level": 2,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "Peak signal-to-noise ratios (PSNR) rPr\\_{\\text{P}} [Kotevski and Mitrevski 2010](https://ar5iv.labs.arxiv.org/html/2405.08484#bib.bib29) is a measure of the similarity between two images (2D data), which is applied to assess the quality on denoising and compression. Considering two images 𝑰\\boldsymbol{I} and 𝑰′\\boldsymbol{I}^{\\prime}, the rPr\\_{\\text{P}} with decibel (dB) as the unit is defined as"
+            },
+            {
+              "type": "formula",
+              "text": "rPr_{\\text{P}}"
+            },
+            {
+              "type": "formula",
+              "text": "𝑰\\boldsymbol{I}"
+            },
+            {
+              "type": "formula",
+              "text": "𝑰′\\boldsymbol{I}^{\\prime}"
+            },
+            {
+              "type": "formula",
+              "text": "rPr_{\\text{P}}"
+            },
+            {
+              "type": "table",
+              "text": "| | | | | | --- | --- | --- | --- | | | rP=10×lg⁡(25521W​L​∑w=1W∑l=1L(Iw​l−I′w​l)2),\\displaystyle r\\_{\\text{P}}=10\\times\\lg\\left(\\frac{{255}^{2}}{\\frac{1}{WL}\\sum\\_{w=1}^{W}\\sum\\_{l=1}^{L}(I\\_{wl}-{I^{\\prime}}\\_{wl})^{2}}\\right), | | (25) |"
+            },
+            {
+              "type": "formula",
+              "text": "rP=10×lg⁡(25521W​L​∑w=1W∑l=1L(Iw​l−I′w​l)2),\\displaystyle r_{\\text{P}}=10\\times\\lg\\left(\\frac{{255}^{2}}{\\frac{1}{WL}\\sum_{w=1}^{W}\\sum_{l=1}^{L}(I_{wl}-{I^{\\prime}}_{wl})^{2}}\\right),"
+            },
+            {
+              "type": "paragraph",
+              "text": "where WW and LL are width and length of the images, and 255 is the maximum value of a pixel. In this paper, rPr\\_{\\text{P}} is computed with the grey-scale images read as 8-bit data. Taking image compression as an example, a PSNR for about rP≃40r\\_{\\text{P}}\\simeq 40 dB or larger usually indicates a well-performed compression [Kotevski and Mitrevski 2010](https://ar5iv.labs.arxiv.org/html/2405.08484#bib.bib29). The larger the rPr\\_{\\text{P}} is, the closer the two images are to each other."
+            },
+            {
+              "type": "formula",
+              "text": "WW"
+            },
+            {
+              "type": "formula",
+              "text": "LL"
+            },
+            {
+              "type": "formula",
+              "text": "rPr_{\\text{P}}"
+            },
+            {
+              "type": "formula",
+              "text": "rP≃40r_{\\text{P}}\\simeq 40"
+            },
+            {
+              "type": "formula",
+              "text": "rPr_{\\text{P}}"
+            },
+            {
+              "type": "paragraph",
+              "text": "In this work, each data point in a bifurcation diagram [see Fig. 2(a) of the main text] is obtained by iterating the map (the Logistic map or those of the ML models) for more than 200 times (which is sufficiently large), starting from a random state. We take 500 random states for each value of μ\\mu, which are taken differently from those of the training samples. The dense of the data points is indicated by the darkness of the colors. PSNR is used to characterize the similarity between two bifurcation diagrams."
+            },
+            {
+              "type": "formula",
+              "text": "μ\\mu"
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "Appendix E Additional results and hyper-parameters",
+          "level": 2,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "Table [A1](https://ar5iv.labs.arxiv.org/html/2405.08484#A5.T1 \"Table A1 ‣ Appendix E Additional results and hyper-parameters ‣ Universal replication of chaotic characteristics by classical and quantum machine learning\") show the RMSE of LE LLEL\\_{\\text{LE}} by LSTM and ADQC on the 1D and 2D Logistic maps. Three observations can be made:"
+            },
+            {
+              "type": "formula",
+              "text": "LLEL_{\\text{LE}}"
+            },
+            {
+              "type": "list",
+              "text": "1. 1. LLEL\\_{\\text{LE}} can be significantly reduced for both LSTM and ADQC by introducing the μ\\mu-tuned pre-processing map; 2. 2. Similar LLEL\\_{\\text{LE}} is achieved with the training and testing sets, indicating sufficient generalization ability on dealing with the unlearned data; 3. 3. With the μ\\mu-tuned preprocessing, ADQC achieves much lower LLEL\\_{\\text{LE}} than LSTM, implying that ADQC better mitigating the over-fitting issue than LSTM. This is also consistent with the results reported in the main text (Fig. 4)."
+            },
+            {
+              "type": "paragraph",
+              "text": "LLEL\\_{\\text{LE}} can be significantly reduced for both LSTM and ADQC by introducing the μ\\mu-tuned pre-processing map;"
+            },
+            {
+              "type": "formula",
+              "text": "LLEL_{\\text{LE}}"
+            },
+            {
+              "type": "formula",
+              "text": "μ\\mu"
+            },
+            {
+              "type": "paragraph",
+              "text": "Similar LLEL\\_{\\text{LE}} is achieved with the training and testing sets, indicating sufficient generalization ability on dealing with the unlearned data;"
+            },
+            {
+              "type": "formula",
+              "text": "LLEL_{\\text{LE}}"
+            },
+            {
+              "type": "paragraph",
+              "text": "With the μ\\mu-tuned preprocessing, ADQC achieves much lower LLEL\\_{\\text{LE}} than LSTM, implying that ADQC better mitigating the over-fitting issue than LSTM. This is also consistent with the results reported in the main text (Fig. 4)."
+            },
+            {
+              "type": "formula",
+              "text": "μ\\mu"
+            },
+            {
+              "type": "formula",
+              "text": "LLEL_{\\text{LE}}"
+            },
+            {
+              "type": "formula",
+              "text": "LLEL_{\\text{LE}}"
+            },
+            {
+              "type": "formula",
+              "text": "μ\\mu"
+            },
+            {
+              "type": "formula",
+              "text": "μ\\mu"
+            },
+            {
+              "type": "formula",
+              "text": "μ\\mu"
+            },
+            {
+              "type": "formula",
+              "text": "LLEL_{\\text{LE}}"
+            },
+            {
+              "type": "table",
+              "text": "| | | | | | | | --- | --- | --- | --- | --- | --- | | LLEL\\_{\\text{LE}} | | LSTM | LSTM (μ\\mu) | ADQC | ADQC (μ\\mu) | | 1D | Training | 0.8278 | 0.4845 | 1.1486 | 0.2688 | | std | 0.3193 | 0.1280 | 0.0471 | 0.0510 | | Testing | 0.8273 | 0.4837 | 1.1486 | 0.2686 | | std | 0.3190 | 0.1281 | 0.0471 | 0.0512 | | 2D | Training | 0.8050 | 0.2333 | 1.2195 | 0.1588 | | std | 0.2320 | 0.0610 | 0.1389 | 0.0584 | | Testing | 0.8048 | 0.2332 | 1.2189 | 0.1582 | | std | 0.2317 | 0.0606 | 0.1388 | 0.0583 |"
+            },
+            {
+              "type": "formula",
+              "text": "LLEL_{\\text{LE}}"
+            },
+            {
+              "type": "formula",
+              "text": "μ\\mu"
+            },
+            {
+              "type": "formula",
+              "text": "μ\\mu"
+            },
+            {
+              "type": "paragraph",
+              "text": "If not specified, the settings of hyper-parameters of LSTM and ADQC used in this work are given in Table [A2](https://ar5iv.labs.arxiv.org/html/2405.08484#A5.T2 \"Table A2 ‣ Appendix E Additional results and hyper-parameters ‣ Universal replication of chaotic characteristics by classical and quantum machine learning\")."
+            },
+            {
+              "type": "formula",
+              "text": "dind_{\\text{in}}"
+            },
+            {
+              "type": "formula",
+              "text": "doutd_{\\text{out}}"
+            },
+            {
+              "type": "formula",
+              "text": "LSQL_{\\text{SQ}}"
+            },
+            {
+              "type": "formula",
+              "text": "NLN_{\\text{L}}"
+            },
+            {
+              "type": "formula",
+              "text": "DhD_{\\text{h}}"
+            },
+            {
+              "type": "formula",
+              "text": "μ\\mu"
+            },
+            {
+              "type": "table",
+              "text": "| 1D | LSTM | din=1,dout=1,LSQ=8,NL=1,Dh=8d\\_{\\text{in}}=1,\\ \\ d\\_{\\text{out}}=1,\\ \\ L\\_{\\text{SQ}}=8,\\ \\ N\\_{\\text{L}}=1,\\ \\ D\\_{\\text{h}}=8 | | --- | --- | --- | | LSTM (μ\\mu) | din=3,dout=1,LSQ=8,NL=1,Dh=8d\\_{\\text{in}}=3,\\ \\ d\\_{\\text{out}}=1,\\ \\ L\\_{\\text{SQ}}=8,\\ \\ N\\_{\\text{L}}=1,\\ \\ D\\_{\\text{h}}=8 | | ADQC | d=3,M=8,NL=4d=3,\\ \\ M=8,\\ \\ N\\_{\\text{L}}=4 | | 2D | LSTM | din=2,dout=2,LSQ=4,NL=1,Dh=8d\\_{\\text{in}}=2,\\ \\ d\\_{\\text{out}}=2,\\ \\ L\\_{\\text{SQ}}=4,\\ \\ N\\_{\\text{L}}=1,\\ \\ D\\_{\\text{h}}=8 | | LSTM (μ\\mu) | din=3,dout=2,LSQ=8,NL=1,Dh=8d\\_{\\text{in}}=3,\\ \\ d\\_{\\text{out}}=2,\\ \\ L\\_{\\text{SQ}}=8,\\ \\ N\\_{\\text{L}}=1,\\ \\ D\\_{\\text{h}}=8 | | ADQC | d=3,M=8,NL=4d=3,\\ \\ M=8,\\ \\ N\\_{\\text{L}}=4 |"
+            },
+            {
+              "type": "formula",
+              "text": "din=1,dout=1,LSQ=8,NL=1,Dh=8d_{\\text{in}}=1,\\ \\ d_{\\text{out}}=1,\\ \\ L_{\\text{SQ}}=8,\\ \\ N_{\\text{L}}=1,\\ \\ D_{\\text{h}}=8"
+            },
+            {
+              "type": "formula",
+              "text": "μ\\mu"
+            },
+            {
+              "type": "formula",
+              "text": "din=3,dout=1,LSQ=8,NL=1,Dh=8d_{\\text{in}}=3,\\ \\ d_{\\text{out}}=1,\\ \\ L_{\\text{SQ}}=8,\\ \\ N_{\\text{L}}=1,\\ \\ D_{\\text{h}}=8"
+            },
+            {
+              "type": "formula",
+              "text": "d=3,M=8,NL=4d=3,\\ \\ M=8,\\ \\ N_{\\text{L}}=4"
+            },
+            {
+              "type": "formula",
+              "text": "din=2,dout=2,LSQ=4,NL=1,Dh=8d_{\\text{in}}=2,\\ \\ d_{\\text{out}}=2,\\ \\ L_{\\text{SQ}}=4,\\ \\ N_{\\text{L}}=1,\\ \\ D_{\\text{h}}=8"
+            },
+            {
+              "type": "formula",
+              "text": "μ\\mu"
+            },
+            {
+              "type": "formula",
+              "text": "din=3,dout=2,LSQ=8,NL=1,Dh=8d_{\\text{in}}=3,\\ \\ d_{\\text{out}}=2,\\ \\ L_{\\text{SQ}}=8,\\ \\ N_{\\text{L}}=1,\\ \\ D_{\\text{h}}=8"
+            },
+            {
+              "type": "formula",
+              "text": "d=3,M=8,NL=4d=3,\\ \\ M=8,\\ \\ N_{\\text{L}}=4"
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "References",
+          "level": 2,
+          "content": [
+            {
+              "type": "list",
+              "text": "* Kantz and Schreiber (2004) H. Kantz and T. Schreiber, *Nonlinear time series analysis*, Vol. 7 (Cambridge university press, 2004). * Strogatz (2018) S. H. Strogatz, *Nonlinear dynamics and chaos with student solutions manual: With applications to physics, biology, chemistry, and engineering* (CRC press, 2018). * May (1976) R. M. May, Simple mathematical models with very complicated dynamics, [Nature 261, 459 (1976)](https://doi.org/10.1038/261459a0). * Lorenz (1963) E. N. Lorenz, Deterministic nonperiodic flow, [Journal of Atmospheric Sciences 20, 130 (1963)](https://doi.org/10.1175/1520-0469(1963)020%3C0130:DNF%3E2.0.CO;2). * Hochreiter and Schmidhuber (1997) S. Hochreiter and J. Schmidhuber, Long short-term memory, [Neural Computation 9, 1735 (1997)](https://doi.org/10.1162/neco.1997.9.8.1735). * Yu *et al.* (2019) Y. Yu, X. Si, C. Hu, and J. Zhang, A Review of Recurrent Neural Networks: LSTM Cells and Network Architectures, [Neural Computation 31, 1235 (2019)](https://doi.org/10.1162/neco_a_01199). * Vaswani *et al.* (2017) A. Vaswani, N. Shazeer, N. Parmar, J. Uszkoreit, L. Jones, A. N. Gomez, L. u. Kaiser, and I. Polosukhin, Attention is all you need, in *Advances in Neural Information Processing Systems*, Vol. 30, edited by I. Guyon, U. V. Luxburg, S. Bengio, H. Wallach, R. Fergus, S. Vishwanathan, and R. Garnett (Curran Associates, Inc., 2017). * He and Droppo (2016) T. He and J. Droppo, Exploiting lstm structure in deep neural networks for speech recognition, in *2016 IEEE international conference on acoustics, speech and signal processing (ICASSP)* (IEEE, 2016) pp. 5445–5449. * Bhaskar and M. (2023) S. Bhaskar and T. T. M., Lstm model for visual speech recognition through facial expressions, [Multimedia Tools and Applications 82, 5455 (2023)](https://doi.org/10.1007/s11042-022-12796-1). * Bi *et al.* (2023) K. Bi, L. Xie, H. Zhang, X. Chen, X. Gu, and Q. Tian, Accurate medium-range global weather forecasting with 3d neural networks, [Nature 619, 533 (2023)](https://doi.org/10.1038/s41586-023-06185-3). * Chen *et al.* (2023) L. Chen, X. Zhong, F. Zhang, Y. Cheng, Y. Xu, Y. Qi, and H. Li, Fuxi: a cascade machine learning forecasting system for 15-day global weather forecast, [npj Climate and Atmospheric Science 6, 190 (2023)](https://doi.org/10.1038/s41612-023-00512-1). * Pathak *et al.* (2018) J. Pathak, B. Hunt, M. Girvan, Z. Lu, and E. Ott, Model-free prediction of large spatiotemporally chaotic systems from data: A reservoir computing approach, [Phys. Rev. Lett. 120, 024102 (2018)](https://doi.org/10.1103/PhysRevLett.120.024102). * Herzog *et al.* (2019) S. Herzog, F. Wörgötter, and U. Parlitz, Convolutional autoencoder and conditional random fields hybrid for predicting spatial-temporal chaos, [Chaos 29, 123116 (2019)](https://doi.org/10.1063/1.5124926). * Borra *et al.* (2020) F. Borra, A. Vulpiani, and M. Cencini, Effective models and predictability of chaotic multiscale systems via machine learning, [Phys. Rev. E 102, 052203 (2020)](https://doi.org/10.1103/PhysRevE.102.052203). * Pathak *et al.* (2017) J. Pathak, Z. Lu, B. R. Hunt, M. Girvan, and E. Ott, Using machine learning to replicate chaotic attractors and calculate Lyapunov exponents from data, [Chaos 27, 121102 (2017)](https://doi.org/10.1063/1.5010300). * Lu *et al.* (2018) Z. Lu, B. R. Hunt, and E. Ott, Attractor reconstruction by machine learning, [Chaos 28, 061104 (2018)](https://doi.org/10.1063/1.5039508). * Antonik *et al.* (2018) P. Antonik, M. Gulina, J. Pauwels, and S. Massar, Using a reservoir computer to learn chaotic attractors, with applications to chaos synchronization and cryptography, [Phys. Rev. E 98, 012215 (2018)](https://doi.org/10.1103/PhysRevE.98.012215). * Fan *et al.* (2020) H. Fan, J. Jiang, C. Zhang, X. Wang, and Y.-C. Lai, Long-term prediction of chaotic systems with machine learning, [Phys. Rev. Res. 2, 012080 (2020)](https://doi.org/10.1103/PhysRevResearch.2.012080). * Sun *et al.* (2023) Y. Sun, L. Zhang, and M. Yao, Chaotic time series prediction of nonlinear systems based on various neural network models, [Chaos, Solitons & Fractals 175, 113971 (2023)](https://doi.org/10.1016/j.chaos.2023.113971). * Peruzzo *et al.* (2014) A. Peruzzo, J. McClean, P. Shadbolt, M.-H. Yung, X.-Q. Zhou, P. J. Love, A. Aspuru-Guzik, and J. L. O’Brien, A variational eigenvalue solver on a photonic quantum processor, [Nature Communications 5, 4213 (2014)](https://doi.org/10.1038/ncomms5213). * Cerezo *et al.* (2021) M. Cerezo, A. Arrasmith, R. Babbush, S. C. Benjamin, S. Endo, K. Fujii, J. R. McClean, K. Mitarai, X. Yuan, L. Cincio, and P. J. Coles, Variational quantum algorithms, [Nature Reviews Physics 3, 625 (2021)](https://doi.org/10.1038/s42254-021-00348-9). * Zhou *et al.* (2021) P.-F. Zhou, R. Hong, and S.-J. Ran, Automatically differentiable quantum circuit for many-qubit state preparation, [Phys. Rev. A 104, 042601 (2021)](https://doi.org/10.1103/PhysRevA.104.042601). * Yuan *et al.* (1983) J.-M. Yuan, M. Tung, D. H. Feng, and L. M. Narducci, Instability and irregular behavior of coupled logistic equations, [Phys. Rev. A 28, 1662 (1983)](https://doi.org/10.1103/PhysRevA.28.1662). * Ferretti and Rahman (1988) A. Ferretti and N. Rahman, A study of coupled logistic map and its applications in chemical physics, [Chemical Physics 119, 275 (1988)](https://doi.org/https://doi.org/10.1016/0301-0104(88)87190-8). * Lipton *et al.* (2015) Z. C. Lipton, J. Berkowitz, and C. Elkan, A critical review of recurrent neural networks for sequence learning (2015), [arXiv:1506.00019 [cs.LG]](https://arxiv.org/abs/1506.00019) . * Salehinejad *et al.* (2018) H. Salehinejad, S. Sankar, J. Barfett, E. Colak, and S. Valaee, Recent advances in recurrent neural networks (2018), [arXiv:1801.01078 [cs.NE]](https://arxiv.org/abs/1801.01078) . * Stoudenmire and Schwab (2016) E. Stoudenmire and D. J. Schwab, Supervised learning with tensor networks, in *Advances in Neural Information Processing Systems*, Vol. 29, edited by D. Lee, M. Sugiyama, U. Luxburg, I. Guyon, and R. Garnett (Curran Associates, Inc., 2016). * Andrecut (1998) M. Andrecut, Logistic map as a random number generator, [International Journal of Modern Physics B 12, 921 (1998)](https://doi.org/10.1142/S021797929800051X). * Kotevski and Mitrevski (2010) Z. Kotevski and P. Mitrevski, Experimental comparison of psnr and ssim metrics for video quality estimation, in *ICT Innovations 2009*, edited by D. Davcev and J. M. Gómez (Springer Berlin Heidelberg, Berlin, Heidelberg, 2010) pp. 357–366. * Parker and Chua (2012) T. S. Parker and L. Chua, *Practical numerical algorithms for chaotic systems* (Springer Science & Business Media, 2012). * Moon (2008) F. C. Moon, *Chaotic and fractal dynamics: introduction for applied scientists and engineers* (John Wiley & Sons, 2008). * Bezruchko and Smirnov (2010) B. Bezruchko and D. Smirnov, *Extracting Knowledge From Time Series: An Introduction to Nonlinear Empirical Modeling*, Springer Series in Synergetics (Springer Berlin Heidelberg, 2010) pp. 56–57. * Han *et al.* (2018) Z.-Y. Han, J. Wang, H. Fan, L. Wang, and P. Zhang, Unsupervised generative modeling using matrix product states, [Phys. Rev. X 8, 031012 (2018)](https://doi.org/10.1103/PhysRevX.8.031012). * Cheng *et al.* (2019) S. Cheng, L. Wang, T. Xiang, and P. Zhang, Tree tensor networks for generative modeling, [Phys. Rev. B 99, 155131 (2019)](https://doi.org/10.1103/PhysRevB.99.155131). * Gao *et al.* (2020) Z.-F. Gao, S. Cheng, R.-Q. He, Z. Y. Xie, H.-H. Zhao, Z.-Y. Lu, and T. Xiang, Compressing deep neural networks by matrix product operators, [Phys. Rev. Res. 2, 023300 (2020)](https://doi.org/10.1103/PhysRevResearch.2.023300). * Qing *et al.* (2023) Y. Qing, P.-F. Zhou, K. Li, and S.-J. Ran, Compressing neural network by tensor network with exponentially fewer variational parameters (2023), [arXiv:2305.06058 [cs.LG]](https://arxiv.org/abs/2305.06058) . * Gill *et al.* (2022) S. S. Gill, A. Kumar, H. Singh, M. Singh, K. Kaur, M. Usman, and R. Buyya, Quantum computing: A taxonomy, systematic review and future directions, [Software: Practice and Experience 52, 66 (2022)](https://doi.org/https://doi.org/10.1002/spe.3039). * Geist *et al.* (1990) K. Geist, U. Parlitz, and W. Lauterborn, Comparison of Different Methods for Computing Lyapunov Exponents, [Progress of Theoretical Physics 83, 875 (1990)](https://doi.org/10.1143/PTP.83.875). * McDonald and Higham (2001) E. J. McDonald and D. J. Higham, Error analysis of qr algorithms for computing lyapunov exponents, [ETNA - Electronic Transactions on Numerical Analysis 12, 234 (2001)](https://www.emis.de/journals/ETNA/vol.12.2001/pp234-251.dir/pp234-251.html)."
+            }
+          ],
+          "children": []
+        }
+      ]
+    }
+  ],
+  "chunks": [
+    {
+      "heading_path": [
+        "Universal replication of chaotic characteristics by classical and quantum machine learning"
+      ],
+      "text": "# Universal replication of chaotic characteristics by classical and quantum machine learning"
+    },
+    {
+      "heading_path": [
+        "Universal replication of chaotic characteristics by classical and quantum machine learning",
+        "Abstract"
+      ],
+      "text": "###### Abstract\n\nReplicating chaotic characteristics of non-linear dynamics by machine learning (ML) has recently drawn wide attentions. In this work, we propose that a ML model, trained to predict the state one-step-ahead from several latest historic states, can accurately replicate the bifurcation diagram and the Lyapunov exponents of discrete dynamic systems. The characteristics for different values of the hyper-parameters are captured universally by a single ML model, while the previous works considered training the ML model independently by fixing the hyper-parameters to be specific values. Our benchmarks on the one- and two-dimensional Logistic maps show that variational quantum circuit can reproduce the long-term characteristics with higher accuracy than the long short-term memory (a well-recognized classical ML model). Our work reveals an essential difference between the ML for the chaotic characteristics and that for standard tasks, from the perspective of the relation between performance and model complexity. Our results suggest that quantum circuit model exhibits potential advantages on mitigating over-fitting, achieving higher accuracy and stability.\n\nIntroduction.— To what extent can a machine learning (ML) model learn from the dynamical data of a chaotic system? Chaos refers to a seemingly disorderly but deterministic behavior of dynamic systems [Kantz and Schreiber 2004](https://ar5iv.labs.arxiv.org/html/2405.08484#bib.bib1); [Strogatz 2018](https://ar5iv.labs.arxiv.org/html/2405.08484#bib.bib2), which appears in a wide range of realistic scenarios that are deemed highly non-linear (such as population growth [May 1976](https://ar5iv.labs.arxiv.org/html/2405.08484#bib.bib3) and atmosphere [Lorenz 1963](https://ar5iv.labs.arxiv.org/html/2405.08484#bib.bib4)). A chaotic system possesses several exotic properties, including high sensitivity to the initial conditions and perturbations [Kantz and Schreiber 2004](https://ar5iv.labs.arxiv.org/html/2405.08484#bib.bib1); [Strogatz 2018](https://ar5iv.labs.arxiv.org/html/2405.08484#bib.bib2). This makes the time series prediction (TPS), particularly after a long-time evolution, almost infeasible.\n\nML has been demonstrated as a powerful approach for TPS. For instance, neural networks, such as the widely-recognized long short-term memory (LSTM) [Hochreiter and Schmidhuber 1997](https://ar5iv.labs.arxiv.org/html/2405.08484#bib.bib5); [Yu et al. 2019](https://ar5iv.labs.arxiv.org/html/2405.08484#bib.bib6) and the transformer models developed most recently [Vaswani et al. 2017](https://ar5iv.labs.arxiv.org/html/2405.08484#bib.bib7), exhibit excellent performances in, e.g., weather forecasting [Bi et al. 2023](https://ar5iv.labs.arxiv.org/html/2405.08484#bib.bib10); [Chen et al. 2023](https://ar5iv.labs.arxiv.org/html/2405.08484#bib.bib11). The ML-based TSP for chaotic systems involve two key issues: (i) short-term prediction of the system’s states [Pathak et al. 2018](https://ar5iv.labs.arxiv.org/html/2405.08484#bib.bib12); [Herzog et al. 2019](https://ar5iv.labs.arxiv.org/html/2405.08484#bib.bib13); [Borra et al. 2020](https://ar5iv.labs.arxiv.org/html/2405.08484#bib.bib14), and (ii) long-term prediction/replication of the statistical/ergodic dynamical behaviors [Pathak et al. 2017](https://ar5iv.labs.arxiv.org/html/2405.08484#bib.bib15); [Lu et al. 2018](https://ar5iv.labs.arxiv.org/html/2405.08484#bib.bib16); [Antonik et al. 2018](https://ar5iv.labs.arxiv.org/html/2405.08484#bib.bib17); [Fan et al. 2020](https://ar5iv.labs.arxiv.org/html/2405.08484#bib.bib18); [Sun et al. 2023](https://ar5iv.labs.arxiv.org/html/2405.08484#bib.bib19). Focusing on the second issue, the previous works mainly attempted to replicate by fixing the hyper-parameters of the dynamical system to be specific values (see, e.g., Refs. [Pathak et al. 2017](https://ar5iv.labs.arxiv.org/html/2405.08484#bib.bib15); [Lu et al. 2018](https://ar5iv.labs.arxiv.org/html/2405.08484#bib.bib16); [Antonik et al. 2018](https://ar5iv.labs.arxiv.org/html/2405.08484#bib.bib17)). It is of greater challenge and importance to use a single ML model for universally capturing the characteristics with the hyper-parameters varying in a non-trivial range, which remains an open issue.\n\nμ\\mu\n\nIn this work, we show that a ML model, which is trained to predict the state one-step-ahead from MM latest historic states, can replicate the long-term chaotic characteristics of discrete dynamical systems. We utilize both classical and quantum ML models, namely LSTM [Hochreiter and Schmidhuber 1997](https://ar5iv.labs.arxiv.org/html/2405.08484#bib.bib5); [Yu et al. 2019](https://ar5iv.labs.arxiv.org/html/2405.08484#bib.bib6) and variational quantum circuit [Peruzzo et al. 2014](https://ar5iv.labs.arxiv.org/html/2405.08484#bib.bib20); [Cerezo et al. 2021](https://ar5iv.labs.arxiv.org/html/2405.08484#bib.bib21) (specifically automatically-differentiable quantum circuit [Zhou et al. 2021](https://ar5iv.labs.arxiv.org/html/2405.08484#bib.bib22), ADQC in short), to learn the one- and two-dimensional Logistic maps [May 1976](https://ar5iv.labs.arxiv.org/html/2405.08484#bib.bib3); [Yuan et al. 1983](https://ar5iv.labs.arxiv.org/html/2405.08484#bib.bib23); [Ferretti and Rahman 1988](https://ar5iv.labs.arxiv.org/html/2405.08484#bib.bib24). The long-term characteristics, including bifurcation diagram and Lyapunov exponents, are simulated by iterating the ML map for sufficiently many steps. These characteristics, for which the hyper-parameter of the Logistic map varies from stable to chaotic regions, are well replicated by a single ML model.\n\nMM\n\nOur results suggest that enhancing the model complexity generally shows no beneficial effects on improving the accuracy of replicating the long-term characteristics due to the high sensitivity to over-fitting. ADQC achieves remarkably higher accuracy and stability than LSTM, particularly for replicating the Lyapunov exponents. These results demonstrate the validity and potential advantage of quantum circuit models on mitigating over-fitting in replicating chaotic characteristics.\n\nClassical and quantum machine learning for time series prediction.— A dynamical system can be generally written as a map xt+1=f⁡(xt)x\\_{t+1}=f(x\\_{t}), with xtx\\_{t} called the state of system at the (discrete) time tt. Here, we take the 1D Logistic chaotic map as an example, which is a fundamental nonlinear dynamical system (see the top-left panel of Fig. [1](https://ar5iv.labs.arxiv.org/html/2405.08484#S0.F1 \"Figure 1 ‣ Universal replication of chaotic characteristics by classical and quantum machine learning\")), with wide applications in understanding chaotic phenomena and generating random numbers [May 1976](https://ar5iv.labs.arxiv.org/html/2405.08484#bib.bib3). The map satisfies\n\nxt+1=f⁡(xt)x_{t+1}=f(x_{t})\n\nxtx_{t}\n\ntt\n\n| | | | | | --- | --- | --- | --- | | | f⁡(xt,μ)=μ​xt​(1−xt),\\displaystyle f(x\\_{t};\\mu)=\\mu x\\_{t}(1-x\\_{t}), | | (1) |\n\nf⁡(xt,μ)=μ​xt​(1−xt),\\displaystyle f(x_{t};\\mu)=\\mu x_{t}(1-x_{t}),\n\nwith 0≤μ≤40\\leq\\mu\\leq 4 the hyper-parameter.\n\n0≤μ≤40\\leq\\mu\\leq 4\n\nA ML model is also essentially a map. Considering the prediction of the state one-step-ahead from the latest MM historic states, the ML map can be formally written as\n\nMM\n\n| | | | | | --- | --- | --- | --- | | | y~=F⁡(x1,x2,…,xM,𝑾),\\tilde{y}=F(x\\_{1},x\\_{2},...,x\\_{M};\\boldsymbol{W}), | | (2) |\n\ny~=F⁡(x1,x2,…,xM,𝑾),\\tilde{y}=F(x_{1},x_{2},...,x_{M};\\boldsymbol{W}),\n\nwith 𝑾\\boldsymbol{W} denoting all the variational parameters of the ML model. The time series generated by the dynamical system ff is used to train the ML model. Accordingly, a ML sample is a piece of the time series with the data of MM states, and the label of this sample is the ground truth of the state one-step-ahead given by ff, i.e., y=f⁡(xM)=xM+1y=f(x\\_{M})=x\\_{M+1}. A state in a sample is also called a feature in the language of ML.\n\n𝑾\\boldsymbol{W}\n\nff\n\nMM\n\nff\n\ny=f⁡(xM)=xM+1y=f(x_{M})=x_{M+1}\n\nA ML model can be trained by minimizing the prediction error on the so-called training samples. We discretize the hyper-parameter μ\\mu into 50 different values in the range of 2<μ≤42<\\mu\\leq 4. For each value of μ\\mu, we generate 2000 samples as the training set, where each sample is obtained by iteratively implementing the dynamical map on a random state for (M−1)(M-1) times. The variational parameters are optimized by minimizing the root mean-square error (RMSE)\n\nμ\\mu\n\n2<μ≤42<\\mu\\leq 4\n\nμ\\mu\n\n(M−1)(M-1)\n\n| | | | | | --- | --- | --- | --- | | | L=1N​∑n(y~[n]−y[n])2,\\displaystyle L=\\sqrt{\\frac{1}{N}\\sum\\_{n}{(\\tilde{y}^{[n]}-y^{[n]})}^{2},} | | (3) |\n\nL=1N​∑n(y~[n]−y[n])2,\\displaystyle L=\\sqrt{\\frac{1}{N}\\sum_{n}{(\\tilde{y}^{[n]}-y^{[n]})}^{2},}\n\nwhere y~[n]\\tilde{y}^{[n]} denotes the prediction of the ML model for the nn-th sample, y[n]y^{[n]} denotes the ground truth (the label of this sample), and the summation over nn goes through the whole training set. The gradient descent method is used to update variational parameters as 𝑾→𝑾−η​∂L∂𝑾\\boldsymbol{W}\\to\\boldsymbol{W}-\\eta\\frac{\\partial L}{\\partial\\boldsymbol{W}} with η\\eta a small positive constant known as the gradient step or learning rate.\n\ny~[n]\\tilde{y}^{[n]}\n\nnn\n\ny[n]y^{[n]}\n\nnn\n\n𝑾→𝑾−η​∂L∂𝑾\\boldsymbol{W}\\to\\boldsymbol{W}-\\eta\\frac{\\partial L}{\\partial\\boldsymbol{W}}\n\nη\\eta\n\nWe here consider LSTM and ADQC for ML. LSTM is a recognized classical ML model for TSP. It belongs to the variants of recursive neural networks [Lipton et al. 2015](https://ar5iv.labs.arxiv.org/html/2405.08484#bib.bib25); [Salehinejad et al. 2018](https://ar5iv.labs.arxiv.org/html/2405.08484#bib.bib26) and addresses the issues of vanishing and exploding gradients by introducing the so-called gate functions. ADQC belongs to the variational quantum circuits. Its main advantage is a universal parameterization way of the quantum gates, so that one does not need to specify the types (rotation, phase-shift, controlled-NOT, etc.) of gates but just design the structure of the circuit. We use the brick-wall structure as illustrated in bottom-left panel of Fig. [1](https://ar5iv.labs.arxiv.org/html/2405.08484#S0.F1 \"Figure 1 ‣ Universal replication of chaotic characteristics by classical and quantum machine learning\"). The prediction is obtained by measuring the last qubit of the quantum state after implementing the ADQC.\n\nFor universally replicating the characteristics of the dynamical system with varying hyper-parameter [say μ\\mu in Eq. ([1](https://ar5iv.labs.arxiv.org/html/2405.08484#S0.E1 \"In Universal replication of chaotic characteristics by classical and quantum machine learning\"))] using a single ML model, we propose to introduce a μ\\mu-tuned trainable pre-processing on the samples before inputting them to the ML model. Our idea is to map each feature (which is a scalar) to vector by a μ\\mu-tuned trainable map, say xt[n]→𝒗[n,t]=(v1[n,t],v2[n,t],⋯,vd[n,t])x^{[n]}\\_{t}\\to\\boldsymbol{v}^{[n,t]}=(v^{[n,t]}\\_{1},v^{[n,t]}\\_{2},\\cdots,v^{[n,t]}\\_{d}), with xt[n]x^{[n]}\\_{t} the tt-th feature of the nn-th sample and d=dim(𝒗[n,t])d=\\dim(\\boldsymbol{v}^{[n,t]}) a preset dimension. In this way, a sample is mapped to a set of vectors. Note that both LSTM and ADQC can take a set of vectors as input.\n\nμ\\mu\n\nμ\\mu\n\nμ\\mu\n\nxt[n]→𝒗[n,t]=(v1[n,t],v2[n,t],⋯,vd[n,t])x^{[n]}_{t}\\to\\boldsymbol{v}^{[n,t]}=(v^{[n,t]}_{1},v^{[n,t]}_{2},\\cdots,v^{[n,t]}_{d})\n\nxt[n]x^{[n]}_{t}\n\ntt\n\nnn\n\nd=dim(𝒗[n,t])d=\\dim(\\boldsymbol{v}^{[n,t]})\n\nThe pre-processing map also depends on some variational parameters that will be optimized in the training stage. We here define the pre-processing map as\n\n| | | | | | --- | --- | --- | --- | | | vk[n,t]=∑i,jξi​(xt[n],θ)​ξj​(μ[n],θ)​Ti​j​k.\\displaystyle v^{[n,t]}\\_{k}=\\sum\\_{i,j}\\xi\\_{i}(x^{[n]}\\_{t};\\theta)\\xi\\_{j}(\\mu^{[n]};\\theta)T\\_{ijk}. | | (4) |\n\nvk[n,t]=∑i,jξi​(xt[n],θ)​ξj​(μ[n],θ)​Ti​j​k.\\displaystyle v^{[n,t]}_{k}=\\sum_{i,j}\\xi_{i}(x^{[n]}_{t};\\theta)\\xi_{j}(\\mu^{[n]};\\theta)T_{ijk}.\n\nThe (d×d×d)(d\\times d\\times d)-dimensional tensor 𝑻\\boldsymbol{T} will be optimized when training the ML model. The vectors 𝝃⁡(xt[n],θ)\\boldsymbol{\\xi}(x^{[n]}\\_{t};\\theta) and 𝝃⁡(μ[n],θ)\\boldsymbol{\\xi}(\\mu^{[n]};\\theta), which are both dd-dimensional, are obtained by the following map that transforms a scalar to a normalized vector [Stoudenmire and Schwab 2016](https://ar5iv.labs.arxiv.org/html/2405.08484#bib.bib27). For a given scalar (say aa), the jj-th elements of the resulting vector 𝝃⁡(a,θ)\\boldsymbol{\\xi}(a;\\theta) satisfies\n\n(d×d×d)(d\\times d\\times d)\n\n𝑻\\boldsymbol{T}\n\n𝝃⁡(xt[n],θ)\\boldsymbol{\\xi}(x^{[n]}_{t};\\theta)\n\n𝝃⁡(μ[n],θ)\\boldsymbol{\\xi}(\\mu^{[n]};\\theta)\n\ndd\n\naa\n\njj\n\n𝝃⁡(a,θ)\\boldsymbol{\\xi}(a;\\theta)\n\n| | | | | | --- | --- | --- | --- | | | ξj(a;θ)=(d−1j−1)cos(θ​π2a)d−jsin(θ​π2a)j−1.\\xi\\_{j}(a;\\theta)=\\sqrt{\\binom{d-1}{j-1}}\\cos\\left(\\frac{\\theta\\pi}{2}a\\right)^{d-j}\\sin\\left(\\frac{\\theta\\pi}{2}a\\right)^{j-1}. | | (5) |\n\nThe parameter θ\\theta will also be optimized (independently on μ\\mu and samples) in the training stage. Note since the training samples are obtained from the dynamics taking different values of μ\\mu, one should take μ[n]{\\mu}^{[n]} in Eq. ([4](https://ar5iv.labs.arxiv.org/html/2405.08484#S0.E4 \"In Universal replication of chaotic characteristics by classical and quantum machine learning\")) to be the corresponding value of μ\\mu for the nn-th sample.\n\nθ\\theta\n\nμ\\mu\n\nμ\\mu\n\nμ[n]{\\mu}^{[n]}\n\nμ\\mu\n\nnn\n\nThe pre-processing map can be generalized to the dynamical system that contains multiple variables and hyper-parameters. We can always use Eq. ([5](https://ar5iv.labs.arxiv.org/html/2405.08484#S0.E5 \"In Universal replication of chaotic characteristics by classical and quantum machine learning\")) and map these variables (hyper-parameters) to multiple dd-dimensional vectors. More details about the dataset and ML models, including pre-processing, forward and backward propagations, prediction, and settings of hyper-parameters can be found in the Appendices.\n\ndd\n\nεR\\varepsilon_{R}\n\ntt\n\nμ=2.2,3.2,3.4\\mu=2.2,3.2,3.4\n\n3.923.92\n\nεR\\varepsilon_{R}\n\nμ=3.92\\mu=3.92\n\nη=0.44\\eta=0.44\n\nη\\eta\n\nμ\\mu\n\nNumerical results and discussions.— Fig. [2](https://ar5iv.labs.arxiv.org/html/2405.08484#S0.F2 \"Figure 2 ‣ Universal replication of chaotic characteristics by classical and quantum machine learning\") demonstrates the ability of LSTM and ADQC on the prediction of the states with different values of μ\\mu. In (a), we show the bifurcation diagrams obtained by ADQC and LSTM, which are consistent with the one given by the Logistic map (see the inset). Each data point in the diagrams is obtained by iterating the map (the Logistic map or those of the ML models) for more than 200 times (which is sufficiently large), starting from a random state. We take 500 random states for each value of μ\\mu, which are taken differently from those of the training samples. The dense of the data points is indicated by the darkness of the colors. Note we define the samples generated by these initial states as the testing set. Since these samples are not used to train the ML model, the testing set is used reveals the so-called generalization ability, which refers to the power of the ML model on dealing with the unlearned samples.\n\nμ\\mu\n\nμ\\mu\n\nThe similarity between two bifurcation diagrams can be characterized by the peak signal-to-noise ratios (PSNR) rPr\\_{\\text{P}}, which is widely used in the field of computer vision to characterize the similarity between two images [Kotevski and Mitrevski 2010](https://ar5iv.labs.arxiv.org/html/2405.08484#bib.bib29). We have rP=43.40r\\_{\\text{P}}=43.40 and 43.5843.58 by comparing the ground-truth diagram by Logistic map with the ones by LSTM and ADQC, respectively. Such a consistency between the bifurcation diagrams does not require to accurately predict the states, but requires the validity of accurately replicating the distribution of the states after long-term evolutions.\n\nrPr_{\\text{P}}\n\nrP=43.40r_{\\text{P}}=43.40\n\n43.5843.58\n\nIn Fig. [2](https://ar5iv.labs.arxiv.org/html/2405.08484#S0.F2 \"Figure 2 ‣ Universal replication of chaotic characteristics by classical and quantum machine learning\")(b), we show the relative error εR=1N​∑n=1N|(y~[n]−y[n])/y[n]|\\varepsilon\\_{\\text{R}}=\\frac{1}{N}\\sum\\_{n=1}^{N}\\left|(\\tilde{y}^{[n]}-y^{[n]})/y^{[n]}\\right| by ADQC versus the discrete time tt for different values of μ\\mu. Note the ML models are always trained to predict the state one-step-ahead. The summation in εR\\varepsilon\\_{\\text{R}} is over the testing test. Different values of μ\\mu are taken so that the system is in the converged (μ=2.2\\mu=2.2), bifurcation (μ=3.2\\mu=3.2), quadrifurcation (μ=3.4\\mu=3.4) and chaotic (μ=3.92\\mu=3.92) regions. The values of Lyapunov exponent (LE) [Parker and Chua 2012](https://ar5iv.labs.arxiv.org/html/2405.08484#bib.bib30); [Moon 2008](https://ar5iv.labs.arxiv.org/html/2405.08484#bib.bib31) are given in the legend, which is calculated as\n\nεR=1N​∑n=1N|(y~[n]−y[n])/y[n]|\\varepsilon_{\\text{R}}=\\frac{1}{N}\\sum_{n=1}^{N}\\left|(\\tilde{y}^{[n]}-y^{[n]})/y^{[n]}\\right|\n\ntt\n\nμ\\mu\n\nεR\\varepsilon_{\\text{R}}\n\nμ\\mu\n\nμ=2.2\\mu=2.2\n\nμ=3.2\\mu=3.2\n\nμ=3.4\\mu=3.4\n\nμ=3.92\\mu=3.92\n\n| | | | | | --- | --- | --- | --- | | | λ=limT→∞1T​∑t=1Tln⁡|d​f​(x,μ)d​x|x=xt.\\displaystyle\\lambda=\\lim\\_{T\\rightarrow\\infty}\\frac{1}{T}\\sum\\_{t=1}^{T}\\ln\\left|\\frac{df(x;\\mu)}{dx}\\right|\\_{x=x\\_{t}}. | | (6) |\n\nλ=limT→∞1T​∑t=1Tln⁡|d​f​(x,μ)d​x|x=xt.\\displaystyle\\lambda=\\lim_{T\\rightarrow\\infty}\\frac{1}{T}\\sum_{t=1}^{T}\\ln\\left|\\frac{df(x;\\mu)}{dx}\\right|_{x=x_{t}}.\n\nIn our numerical simulations, we take T>200T>200, which is sufficiently large.\n\nT>200T>200\n\nOur results suggest that for the state prediction in the converged and bifurcation regions (with negative LE), ADQC can well predict the system’s state after a long-time evolution, with the relative error εR∼O⁡(10−3)\\varepsilon\\_{\\text{R}}\\sim O(10^{-3}). When the system is in a chaotic region (with positive LE), previous work suggests that the state prediction is valid in a short duration characterized usually by the Lyapunov time TLE≡λ−1T\\_{\\text{LE}}\\equiv\\lambda^{-1} [Bezruchko and Smirnov 2010](https://ar5iv.labs.arxiv.org/html/2405.08484#bib.bib32). Our results show that εR\\varepsilon\\_{\\text{R}} grows exponentially with tt before it converges to O⁡(1)O(1), which obeys\n\nεR∼O⁡(10−3)\\varepsilon_{\\text{R}}\\sim O(10^{-3})\n\nTLE≡λ−1T_{\\text{LE}}\\equiv\\lambda^{-1}\n\nεR\\varepsilon_{\\text{R}}\n\ntt\n\nO⁡(1)O(1)\n\n| | | | | | --- | --- | --- | --- | | | εR∼eη​t.\\displaystyle\\varepsilon\\_{\\text{R}}\\sim e^{\\eta t}. | | (7) |\n\nεR∼eη​t.\\displaystyle\\varepsilon_{\\text{R}}\\sim e^{\\eta t}.\n\nThe table in Fig. [2](https://ar5iv.labs.arxiv.org/html/2405.08484#S0.F2 \"Figure 2 ‣ Universal replication of chaotic characteristics by classical and quantum machine learning\")(b) shows the exponential index to be about η≈0.4+O⁡(10−1)\\eta\\approx 0.4+O(10^{-1}). Note the system is chaotic for 3.57<μ<43.57<\\mu<4 [Andrecut 1998](https://ar5iv.labs.arxiv.org/html/2405.08484#bib.bib28).\n\nη≈0.4+O⁡(10−1)\\eta\\approx 0.4+O(10^{-1})\n\n3.57<μ<43.57<\\mu<4\n\nThe above results show the ability of the ML models on replicating the characteristics instead of predicting the states. Such an ability is further demonstrated by comparing the LE of the 1D Logistic map and the ML maps (the trained LSTM and ADQC), as shown in Fig. [3](https://ar5iv.labs.arxiv.org/html/2405.08484#S0.F3 \"Figure 3 ‣ Universal replication of chaotic characteristics by classical and quantum machine learning\") (a). The LE of the ML models is obtained by replacing the differential term in Eq. ([6](https://ar5iv.labs.arxiv.org/html/2405.08484#S0.E6 \"In Universal replication of chaotic characteristics by classical and quantum machine learning\")) by dF(xt−M+1,…,x;𝑾]/dxdF(x\\_{t-M+1},...,x;\\boldsymbol{W}]/dx at x=xtx=x\\_{t}.\n\nx=xtx=x_{t}\n\nThe LE’s with varying μ\\mu given by the LSTM and ADQC with the μ\\mu-tuned pre-processing (green and blue lines with symbols) are consistent with those given by the Logistic map (the ground truth shown by red solid line). As a comparison, much worse consistence is reached by the standard LSTM without the μ\\mu-tuned pre-processing (black dash-dot line). This is a demonstration of the improvement brought by our μ\\mu-tuned pre-processing. The two horizontal stripes indicate whether the μ\\mu-tuned LSTM and ADQC give the LE with correct (green) or incorrect (red) sign. Generally, the accuracy on replicating the LE’s sign is high. The incorrect signs appeal in the chaotic region.\n\nμ\\mu\n\nμ\\mu\n\nμ\\mu\n\nμ\\mu\n\nμ\\mu\n\nSimilar results are obtained for the two-dimensional (2D) Logistic map [see Fig. [3](https://ar5iv.labs.arxiv.org/html/2405.08484#S0.F3 \"Figure 3 ‣ Universal replication of chaotic characteristics by classical and quantum machine learning\") (b)], which represents a more intricate nonlinear system with richer dynamical behaviors by incorporating a linear coupling term [Yuan et al. 1983](https://ar5iv.labs.arxiv.org/html/2405.08484#bib.bib23); [Ferretti and Rahman 1988](https://ar5iv.labs.arxiv.org/html/2405.08484#bib.bib24). The two variables [xt,xt′][x\\_{t},x^{\\prime}\\_{t}] are mapped as\n\n[xt,xt′][x_{t},x^{\\prime}_{t}]\n\n| | | | | --- | --- | --- | | | xt+1=4​μ1​xt​(1−xt)+β​xt′xt+1′=4​μ2​xt′​(1−xt′)+β​xt.\\displaystyle\\begin{array}[]{c}x\\_{t+1}=4\\mu\\_{1}x\\_{t}(1-x\\_{t})+\\beta x^{\\prime}\\_{t}\\\\ x^{\\prime}\\_{t+1}=4\\mu\\_{2}x^{\\prime}\\_{t}(1-x^{\\prime}\\_{t})+\\beta x\\_{t}\\end{array}. | |\n\nxt+1=4​μ1​xt​(1−xt)+β​xt′xt+1′=4​μ2​xt′​(1−xt′)+β​xt.\\displaystyle\\begin{array}[]{c}x_{t+1}=4\\mu_{1}x_{t}(1-x_{t})+\\beta x^{\\prime}_{t}\\\\ x^{\\prime}_{t+1}=4\\mu_{2}x^{\\prime}_{t}(1-x^{\\prime}_{t})+\\beta x_{t}\\end{array}.\n\nWe take μ1=μ2=μ\\mu\\_{1}=\\mu\\_{2}=\\mu and fix β=0.1\\beta=0.1 for simplicity. Two LE’s are defined. Obviously, replicating the LE’s of the 2D Logistic map is much more challenging than the 1D case. Consequently, the LSTM without the μ\\mu-tuned pre-processing becomes almost invalid. With the μ\\mu-tuned pre-processing, ADQC achieves higher accuracy than LSTM.\n\nμ1=μ2=μ\\mu_{1}=\\mu_{2}=\\mu\n\nβ=0.1\\beta=0.1\n\nμ\\mu\n\nμ\\mu\n\nLL\n\nLLEL_{\\text{LE}}\n\nLL\n\nLLEL_{\\text{LE}}\n\ndhd_{\\text{h}}\n\nNLN_{\\text{L}}\n\nA usual way to improve the performance of a ML model is to increase its complexity. However, such a way possibly fails in our case. Be noted that though the dynamical system may just contain a handful of hyper-parameters (say one parameter μ\\mu in the 1D Logistic map), leaning its dynamics is a big challenge, and the key factor to determine the performance of a ML model on replicating the long-term characteristics should not be its parameter complexity. We expect high sensitivity to the over-fitting issue.\n\nμ\\mu\n\nFig. [4](https://ar5iv.labs.arxiv.org/html/2405.08484#S0.F4 \"Figure 4 ‣ Universal replication of chaotic characteristics by classical and quantum machine learning\") supports such an expectation. Increasing the parameter complexity generally lowers the error on the short-term prediction (say predicting the state one-step ahead). For the 1D and 2D Logistic maps, Fig. [4](https://ar5iv.labs.arxiv.org/html/2405.08484#S0.F4 \"Figure 4 ‣ Universal replication of chaotic characteristics by classical and quantum machine learning\") (a) shows that the RMSE LL [Eq. ([3](https://ar5iv.labs.arxiv.org/html/2405.08484#S0.E3 \"In Universal replication of chaotic characteristics by classical and quantum machine learning\"))] obtained by LSTM decreases gradually from about 0.020.02 to 0.0040.004 when increasing the hidden dimension dhd\\_{\\text{h}} from 22 to 8080. Similar observation is obtained with ADQC, where LL decreases to about 0.0020.002 (for the 1D Logistic map) or 0.0040.004 (for the 2D Logistic map) by increasing the number of circuit layers to NL=8N\\_{\\text{L}}=8.\n\nLL\n\n0.020.02\n\n0.0040.004\n\ndhd_{\\text{h}}\n\n22\n\n8080\n\nLL\n\n0.0020.002\n\n0.0040.004\n\nNL=8N_{\\text{L}}=8\n\nThe RMSE of LE (denoted as LLEL\\_{\\text{LE}}) behaves differently from that of LL. LLEL\\_{\\text{LE}} is calculated in the same way as LL using the definition of RMSE [Eq. ([3](https://ar5iv.labs.arxiv.org/html/2405.08484#S0.E3 \"In Universal replication of chaotic characteristics by classical and quantum machine learning\"))]. For LSTM, the LLEL\\_{\\text{LE}} fluctuates approximately in the range of 0.005<LLE<0.0250.005<L\\_{\\text{LE}}<0.025. Increasing dhd\\_{\\text{h}} of LSTM cannot improve the accuracy on replicating LE. For ADQC, though we fail to see obvious drop of LLEL\\_{\\text{LE}} by increasing NLN\\_{\\text{L}}, LLEL\\_{\\text{LE}} varies much more smoothly approximately in the range of (0.002<LLE<0.0050.002<L\\_{\\text{LE}}<0.005), which is much lower than that of LSTM. Note all the data in Fig. [4](https://ar5iv.labs.arxiv.org/html/2405.08484#S0.F4 \"Figure 4 ‣ Universal replication of chaotic characteristics by classical and quantum machine learning\") are computed using the testing set.\n\nLLEL_{\\text{LE}}\n\nLL\n\nLLEL_{\\text{LE}}\n\nLL\n\nLLEL_{\\text{LE}}\n\n0.005<LLE<0.0250.005<L_{\\text{LE}}<0.025\n\ndhd_{\\text{h}}\n\nLLEL_{\\text{LE}}\n\nNLN_{\\text{L}}\n\nLLEL_{\\text{LE}}\n\n0.002<LLE<0.0050.002<L_{\\text{LE}}<0.005\n\nOur results suggest that the key of improving the accuracy on the prediction of long-term dynamical characteristics is to developing ML models that better mitigate over-fitting. This is different from the ML tasks such as classification and short-term prediction, where the accuracy can be generally improved by enhancing the model complexity. Our work demonstrates the superior ability of variational quantum circuits on mitigating over-fitting, which is consistent with the previous investigations on different but relevant topics such as image generation [Han et al. 2018](https://ar5iv.labs.arxiv.org/html/2405.08484#bib.bib33); [Cheng et al. 2019](https://ar5iv.labs.arxiv.org/html/2405.08484#bib.bib34) and model compression [Gao et al. 2020](https://ar5iv.labs.arxiv.org/html/2405.08484#bib.bib35); [Qing et al. 2023](https://ar5iv.labs.arxiv.org/html/2405.08484#bib.bib36). In comparison, LSTM suffers from severe over-fitting issue, though it has been widely recognized as a powerful model with remarkable generalization ability and venial over-fitting issue when dealing with many other ML tasks.\n\nSummary.— This work reveals the ability of machine learning (ML) models, which are trained to predict the state one-step-ahead from certain historic data, on replicating the long-term characteristics of discrete dynamical systems. In comparison with the previous works, the characteristics with varying values of hyper-parameters are replicated universally by a single ML model. Our results suggest high sensitivity to the over-fitting issue for the replication of the long-term dynamical characteristics. Taking the one- and two-dimensional Logistic maps as examples, the variational quantum circuit exhibits superior performance on replicating the bifurcation diagram and Lyapunov exponents. Our findings add to the potential advantages of quantum circuit models on achieving high accuracy and stability for the ML tasks that are sensitive to over-fitting.\n\nAcknowledgment. SCB is grateful to Qing lv, Peng-Fei Zhou, Yong Qing, Zhang-Xu Chen, Guo-Dong Cheng, Ke Li, Rui Hong, Ying Lu, Yi-Cheng Tang, and Yu-Jia An for helpful discussions. This work was supported in part by NSFC (Grant No. 12004266), Beijing Natural Science Foundation (Grant No. 1232025), Tianjin Natural Science Foundation of China (Grant No. 20JCYBJC00500), and Academy for Multidisciplinary Studies, Capital Normal University."
+    },
+    {
+      "heading_path": [
+        "Universal replication of chaotic characteristics by classical and quantum machine learning",
+        "Appendix A Details of dataset and pre-processing"
+      ],
+      "text": "## Appendix A Details of dataset and pre-processing\n\nAs an example, we consider the one-dimensional (1D) Logistic map f⁡(xt,μ)=μ​xt​(1−xt)f(x\\_{t};\\mu)=\\mu x\\_{t}(1-x\\_{t}). We take the hyper-parameter μ\\mu to vary from 22 to 44, and discretize to 5050 values with an interval of 0.040.04. For each value of μ\\mu, we randomly generate 3000 training samples and 500 testing samples. Each sample (say 𝒙[n]\\boldsymbol{x}^{[n]}) is generated by implementing the dynamical map ff on a randomly-taken initial state (say x1[n]x^{[n]}\\_{1}) for (M−1)(M-1) times. Therefore, a sample 𝒙[n]=(x1[n],⋯,xM[n])\\boldsymbol{x}^{[n]}=(x^{[n]}\\_{1},\\cdots,x^{[n]}\\_{M}) contains MM features with xt[n]=ft−1​(x1[n])x^{[n]}\\_{t}=f^{t-1}(x^{[n]}\\_{1}), where ft−1f^{t-1} means to implement ff for (t−1)(t-1) times.\n\nf⁡(xt,μ)=μ​xt​(1−xt)f(x_{t};\\mu)=\\mu x_{t}(1-x_{t})\n\nμ\\mu\n\n22\n\n44\n\n5050\n\n0.040.04\n\nμ\\mu\n\n𝒙[n]\\boldsymbol{x}^{[n]}\n\nff\n\nx1[n]x^{[n]}_{1}\n\n(M−1)(M-1)\n\n𝒙[n]=(x1[n],⋯,xM[n])\\boldsymbol{x}^{[n]}=(x^{[n]}_{1},\\cdots,x^{[n]}_{M})\n\nMM\n\nxt[n]=ft−1​(x1[n])x^{[n]}_{t}=f^{t-1}(x^{[n]}_{1})\n\nft−1f^{t-1}\n\nff\n\n(t−1)(t-1)\n\nThe ML model is trained to predict the value of xM+1[n]=f⁡(xM(n),μ)x^{[n]}\\_{M+1}=f(x^{(n)}\\_{M};\\mu) from this sample. The ground truth of xM+1[n]x^{[n]}\\_{M+1} (generated by the dynamical system itself) is called the label of the nn-th sample. For different independent simulations, we randomly take 20002000 training samples from the training set for each value of μ\\mu to train the ML models. If not specified, we take M=8M=8, and all data such as the bifurcation diagram and the Lyapunov exponents in the main text are computed using the testing set.\n\nxM+1[n]=f⁡(xM(n),μ)x^{[n]}_{M+1}=f(x^{(n)}_{M};\\mu)\n\nxM+1[n]x^{[n]}_{M+1}\n\nnn\n\n20002000\n\nμ\\mu\n\nM=8M=8\n\nA μ\\mu-tuned pre-processing is introduced to map each sample to a set of vectors. Specifically, the tt-th feature of the nn-th sample xt[n]x^{[n]}\\_{t} is mapped to a vector 𝒗[n,t]\\boldsymbol{v}^{[n,t]} as xt[n]→𝒗[n,t]=(v1[n,t],v2[n,t],⋯,vd[n,t])x^{[n]}\\_{t}\\to\\boldsymbol{v}^{[n,t]}=(v^{[n,t]}\\_{1},v^{[n,t]}\\_{2},\\cdots,v^{[n,t]}\\_{d}), where the dimension d=dim(𝒗[n,t])d=\\dim(\\boldsymbol{v}^{[n,t]}) is a preset hyper-parameter. Consequently, a sample is mapped to MM vectors.\n\nμ\\mu\n\ntt\n\nnn\n\nxt[n]x^{[n]}_{t}\n\n𝒗[n,t]\\boldsymbol{v}^{[n,t]}\n\nxt[n]→𝒗[n,t]=(v1[n,t],v2[n,t],⋯,vd[n,t])x^{[n]}_{t}\\to\\boldsymbol{v}^{[n,t]}=(v^{[n,t]}_{1},v^{[n,t]}_{2},\\cdots,v^{[n,t]}_{d})\n\nd=dim(𝒗[n,t])d=\\dim(\\boldsymbol{v}^{[n,t]})\n\nMM\n\nWe define the pre-processing map to depend on μ\\mu and some variational parameters that will be optimized in the training stage. Here, the pre-processing map [also see Eq. (4) of the main text] is defined as\n\nμ\\mu\n\n| | | | | | --- | --- | --- | --- | | | vk[n,t]=∑i,jξi​(xt[n],θ)​ξj​(μ[n],θ)​Ti​j​k.\\displaystyle v^{[n,t]}\\_{k}=\\sum\\_{i,j}\\xi\\_{i}(x^{[n]}\\_{t};\\theta)\\xi\\_{j}(\\mu^{[n]};\\theta)T\\_{ijk}. | | (11) |\n\nvk[n,t]=∑i,jξi​(xt[n],θ)​ξj​(μ[n],θ)​Ti​j​k.\\displaystyle v^{[n,t]}_{k}=\\sum_{i,j}\\xi_{i}(x^{[n]}_{t};\\theta)\\xi_{j}(\\mu^{[n]};\\theta)T_{ijk}.\n\nThe (d×d×d)(d\\times d\\times d)-dimensional tensor 𝑻\\boldsymbol{T} and scalar θ\\theta are the variational parameters that are optimized in the training stage. The vectors 𝝃⁡(xt[n],θ)\\boldsymbol{\\xi}(x^{[n]}\\_{t};\\theta) and 𝝃⁡(μ[n],θ)\\boldsymbol{\\xi}(\\mu^{[n]};\\theta), which are both dd-dimensional, are obtained by the following map that transforms a scalar to a normalized vector [also see Eq. (5) of the main text]. For a given scalar (say aa), the jj-th elements of the resulting vector 𝝃⁡(a,θ)\\boldsymbol{\\xi}(a;\\theta) satisfies\n\n(d×d×d)(d\\times d\\times d)\n\n𝑻\\boldsymbol{T}\n\nθ\\theta\n\n𝝃⁡(xt[n],θ)\\boldsymbol{\\xi}(x^{[n]}_{t};\\theta)\n\n𝝃⁡(μ[n],θ)\\boldsymbol{\\xi}(\\mu^{[n]};\\theta)\n\ndd\n\naa\n\njj\n\n𝝃⁡(a,θ)\\boldsymbol{\\xi}(a;\\theta)\n\n| | | | | | --- | --- | --- | --- | | | ξj(a;θ)=(d−1j−1)cos(θ​π2a)d−jsin(θ​π2a)j−1.\\xi\\_{j}(a;\\theta)=\\sqrt{\\binom{d-1}{j-1}}\\cos\\left(\\frac{\\theta\\pi}{2}a\\right)^{d-j}\\sin\\left(\\frac{\\theta\\pi}{2}a\\right)^{j-1}. | | (12) |\n\nSince we train a ML model with different values of μ\\mu, one should take μ[n]{\\mu}^{[n]} to be the corresponding value of μ\\mu for the nn-th sample.\n\nμ\\mu\n\nμ[n]{\\mu}^{[n]}\n\nμ\\mu\n\nnn\n\nFor the 2D logistic map, we take the hyper-parameter μ\\mu to be the discrete values from 0.510.51 to 0.90.9 with an interval of 0.010.01. For each value of μ\\mu, we randomly generate 3000 training samples and 500 testing samples. Since it contains two variables (xtx\\_{t} and xt′x^{\\prime}\\_{t}), we define the nn-th sample as (x1[n],x1′[n],⋯,xM[n],xM′[n])(x^{[n]}\\_{1},x^{\\prime[n]}\\_{1},\\cdots,x^{[n]}\\_{M},x^{\\prime[n]}\\_{M}), and take M=4M=4 in our simulations. The pre-processing map is applied similarly to transform the features in a sample to 2​M2M vectors.\n\nμ\\mu\n\n0.510.51\n\n0.90.9\n\n0.010.01\n\nμ\\mu\n\nxtx_{t}\n\nxt′x^{\\prime}_{t}\n\nnn\n\n(x1[n],x1′[n],⋯,xM[n],xM′[n])(x^{[n]}_{1},x^{\\prime[n]}_{1},\\cdots,x^{[n]}_{M},x^{\\prime[n]}_{M})\n\nM=4M=4\n\n2​M2M"
+    },
+    {
+      "heading_path": [
+        "Universal replication of chaotic characteristics by classical and quantum machine learning",
+        "Appendix B Automatically-differentiable quantum circuit for time series prediction"
+      ],
+      "text": "## Appendix B Automatically-differentiable quantum circuit for time series prediction\n\nThe input of an automatically-differentiable quantum circuit (ADQC) [Zhou et al. 2021](https://ar5iv.labs.arxiv.org/html/2405.08484#bib.bib22) is usually a MM-qubit quantum state. With the pre-processing explained above, one maps a sample to a set of vectors, namely from (x1[n],⋯,xM[n])(x^{[n]}\\_{1},\\cdots,x^{[n]}\\_{M}) to (𝒗[n,1],⋯,𝒗[n,M])(\\boldsymbol{v}^{[n,1]},\\cdots,\\boldsymbol{v}^{[n,M]}). These vectors are subsequently mapped to a product state as\n\nMM\n\n(x1[n],⋯,xM[n])(x^{[n]}_{1},\\cdots,x^{[n]}_{M})\n\n(𝒗[n,1],⋯,𝒗[n,M])(\\boldsymbol{v}^{[n,1]},\\cdots,\\boldsymbol{v}^{[n,M]})\n\n| | | | | | --- | --- | --- | --- | | | 𝝍[n]=∏⊗t=1M𝒗[n,t].\\displaystyle\\boldsymbol{\\psi}^{[n]}=\\prod\\_{\\otimes t=1}^{M}\\boldsymbol{v}^{[n,t]}. | | (13) |\n\n𝝍[n]=∏⊗t=1M𝒗[n,t].\\displaystyle\\boldsymbol{\\psi}^{[n]}=\\prod_{\\otimes t=1}^{M}\\boldsymbol{v}^{[n,t]}.\n\nIn other words, the elements of 𝝍[n]\\boldsymbol{\\psi}^{[n]} satisfies ψs1,⋯,sM[n]=∏t=1Mvst[n,t]\\psi^{[n]}\\_{s\\_{1},\\cdots,s\\_{M}}=\\prod\\_{t=1}^{M}v^{[n,t]}\\_{s\\_{t}}.\n\n𝝍[n]\\boldsymbol{\\psi}^{[n]}\n\nψs1,⋯,sM[n]=∏t=1Mvst[n,t]\\psi^{[n]}_{s_{1},\\cdots,s_{M}}=\\prod_{t=1}^{M}v^{[n,t]}_{s_{t}}\n\nThe ADQC represents a unitary transformation (denoted as U^\\hat{U}) that maps the input state to the final state that is usually entangled. Formally, we have 𝚿[n]=U^​𝝍[n]\\boldsymbol{\\Psi}^{[n]}=\\hat{U}\\boldsymbol{\\psi}^{[n]} for the state corresponding to the sample 𝒙[n]\\boldsymbol{x}^{[n]}, where U^\\hat{U} can be regarded as a (dM×dM)(d^{M}\\times d^{M})-dimensional unitary matrix. For a variational quantum circuit including ADQC, U^\\hat{U} is written as the product of multiple local gates. As illustrated in the bottom-left panel of Fig. 1 of the main text, we here choose the gates to be two-body, which are (d2×d2)(d^{2}\\times d^{2})-dimensional unitary matrices (denoted as {G^[g]}\\{\\hat{G}^{[g]}\\} for g=1,⋯,NGg=1,\\cdots,N\\_{\\text{G}}, with NGN\\_{\\text{G}} the total number of gates).\n\nU^\\hat{U}\n\n𝚿[n]=U^​𝝍[n]\\boldsymbol{\\Psi}^{[n]}=\\hat{U}\\boldsymbol{\\psi}^{[n]}\n\n𝒙[n]\\boldsymbol{x}^{[n]}\n\nU^\\hat{U}\n\n(dM×dM)(d^{M}\\times d^{M})\n\nU^\\hat{U}\n\n(d2×d2)(d^{2}\\times d^{2})\n\n{G^[g]}\\{\\hat{G}^{[g]}\\}\n\ng=1,⋯,NGg=1,\\cdots,N_{\\text{G}}\n\nNGN_{\\text{G}}\n\nFor the 1D Logistic map, the prediction from ADQC is given by the measurement on the final state 𝚿[n]\\boldsymbol{\\Psi}^{[n]}, satisfying\n\n𝚿[n]\\boldsymbol{\\Psi}^{[n]}\n\n| | | | | | --- | --- | --- | --- | | | y~[n]=|Ψs1,⋯,sM−1,0[n]|2.\\displaystyle\\tilde{y}^{[n]}=|\\Psi^{[n]}\\_{s\\_{1},\\cdots,s\\_{M-1},0}|^{2}. | | (14) |\n\ny~[n]=|Ψs1,⋯,sM−1,0[n]|2.\\displaystyle\\tilde{y}^{[n]}=|\\Psi^{[n]}_{s_{1},\\cdots,s_{M-1},0}|^{2}.\n\nIn the quantum language, y~[n]\\tilde{y}^{[n]} is the probability of projecting the last qubit to the spin-up state. For the 1D Logistic map, the predictions of the two variables are defined as\n\ny~[n]\\tilde{y}^{[n]}\n\n| | | | | | | | --- | --- | --- | --- | --- | --- | | | y~[n]\\displaystyle\\tilde{y}^{[n]} | =\\displaystyle= | |Ψs1,⋯,sM−2,sM−1,0[n]|2,\\displaystyle|\\Psi^{[n]}\\_{s\\_{1},\\cdots,s\\_{M-2},s\\_{M-1},0}|^{2}, | | (15) | | | | | | | | | --- | --- | --- | --- | --- | --- | | | y~[n]\\displaystyle\\tilde{y}^{[n]} | =\\displaystyle= | |Ψs1,⋯,sM−2,0,sM[n]|2.\\displaystyle|\\Psi^{[n]}\\_{s\\_{1},\\cdots,s\\_{M-2},0,s\\_{M}}|^{2}. | | (16) |\n\ny~[n]\\displaystyle\\tilde{y}^{[n]}\n\n=\\displaystyle=\n\n|Ψs1,⋯,sM−2,sM−1,0[n]|2,\\displaystyle|\\Psi^{[n]}_{s_{1},\\cdots,s_{M-2},s_{M-1},0}|^{2},\n\ny~[n]\\displaystyle\\tilde{y}^{[n]}\n\n=\\displaystyle=\n\n|Ψs1,⋯,sM−2,0,sM[n]|2.\\displaystyle|\\Psi^{[n]}_{s_{1},\\cdots,s_{M-2},0,s_{M}}|^{2}.\n\nThese are the probabilities of projecting the penultimate and last qubits to the spin-up state, respectively.\n\nFor the ADQC, each unitary gate is parameterized by a (d2×d2)(d^{2}\\times d^{2})-dimensional matrix named as latent gates (denoted as {𝑮[g]}\\{\\boldsymbol{G}^{[g]}\\}). In other words, the latent gates are the variational parameters of the ADQC. To satisfy the unitary condition of {𝑮[g]}\\{\\boldsymbol{G}^{[g]}\\}, the latent gates are mapped to unitary gates by singular value decomposition (SVD) as\n\n(d2×d2)(d^{2}\\times d^{2})\n\n{𝑮[g]}\\{\\boldsymbol{G}^{[g]}\\}\n\n{𝑮[g]}\\{\\boldsymbol{G}^{[g]}\\}\n\n| | | | | | --- | --- | --- | --- | | | 𝑮[g]→SVD𝑼[g]Λ[g]𝑽[g]†,\\displaystyle\\boldsymbol{G}^{[g]}\\overset{\\text{SVD}}{\\to}\\boldsymbol{U}^{[g]}\\Lambda^{[g]}\\boldsymbol{V}^{[g]\\dagger}, | | (17) | | | | | | | --- | --- | --- | --- | | | 𝑼[g]𝑽[g]†→G^[g].\\displaystyle\\boldsymbol{U}^{[g]}\\boldsymbol{V}^{[g]\\dagger}\\to\\hat{G}^{[g]}. | | (18) |\n\nA main advantage of ADQC is that any unitary gate can be parameterized in the same way by a matrix (latent gate) of the same dimensions. Therefore, we only need to specify the structure of the circuit, such as the dimensions of the gates (e.g., the number of spins that one gate acts on and the number of levels for each spin) and how they are connected to each other. For other variational quantum circuit models, one has to additionally specify the types of gates (such as rotational and phase-shift gates). Different types of gates are parameterized in different ways [Gill et al. 2022](https://ar5iv.labs.arxiv.org/html/2405.08484#bib.bib37).\n\nThe latent gates (and all other variational parameters) are updated by the gradient decent method in the training stages, as 𝑮[g]→𝑮[g]−η​∂L∂𝑮[g]\\boldsymbol{G}^{[g]}\\to\\boldsymbol{G}^{[g]}-\\eta\\frac{\\partial L}{\\partial\\boldsymbol{G}^{[g]}} with η\\eta the learning rate. We choose LL to be the root mean-square error (see Eq. (3) of the main text). As the map from latent gates to unitary gates is differentiable, one can use the standard back propagation technique in ML to obtain the gradients.\n\n𝑮[g]→𝑮[g]−η​∂L∂𝑮[g]\\boldsymbol{G}^{[g]}\\to\\boldsymbol{G}^{[g]}-\\eta\\frac{\\partial L}{\\partial\\boldsymbol{G}^{[g]}}\n\nη\\eta\n\nLL"
+    },
+    {
+      "heading_path": [
+        "Universal replication of chaotic characteristics by classical and quantum machine learning",
+        "Appendix C Lyapunov exponent"
+      ],
+      "text": "## Appendix C Lyapunov exponent\n\nThe Lyapunov exponent (LE) [Parker and Chua 2012](https://ar5iv.labs.arxiv.org/html/2405.08484#bib.bib30); [Moon 2008](https://ar5iv.labs.arxiv.org/html/2405.08484#bib.bib31) is an important measure to describe the chaotic nature of a dynamical system. It reflects the exponential growth rate of small perturbations in the system, quantifying the sensitivity to initial conditions and the amplification of uncertainties.\n\nConsider a discrete dynamical system with one variable xt+1=f⁡(xt)x\\_{t+1}=f(x\\_{t}) (such as the one-dimensional Logistic map). One can assume an exponential form for the difference between the states with and without a perturbation ε\\varepsilon on the initial state, where one has\n\nxt+1=f⁡(xt)x_{t+1}=f(x_{t})\n\nε\\varepsilon\n\n| | | | | | --- | --- | --- | --- | | | ε​eT​λ​(x0)=|fT​(x0+ε)−fT​(x0)|,\\displaystyle\\varepsilon e^{T\\lambda(x\\_{0})}=|f^{T}(x\\_{0}+\\varepsilon)-f^{T}(x\\_{0})|, | | (19) |\n\nε​eT​λ​(x0)=|fT​(x0+ε)−fT​(x0)|,\\displaystyle\\varepsilon e^{T\\lambda(x_{0})}=|f^{T}(x_{0}+\\varepsilon)-f^{T}(x_{0})|,\n\nwhere fTf^{T} means to recursively implement the map ff for TT times. LE is defined as the exponential index λ\\lambda in the limit of ε→0\\varepsilon\\rightarrow 0 and T→∞T\\to\\infty. In practical simulations, LE can be calculated as\n\nfTf^{T}\n\nff\n\nTT\n\nλ\\lambda\n\nε→0\\varepsilon\\rightarrow 0\n\nT→∞T\\to\\infty\n\n| | | | | | --- | --- | --- | --- | | | λ=1T​∑t=1Tln⁡|d​f​(x,μ)d​x|x=xt,\\displaystyle\\lambda=\\frac{1}{T}\\sum\\_{t=1}^{T}\\ln\\left|\\frac{df(x;\\mu)}{dx}\\right|\\_{x=x\\_{t}}, | | (20) |\n\nλ=1T​∑t=1Tln⁡|d​f​(x,μ)d​x|x=xt,\\displaystyle\\lambda=\\frac{1}{T}\\sum_{t=1}^{T}\\ln\\left|\\frac{df(x;\\mu)}{dx}\\right|_{x=x_{t}},\n\nby taking a sufficiently large TT. In this work, we take T=264T=264.\n\nTT\n\nT=264T=264\n\nFor the 2D case, we employ the QR decomposition method [Geist et al. 1990](https://ar5iv.labs.arxiv.org/html/2405.08484#bib.bib38); [McDonald and Higham 2001](https://ar5iv.labs.arxiv.org/html/2405.08484#bib.bib39) to compute the LE’s. Consider a map with two variables (xt,xt′)(x\\_{t},x^{\\prime}\\_{t}). The map 𝒇\\boldsymbol{f} (which has two components) can be generally written as xt+1=f1​(xt,xt′)x\\_{t+1}=f\\_{1}(x\\_{t},x^{\\prime}\\_{t}) and xt+1′=f2​(xt,xt′)x^{\\prime}\\_{t+1}=f\\_{2}(x\\_{t},x^{\\prime}\\_{t}). The Jacobi matrix at the discrete time tt is defined as\n\n(xt,xt′)(x_{t},x^{\\prime}_{t})\n\n𝒇\\boldsymbol{f}\n\nxt+1=f1​(xt,xt′)x_{t+1}=f_{1}(x_{t},x^{\\prime}_{t})\n\nxt+1′=f2​(xt,xt′)x^{\\prime}_{t+1}=f_{2}(x_{t},x^{\\prime}_{t})\n\ntt\n\n| | | | | --- | --- | --- | | | 𝑱(t)=(∂f1​(x,x′)∂x∂f1​(x,x′)∂x′∂f2​(x,x′)∂x∂f2​(x,x′)∂x′)x=xt,x′=xt′.\\displaystyle\\boldsymbol{J}^{(t)}=\\left(\\begin{array}[]{cc}\\scalebox{1}{$\\dfrac{\\partial f\\_{1}(x,x^{\\prime})}{\\partial x}$}&\\scalebox{1}{$\\dfrac{\\partial f\\_{1}(x,x^{\\prime})}{\\partial x^{\\prime}}$}\\\\ \\scalebox{1}{$\\dfrac{\\partial f\\_{2}(x,x^{\\prime})}{\\partial x}$}&\\scalebox{1}{$\\dfrac{\\partial f\\_{2}(x,x^{\\prime})}{\\partial x^{\\prime}}$}\\end{array}\\right)\\_{x=x\\_{t},x^{\\prime}=x^{\\prime}\\_{t}}. | |\n\n𝑱(t)=(∂f1​(x,x′)∂x∂f1​(x,x′)∂x′∂f2​(x,x′)∂x∂f2​(x,x′)∂x′)x=xt,x′=xt′.\\displaystyle\\boldsymbol{J}^{(t)}=\\left(\\begin{array}[]{cc}\\scalebox{1}{$\\dfrac{\\partial f_{1}(x,x^{\\prime})}{\\partial x}$}&\\scalebox{1}{$\\dfrac{\\partial f_{1}(x,x^{\\prime})}{\\partial x^{\\prime}}$}\\\\ \\scalebox{1}{$\\dfrac{\\partial f_{2}(x,x^{\\prime})}{\\partial x}$}&\\scalebox{1}{$\\dfrac{\\partial f_{2}(x,x^{\\prime})}{\\partial x^{\\prime}}$}\\end{array}\\right)_{x=x_{t},x^{\\prime}=x^{\\prime}_{t}}.\n\nThe two LE’s can be calculates as\n\n| | | | | | --- | --- | --- | --- | | | λk=1T​∑t=1Tln⁡|Rk,k(t)|,\\displaystyle\\lambda\\_{k}=\\frac{1}{T}\\sum\\_{t=1}^{T}\\ln\\left|R^{(t)}\\_{k,k}\\right|, | | (24) |\n\nλk=1T​∑t=1Tln⁡|Rk,k(t)|,\\displaystyle\\lambda_{k}=\\frac{1}{T}\\sum_{t=1}^{T}\\ln\\left|R^{(t)}_{k,k}\\right|,\n\nwith k=1k=1 or 22, and the (2×2)(2\\times 2) matrix 𝑹(t)\\boldsymbol{R}^{(t)} obtained by implementing QR decomposition 𝑱(t)→𝑸(t)​𝑹(t)\\boldsymbol{J}^{(t)}\\to\\boldsymbol{Q}^{(t)}\\boldsymbol{R}^{(t)}. We still take T=264T=264 in our simulations, which is sufficiently large.\n\nk=1k=1\n\n22\n\n(2×2)(2\\times 2)\n\n𝑹(t)\\boldsymbol{R}^{(t)}\n\n𝑱(t)→𝑸(t)​𝑹(t)\\boldsymbol{J}^{(t)}\\to\\boldsymbol{Q}^{(t)}\\boldsymbol{R}^{(t)}\n\nT=264T=264"
+    },
+    {
+      "heading_path": [
+        "Universal replication of chaotic characteristics by classical and quantum machine learning",
+        "Appendix D Peak signal-to-noise ratios"
+      ],
+      "text": "## Appendix D Peak signal-to-noise ratios\n\nPeak signal-to-noise ratios (PSNR) rPr\\_{\\text{P}} [Kotevski and Mitrevski 2010](https://ar5iv.labs.arxiv.org/html/2405.08484#bib.bib29) is a measure of the similarity between two images (2D data), which is applied to assess the quality on denoising and compression. Considering two images 𝑰\\boldsymbol{I} and 𝑰′\\boldsymbol{I}^{\\prime}, the rPr\\_{\\text{P}} with decibel (dB) as the unit is defined as\n\nrPr_{\\text{P}}\n\n𝑰\\boldsymbol{I}\n\n𝑰′\\boldsymbol{I}^{\\prime}\n\nrPr_{\\text{P}}\n\n| | | | | | --- | --- | --- | --- | | | rP=10×lg⁡(25521W​L​∑w=1W∑l=1L(Iw​l−I′w​l)2),\\displaystyle r\\_{\\text{P}}=10\\times\\lg\\left(\\frac{{255}^{2}}{\\frac{1}{WL}\\sum\\_{w=1}^{W}\\sum\\_{l=1}^{L}(I\\_{wl}-{I^{\\prime}}\\_{wl})^{2}}\\right), | | (25) |\n\nrP=10×lg⁡(25521W​L​∑w=1W∑l=1L(Iw​l−I′w​l)2),\\displaystyle r_{\\text{P}}=10\\times\\lg\\left(\\frac{{255}^{2}}{\\frac{1}{WL}\\sum_{w=1}^{W}\\sum_{l=1}^{L}(I_{wl}-{I^{\\prime}}_{wl})^{2}}\\right),\n\nwhere WW and LL are width and length of the images, and 255 is the maximum value of a pixel. In this paper, rPr\\_{\\text{P}} is computed with the grey-scale images read as 8-bit data. Taking image compression as an example, a PSNR for about rP≃40r\\_{\\text{P}}\\simeq 40 dB or larger usually indicates a well-performed compression [Kotevski and Mitrevski 2010](https://ar5iv.labs.arxiv.org/html/2405.08484#bib.bib29). The larger the rPr\\_{\\text{P}} is, the closer the two images are to each other.\n\nWW\n\nLL\n\nrPr_{\\text{P}}\n\nrP≃40r_{\\text{P}}\\simeq 40\n\nrPr_{\\text{P}}\n\nIn this work, each data point in a bifurcation diagram [see Fig. 2(a) of the main text] is obtained by iterating the map (the Logistic map or those of the ML models) for more than 200 times (which is sufficiently large), starting from a random state. We take 500 random states for each value of μ\\mu, which are taken differently from those of the training samples. The dense of the data points is indicated by the darkness of the colors. PSNR is used to characterize the similarity between two bifurcation diagrams.\n\nμ\\mu"
+    },
+    {
+      "heading_path": [
+        "Universal replication of chaotic characteristics by classical and quantum machine learning",
+        "Appendix E Additional results and hyper-parameters"
+      ],
+      "text": "## Appendix E Additional results and hyper-parameters\n\nTable [A1](https://ar5iv.labs.arxiv.org/html/2405.08484#A5.T1 \"Table A1 ‣ Appendix E Additional results and hyper-parameters ‣ Universal replication of chaotic characteristics by classical and quantum machine learning\") show the RMSE of LE LLEL\\_{\\text{LE}} by LSTM and ADQC on the 1D and 2D Logistic maps. Three observations can be made:\n\nLLEL_{\\text{LE}}\n\n1. 1. LLEL\\_{\\text{LE}} can be significantly reduced for both LSTM and ADQC by introducing the μ\\mu-tuned pre-processing map; 2. 2. Similar LLEL\\_{\\text{LE}} is achieved with the training and testing sets, indicating sufficient generalization ability on dealing with the unlearned data; 3. 3. With the μ\\mu-tuned preprocessing, ADQC achieves much lower LLEL\\_{\\text{LE}} than LSTM, implying that ADQC better mitigating the over-fitting issue than LSTM. This is also consistent with the results reported in the main text (Fig. 4).\n\nLLEL\\_{\\text{LE}} can be significantly reduced for both LSTM and ADQC by introducing the μ\\mu-tuned pre-processing map;\n\nLLEL_{\\text{LE}}\n\nμ\\mu\n\nSimilar LLEL\\_{\\text{LE}} is achieved with the training and testing sets, indicating sufficient generalization ability on dealing with the unlearned data;\n\nLLEL_{\\text{LE}}\n\nWith the μ\\mu-tuned preprocessing, ADQC achieves much lower LLEL\\_{\\text{LE}} than LSTM, implying that ADQC better mitigating the over-fitting issue than LSTM. This is also consistent with the results reported in the main text (Fig. 4).\n\nμ\\mu\n\nLLEL_{\\text{LE}}\n\nLLEL_{\\text{LE}}\n\nμ\\mu\n\nμ\\mu\n\nμ\\mu\n\nLLEL_{\\text{LE}}\n\n| | | | | | | | --- | --- | --- | --- | --- | --- | | LLEL\\_{\\text{LE}} | | LSTM | LSTM (μ\\mu) | ADQC | ADQC (μ\\mu) | | 1D | Training | 0.8278 | 0.4845 | 1.1486 | 0.2688 | | std | 0.3193 | 0.1280 | 0.0471 | 0.0510 | | Testing | 0.8273 | 0.4837 | 1.1486 | 0.2686 | | std | 0.3190 | 0.1281 | 0.0471 | 0.0512 | | 2D | Training | 0.8050 | 0.2333 | 1.2195 | 0.1588 | | std | 0.2320 | 0.0610 | 0.1389 | 0.0584 | | Testing | 0.8048 | 0.2332 | 1.2189 | 0.1582 | | std | 0.2317 | 0.0606 | 0.1388 | 0.0583 |\n\nLLEL_{\\text{LE}}\n\nμ\\mu\n\nμ\\mu\n\nIf not specified, the settings of hyper-parameters of LSTM and ADQC used in this work are given in Table [A2](https://ar5iv.labs.arxiv.org/html/2405.08484#A5.T2 \"Table A2 ‣ Appendix E Additional results and hyper-parameters ‣ Universal replication of chaotic characteristics by classical and quantum machine learning\").\n\ndind_{\\text{in}}\n\ndoutd_{\\text{out}}\n\nLSQL_{\\text{SQ}}\n\nNLN_{\\text{L}}\n\nDhD_{\\text{h}}\n\nμ\\mu\n\n| 1D | LSTM | din=1,dout=1,LSQ=8,NL=1,Dh=8d\\_{\\text{in}}=1,\\ \\ d\\_{\\text{out}}=1,\\ \\ L\\_{\\text{SQ}}=8,\\ \\ N\\_{\\text{L}}=1,\\ \\ D\\_{\\text{h}}=8 | | --- | --- | --- | | LSTM (μ\\mu) | din=3,dout=1,LSQ=8,NL=1,Dh=8d\\_{\\text{in}}=3,\\ \\ d\\_{\\text{out}}=1,\\ \\ L\\_{\\text{SQ}}=8,\\ \\ N\\_{\\text{L}}=1,\\ \\ D\\_{\\text{h}}=8 | | ADQC | d=3,M=8,NL=4d=3,\\ \\ M=8,\\ \\ N\\_{\\text{L}}=4 | | 2D | LSTM | din=2,dout=2,LSQ=4,NL=1,Dh=8d\\_{\\text{in}}=2,\\ \\ d\\_{\\text{out}}=2,\\ \\ L\\_{\\text{SQ}}=4,\\ \\ N\\_{\\text{L}}=1,\\ \\ D\\_{\\text{h}}=8 | | LSTM (μ\\mu) | din=3,dout=2,LSQ=8,NL=1,Dh=8d\\_{\\text{in}}=3,\\ \\ d\\_{\\text{out}}=2,\\ \\ L\\_{\\text{SQ}}=8,\\ \\ N\\_{\\text{L}}=1,\\ \\ D\\_{\\text{h}}=8 | | ADQC | d=3,M=8,NL=4d=3,\\ \\ M=8,\\ \\ N\\_{\\text{L}}=4 |\n\ndin=1,dout=1,LSQ=8,NL=1,Dh=8d_{\\text{in}}=1,\\ \\ d_{\\text{out}}=1,\\ \\ L_{\\text{SQ}}=8,\\ \\ N_{\\text{L}}=1,\\ \\ D_{\\text{h}}=8\n\nμ\\mu\n\ndin=3,dout=1,LSQ=8,NL=1,Dh=8d_{\\text{in}}=3,\\ \\ d_{\\text{out}}=1,\\ \\ L_{\\text{SQ}}=8,\\ \\ N_{\\text{L}}=1,\\ \\ D_{\\text{h}}=8\n\nd=3,M=8,NL=4d=3,\\ \\ M=8,\\ \\ N_{\\text{L}}=4\n\ndin=2,dout=2,LSQ=4,NL=1,Dh=8d_{\\text{in}}=2,\\ \\ d_{\\text{out}}=2,\\ \\ L_{\\text{SQ}}=4,\\ \\ N_{\\text{L}}=1,\\ \\ D_{\\text{h}}=8\n\nμ\\mu\n\ndin=3,dout=2,LSQ=8,NL=1,Dh=8d_{\\text{in}}=3,\\ \\ d_{\\text{out}}=2,\\ \\ L_{\\text{SQ}}=8,\\ \\ N_{\\text{L}}=1,\\ \\ D_{\\text{h}}=8\n\nd=3,M=8,NL=4d=3,\\ \\ M=8,\\ \\ N_{\\text{L}}=4"
+    },
+    {
+      "heading_path": [
+        "Universal replication of chaotic characteristics by classical and quantum machine learning",
+        "References"
+      ],
+      "text": "## References\n\n* Kantz and Schreiber (2004) H. Kantz and T. Schreiber, *Nonlinear time series analysis*, Vol. 7 (Cambridge university press, 2004). * Strogatz (2018) S. H. Strogatz, *Nonlinear dynamics and chaos with student solutions manual: With applications to physics, biology, chemistry, and engineering* (CRC press, 2018). * May (1976) R. M. May, Simple mathematical models with very complicated dynamics, [Nature 261, 459 (1976)](https://doi.org/10.1038/261459a0). * Lorenz (1963) E. N. Lorenz, Deterministic nonperiodic flow, [Journal of Atmospheric Sciences 20, 130 (1963)](https://doi.org/10.1175/1520-0469(1963)020%3C0130:DNF%3E2.0.CO;2). * Hochreiter and Schmidhuber (1997) S. Hochreiter and J. Schmidhuber, Long short-term memory, [Neural Computation 9, 1735 (1997)](https://doi.org/10.1162/neco.1997.9.8.1735). * Yu *et al.* (2019) Y. Yu, X. Si, C. Hu, and J. Zhang, A Review of Recurrent Neural Networks: LSTM Cells and Network Architectures, [Neural Computation 31, 1235 (2019)](https://doi.org/10.1162/neco_a_01199). * Vaswani *et al.* (2017) A. Vaswani, N. Shazeer, N. Parmar, J. Uszkoreit, L. Jones, A. N. Gomez, L. u. Kaiser, and I. Polosukhin, Attention is all you need, in *Advances in Neural Information Processing Systems*, Vol. 30, edited by I. Guyon, U. V. Luxburg, S. Bengio, H. Wallach, R. Fergus, S. Vishwanathan, and R. Garnett (Curran Associates, Inc., 2017). * He and Droppo (2016) T. He and J. Droppo, Exploiting lstm structure in deep neural networks for speech recognition, in *2016 IEEE international conference on acoustics, speech and signal processing (ICASSP)* (IEEE, 2016) pp. 5445–5449. * Bhaskar and M. (2023) S. Bhaskar and T. T. M., Lstm model for visual speech recognition through facial expressions, [Multimedia Tools and Applications 82, 5455 (2023)](https://doi.org/10.1007/s11042-022-12796-1). * Bi *et al.* (2023) K. Bi, L. Xie, H. Zhang, X. Chen, X. Gu, and Q. Tian, Accurate medium-range global weather forecasting with 3d neural networks, [Nature 619, 533 (2023)](https://doi.org/10.1038/s41586-023-06185-3). * Chen *et al.* (2023) L. Chen, X. Zhong, F. Zhang, Y. Cheng, Y. Xu, Y. Qi, and H. Li, Fuxi: a cascade machine learning forecasting system for 15-day global weather forecast, [npj Climate and Atmospheric Science 6, 190 (2023)](https://doi.org/10.1038/s41612-023-00512-1). * Pathak *et al.* (2018) J. Pathak, B. Hunt, M. Girvan, Z. Lu, and E. Ott, Model-free prediction of large spatiotemporally chaotic systems from data: A reservoir computing approach, [Phys. Rev. Lett. 120, 024102 (2018)](https://doi.org/10.1103/PhysRevLett.120.024102). * Herzog *et al.* (2019) S. Herzog, F. Wörgötter, and U. Parlitz, Convolutional autoencoder and conditional random fields hybrid for predicting spatial-temporal chaos, [Chaos 29, 123116 (2019)](https://doi.org/10.1063/1.5124926). * Borra *et al.* (2020) F. Borra, A. Vulpiani, and M. Cencini, Effective models and predictability of chaotic multiscale systems via machine learning, [Phys. Rev. E 102, 052203 (2020)](https://doi.org/10.1103/PhysRevE.102.052203). * Pathak *et al.* (2017) J. Pathak, Z. Lu, B. R. Hunt, M. Girvan, and E. Ott, Using machine learning to replicate chaotic attractors and calculate Lyapunov exponents from data, [Chaos 27, 121102 (2017)](https://doi.org/10.1063/1.5010300). * Lu *et al.* (2018) Z. Lu, B. R. Hunt, and E. Ott, Attractor reconstruction by machine learning, [Chaos 28, 061104 (2018)](https://doi.org/10.1063/1.5039508). * Antonik *et al.* (2018) P. Antonik, M. Gulina, J. Pauwels, and S. Massar, Using a reservoir computer to learn chaotic attractors, with applications to chaos synchronization and cryptography, [Phys. Rev. E 98, 012215 (2018)](https://doi.org/10.1103/PhysRevE.98.012215). * Fan *et al.* (2020) H. Fan, J. Jiang, C. Zhang, X. Wang, and Y.-C. Lai, Long-term prediction of chaotic systems with machine learning, [Phys. Rev. Res. 2, 012080 (2020)](https://doi.org/10.1103/PhysRevResearch.2.012080). * Sun *et al.* (2023) Y. Sun, L. Zhang, and M. Yao, Chaotic time series prediction of nonlinear systems based on various neural network models, [Chaos, Solitons & Fractals 175, 113971 (2023)](https://doi.org/10.1016/j.chaos.2023.113971). * Peruzzo *et al.* (2014) A. Peruzzo, J. McClean, P. Shadbolt, M.-H. Yung, X.-Q. Zhou, P. J. Love, A. Aspuru-Guzik, and J. L. O’Brien, A variational eigenvalue solver on a photonic quantum processor, [Nature Communications 5, 4213 (2014)](https://doi.org/10.1038/ncomms5213). * Cerezo *et al.* (2021) M. Cerezo, A. Arrasmith, R. Babbush, S. C. Benjamin, S. Endo, K. Fujii, J. R. McClean, K. Mitarai, X. Yuan, L. Cincio, and P. J. Coles, Variational quantum algorithms, [Nature Reviews Physics 3, 625 (2021)](https://doi.org/10.1038/s42254-021-00348-9). * Zhou *et al.* (2021) P.-F. Zhou, R. Hong, and S.-J. Ran, Automatically differentiable quantum circuit for many-qubit state preparation, [Phys. Rev. A 104, 042601 (2021)](https://doi.org/10.1103/PhysRevA.104.042601). * Yuan *et al.* (1983) J.-M. Yuan, M. Tung, D. H. Feng, and L. M. Narducci, Instability and irregular behavior of coupled logistic equations, [Phys. Rev. A 28, 1662 (1983)](https://doi.org/10.1103/PhysRevA.28.1662). * Ferretti and Rahman (1988) A. Ferretti and N. Rahman, A study of coupled logistic map and its applications in chemical physics, [Chemical Physics 119, 275 (1988)](https://doi.org/https://doi.org/10.1016/0301-0104(88)87190-8). * Lipton *et al.* (2015) Z. C. Lipton, J. Berkowitz, and C. Elkan, A critical review of recurrent neural networks for sequence learning (2015), [arXiv:1506.00019 [cs.LG]](https://arxiv.org/abs/1506.00019) . * Salehinejad *et al.* (2018) H. Salehinejad, S. Sankar, J. Barfett, E. Colak, and S. Valaee, Recent advances in recurrent neural networks (2018), [arXiv:1801.01078 [cs.NE]](https://arxiv.org/abs/1801.01078) . * Stoudenmire and Schwab (2016) E. Stoudenmire and D. J. Schwab, Supervised learning with tensor networks, in *Advances in Neural Information Processing Systems*, Vol. 29, edited by D. Lee, M. Sugiyama, U. Luxburg, I. Guyon, and R. Garnett (Curran Associates, Inc., 2016). * Andrecut (1998) M. Andrecut, Logistic map as a random number generator, [International Journal of Modern Physics B 12, 921 (1998)](https://doi.org/10.1142/S021797929800051X). * Kotevski and Mitrevski (2010) Z. Kotevski and P. Mitrevski, Experimental comparison of psnr and ssim metrics for video quality estimation, in *ICT Innovations 2009*, edited by D. Davcev and J. M. Gómez (Springer Berlin Heidelberg, Berlin, Heidelberg, 2010) pp. 357–366. * Parker and Chua (2012) T. S. Parker and L. Chua, *Practical numerical algorithms for chaotic systems* (Springer Science & Business Media, 2012). * Moon (2008) F. C. Moon, *Chaotic and fractal dynamics: introduction for applied scientists and engineers* (John Wiley & Sons, 2008). * Bezruchko and Smirnov (2010) B. Bezruchko and D. Smirnov, *Extracting Knowledge From Time Series: An Introduction to Nonlinear Empirical Modeling*, Springer Series in Synergetics (Springer Berlin Heidelberg, 2010) pp. 56–57. * Han *et al.* (2018) Z.-Y. Han, J. Wang, H. Fan, L. Wang, and P. Zhang, Unsupervised generative modeling using matrix product states, [Phys. Rev. X 8, 031012 (2018)](https://doi.org/10.1103/PhysRevX.8.031012). * Cheng *et al.* (2019) S. Cheng, L. Wang, T. Xiang, and P. Zhang, Tree tensor networks for generative modeling, [Phys. Rev. B 99, 155131 (2019)](https://doi.org/10.1103/PhysRevB.99.155131). * Gao *et al.* (2020) Z.-F. Gao, S. Cheng, R.-Q. He, Z. Y. Xie, H.-H. Zhao, Z.-Y. Lu, and T. Xiang, Compressing deep neural networks by matrix product operators, [Phys. Rev. Res. 2, 023300 (2020)](https://doi.org/10.1103/PhysRevResearch.2.023300). * Qing *et al.* (2023) Y. Qing, P.-F. Zhou, K. Li, and S.-J. Ran, Compressing neural network by tensor network with exponentially fewer variational parameters (2023), [arXiv:2305.06058 [cs.LG]](https://arxiv.org/abs/2305.06058) . * Gill *et al.* (2022) S. S. Gill, A. Kumar, H. Singh, M. Singh, K. Kaur, M. Usman, and R. Buyya, Quantum computing: A taxonomy, systematic review and future directions, [Software: Practice and Experience 52, 66 (2022)](https://doi.org/https://doi.org/10.1002/spe.3039). * Geist *et al.* (1990) K. Geist, U. Parlitz, and W. Lauterborn, Comparison of Different Methods for Computing Lyapunov Exponents, [Progress of Theoretical Physics 83, 875 (1990)](https://doi.org/10.1143/PTP.83.875). * McDonald and Higham (2001) E. J. McDonald and D. J. Higham, Error analysis of qr algorithms for computing lyapunov exponents, [ETNA - Electronic Transactions on Numerical Analysis 12, 234 (2001)](https://www.emis.de/journals/ETNA/vol.12.2001/pp234-251.dir/pp234-251.html)."
+    }
+  ]
+}

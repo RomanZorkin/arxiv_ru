@@ -1,0 +1,932 @@
+{
+  "title": "[2403.12979] AltGraph: Redesigning Quantum Circuits Using Generative Graph Models for Efficient Optimization",
+  "sections": [
+    {
+      "heading": "AltGraph: Redesigning Quantum Circuits Using Generative Graph Models for Efficient OptimizationDOI: XXXXXXX.XXXXXXXConference: Make sure to enter the correct conference title from your rights confirmation emai; June, 2024; San Francisco, CAISBN: 978-1-4503-XXXX-X/18/06",
+      "level": 1,
+      "content": [],
+      "children": [
+        {
+          "heading": "Abstract.",
+          "level": 6,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "Quantum circuit transformation aims to produce equivalent circuits while optimizing for various aspects such as circuit depth, gate count, and compatibility with modern Noisy Intermediate Scale Quantum (NISQ) devices. There are two techniques for circuit transformation. The first is a rule-based approach that greedily cancels out pairs of gates that equate to the identity unitary operation. Rule-based approaches are used in quantum compilers such as Qiskit, t|k​e​t⟩\\ket{ket}, and Quilc. The second is a search-based approach that tries to find an equivalent quantum circuit by exploring the quantum circuits search space. Search-based approaches typically rely on machine learning techniques such as generative models and Reinforcement Learning (RL). In this work, we propose *AltGraph*, a novel search-based circuit transformation approach that generates equivalent quantum circuits using existing generative graph models. We use three main graph models: DAG Variational Autoencoder (*D-VAE*) with two variants: Gated Recurrent Unit (GRU) and Graph Convolutional Network (GCN), and Deep Generative Model for Graphs (*DeepGMG*) that take a Direct Acyclic Graph (DAG) of the quantum circuit as input and output a new DAG from which we reconstruct the equivalent quantum circuit. Next, we perturb the latent space to generate equivalent quantum circuits some of which may be more compatible with the hardware coupling map and/or enable better optimization leading to reduced gate count and circuit depth. AltGraph achieves on average a 37.55% reduction in the number of gates and a 37.75% reduction in the circuit depth post-transpiling compared to the original transpiled circuit with only 0.0074 Mean Squared Error (MSE) in the density matrix."
+            },
+            {
+              "type": "formula",
+              "text": "|k​e​t⟩\\ket{ket}"
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "Keywords:",
+          "level": 6,
+          "content": [],
+          "children": []
+        },
+        {
+          "heading": "1. Introduction",
+          "level": 2,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "Quantum circuits are the fundamental component of modern-day quantum computing. They are analogous to classical electronic circuits, where various classical (quantum) gate operations are performed on bits (qubits) to obtain the desired output. Typically, each quantum circuit has a set of quantum gate operations followed by a measurement operation on desired qubits at the end. Special quantum circuits, such as Parametric Quantum Circuits (PQC), also have a state preparation component at the start to prepare the initial state of qubits. Each quantum gate is a unitary operation that can be represented as unitary matrix UU (for conjugate transpose U∗U^{\\*}, U​U∗=U​U−1=IUU^{\\*}=UU^{-1}=I) and works on either a single qubit or multiple qubits. A few well-known single qubit gates are Hadamard (H), Pauli X/Y/Z gates, rotation gates like RX/RY/RZ and U, and multi-qubit gates are CNOT, Toffoli, controlled Pauli and controlled rotation gates."
+            },
+            {
+              "type": "formula",
+              "text": "UU"
+            },
+            {
+              "type": "formula",
+              "text": "U∗U^{*}"
+            },
+            {
+              "type": "formula",
+              "text": "U​U∗=U​U−1=IUU^{*}=UU^{-1}=I"
+            },
+            {
+              "type": "paragraph",
+              "text": "Ideal quantum circuits with no noise produce correct output with 100%\\% fidelity. Unfortunately, NISQ computers have gate errors, readout errors, decoherence errors, crosstalk errors, and other noise sources that degrade the overall fidelity and correctness of computation. In such noisy environments, gate count and circuit depth are salient when crafting a circuit. Typically, circuits with low depths and gate counts are ideal for maximum fidelity. Therefore, generating equivalent quantum circuits to obtain lower-gate functionally equivalent quantum circuits is a fundamental research problem in the NISQ era."
+            },
+            {
+              "type": "formula",
+              "text": "%\\%"
+            },
+            {
+              "type": "paragraph",
+              "text": "There are two methods of performing *quantum circuit transformation* (referred to as *circuit transformation* for brevity) ([Li et al. 2023](https://ar5iv.labs.arxiv.org/html/2403.12979#bib.bib11)) namely, *rule-based* and *search-based*. The former uses gate-cancellation rules to optimize quantum circuits([Anis et al. 2021](https://ar5iv.labs.arxiv.org/html/2403.12979#bib.bib2)), while the latter uses machine learning techniques to find functionally equivalent quantum circuits from the search space of quantum circuits ([Li et al. 2023](https://ar5iv.labs.arxiv.org/html/2403.12979#bib.bib11); [Schulman et al. 2017](https://ar5iv.labs.arxiv.org/html/2403.12979#bib.bib15); [Fösel et al. 2021](https://ar5iv.labs.arxiv.org/html/2403.12979#bib.bib5); [Xu et al. 2022](https://ar5iv.labs.arxiv.org/html/2403.12979#bib.bib17); [Zhou et al. 2020](https://ar5iv.labs.arxiv.org/html/2403.12979#bib.bib19)). These techniques primarily use Reinforcement Learning (RL) methods e.g., ([Moflic et al. 2023](https://ar5iv.labs.arxiv.org/html/2403.12979#bib.bib12)) uses an RL agent to determine the correct set of gate cancellations to reach optimal depth on ICM+H circuits. Since ICM+H circuits contain only CNOT and Hadamard gates which are easy to optimize, this technique may not necessarily work on quantum circuits involving other gates. ([Fösel et al. 2021](https://ar5iv.labs.arxiv.org/html/2403.12979#bib.bib5)) overcomes this issue by using parametric quantum circuits but require circuits to be hardware compliant prior to performing optimization. ([Xu et al. 2022](https://ar5iv.labs.arxiv.org/html/2403.12979#bib.bib17)) uses generative methods by generating circuits as Quantum Assembly Language (QASM) instructions, however the search space of the generation algorithm is limited and also does not sample new circuit representations that may fundamentally address the issues like hardware constraint. We address these shortcomings by proposing *AltGraph*: usage of generative graph models that produce an equivalent Directed Acyclic Graph (DAG) of the original quantum circuit DAG from which we reconstruct the corresponding quantum circuit. We perturb the latent space of the models to generate equivalent quantum circuits some of which may be more compatible with the hardware coupling map and/or enable better optimization leading to compact circuits. We use multiple graph generation models, specifically DAG Variational Autoencoder (D-VAE) Gated Recurrent Unit (GRU), D-VAE Graph Convolutional Network (GCN) and Deep Generative Model for Graphs (DeepGMG) and perform comparative analysis."
+            },
+            {
+              "type": "paragraph",
+              "text": "Novelty: The D-VAE and DeepGMG models were able to process DAGs and generate stylistically similar graphs as the original DAGs. However, there was no way to guarantee a reconstructed DAG could be interpreted as a valid quantum circuit. We extend D-VAE and DeepGMG’s graph reconstruction capabilities to generate always valid quantum circuits. Furthermore, we enable the capability to generate novel quantum circuits equivalent to the original quantum circuit by sampling from the latent space of the generative models. Finally, we perform detailed comparative analysis of the effectiveness of the generative models in producing compact representation of the original circuits. *To the best of our knowledge, this is the first paper that uses generative graph model-based circuit transformation to produce optimized quantum circuits.*"
+            },
+            {
+              "type": "paragraph",
+              "text": "The rest of the paper’s organization is as follows: Section [2](https://ar5iv.labs.arxiv.org/html/2403.12979#S2 \"2. Background and Related Works ‣ AltGraph: Redesigning Quantum Circuits Using Generative Graph Models for Efficient Optimization\") illustrates the background information required to understand the paper and related work. Section [3](https://ar5iv.labs.arxiv.org/html/2403.12979#S3 \"3. AltGraph: Proposed Approach ‣ AltGraph: Redesigning Quantum Circuits Using Generative Graph Models for Efficient Optimization\") presents the approach to convert the models to valid quantum circuit graph generators. Section [4](https://ar5iv.labs.arxiv.org/html/2403.12979#S4 \"4. Results ‣ AltGraph: Redesigning Quantum Circuits Using Generative Graph Models for Efficient Optimization\") contains visualizations of each model’s abilities to process quantum circuits. Section [5](https://ar5iv.labs.arxiv.org/html/2403.12979#S5 \"5. Discussion ‣ AltGraph: Redesigning Quantum Circuits Using Generative Graph Models for Efficient Optimization\") analyzes the results, and Section [6](https://ar5iv.labs.arxiv.org/html/2403.12979#S6 \"6. Conclusions ‣ AltGraph: Redesigning Quantum Circuits Using Generative Graph Models for Efficient Optimization\") summarizes the work."
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "2. Background and Related Works",
+          "level": 2,
+          "content": [],
+          "children": [
+            {
+              "heading": "2.1. Fundamentals of Quantum Computing",
+              "level": 3,
+              "content": [],
+              "children": [
+                {
+                  "heading": "2.1.1. Qubits",
+                  "level": 4,
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "text": "Qubits are the basic elements of a quantum computer, similar to bits in classical computing. Typically, a qubit is denoted by the quantum state |ψ⟩=\\ket{\\psi}= [αβ]\\big[\\begin{smallmatrix}\\alpha\\\\ \\beta\\end{smallmatrix}\\big]. Here, α\\alpha and β\\beta are complex values. The square magnitude of α\\alpha, |α|2|\\alpha|^{2}, indicates the likelihood of the qubit being observed as a classical 0, while |β|2|\\beta|^{2} shows the chance of it being observed as a classical 1. Their combined probabilities always sum up to 1, i.e., |α|2+|β|2=1|\\alpha|^{2}+|\\beta|^{2}=1. Every qubit has two primary states: |0⟩\\ket{0} (with α=1\\alpha=1 and β=0\\beta=0) and |1⟩\\ket{1} (with α=0\\alpha=0 and β=1\\beta=1). Qubits can be manipulated using unitary gates, and when measured, they settle into either a 0 or 1 state."
+                    },
+                    {
+                      "type": "formula",
+                      "text": "|ψ⟩=\\ket{\\psi}="
+                    },
+                    {
+                      "type": "formula",
+                      "text": "[αβ]\\big[\\begin{smallmatrix}\\alpha\\\\ \\beta\\end{smallmatrix}\\big]"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "α\\alpha"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "β\\beta"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "α\\alpha"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "|α|2|\\alpha|^{2}"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "|β|2|\\beta|^{2}"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "|α|2+|β|2=1|\\alpha|^{2}+|\\beta|^{2}=1"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "|0⟩\\ket{0}"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "α=1\\alpha=1"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "β=0\\beta=0"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "|1⟩\\ket{1}"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "α=0\\alpha=0"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "β=1\\beta=1"
+                    }
+                  ],
+                  "children": []
+                },
+                {
+                  "heading": "2.1.2. Quantum Gates",
+                  "level": 4,
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "text": "Quantum gates, which are unitary matrix functions, modify the states of one or multiple qubits. Dependent on qubit technology, gates are implemented in various ways. For instance, superconducting qubits utilize microwave pulses ([Krantz et al. 2019](https://ar5iv.labs.arxiv.org/html/2403.12979#bib.bib7)), while trapped ion and quantum dots employ laser pulses ([Benhelm et al. 2008](https://ar5iv.labs.arxiv.org/html/2403.12979#bib.bib3); [Nguyen et al. 2012](https://ar5iv.labs.arxiv.org/html/2403.12979#bib.bib13)). On the other hand, Nuclear Magnetic Resonance (NMR) qubits use radio frequency pulses. The speed at which these gates operate can differ significantly based on the technology, with photonic qubits working in picoseconds and NMR qubits taking up to several seconds ([Ladd et al. 2010](https://ar5iv.labs.arxiv.org/html/2403.12979#bib.bib8)). Gates that affect a single qubit encompass the X (NOT) gate, H (Hadamard) gate, and rotational gates like RXR\\_{X}/RYR\\_{Y}/RZR\\_{Z}, and the UU gate. Gates impacting multiple qubits consist of the CNOT (controlled-NOT) gate, Toffoli gate, controlled rotation gates, and the Peres gate ([Peres 1985](https://ar5iv.labs.arxiv.org/html/2403.12979#bib.bib14))."
+                    },
+                    {
+                      "type": "formula",
+                      "text": "RXR_{X}"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "RYR_{Y}"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "RZR_{Z}"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "UU"
+                    }
+                  ],
+                  "children": []
+                },
+                {
+                  "heading": "2.1.3. Quantum circuit",
+                  "level": 4,
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "text": "A quantum circuit is a structured series of gate tasks carried out chronologically. It starts with setting up the initial state of the qubits, known as state initialization. Following this, gate operations within the circuit modify qubits to achieve a specific state. The process concludes with a measurement using a particular gate. These quantum activities occur in a quantum Hilbert space ([Von Neumann 2018](https://ar5iv.labs.arxiv.org/html/2403.12979#bib.bib16))."
+                    }
+                  ],
+                  "children": []
+                },
+                {
+                  "heading": "2.1.4. Transpilation",
+                  "level": 4,
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "text": "Before running a quantum circuit, more complex gates, like Tofolli, multi-controlled NOT gate, etc. are broken into sets of gates that the quantum device natively understands. Converting gates to hardware native gates is known as *decomposition*. NISQ devices have restricted connectivity i.e. not every qubit is connected to every other qubit. Physical qubit connections are represented in a graph called a coupling map. Because not all qubits are connected, compilation requires mapping logical qubits to physical qubits, termed as *qubit mapping*. Decomposition combined with qubit mapping is formally known as transpilation. If a gate operation is required between qubits that are not connected, swap operations will be required to bring them to physically connected qubits. Each swap operation introduces 3 CNOT gates which increases the circuit depth and gate count."
+                    }
+                  ],
+                  "children": []
+                }
+              ]
+            },
+            {
+              "heading": "2.2. Quantum Circuit Transformation",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "There are two types of circuit transformation: rule-based approach and search-based approach. A rule-based approach involves utilizing gate-cancellation rules on particular subcircuits to reduce them into smaller amounts of gates with lower depths. For example, two back-to-back Pauli X gates computationally equate to identity operation (I) as [0110]​[0110]=[1001]\\begin{bmatrix}0&1\\\\ 1&0\\end{bmatrix}\\begin{bmatrix}0&1\\\\ 1&0\\end{bmatrix}=\\begin{bmatrix}1&0\\\\ 0&1\\end{bmatrix}. Similar behavior exists for other single-qubit gates and multi-qubit gates. This kind of circuit transformation is typically incorporated in quantum compilers like Qiskit ([Anis et al. 2021](https://ar5iv.labs.arxiv.org/html/2403.12979#bib.bib2)). Search-based approaches offer flexibility in terms of optimization. Rather than relying on gate-cancellation rules, this approach searches for a functionally equivalent circuit. Typically, Machine Learning (ML) techniques such as Reinforcement Learning (RL), generative models, or other methods aid the approach. In RL-based search, the current quantum circuit is the state, and the original version of the circuit is the environment. The circuit transformation performed in each step is the action, and based on some input, the agent performs the most rewarding action. Some RL-based works include \\raisebox{-0.9pt}{1}⃝ ([Moflic et al. 2023](https://ar5iv.labs.arxiv.org/html/2403.12979#bib.bib12)), that uses D-VAE to encode a quantum circuit DAG and send that encoding to an RL agent which then decides what action to perform among the possible set of updates, \\raisebox{-0.9pt}{2}⃝ ([Li et al. 2023](https://ar5iv.labs.arxiv.org/html/2403.12979#bib.bib11)), that uses Hierarchical Advantage Learning (HAL) combined with Proximal Policy Optimization (PPO) ([Schulman et al. 2017](https://ar5iv.labs.arxiv.org/html/2403.12979#bib.bib15)) to perform reinforcement learning, and \\raisebox{-0.9pt}{3}⃝ ([Fösel et al. 2021](https://ar5iv.labs.arxiv.org/html/2403.12979#bib.bib5)) that also uses PPO along with Advantage Actor Critique (AAC) scheme-based agent. In contrast, generative approaches such as ([Xu et al. 2022](https://ar5iv.labs.arxiv.org/html/2403.12979#bib.bib17)) generate quantum circuits as a Quantum Assembly Language (QASM) sequence of instructions. Other methods include \\raisebox{-0.9pt}{1}⃝ ([Zhou et al. 2020](https://ar5iv.labs.arxiv.org/html/2403.12979#bib.bib19)) uses Monte Carlo tree search framework to generate hardware compliant quantum circuits, and \\raisebox{-0.9pt}{2}⃝ ([Duncan et al. 2020](https://ar5iv.labs.arxiv.org/html/2403.12979#bib.bib4)) performs ZX-calculus on graphs to perform circuit transformation."
+                },
+                {
+                  "type": "formula",
+                  "text": "[0110]​[0110]=[1001]\\begin{bmatrix}0&1\\\\ 1&0\\end{bmatrix}\\begin{bmatrix}0&1\\\\ 1&0\\end{bmatrix}=\\begin{bmatrix}1&0\\\\ 0&1\\end{bmatrix}"
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "2.3. Message Passing",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "Generative graph models and graph neural networks, in general, require nodes to share information to build either a global or a local understanding of themselves and the nodes around them in hopes of generating a (semi-)unique representation. While there are multiple techniques, only two approaches exist in D-VAE and DeepGMG: simultaneous message passing and asynchronous message passing."
+                }
+              ],
+              "children": [
+                {
+                  "heading": "2.3.1. Simultaneous",
+                  "level": 4,
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "text": "The more common approach in graph neural networks, specifically Graph Convolution Networks (GCN), is simultaneous message passing. In D-VAE, simultaneous message passing starts by taking the initial type of each node and sharing it with all its immediate neighbors (downstream neighbors if uni-directional). These messages are then combined to create a new localized representation of each node based on its type and its neighbors. The localization extends to additional neighbors by iteratively repeating this process."
+                    }
+                  ],
+                  "children": []
+                },
+                {
+                  "heading": "2.3.2. D-VAE Asynchronous",
+                  "level": 4,
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "text": "D-VAE proposes an “asynchronous\" message-passing scheme. This name may seem misleading since D-VAE does require some synchronization. Analysis of the first few gates of Fig. [1](https://ar5iv.labs.arxiv.org/html/2403.12979#S2.F1 \"Figure 1 ‣ 2.2. Quantum Circuit Transformation ‣ 2. Background and Related Works ‣ AltGraph: Redesigning Quantum Circuits Using Generative Graph Models for Efficient Optimization\")b is done for clarity. At the top is the initial or the “start\" node. Once the representation of this node is created the children begin to process, however not all three children can process immediately. D-VAE requires processing all predecessor nodes before updating a node’s state. So, only the “csdg\" and the “y\" gate may asynchronously process. The “csx\" will not be active until the completion of the “cy\" node following “csdg\". While the synchronization is time-consuming, it allows each node a “complete\" understanding of all predecessor nodes."
+                    }
+                  ],
+                  "children": []
+                }
+              ]
+            },
+            {
+              "heading": "2.4. Generative Graph Models",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "Generative graph models create new equivalent models based on input graphs and various constraints. D-VAE encodes a DAG to the latent space, then the encoding is used to obtain reconstructed DAGs. For detailed analysis, different variations of the D-VAE generative graph model ([Zhang et al. 2019](https://ar5iv.labs.arxiv.org/html/2403.12979#bib.bib18)) are used. Namely, D-VAE GRU, D-VAE GCN, and D-VAE DeepGMG ([Li et al. 2018](https://ar5iv.labs.arxiv.org/html/2403.12979#bib.bib10)). All three versions use topological ordering to create their DAGs, differing mainly in the encoding method."
+                }
+              ],
+              "children": [
+                {
+                  "heading": "2.4.1. D-VAE GRU",
+                  "level": 4,
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "text": "The standard D-VAE approach uses the Gated Recurrent Unit (GRU), which encodes the current node’s state using the node’s predecessors’ states and the current node type. D-VAE uses asynchronous message passing ([Li et al. 2015](https://ar5iv.labs.arxiv.org/html/2403.12979#bib.bib9)) and topological sorting to ensure all information is available to the node before encoding. D-VAE defaults to bi-directional encoding, where upon completion of forward encoding D-VAE reverses the graph and the node states are updated by repeating the same process."
+                    }
+                  ],
+                  "children": []
+                },
+                {
+                  "heading": "2.4.2. D-VAE GCN",
+                  "level": 4,
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "text": "The second D-VAE approach uses GCN. D-VAE allows the designer to decide how many rounds of simultaneous message passing ([Kipf et al. 2016](https://ar5iv.labs.arxiv.org/html/2403.12979#bib.bib6)) they desire to create the encodings of the nodes. To initialize the encoding D-VAE uses the neighbor (or predecessors if uni-directional) node types to initialize each node’s state. In additional rounds of encoding neighbor (or predecessor) node states are used to update the state. Standard GCN models are primarily for encoding, so D-VAE applies the GRU method for GCN decoding."
+                    }
+                  ],
+                  "children": []
+                },
+                {
+                  "heading": "2.4.3. D-VAE DeepGMG",
+                  "level": 4,
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "text": "The third D-VAE approach uses DeepGMG ([Li et al. 2018](https://ar5iv.labs.arxiv.org/html/2403.12979#bib.bib10)). The original DeepGMG work focuses on undirected graph generation. It also does not use topological ordering and uses a random order instead. To make a more valid comparison, D-VAE updates the design of DeepGMG to use topological ordering, allowing for multiple iterations of message passing and the processing of directed graphs. DeepGMG relies on a similar simultaneous message-passing scheme as GCN with an important update. DeepGMG, instead of only relying on surrounding node information, also accounts for an edge feature vector to better understand node connections."
+                    }
+                  ],
+                  "children": []
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "heading": "3. AltGraph: Proposed Approach",
+          "level": 2,
+          "content": [],
+          "children": [
+            {
+              "heading": "3.1. Approach",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "To leverage the generative abilities of D-VAE for the quantum domain, we propose AltGraph, a robust approach to generate valid equivalent quantum circuits. In quantum graph representation, nodes represent quantum gates in a system, and edges represent the connection between the gates. We discuss the changes required in original D-VAE to realize AltGraph in the following paragraphs."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "The overall process of generating quantum circuits using AltGraph is shown in Fig. [2](https://ar5iv.labs.arxiv.org/html/2403.12979#S2.F2 \"Figure 2 ‣ 2.3.1. Simultaneous ‣ 2.3. Message Passing ‣ 2. Background and Related Works ‣ AltGraph: Redesigning Quantum Circuits Using Generative Graph Models for Efficient Optimization\"). First, the original quantum circuits (step \\raisebox{-0.9pt}{1}⃝) are converted into DAGs (step \\raisebox{-0.9pt}{2}⃝). These DAGs are sent to the generative graph model (step \\raisebox{-0.9pt}{3}⃝) for reconstructing new DAGs (step \\raisebox{-0.9pt}{4}⃝), from which the new quantum circuit is reconstructed (step \\raisebox{-0.9pt}{5}⃝). For training, we use MSE Loss between the density matrices of original and new quantum circuits to ensure similar functionality. Finally, to obtain the best quantum circuit, we perturb the latent representation of the circuit with some noise (step \\raisebox{-0.9pt}{6}⃝) and obtain multiple candidate circuits. From these, one can select the circuit with matching density metrix and least depth and gate count."
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "3.2. Loss",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "D-VAE used teacher forcing to get faster convergence of models. For loss evaluation, D-VAE used encoder KLD and the model’s ability to predict the correct node. D-VAE also evaluated the loss based on the model’s ability to predict edges using the “true\" node. While these features are viable when dealing with graphs and ensuring similarly designed graphs, the goal is to generate equivalent quantum circuits. Structurally similar graphs are not a guarantee of equivalent quantum circuits. It’s necessary to compare density matrices to evaluate quantum circuit equivalence. The loss process is updated to generate the nodes and edges rather than forcing edge predictions based on the “true\" node. This forces complete graph reconstruction for each input, allowing density matrix comparison. The density matrices are taken from the target hardware post-transpilation using Qiskit’s default optimization level 1. This ensures the circuits are compared based on their real values rather than the ideal state. AltGraph’s loss calculation uses the KLD of the encoder, the mean squared error (MSE) of the original circuit’s density matrix, and the reconstructed circuit’s density matrix."
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "3.3. Graph Generation",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "D-VAE requires that each graph has a single input node and a single output node. In cases with multiple input/output nodes, D-VAE requires a virtual node to represent the final input/output. To match D-VAE requirements, input qubit wires map to the start node, and all qubit measurements map to the end node. An example mapping is in Fig. [1](https://ar5iv.labs.arxiv.org/html/2403.12979#S2.F1 \"Figure 1 ‣ 2.2. Quantum Circuit Transformation ‣ 2. Background and Related Works ‣ AltGraph: Redesigning Quantum Circuits Using Generative Graph Models for Efficient Optimization\")."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Quantum circuits have numerous requirements to ensure validity. Ideally, a neural network could learn the basic requirements of quantum circuit structures. However, the loss calculations use the difference between the density matrices of the original and reconstructed circuit, so even the initial circuits need to be valid constructed designs."
+                }
+              ],
+              "children": [
+                {
+                  "heading": "3.3.1. Number of Qubits",
+                  "level": 4,
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "text": "The first requirement for density matrix comparison is that both density matrices are the same size. Density matrices are size 2N∗2N2^{N}\\*2^{N} where NN is the number of qubits. To ensure reconstructed circuit size equivalence, the reconstructed DAG start node out-degree must match the out-degree of the original DAG’s start node. The reconstructed DAG end node must have the same in-degree as the original DAG’s end node."
+                    },
+                    {
+                      "type": "formula",
+                      "text": "2N∗2N2^{N}*2^{N}"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "NN"
+                    }
+                  ],
+                  "children": []
+                },
+                {
+                  "heading": "3.3.2. Gates & Gate Connections",
+                  "level": 4,
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "text": "D-VAE uses a topological ordering for both encoding and reconstruction. During reconstruction, it allows for the selection of edges between the current node and any previous node. D-VAE also allows the model to learn the appropriate amount of in and out edges. However, quantum gates have a specified in and out edge limitation. To ensure the use of all out-edges, the model maintains a queue of available nodes for the current node to connect. The node is removed from the queue when the out-edges are complete. When the model predicts the “end\" node it connects all remaining nodes in the queue. The model predicts the most likely connection from the available list of previous nodes for the in edge. If it is a multiple-wire gate, the prediction process repeats until all in-degrees are filled."
+                    }
+                  ],
+                  "children": []
+                },
+                {
+                  "heading": "3.3.3. Circuit Types",
+                  "level": 4,
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "text": "To reduce the search space complexity of quantum circuits training/testing uses graphs made of non-parametric circuits that consist of one and two-qubit gates. Specifically, the single qubit gates xx, yy, zz, hh, ss, tt, i​did, s​x​d​gsxdg, s​d​gsdg, s​xsx, t​d​gtdg and c​xcx, c​ycy, c​zcz, s​w​a​pswap, d​c​xdcx, i​s​w​a​piswap, c​s​d​gcsdg, e​c​recr, c​hch, c​scs, c​s​xcsx two-qubit gates are used."
+                    },
+                    {
+                      "type": "formula",
+                      "text": "xx"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "yy"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "zz"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "hh"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "ss"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "tt"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "i​did"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "s​x​d​gsxdg"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "s​d​gsdg"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "s​xsx"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "t​d​gtdg"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "c​xcx"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "c​ycy"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "c​zcz"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "s​w​a​pswap"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "d​c​xdcx"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "i​s​w​a​piswap"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "c​s​d​gcsdg"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "e​c​recr"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "c​hch"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "c​scs"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "c​s​xcsx"
+                    }
+                  ],
+                  "children": []
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "heading": "4. Results",
+          "level": 2,
+          "content": [],
+          "children": [
+            {
+              "heading": "4.1. Setup and Evaluation Framework",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "In generating equivalent quantum circuits, the maximum gate predictions are capped at the original circuit gate count. This can yield higher loss values but penalizes models for larger circuits, aligning with the aim of more hardware-friendly circuits. AltGraph’s performance is assessed with qubit counts of 2, 4, and 6 and gate counts of 16, 24, and 32 per qubit. A total of 300 random circuits for each size are produced using gates from Section [3.3.3](https://ar5iv.labs.arxiv.org/html/2403.12979#S3.SS3.SSS3 \"3.3.3. Circuit Types ‣ 3.3. Graph Generation ‣ 3. AltGraph: Proposed Approach ‣ AltGraph: Redesigning Quantum Circuits Using Generative Graph Models for Efficient Optimization\"). The data follows a 90-10 training/testing split. The same 300 samples are used for all models, ensuring consistency. Each model is trained thrice per circuit size, and reported values represent the average outcomes."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "2 Qubit 4 Qubit 6 Qubit Model Type #Gate Loss Reduction Loss Reduction Loss Reduction GRU 16 0.09 19.59% 0.01 24.63% 0.01 30.18% GRU 24 0.09 33.94% 0.01 43.86% 0.01 43.96% GRU 32 0.10 36.27% 0.01 51.37% 0.01 54.16% GCN 16 0.22 19.83% 0.12 26.17% 0.11 32.29% GCN 24 0.31 33.02% 0.22 41.09% 0.19 41.99% GCN 32 0.54 35.34% 0.44 51.74% 0.43 53.1% DeepGMG 16 0.14 19.57% 0.03 23.67% 0.06 30.34% DeepGMG 24 0.18 31.99% 0.10 31.71% 0.08 42.6% DeepGMG 32 0.28 40.77% 0.11 40.44% 0.12 51.50%"
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "4.2. Results and Analysis",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "Table [1](https://ar5iv.labs.arxiv.org/html/2403.12979#S4.T1 \"Table 1 ‣ 4.1. Setup and Evaluation Framework ‣ 4. Results ‣ AltGraph: Redesigning Quantum Circuits Using Generative Graph Models for Efficient Optimization\") presents the mean training loss and gate reduction percentages for three models: AltGraph GRU, AltGraph GCN, and AltGraph DeepGMG across various circuit sizes. These percentage reductions are derived from comparing the number of gates between the transpiled original and the transpiled reconstructed circuits."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "The GRU model’s loss tends towards zero faster than both the GCN and DeepGMG models, irrespective of the qubit and gate counts. Moreover, DeepGMG’s loss approaches zero faster than GCN. Interestingly, despite GCN’s generally higher loss, it surpasses both GRU and DeepGMG when circuits have 16 gates, irrespective of the qubit count. Conversely, for circuits with 24 gates, GRU is superior, irrespective of qubit count. For 32-gate circuits, performance varies by qubit count: DeepGMG excels for 2-qubit circuits, GCN for 4-qubit circuits, and GRU for 6-qubit circuits."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Delving deeper into each model’s capability to yield a circuit with fewer gates post-transpilation provides further insights into their efficiencies. This analysis involves three different encodings for each testing gate and three decodings for each encoding sample, resulting in nine reconstructions per circuit. Upon generating these samples, both the reconstructed and original circuits are transpiled using Qiskit’s FakeWashingtonV2 to emulate performance on cutting-edge hardware. Fig. [3](https://ar5iv.labs.arxiv.org/html/2403.12979#S4.F3 \"Figure 3 ‣ 4.2. Results and Analysis ‣ 4. Results ‣ AltGraph: Redesigning Quantum Circuits Using Generative Graph Models for Efficient Optimization\")a showcases the mean gate reduction for the AltGraph GRU model per transpiled circuit size."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "![Refer to caption](./[2403.12979] AltGraph_ Redesigning Quantum Circuits Using Generative Graph Models for Efficient Optimization_files/box_gate.png)"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "![Refer to caption](./[2403.12979] AltGraph_ Redesigning Quantum Circuits Using Generative Graph Models for Efficient Optimization_files/box_depth.png)"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Gate Reduction Trends Across Models: From Fig. [3](https://ar5iv.labs.arxiv.org/html/2403.12979#S4.F3 \"Figure 3 ‣ 4.2. Results and Analysis ‣ 4. Results ‣ AltGraph: Redesigning Quantum Circuits Using Generative Graph Models for Efficient Optimization\")a, a consistent positive gate reduction is observed across different qubits and gate configurations. Median gate reductions range from 24% (2 qubits, 16 gates) to 53% (6 qubits, 32 gates). As the gate count increases within each qubit category, there’s a proportional increase in gate reduction percentages. Specifically, for 6 qubit circuits with 16, 24, and 32 gates, the median reductions stand at 33.6%, 42.4%, and 52.9%, respectively. Comparable patterns are seen for 2 and 4-qubit circuits. There are few reconstructions that result in an increased gate count, like a 4 qubit, 16 gate circuit showing a surge of 73%. However, such cases are exceptions, as Fig. [3](https://ar5iv.labs.arxiv.org/html/2403.12979#S4.F3 \"Figure 3 ‣ 4.2. Results and Analysis ‣ 4. Results ‣ AltGraph: Redesigning Quantum Circuits Using Generative Graph Models for Efficient Optimization\")a indicates that most alternative configurations yield a reduction in gate count."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Trends seen in GCN and DeepGMG match those of GRU, as demonstrated in Figures [3](https://ar5iv.labs.arxiv.org/html/2403.12979#S4.F3 \"Figure 3 ‣ 4.2. Results and Analysis ‣ 4. Results ‣ AltGraph: Redesigning Quantum Circuits Using Generative Graph Models for Efficient Optimization\")b and [3](https://ar5iv.labs.arxiv.org/html/2403.12979#S4.F3 \"Figure 3 ‣ 4.2. Results and Analysis ‣ 4. Results ‣ AltGraph: Redesigning Quantum Circuits Using Generative Graph Models for Efficient Optimization\")c. GCN’s median gate reduction spans from 25% (2 qubits, 16 gates) to 54% (4 qubits, 32 gates), and DeepGMG’s range is from 27% (2 qubits, 16 gates) to 52.4% (6 qubits, 32 gates). For both models, as the number of gates grows, gate reduction percentages correspondingly increase. Comparatively: \\raisebox{-0.9pt}{1}⃝ For 2-qubit circuits, DeepGMG achieves the peak in median gate reduction, followed by GRU and then GCN, \\raisebox{-0.9pt}{2}⃝ in 4-qubit circuits, GCN leads in median gate reduction, with GRU second and DeepGMG last, and \\raisebox{-0.9pt}{3}⃝ for 6-qubit circuits, all models display similar median reductions, though DeepGMG has an advantage."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Depth Reduction Trends Across Models: From Fig. [4](https://ar5iv.labs.arxiv.org/html/2403.12979#S4.F4 \"Figure 4 ‣ 4.2. Results and Analysis ‣ 4. Results ‣ AltGraph: Redesigning Quantum Circuits Using Generative Graph Models for Efficient Optimization\")a, there’s a clear and consistent depth reduction across different configurations of qubits and gates. The median depth reduction spans from 24% for circuits with 2 qubits and 16 gates to 56% for those with 4 qubits and 32 gates. Intriguingly, circuits with an identical qubit count display an enhanced depth percentage reduction with the addition of more gates. For 6-qubit circuits, the median depth reductions are 39.6% for 16 gates, 49.9% for 24 gates, and 53.9% for 32 gates. This pattern is consistent for 2 and 4-qubit circuits as well. While there are rare quantum circuits that show an increased depth post-reconstruction, such as a 4-qubit, 16-gate circuit with a 100% depth increase, these cases are rare, predominantly outliers. As illustrated in Fig. [4](https://ar5iv.labs.arxiv.org/html/2403.12979#S4.F4 \"Figure 4 ‣ 4.2. Results and Analysis ‣ 4. Results ‣ AltGraph: Redesigning Quantum Circuits Using Generative Graph Models for Efficient Optimization\")a, the dominant trend is a depth reduction in the alternative representations."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "GCN and DeepGMG trends reflect those of GRU, as observed in Figures [4](https://ar5iv.labs.arxiv.org/html/2403.12979#S4.F4 \"Figure 4 ‣ 4.2. Results and Analysis ‣ 4. Results ‣ AltGraph: Redesigning Quantum Circuits Using Generative Graph Models for Efficient Optimization\")b and [4](https://ar5iv.labs.arxiv.org/html/2403.12979#S4.F4 \"Figure 4 ‣ 4.2. Results and Analysis ‣ 4. Results ‣ AltGraph: Redesigning Quantum Circuits Using Generative Graph Models for Efficient Optimization\")c. GCN’s median depth reduction ranges from 26% (2 qubits, 16 gates) to 55% (4 qubits, 32 gates), while for DeepGMG, it’s between 24% (2 qubits, 16 gates) and 58% (6 qubits, 32 gates). As gate counts rise for every qubit configuration, depth reduction percentages also climb for both GCN and DeepGMG. Comparative analysis of the models reveals: \\raisebox{-0.9pt}{1}⃝ For 2-qubit circuits, GRU tops in median depth reduction, succeeded by DeepGMG and then GCN. \\raisebox{-0.9pt}{2}⃝ With 4-qubit circuits, GRU retains the lead in median depth reduction, followed by GCN and subsequently DeepGMG. \\raisebox{-0.9pt}{3}⃝ In 6-qubit circuits, DeepGMG stands out with the highest median depth reduction, with GCN in the second spot and GRU trailing."
+                },
+                {
+                  "type": "table",
+                  "text": "| Model | 16 Gate | 24 Gate | 32 Gate | | --- | --- | --- | --- | | AltGraph GRU | 24.80% | 40.59% | 47.27% | | AltGraph GCN | 26.10% | 38.70% | 46.73% | | AltGraph DeepGMG | 24.53% | 35.44% | 44.24% |"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Model Average Gates Reduced Average Reduction% AltGraph GRU 35.67 37.55 AltGraph GCN 33.78 37.17 AltGraph DeepGMG 32.87 34.73 Qiskit 26.15 18.65 t|k​e​t⟩\\ket{ket} 73.68 33.5 Quartz ([Xu et al. 2022](https://ar5iv.labs.arxiv.org/html/2403.12979#bib.bib17)) – 30.1 Quarl ([Li et al. 2023](https://ar5iv.labs.arxiv.org/html/2403.12979#bib.bib11)) – 36.6 Monte Carlo Tree ([Zhou et al. 2020](https://ar5iv.labs.arxiv.org/html/2403.12979#bib.bib19)) – 30.0"
+                },
+                {
+                  "type": "formula",
+                  "text": "|k​e​t⟩\\ket{ket}"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Comparative Analysis of Model Performances: \\raisebox{-0.9pt}{1}⃝ From Table [2](https://ar5iv.labs.arxiv.org/html/2403.12979#S4.T2 \"Table 2 ‣ 4.2. Results and Analysis ‣ 4. Results ‣ AltGraph: Redesigning Quantum Circuits Using Generative Graph Models for Efficient Optimization\"), AltGraph GRU stands out in its gate count reduction capabilities when compared to both GCN and DeepGMG for circuits with 24 and 32 gates. However, for 16-gate circuits, the GCN model surpasses, showing a 5.11% performance difference over the GRU model. The cumulative gate reduction performance of each model is detailed in Table [3](https://ar5iv.labs.arxiv.org/html/2403.12979#S4.T3 \"Table 3 ‣ 4.2. Results and Analysis ‣ 4. Results ‣ AltGraph: Redesigning Quantum Circuits Using Generative Graph Models for Efficient Optimization\"). \\raisebox{-0.9pt}{2}⃝ Upon inspecting Table [3](https://ar5iv.labs.arxiv.org/html/2403.12979#S4.T3 \"Table 3 ‣ 4.2. Results and Analysis ‣ 4. Results ‣ AltGraph: Redesigning Quantum Circuits Using Generative Graph Models for Efficient Optimization\"), it’s evident that the AltGraph GRU, on average, trims more gates than either the GCN or DeepGMG models. Yet, GCN remains a strong contender, lagging behind GRU by a mere 1.02%. To understand how AltGraph performs compared to state-of-the-art systems we include the results from optimizing the same circuits using two rules based methods, t|k​e​t⟩\\ket{ket} and Qiskit. We also include the reported average improvements of 3 state-of-the-art systems ran on IBM Qiskit non-parametric circuits. ([Xu et al. 2022](https://ar5iv.labs.arxiv.org/html/2403.12979#bib.bib17); [Schulman et al. 2017](https://ar5iv.labs.arxiv.org/html/2403.12979#bib.bib15); [Zhou et al. 2020](https://ar5iv.labs.arxiv.org/html/2403.12979#bib.bib19))."
+                },
+                {
+                  "type": "formula",
+                  "text": "|k​e​t⟩\\ket{ket}"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "The collective depth reduction performance for each model is compiled in Table [4](https://ar5iv.labs.arxiv.org/html/2403.12979#S4.T4 \"Table 4 ‣ 4.2. Results and Analysis ‣ 4. Results ‣ AltGraph: Redesigning Quantum Circuits Using Generative Graph Models for Efficient Optimization\"). \\raisebox{-0.9pt}{3}⃝ A closer look at Table [4](https://ar5iv.labs.arxiv.org/html/2403.12979#S4.T4 \"Table 4 ‣ 4.2. Results and Analysis ‣ 4. Results ‣ AltGraph: Redesigning Quantum Circuits Using Generative Graph Models for Efficient Optimization\") reveals that the AltGraph DeepGMG consistently outperforms in depth reduction when set against the GCN and GRU models. Nevertheless, the GRU model isn’t far behind, showing only a slight 5.98% performance gap to the DeepGMG. For a comprehensive view of the average MSE for test circuits, refer to the last column of Table [4](https://ar5iv.labs.arxiv.org/html/2403.12979#S4.T4 \"Table 4 ‣ 4.2. Results and Analysis ‣ 4. Results ‣ AltGraph: Redesigning Quantum Circuits Using Generative Graph Models for Efficient Optimization\"). \\raisebox{-0.9pt}{4}⃝ Finally, analyzing Table [4](https://ar5iv.labs.arxiv.org/html/2403.12979#S4.T4 \"Table 4 ‣ 4.2. Results and Analysis ‣ 4. Results ‣ AltGraph: Redesigning Quantum Circuits Using Generative Graph Models for Efficient Optimization\"), it becomes clear that AltGraph GRU excels in achieving a smaller density matrix difference than both the GCN and DeepGMG models."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Model Average Depth Reduction% Average MSE AltGraph GRU 37.75 .0074 AltGraph GCN 35.54 .27 AltGraph DeepGMG 40.08 .13"
+                }
+              ],
+              "children": []
+            }
+          ]
+        },
+        {
+          "heading": "5. Discussion",
+          "level": 2,
+          "content": [],
+          "children": [
+            {
+              "heading": "5.1. Mixed Optimization Techniques",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "Drawing from Table [2](https://ar5iv.labs.arxiv.org/html/2403.12979#S4.T2 \"Table 2 ‣ 4.2. Results and Analysis ‣ 4. Results ‣ AltGraph: Redesigning Quantum Circuits Using Generative Graph Models for Efficient Optimization\"), it’s evident that graph generative models present a promising avenue for gate reductions across different circuit dimensions. However, there’s scope for refining the models further. The circuits used in this study were randomly generated and didn’t undergo optimization using conventional rule-based methodologies. If models were trained on optimized circuits, it’s plausible that there would be a more significant overall reduction between original and reconstructed circuits, as the model would target only substitutions not already addressed. Implementing rule-based optimization post circuit reconstruction could yield added reductions."
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "5.2. MSE Constraints",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "Despite the models exhibiting robust learning capabilities, using MSELoss as an evaluative metric has its drawbacks. While MSELoss serves well in gauging matrix similarity, there are pitfalls in its application. Being a regressive optimizer, MSELoss doesn’t always ensure the discovery of the best solution. In the quantum realm, this can translate to functional discrepancies. For instance, if a model, during training, predicts a Pauli-X gate ([0110]\\begin{bmatrix}0&1\\\\ 1&0\\end{bmatrix}) for an original Pauli-Z gate ([100−1]\\begin{bmatrix}1&0\\\\ 0&-1\\end{bmatrix}) , a high loss results. But if the model later predicts an S gate ([100i]\\begin{bmatrix}1&0\\\\ 0&i\\end{bmatrix}) , the resulting lower loss might misleadingly suggest an “optimized” circuit, which isn’t functionally accurate. A deeper probe into the relationship between a low MSELoss and a model’s functional accuracy is warranted."
+                },
+                {
+                  "type": "formula",
+                  "text": "[0110]\\begin{bmatrix}0&1\\\\ 1&0\\end{bmatrix}"
+                },
+                {
+                  "type": "formula",
+                  "text": "[100−1]\\begin{bmatrix}1&0\\\\ 0&-1\\end{bmatrix}"
+                },
+                {
+                  "type": "formula",
+                  "text": "[100i]\\begin{bmatrix}1&0\\\\ 0&i\\end{bmatrix}"
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "5.3. Density Matrix Constraints",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "Another challenge with MSELoss arises with sparse density matrices. In cases with notably high qubit counts and minimal gate counts, MSELoss might fall short. For illustration, consider a 16 qubit circuit with (216∗216=4,294,967,2962^{16}\\*2^{16}=4,294,967,296) values that possesses only one single qubit gate. Here, the MSELoss for a circuit with any such gate would be nearly zero. Yet, this limitation can be overlooked as the primary objective is to optimize large, intricate circuits, rendering sparse configurations, like the one mentioned, irrelevant to the study’s context."
+                },
+                {
+                  "type": "formula",
+                  "text": "216∗216=4,294,967,2962^{16}*2^{16}=4,294,967,296"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Scalability to larger qubit counts initially seems problematic, as density matrices suffer from Nth power scaling. However, scaling can be addressed by performing block replacements of sub-circuits. For example, if there is a 100 qubit quantum circuit, the density matrix will have 21002^{100} elements, which will be difficult to process. However, one can break it down into blocks of five qubit sub-circuits and generate alternate representations for each sub-circuit one by one."
+                },
+                {
+                  "type": "formula",
+                  "text": "21002^{100}"
+                }
+              ],
+              "children": []
+            }
+          ]
+        },
+        {
+          "heading": "6. Conclusions",
+          "level": 2,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "In our study, generative graph models have proven to be a promising method for gate reduction in quantum circuits. The AltGraph GRU model showcased an average gate count reduction of 37.55%, coupled with a depth reduction of 37.75%, and achieved an impressively low average MSE of 0.0074. The AltGraph GCN model delivered a comparable gate count reduction of 37.17%, a depth reduction of 35.54%, but with a slightly higher average MSE of 0.27. Finally, the AltGraph DeepGMG model, while averaging a gate reduction of 34.73% and achieving the highest depth reduction of 40.08%, reported an average MSE of 0.13. These findings underscore the potential and versatility of generative graph models in the realm of quantum circuit optimization."
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "References",
+          "level": 2,
+          "content": [
+            {
+              "type": "list",
+              "text": "* (1) * Anis et al. (2021) Md Sajid Anis et al. 2021. Qiskit: An open-source framework for quantum computing. *Qiskit/qiskit* (2021). * Benhelm et al. (2008) Jan Benhelm et al. 2008. Towards fault-tolerant quantum computing with trapped ions. *Nature Physics* 4, 6 (2008), 463–466. * Duncan et al. (2020) Ross Duncan et al. 2020. Graph-theoretic Simplification of Quantum Circuits with the ZX-calculus. *Quantum* 4 (2020), 279. * Fösel et al. (2021) Thomas Fösel et al. 2021. Quantum circuit optimization with deep reinforcement learning. *arXiv preprint arXiv:2103.07585* (2021). * Kipf et al. (2016) Thomas N Kipf et al. 2016. Semi-supervised classification with graph convolutional networks. *arXiv preprint arXiv:1609.02907* (2016). * Krantz et al. (2019) Philip Krantz et al. 2019. A quantum engineer’s guide to superconducting qubits. *Applied physics reviews* 6, 2 (2019). * Ladd et al. (2010) Thaddeus D Ladd et al. 2010. Quantum computers. *nature* 464, 7285 (2010), 45–53. * Li et al. (2015) Yujia Li et al. 2015. Gated graph sequence neural networks. *arXiv preprint arXiv:1511.05493* (2015). * Li et al. (2018) Yujia Li et al. 2018. Learning deep generative models of graphs. *arXiv preprint arXiv:1803.03324* (2018). * Li et al. (2023) Zikun Li et al. 2023. Quarl: A Learning-Based Quantum Circuit Optimizer. *arXiv preprint arXiv:2307.10120* (2023). * Moflic et al. (2023) Ioana Moflic et al. 2023. Graph Neural Network Autoencoders for Efficient Quantum Circuit Optimisation. *arXiv preprint arXiv:2303.03280* (2023). * Nguyen et al. (2012) Hai-Son Nguyen et al. 2012. Optically gated resonant emission of single quantum dots. *Physical review letters* 108, 5 (2012), 057401. * Peres (1985) Asher Peres. 1985. Reversible logic and quantum computers. *Physical review A* 32, 6 (1985), 3266. * Schulman et al. (2017) John Schulman et al. 2017. Proximal policy optimization algorithms. *arXiv preprint arXiv:1707.06347* (2017). * Von Neumann (2018) John Von Neumann. 2018. *Mathematical foundations of quantum mechanics: New edition*. Vol. 53. Princeton university press. * Xu et al. (2022) Mingkuan Xu et al. 2022. Quartz: superoptimization of quantum circuits. In *Proceedings of the 43rd ACM SIGPLAN International Conference on Programming Language Design and Implementation*. 625–640. * Zhang et al. (2019) Muhan Zhang et al. 2019. D-vae: A variational autoencoder for directed acyclic graphs. *Advances in Neural Information Processing Systems* 32 (2019). * Zhou et al. (2020) Xiangzhen Zhou et al. 2020. A Monte Carlo tree search framework for quantum circuit transformation. In *Proceedings of the 39th International Conference on Computer-Aided Design*. 1–7."
+            }
+          ],
+          "children": []
+        }
+      ]
+    }
+  ],
+  "chunks": [
+    {
+      "heading_path": [
+        "AltGraph: Redesigning Quantum Circuits Using Generative Graph Models for Efficient OptimizationDOI: XXXXXXX.XXXXXXXConference: Make sure to enter the correct conference title from your rights confirmation emai; June, 2024; San Francisco, CAISBN: 978-1-4503-XXXX-X/18/06"
+      ],
+      "text": "# AltGraph: Redesigning Quantum Circuits Using Generative Graph Models for Efficient OptimizationDOI: XXXXXXX.XXXXXXXConference: Make sure to enter the correct conference title from your rights confirmation emai; June, 2024; San Francisco, CAISBN: 978-1-4503-XXXX-X/18/06"
+    },
+    {
+      "heading_path": [
+        "AltGraph: Redesigning Quantum Circuits Using Generative Graph Models for Efficient OptimizationDOI: XXXXXXX.XXXXXXXConference: Make sure to enter the correct conference title from your rights confirmation emai; June, 2024; San Francisco, CAISBN: 978-1-4503-XXXX-X/18/06",
+        "Abstract."
+      ],
+      "text": "###### Abstract.\n\nQuantum circuit transformation aims to produce equivalent circuits while optimizing for various aspects such as circuit depth, gate count, and compatibility with modern Noisy Intermediate Scale Quantum (NISQ) devices. There are two techniques for circuit transformation. The first is a rule-based approach that greedily cancels out pairs of gates that equate to the identity unitary operation. Rule-based approaches are used in quantum compilers such as Qiskit, t|k​e​t⟩\\ket{ket}, and Quilc. The second is a search-based approach that tries to find an equivalent quantum circuit by exploring the quantum circuits search space. Search-based approaches typically rely on machine learning techniques such as generative models and Reinforcement Learning (RL). In this work, we propose *AltGraph*, a novel search-based circuit transformation approach that generates equivalent quantum circuits using existing generative graph models. We use three main graph models: DAG Variational Autoencoder (*D-VAE*) with two variants: Gated Recurrent Unit (GRU) and Graph Convolutional Network (GCN), and Deep Generative Model for Graphs (*DeepGMG*) that take a Direct Acyclic Graph (DAG) of the quantum circuit as input and output a new DAG from which we reconstruct the equivalent quantum circuit. Next, we perturb the latent space to generate equivalent quantum circuits some of which may be more compatible with the hardware coupling map and/or enable better optimization leading to reduced gate count and circuit depth. AltGraph achieves on average a 37.55% reduction in the number of gates and a 37.75% reduction in the circuit depth post-transpiling compared to the original transpiled circuit with only 0.0074 Mean Squared Error (MSE) in the density matrix.\n\n|k​e​t⟩\\ket{ket}"
+    },
+    {
+      "heading_path": [
+        "AltGraph: Redesigning Quantum Circuits Using Generative Graph Models for Efficient OptimizationDOI: XXXXXXX.XXXXXXXConference: Make sure to enter the correct conference title from your rights confirmation emai; June, 2024; San Francisco, CAISBN: 978-1-4503-XXXX-X/18/06",
+        "Keywords:"
+      ],
+      "text": "###### Keywords:"
+    },
+    {
+      "heading_path": [
+        "AltGraph: Redesigning Quantum Circuits Using Generative Graph Models for Efficient OptimizationDOI: XXXXXXX.XXXXXXXConference: Make sure to enter the correct conference title from your rights confirmation emai; June, 2024; San Francisco, CAISBN: 978-1-4503-XXXX-X/18/06",
+        "1. Introduction"
+      ],
+      "text": "## 1. Introduction\n\nQuantum circuits are the fundamental component of modern-day quantum computing. They are analogous to classical electronic circuits, where various classical (quantum) gate operations are performed on bits (qubits) to obtain the desired output. Typically, each quantum circuit has a set of quantum gate operations followed by a measurement operation on desired qubits at the end. Special quantum circuits, such as Parametric Quantum Circuits (PQC), also have a state preparation component at the start to prepare the initial state of qubits. Each quantum gate is a unitary operation that can be represented as unitary matrix UU (for conjugate transpose U∗U^{\\*}, U​U∗=U​U−1=IUU^{\\*}=UU^{-1}=I) and works on either a single qubit or multiple qubits. A few well-known single qubit gates are Hadamard (H), Pauli X/Y/Z gates, rotation gates like RX/RY/RZ and U, and multi-qubit gates are CNOT, Toffoli, controlled Pauli and controlled rotation gates.\n\nUU\n\nU∗U^{*}\n\nU​U∗=U​U−1=IUU^{*}=UU^{-1}=I\n\nIdeal quantum circuits with no noise produce correct output with 100%\\% fidelity. Unfortunately, NISQ computers have gate errors, readout errors, decoherence errors, crosstalk errors, and other noise sources that degrade the overall fidelity and correctness of computation. In such noisy environments, gate count and circuit depth are salient when crafting a circuit. Typically, circuits with low depths and gate counts are ideal for maximum fidelity. Therefore, generating equivalent quantum circuits to obtain lower-gate functionally equivalent quantum circuits is a fundamental research problem in the NISQ era.\n\n%\\%\n\nThere are two methods of performing *quantum circuit transformation* (referred to as *circuit transformation* for brevity) ([Li et al. 2023](https://ar5iv.labs.arxiv.org/html/2403.12979#bib.bib11)) namely, *rule-based* and *search-based*. The former uses gate-cancellation rules to optimize quantum circuits([Anis et al. 2021](https://ar5iv.labs.arxiv.org/html/2403.12979#bib.bib2)), while the latter uses machine learning techniques to find functionally equivalent quantum circuits from the search space of quantum circuits ([Li et al. 2023](https://ar5iv.labs.arxiv.org/html/2403.12979#bib.bib11); [Schulman et al. 2017](https://ar5iv.labs.arxiv.org/html/2403.12979#bib.bib15); [Fösel et al. 2021](https://ar5iv.labs.arxiv.org/html/2403.12979#bib.bib5); [Xu et al. 2022](https://ar5iv.labs.arxiv.org/html/2403.12979#bib.bib17); [Zhou et al. 2020](https://ar5iv.labs.arxiv.org/html/2403.12979#bib.bib19)). These techniques primarily use Reinforcement Learning (RL) methods e.g., ([Moflic et al. 2023](https://ar5iv.labs.arxiv.org/html/2403.12979#bib.bib12)) uses an RL agent to determine the correct set of gate cancellations to reach optimal depth on ICM+H circuits. Since ICM+H circuits contain only CNOT and Hadamard gates which are easy to optimize, this technique may not necessarily work on quantum circuits involving other gates. ([Fösel et al. 2021](https://ar5iv.labs.arxiv.org/html/2403.12979#bib.bib5)) overcomes this issue by using parametric quantum circuits but require circuits to be hardware compliant prior to performing optimization. ([Xu et al. 2022](https://ar5iv.labs.arxiv.org/html/2403.12979#bib.bib17)) uses generative methods by generating circuits as Quantum Assembly Language (QASM) instructions, however the search space of the generation algorithm is limited and also does not sample new circuit representations that may fundamentally address the issues like hardware constraint. We address these shortcomings by proposing *AltGraph*: usage of generative graph models that produce an equivalent Directed Acyclic Graph (DAG) of the original quantum circuit DAG from which we reconstruct the corresponding quantum circuit. We perturb the latent space of the models to generate equivalent quantum circuits some of which may be more compatible with the hardware coupling map and/or enable better optimization leading to compact circuits. We use multiple graph generation models, specifically DAG Variational Autoencoder (D-VAE) Gated Recurrent Unit (GRU), D-VAE Graph Convolutional Network (GCN) and Deep Generative Model for Graphs (DeepGMG) and perform comparative analysis.\n\nNovelty: The D-VAE and DeepGMG models were able to process DAGs and generate stylistically similar graphs as the original DAGs. However, there was no way to guarantee a reconstructed DAG could be interpreted as a valid quantum circuit. We extend D-VAE and DeepGMG’s graph reconstruction capabilities to generate always valid quantum circuits. Furthermore, we enable the capability to generate novel quantum circuits equivalent to the original quantum circuit by sampling from the latent space of the generative models. Finally, we perform detailed comparative analysis of the effectiveness of the generative models in producing compact representation of the original circuits. *To the best of our knowledge, this is the first paper that uses generative graph model-based circuit transformation to produce optimized quantum circuits.*\n\nThe rest of the paper’s organization is as follows: Section [2](https://ar5iv.labs.arxiv.org/html/2403.12979#S2 \"2. Background and Related Works ‣ AltGraph: Redesigning Quantum Circuits Using Generative Graph Models for Efficient Optimization\") illustrates the background information required to understand the paper and related work. Section [3](https://ar5iv.labs.arxiv.org/html/2403.12979#S3 \"3. AltGraph: Proposed Approach ‣ AltGraph: Redesigning Quantum Circuits Using Generative Graph Models for Efficient Optimization\") presents the approach to convert the models to valid quantum circuit graph generators. Section [4](https://ar5iv.labs.arxiv.org/html/2403.12979#S4 \"4. Results ‣ AltGraph: Redesigning Quantum Circuits Using Generative Graph Models for Efficient Optimization\") contains visualizations of each model’s abilities to process quantum circuits. Section [5](https://ar5iv.labs.arxiv.org/html/2403.12979#S5 \"5. Discussion ‣ AltGraph: Redesigning Quantum Circuits Using Generative Graph Models for Efficient Optimization\") analyzes the results, and Section [6](https://ar5iv.labs.arxiv.org/html/2403.12979#S6 \"6. Conclusions ‣ AltGraph: Redesigning Quantum Circuits Using Generative Graph Models for Efficient Optimization\") summarizes the work."
+    },
+    {
+      "heading_path": [
+        "AltGraph: Redesigning Quantum Circuits Using Generative Graph Models for Efficient OptimizationDOI: XXXXXXX.XXXXXXXConference: Make sure to enter the correct conference title from your rights confirmation emai; June, 2024; San Francisco, CAISBN: 978-1-4503-XXXX-X/18/06",
+        "2. Background and Related Works"
+      ],
+      "text": "## 2. Background and Related Works"
+    },
+    {
+      "heading_path": [
+        "AltGraph: Redesigning Quantum Circuits Using Generative Graph Models for Efficient OptimizationDOI: XXXXXXX.XXXXXXXConference: Make sure to enter the correct conference title from your rights confirmation emai; June, 2024; San Francisco, CAISBN: 978-1-4503-XXXX-X/18/06",
+        "2. Background and Related Works",
+        "2.1. Fundamentals of Quantum Computing"
+      ],
+      "text": "### 2.1. Fundamentals of Quantum Computing"
+    },
+    {
+      "heading_path": [
+        "AltGraph: Redesigning Quantum Circuits Using Generative Graph Models for Efficient OptimizationDOI: XXXXXXX.XXXXXXXConference: Make sure to enter the correct conference title from your rights confirmation emai; June, 2024; San Francisco, CAISBN: 978-1-4503-XXXX-X/18/06",
+        "2. Background and Related Works",
+        "2.1. Fundamentals of Quantum Computing",
+        "2.1.1. Qubits"
+      ],
+      "text": "#### 2.1.1. Qubits\n\nQubits are the basic elements of a quantum computer, similar to bits in classical computing. Typically, a qubit is denoted by the quantum state |ψ⟩=\\ket{\\psi}= [αβ]\\big[\\begin{smallmatrix}\\alpha\\\\ \\beta\\end{smallmatrix}\\big]. Here, α\\alpha and β\\beta are complex values. The square magnitude of α\\alpha, |α|2|\\alpha|^{2}, indicates the likelihood of the qubit being observed as a classical 0, while |β|2|\\beta|^{2} shows the chance of it being observed as a classical 1. Their combined probabilities always sum up to 1, i.e., |α|2+|β|2=1|\\alpha|^{2}+|\\beta|^{2}=1. Every qubit has two primary states: |0⟩\\ket{0} (with α=1\\alpha=1 and β=0\\beta=0) and |1⟩\\ket{1} (with α=0\\alpha=0 and β=1\\beta=1). Qubits can be manipulated using unitary gates, and when measured, they settle into either a 0 or 1 state.\n\n|ψ⟩=\\ket{\\psi}=\n\n[αβ]\\big[\\begin{smallmatrix}\\alpha\\\\ \\beta\\end{smallmatrix}\\big]\n\nα\\alpha\n\nβ\\beta\n\nα\\alpha\n\n|α|2|\\alpha|^{2}\n\n|β|2|\\beta|^{2}\n\n|α|2+|β|2=1|\\alpha|^{2}+|\\beta|^{2}=1\n\n|0⟩\\ket{0}\n\nα=1\\alpha=1\n\nβ=0\\beta=0\n\n|1⟩\\ket{1}\n\nα=0\\alpha=0\n\nβ=1\\beta=1"
+    },
+    {
+      "heading_path": [
+        "AltGraph: Redesigning Quantum Circuits Using Generative Graph Models for Efficient OptimizationDOI: XXXXXXX.XXXXXXXConference: Make sure to enter the correct conference title from your rights confirmation emai; June, 2024; San Francisco, CAISBN: 978-1-4503-XXXX-X/18/06",
+        "2. Background and Related Works",
+        "2.1. Fundamentals of Quantum Computing",
+        "2.1.2. Quantum Gates"
+      ],
+      "text": "#### 2.1.2. Quantum Gates\n\nQuantum gates, which are unitary matrix functions, modify the states of one or multiple qubits. Dependent on qubit technology, gates are implemented in various ways. For instance, superconducting qubits utilize microwave pulses ([Krantz et al. 2019](https://ar5iv.labs.arxiv.org/html/2403.12979#bib.bib7)), while trapped ion and quantum dots employ laser pulses ([Benhelm et al. 2008](https://ar5iv.labs.arxiv.org/html/2403.12979#bib.bib3); [Nguyen et al. 2012](https://ar5iv.labs.arxiv.org/html/2403.12979#bib.bib13)). On the other hand, Nuclear Magnetic Resonance (NMR) qubits use radio frequency pulses. The speed at which these gates operate can differ significantly based on the technology, with photonic qubits working in picoseconds and NMR qubits taking up to several seconds ([Ladd et al. 2010](https://ar5iv.labs.arxiv.org/html/2403.12979#bib.bib8)). Gates that affect a single qubit encompass the X (NOT) gate, H (Hadamard) gate, and rotational gates like RXR\\_{X}/RYR\\_{Y}/RZR\\_{Z}, and the UU gate. Gates impacting multiple qubits consist of the CNOT (controlled-NOT) gate, Toffoli gate, controlled rotation gates, and the Peres gate ([Peres 1985](https://ar5iv.labs.arxiv.org/html/2403.12979#bib.bib14)).\n\nRXR_{X}\n\nRYR_{Y}\n\nRZR_{Z}\n\nUU"
+    },
+    {
+      "heading_path": [
+        "AltGraph: Redesigning Quantum Circuits Using Generative Graph Models for Efficient OptimizationDOI: XXXXXXX.XXXXXXXConference: Make sure to enter the correct conference title from your rights confirmation emai; June, 2024; San Francisco, CAISBN: 978-1-4503-XXXX-X/18/06",
+        "2. Background and Related Works",
+        "2.1. Fundamentals of Quantum Computing",
+        "2.1.3. Quantum circuit"
+      ],
+      "text": "#### 2.1.3. Quantum circuit\n\nA quantum circuit is a structured series of gate tasks carried out chronologically. It starts with setting up the initial state of the qubits, known as state initialization. Following this, gate operations within the circuit modify qubits to achieve a specific state. The process concludes with a measurement using a particular gate. These quantum activities occur in a quantum Hilbert space ([Von Neumann 2018](https://ar5iv.labs.arxiv.org/html/2403.12979#bib.bib16))."
+    },
+    {
+      "heading_path": [
+        "AltGraph: Redesigning Quantum Circuits Using Generative Graph Models for Efficient OptimizationDOI: XXXXXXX.XXXXXXXConference: Make sure to enter the correct conference title from your rights confirmation emai; June, 2024; San Francisco, CAISBN: 978-1-4503-XXXX-X/18/06",
+        "2. Background and Related Works",
+        "2.1. Fundamentals of Quantum Computing",
+        "2.1.4. Transpilation"
+      ],
+      "text": "#### 2.1.4. Transpilation\n\nBefore running a quantum circuit, more complex gates, like Tofolli, multi-controlled NOT gate, etc. are broken into sets of gates that the quantum device natively understands. Converting gates to hardware native gates is known as *decomposition*. NISQ devices have restricted connectivity i.e. not every qubit is connected to every other qubit. Physical qubit connections are represented in a graph called a coupling map. Because not all qubits are connected, compilation requires mapping logical qubits to physical qubits, termed as *qubit mapping*. Decomposition combined with qubit mapping is formally known as transpilation. If a gate operation is required between qubits that are not connected, swap operations will be required to bring them to physically connected qubits. Each swap operation introduces 3 CNOT gates which increases the circuit depth and gate count."
+    },
+    {
+      "heading_path": [
+        "AltGraph: Redesigning Quantum Circuits Using Generative Graph Models for Efficient OptimizationDOI: XXXXXXX.XXXXXXXConference: Make sure to enter the correct conference title from your rights confirmation emai; June, 2024; San Francisco, CAISBN: 978-1-4503-XXXX-X/18/06",
+        "2. Background and Related Works",
+        "2.2. Quantum Circuit Transformation"
+      ],
+      "text": "### 2.2. Quantum Circuit Transformation\n\nThere are two types of circuit transformation: rule-based approach and search-based approach. A rule-based approach involves utilizing gate-cancellation rules on particular subcircuits to reduce them into smaller amounts of gates with lower depths. For example, two back-to-back Pauli X gates computationally equate to identity operation (I) as [0110]​[0110]=[1001]\\begin{bmatrix}0&1\\\\ 1&0\\end{bmatrix}\\begin{bmatrix}0&1\\\\ 1&0\\end{bmatrix}=\\begin{bmatrix}1&0\\\\ 0&1\\end{bmatrix}. Similar behavior exists for other single-qubit gates and multi-qubit gates. This kind of circuit transformation is typically incorporated in quantum compilers like Qiskit ([Anis et al. 2021](https://ar5iv.labs.arxiv.org/html/2403.12979#bib.bib2)). Search-based approaches offer flexibility in terms of optimization. Rather than relying on gate-cancellation rules, this approach searches for a functionally equivalent circuit. Typically, Machine Learning (ML) techniques such as Reinforcement Learning (RL), generative models, or other methods aid the approach. In RL-based search, the current quantum circuit is the state, and the original version of the circuit is the environment. The circuit transformation performed in each step is the action, and based on some input, the agent performs the most rewarding action. Some RL-based works include \\raisebox{-0.9pt}{1}⃝ ([Moflic et al. 2023](https://ar5iv.labs.arxiv.org/html/2403.12979#bib.bib12)), that uses D-VAE to encode a quantum circuit DAG and send that encoding to an RL agent which then decides what action to perform among the possible set of updates, \\raisebox{-0.9pt}{2}⃝ ([Li et al. 2023](https://ar5iv.labs.arxiv.org/html/2403.12979#bib.bib11)), that uses Hierarchical Advantage Learning (HAL) combined with Proximal Policy Optimization (PPO) ([Schulman et al. 2017](https://ar5iv.labs.arxiv.org/html/2403.12979#bib.bib15)) to perform reinforcement learning, and \\raisebox{-0.9pt}{3}⃝ ([Fösel et al. 2021](https://ar5iv.labs.arxiv.org/html/2403.12979#bib.bib5)) that also uses PPO along with Advantage Actor Critique (AAC) scheme-based agent. In contrast, generative approaches such as ([Xu et al. 2022](https://ar5iv.labs.arxiv.org/html/2403.12979#bib.bib17)) generate quantum circuits as a Quantum Assembly Language (QASM) sequence of instructions. Other methods include \\raisebox{-0.9pt}{1}⃝ ([Zhou et al. 2020](https://ar5iv.labs.arxiv.org/html/2403.12979#bib.bib19)) uses Monte Carlo tree search framework to generate hardware compliant quantum circuits, and \\raisebox{-0.9pt}{2}⃝ ([Duncan et al. 2020](https://ar5iv.labs.arxiv.org/html/2403.12979#bib.bib4)) performs ZX-calculus on graphs to perform circuit transformation.\n\n[0110]​[0110]=[1001]\\begin{bmatrix}0&1\\\\ 1&0\\end{bmatrix}\\begin{bmatrix}0&1\\\\ 1&0\\end{bmatrix}=\\begin{bmatrix}1&0\\\\ 0&1\\end{bmatrix}"
+    },
+    {
+      "heading_path": [
+        "AltGraph: Redesigning Quantum Circuits Using Generative Graph Models for Efficient OptimizationDOI: XXXXXXX.XXXXXXXConference: Make sure to enter the correct conference title from your rights confirmation emai; June, 2024; San Francisco, CAISBN: 978-1-4503-XXXX-X/18/06",
+        "2. Background and Related Works",
+        "2.3. Message Passing"
+      ],
+      "text": "### 2.3. Message Passing\n\nGenerative graph models and graph neural networks, in general, require nodes to share information to build either a global or a local understanding of themselves and the nodes around them in hopes of generating a (semi-)unique representation. While there are multiple techniques, only two approaches exist in D-VAE and DeepGMG: simultaneous message passing and asynchronous message passing."
+    },
+    {
+      "heading_path": [
+        "AltGraph: Redesigning Quantum Circuits Using Generative Graph Models for Efficient OptimizationDOI: XXXXXXX.XXXXXXXConference: Make sure to enter the correct conference title from your rights confirmation emai; June, 2024; San Francisco, CAISBN: 978-1-4503-XXXX-X/18/06",
+        "2. Background and Related Works",
+        "2.3. Message Passing",
+        "2.3.1. Simultaneous"
+      ],
+      "text": "#### 2.3.1. Simultaneous\n\nThe more common approach in graph neural networks, specifically Graph Convolution Networks (GCN), is simultaneous message passing. In D-VAE, simultaneous message passing starts by taking the initial type of each node and sharing it with all its immediate neighbors (downstream neighbors if uni-directional). These messages are then combined to create a new localized representation of each node based on its type and its neighbors. The localization extends to additional neighbors by iteratively repeating this process."
+    },
+    {
+      "heading_path": [
+        "AltGraph: Redesigning Quantum Circuits Using Generative Graph Models for Efficient OptimizationDOI: XXXXXXX.XXXXXXXConference: Make sure to enter the correct conference title from your rights confirmation emai; June, 2024; San Francisco, CAISBN: 978-1-4503-XXXX-X/18/06",
+        "2. Background and Related Works",
+        "2.3. Message Passing",
+        "2.3.2. D-VAE Asynchronous"
+      ],
+      "text": "#### 2.3.2. D-VAE Asynchronous\n\nD-VAE proposes an “asynchronous\" message-passing scheme. This name may seem misleading since D-VAE does require some synchronization. Analysis of the first few gates of Fig. [1](https://ar5iv.labs.arxiv.org/html/2403.12979#S2.F1 \"Figure 1 ‣ 2.2. Quantum Circuit Transformation ‣ 2. Background and Related Works ‣ AltGraph: Redesigning Quantum Circuits Using Generative Graph Models for Efficient Optimization\")b is done for clarity. At the top is the initial or the “start\" node. Once the representation of this node is created the children begin to process, however not all three children can process immediately. D-VAE requires processing all predecessor nodes before updating a node’s state. So, only the “csdg\" and the “y\" gate may asynchronously process. The “csx\" will not be active until the completion of the “cy\" node following “csdg\". While the synchronization is time-consuming, it allows each node a “complete\" understanding of all predecessor nodes."
+    },
+    {
+      "heading_path": [
+        "AltGraph: Redesigning Quantum Circuits Using Generative Graph Models for Efficient OptimizationDOI: XXXXXXX.XXXXXXXConference: Make sure to enter the correct conference title from your rights confirmation emai; June, 2024; San Francisco, CAISBN: 978-1-4503-XXXX-X/18/06",
+        "2. Background and Related Works",
+        "2.4. Generative Graph Models"
+      ],
+      "text": "### 2.4. Generative Graph Models\n\nGenerative graph models create new equivalent models based on input graphs and various constraints. D-VAE encodes a DAG to the latent space, then the encoding is used to obtain reconstructed DAGs. For detailed analysis, different variations of the D-VAE generative graph model ([Zhang et al. 2019](https://ar5iv.labs.arxiv.org/html/2403.12979#bib.bib18)) are used. Namely, D-VAE GRU, D-VAE GCN, and D-VAE DeepGMG ([Li et al. 2018](https://ar5iv.labs.arxiv.org/html/2403.12979#bib.bib10)). All three versions use topological ordering to create their DAGs, differing mainly in the encoding method."
+    },
+    {
+      "heading_path": [
+        "AltGraph: Redesigning Quantum Circuits Using Generative Graph Models for Efficient OptimizationDOI: XXXXXXX.XXXXXXXConference: Make sure to enter the correct conference title from your rights confirmation emai; June, 2024; San Francisco, CAISBN: 978-1-4503-XXXX-X/18/06",
+        "2. Background and Related Works",
+        "2.4. Generative Graph Models",
+        "2.4.1. D-VAE GRU"
+      ],
+      "text": "#### 2.4.1. D-VAE GRU\n\nThe standard D-VAE approach uses the Gated Recurrent Unit (GRU), which encodes the current node’s state using the node’s predecessors’ states and the current node type. D-VAE uses asynchronous message passing ([Li et al. 2015](https://ar5iv.labs.arxiv.org/html/2403.12979#bib.bib9)) and topological sorting to ensure all information is available to the node before encoding. D-VAE defaults to bi-directional encoding, where upon completion of forward encoding D-VAE reverses the graph and the node states are updated by repeating the same process."
+    },
+    {
+      "heading_path": [
+        "AltGraph: Redesigning Quantum Circuits Using Generative Graph Models for Efficient OptimizationDOI: XXXXXXX.XXXXXXXConference: Make sure to enter the correct conference title from your rights confirmation emai; June, 2024; San Francisco, CAISBN: 978-1-4503-XXXX-X/18/06",
+        "2. Background and Related Works",
+        "2.4. Generative Graph Models",
+        "2.4.2. D-VAE GCN"
+      ],
+      "text": "#### 2.4.2. D-VAE GCN\n\nThe second D-VAE approach uses GCN. D-VAE allows the designer to decide how many rounds of simultaneous message passing ([Kipf et al. 2016](https://ar5iv.labs.arxiv.org/html/2403.12979#bib.bib6)) they desire to create the encodings of the nodes. To initialize the encoding D-VAE uses the neighbor (or predecessors if uni-directional) node types to initialize each node’s state. In additional rounds of encoding neighbor (or predecessor) node states are used to update the state. Standard GCN models are primarily for encoding, so D-VAE applies the GRU method for GCN decoding."
+    },
+    {
+      "heading_path": [
+        "AltGraph: Redesigning Quantum Circuits Using Generative Graph Models for Efficient OptimizationDOI: XXXXXXX.XXXXXXXConference: Make sure to enter the correct conference title from your rights confirmation emai; June, 2024; San Francisco, CAISBN: 978-1-4503-XXXX-X/18/06",
+        "2. Background and Related Works",
+        "2.4. Generative Graph Models",
+        "2.4.3. D-VAE DeepGMG"
+      ],
+      "text": "#### 2.4.3. D-VAE DeepGMG\n\nThe third D-VAE approach uses DeepGMG ([Li et al. 2018](https://ar5iv.labs.arxiv.org/html/2403.12979#bib.bib10)). The original DeepGMG work focuses on undirected graph generation. It also does not use topological ordering and uses a random order instead. To make a more valid comparison, D-VAE updates the design of DeepGMG to use topological ordering, allowing for multiple iterations of message passing and the processing of directed graphs. DeepGMG relies on a similar simultaneous message-passing scheme as GCN with an important update. DeepGMG, instead of only relying on surrounding node information, also accounts for an edge feature vector to better understand node connections."
+    },
+    {
+      "heading_path": [
+        "AltGraph: Redesigning Quantum Circuits Using Generative Graph Models for Efficient OptimizationDOI: XXXXXXX.XXXXXXXConference: Make sure to enter the correct conference title from your rights confirmation emai; June, 2024; San Francisco, CAISBN: 978-1-4503-XXXX-X/18/06",
+        "3. AltGraph: Proposed Approach"
+      ],
+      "text": "## 3. AltGraph: Proposed Approach"
+    },
+    {
+      "heading_path": [
+        "AltGraph: Redesigning Quantum Circuits Using Generative Graph Models for Efficient OptimizationDOI: XXXXXXX.XXXXXXXConference: Make sure to enter the correct conference title from your rights confirmation emai; June, 2024; San Francisco, CAISBN: 978-1-4503-XXXX-X/18/06",
+        "3. AltGraph: Proposed Approach",
+        "3.1. Approach"
+      ],
+      "text": "### 3.1. Approach\n\nTo leverage the generative abilities of D-VAE for the quantum domain, we propose AltGraph, a robust approach to generate valid equivalent quantum circuits. In quantum graph representation, nodes represent quantum gates in a system, and edges represent the connection between the gates. We discuss the changes required in original D-VAE to realize AltGraph in the following paragraphs.\n\nThe overall process of generating quantum circuits using AltGraph is shown in Fig. [2](https://ar5iv.labs.arxiv.org/html/2403.12979#S2.F2 \"Figure 2 ‣ 2.3.1. Simultaneous ‣ 2.3. Message Passing ‣ 2. Background and Related Works ‣ AltGraph: Redesigning Quantum Circuits Using Generative Graph Models for Efficient Optimization\"). First, the original quantum circuits (step \\raisebox{-0.9pt}{1}⃝) are converted into DAGs (step \\raisebox{-0.9pt}{2}⃝). These DAGs are sent to the generative graph model (step \\raisebox{-0.9pt}{3}⃝) for reconstructing new DAGs (step \\raisebox{-0.9pt}{4}⃝), from which the new quantum circuit is reconstructed (step \\raisebox{-0.9pt}{5}⃝). For training, we use MSE Loss between the density matrices of original and new quantum circuits to ensure similar functionality. Finally, to obtain the best quantum circuit, we perturb the latent representation of the circuit with some noise (step \\raisebox{-0.9pt}{6}⃝) and obtain multiple candidate circuits. From these, one can select the circuit with matching density metrix and least depth and gate count."
+    },
+    {
+      "heading_path": [
+        "AltGraph: Redesigning Quantum Circuits Using Generative Graph Models for Efficient OptimizationDOI: XXXXXXX.XXXXXXXConference: Make sure to enter the correct conference title from your rights confirmation emai; June, 2024; San Francisco, CAISBN: 978-1-4503-XXXX-X/18/06",
+        "3. AltGraph: Proposed Approach",
+        "3.2. Loss"
+      ],
+      "text": "### 3.2. Loss\n\nD-VAE used teacher forcing to get faster convergence of models. For loss evaluation, D-VAE used encoder KLD and the model’s ability to predict the correct node. D-VAE also evaluated the loss based on the model’s ability to predict edges using the “true\" node. While these features are viable when dealing with graphs and ensuring similarly designed graphs, the goal is to generate equivalent quantum circuits. Structurally similar graphs are not a guarantee of equivalent quantum circuits. It’s necessary to compare density matrices to evaluate quantum circuit equivalence. The loss process is updated to generate the nodes and edges rather than forcing edge predictions based on the “true\" node. This forces complete graph reconstruction for each input, allowing density matrix comparison. The density matrices are taken from the target hardware post-transpilation using Qiskit’s default optimization level 1. This ensures the circuits are compared based on their real values rather than the ideal state. AltGraph’s loss calculation uses the KLD of the encoder, the mean squared error (MSE) of the original circuit’s density matrix, and the reconstructed circuit’s density matrix."
+    },
+    {
+      "heading_path": [
+        "AltGraph: Redesigning Quantum Circuits Using Generative Graph Models for Efficient OptimizationDOI: XXXXXXX.XXXXXXXConference: Make sure to enter the correct conference title from your rights confirmation emai; June, 2024; San Francisco, CAISBN: 978-1-4503-XXXX-X/18/06",
+        "3. AltGraph: Proposed Approach",
+        "3.3. Graph Generation"
+      ],
+      "text": "### 3.3. Graph Generation\n\nD-VAE requires that each graph has a single input node and a single output node. In cases with multiple input/output nodes, D-VAE requires a virtual node to represent the final input/output. To match D-VAE requirements, input qubit wires map to the start node, and all qubit measurements map to the end node. An example mapping is in Fig. [1](https://ar5iv.labs.arxiv.org/html/2403.12979#S2.F1 \"Figure 1 ‣ 2.2. Quantum Circuit Transformation ‣ 2. Background and Related Works ‣ AltGraph: Redesigning Quantum Circuits Using Generative Graph Models for Efficient Optimization\").\n\nQuantum circuits have numerous requirements to ensure validity. Ideally, a neural network could learn the basic requirements of quantum circuit structures. However, the loss calculations use the difference between the density matrices of the original and reconstructed circuit, so even the initial circuits need to be valid constructed designs."
+    },
+    {
+      "heading_path": [
+        "AltGraph: Redesigning Quantum Circuits Using Generative Graph Models for Efficient OptimizationDOI: XXXXXXX.XXXXXXXConference: Make sure to enter the correct conference title from your rights confirmation emai; June, 2024; San Francisco, CAISBN: 978-1-4503-XXXX-X/18/06",
+        "3. AltGraph: Proposed Approach",
+        "3.3. Graph Generation",
+        "3.3.1. Number of Qubits"
+      ],
+      "text": "#### 3.3.1. Number of Qubits\n\nThe first requirement for density matrix comparison is that both density matrices are the same size. Density matrices are size 2N∗2N2^{N}\\*2^{N} where NN is the number of qubits. To ensure reconstructed circuit size equivalence, the reconstructed DAG start node out-degree must match the out-degree of the original DAG’s start node. The reconstructed DAG end node must have the same in-degree as the original DAG’s end node.\n\n2N∗2N2^{N}*2^{N}\n\nNN"
+    },
+    {
+      "heading_path": [
+        "AltGraph: Redesigning Quantum Circuits Using Generative Graph Models for Efficient OptimizationDOI: XXXXXXX.XXXXXXXConference: Make sure to enter the correct conference title from your rights confirmation emai; June, 2024; San Francisco, CAISBN: 978-1-4503-XXXX-X/18/06",
+        "3. AltGraph: Proposed Approach",
+        "3.3. Graph Generation",
+        "3.3.2. Gates & Gate Connections"
+      ],
+      "text": "#### 3.3.2. Gates & Gate Connections\n\nD-VAE uses a topological ordering for both encoding and reconstruction. During reconstruction, it allows for the selection of edges between the current node and any previous node. D-VAE also allows the model to learn the appropriate amount of in and out edges. However, quantum gates have a specified in and out edge limitation. To ensure the use of all out-edges, the model maintains a queue of available nodes for the current node to connect. The node is removed from the queue when the out-edges are complete. When the model predicts the “end\" node it connects all remaining nodes in the queue. The model predicts the most likely connection from the available list of previous nodes for the in edge. If it is a multiple-wire gate, the prediction process repeats until all in-degrees are filled."
+    },
+    {
+      "heading_path": [
+        "AltGraph: Redesigning Quantum Circuits Using Generative Graph Models for Efficient OptimizationDOI: XXXXXXX.XXXXXXXConference: Make sure to enter the correct conference title from your rights confirmation emai; June, 2024; San Francisco, CAISBN: 978-1-4503-XXXX-X/18/06",
+        "3. AltGraph: Proposed Approach",
+        "3.3. Graph Generation",
+        "3.3.3. Circuit Types"
+      ],
+      "text": "#### 3.3.3. Circuit Types\n\nTo reduce the search space complexity of quantum circuits training/testing uses graphs made of non-parametric circuits that consist of one and two-qubit gates. Specifically, the single qubit gates xx, yy, zz, hh, ss, tt, i​did, s​x​d​gsxdg, s​d​gsdg, s​xsx, t​d​gtdg and c​xcx, c​ycy, c​zcz, s​w​a​pswap, d​c​xdcx, i​s​w​a​piswap, c​s​d​gcsdg, e​c​recr, c​hch, c​scs, c​s​xcsx two-qubit gates are used.\n\nxx\n\nyy\n\nzz\n\nhh\n\nss\n\ntt\n\ni​did\n\ns​x​d​gsxdg\n\ns​d​gsdg\n\ns​xsx\n\nt​d​gtdg\n\nc​xcx\n\nc​ycy\n\nc​zcz\n\ns​w​a​pswap\n\nd​c​xdcx\n\ni​s​w​a​piswap\n\nc​s​d​gcsdg\n\ne​c​recr\n\nc​hch\n\nc​scs\n\nc​s​xcsx"
+    },
+    {
+      "heading_path": [
+        "AltGraph: Redesigning Quantum Circuits Using Generative Graph Models for Efficient OptimizationDOI: XXXXXXX.XXXXXXXConference: Make sure to enter the correct conference title from your rights confirmation emai; June, 2024; San Francisco, CAISBN: 978-1-4503-XXXX-X/18/06",
+        "4. Results"
+      ],
+      "text": "## 4. Results"
+    },
+    {
+      "heading_path": [
+        "AltGraph: Redesigning Quantum Circuits Using Generative Graph Models for Efficient OptimizationDOI: XXXXXXX.XXXXXXXConference: Make sure to enter the correct conference title from your rights confirmation emai; June, 2024; San Francisco, CAISBN: 978-1-4503-XXXX-X/18/06",
+        "4. Results",
+        "4.1. Setup and Evaluation Framework"
+      ],
+      "text": "### 4.1. Setup and Evaluation Framework\n\nIn generating equivalent quantum circuits, the maximum gate predictions are capped at the original circuit gate count. This can yield higher loss values but penalizes models for larger circuits, aligning with the aim of more hardware-friendly circuits. AltGraph’s performance is assessed with qubit counts of 2, 4, and 6 and gate counts of 16, 24, and 32 per qubit. A total of 300 random circuits for each size are produced using gates from Section [3.3.3](https://ar5iv.labs.arxiv.org/html/2403.12979#S3.SS3.SSS3 \"3.3.3. Circuit Types ‣ 3.3. Graph Generation ‣ 3. AltGraph: Proposed Approach ‣ AltGraph: Redesigning Quantum Circuits Using Generative Graph Models for Efficient Optimization\"). The data follows a 90-10 training/testing split. The same 300 samples are used for all models, ensuring consistency. Each model is trained thrice per circuit size, and reported values represent the average outcomes.\n\n2 Qubit 4 Qubit 6 Qubit Model Type #Gate Loss Reduction Loss Reduction Loss Reduction GRU 16 0.09 19.59% 0.01 24.63% 0.01 30.18% GRU 24 0.09 33.94% 0.01 43.86% 0.01 43.96% GRU 32 0.10 36.27% 0.01 51.37% 0.01 54.16% GCN 16 0.22 19.83% 0.12 26.17% 0.11 32.29% GCN 24 0.31 33.02% 0.22 41.09% 0.19 41.99% GCN 32 0.54 35.34% 0.44 51.74% 0.43 53.1% DeepGMG 16 0.14 19.57% 0.03 23.67% 0.06 30.34% DeepGMG 24 0.18 31.99% 0.10 31.71% 0.08 42.6% DeepGMG 32 0.28 40.77% 0.11 40.44% 0.12 51.50%"
+    },
+    {
+      "heading_path": [
+        "AltGraph: Redesigning Quantum Circuits Using Generative Graph Models for Efficient OptimizationDOI: XXXXXXX.XXXXXXXConference: Make sure to enter the correct conference title from your rights confirmation emai; June, 2024; San Francisco, CAISBN: 978-1-4503-XXXX-X/18/06",
+        "4. Results",
+        "4.2. Results and Analysis"
+      ],
+      "text": "### 4.2. Results and Analysis\n\nTable [1](https://ar5iv.labs.arxiv.org/html/2403.12979#S4.T1 \"Table 1 ‣ 4.1. Setup and Evaluation Framework ‣ 4. Results ‣ AltGraph: Redesigning Quantum Circuits Using Generative Graph Models for Efficient Optimization\") presents the mean training loss and gate reduction percentages for three models: AltGraph GRU, AltGraph GCN, and AltGraph DeepGMG across various circuit sizes. These percentage reductions are derived from comparing the number of gates between the transpiled original and the transpiled reconstructed circuits.\n\nThe GRU model’s loss tends towards zero faster than both the GCN and DeepGMG models, irrespective of the qubit and gate counts. Moreover, DeepGMG’s loss approaches zero faster than GCN. Interestingly, despite GCN’s generally higher loss, it surpasses both GRU and DeepGMG when circuits have 16 gates, irrespective of the qubit count. Conversely, for circuits with 24 gates, GRU is superior, irrespective of qubit count. For 32-gate circuits, performance varies by qubit count: DeepGMG excels for 2-qubit circuits, GCN for 4-qubit circuits, and GRU for 6-qubit circuits.\n\nDelving deeper into each model’s capability to yield a circuit with fewer gates post-transpilation provides further insights into their efficiencies. This analysis involves three different encodings for each testing gate and three decodings for each encoding sample, resulting in nine reconstructions per circuit. Upon generating these samples, both the reconstructed and original circuits are transpiled using Qiskit’s FakeWashingtonV2 to emulate performance on cutting-edge hardware. Fig. [3](https://ar5iv.labs.arxiv.org/html/2403.12979#S4.F3 \"Figure 3 ‣ 4.2. Results and Analysis ‣ 4. Results ‣ AltGraph: Redesigning Quantum Circuits Using Generative Graph Models for Efficient Optimization\")a showcases the mean gate reduction for the AltGraph GRU model per transpiled circuit size.\n\n![Refer to caption](./[2403.12979] AltGraph_ Redesigning Quantum Circuits Using Generative Graph Models for Efficient Optimization_files/box_gate.png)\n\n![Refer to caption](./[2403.12979] AltGraph_ Redesigning Quantum Circuits Using Generative Graph Models for Efficient Optimization_files/box_depth.png)\n\nGate Reduction Trends Across Models: From Fig. [3](https://ar5iv.labs.arxiv.org/html/2403.12979#S4.F3 \"Figure 3 ‣ 4.2. Results and Analysis ‣ 4. Results ‣ AltGraph: Redesigning Quantum Circuits Using Generative Graph Models for Efficient Optimization\")a, a consistent positive gate reduction is observed across different qubits and gate configurations. Median gate reductions range from 24% (2 qubits, 16 gates) to 53% (6 qubits, 32 gates). As the gate count increases within each qubit category, there’s a proportional increase in gate reduction percentages. Specifically, for 6 qubit circuits with 16, 24, and 32 gates, the median reductions stand at 33.6%, 42.4%, and 52.9%, respectively. Comparable patterns are seen for 2 and 4-qubit circuits. There are few reconstructions that result in an increased gate count, like a 4 qubit, 16 gate circuit showing a surge of 73%. However, such cases are exceptions, as Fig. [3](https://ar5iv.labs.arxiv.org/html/2403.12979#S4.F3 \"Figure 3 ‣ 4.2. Results and Analysis ‣ 4. Results ‣ AltGraph: Redesigning Quantum Circuits Using Generative Graph Models for Efficient Optimization\")a indicates that most alternative configurations yield a reduction in gate count.\n\nTrends seen in GCN and DeepGMG match those of GRU, as demonstrated in Figures [3](https://ar5iv.labs.arxiv.org/html/2403.12979#S4.F3 \"Figure 3 ‣ 4.2. Results and Analysis ‣ 4. Results ‣ AltGraph: Redesigning Quantum Circuits Using Generative Graph Models for Efficient Optimization\")b and [3](https://ar5iv.labs.arxiv.org/html/2403.12979#S4.F3 \"Figure 3 ‣ 4.2. Results and Analysis ‣ 4. Results ‣ AltGraph: Redesigning Quantum Circuits Using Generative Graph Models for Efficient Optimization\")c. GCN’s median gate reduction spans from 25% (2 qubits, 16 gates) to 54% (4 qubits, 32 gates), and DeepGMG’s range is from 27% (2 qubits, 16 gates) to 52.4% (6 qubits, 32 gates). For both models, as the number of gates grows, gate reduction percentages correspondingly increase. Comparatively: \\raisebox{-0.9pt}{1}⃝ For 2-qubit circuits, DeepGMG achieves the peak in median gate reduction, followed by GRU and then GCN, \\raisebox{-0.9pt}{2}⃝ in 4-qubit circuits, GCN leads in median gate reduction, with GRU second and DeepGMG last, and \\raisebox{-0.9pt}{3}⃝ for 6-qubit circuits, all models display similar median reductions, though DeepGMG has an advantage.\n\nDepth Reduction Trends Across Models: From Fig. [4](https://ar5iv.labs.arxiv.org/html/2403.12979#S4.F4 \"Figure 4 ‣ 4.2. Results and Analysis ‣ 4. Results ‣ AltGraph: Redesigning Quantum Circuits Using Generative Graph Models for Efficient Optimization\")a, there’s a clear and consistent depth reduction across different configurations of qubits and gates. The median depth reduction spans from 24% for circuits with 2 qubits and 16 gates to 56% for those with 4 qubits and 32 gates. Intriguingly, circuits with an identical qubit count display an enhanced depth percentage reduction with the addition of more gates. For 6-qubit circuits, the median depth reductions are 39.6% for 16 gates, 49.9% for 24 gates, and 53.9% for 32 gates. This pattern is consistent for 2 and 4-qubit circuits as well. While there are rare quantum circuits that show an increased depth post-reconstruction, such as a 4-qubit, 16-gate circuit with a 100% depth increase, these cases are rare, predominantly outliers. As illustrated in Fig. [4](https://ar5iv.labs.arxiv.org/html/2403.12979#S4.F4 \"Figure 4 ‣ 4.2. Results and Analysis ‣ 4. Results ‣ AltGraph: Redesigning Quantum Circuits Using Generative Graph Models for Efficient Optimization\")a, the dominant trend is a depth reduction in the alternative representations.\n\nGCN and DeepGMG trends reflect those of GRU, as observed in Figures [4](https://ar5iv.labs.arxiv.org/html/2403.12979#S4.F4 \"Figure 4 ‣ 4.2. Results and Analysis ‣ 4. Results ‣ AltGraph: Redesigning Quantum Circuits Using Generative Graph Models for Efficient Optimization\")b and [4](https://ar5iv.labs.arxiv.org/html/2403.12979#S4.F4 \"Figure 4 ‣ 4.2. Results and Analysis ‣ 4. Results ‣ AltGraph: Redesigning Quantum Circuits Using Generative Graph Models for Efficient Optimization\")c. GCN’s median depth reduction ranges from 26% (2 qubits, 16 gates) to 55% (4 qubits, 32 gates), while for DeepGMG, it’s between 24% (2 qubits, 16 gates) and 58% (6 qubits, 32 gates). As gate counts rise for every qubit configuration, depth reduction percentages also climb for both GCN and DeepGMG. Comparative analysis of the models reveals: \\raisebox{-0.9pt}{1}⃝ For 2-qubit circuits, GRU tops in median depth reduction, succeeded by DeepGMG and then GCN. \\raisebox{-0.9pt}{2}⃝ With 4-qubit circuits, GRU retains the lead in median depth reduction, followed by GCN and subsequently DeepGMG. \\raisebox{-0.9pt}{3}⃝ In 6-qubit circuits, DeepGMG stands out with the highest median depth reduction, with GCN in the second spot and GRU trailing.\n\n| Model | 16 Gate | 24 Gate | 32 Gate | | --- | --- | --- | --- | | AltGraph GRU | 24.80% | 40.59% | 47.27% | | AltGraph GCN | 26.10% | 38.70% | 46.73% | | AltGraph DeepGMG | 24.53% | 35.44% | 44.24% |\n\nModel Average Gates Reduced Average Reduction% AltGraph GRU 35.67 37.55 AltGraph GCN 33.78 37.17 AltGraph DeepGMG 32.87 34.73 Qiskit 26.15 18.65 t|k​e​t⟩\\ket{ket} 73.68 33.5 Quartz ([Xu et al. 2022](https://ar5iv.labs.arxiv.org/html/2403.12979#bib.bib17)) – 30.1 Quarl ([Li et al. 2023](https://ar5iv.labs.arxiv.org/html/2403.12979#bib.bib11)) – 36.6 Monte Carlo Tree ([Zhou et al. 2020](https://ar5iv.labs.arxiv.org/html/2403.12979#bib.bib19)) – 30.0\n\n|k​e​t⟩\\ket{ket}\n\nComparative Analysis of Model Performances: \\raisebox{-0.9pt}{1}⃝ From Table [2](https://ar5iv.labs.arxiv.org/html/2403.12979#S4.T2 \"Table 2 ‣ 4.2. Results and Analysis ‣ 4. Results ‣ AltGraph: Redesigning Quantum Circuits Using Generative Graph Models for Efficient Optimization\"), AltGraph GRU stands out in its gate count reduction capabilities when compared to both GCN and DeepGMG for circuits with 24 and 32 gates. However, for 16-gate circuits, the GCN model surpasses, showing a 5.11% performance difference over the GRU model. The cumulative gate reduction performance of each model is detailed in Table [3](https://ar5iv.labs.arxiv.org/html/2403.12979#S4.T3 \"Table 3 ‣ 4.2. Results and Analysis ‣ 4. Results ‣ AltGraph: Redesigning Quantum Circuits Using Generative Graph Models for Efficient Optimization\"). \\raisebox{-0.9pt}{2}⃝ Upon inspecting Table [3](https://ar5iv.labs.arxiv.org/html/2403.12979#S4.T3 \"Table 3 ‣ 4.2. Results and Analysis ‣ 4. Results ‣ AltGraph: Redesigning Quantum Circuits Using Generative Graph Models for Efficient Optimization\"), it’s evident that the AltGraph GRU, on average, trims more gates than either the GCN or DeepGMG models. Yet, GCN remains a strong contender, lagging behind GRU by a mere 1.02%. To understand how AltGraph performs compared to state-of-the-art systems we include the results from optimizing the same circuits using two rules based methods, t|k​e​t⟩\\ket{ket} and Qiskit. We also include the reported average improvements of 3 state-of-the-art systems ran on IBM Qiskit non-parametric circuits. ([Xu et al. 2022](https://ar5iv.labs.arxiv.org/html/2403.12979#bib.bib17); [Schulman et al. 2017](https://ar5iv.labs.arxiv.org/html/2403.12979#bib.bib15); [Zhou et al. 2020](https://ar5iv.labs.arxiv.org/html/2403.12979#bib.bib19)).\n\n|k​e​t⟩\\ket{ket}\n\nThe collective depth reduction performance for each model is compiled in Table [4](https://ar5iv.labs.arxiv.org/html/2403.12979#S4.T4 \"Table 4 ‣ 4.2. Results and Analysis ‣ 4. Results ‣ AltGraph: Redesigning Quantum Circuits Using Generative Graph Models for Efficient Optimization\"). \\raisebox{-0.9pt}{3}⃝ A closer look at Table [4](https://ar5iv.labs.arxiv.org/html/2403.12979#S4.T4 \"Table 4 ‣ 4.2. Results and Analysis ‣ 4. Results ‣ AltGraph: Redesigning Quantum Circuits Using Generative Graph Models for Efficient Optimization\") reveals that the AltGraph DeepGMG consistently outperforms in depth reduction when set against the GCN and GRU models. Nevertheless, the GRU model isn’t far behind, showing only a slight 5.98% performance gap to the DeepGMG. For a comprehensive view of the average MSE for test circuits, refer to the last column of Table [4](https://ar5iv.labs.arxiv.org/html/2403.12979#S4.T4 \"Table 4 ‣ 4.2. Results and Analysis ‣ 4. Results ‣ AltGraph: Redesigning Quantum Circuits Using Generative Graph Models for Efficient Optimization\"). \\raisebox{-0.9pt}{4}⃝ Finally, analyzing Table [4](https://ar5iv.labs.arxiv.org/html/2403.12979#S4.T4 \"Table 4 ‣ 4.2. Results and Analysis ‣ 4. Results ‣ AltGraph: Redesigning Quantum Circuits Using Generative Graph Models for Efficient Optimization\"), it becomes clear that AltGraph GRU excels in achieving a smaller density matrix difference than both the GCN and DeepGMG models.\n\nModel Average Depth Reduction% Average MSE AltGraph GRU 37.75 .0074 AltGraph GCN 35.54 .27 AltGraph DeepGMG 40.08 .13"
+    },
+    {
+      "heading_path": [
+        "AltGraph: Redesigning Quantum Circuits Using Generative Graph Models for Efficient OptimizationDOI: XXXXXXX.XXXXXXXConference: Make sure to enter the correct conference title from your rights confirmation emai; June, 2024; San Francisco, CAISBN: 978-1-4503-XXXX-X/18/06",
+        "5. Discussion"
+      ],
+      "text": "## 5. Discussion"
+    },
+    {
+      "heading_path": [
+        "AltGraph: Redesigning Quantum Circuits Using Generative Graph Models for Efficient OptimizationDOI: XXXXXXX.XXXXXXXConference: Make sure to enter the correct conference title from your rights confirmation emai; June, 2024; San Francisco, CAISBN: 978-1-4503-XXXX-X/18/06",
+        "5. Discussion",
+        "5.1. Mixed Optimization Techniques"
+      ],
+      "text": "### 5.1. Mixed Optimization Techniques\n\nDrawing from Table [2](https://ar5iv.labs.arxiv.org/html/2403.12979#S4.T2 \"Table 2 ‣ 4.2. Results and Analysis ‣ 4. Results ‣ AltGraph: Redesigning Quantum Circuits Using Generative Graph Models for Efficient Optimization\"), it’s evident that graph generative models present a promising avenue for gate reductions across different circuit dimensions. However, there’s scope for refining the models further. The circuits used in this study were randomly generated and didn’t undergo optimization using conventional rule-based methodologies. If models were trained on optimized circuits, it’s plausible that there would be a more significant overall reduction between original and reconstructed circuits, as the model would target only substitutions not already addressed. Implementing rule-based optimization post circuit reconstruction could yield added reductions."
+    },
+    {
+      "heading_path": [
+        "AltGraph: Redesigning Quantum Circuits Using Generative Graph Models for Efficient OptimizationDOI: XXXXXXX.XXXXXXXConference: Make sure to enter the correct conference title from your rights confirmation emai; June, 2024; San Francisco, CAISBN: 978-1-4503-XXXX-X/18/06",
+        "5. Discussion",
+        "5.2. MSE Constraints"
+      ],
+      "text": "### 5.2. MSE Constraints\n\nDespite the models exhibiting robust learning capabilities, using MSELoss as an evaluative metric has its drawbacks. While MSELoss serves well in gauging matrix similarity, there are pitfalls in its application. Being a regressive optimizer, MSELoss doesn’t always ensure the discovery of the best solution. In the quantum realm, this can translate to functional discrepancies. For instance, if a model, during training, predicts a Pauli-X gate ([0110]\\begin{bmatrix}0&1\\\\ 1&0\\end{bmatrix}) for an original Pauli-Z gate ([100−1]\\begin{bmatrix}1&0\\\\ 0&-1\\end{bmatrix}) , a high loss results. But if the model later predicts an S gate ([100i]\\begin{bmatrix}1&0\\\\ 0&i\\end{bmatrix}) , the resulting lower loss might misleadingly suggest an “optimized” circuit, which isn’t functionally accurate. A deeper probe into the relationship between a low MSELoss and a model’s functional accuracy is warranted.\n\n[0110]\\begin{bmatrix}0&1\\\\ 1&0\\end{bmatrix}\n\n[100−1]\\begin{bmatrix}1&0\\\\ 0&-1\\end{bmatrix}\n\n[100i]\\begin{bmatrix}1&0\\\\ 0&i\\end{bmatrix}"
+    },
+    {
+      "heading_path": [
+        "AltGraph: Redesigning Quantum Circuits Using Generative Graph Models for Efficient OptimizationDOI: XXXXXXX.XXXXXXXConference: Make sure to enter the correct conference title from your rights confirmation emai; June, 2024; San Francisco, CAISBN: 978-1-4503-XXXX-X/18/06",
+        "5. Discussion",
+        "5.3. Density Matrix Constraints"
+      ],
+      "text": "### 5.3. Density Matrix Constraints\n\nAnother challenge with MSELoss arises with sparse density matrices. In cases with notably high qubit counts and minimal gate counts, MSELoss might fall short. For illustration, consider a 16 qubit circuit with (216∗216=4,294,967,2962^{16}\\*2^{16}=4,294,967,296) values that possesses only one single qubit gate. Here, the MSELoss for a circuit with any such gate would be nearly zero. Yet, this limitation can be overlooked as the primary objective is to optimize large, intricate circuits, rendering sparse configurations, like the one mentioned, irrelevant to the study’s context.\n\n216∗216=4,294,967,2962^{16}*2^{16}=4,294,967,296\n\nScalability to larger qubit counts initially seems problematic, as density matrices suffer from Nth power scaling. However, scaling can be addressed by performing block replacements of sub-circuits. For example, if there is a 100 qubit quantum circuit, the density matrix will have 21002^{100} elements, which will be difficult to process. However, one can break it down into blocks of five qubit sub-circuits and generate alternate representations for each sub-circuit one by one.\n\n21002^{100}"
+    },
+    {
+      "heading_path": [
+        "AltGraph: Redesigning Quantum Circuits Using Generative Graph Models for Efficient OptimizationDOI: XXXXXXX.XXXXXXXConference: Make sure to enter the correct conference title from your rights confirmation emai; June, 2024; San Francisco, CAISBN: 978-1-4503-XXXX-X/18/06",
+        "6. Conclusions"
+      ],
+      "text": "## 6. Conclusions\n\nIn our study, generative graph models have proven to be a promising method for gate reduction in quantum circuits. The AltGraph GRU model showcased an average gate count reduction of 37.55%, coupled with a depth reduction of 37.75%, and achieved an impressively low average MSE of 0.0074. The AltGraph GCN model delivered a comparable gate count reduction of 37.17%, a depth reduction of 35.54%, but with a slightly higher average MSE of 0.27. Finally, the AltGraph DeepGMG model, while averaging a gate reduction of 34.73% and achieving the highest depth reduction of 40.08%, reported an average MSE of 0.13. These findings underscore the potential and versatility of generative graph models in the realm of quantum circuit optimization."
+    },
+    {
+      "heading_path": [
+        "AltGraph: Redesigning Quantum Circuits Using Generative Graph Models for Efficient OptimizationDOI: XXXXXXX.XXXXXXXConference: Make sure to enter the correct conference title from your rights confirmation emai; June, 2024; San Francisco, CAISBN: 978-1-4503-XXXX-X/18/06",
+        "References"
+      ],
+      "text": "## References\n\n* (1) * Anis et al. (2021) Md Sajid Anis et al. 2021. Qiskit: An open-source framework for quantum computing. *Qiskit/qiskit* (2021). * Benhelm et al. (2008) Jan Benhelm et al. 2008. Towards fault-tolerant quantum computing with trapped ions. *Nature Physics* 4, 6 (2008), 463–466. * Duncan et al. (2020) Ross Duncan et al. 2020. Graph-theoretic Simplification of Quantum Circuits with the ZX-calculus. *Quantum* 4 (2020), 279. * Fösel et al. (2021) Thomas Fösel et al. 2021. Quantum circuit optimization with deep reinforcement learning. *arXiv preprint arXiv:2103.07585* (2021). * Kipf et al. (2016) Thomas N Kipf et al. 2016. Semi-supervised classification with graph convolutional networks. *arXiv preprint arXiv:1609.02907* (2016). * Krantz et al. (2019) Philip Krantz et al. 2019. A quantum engineer’s guide to superconducting qubits. *Applied physics reviews* 6, 2 (2019). * Ladd et al. (2010) Thaddeus D Ladd et al. 2010. Quantum computers. *nature* 464, 7285 (2010), 45–53. * Li et al. (2015) Yujia Li et al. 2015. Gated graph sequence neural networks. *arXiv preprint arXiv:1511.05493* (2015). * Li et al. (2018) Yujia Li et al. 2018. Learning deep generative models of graphs. *arXiv preprint arXiv:1803.03324* (2018). * Li et al. (2023) Zikun Li et al. 2023. Quarl: A Learning-Based Quantum Circuit Optimizer. *arXiv preprint arXiv:2307.10120* (2023). * Moflic et al. (2023) Ioana Moflic et al. 2023. Graph Neural Network Autoencoders for Efficient Quantum Circuit Optimisation. *arXiv preprint arXiv:2303.03280* (2023). * Nguyen et al. (2012) Hai-Son Nguyen et al. 2012. Optically gated resonant emission of single quantum dots. *Physical review letters* 108, 5 (2012), 057401. * Peres (1985) Asher Peres. 1985. Reversible logic and quantum computers. *Physical review A* 32, 6 (1985), 3266. * Schulman et al. (2017) John Schulman et al. 2017. Proximal policy optimization algorithms. *arXiv preprint arXiv:1707.06347* (2017). * Von Neumann (2018) John Von Neumann. 2018. *Mathematical foundations of quantum mechanics: New edition*. Vol. 53. Princeton university press. * Xu et al. (2022) Mingkuan Xu et al. 2022. Quartz: superoptimization of quantum circuits. In *Proceedings of the 43rd ACM SIGPLAN International Conference on Programming Language Design and Implementation*. 625–640. * Zhang et al. (2019) Muhan Zhang et al. 2019. D-vae: A variational autoencoder for directed acyclic graphs. *Advances in Neural Information Processing Systems* 32 (2019). * Zhou et al. (2020) Xiangzhen Zhou et al. 2020. A Monte Carlo tree search framework for quantum circuit transformation. In *Proceedings of the 39th International Conference on Computer-Aided Design*. 1–7."
+    }
+  ]
+}

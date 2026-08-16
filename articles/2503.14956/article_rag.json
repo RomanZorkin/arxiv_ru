@@ -1,0 +1,1062 @@
+{
+  "title": "[2503.14956] Machine learning predictions from unpredictable chaos",
+  "sections": [
+    {
+      "heading": "Machine learning predictions from unpredictable chaos",
+      "level": 1,
+      "content": [],
+      "children": [
+        {
+          "heading": "Abstract",
+          "level": 6,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "Chaos is omnipresent in nature, and its understanding provides enormous social and economic benefits. However, the unpredictability of chaotic systems is a textbook concept due to their sensitivity to initial conditions, aperiodic behavior, fractal dimensions, nonlinearity, and strange attractors. In this work, we introduce, for the first time, chaotic learning, a novel multiscale topological paradigm that enables accurate predictions from chaotic systems. We show that seemingly random and unpredictable chaotic dynamics counterintuitively offer unprecedented quantitative predictions. Specifically, we devise multiscale topological Laplacians to embed real-world data into a family of interactive chaotic dynamical systems, modulate their dynamical behaviors, and enable the accurate prediction of the input data. As a proof of concept, we consider 28 datasets from four categories of realistic problems: 10 brain waves, four benchmark protein datasets, 13 single-cell RNA sequencing datasets, and an image dataset, as well as two distinct chaotic dynamical systems, namely the Lorenz and Rossler attractors. We demonstrate chaotic learning predictions of the physical properties from chaos. Our new chaotic learning paradigm profoundly changes the textbook perception of chaos and bridges topology, chaos, and learning for the first time."
+            },
+            {
+              "type": "paragraph",
+              "text": "Keywords: Chaotic systems, Machine learning, Multiscale topology."
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "1 Introduction",
+          "level": 2,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "Chaos in dynamical systems refers to the complex behavior that emerges from deterministic, yet sensitive complex systems such as double pendulum, social network, turbulent fluid flow, weather systems, etc [[1](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib1)]. Characterized by a sensitive dependence on initial conditions and aperiodic behavior, chaos challenges the ability to predict long-term behavior [[2](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib2)]. Nonlinearity is another key feature of chaos, where interactions between system elements lead to unpredictable and often erratic dynamics. The seminal work of Edward Lorenz in the 1960s [[3](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib3)], particularly his study of the weather model, introduced the notion that chaotic systems are fundamentally unpredictable over long timescales. This insight laid the foundation for chaos theory, marking a shift in the way scientists viewed complex systems. Over half a century, the unpredictability of chaotic systems has been a textbook concept in both theoretical and applied dynamics, shaping research and application in various fields, from meteorology to engineering [[4](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib4)]."
+            },
+            {
+              "type": "paragraph",
+              "text": "Chaos theory and chaotic dynamics have profoundly impacted numerous disciplines by providing a framework for understanding complex and nonlinear phenomena[[5](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib5)]. For example, in meteorology, chaos theory revolutionized weather prediction, highlighting the challenge of long-term forecasts due to sensitive dependence on initial conditions [[6](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib6)]. In engineering, chaotic systems have inspired the design of robust control strategies and fault-tolerant systems, especially in nonlinear circuits and mechanical systems [[7](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib7)]. In biology, the study of chaos has shed light on irregular patterns in physiological processes, such as cardiac rhythms and neural activity, enhancing the understanding of health and disease dynamics [[8](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib8)]. Similarly, in economics, chaotic models have been employed to explain irregular market fluctuations, providing insights into complex financial systems [[9](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib9)]. The unpredictability inherent in chaos also plays a pivotal role in encryption [[10](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib10)] and secure communications [[11](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib11)], where it ensures high levels of randomness and security. Across these fields, chaos theory has underscored the importance of recognizing and leveraging unpredictability to uncover hidden structures and drive innovation from complex systems."
+            },
+            {
+              "type": "paragraph",
+              "text": "Recently, machine learning (ML) has exploited the deterministic nature of chaos theory to predict certain properties of chaotic systems, such as spatial extent and attractor dimension [[12](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib12)], fluctuations in a chaotic cancer model [[13](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib13)], and the evolution of chaotic dynamical systems [[14](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib14)]. Deep learning (DL) methods have also been utilized to demonstrate chaotic synchronization [[15](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib15)]. However, utilizing chaotic systems for quantitative prediction remains an unthinkable challenge because of their unpredictability."
+            },
+            {
+              "type": "paragraph",
+              "text": "In this work, we propose chaotic learning to transform unpredictable chaotic systems into accurate predictors. Our approach utilizes a novel multiscale topological method, known as persistent Laplacian (PL) [[16](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib16)], to embed realistic data in a family of heterogeneous chaotic systems. More specifically, each data point is modeled as a chaotic oscillator, and its interactions with other oscillators are captured with multiscale Laplacians. The resulting data-embedded chaotic systems exhibit rich chaotic patterns that faithfully manifest the traits of the original data, leading to accurate ML predictions. The proposed topology-enabled predictions from chaos (TEPC) utilizes various chaotic dynamics, such as the Lorenz and Rossler systems, for chaotic learning. Additionally, TEPC may employ different persistent topological Laplacians, including persistent spectral graph [[16](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib16)] or persistent sheaf Laplacian [[17](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib17)]. Finally, TEPC has been extensively validated by using a wide variety of benchmark data, including organ-scale brain electroencephalogram (EEG) data classification, molecular-scale protein B-factor prediction, cellular-scale single-cell RNA sequence data classification, and general image classification problems. TEPC turns chaotic theory on its head, challenging long-held perception of the unpredictability of chaos. It also bridges the gap between traditional chaos and modern learning algorithms."
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "2 Results",
+          "level": 2,
+          "content": [],
+          "children": [
+            {
+              "heading": "2.1 Overview of chaotic learning — topology-enabled predictions from chaos (TEPC)",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "Fig. [1](https://ar5iv.labs.arxiv.org/html/2503.14956#S2.F1 \"Figure 1 ‣ 2.1 Overview of chaotic learning — topology-enabled predictions from chaos (TEPC) ‣ 2 Results ‣ Machine learning predictions from unpredictable chaos\") illustrates the TEPC platform that provides a general workflow of topology-enabled ML predictions from chaotic dynamics. First, the data of interest are collected from real world problems, and then an interaction network or a hypergraph is constructed where nodes are individual data points, and the links represent the correlations or connections between nodes. Next, each node is introduced with a chaotic dynamics, such as the Lorenz and Rossler dynamics [[18](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib18)]. A family of chaotic systems is constructed by using topological Laplacians [[16](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib16)], which encode the interactions into the multiscale connectivity matrices for chaotic systems. Subsequently, the multiscale evolution trajectories of the chaotic systems, which may display various patterns, such as full synchronized, partial synchronized, and unsynchronized chaos, faithfully embed the property of the data of interest. Finally, statistic features are extracted from chaotic trajectories and utilized for downstream ML or DL predictions. Alternatively, chaotic trajectories choice is that these chaotic dynamics is fed into recurrent neural network (RNN) or long short-term memory (LSTM) for downstream predictions as discussed in Section S2 of the Supporting Information."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "The proposed chaotic learning is an ML algorithm for real-world data prediction rather than a new model for chaos or nonlinear dynamics. Data-embedded chaotic systems have heterogeneous nodal dynamics. Even if complete synchronizations may eventually achieved, the heterogeneous synchronization process of individual nodes reveals the intrinsic properties of individual nodes, which forms the foundation of the proposed chaotic learning model."
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "2.2 Illustration of chaotic learning principle",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "To illustrate the working principle of the proposed chaotic learning paradigm, let us consider two simple models. Our first model is a simple model with sixteen nodes as shown in Fig. [2](https://ar5iv.labs.arxiv.org/html/2503.14956#S2.F2 \"Figure 2 ‣ 2.2 Illustration of chaotic learning principle ‣ 2 Results ‣ Machine learning predictions from unpredictable chaos\")a to demonstrate the proposed paradigm. The three-dimension coordinates of each node are given in Table S13 of the Supporting Information. Each point or node can be regarded as a data point or an individual object, such as an atom in a molecule, a protein in a protein-protein network, or a neuron in a brain network. To extract the localized properties of the sixteen nodes, we introduce a chaotic oscillator, or a nonlinear chaotic dynamic to each node. More specifically, we utilize the Lorenz oscillator although any other chaotic oscillators can be used as well. The persistent Laplacians are constructed for the set of oscillators, resulting in a family of connectivity matrices for the coupled chaotic systems. Three typical connectivity matrices are given in Fig. [2](https://ar5iv.labs.arxiv.org/html/2503.14956#S2.F2 \"Figure 2 ‣ 2.2 Illustration of chaotic learning principle ‣ 2 Results ‣ Machine learning predictions from unpredictable chaos\")b, corresponding to three different filtration radius given in Fig. [2](https://ar5iv.labs.arxiv.org/html/2503.14956#S2.F2 \"Figure 2 ‣ 2.2 Illustration of chaotic learning principle ‣ 2 Results ‣ Machine learning predictions from unpredictable chaos\")a. The details of these chaotic systems can be found in Section S1 of the Supporting Information. Initial values for all oscillators are randomly chosen. The smaller filtration radius, the narrower coupling among oscillators is. For example, with the filtration radius shown at the top of Fig. [2](https://ar5iv.labs.arxiv.org/html/2503.14956#S2.F2 \"Figure 2 ‣ 2.2 Illustration of chaotic learning principle ‣ 2 Results ‣ Machine learning predictions from unpredictable chaos\")a, as there is no overlap between the nodes, Laplacian is zero everywhere as shown at the top of Fig. [2](https://ar5iv.labs.arxiv.org/html/2503.14956#S2.F2 \"Figure 2 ‣ 2.2 Illustration of chaotic learning principle ‣ 2 Results ‣ Machine learning predictions from unpredictable chaos\")b. Consequently, we have a set of isolated chaotic dynamics as shown on the top of Fig. [2](https://ar5iv.labs.arxiv.org/html/2503.14956#S2.F2 \"Figure 2 ‣ 2.2 Illustration of chaotic learning principle ‣ 2 Results ‣ Machine learning predictions from unpredictable chaos\")c, resulting in irregular orbits on the top of Fig. [2](https://ar5iv.labs.arxiv.org/html/2503.14956#S2.F2 \"Figure 2 ‣ 2.2 Illustration of chaotic learning principle ‣ 2 Results ‣ Machine learning predictions from unpredictable chaos\")d."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "As the filtration radius increases showing in the middle of Fig. [2](https://ar5iv.labs.arxiv.org/html/2503.14956#S2.F2 \"Figure 2 ‣ 2.2 Illustration of chaotic learning principle ‣ 2 Results ‣ Machine learning predictions from unpredictable chaos\")a, there are some interactions in the system given by the Laplacian in the middle of Fig. [2](https://ar5iv.labs.arxiv.org/html/2503.14956#S2.F2 \"Figure 2 ‣ 2.2 Illustration of chaotic learning principle ‣ 2 Results ‣ Machine learning predictions from unpredictable chaos\")b, which causes partial synchronization among chaotic oscillators during the temporal evolution of system (see the middle of Fig. [2](https://ar5iv.labs.arxiv.org/html/2503.14956#S2.F2 \"Figure 2 ‣ 2.2 Illustration of chaotic learning principle ‣ 2 Results ‣ Machine learning predictions from unpredictable chaos\")c) and periodic orbit in the middle of Fig. [2](https://ar5iv.labs.arxiv.org/html/2503.14956#S2.F2 \"Figure 2 ‣ 2.2 Illustration of chaotic learning principle ‣ 2 Results ‣ Machine learning predictions from unpredictable chaos\")d. When the filtration radius continuously increases, the coupling among the nodes becomes sufficiently strong to create a full synchronization in the system, and each oscillator resembles the well-known wings of butterfly as plotted at the bottom of Fig. [2](https://ar5iv.labs.arxiv.org/html/2503.14956#S2.F2 \"Figure 2 ‣ 2.2 Illustration of chaotic learning principle ‣ 2 Results ‣ Machine learning predictions from unpredictable chaos\")d. In this simple model, it is found that multiscale topological Laplacians induce the transition from chaos to periodicity. However, since the geometry of the above example is very regular and thus, their dynamics are homogeneous as shown in Figs. [2](https://ar5iv.labs.arxiv.org/html/2503.14956#S2.F2 \"Figure 2 ‣ 2.2 Illustration of chaotic learning principle ‣ 2 Results ‣ Machine learning predictions from unpredictable chaos\")a-d."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "In our second model, we consider three sets of irregular geometries as shown in Figs. [2](https://ar5iv.labs.arxiv.org/html/2503.14956#S2.F2 \"Figure 2 ‣ 2.2 Illustration of chaotic learning principle ‣ 2 Results ‣ Machine learning predictions from unpredictable chaos\")e-g to illustrate how irregular geometries induce heterogeneous chaotic dynamics, including partially synchronized chaos. We create a set of 120 nodes as shown on the top of each chart. The detailed coordinates are given in Tables S14, S15, S16 of the Supporting Information, respectively. The geometric shapes of these nodes are schematically displayed in Figs. [2](https://ar5iv.labs.arxiv.org/html/2503.14956#S2.F2 \"Figure 2 ‣ 2.2 Illustration of chaotic learning principle ‣ 2 Results ‣ Machine learning predictions from unpredictable chaos\")e-g. We inject the Lorenz dynamics into each of these nodes with the same parameters as those in the early example. However, for chaotic systems, we set coupling strength as ϵ=\\epsilon= 1.1, 1.0, and 0.1 for Figs. [2](https://ar5iv.labs.arxiv.org/html/2503.14956#S2.F2 \"Figure 2 ‣ 2.2 Illustration of chaotic learning principle ‣ 2 Results ‣ Machine learning predictions from unpredictable chaos\")e-g, respectively. The connectivity matrices are generated by using the persistent Laplacian algorithm with the filtration radii being 1, 1, and 0.2 for the point cloud in Figs. [2](https://ar5iv.labs.arxiv.org/html/2503.14956#S2.F2 \"Figure 2 ‣ 2.2 Illustration of chaotic learning principle ‣ 2 Results ‣ Machine learning predictions from unpredictable chaos\")e-g, respectively. We used the forward Euler scheme with the time increment of h=10−3h=10^{-3} for the time integration. All details of parameters used in Fig. [2](https://ar5iv.labs.arxiv.org/html/2503.14956#S2.F2 \"Figure 2 ‣ 2.2 Illustration of chaotic learning principle ‣ 2 Results ‣ Machine learning predictions from unpredictable chaos\") can be found in Table S1 of the Supporting Information."
+                },
+                {
+                  "type": "formula",
+                  "text": "ϵ=\\epsilon="
+                },
+                {
+                  "type": "formula",
+                  "text": "h=10−3h=10^{-3}"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "The first set of 120 nodes is folded, which leads to a fully synchronized chaotic system as shown in Fig. [2](https://ar5iv.labs.arxiv.org/html/2503.14956#S2.F2 \"Figure 2 ‣ 2.2 Illustration of chaotic learning principle ‣ 2 Results ‣ Machine learning predictions from unpredictable chaos\")e. This synchronous chaos is very similar to that in the bottom of Fig. [2](https://ar5iv.labs.arxiv.org/html/2503.14956#S2.F2 \"Figure 2 ‣ 2.2 Illustration of chaotic learning principle ‣ 2 Results ‣ Machine learning predictions from unpredictable chaos\")c. In Fig. [2](https://ar5iv.labs.arxiv.org/html/2503.14956#S2.F2 \"Figure 2 ‣ 2.2 Illustration of chaotic learning principle ‣ 2 Results ‣ Machine learning predictions from unpredictable chaos\")f, the partially folded conformation having 40 unfolded nodes and 80 folded ones, which gives rise to a partially synchronized dynamic behavior. In Fig. [2](https://ar5iv.labs.arxiv.org/html/2503.14956#S2.F2 \"Figure 2 ‣ 2.2 Illustration of chaotic learning principle ‣ 2 Results ‣ Machine learning predictions from unpredictable chaos\")g, the dynamics of the completely unfolded conformation is completely chaotic. It is this strong geometry-dynamics correlation as well as the rich behavior in chaos synchronization that lays the foundation to embed a wide variety of real-world data into chaotic systems and extract the full set of seemingly chaotic information for the accurate prediction of the underlying data."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Although the filtration radius can be regarded as a threshold used to define a family of networks, it is not highly sensitive across different applications. This is because we implement a topological filtration procedure on the weighted Laplacian matrix to construct a family of subgraphs or networks, which encode the interactions between oscillators into the multiscale connectivity of the networks. The resulting multiscale evolution trajectories of these networks exhibit various patterns, such as synchronized, partially synchronized, and unsynchronized chaos, that effectively capture intrinsic traits of the data for downstream ML predictions. Consequently, in our model, the threshold does not require fine-tuning; an ”educated choice” is sufficient to achieve good predictive performance."
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "2.3 Chaotic learning prediction of brain EEG data",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "To present a proof-of-principle exploration of the proposed chaotic learning paradigm and demonstrate its predictive power, we consider brain electroencephalogram (EEG) datasets. The EEG is obtained from a medical measurement of brain electrical activity using a number of electrodes applied to the scalp. It plays a significant role in the diagnosis of various patient conditions, such as epilepsy, schizophreniacs, sleep disorders, and brain tumors. In our analysis, the EEG data have 300 signals and were collected from 5 epilepsy patients and 5 healthy individuals, classified into three distinct categories: normal, preictal, and seizure [[19](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib19)]. Each category contains 100 single-channel EEG signals. This data set can be accessed from the official website of the Department of Epileptology of the University of Bonn (<https://www.ukbonn.de/epileptologie/arbeitsgruppen/ag-lehnertz-neurophysik/downloads/>). Their details can be found in Section S5 of the Supporting Information."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "We embed the real brain activity time series data into nonlinear dynamics systems by considering each EEG signal as a nonlinear oscillator. We further compute the mean coupling matrix of this brain neural network by calculating the Pearson correlation coefficient between each pair of 300 signals, respectively. We then apply persistent Laplacian to obtain a family of connectivity matrices of brain neural networks with the filtration process. For each connectivity matrix, we introduce a chaotic system and collect its trajectories. Their statistical values are computed for EEG classification. We use ten-fold cross-validation with 10 random seeds and k-nearest neighbor classifier (KNN) algorithm in the prediction. The details of parameters used in the implementation are given in the Supporting Information. To demonstrate the predictive power of TEPC, we consider classification predictions of the EEG data. Our TEPC was implemented with two different oscillators i.e., Lorenz and Rossler and two neural network models i.e., RNN and LSTM, denoted as TEPC (Lorenz), TEPC (Rossler), TEPC (RNN), and TEPC (LSTM), respectively. Their comparison with other existing methods is shown in Fig. [3](https://ar5iv.labs.arxiv.org/html/2503.14956#S2.F3 \"Figure 3 ‣ 2.4 Predicting protein B-factors from chaotic systems ‣ 2 Results ‣ Machine learning predictions from unpredictable chaos\")a, including Fuzzy sugeno1 [[20](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib20)], Random forest [[21](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib21)], PCA [[22](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib22)], SVM5 [[23](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib23)], Fuzzy sugeno2 [[24](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib24)], LMB neural network [[25](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib25)], Fuzzy sugeno3 [[26](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib26)], SVM2 [[27](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib27)], SVM4 [[28](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib28)], SVM3 [[29](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib29)], C4.5 decision tree [[30](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib30)], Multi-spiking [[31](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib31)], KNN [[32](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib32)], SVM1 [[33](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib33)], GMM2 [[34](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib34)], GMM3 [[35](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib35)], Spiking [[36](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib36)], and CNN [[37](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib37)]. The ten-fold cross validation is employed in all predictions. ACC, SEN, and SPEC in Fig. [3](https://ar5iv.labs.arxiv.org/html/2503.14956#S2.F3 \"Figure 3 ‣ 2.4 Predicting protein B-factors from chaotic systems ‣ 2 Results ‣ Machine learning predictions from unpredictable chaos\")a are accuracy, sensitivity, and specificity, respectively. From Fig. [3](https://ar5iv.labs.arxiv.org/html/2503.14956#S2.F3 \"Figure 3 ‣ 2.4 Predicting protein B-factors from chaotic systems ‣ 2 Results ‣ Machine learning predictions from unpredictable chaos\")a, we can find that TEPC (Lorenz), TEPC (Rossler), TEPC (RNN), and TEPC (LSTM) obtains all 100% on these three metrics, which are equivalent or higher than those of other existing methods. The confusion matrices for all ten folds of these results are given in Tables S8, S9, S10, and S11 of the Supporting Information. These results indicate that TEPC is a general approach that is robust with respect to the selection of dynamic models and ML algorithms."
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "2.4 Predicting protein B-factors from chaotic systems",
+              "level": 3,
+              "content": [
+                {
+                  "type": "formula",
+                  "text": "xx"
+                },
+                {
+                  "type": "formula",
+                  "text": "yy"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "As another proof of principle, we demonstrate quantitative ML predictions of molecular properties from chaotic systems. To this end, we consider protein B-factor predictions. Protein B-Factor or the Debye-Waller factor is used in protein crystallography to describe the attenuation of X-ray caused by thermal motion. The analysis of protein B-factors sheds light on the large scale and long time functional behaviors of native state macromolecules [[38](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib38), [39](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib39)]. There are many existing methods for protein flexibility analysis. For example, Park et al. [[39](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib39)] compared the performance of normal mode analysis (NMA) [[40](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib40)] and Gaussian network model (GNM) [[38](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib38)] for three sets of proteins. Among them, the GNM is the most popular method for protein flexibility analysis [[38](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib38)]. Xia et al. developed generalized GNM and generalized anisotropic network model (ANM) for protein B-factor predictions [[41](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib41)]. Opron et al. proposed a multiscale flexibility rigidity index (FRI) model to achieve nearly 20% improvement to the GNM prediction[[42](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib42)]. Recently, Cang et al. introduced an evolutionary homology method to analyze the protein flexibility and obtained the state-of-the-art performance [[43](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib43)]."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "In the present work, we utilize a few benchmark datasets that have been intensively studied in the literature [[39](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib39), [44](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib44), [43](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib43)], and thus, the performance of the proposed methods can be compared. The largest dataset involves 364 distinct proteins, having tens to thousands of amino acid residues [[44](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib44)]."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "In the proposed approach, each protein residue is represented by its Cα atom. Each Cα atom is assigned with a nonlinear oscillator. We choose the Lorenz system with parameters α=10\\alpha=10, γ=60\\gamma=60, β=8/3\\beta=8/3, and ϵ=13.6\\epsilon=13.6 with the connectivity matrix being Γ=𝐈\\Gamma={\\bf I} (the identity matrix). The interaction strength between each pair of Cα atoms is computed with the generalized exponential function Eq.([2](https://ar5iv.labs.arxiv.org/html/2503.14956#S4.E2 \"In 4.1 Mapping interaction to topology ‣ 4 Methods ‣ Machine learning predictions from unpredictable chaos\")) with κ=1\\kappa=1 and σ=3\\sigma=3. We further use persistent Laplacians to obtain a family of coupling matrices among the residues at various scales according to filtration. At each scale, we have a coupled chaotic system. To generate the time trajectory of a specific oscillator (residue), we choose its initial value to one and those of other oscillators to zero in a perturbative time integration. Then, the statistic values of the trajectory are used as the inputs in the ML study of the residue’s B-factor. Persistent Laplacians enable us to collect multiple sets of the statistic values for each residue."
+                },
+                {
+                  "type": "formula",
+                  "text": "α=10\\alpha=10"
+                },
+                {
+                  "type": "formula",
+                  "text": "γ=60\\gamma=60"
+                },
+                {
+                  "type": "formula",
+                  "text": "β=8/3\\beta=8/3"
+                },
+                {
+                  "type": "formula",
+                  "text": "ϵ=13.6\\epsilon=13.6"
+                },
+                {
+                  "type": "formula",
+                  "text": "Γ=𝐈\\Gamma={\\bf I}"
+                },
+                {
+                  "type": "formula",
+                  "text": "κ=1\\kappa=1"
+                },
+                {
+                  "type": "formula",
+                  "text": "σ=3\\sigma=3"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "We carry out B-factor predictions by a multiple linear regression model that has been used in earlier papers [[38](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib38), [39](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib39), [44](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib44)] and compute the average Pearson correlation coefficients (PCCs) between the predicted and the experimental B-factors. Figs. [3](https://ar5iv.labs.arxiv.org/html/2503.14956#S2.F3 \"Figure 3 ‣ 2.4 Predicting protein B-factors from chaotic systems ‣ 2 Results ‣ Machine learning predictions from unpredictable chaos\")b and c show a comparison of average PCCs over different datasets with other existing methods, including EH [[43](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib43)], opFRI [[44](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib44)], pfFRI [[44](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib44)], MND [[45](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib45)], GNM [[45](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib45), [39](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib39)], NMA [[39](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib39)], mFRI [[42](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib42)], mGNM [[41](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib41)], and mANM [[41](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib41)]. Here, TEPC (Lorenz) and TEPC (Rossler) are the present methods implemented through the Lorenz oscillator and Rossler oscillator, respectively. We find that our method TEPC (Lorenz) outperforms all other methods in computational biophysics and achieves the largest average PCCs over all different protein datasets. Specifically, in Fig. [3](https://ar5iv.labs.arxiv.org/html/2503.14956#S2.F3 \"Figure 3 ‣ 2.4 Predicting protein B-factors from chaotic systems ‣ 2 Results ‣ Machine learning predictions from unpredictable chaos\")b, for three sets of proteins with small (33 samples), medium (36 samples), and large (35 samples) sizes, our average PCCs are 0.940, 0.826, and 0.789 by TEPC (Lorenz), which are improved up to 95.8%, 71.4%, and 59.7% compared to those of 0.480, 0.482, and 0.494 in Ref. [[39](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib39)], respectively. Additionally, in Fig. [3](https://ar5iv.labs.arxiv.org/html/2503.14956#S2.F3 \"Figure 3 ‣ 2.4 Predicting protein B-factors from chaotic systems ‣ 2 Results ‣ Machine learning predictions from unpredictable chaos\")c, compared with the existing best results, the average PCCs 0.794, 0.796, and 0.817 obtained by TEPC (Lorenz) are about 13.8%, 24.0%, and 49.6% higher than 0.698 [[43](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib43)], 0.642 [[41](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib41)], and 0.546 [[41](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib41)] on 364, 362, and 300 datasets, respectively. The potential reason for this excellent performance is that the proposed method provides richer information of residue interactions through multiscale topological Laplacians. More details about the results in Fig. [3](https://ar5iv.labs.arxiv.org/html/2503.14956#S2.F3 \"Figure 3 ‣ 2.4 Predicting protein B-factors from chaotic systems ‣ 2 Results ‣ Machine learning predictions from unpredictable chaos\")b and c, and the prediction result of B-factor on 364 datasets can be found in Tables S12 and S17 of the Supporting Information, respectively. Three examples of B-factor predictions of proteins 1FF4, 2WUL, and 2Y7L with correlation coefficients 0.963, 0.955, and 0.891 are given in the Supporting Information, which suggests that our prediction results agree well with experiments."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Figs. [3](https://ar5iv.labs.arxiv.org/html/2503.14956#S2.F3 \"Figure 3 ‣ 2.4 Predicting protein B-factors from chaotic systems ‣ 2 Results ‣ Machine learning predictions from unpredictable chaos\")d and e show another B-factor predictions on protein calmodulin (PDB ID: 1CLL). In Fig. [3](https://ar5iv.labs.arxiv.org/html/2503.14956#S2.F3 \"Figure 3 ‣ 2.4 Predicting protein B-factors from chaotic systems ‣ 2 Results ‣ Machine learning predictions from unpredictable chaos\")d, our TEPC method with the Lorenz oscillator displays excellent performance, and its results match closely with experiments for residues 60-90. In contrast, the GNM method demonstrates poor predictions. This difference is obvious when comparing the color representations based on B-factor values of the 1CLL protein structure in Fig. [3](https://ar5iv.labs.arxiv.org/html/2503.14956#S2.F3 \"Figure 3 ‣ 2.4 Predicting protein B-factors from chaotic systems ‣ 2 Results ‣ Machine learning predictions from unpredictable chaos\")e."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "These protein B-factor predictions not only demonstrate the usefulness of the present TEPC method in handling proteins with different sizes and different complex structures, but also indicate that the proposed approach has great potential for other important biophysics applications, such as the predictions of protein-ligand binding affinities and protein-protein interactions."
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "2.5 Predicting single cell properties from chaotic systems",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "Having demonstrated the utility of topology-enabled molecular property predictions from chaos, we further demonstrate the topology-enabled cellular property predictions from chaos. Specifically, we consider single-cell RNA sequencing (scRNA-seq) data analysis, which is a computational process aimed at extracting meaningful biological insights from single-cell gene expression data. In the present work, we employ 13 scRNA-seq datasets as shown in Table S4 of the Supporting Information. These datasets involve tens of thousands of single cell samples collected from human or mouse. The single cells contain thousands or tens of thousands of genes. The problem is to classify these cells into various cell types, from 4 to 14 types, in various datasets based on their gene expressions."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "We first compute the Euclidean distance between cells and then set κ=1\\kappa=1 and σ=3\\sigma=3 for the exponential kernel in Eq. ([2](https://ar5iv.labs.arxiv.org/html/2503.14956#S4.E2 \"In 4.1 Mapping interaction to topology ‣ 4 Methods ‣ Machine learning predictions from unpredictable chaos\")) to evaluate pairwise correlations. We employ persistent Laplacians to create a family of correlation matrices for various chaotic systems. The trajectories from chaotic systems are collected, and their statistical values are computed for cell classification. We use 5-fold cross-validation with 10 random seeds and the random forest (RF) algorithm to predict cell type. The default parameters of RF from Scikit-learn’s packages were used in the implementation. Here, we compare the overall classification performance of our method (TEPC with Lorenz oscillators) with widely used principal components analysis (PCA) method in Fig. [3](https://ar5iv.labs.arxiv.org/html/2503.14956#S2.F3 \"Figure 3 ‣ 2.4 Predicting protein B-factors from chaotic systems ‣ 2 Results ‣ Machine learning predictions from unpredictable chaos\")f."
+                },
+                {
+                  "type": "formula",
+                  "text": "κ=1\\kappa=1"
+                },
+                {
+                  "type": "formula",
+                  "text": "σ=3\\sigma=3"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "For PCA, we take the average value of balanced accuracy (BA) over different dimensions, namely 50, 100, 150, 200, 250, and 300. For each reduction, 20 random initializations were used to ensure robustness and stability. Additionally, before the dimensionality reduction, a log-transform was performed on the data sets. The 5-fold cross-validation is employed to assess the performance of various methods. Since scRNA-seq datasets usually have an unbalanced number of cells per type, we use a balanced accuracy score rather than the traditional accuracy score, whose details are given in Section S4 of the Supporting Information. From Fig. [3](https://ar5iv.labs.arxiv.org/html/2503.14956#S2.F3 \"Figure 3 ‣ 2.4 Predicting protein B-factors from chaotic systems ‣ 2 Results ‣ Machine learning predictions from unpredictable chaos\")f, we find that our TEPC with Lorenz oscillators outperforms PCA on all 13 scRNA-seq dataset. Specifically, the highest improvement of BA value is up to 50.79% on GSE45719 data and the average improvement is 11.29% for each data set, suggesting that TEPC is a useful tool in the classification of scRNA-seq data. The details of Fig. [3](https://ar5iv.labs.arxiv.org/html/2503.14956#S2.F3 \"Figure 3 ‣ 2.4 Predicting protein B-factors from chaotic systems ‣ 2 Results ‣ Machine learning predictions from unpredictable chaos\")f can be found in Table S4 of the Supporting Information."
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "2.6 Predicting image properties from chaotic learning",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "To further demonstrate the predictive power and robustness of the proposed topology-enabled predictions from chaos, we consider a non-biological problem. Image classification is a general task in data science and has wide-spread applications in a wide variety of fields and disciplines. In this work, we consider Coil-20, a benchmark dataset of image classifications with 1440 images [[46](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib46)]. Each image has a size of 128\\*128, where 20 objects or classes are captured at 72 angles, and was treated as a vector of length 16384. The details of Coil-20 data are given in SectionS7 of the Supporting Information. In our implementation, we first reduce the dimension from 16384 to 3 with uniform manifold approximation and projection (UMAP). However, t-distributed stochastic neighbor embedding (t-SNE) or PCA could be similarly used for dimension reduction. The pairwise correlations among images in the dataset are computed with the exponential kernel κ=1\\kappa=1 and σ=3\\sigma=3 from the three-dimensional (3D) UMAP results. Then, we use persistent Laplacians to generate a family of correlation matrices for 1440 images. For each correlation matrix, we install a chaotic system and compute a perturbative trajectory for each image. The statistical values of trajectories are used for downstream ML predictions. As a comparison, we also directly use the features from the UMAP, PCA, and t-SNE dimension reduction for downstream classifiers. We use three different classifiers, including random forest (RF), gradient boosting decision tree (GBDT), and k-nearest neighbor classifier (KNN) in the classification with all default parameters of Scikit-learn packages. We use the 5-fold cross-validation to evaluate the performance of classifications. All details of parameters used in Fig. [3](https://ar5iv.labs.arxiv.org/html/2503.14956#S2.F3 \"Figure 3 ‣ 2.4 Predicting protein B-factors from chaotic systems ‣ 2 Results ‣ Machine learning predictions from unpredictable chaos\") can be found in Table S2 of the Supporting Information."
+                },
+                {
+                  "type": "formula",
+                  "text": "κ=1\\kappa=1"
+                },
+                {
+                  "type": "formula",
+                  "text": "σ=3\\sigma=3"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "In Fig. [3](https://ar5iv.labs.arxiv.org/html/2503.14956#S2.F3 \"Figure 3 ‣ 2.4 Predicting protein B-factors from chaotic systems ‣ 2 Results ‣ Machine learning predictions from unpredictable chaos\")g, we compare the balanced accuracy of classification with these four methods, i.e., TEPC, UMAP, PCA, and t-SNE, where TEPC (Lorenz) and TEPC (Rossler) indicate the use of two different chaotic dynamics, i.e., Lorenz and Rossler oscillators. We find that TEPC (Lorenz) outperforms UMAP, PCA, and t-SNE methods on all three classifiers. Compared with UMAP, PCA, and t-SNE, TEPC (Lorenz) has improved the balanced accuracy up to 11.59%, 13.53%, and 11.64% for RF, GBDT, and KNN classifiers, respectively. The details of Fig. [3](https://ar5iv.labs.arxiv.org/html/2503.14956#S2.F3 \"Figure 3 ‣ 2.4 Predicting protein B-factors from chaotic systems ‣ 2 Results ‣ Machine learning predictions from unpredictable chaos\")g can be found in Table S7 of the Supporting Information. It is interesting to note that although TEPC (Lorenz) started with the same UMAP information, it outperforms UMAP by 8.65%, 8.75%, and 11.14% for RF, GBDT, and KNN classifiers, respectively. This amazing improvement is due to the fact that the proposed topology-enabled chaotic embedding captures the network interactions and multiscale correlations among oscillators (images). In contrast, the UMAP information is relatively isolated for each image and neglects crucial ‘spatial’ correlations among images."
+                }
+              ],
+              "children": []
+            }
+          ]
+        },
+        {
+          "heading": "3 Discussion",
+          "level": 2,
+          "content": [],
+          "children": [
+            {
+              "heading": "3.1 Robustness with respect to dynamical systems and ML models",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "In order to demonstrate the robustness of the proposed chaotic learning with respect to the choice of chaotic dynamics and ML algorithms, we consider two oscillators, i.e., Lorenz and Rossler and many ML algorithms, including KNN, RF, GBDT, RNN, and LSTM. Specifically, we integrate the Rossler equation using the fourth-order Runge-Kutta scheme and set their parameters to a=b=0.1a=b=0.1, c=4c=4, and a=35,b=3,c=28a=35,b=3,c=28, respectively. In Fig. [3](https://ar5iv.labs.arxiv.org/html/2503.14956#S2.F3 \"Figure 3 ‣ 2.4 Predicting protein B-factors from chaotic systems ‣ 2 Results ‣ Machine learning predictions from unpredictable chaos\"), TEPC (Rossler) means the TEPC method with Rossler oscillators."
+                },
+                {
+                  "type": "formula",
+                  "text": "a=b=0.1a=b=0.1"
+                },
+                {
+                  "type": "formula",
+                  "text": "c=4c=4"
+                },
+                {
+                  "type": "formula",
+                  "text": "a=35,b=3,c=28a=35,b=3,c=28"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "In Fig. [3](https://ar5iv.labs.arxiv.org/html/2503.14956#S2.F3 \"Figure 3 ‣ 2.4 Predicting protein B-factors from chaotic systems ‣ 2 Results ‣ Machine learning predictions from unpredictable chaos\")a, TEPC (Rossler) performances as well as TEPC (Lorenz) on the EEG classification task obtaining all 100% on three metrics including accuracy, sensitivity, and specificity, which are equivalent or higher than those of other existing methods."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "In Fig. [3](https://ar5iv.labs.arxiv.org/html/2503.14956#S2.F3 \"Figure 3 ‣ 2.4 Predicting protein B-factors from chaotic systems ‣ 2 Results ‣ Machine learning predictions from unpredictable chaos\")b, EH indicates the evolutionary homology method, and NMA refers to the normal mode analysis. Regarding the protein B-factor prediction, for the set of small-size proteins with 33 samples, TEPC (Rossler) method with an average PCC 0.934 outperforms other existing methods. Specifically, the average PCC value is improved 20.81% and 94.58% compared with 0.773 and 0.480 obtained by EH and NMA methods in references [[43](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib43)] and [[39](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib39)], respectively. For the set of medium-size proteins with 36 samples, TEPC (Rossler) raises the average PCC value up to 6.17% and 60.58% from 0.729, 0.482 to 0.774 compared to those of EH method [[43](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib43)] and reference [[39](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib39)], respectively. Similarly, for the set of large-size proteins with 35 samples, TEPC (Rossler) raises the average PCC value up to 5.4%, 41.9% compared to those of EH method [[43](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib43)] and reference [[39](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib39)], respectively. Additionally, in Fig. [3](https://ar5iv.labs.arxiv.org/html/2503.14956#S2.F3 \"Figure 3 ‣ 2.4 Predicting protein B-factors from chaotic systems ‣ 2 Results ‣ Machine learning predictions from unpredictable chaos\")c, TEPC (Rossler) also achieves better prediction result than other existing methods in different sets of proteins with 300, 362, and 364 samples, respectively. That is, TEPC (Rossler) gets the average PCCs 0.748, 0.722, and 0.72 with the increment up to 37.0%, 12.46%, and 27.43% compared to those of 0.546, 0.642, and 0.565 by mANM [[41](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib41)], mGNM [[41](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib41)], and GNM methods [[44](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib44)] with 300, 362, and 364 datasets, respectively."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "In Fig. [3](https://ar5iv.labs.arxiv.org/html/2503.14956#S2.F3 \"Figure 3 ‣ 2.4 Predicting protein B-factors from chaotic systems ‣ 2 Results ‣ Machine learning predictions from unpredictable chaos\")g, for image classification task, TEPC (Rossler) obtains a comparable performance with TEPC (Lorenz) method, except with KNN classifier. The balanced accuracy values of prediction, 0.915 and 0.894 with RF and GBDT classifiers attained by TEPC (Rossler) are improved up to 2.8% and 3.35% compared to PCA method, and 2.92% and 0.45% with t-SNE method, respectively, which is similar with those of UMAP method. However, TEPC (Rossler) with KNN classifier performs worse than other methods."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "From Figs. [3](https://ar5iv.labs.arxiv.org/html/2503.14956#S2.F3 \"Figure 3 ‣ 2.4 Predicting protein B-factors from chaotic systems ‣ 2 Results ‣ Machine learning predictions from unpredictable chaos\")a, b, c, g, though the TEPC method with different kinds of oscillators have various performances on brain EEG data, protein B-factor prediction, and image classification task, they outperform the existing advanced methods or the traditional baseline methods, like PCA or UMAP or t-SNE in most of cases, which verifies the generalizability of TEPC method is independent of specific chaotic systems."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Finally, in Fig. [3](https://ar5iv.labs.arxiv.org/html/2503.14956#S2.F3 \"Figure 3 ‣ 2.4 Predicting protein B-factors from chaotic systems ‣ 2 Results ‣ Machine learning predictions from unpredictable chaos\")a, TEPC (RNN) and TEPC (LSTM) were paired with Lorenz, and TEPC (Lorenz) and TEPC (Rossler) were combined with KNN. All of these methods achieved 100% in accuracy, sensitivity, and specificity for EEG classification, confirming that the proposed TEPC method is highly robust."
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "3.2 Impact of numerical integrators",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "In the implementation of TEPC method, we all utilize the fourth-order Runge-Kutta (RK-4) method to solve Lorenz (Rossler) equations. Here, in order to discuss the effect caused by different numerical integrators on ML predictions, we show the comparison results between RK-4 and RK-2 methods on 13 single cell RNA sequencing data in Fig. [3](https://ar5iv.labs.arxiv.org/html/2503.14956#S2.F3 \"Figure 3 ‣ 2.4 Predicting protein B-factors from chaotic systems ‣ 2 Results ‣ Machine learning predictions from unpredictable chaos\")h, where the balanced accuracy (BA) are compared by the TEPC method with the Lorenz oscillator integrating with three different classifiers, including RF, GBDT, and SVM."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "From Fig. [3](https://ar5iv.labs.arxiv.org/html/2503.14956#S2.F3 \"Figure 3 ‣ 2.4 Predicting protein B-factors from chaotic systems ‣ 2 Results ‣ Machine learning predictions from unpredictable chaos\")h, the balanced accuracy (BA) values by RK-4 method are larger than those by Rk-2 with RF classifier on all 13 single cell data sets. For GBDT and SVM classifier, the comparison results between RK-4 method and RK-2 method can be found in Fig. S5 of the Supporting Information. These results suggest that the RK-4 method used in our numerical experiments is a robust approach to provide reliable and efficient prediction results. The details of Fig. [3](https://ar5iv.labs.arxiv.org/html/2503.14956#S2.F3 \"Figure 3 ‣ 2.4 Predicting protein B-factors from chaotic systems ‣ 2 Results ‣ Machine learning predictions from unpredictable chaos\")h can be found in Table S6 of the Supporting Information."
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "3.3 Impact of model parametrization",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "To analyze the best parameter for exponential function of Eq. ([2](https://ar5iv.labs.arxiv.org/html/2503.14956#S4.E2 \"In 4.1 Mapping interaction to topology ‣ 4 Methods ‣ Machine learning predictions from unpredictable chaos\")), we test a range of parameters to predict the B-factor averaged on 6RXN protein in Fig. S1 of the Supporting Information, where the best average B-factor is got around κ=1\\kappa=1 and σ=3\\sigma=3. This result suggests that the TEPC model introduced in present study can be a parameter-free model by setting κ=1\\kappa=1 and σ=3\\sigma=3. Our findings do not depend on chaotic models and model parametrization."
+                },
+                {
+                  "type": "formula",
+                  "text": "κ=1\\kappa=1"
+                },
+                {
+                  "type": "formula",
+                  "text": "σ=3\\sigma=3"
+                },
+                {
+                  "type": "formula",
+                  "text": "κ=1\\kappa=1"
+                },
+                {
+                  "type": "formula",
+                  "text": "σ=3\\sigma=3"
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "3.4 Residue-Similarity (R-S) plots",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "In this section, we implement the residue-similarity (R-S) analysis [[47](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib47)] for the visualization of classification performance on single cell RNA sequencing (scRNA-seq) datasets. In classification tasks involving two classes, conventional approaches such as Receiver Operating Characteristic (ROC) curves and Area Under the ROC Curve (AUC) serve comparable purposes to R-S scores. However, unlike these traditional methods, R-S scores possess the capability to be extended to scenarios with any number of classes, which is advantageous over the traditional methods."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Figs. [4](https://ar5iv.labs.arxiv.org/html/2503.14956#S3.F4 \"Figure 4 ‣ 3.4 Residue-Similarity (R-S) plots ‣ 3 Discussion ‣ Machine learning predictions from unpredictable chaos\")a-b show a comparison between the R-S plot and two-dimension (2D) plots of UMAP for four scRNA-seq data sets, including GSE45719, GSE59114, GSE75748 cell, and GSE75748 time. For each data set, it was partitioned into five subsets using 5-fold cross-validation. Four subsets were utilized to train the random forest (RF) classifier, while one subset was reserved for testing. Subsequently, residue and similarity scores were calculated for each sample and visualized based on their true cell type. Samples were then color-coded according to the labels predicted by the RF classifier. The xx-axis represents residue scores, while the yy-axis represents similarity scores. Both scores range from 0 to 1, with 1 indicating optimal performance. A well-separated and clustered reduction is indicated by the top-right corner of the plot. The TEPC model was used to reduce the dimension to 30 supergenes with κ=1\\kappa=1 and σ=3\\sigma=3."
+                },
+                {
+                  "type": "formula",
+                  "text": "xx"
+                },
+                {
+                  "type": "formula",
+                  "text": "yy"
+                },
+                {
+                  "type": "formula",
+                  "text": "κ=1\\kappa=1"
+                },
+                {
+                  "type": "formula",
+                  "text": "σ=3\\sigma=3"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Fig. [4](https://ar5iv.labs.arxiv.org/html/2503.14956#S3.F4 \"Figure 4 ‣ 3.4 Residue-Similarity (R-S) plots ‣ 3 Discussion ‣ Machine learning predictions from unpredictable chaos\")c represents the confusion matrix of R-S plots, where the xx-axis means the true labels and the yy-axis means the predicted labels. For instance, for the GSE45719 data set, in the first row of figure, we can find that classes 2, 5, and 6 are all classified correctly, and classes 0, 1, 3, 4, and 7 are classified correctly except one, three, three, four samples, respectively. However, in UMAP plots, the samples of classes 0, 1, 3, and 7 do not form compact individual cluster, and there are two obvious separated clusters for each class. These findings suggest that although UMAP has a good clustering visualization, an R-S plot has better prediction performance than UMAP. Similar results are found in the cases of GSE59114, GSE75748 cell, and GSE75748 time data sets, shown in the last three rows of Figs. [4](https://ar5iv.labs.arxiv.org/html/2503.14956#S3.F4 \"Figure 4 ‣ 3.4 Residue-Similarity (R-S) plots ‣ 3 Discussion ‣ Machine learning predictions from unpredictable chaos\")a-c. The clustering visualization of left scRNA-seq data sets is given in Figs.S2, S3, and S4 of the Supporting Information."
+                },
+                {
+                  "type": "formula",
+                  "text": "xx"
+                },
+                {
+                  "type": "formula",
+                  "text": "yy"
+                },
+                {
+                  "type": "formula",
+                  "text": "κ=1\\kappa=1"
+                },
+                {
+                  "type": "formula",
+                  "text": "σ=3\\sigma=3"
+                },
+                {
+                  "type": "formula",
+                  "text": "10−610^{-6}"
+                },
+                {
+                  "type": "formula",
+                  "text": "β0α,0\\beta^{\\alpha,0}_{0}"
+                },
+                {
+                  "type": "formula",
+                  "text": "β1α,0\\beta^{\\alpha,0}_{1}"
+                },
+                {
+                  "type": "formula",
+                  "text": "λ0α,0\\lambda^{\\alpha,0}_{0}"
+                },
+                {
+                  "type": "formula",
+                  "text": "λ1α,0\\lambda^{\\alpha,0}_{1}"
+                },
+                {
+                  "type": "formula",
+                  "text": "α\\alpha"
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "3.5 Applications of chaotic learning to other fields",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "In present work, chaotic learning has been applied to diverse complex systems, from single molecules (proteins), single cells, organs (brain EEG), to non-biological data (images). While all examples shown in this work are about element-specific predictions, the proposed TEPC can be used for global property predictions by appropriately integrating element-specific features into global ones, such as features for a whole protein, which can be used for global predictions, such as protein solubility, toxicity, folding free energy, etc."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Here, by integrating the ML, chaos theory, and persistent Laplacian, we propose a chaotic learning paradigm to predict the properties of general data from unpredictable chaotic dynamics. Our paradigm can be used not only as a tool in ML predictions, but also as a new method for the analysis of times series, such as the brain EEG data."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "The proposed chaotic learning can be improved by other topological Laplacian methods, such as persistent hyerdigraph Laplacian and persistent sheaf Laplacian [[17](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib17)], as well as better time integrators."
+                }
+              ],
+              "children": []
+            }
+          ]
+        },
+        {
+          "heading": "4 Methods",
+          "level": 2,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "We consider a spatial network or high-order hypergraph where the nodes mean objects or particles, neurons and the links or edges between nodes represent the interaction between nodes. The distance between two nodes is directly associated with their interaction strength. Additionally, we assume that all functions of nodes are solely determined by the network structure. Therefore, functional predictions can be carried out with the structural information without resorting to the ultimate interactions. We build up a connectivity matrix from the interactive network, and we represent the dynamics of each node by a nonlinear oscillator, and couple nodes with the connectivity matrix extracted from the data. Finally, we review persistent Laplacian and propose a new filtration method, Laplacian filtration, instead of a conventional filtration method. In this section, we discuss the details of our main methods, mapping interaction to topology and persistent Laplacian analysis. A brief discussion of stability analysis of coupled chaotic systems and the details of residue-similarity scores are given in SectionsS1.2 and S9 of the Supporting Information, respectively."
+            }
+          ],
+          "children": [
+            {
+              "heading": "4.1 Mapping interaction to topology",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "Topological relations or connectivities among network nodes are basic ingredients in network nonlinear dynamics models. As discussed above, this topological information can be extracted from the interaction of a given node of interest in an nn-dimensional space. Let us consider a network of NN nodes located on different regions 𝕣1,𝕣2,⋯,𝕣N{\\mathbb{r}\\_{1}},{\\mathbb{r}\\_{2}},\\cdots,{\\mathbb{r}\\_{N}}, (𝕣j∈ℝn\\mathbb{r}\\_{j}\\in{\\mathbb{R}^{n}}), where nodes can be neurons, atoms, amino acids residues in a molecule, or people in society if applied in other scenarios. The distance between the iith and jjth nodes is given by di​j​(ri,rj)=‖𝕣i−𝕣j‖2d\\_{ij}(r\\_{i},r\\_{j})=\\left\\|{{\\mathbb{r}\\_{i}}-{\\mathbb{r}\\_{j}}}\\right\\|\\_{2}. The connectivity matrix must agree with the driven and response relation between two dynamics systems. Moreover, we suppose that all nodes in the network are mutually linked and their interactions decay as a function of their distance 𝔸i​j​(di​j)\\mathbb{A}\\_{ij}(d\\_{ij}). The simplest form of the connectivity matrix is the Kirchoff (or connectivity) matrix generated by cutoff distance σi​j\\sigma\\_{ij}:"
+                },
+                {
+                  "type": "formula",
+                  "text": "nn"
+                },
+                {
+                  "type": "formula",
+                  "text": "NN"
+                },
+                {
+                  "type": "formula",
+                  "text": "𝕣1,𝕣2,⋯,𝕣N{\\mathbb{r}_{1}},{\\mathbb{r}_{2}},\\cdots,{\\mathbb{r}_{N}}"
+                },
+                {
+                  "type": "formula",
+                  "text": "𝕣j∈ℝn\\mathbb{r}_{j}\\in{\\mathbb{R}^{n}}"
+                },
+                {
+                  "type": "formula",
+                  "text": "ii"
+                },
+                {
+                  "type": "formula",
+                  "text": "jj"
+                },
+                {
+                  "type": "formula",
+                  "text": "di​j​(ri,rj)=‖𝕣i−𝕣j‖2d_{ij}(r_{i},r_{j})=\\left\\|{{\\mathbb{r}_{i}}-{\\mathbb{r}_{j}}}\\right\\|_{2}"
+                },
+                {
+                  "type": "formula",
+                  "text": "𝔸i​j​(di​j)\\mathbb{A}_{ij}(d_{ij})"
+                },
+                {
+                  "type": "formula",
+                  "text": "σi​j\\sigma_{ij}"
+                },
+                {
+                  "type": "table",
+                  "text": "| | | | | | --- | --- | --- | --- | | | Ai​j={1,∀di​j≤σi​j,i≠j0,∀di​j>σi​j,i≠j−∑j≠iAi​j,∀i=j.{A\\_{ij}}=\\left\\{{\\begin{array}[]{\\*{20}{c}}{1,\\quad{\\rm{}}\\forall{d\\_{ij}}\\leq{\\sigma\\_{ij}},i\\neq j}\\\\ {0,\\quad{\\rm{}}\\forall{d\\_{ij}}>{\\sigma\\_{ij}},i\\neq j}\\\\ {-\\sum\\nolimits\\_{j\\neq i}{{A\\_{ij}},}\\quad{\\rm{}}\\forall i=j.}\\end{array}}\\right. | | (1) |"
+                },
+                {
+                  "type": "formula",
+                  "text": "Ai​j={1,∀di​j≤σi​j,i≠j0,∀di​j>σi​j,i≠j−∑j≠iAi​j,∀i=j.{A_{ij}}=\\left\\{{\\begin{array}[]{*{20}{c}}{1,\\quad{\\rm{}}\\forall{d_{ij}}\\leq{\\sigma_{ij}},i\\neq j}\\\\ {0,\\quad{\\rm{}}\\forall{d_{ij}}>{\\sigma_{ij}},i\\neq j}\\\\ {-\\sum\\nolimits_{j\\neq i}{{A_{ij}},}\\quad{\\rm{}}\\forall i=j.}\\end{array}}\\right."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "In order to take the distance effect in a more practical manner into the consideration, smooth and monotonically decreasing radial basis functions or the delta sequence kernels of positive type are often employed for convenience [[48](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib48)]. Here, generalized exponential functions"
+                },
+                {
+                  "type": "table",
+                  "text": "| | | | | | --- | --- | --- | --- | | | Ai​j={e−di​jk​/​k​σi​jk,∀i≠j,k=1,2,⋯−∑j≠iAi​j,∀i=j{A\\_{ij}}=\\left\\{{\\begin{array}[]{\\*{20}{c}}{{e^{{{-d\\_{ij}^{k}}\\mathord{\\left/{\\vphantom{{-d\\_{ij}^{k}}{k\\sigma\\_{ij}^{k}}}}\\right.\\kern-1.2pt}{k\\sigma\\_{ij}^{k}}}}},\\quad{\\rm{}}\\forall i\\neq j,{\\rm{}}k=1,2,\\cdots}\\\\ {-\\sum\\nolimits\\_{j\\neq i}{{A\\_{ij}},}\\quad{\\rm{}}\\forall i=j}\\end{array}}\\right. | | (2) |"
+                },
+                {
+                  "type": "formula",
+                  "text": "Ai​j={e−di​jk​/​k​σi​jk,∀i≠j,k=1,2,⋯−∑j≠iAi​j,∀i=j{A_{ij}}=\\left\\{{\\begin{array}[]{*{20}{c}}{{e^{{{-d_{ij}^{k}}\\mathord{\\left/{\\vphantom{{-d_{ij}^{k}}{k\\sigma_{ij}^{k}}}}\\right.\\kern-1.2pt}{k\\sigma_{ij}^{k}}}}},\\quad{\\rm{}}\\forall i\\neq j,{\\rm{}}k=1,2,\\cdots}\\\\ {-\\sum\\nolimits_{j\\neq i}{{A_{ij}},}\\quad{\\rm{}}\\forall i=j}\\end{array}}\\right."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "and power law functions are considered,"
+                },
+                {
+                  "type": "table",
+                  "text": "| | | | | | --- | --- | --- | --- | | | Ai​j={(di​j​/​σi​j)−υ,∀i≠j,υ>1−∑j≠iAi​j,∀i=j,{A\\_{ij}}=\\left\\{{\\begin{array}[]{\\*{20}{c}}{{{\\left({{{{d\\_{ij}}}\\mathord{\\left/{\\vphantom{{{d\\_{ij}}}{{\\sigma\\_{ij}}}}}\\right.\\kern-1.2pt}{{\\sigma\\_{ij}}}}}\\right)}^{-\\upsilon}},\\quad{\\rm{}}\\forall i\\neq j,{\\rm{}}\\upsilon>1{\\rm{}}}\\\\ {-\\sum\\nolimits\\_{j\\neq i}{{A\\_{ij}},}\\quad{\\rm{}}\\forall i=j,}\\end{array}}\\right. | | (3) |"
+                },
+                {
+                  "type": "formula",
+                  "text": "Ai​j={(di​j​/​σi​j)−υ,∀i≠j,υ>1−∑j≠iAi​j,∀i=j,{A_{ij}}=\\left\\{{\\begin{array}[]{*{20}{c}}{{{\\left({{{{d_{ij}}}\\mathord{\\left/{\\vphantom{{{d_{ij}}}{{\\sigma_{ij}}}}}\\right.\\kern-1.2pt}{{\\sigma_{ij}}}}}\\right)}^{-\\upsilon}},\\quad{\\rm{}}\\forall i\\neq j,{\\rm{}}\\upsilon>1{\\rm{}}}\\\\ {-\\sum\\nolimits_{j\\neq i}{{A_{ij}},}\\quad{\\rm{}}\\forall i=j,}\\end{array}}\\right."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "where σi​j\\sigma\\_{ij} are characteristic distance between nodes. In the present work, σi​j\\sigma\\_{ij} is a tuneable parameter. Note that the above matrix functions have already been applied to other methods, like flexibility analysis methods in biology system [[49](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib49), [50](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib50)]. But, the present construction of these functional forms is based on the driven and response relationship of coupled dynamical systems [[51](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib51)]."
+                },
+                {
+                  "type": "formula",
+                  "text": "σi​j\\sigma_{ij}"
+                },
+                {
+                  "type": "formula",
+                  "text": "σi​j\\sigma_{ij}"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Formulas ([1](https://ar5iv.labs.arxiv.org/html/2503.14956#S4.E1 \"In 4.1 Mapping interaction to topology ‣ 4 Methods ‣ Machine learning predictions from unpredictable chaos\"))-([3](https://ar5iv.labs.arxiv.org/html/2503.14956#S4.E3 \"In 4.1 Mapping interaction to topology ‣ 4 Methods ‣ Machine learning predictions from unpredictable chaos\")) can be used to map the geometry of a network into topological relations or connectivities. The connectivity matrix 𝐀\\bf A is an N×NN\\times N symmetric, diagonally dominant matrix, and the elements in the matrix are not interaction potentials among nodes. For simplify, we set that the characteristic distances of all nodes are the same σi​j=σ\\sigma\\_{ij}=\\sigma."
+                },
+                {
+                  "type": "formula",
+                  "text": "𝐀\\bf A"
+                },
+                {
+                  "type": "formula",
+                  "text": "N×NN\\times N"
+                },
+                {
+                  "type": "formula",
+                  "text": "σi​j=σ\\sigma_{ij}=\\sigma"
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "4.2 Persistent Laplacian analysis",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "Persistent homology (PH) is a new branch of algebraic topology and has been developed as a new multiscale representation of topological features applied successfully in various fields, including mathematics [[52](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib52)], chemistry [[53](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib53)], etc. It contains a filtration process to generate a family of topological spaces so that the system can be analyzed at multiscales. More discussion of PH theory is given in Section S8 of the Supporting Information. However, PH cannot detect the homotopic shape evolution of the system during filtration. Recently, persistent Laplacian (PL) or persistent spectral graph (PSG) is developed to fill the gap. PL not only retains the full set of topological invariants in their harmonic spectra as PH does but also captures the homotopic shape evolution of data during the filtration in their non-harmonic spectra that PH does not describe [[16](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib16)]. PL is a special case of persistent topological Lpalacians, including the persistent Hodge Laplacian defined on a Riemannian manifold [[54](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib54)], and a variety of other formulations defined on many topological spaces, such as cellular sheaf, hyperdigraphs, path complexes, etc. Like PH, PLs utilize a filtration process to generate a series of geometric shapes and associated topological spaces, on which persistent spectral graphs are defined. The change in the null space dimensions of the PLs during the filtration indicates the persistence of topological invariants, while the nonzero eigenvalues and related eigenfunctions of the PLs reveal the geometric shape evolution of the data during the filtration."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "An oriented simplicial complex KK is a sequence of subcomplexes (Kt)t=0m(K\\_{t})\\_{t=0}^{m} of KK:"
+                },
+                {
+                  "type": "formula",
+                  "text": "KK"
+                },
+                {
+                  "type": "formula",
+                  "text": "(Kt)t=0m(K_{t})_{t=0}^{m}"
+                },
+                {
+                  "type": "formula",
+                  "text": "KK"
+                },
+                {
+                  "type": "table",
+                  "text": "| | | | | | --- | --- | --- | --- | | | ∅=K0⊆K1⊆K2⊆⋯⊆Km=K.\\emptyset=K\\_{0}\\subseteq K\\_{1}\\subseteq K\\_{2}\\subseteq\\cdots\\subseteq K\\_{m}=K. | | (4) |"
+                },
+                {
+                  "type": "formula",
+                  "text": "∅=K0⊆K1⊆K2⊆⋯⊆Km=K.\\emptyset=K_{0}\\subseteq K_{1}\\subseteq K_{2}\\subseteq\\cdots\\subseteq K_{m}=K."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Considering the corresponding chain group of each subcomplex KtK\\_{t} and qq-boundary operator: Cq​(Kt)C\\_{q}(K\\_{t}) and ∂qt:Cq​(Kt)→Cq−1​(Kt)\\partial\\_{q}^{t}:C\\_{q}(K\\_{t})\\to C\\_{q-1}(K\\_{t}), if 0<q≤dimKt0<q\\leq\\dim K\\_{t}, we have"
+                },
+                {
+                  "type": "formula",
+                  "text": "KtK_{t}"
+                },
+                {
+                  "type": "formula",
+                  "text": "qq"
+                },
+                {
+                  "type": "formula",
+                  "text": "Cq​(Kt)C_{q}(K_{t})"
+                },
+                {
+                  "type": "formula",
+                  "text": "∂qt:Cq​(Kt)→Cq−1​(Kt)\\partial_{q}^{t}:C_{q}(K_{t})\\to C_{q-1}(K_{t})"
+                },
+                {
+                  "type": "formula",
+                  "text": "0<q≤dimKt0<q\\leq\\dim K_{t}"
+                },
+                {
+                  "type": "table",
+                  "text": "| | | | | | --- | --- | --- | --- | | | ∂qt(σq)=∑iq(−1)i​σq−1i,∀σq∈Kt,\\partial\\_{q}^{t}(\\sigma\\_{q})=\\sum\\_{i}^{q}(-1)^{i}\\sigma^{i}\\_{q-1},\\quad\\forall\\sigma\\_{q}\\in K\\_{t}, | | (5) |"
+                },
+                {
+                  "type": "formula",
+                  "text": "∂qt(σq)=∑iq(−1)i​σq−1i,∀σq∈Kt,\\partial_{q}^{t}(\\sigma_{q})=\\sum_{i}^{q}(-1)^{i}\\sigma^{i}_{q-1},\\quad\\forall\\sigma_{q}\\in K_{t},"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "where σq=[v0,⋯,vq]\\sigma\\_{q}=[v\\_{0},\\cdots,v\\_{q}] is any qq-simplex and σq−1i=[v0,⋯,vi^,⋯,vq]\\sigma^{i}\\_{q-1}=[v\\_{0},\\cdots,\\hat{v\\_{i}},\\cdots,v\\_{q}] the oriented (q−1)(q\\!-\\!1)-simplex constructed by removing viv\\_{i}. It is important to define an adjoint operator of ∂qt\\partial\\_{q}^{t} as the coboundary operator ∂qt∗:Cq−1​(Kt)→Cq​(Kt)\\partial\\_{q}^{t^{\\ast}}:C^{q-1}(K\\_{t})\\to C^{q}(K\\_{t}), mapping from Cq−1​(Kt)C\\_{q-1}(K\\_{t}) to Cq​(Kt)C\\_{q}(K\\_{t}) by the isomorphism between cochain groups and chain groups Cq​(Kt)≅Cq​(Kt)C^{q}(K\\_{t})\\cong C\\_{q}(K\\_{t})."
+                },
+                {
+                  "type": "formula",
+                  "text": "σq=[v0,⋯,vq]\\sigma_{q}=[v_{0},\\cdots,v_{q}]"
+                },
+                {
+                  "type": "formula",
+                  "text": "qq"
+                },
+                {
+                  "type": "formula",
+                  "text": "σq−1i=[v0,⋯,vi^,⋯,vq]\\sigma^{i}_{q-1}=[v_{0},\\cdots,\\hat{v_{i}},\\cdots,v_{q}]"
+                },
+                {
+                  "type": "formula",
+                  "text": "(q−1)(q\\!-\\!1)"
+                },
+                {
+                  "type": "formula",
+                  "text": "viv_{i}"
+                },
+                {
+                  "type": "formula",
+                  "text": "∂qt\\partial_{q}^{t}"
+                },
+                {
+                  "type": "formula",
+                  "text": "∂qt∗:Cq−1​(Kt)→Cq​(Kt)\\partial_{q}^{t^{\\ast}}:C^{q-1}(K_{t})\\to C^{q}(K_{t})"
+                },
+                {
+                  "type": "formula",
+                  "text": "Cq−1​(Kt)C_{q-1}(K_{t})"
+                },
+                {
+                  "type": "formula",
+                  "text": "Cq​(Kt)C_{q}(K_{t})"
+                },
+                {
+                  "type": "formula",
+                  "text": "Cq​(Kt)≅Cq​(Kt)C^{q}(K_{t})\\cong C_{q}(K_{t})"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "For simplicity, denoting CqtC\\_{q}^{t} the chain group Cq​(Kt)C\\_{q}(K\\_{t}) and using the natural inclusion map from Cq−1tC\\_{q-1}^{t} to Cq−1t+pC\\_{q-1}^{t+p}, one defines the subset of Cqt+pC\\_{q}^{t+p} as ℂqt,p\\mathbb{C}\\_{q}^{t,p} with the boundary being in Cq−1tC\\_{q-1}^{t} as"
+                },
+                {
+                  "type": "formula",
+                  "text": "CqtC_{q}^{t}"
+                },
+                {
+                  "type": "formula",
+                  "text": "Cq​(Kt)C_{q}(K_{t})"
+                },
+                {
+                  "type": "formula",
+                  "text": "Cq−1tC_{q-1}^{t}"
+                },
+                {
+                  "type": "formula",
+                  "text": "Cq−1t+pC_{q-1}^{t+p}"
+                },
+                {
+                  "type": "formula",
+                  "text": "Cqt+pC_{q}^{t+p}"
+                },
+                {
+                  "type": "formula",
+                  "text": "ℂqt,p\\mathbb{C}_{q}^{t,p}"
+                },
+                {
+                  "type": "formula",
+                  "text": "Cq−1tC_{q-1}^{t}"
+                },
+                {
+                  "type": "table",
+                  "text": "| | | | | | --- | --- | --- | --- | | | ℂqt,p≔{β∈Cqt+p∣∂qt+p(β)∈Cq−1t}.\\mathbb{C}\\_{q}^{t,p}\\coloneqq\\{\\beta\\in C\\_{q}^{t+p}\\mid\\ \\partial\\_{q}^{t+p}(\\beta)\\in C\\_{q-1}^{t}\\}. | | (6) |"
+                },
+                {
+                  "type": "formula",
+                  "text": "ℂqt,p≔{β∈Cqt+p∣∂qt+p(β)∈Cq−1t}.\\mathbb{C}_{q}^{t,p}\\coloneqq\\{\\beta\\in C_{q}^{t+p}\\mid\\ \\partial_{q}^{t+p}(\\beta)\\in C_{q-1}^{t}\\}."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "On this subset, we denote the pp-persistent qq-boundary operator by ðqt,p:ℂqt,p→Cq−1t\\eth\\_{q}^{t,p}:\\mathbb{C}\\_{q}^{t,p}\\to C\\_{q-1}^{t}and the corresponding adjoint operator by (ðqt,p)∗:Cq−1t→ℂqt,p(\\eth\\_{q}^{t,p})^{\\ast}:C\\_{q-1}^{t}\\to\\mathbb{C}\\_{q}^{t,p} via the determination of cochains with chains. We can define the qq-order pp-persistent Laplacian operator Δqt,p:Cqt→Cqt\\Delta\\_{q}^{t,p}:C\\_{q}^{t}\\to C\\_{q}^{t} in the filtration [[16](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib16)]"
+                },
+                {
+                  "type": "formula",
+                  "text": "pp"
+                },
+                {
+                  "type": "formula",
+                  "text": "qq"
+                },
+                {
+                  "type": "formula",
+                  "text": "ðqt,p:ℂqt,p→Cq−1t\\eth_{q}^{t,p}:\\mathbb{C}_{q}^{t,p}\\to C_{q-1}^{t}"
+                },
+                {
+                  "type": "formula",
+                  "text": "(ðqt,p)∗:Cq−1t→ℂqt,p(\\eth_{q}^{t,p})^{\\ast}:C_{q-1}^{t}\\to\\mathbb{C}_{q}^{t,p}"
+                },
+                {
+                  "type": "formula",
+                  "text": "qq"
+                },
+                {
+                  "type": "formula",
+                  "text": "pp"
+                },
+                {
+                  "type": "formula",
+                  "text": "Δqt,p:Cqt→Cqt\\Delta_{q}^{t,p}:C_{q}^{t}\\to C_{q}^{t}"
+                },
+                {
+                  "type": "table",
+                  "text": "| | | | | | --- | --- | --- | --- | | | Δqt,p=ðq+1t,p(ðq+1t,p)∗+∂qt∗∂qt.\\Delta\\_{q}^{t,p}=\\eth\\_{q+1}^{t,p}\\left(\\eth\\_{q+1}^{t,p}\\right)^{\\ast}+\\partial\\_{q}^{t^{\\ast}}\\partial\\_{q}^{t}. | | (7) |"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "The matrix representation of Δqt,p\\Delta\\_{q}^{t,p} in the simplicial basis is"
+                },
+                {
+                  "type": "formula",
+                  "text": "Δqt,p\\Delta_{q}^{t,p}"
+                },
+                {
+                  "type": "table",
+                  "text": "| | | | | | --- | --- | --- | --- | | | ℒqt,p=ℬq+1t,p​(ℬq+1t,p)T+(ℬqt)T​ℬqt.\\mathcal{L}\\_{q}^{t,p}=\\mathcal{B}\\_{q+1}^{t,p}(\\mathcal{B}\\_{q+1}^{t,p})^{T}+(\\mathcal{B}\\_{q}^{t})^{T}\\mathcal{B}\\_{q}^{t}. | | (8) |"
+                },
+                {
+                  "type": "formula",
+                  "text": "ℒqt,p=ℬq+1t,p​(ℬq+1t,p)T+(ℬqt)T​ℬqt.\\mathcal{L}_{q}^{t,p}=\\mathcal{B}_{q+1}^{t,p}(\\mathcal{B}_{q+1}^{t,p})^{T}+(\\mathcal{B}_{q}^{t})^{T}\\mathcal{B}_{q}^{t}."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "The topological invariants of the corresponding persistent homology defined by the same filtration can be recovered from the kernel of PL Eq. ([7](https://ar5iv.labs.arxiv.org/html/2503.14956#S4.E7 \"In 4.2 Persistent Laplacian analysis ‣ 4 Methods ‣ Machine learning predictions from unpredictable chaos\")):"
+                },
+                {
+                  "type": "table",
+                  "text": "| | | | | | --- | --- | --- | --- | | | βqt,p=dimker∂qt−dimimðq+1t,p=dimkerℒqt,p=#0 eigenvalues of ℒqt,p.\\displaystyle\\beta\\_{q}^{t,p}=\\dim\\ker\\partial\\_{q}^{t}-\\dim\\im\\eth\\_{q+1}^{t,p}=\\dim\\ker\\mathcal{L}\\_{q}^{t,p}=\\#\\text{0 eigenvalues of }\\mathcal{L}\\_{q}^{t,p}. | | (9) |"
+                },
+                {
+                  "type": "formula",
+                  "text": "βqt,p=dimker∂qt−dimimðq+1t,p=dimkerℒqt,p=#0 eigenvalues of ℒqt,p.\\displaystyle\\beta_{q}^{t,p}=\\dim\\ker\\partial_{q}^{t}-\\dim\\im\\eth_{q+1}^{t,p}=\\dim\\ker\\mathcal{L}_{q}^{t,p}=\\#\\text{0 eigenvalues of }\\mathcal{L}_{q}^{t,p}."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "In this study, we only focus on the 0, 1, and 2nd-order PLs for brain neural network data. Mathematically, βqt,p\\beta\\_{q}^{t,p} from the null space of LPs tracks the number of independent qq-dimensional holes in KtK\\_{t} that are still alive in Kt+pK\\_{t+p}. Therefore, it gives the same topological information as PH does. However, the non-zero eigenvalues of the PLs reveal the homotopic shape evolution of data during filtration."
+                },
+                {
+                  "type": "formula",
+                  "text": "βqt,p\\beta_{q}^{t,p}"
+                },
+                {
+                  "type": "formula",
+                  "text": "qq"
+                },
+                {
+                  "type": "formula",
+                  "text": "KtK_{t}"
+                },
+                {
+                  "type": "formula",
+                  "text": "Kt+pK_{t+p}"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "It is worth noting that rather than conventional filtration method directly by studying the simplicial complexes themselves in PH or PL, in the present work, we implement a Laplacian filtration procedure on our weighted Laplacian matrix to construct a family a subgraphs based on an accumulation threshold. The function of the weighted Laplacian matrix is as following:"
+                },
+                {
+                  "type": "table",
+                  "text": "| | | | | | --- | --- | --- | --- | | | L=(li​j),li​j={li​j,i≠j,i,j=1,…,nli​i=−∑j=1nli​j.\\begin{split}L=(l\\_{ij}),l\\_{ij}=\\left\\{\\begin{array}[]{cc}l\\_{ij},&i\\neq j,i,j=1,\\dots,n\\\\ l\\_{ii}=-\\sum\\_{j=1}^{n}l\\_{ij}.&\\end{array}\\right.\\end{split} | | (10) |"
+                },
+                {
+                  "type": "formula",
+                  "text": "L=(li​j),li​j={li​j,i≠j,i,j=1,…,nli​i=−∑j=1nli​j.\\begin{split}L=(l_{ij}),l_{ij}=\\left\\{\\begin{array}[]{cc}l_{ij},&i\\neq j,i,j=1,\\dots,n\\\\ l_{ii}=-\\sum_{j=1}^{n}l_{ij}.&\\end{array}\\right.\\end{split}"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "For i≠ji\\neq j, let lmax=max​(li​j)l\\_{\\text{max}}=\\text{max}(l\\_{ij}), lmin=min​(li​j)l\\_{\\text{min}}=\\text{min}(l\\_{ij}), and d=lmax−lmind=l\\_{\\text{max}}-l\\_{\\text{min}}. We set the kkth Persistent Laplacian Lk,k=1,…,pL^{k},k=1,\\dots,p:"
+                },
+                {
+                  "type": "formula",
+                  "text": "i≠ji\\neq j"
+                },
+                {
+                  "type": "formula",
+                  "text": "lmax=max​(li​j)l_{\\text{max}}=\\text{max}(l_{ij})"
+                },
+                {
+                  "type": "formula",
+                  "text": "lmin=min​(li​j)l_{\\text{min}}=\\text{min}(l_{ij})"
+                },
+                {
+                  "type": "formula",
+                  "text": "d=lmax−lmind=l_{\\text{max}}-l_{\\text{min}}"
+                },
+                {
+                  "type": "formula",
+                  "text": "kk"
+                },
+                {
+                  "type": "formula",
+                  "text": "Lk,k=1,…,pL^{k},k=1,\\dots,p"
+                },
+                {
+                  "type": "table",
+                  "text": "| | | | | | --- | --- | --- | --- | | | Lk=(li​jk),li​jk={0,if​li​j≤(k/p)​d+lmin−1otherwiseli​ik=−∑j=1nli​jk.\\begin{split}L^{k}=(l^{k}\\_{ij}),l^{k}\\_{ij}=\\left\\{\\begin{array}[]{cc}0,&\\text{if}\\ l\\_{ij}\\leq(k/p)d+l\\_{\\text{min}}\\\\ -1&\\text{otherwise}\\\\ l\\_{ii}^{k}=-\\sum\\_{j=1}^{n}l\\_{ij}^{k}.&\\\\ \\end{array}\\right.\\end{split} | | (11) |"
+                },
+                {
+                  "type": "formula",
+                  "text": "Lk=(li​jk),li​jk={0,if​li​j≤(k/p)​d+lmin−1otherwiseli​ik=−∑j=1nli​jk.\\begin{split}L^{k}=(l^{k}_{ij}),l^{k}_{ij}=\\left\\{\\begin{array}[]{cc}0,&\\text{if}\\ l_{ij}\\leq(k/p)d+l_{\\text{min}}\\\\ -1&\\text{otherwise}\\\\ l_{ii}^{k}=-\\sum_{j=1}^{n}l_{ij}^{k}.&\\\\ \\end{array}\\right.\\end{split}"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Additionally, Fig. [4](https://ar5iv.labs.arxiv.org/html/2503.14956#S3.F4 \"Figure 4 ‣ 3.4 Residue-Similarity (R-S) plots ‣ 3 Discussion ‣ Machine learning predictions from unpredictable chaos\")d describes the topological representation of point clouds through Vietoris-Rips complexes with different filtration radius α\\alpha. The behaviors of Betti-0 and Betti-1 of persistent homology over filtration are illustrated as the red lines in Fig. [4](https://ar5iv.labs.arxiv.org/html/2503.14956#S3.F4 \"Figure 4 ‣ 3.4 Residue-Similarity (R-S) plots ‣ 3 Discussion ‣ Machine learning predictions from unpredictable chaos\")e. In contrast, the lowest nonzero eigenvalues (λ0α,0\\lambda^{\\alpha,0}\\_{0} and λ1α,0\\lambda^{\\alpha,0}\\_{1}) of persistent Laplacian over the same filtration are illustrated by blue lines in Fig. [4](https://ar5iv.labs.arxiv.org/html/2503.14956#S3.F4 \"Figure 4 ‣ 3.4 Residue-Similarity (R-S) plots ‣ 3 Discussion ‣ Machine learning predictions from unpredictable chaos\")e. Persistent Laplacian captures not only all topological changes but also homotopic geometric evolution during the filtration. The topological representation of point clouds in regular octagon can be found in the Supporting Information."
+                },
+                {
+                  "type": "formula",
+                  "text": "α\\alpha"
+                },
+                {
+                  "type": "formula",
+                  "text": "λ0α,0\\lambda^{\\alpha,0}_{0}"
+                },
+                {
+                  "type": "formula",
+                  "text": "λ1α,0\\lambda^{\\alpha,0}_{1}"
+                }
+              ],
+              "children": []
+            }
+          ]
+        },
+        {
+          "heading": "Data and code availability",
+          "level": 2,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "The related codes studied in the present work are available at: <https://github.com/kelu0124/TEPC/tree/main>."
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "Acknowledgment",
+          "level": 2,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "This work was supported in part by NIH grants R01GM126189 and R01AI164266, NSF grants DMS-2052983, DMS-1761320, and IIS-1900473, NASA grant 80NSSC21M0023, MSU Foundation, Bristol-Myers Squibb 65109, and Pfizer. The work of Huahai Qiu and Bengong Zhang was supported by the National Natural Science Foundation of China under Grant No.12271416 and No.12371500, respectively."
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "Competing interests",
+          "level": 2,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "The authors declare no competing interests."
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "References",
+          "level": 2,
+          "content": [
+            {
+              "type": "list",
+              "text": "* [1] Luis A Aguirre and Christophe Letellier. Modeling nonlinear dynamics and chaos: a review. Mathematical Problems in Engineering, 2009(1):238960, 2009. * [2] James P Crutchfield. Between order and chaos. Nature Physics, 8(1):17–24, 2012. * [3] Edward N Lorenz. Deterministic nonperiodic flow. Journal of atmospheric sciences, 20(2):130–141, 1963. * [4] Stefanos Boccaletti, Celso Grebogi, Y-C Lai, Hector Mancini, and Diego Maza. The control of chaos: theory and applications. Physics reports, 329(3):103–197, 2000. * [5] Tien-Yien Li and James A Yorke. Period three implies chaos. The American Mathematical Monthly, 82(10):985–992, 1975. * [6] Amujuri Mary Selvam and Amujuri Mary Selvam. Nonlinear dynamics and chaos: applications in meteorology and atmospheric physics. Self-organized Criticality and Predictability in Atmospheric Flows: The Quantum World of Clouds and Rain, pages 1–40, 2017. * [7] Yujiao Dong, Shuting Yang, Yan Liang, and Guangyi Wang. Neuromorphic dynamics near the edge of chaos in memristive neurons. Chaos, Solitons & Fractals, 160:112241, 2022. * [8] Mathias L Heltberg, Sandeep Krishna, Leo P Kadanoff, and Mogens H Jensen. A tale of two rhythms: Locked clocks and chaos in biology. Cell Systems, 12(4):291–303, 2021. * [9] Andrés Fernández-Díaz. Overview and perspectives of chaos theory and its applications in economics. Mathematics, 12(1):92, 2023. * [10] Bowen Zhang and Lingfeng Liu. Chaos-based image encryption: Review, application, and challenges. Mathematics, 11(11):2585, 2023. * [11] Ashraf A Zaher and Abdulnasser Abu-Rezq. On the design of chaos-based secure communication systems. Communications in Nonlinear Science and Numerical Simulation, 16(9):3721–3737, 2011. * [12] Jaideep Pathak, Brian Hunt, Michelle Girvan, Zhixin Lu, and Edward Ott. Model-free prediction of large spatiotemporally chaotic systems from data: A reservoir computing approach. Physical review letters, 120(2):024102, 2018. * [13] Bhukya Ramadevi and Kishore Bingi. Chaotic time series forecasting approaches using machine learning techniques: A review. Symmetry, 14(5):955, 2022. * [14] Huawei Fan, Junjie Jiang, Chun Zhang, Xingang Wang, and Ying-Cheng Lai. Long-term prediction of chaotic systems with machine learning. Physical Review Research, 2(1):012080, 2020. * [15] Tongfeng Weng, Huijie Yang, Jie Zhang, and Michael Small. Modeling chaotic systems: Dynamical equations vs machine learning approach. Communications in Nonlinear Science and Numerical Simulation, 114:106452, 2022. * [16] Rui Wang, Duc Duy Nguyen, and Guo-Wei Wei. Persistent spectral graph. Int J Numer Meth Biomed Engng., 36(9):e3376, 2020. * [17] Xiaoqi Wei and Guo-Wei Wei. Persistent sheaf laplacians. Foundations of Data Science, doi:10.3934/fods.2024033, 2025. * [18] Grigory V Osipov, Arkady S Pikovsky, Michael G Rosenblum, and Jürgen Kurths. Phase synchronization effects in a lattice of nonidentical rössler oscillators. Physical Review E, 55(3):2353, 1997. * [19] Ralph G Andrzejak, Klaus Lehnertz, Florian Mormann, Christoph Rieke, Peter David, and Christian E Elger. Indications of nonlinear deterministic and finite-dimensional structures in time series of brain electrical activity: Dependence on recording region and brain state. Physical Review E, 64(6):061907, 2001. * [20] U Rajendra Acharya, S Vinitha Sree, Peng Chuan Alvin Ang, Ratna Yanti, and Jasjit S Suri. Application of non-linear and wavelet based features for the automated identification of epileptic eeg signals. International journal of neural systems, 22(02):1250002, 2012. * [21] Abhijit Bhattacharyya and Ram Bilas Pachori. A multivariate approach for patient-specific eeg seizure detection using empirical wavelet transform. IEEE Transactions on Biomedical Engineering, 64(9):2003–2015, 2017. * [22] Samanwoy Ghosh-Dastidar, Hojjat Adeli, and Nahid Dadmehr. Mixed-band wavelet-chaos-neural network methodology for epilepsy and epileptic seizure detection. IEEE transactions on biomedical engineering, 54(9):1545–1551, 2007. * [23] Abhijit Bhattacharyya, Ram Bilas Pachori, Abhay Upadhyay, and U Rajendra Acharya. Tunable-q wavelet transform based multiscale entropy measure for automated classification of epileptic eeg signals. Applied Sciences, 7(4):385, 2017. * [24] U Rajendra Acharya, Filippo Molinari, S Vinitha Sree, Subhagata Chattopadhyay, Kwan-Hoong Ng, and Jasjit S Suri. Automated diagnosis of epileptic eeg using entropies. Biomedical signal processing and control, 7(4):401–408, 2012. * [25] Samanwoy Ghosh-Dastidar and Hojjat Adeli. A new supervised learning algorithm for multiple spiking neural networks with application in epilepsy and seizure detection. Neural networks, 22(10):1419–1431, 2009. * [26] U Rajendra Acharya, S Vinitha Sree, Ang Peng Chuan Alvin, and Jasjit S Suri. Use of principal component analysis for automatic classification of epileptic eeg activities in wavelet framework. Expert Systems with Applications, 39(10):9072–9078, 2012. * [27] U Rajendra Acharya, S Vinitha Sree, and Jasjit S Suri. Automatic detection of epileptic eeg signals using higher order cumulant features. International journal of neural systems, 21(05):403–414, 2011. * [28] Acharya UR, Sree VS, Martis RJ, and Suri JS. Automated diagnosis of epileptic electroencephalogram using independent component analysis and discrete wavelet transform for different electroencephalogram durations. Proceedings of the Institution of Mechanical Engineers, Part H: Journal of Engineering in Medicine, 227(3):234–244, 2013. * [29] U Rajendra Acharya, S Vinitha Sree, Subhagata Chattopadhyay, Wenwei Yu, and Peng Chuan Alvin Ang. Application of recurrence quantification analysis for the automated identification of epileptic eeg signals. International journal of neural systems, 21(03):199–211, 2011. * [30] Roshan Joy Martis, U Rajendra Acharya, Jen Hong Tan, Andrea Petznick, Ratna Yanti, Chua Kuang Chua, EY Kwee Ng, and Louis Tong. Application of empirical mode decomposition (emd) for automated detection of epilepsy using eeg signals. International journal of neural systems, 22(06):1250027, 2012. * [31] Samanwoy Ghosh-Dastidar and Hojjat Adeli. Spiking neural networks. International journal of neural systems, 19(04):295–308, 2009. * [32] Ling Guo, Daniel Rivero, Julián Dorado, Cristian R Munteanu, and Alejandro Pazos. Automatic feature extraction using genetic programming: An application to epileptic eeg classification. Expert Systems with Applications, 38(8):10425–10436, 2011. * [33] Oliver Faust, U Rajendra Acharya, Lim Choo Min, and Bernhard HC Sputh. Automatic identification of epileptic and background eeg signals using frequency domain parameters. International journal of neural systems, 20(02):159–176, 2010. * [34] KC Chua, Vinod Chandran, U Rajendra Acharya, and CM Lim. Automatic identification of epileptic electroencephalography signals using higher-order spectra. Proceedings of the Institution of Mechanical Engineers, Part H: Journal of Engineering in Medicine, 223(4):485–495, 2009. * [35] Kuang Chua Chua, Vinod Chandran, U Rajendra Acharya, and Choo Min Lim. Application of higher order spectra to identify epileptic eeg. Journal of medical systems, 35:1563–1571, 2011. * [36] Samanwoy Ghosh-Dastidar and Hojjat Adeli. Improved spiking neural networks for eeg classification and epilepsy and seizure detection. Integrated Computer-Aided Engineering, 14(3):187–212, 2007. * [37] U Rajendra Acharya, Shu Lih Oh, Yuki Hagiwara, Jen Hong Tan, and Hojjat Adeli. Deep convolutional neural network for the automated detection and diagnosis of seizure using eeg signals. Computers in biology and medicine, 100:270–278, 2018. * [38] Turkan Haliloglu, Ivet Bahar, and Burak Erman. Gaussian dynamics of folded proteins. Physical review letters, 79(16):3090, 1997. * [39] Jun-Koo Park, Robert Jernigan, and Zhijun Wu. Coarse grained normal mode analysis vs. refined gaussian network model for protein residue-level structural fluctuations. Bulletin of mathematical biology, 75:124–160, 2013. * [40] Nobuhiro Go, Tosiyuki Noguti, and Testuo Nishikawa. Dynamics of a small globular protein in terms of low-frequency vibrational modes. Proceedings of the National Academy of Sciences, 80(12):3696–3700, 1983. * [41] Kelin Xia, Kristopher Opron, and Guo-Wei Wei. Multiscale gaussian network model (mgnm) and multiscale anisotropic network model (manm). The Journal of chemical physics, 143(204106), 2015. * [42] Kristopher Opron, Kelin Xia, and Guo-Wei Wei. Communication: Capturing protein multiscale thermal fluctuations. The Journal of chemical physics, 142(21), 2015. * [43] Zixuan Cang, Elizabeth Munch, and Guo-Wei Wei. Evolutionary homology on coupled dynamical systems with applications to protein flexibility analysis. Journal of applied and computational topology, 4:481–507, 2020. * [44] Kristopher Opron, Kelin Xia, and Guo-Wei Wei. Fast and anisotropic flexibility-rigidity index for protein flexibility and fluctuation analysis. The Journal of chemical physics, 140(23), 2014. * [45] Kelin Xia and Guo-Wei Wei. Molecular nonlinear dynamics and protein thermal uncertainty quantification. Chaos: An Interdisciplinary Journal of Nonlinear Science, 24(1), 2014. * [46] Sameer A Nene, Shree K Nayar, Hiroshi Murase, et al. Columbia object image library (coil-20). 1996. * [47] Yuta Hozumi, Kiyoto Aramis Tanemura, and Guo-Wei Wei. Preprocessing of single cell rna sequencing data using correlated clustering and projection. Journal of Chemical Information and Modeling, 64(7):2829–2838, 2024. * [48] GW Wei. Wavelets generated by using discrete singular convolution kernels. Journal of Physics A: Mathematical and General, 33(47):8577, 2000. * [49] Ivet Bahar, Ali Rana Atilgan, Melik C Demirel, and Burak Erman. Vibrational dynamics of folded proteins: significance of slow and fast motions in relation to function and stability. Physical review letters, 80(12):2733, 1998. * [50] Ali Rana Atilgan, SR Durell, Robert L Jernigan, Melik C Demirel, O Keskin, and Ivet Bahar. Anisotropy of fluctuation dynamics of proteins with an elastic network model. Biophysical journal, 80(1):505–515, 2001. * [51] Louis M Pecora, Thomas L Carroll, Gregg A Johnson, Douglas J Mar, and James F Heagy. Fundamentals of synchronization in chaotic systems, concepts, and applications. Chaos: An Interdisciplinary Journal of Nonlinear Science, 7(4):520–543, 1997. * [52] Herbert Edelsbrunner, John Harer, et al. Persistent homology-a survey. Contemporary mathematics, 453(26):257–282, 2008. * [53] Jacob Townsend, Cassie Putman Micucci, John H Hymel, Vasileios Maroulas, and Konstantinos D Vogiatzis. Representation of molecular structures with persistent homology for machine learning applications in chemistry. Nature communications, 11(1):3230, 2020. * [54] Jiahui Chen, Rundong Zhao, Yiying Tong, and Guo-Wei Wei. Evolutionary de rham-hodge method. Discrete and continuous dynamical systems. Series B, 26(7):3785, 2021."
+            }
+          ],
+          "children": []
+        }
+      ]
+    }
+  ],
+  "chunks": [
+    {
+      "heading_path": [
+        "Machine learning predictions from unpredictable chaos"
+      ],
+      "text": "# Machine learning predictions from unpredictable chaos"
+    },
+    {
+      "heading_path": [
+        "Machine learning predictions from unpredictable chaos",
+        "Abstract"
+      ],
+      "text": "###### Abstract\n\nChaos is omnipresent in nature, and its understanding provides enormous social and economic benefits. However, the unpredictability of chaotic systems is a textbook concept due to their sensitivity to initial conditions, aperiodic behavior, fractal dimensions, nonlinearity, and strange attractors. In this work, we introduce, for the first time, chaotic learning, a novel multiscale topological paradigm that enables accurate predictions from chaotic systems. We show that seemingly random and unpredictable chaotic dynamics counterintuitively offer unprecedented quantitative predictions. Specifically, we devise multiscale topological Laplacians to embed real-world data into a family of interactive chaotic dynamical systems, modulate their dynamical behaviors, and enable the accurate prediction of the input data. As a proof of concept, we consider 28 datasets from four categories of realistic problems: 10 brain waves, four benchmark protein datasets, 13 single-cell RNA sequencing datasets, and an image dataset, as well as two distinct chaotic dynamical systems, namely the Lorenz and Rossler attractors. We demonstrate chaotic learning predictions of the physical properties from chaos. Our new chaotic learning paradigm profoundly changes the textbook perception of chaos and bridges topology, chaos, and learning for the first time.\n\nKeywords: Chaotic systems, Machine learning, Multiscale topology."
+    },
+    {
+      "heading_path": [
+        "Machine learning predictions from unpredictable chaos",
+        "1 Introduction"
+      ],
+      "text": "## 1 Introduction\n\nChaos in dynamical systems refers to the complex behavior that emerges from deterministic, yet sensitive complex systems such as double pendulum, social network, turbulent fluid flow, weather systems, etc [[1](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib1)]. Characterized by a sensitive dependence on initial conditions and aperiodic behavior, chaos challenges the ability to predict long-term behavior [[2](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib2)]. Nonlinearity is another key feature of chaos, where interactions between system elements lead to unpredictable and often erratic dynamics. The seminal work of Edward Lorenz in the 1960s [[3](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib3)], particularly his study of the weather model, introduced the notion that chaotic systems are fundamentally unpredictable over long timescales. This insight laid the foundation for chaos theory, marking a shift in the way scientists viewed complex systems. Over half a century, the unpredictability of chaotic systems has been a textbook concept in both theoretical and applied dynamics, shaping research and application in various fields, from meteorology to engineering [[4](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib4)].\n\nChaos theory and chaotic dynamics have profoundly impacted numerous disciplines by providing a framework for understanding complex and nonlinear phenomena[[5](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib5)]. For example, in meteorology, chaos theory revolutionized weather prediction, highlighting the challenge of long-term forecasts due to sensitive dependence on initial conditions [[6](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib6)]. In engineering, chaotic systems have inspired the design of robust control strategies and fault-tolerant systems, especially in nonlinear circuits and mechanical systems [[7](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib7)]. In biology, the study of chaos has shed light on irregular patterns in physiological processes, such as cardiac rhythms and neural activity, enhancing the understanding of health and disease dynamics [[8](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib8)]. Similarly, in economics, chaotic models have been employed to explain irregular market fluctuations, providing insights into complex financial systems [[9](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib9)]. The unpredictability inherent in chaos also plays a pivotal role in encryption [[10](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib10)] and secure communications [[11](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib11)], where it ensures high levels of randomness and security. Across these fields, chaos theory has underscored the importance of recognizing and leveraging unpredictability to uncover hidden structures and drive innovation from complex systems.\n\nRecently, machine learning (ML) has exploited the deterministic nature of chaos theory to predict certain properties of chaotic systems, such as spatial extent and attractor dimension [[12](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib12)], fluctuations in a chaotic cancer model [[13](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib13)], and the evolution of chaotic dynamical systems [[14](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib14)]. Deep learning (DL) methods have also been utilized to demonstrate chaotic synchronization [[15](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib15)]. However, utilizing chaotic systems for quantitative prediction remains an unthinkable challenge because of their unpredictability.\n\nIn this work, we propose chaotic learning to transform unpredictable chaotic systems into accurate predictors. Our approach utilizes a novel multiscale topological method, known as persistent Laplacian (PL) [[16](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib16)], to embed realistic data in a family of heterogeneous chaotic systems. More specifically, each data point is modeled as a chaotic oscillator, and its interactions with other oscillators are captured with multiscale Laplacians. The resulting data-embedded chaotic systems exhibit rich chaotic patterns that faithfully manifest the traits of the original data, leading to accurate ML predictions. The proposed topology-enabled predictions from chaos (TEPC) utilizes various chaotic dynamics, such as the Lorenz and Rossler systems, for chaotic learning. Additionally, TEPC may employ different persistent topological Laplacians, including persistent spectral graph [[16](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib16)] or persistent sheaf Laplacian [[17](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib17)]. Finally, TEPC has been extensively validated by using a wide variety of benchmark data, including organ-scale brain electroencephalogram (EEG) data classification, molecular-scale protein B-factor prediction, cellular-scale single-cell RNA sequence data classification, and general image classification problems. TEPC turns chaotic theory on its head, challenging long-held perception of the unpredictability of chaos. It also bridges the gap between traditional chaos and modern learning algorithms."
+    },
+    {
+      "heading_path": [
+        "Machine learning predictions from unpredictable chaos",
+        "2 Results"
+      ],
+      "text": "## 2 Results"
+    },
+    {
+      "heading_path": [
+        "Machine learning predictions from unpredictable chaos",
+        "2 Results",
+        "2.1 Overview of chaotic learning — topology-enabled predictions from chaos (TEPC)"
+      ],
+      "text": "### 2.1 Overview of chaotic learning — topology-enabled predictions from chaos (TEPC)\n\nFig. [1](https://ar5iv.labs.arxiv.org/html/2503.14956#S2.F1 \"Figure 1 ‣ 2.1 Overview of chaotic learning — topology-enabled predictions from chaos (TEPC) ‣ 2 Results ‣ Machine learning predictions from unpredictable chaos\") illustrates the TEPC platform that provides a general workflow of topology-enabled ML predictions from chaotic dynamics. First, the data of interest are collected from real world problems, and then an interaction network or a hypergraph is constructed where nodes are individual data points, and the links represent the correlations or connections between nodes. Next, each node is introduced with a chaotic dynamics, such as the Lorenz and Rossler dynamics [[18](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib18)]. A family of chaotic systems is constructed by using topological Laplacians [[16](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib16)], which encode the interactions into the multiscale connectivity matrices for chaotic systems. Subsequently, the multiscale evolution trajectories of the chaotic systems, which may display various patterns, such as full synchronized, partial synchronized, and unsynchronized chaos, faithfully embed the property of the data of interest. Finally, statistic features are extracted from chaotic trajectories and utilized for downstream ML or DL predictions. Alternatively, chaotic trajectories choice is that these chaotic dynamics is fed into recurrent neural network (RNN) or long short-term memory (LSTM) for downstream predictions as discussed in Section S2 of the Supporting Information.\n\nThe proposed chaotic learning is an ML algorithm for real-world data prediction rather than a new model for chaos or nonlinear dynamics. Data-embedded chaotic systems have heterogeneous nodal dynamics. Even if complete synchronizations may eventually achieved, the heterogeneous synchronization process of individual nodes reveals the intrinsic properties of individual nodes, which forms the foundation of the proposed chaotic learning model."
+    },
+    {
+      "heading_path": [
+        "Machine learning predictions from unpredictable chaos",
+        "2 Results",
+        "2.2 Illustration of chaotic learning principle"
+      ],
+      "text": "### 2.2 Illustration of chaotic learning principle\n\nTo illustrate the working principle of the proposed chaotic learning paradigm, let us consider two simple models. Our first model is a simple model with sixteen nodes as shown in Fig. [2](https://ar5iv.labs.arxiv.org/html/2503.14956#S2.F2 \"Figure 2 ‣ 2.2 Illustration of chaotic learning principle ‣ 2 Results ‣ Machine learning predictions from unpredictable chaos\")a to demonstrate the proposed paradigm. The three-dimension coordinates of each node are given in Table S13 of the Supporting Information. Each point or node can be regarded as a data point or an individual object, such as an atom in a molecule, a protein in a protein-protein network, or a neuron in a brain network. To extract the localized properties of the sixteen nodes, we introduce a chaotic oscillator, or a nonlinear chaotic dynamic to each node. More specifically, we utilize the Lorenz oscillator although any other chaotic oscillators can be used as well. The persistent Laplacians are constructed for the set of oscillators, resulting in a family of connectivity matrices for the coupled chaotic systems. Three typical connectivity matrices are given in Fig. [2](https://ar5iv.labs.arxiv.org/html/2503.14956#S2.F2 \"Figure 2 ‣ 2.2 Illustration of chaotic learning principle ‣ 2 Results ‣ Machine learning predictions from unpredictable chaos\")b, corresponding to three different filtration radius given in Fig. [2](https://ar5iv.labs.arxiv.org/html/2503.14956#S2.F2 \"Figure 2 ‣ 2.2 Illustration of chaotic learning principle ‣ 2 Results ‣ Machine learning predictions from unpredictable chaos\")a. The details of these chaotic systems can be found in Section S1 of the Supporting Information. Initial values for all oscillators are randomly chosen. The smaller filtration radius, the narrower coupling among oscillators is. For example, with the filtration radius shown at the top of Fig. [2](https://ar5iv.labs.arxiv.org/html/2503.14956#S2.F2 \"Figure 2 ‣ 2.2 Illustration of chaotic learning principle ‣ 2 Results ‣ Machine learning predictions from unpredictable chaos\")a, as there is no overlap between the nodes, Laplacian is zero everywhere as shown at the top of Fig. [2](https://ar5iv.labs.arxiv.org/html/2503.14956#S2.F2 \"Figure 2 ‣ 2.2 Illustration of chaotic learning principle ‣ 2 Results ‣ Machine learning predictions from unpredictable chaos\")b. Consequently, we have a set of isolated chaotic dynamics as shown on the top of Fig. [2](https://ar5iv.labs.arxiv.org/html/2503.14956#S2.F2 \"Figure 2 ‣ 2.2 Illustration of chaotic learning principle ‣ 2 Results ‣ Machine learning predictions from unpredictable chaos\")c, resulting in irregular orbits on the top of Fig. [2](https://ar5iv.labs.arxiv.org/html/2503.14956#S2.F2 \"Figure 2 ‣ 2.2 Illustration of chaotic learning principle ‣ 2 Results ‣ Machine learning predictions from unpredictable chaos\")d.\n\nAs the filtration radius increases showing in the middle of Fig. [2](https://ar5iv.labs.arxiv.org/html/2503.14956#S2.F2 \"Figure 2 ‣ 2.2 Illustration of chaotic learning principle ‣ 2 Results ‣ Machine learning predictions from unpredictable chaos\")a, there are some interactions in the system given by the Laplacian in the middle of Fig. [2](https://ar5iv.labs.arxiv.org/html/2503.14956#S2.F2 \"Figure 2 ‣ 2.2 Illustration of chaotic learning principle ‣ 2 Results ‣ Machine learning predictions from unpredictable chaos\")b, which causes partial synchronization among chaotic oscillators during the temporal evolution of system (see the middle of Fig. [2](https://ar5iv.labs.arxiv.org/html/2503.14956#S2.F2 \"Figure 2 ‣ 2.2 Illustration of chaotic learning principle ‣ 2 Results ‣ Machine learning predictions from unpredictable chaos\")c) and periodic orbit in the middle of Fig. [2](https://ar5iv.labs.arxiv.org/html/2503.14956#S2.F2 \"Figure 2 ‣ 2.2 Illustration of chaotic learning principle ‣ 2 Results ‣ Machine learning predictions from unpredictable chaos\")d. When the filtration radius continuously increases, the coupling among the nodes becomes sufficiently strong to create a full synchronization in the system, and each oscillator resembles the well-known wings of butterfly as plotted at the bottom of Fig. [2](https://ar5iv.labs.arxiv.org/html/2503.14956#S2.F2 \"Figure 2 ‣ 2.2 Illustration of chaotic learning principle ‣ 2 Results ‣ Machine learning predictions from unpredictable chaos\")d. In this simple model, it is found that multiscale topological Laplacians induce the transition from chaos to periodicity. However, since the geometry of the above example is very regular and thus, their dynamics are homogeneous as shown in Figs. [2](https://ar5iv.labs.arxiv.org/html/2503.14956#S2.F2 \"Figure 2 ‣ 2.2 Illustration of chaotic learning principle ‣ 2 Results ‣ Machine learning predictions from unpredictable chaos\")a-d.\n\nIn our second model, we consider three sets of irregular geometries as shown in Figs. [2](https://ar5iv.labs.arxiv.org/html/2503.14956#S2.F2 \"Figure 2 ‣ 2.2 Illustration of chaotic learning principle ‣ 2 Results ‣ Machine learning predictions from unpredictable chaos\")e-g to illustrate how irregular geometries induce heterogeneous chaotic dynamics, including partially synchronized chaos. We create a set of 120 nodes as shown on the top of each chart. The detailed coordinates are given in Tables S14, S15, S16 of the Supporting Information, respectively. The geometric shapes of these nodes are schematically displayed in Figs. [2](https://ar5iv.labs.arxiv.org/html/2503.14956#S2.F2 \"Figure 2 ‣ 2.2 Illustration of chaotic learning principle ‣ 2 Results ‣ Machine learning predictions from unpredictable chaos\")e-g. We inject the Lorenz dynamics into each of these nodes with the same parameters as those in the early example. However, for chaotic systems, we set coupling strength as ϵ=\\epsilon= 1.1, 1.0, and 0.1 for Figs. [2](https://ar5iv.labs.arxiv.org/html/2503.14956#S2.F2 \"Figure 2 ‣ 2.2 Illustration of chaotic learning principle ‣ 2 Results ‣ Machine learning predictions from unpredictable chaos\")e-g, respectively. The connectivity matrices are generated by using the persistent Laplacian algorithm with the filtration radii being 1, 1, and 0.2 for the point cloud in Figs. [2](https://ar5iv.labs.arxiv.org/html/2503.14956#S2.F2 \"Figure 2 ‣ 2.2 Illustration of chaotic learning principle ‣ 2 Results ‣ Machine learning predictions from unpredictable chaos\")e-g, respectively. We used the forward Euler scheme with the time increment of h=10−3h=10^{-3} for the time integration. All details of parameters used in Fig. [2](https://ar5iv.labs.arxiv.org/html/2503.14956#S2.F2 \"Figure 2 ‣ 2.2 Illustration of chaotic learning principle ‣ 2 Results ‣ Machine learning predictions from unpredictable chaos\") can be found in Table S1 of the Supporting Information.\n\nϵ=\\epsilon=\n\nh=10−3h=10^{-3}\n\nThe first set of 120 nodes is folded, which leads to a fully synchronized chaotic system as shown in Fig. [2](https://ar5iv.labs.arxiv.org/html/2503.14956#S2.F2 \"Figure 2 ‣ 2.2 Illustration of chaotic learning principle ‣ 2 Results ‣ Machine learning predictions from unpredictable chaos\")e. This synchronous chaos is very similar to that in the bottom of Fig. [2](https://ar5iv.labs.arxiv.org/html/2503.14956#S2.F2 \"Figure 2 ‣ 2.2 Illustration of chaotic learning principle ‣ 2 Results ‣ Machine learning predictions from unpredictable chaos\")c. In Fig. [2](https://ar5iv.labs.arxiv.org/html/2503.14956#S2.F2 \"Figure 2 ‣ 2.2 Illustration of chaotic learning principle ‣ 2 Results ‣ Machine learning predictions from unpredictable chaos\")f, the partially folded conformation having 40 unfolded nodes and 80 folded ones, which gives rise to a partially synchronized dynamic behavior. In Fig. [2](https://ar5iv.labs.arxiv.org/html/2503.14956#S2.F2 \"Figure 2 ‣ 2.2 Illustration of chaotic learning principle ‣ 2 Results ‣ Machine learning predictions from unpredictable chaos\")g, the dynamics of the completely unfolded conformation is completely chaotic. It is this strong geometry-dynamics correlation as well as the rich behavior in chaos synchronization that lays the foundation to embed a wide variety of real-world data into chaotic systems and extract the full set of seemingly chaotic information for the accurate prediction of the underlying data.\n\nAlthough the filtration radius can be regarded as a threshold used to define a family of networks, it is not highly sensitive across different applications. This is because we implement a topological filtration procedure on the weighted Laplacian matrix to construct a family of subgraphs or networks, which encode the interactions between oscillators into the multiscale connectivity of the networks. The resulting multiscale evolution trajectories of these networks exhibit various patterns, such as synchronized, partially synchronized, and unsynchronized chaos, that effectively capture intrinsic traits of the data for downstream ML predictions. Consequently, in our model, the threshold does not require fine-tuning; an ”educated choice” is sufficient to achieve good predictive performance."
+    },
+    {
+      "heading_path": [
+        "Machine learning predictions from unpredictable chaos",
+        "2 Results",
+        "2.3 Chaotic learning prediction of brain EEG data"
+      ],
+      "text": "### 2.3 Chaotic learning prediction of brain EEG data\n\nTo present a proof-of-principle exploration of the proposed chaotic learning paradigm and demonstrate its predictive power, we consider brain electroencephalogram (EEG) datasets. The EEG is obtained from a medical measurement of brain electrical activity using a number of electrodes applied to the scalp. It plays a significant role in the diagnosis of various patient conditions, such as epilepsy, schizophreniacs, sleep disorders, and brain tumors. In our analysis, the EEG data have 300 signals and were collected from 5 epilepsy patients and 5 healthy individuals, classified into three distinct categories: normal, preictal, and seizure [[19](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib19)]. Each category contains 100 single-channel EEG signals. This data set can be accessed from the official website of the Department of Epileptology of the University of Bonn (<https://www.ukbonn.de/epileptologie/arbeitsgruppen/ag-lehnertz-neurophysik/downloads/>). Their details can be found in Section S5 of the Supporting Information.\n\nWe embed the real brain activity time series data into nonlinear dynamics systems by considering each EEG signal as a nonlinear oscillator. We further compute the mean coupling matrix of this brain neural network by calculating the Pearson correlation coefficient between each pair of 300 signals, respectively. We then apply persistent Laplacian to obtain a family of connectivity matrices of brain neural networks with the filtration process. For each connectivity matrix, we introduce a chaotic system and collect its trajectories. Their statistical values are computed for EEG classification. We use ten-fold cross-validation with 10 random seeds and k-nearest neighbor classifier (KNN) algorithm in the prediction. The details of parameters used in the implementation are given in the Supporting Information. To demonstrate the predictive power of TEPC, we consider classification predictions of the EEG data. Our TEPC was implemented with two different oscillators i.e., Lorenz and Rossler and two neural network models i.e., RNN and LSTM, denoted as TEPC (Lorenz), TEPC (Rossler), TEPC (RNN), and TEPC (LSTM), respectively. Their comparison with other existing methods is shown in Fig. [3](https://ar5iv.labs.arxiv.org/html/2503.14956#S2.F3 \"Figure 3 ‣ 2.4 Predicting protein B-factors from chaotic systems ‣ 2 Results ‣ Machine learning predictions from unpredictable chaos\")a, including Fuzzy sugeno1 [[20](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib20)], Random forest [[21](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib21)], PCA [[22](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib22)], SVM5 [[23](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib23)], Fuzzy sugeno2 [[24](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib24)], LMB neural network [[25](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib25)], Fuzzy sugeno3 [[26](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib26)], SVM2 [[27](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib27)], SVM4 [[28](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib28)], SVM3 [[29](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib29)], C4.5 decision tree [[30](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib30)], Multi-spiking [[31](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib31)], KNN [[32](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib32)], SVM1 [[33](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib33)], GMM2 [[34](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib34)], GMM3 [[35](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib35)], Spiking [[36](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib36)], and CNN [[37](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib37)]. The ten-fold cross validation is employed in all predictions. ACC, SEN, and SPEC in Fig. [3](https://ar5iv.labs.arxiv.org/html/2503.14956#S2.F3 \"Figure 3 ‣ 2.4 Predicting protein B-factors from chaotic systems ‣ 2 Results ‣ Machine learning predictions from unpredictable chaos\")a are accuracy, sensitivity, and specificity, respectively. From Fig. [3](https://ar5iv.labs.arxiv.org/html/2503.14956#S2.F3 \"Figure 3 ‣ 2.4 Predicting protein B-factors from chaotic systems ‣ 2 Results ‣ Machine learning predictions from unpredictable chaos\")a, we can find that TEPC (Lorenz), TEPC (Rossler), TEPC (RNN), and TEPC (LSTM) obtains all 100% on these three metrics, which are equivalent or higher than those of other existing methods. The confusion matrices for all ten folds of these results are given in Tables S8, S9, S10, and S11 of the Supporting Information. These results indicate that TEPC is a general approach that is robust with respect to the selection of dynamic models and ML algorithms."
+    },
+    {
+      "heading_path": [
+        "Machine learning predictions from unpredictable chaos",
+        "2 Results",
+        "2.4 Predicting protein B-factors from chaotic systems"
+      ],
+      "text": "### 2.4 Predicting protein B-factors from chaotic systems\n\nxx\n\nyy\n\nAs another proof of principle, we demonstrate quantitative ML predictions of molecular properties from chaotic systems. To this end, we consider protein B-factor predictions. Protein B-Factor or the Debye-Waller factor is used in protein crystallography to describe the attenuation of X-ray caused by thermal motion. The analysis of protein B-factors sheds light on the large scale and long time functional behaviors of native state macromolecules [[38](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib38), [39](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib39)]. There are many existing methods for protein flexibility analysis. For example, Park et al. [[39](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib39)] compared the performance of normal mode analysis (NMA) [[40](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib40)] and Gaussian network model (GNM) [[38](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib38)] for three sets of proteins. Among them, the GNM is the most popular method for protein flexibility analysis [[38](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib38)]. Xia et al. developed generalized GNM and generalized anisotropic network model (ANM) for protein B-factor predictions [[41](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib41)]. Opron et al. proposed a multiscale flexibility rigidity index (FRI) model to achieve nearly 20% improvement to the GNM prediction[[42](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib42)]. Recently, Cang et al. introduced an evolutionary homology method to analyze the protein flexibility and obtained the state-of-the-art performance [[43](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib43)].\n\nIn the present work, we utilize a few benchmark datasets that have been intensively studied in the literature [[39](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib39), [44](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib44), [43](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib43)], and thus, the performance of the proposed methods can be compared. The largest dataset involves 364 distinct proteins, having tens to thousands of amino acid residues [[44](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib44)].\n\nIn the proposed approach, each protein residue is represented by its Cα atom. Each Cα atom is assigned with a nonlinear oscillator. We choose the Lorenz system with parameters α=10\\alpha=10, γ=60\\gamma=60, β=8/3\\beta=8/3, and ϵ=13.6\\epsilon=13.6 with the connectivity matrix being Γ=𝐈\\Gamma={\\bf I} (the identity matrix). The interaction strength between each pair of Cα atoms is computed with the generalized exponential function Eq.([2](https://ar5iv.labs.arxiv.org/html/2503.14956#S4.E2 \"In 4.1 Mapping interaction to topology ‣ 4 Methods ‣ Machine learning predictions from unpredictable chaos\")) with κ=1\\kappa=1 and σ=3\\sigma=3. We further use persistent Laplacians to obtain a family of coupling matrices among the residues at various scales according to filtration. At each scale, we have a coupled chaotic system. To generate the time trajectory of a specific oscillator (residue), we choose its initial value to one and those of other oscillators to zero in a perturbative time integration. Then, the statistic values of the trajectory are used as the inputs in the ML study of the residue’s B-factor. Persistent Laplacians enable us to collect multiple sets of the statistic values for each residue.\n\nα=10\\alpha=10\n\nγ=60\\gamma=60\n\nβ=8/3\\beta=8/3\n\nϵ=13.6\\epsilon=13.6\n\nΓ=𝐈\\Gamma={\\bf I}\n\nκ=1\\kappa=1\n\nσ=3\\sigma=3\n\nWe carry out B-factor predictions by a multiple linear regression model that has been used in earlier papers [[38](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib38), [39](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib39), [44](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib44)] and compute the average Pearson correlation coefficients (PCCs) between the predicted and the experimental B-factors. Figs. [3](https://ar5iv.labs.arxiv.org/html/2503.14956#S2.F3 \"Figure 3 ‣ 2.4 Predicting protein B-factors from chaotic systems ‣ 2 Results ‣ Machine learning predictions from unpredictable chaos\")b and c show a comparison of average PCCs over different datasets with other existing methods, including EH [[43](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib43)], opFRI [[44](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib44)], pfFRI [[44](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib44)], MND [[45](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib45)], GNM [[45](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib45), [39](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib39)], NMA [[39](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib39)], mFRI [[42](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib42)], mGNM [[41](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib41)], and mANM [[41](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib41)]. Here, TEPC (Lorenz) and TEPC (Rossler) are the present methods implemented through the Lorenz oscillator and Rossler oscillator, respectively. We find that our method TEPC (Lorenz) outperforms all other methods in computational biophysics and achieves the largest average PCCs over all different protein datasets. Specifically, in Fig. [3](https://ar5iv.labs.arxiv.org/html/2503.14956#S2.F3 \"Figure 3 ‣ 2.4 Predicting protein B-factors from chaotic systems ‣ 2 Results ‣ Machine learning predictions from unpredictable chaos\")b, for three sets of proteins with small (33 samples), medium (36 samples), and large (35 samples) sizes, our average PCCs are 0.940, 0.826, and 0.789 by TEPC (Lorenz), which are improved up to 95.8%, 71.4%, and 59.7% compared to those of 0.480, 0.482, and 0.494 in Ref. [[39](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib39)], respectively. Additionally, in Fig. [3](https://ar5iv.labs.arxiv.org/html/2503.14956#S2.F3 \"Figure 3 ‣ 2.4 Predicting protein B-factors from chaotic systems ‣ 2 Results ‣ Machine learning predictions from unpredictable chaos\")c, compared with the existing best results, the average PCCs 0.794, 0.796, and 0.817 obtained by TEPC (Lorenz) are about 13.8%, 24.0%, and 49.6% higher than 0.698 [[43](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib43)], 0.642 [[41](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib41)], and 0.546 [[41](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib41)] on 364, 362, and 300 datasets, respectively. The potential reason for this excellent performance is that the proposed method provides richer information of residue interactions through multiscale topological Laplacians. More details about the results in Fig. [3](https://ar5iv.labs.arxiv.org/html/2503.14956#S2.F3 \"Figure 3 ‣ 2.4 Predicting protein B-factors from chaotic systems ‣ 2 Results ‣ Machine learning predictions from unpredictable chaos\")b and c, and the prediction result of B-factor on 364 datasets can be found in Tables S12 and S17 of the Supporting Information, respectively. Three examples of B-factor predictions of proteins 1FF4, 2WUL, and 2Y7L with correlation coefficients 0.963, 0.955, and 0.891 are given in the Supporting Information, which suggests that our prediction results agree well with experiments.\n\nFigs. [3](https://ar5iv.labs.arxiv.org/html/2503.14956#S2.F3 \"Figure 3 ‣ 2.4 Predicting protein B-factors from chaotic systems ‣ 2 Results ‣ Machine learning predictions from unpredictable chaos\")d and e show another B-factor predictions on protein calmodulin (PDB ID: 1CLL). In Fig. [3](https://ar5iv.labs.arxiv.org/html/2503.14956#S2.F3 \"Figure 3 ‣ 2.4 Predicting protein B-factors from chaotic systems ‣ 2 Results ‣ Machine learning predictions from unpredictable chaos\")d, our TEPC method with the Lorenz oscillator displays excellent performance, and its results match closely with experiments for residues 60-90. In contrast, the GNM method demonstrates poor predictions. This difference is obvious when comparing the color representations based on B-factor values of the 1CLL protein structure in Fig. [3](https://ar5iv.labs.arxiv.org/html/2503.14956#S2.F3 \"Figure 3 ‣ 2.4 Predicting protein B-factors from chaotic systems ‣ 2 Results ‣ Machine learning predictions from unpredictable chaos\")e.\n\nThese protein B-factor predictions not only demonstrate the usefulness of the present TEPC method in handling proteins with different sizes and different complex structures, but also indicate that the proposed approach has great potential for other important biophysics applications, such as the predictions of protein-ligand binding affinities and protein-protein interactions."
+    },
+    {
+      "heading_path": [
+        "Machine learning predictions from unpredictable chaos",
+        "2 Results",
+        "2.5 Predicting single cell properties from chaotic systems"
+      ],
+      "text": "### 2.5 Predicting single cell properties from chaotic systems\n\nHaving demonstrated the utility of topology-enabled molecular property predictions from chaos, we further demonstrate the topology-enabled cellular property predictions from chaos. Specifically, we consider single-cell RNA sequencing (scRNA-seq) data analysis, which is a computational process aimed at extracting meaningful biological insights from single-cell gene expression data. In the present work, we employ 13 scRNA-seq datasets as shown in Table S4 of the Supporting Information. These datasets involve tens of thousands of single cell samples collected from human or mouse. The single cells contain thousands or tens of thousands of genes. The problem is to classify these cells into various cell types, from 4 to 14 types, in various datasets based on their gene expressions.\n\nWe first compute the Euclidean distance between cells and then set κ=1\\kappa=1 and σ=3\\sigma=3 for the exponential kernel in Eq. ([2](https://ar5iv.labs.arxiv.org/html/2503.14956#S4.E2 \"In 4.1 Mapping interaction to topology ‣ 4 Methods ‣ Machine learning predictions from unpredictable chaos\")) to evaluate pairwise correlations. We employ persistent Laplacians to create a family of correlation matrices for various chaotic systems. The trajectories from chaotic systems are collected, and their statistical values are computed for cell classification. We use 5-fold cross-validation with 10 random seeds and the random forest (RF) algorithm to predict cell type. The default parameters of RF from Scikit-learn’s packages were used in the implementation. Here, we compare the overall classification performance of our method (TEPC with Lorenz oscillators) with widely used principal components analysis (PCA) method in Fig. [3](https://ar5iv.labs.arxiv.org/html/2503.14956#S2.F3 \"Figure 3 ‣ 2.4 Predicting protein B-factors from chaotic systems ‣ 2 Results ‣ Machine learning predictions from unpredictable chaos\")f.\n\nκ=1\\kappa=1\n\nσ=3\\sigma=3\n\nFor PCA, we take the average value of balanced accuracy (BA) over different dimensions, namely 50, 100, 150, 200, 250, and 300. For each reduction, 20 random initializations were used to ensure robustness and stability. Additionally, before the dimensionality reduction, a log-transform was performed on the data sets. The 5-fold cross-validation is employed to assess the performance of various methods. Since scRNA-seq datasets usually have an unbalanced number of cells per type, we use a balanced accuracy score rather than the traditional accuracy score, whose details are given in Section S4 of the Supporting Information. From Fig. [3](https://ar5iv.labs.arxiv.org/html/2503.14956#S2.F3 \"Figure 3 ‣ 2.4 Predicting protein B-factors from chaotic systems ‣ 2 Results ‣ Machine learning predictions from unpredictable chaos\")f, we find that our TEPC with Lorenz oscillators outperforms PCA on all 13 scRNA-seq dataset. Specifically, the highest improvement of BA value is up to 50.79% on GSE45719 data and the average improvement is 11.29% for each data set, suggesting that TEPC is a useful tool in the classification of scRNA-seq data. The details of Fig. [3](https://ar5iv.labs.arxiv.org/html/2503.14956#S2.F3 \"Figure 3 ‣ 2.4 Predicting protein B-factors from chaotic systems ‣ 2 Results ‣ Machine learning predictions from unpredictable chaos\")f can be found in Table S4 of the Supporting Information."
+    },
+    {
+      "heading_path": [
+        "Machine learning predictions from unpredictable chaos",
+        "2 Results",
+        "2.6 Predicting image properties from chaotic learning"
+      ],
+      "text": "### 2.6 Predicting image properties from chaotic learning\n\nTo further demonstrate the predictive power and robustness of the proposed topology-enabled predictions from chaos, we consider a non-biological problem. Image classification is a general task in data science and has wide-spread applications in a wide variety of fields and disciplines. In this work, we consider Coil-20, a benchmark dataset of image classifications with 1440 images [[46](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib46)]. Each image has a size of 128\\*128, where 20 objects or classes are captured at 72 angles, and was treated as a vector of length 16384. The details of Coil-20 data are given in SectionS7 of the Supporting Information. In our implementation, we first reduce the dimension from 16384 to 3 with uniform manifold approximation and projection (UMAP). However, t-distributed stochastic neighbor embedding (t-SNE) or PCA could be similarly used for dimension reduction. The pairwise correlations among images in the dataset are computed with the exponential kernel κ=1\\kappa=1 and σ=3\\sigma=3 from the three-dimensional (3D) UMAP results. Then, we use persistent Laplacians to generate a family of correlation matrices for 1440 images. For each correlation matrix, we install a chaotic system and compute a perturbative trajectory for each image. The statistical values of trajectories are used for downstream ML predictions. As a comparison, we also directly use the features from the UMAP, PCA, and t-SNE dimension reduction for downstream classifiers. We use three different classifiers, including random forest (RF), gradient boosting decision tree (GBDT), and k-nearest neighbor classifier (KNN) in the classification with all default parameters of Scikit-learn packages. We use the 5-fold cross-validation to evaluate the performance of classifications. All details of parameters used in Fig. [3](https://ar5iv.labs.arxiv.org/html/2503.14956#S2.F3 \"Figure 3 ‣ 2.4 Predicting protein B-factors from chaotic systems ‣ 2 Results ‣ Machine learning predictions from unpredictable chaos\") can be found in Table S2 of the Supporting Information.\n\nκ=1\\kappa=1\n\nσ=3\\sigma=3\n\nIn Fig. [3](https://ar5iv.labs.arxiv.org/html/2503.14956#S2.F3 \"Figure 3 ‣ 2.4 Predicting protein B-factors from chaotic systems ‣ 2 Results ‣ Machine learning predictions from unpredictable chaos\")g, we compare the balanced accuracy of classification with these four methods, i.e., TEPC, UMAP, PCA, and t-SNE, where TEPC (Lorenz) and TEPC (Rossler) indicate the use of two different chaotic dynamics, i.e., Lorenz and Rossler oscillators. We find that TEPC (Lorenz) outperforms UMAP, PCA, and t-SNE methods on all three classifiers. Compared with UMAP, PCA, and t-SNE, TEPC (Lorenz) has improved the balanced accuracy up to 11.59%, 13.53%, and 11.64% for RF, GBDT, and KNN classifiers, respectively. The details of Fig. [3](https://ar5iv.labs.arxiv.org/html/2503.14956#S2.F3 \"Figure 3 ‣ 2.4 Predicting protein B-factors from chaotic systems ‣ 2 Results ‣ Machine learning predictions from unpredictable chaos\")g can be found in Table S7 of the Supporting Information. It is interesting to note that although TEPC (Lorenz) started with the same UMAP information, it outperforms UMAP by 8.65%, 8.75%, and 11.14% for RF, GBDT, and KNN classifiers, respectively. This amazing improvement is due to the fact that the proposed topology-enabled chaotic embedding captures the network interactions and multiscale correlations among oscillators (images). In contrast, the UMAP information is relatively isolated for each image and neglects crucial ‘spatial’ correlations among images."
+    },
+    {
+      "heading_path": [
+        "Machine learning predictions from unpredictable chaos",
+        "3 Discussion"
+      ],
+      "text": "## 3 Discussion"
+    },
+    {
+      "heading_path": [
+        "Machine learning predictions from unpredictable chaos",
+        "3 Discussion",
+        "3.1 Robustness with respect to dynamical systems and ML models"
+      ],
+      "text": "### 3.1 Robustness with respect to dynamical systems and ML models\n\nIn order to demonstrate the robustness of the proposed chaotic learning with respect to the choice of chaotic dynamics and ML algorithms, we consider two oscillators, i.e., Lorenz and Rossler and many ML algorithms, including KNN, RF, GBDT, RNN, and LSTM. Specifically, we integrate the Rossler equation using the fourth-order Runge-Kutta scheme and set their parameters to a=b=0.1a=b=0.1, c=4c=4, and a=35,b=3,c=28a=35,b=3,c=28, respectively. In Fig. [3](https://ar5iv.labs.arxiv.org/html/2503.14956#S2.F3 \"Figure 3 ‣ 2.4 Predicting protein B-factors from chaotic systems ‣ 2 Results ‣ Machine learning predictions from unpredictable chaos\"), TEPC (Rossler) means the TEPC method with Rossler oscillators.\n\na=b=0.1a=b=0.1\n\nc=4c=4\n\na=35,b=3,c=28a=35,b=3,c=28\n\nIn Fig. [3](https://ar5iv.labs.arxiv.org/html/2503.14956#S2.F3 \"Figure 3 ‣ 2.4 Predicting protein B-factors from chaotic systems ‣ 2 Results ‣ Machine learning predictions from unpredictable chaos\")a, TEPC (Rossler) performances as well as TEPC (Lorenz) on the EEG classification task obtaining all 100% on three metrics including accuracy, sensitivity, and specificity, which are equivalent or higher than those of other existing methods.\n\nIn Fig. [3](https://ar5iv.labs.arxiv.org/html/2503.14956#S2.F3 \"Figure 3 ‣ 2.4 Predicting protein B-factors from chaotic systems ‣ 2 Results ‣ Machine learning predictions from unpredictable chaos\")b, EH indicates the evolutionary homology method, and NMA refers to the normal mode analysis. Regarding the protein B-factor prediction, for the set of small-size proteins with 33 samples, TEPC (Rossler) method with an average PCC 0.934 outperforms other existing methods. Specifically, the average PCC value is improved 20.81% and 94.58% compared with 0.773 and 0.480 obtained by EH and NMA methods in references [[43](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib43)] and [[39](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib39)], respectively. For the set of medium-size proteins with 36 samples, TEPC (Rossler) raises the average PCC value up to 6.17% and 60.58% from 0.729, 0.482 to 0.774 compared to those of EH method [[43](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib43)] and reference [[39](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib39)], respectively. Similarly, for the set of large-size proteins with 35 samples, TEPC (Rossler) raises the average PCC value up to 5.4%, 41.9% compared to those of EH method [[43](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib43)] and reference [[39](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib39)], respectively. Additionally, in Fig. [3](https://ar5iv.labs.arxiv.org/html/2503.14956#S2.F3 \"Figure 3 ‣ 2.4 Predicting protein B-factors from chaotic systems ‣ 2 Results ‣ Machine learning predictions from unpredictable chaos\")c, TEPC (Rossler) also achieves better prediction result than other existing methods in different sets of proteins with 300, 362, and 364 samples, respectively. That is, TEPC (Rossler) gets the average PCCs 0.748, 0.722, and 0.72 with the increment up to 37.0%, 12.46%, and 27.43% compared to those of 0.546, 0.642, and 0.565 by mANM [[41](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib41)], mGNM [[41](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib41)], and GNM methods [[44](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib44)] with 300, 362, and 364 datasets, respectively.\n\nIn Fig. [3](https://ar5iv.labs.arxiv.org/html/2503.14956#S2.F3 \"Figure 3 ‣ 2.4 Predicting protein B-factors from chaotic systems ‣ 2 Results ‣ Machine learning predictions from unpredictable chaos\")g, for image classification task, TEPC (Rossler) obtains a comparable performance with TEPC (Lorenz) method, except with KNN classifier. The balanced accuracy values of prediction, 0.915 and 0.894 with RF and GBDT classifiers attained by TEPC (Rossler) are improved up to 2.8% and 3.35% compared to PCA method, and 2.92% and 0.45% with t-SNE method, respectively, which is similar with those of UMAP method. However, TEPC (Rossler) with KNN classifier performs worse than other methods.\n\nFrom Figs. [3](https://ar5iv.labs.arxiv.org/html/2503.14956#S2.F3 \"Figure 3 ‣ 2.4 Predicting protein B-factors from chaotic systems ‣ 2 Results ‣ Machine learning predictions from unpredictable chaos\")a, b, c, g, though the TEPC method with different kinds of oscillators have various performances on brain EEG data, protein B-factor prediction, and image classification task, they outperform the existing advanced methods or the traditional baseline methods, like PCA or UMAP or t-SNE in most of cases, which verifies the generalizability of TEPC method is independent of specific chaotic systems.\n\nFinally, in Fig. [3](https://ar5iv.labs.arxiv.org/html/2503.14956#S2.F3 \"Figure 3 ‣ 2.4 Predicting protein B-factors from chaotic systems ‣ 2 Results ‣ Machine learning predictions from unpredictable chaos\")a, TEPC (RNN) and TEPC (LSTM) were paired with Lorenz, and TEPC (Lorenz) and TEPC (Rossler) were combined with KNN. All of these methods achieved 100% in accuracy, sensitivity, and specificity for EEG classification, confirming that the proposed TEPC method is highly robust."
+    },
+    {
+      "heading_path": [
+        "Machine learning predictions from unpredictable chaos",
+        "3 Discussion",
+        "3.2 Impact of numerical integrators"
+      ],
+      "text": "### 3.2 Impact of numerical integrators\n\nIn the implementation of TEPC method, we all utilize the fourth-order Runge-Kutta (RK-4) method to solve Lorenz (Rossler) equations. Here, in order to discuss the effect caused by different numerical integrators on ML predictions, we show the comparison results between RK-4 and RK-2 methods on 13 single cell RNA sequencing data in Fig. [3](https://ar5iv.labs.arxiv.org/html/2503.14956#S2.F3 \"Figure 3 ‣ 2.4 Predicting protein B-factors from chaotic systems ‣ 2 Results ‣ Machine learning predictions from unpredictable chaos\")h, where the balanced accuracy (BA) are compared by the TEPC method with the Lorenz oscillator integrating with three different classifiers, including RF, GBDT, and SVM.\n\nFrom Fig. [3](https://ar5iv.labs.arxiv.org/html/2503.14956#S2.F3 \"Figure 3 ‣ 2.4 Predicting protein B-factors from chaotic systems ‣ 2 Results ‣ Machine learning predictions from unpredictable chaos\")h, the balanced accuracy (BA) values by RK-4 method are larger than those by Rk-2 with RF classifier on all 13 single cell data sets. For GBDT and SVM classifier, the comparison results between RK-4 method and RK-2 method can be found in Fig. S5 of the Supporting Information. These results suggest that the RK-4 method used in our numerical experiments is a robust approach to provide reliable and efficient prediction results. The details of Fig. [3](https://ar5iv.labs.arxiv.org/html/2503.14956#S2.F3 \"Figure 3 ‣ 2.4 Predicting protein B-factors from chaotic systems ‣ 2 Results ‣ Machine learning predictions from unpredictable chaos\")h can be found in Table S6 of the Supporting Information."
+    },
+    {
+      "heading_path": [
+        "Machine learning predictions from unpredictable chaos",
+        "3 Discussion",
+        "3.3 Impact of model parametrization"
+      ],
+      "text": "### 3.3 Impact of model parametrization\n\nTo analyze the best parameter for exponential function of Eq. ([2](https://ar5iv.labs.arxiv.org/html/2503.14956#S4.E2 \"In 4.1 Mapping interaction to topology ‣ 4 Methods ‣ Machine learning predictions from unpredictable chaos\")), we test a range of parameters to predict the B-factor averaged on 6RXN protein in Fig. S1 of the Supporting Information, where the best average B-factor is got around κ=1\\kappa=1 and σ=3\\sigma=3. This result suggests that the TEPC model introduced in present study can be a parameter-free model by setting κ=1\\kappa=1 and σ=3\\sigma=3. Our findings do not depend on chaotic models and model parametrization.\n\nκ=1\\kappa=1\n\nσ=3\\sigma=3\n\nκ=1\\kappa=1\n\nσ=3\\sigma=3"
+    },
+    {
+      "heading_path": [
+        "Machine learning predictions from unpredictable chaos",
+        "3 Discussion",
+        "3.4 Residue-Similarity (R-S) plots"
+      ],
+      "text": "### 3.4 Residue-Similarity (R-S) plots\n\nIn this section, we implement the residue-similarity (R-S) analysis [[47](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib47)] for the visualization of classification performance on single cell RNA sequencing (scRNA-seq) datasets. In classification tasks involving two classes, conventional approaches such as Receiver Operating Characteristic (ROC) curves and Area Under the ROC Curve (AUC) serve comparable purposes to R-S scores. However, unlike these traditional methods, R-S scores possess the capability to be extended to scenarios with any number of classes, which is advantageous over the traditional methods.\n\nFigs. [4](https://ar5iv.labs.arxiv.org/html/2503.14956#S3.F4 \"Figure 4 ‣ 3.4 Residue-Similarity (R-S) plots ‣ 3 Discussion ‣ Machine learning predictions from unpredictable chaos\")a-b show a comparison between the R-S plot and two-dimension (2D) plots of UMAP for four scRNA-seq data sets, including GSE45719, GSE59114, GSE75748 cell, and GSE75748 time. For each data set, it was partitioned into five subsets using 5-fold cross-validation. Four subsets were utilized to train the random forest (RF) classifier, while one subset was reserved for testing. Subsequently, residue and similarity scores were calculated for each sample and visualized based on their true cell type. Samples were then color-coded according to the labels predicted by the RF classifier. The xx-axis represents residue scores, while the yy-axis represents similarity scores. Both scores range from 0 to 1, with 1 indicating optimal performance. A well-separated and clustered reduction is indicated by the top-right corner of the plot. The TEPC model was used to reduce the dimension to 30 supergenes with κ=1\\kappa=1 and σ=3\\sigma=3.\n\nxx\n\nyy\n\nκ=1\\kappa=1\n\nσ=3\\sigma=3\n\nFig. [4](https://ar5iv.labs.arxiv.org/html/2503.14956#S3.F4 \"Figure 4 ‣ 3.4 Residue-Similarity (R-S) plots ‣ 3 Discussion ‣ Machine learning predictions from unpredictable chaos\")c represents the confusion matrix of R-S plots, where the xx-axis means the true labels and the yy-axis means the predicted labels. For instance, for the GSE45719 data set, in the first row of figure, we can find that classes 2, 5, and 6 are all classified correctly, and classes 0, 1, 3, 4, and 7 are classified correctly except one, three, three, four samples, respectively. However, in UMAP plots, the samples of classes 0, 1, 3, and 7 do not form compact individual cluster, and there are two obvious separated clusters for each class. These findings suggest that although UMAP has a good clustering visualization, an R-S plot has better prediction performance than UMAP. Similar results are found in the cases of GSE59114, GSE75748 cell, and GSE75748 time data sets, shown in the last three rows of Figs. [4](https://ar5iv.labs.arxiv.org/html/2503.14956#S3.F4 \"Figure 4 ‣ 3.4 Residue-Similarity (R-S) plots ‣ 3 Discussion ‣ Machine learning predictions from unpredictable chaos\")a-c. The clustering visualization of left scRNA-seq data sets is given in Figs.S2, S3, and S4 of the Supporting Information.\n\nxx\n\nyy\n\nκ=1\\kappa=1\n\nσ=3\\sigma=3\n\n10−610^{-6}\n\nβ0α,0\\beta^{\\alpha,0}_{0}\n\nβ1α,0\\beta^{\\alpha,0}_{1}\n\nλ0α,0\\lambda^{\\alpha,0}_{0}\n\nλ1α,0\\lambda^{\\alpha,0}_{1}\n\nα\\alpha"
+    },
+    {
+      "heading_path": [
+        "Machine learning predictions from unpredictable chaos",
+        "3 Discussion",
+        "3.5 Applications of chaotic learning to other fields"
+      ],
+      "text": "### 3.5 Applications of chaotic learning to other fields\n\nIn present work, chaotic learning has been applied to diverse complex systems, from single molecules (proteins), single cells, organs (brain EEG), to non-biological data (images). While all examples shown in this work are about element-specific predictions, the proposed TEPC can be used for global property predictions by appropriately integrating element-specific features into global ones, such as features for a whole protein, which can be used for global predictions, such as protein solubility, toxicity, folding free energy, etc.\n\nHere, by integrating the ML, chaos theory, and persistent Laplacian, we propose a chaotic learning paradigm to predict the properties of general data from unpredictable chaotic dynamics. Our paradigm can be used not only as a tool in ML predictions, but also as a new method for the analysis of times series, such as the brain EEG data.\n\nThe proposed chaotic learning can be improved by other topological Laplacian methods, such as persistent hyerdigraph Laplacian and persistent sheaf Laplacian [[17](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib17)], as well as better time integrators."
+    },
+    {
+      "heading_path": [
+        "Machine learning predictions from unpredictable chaos",
+        "4 Methods"
+      ],
+      "text": "## 4 Methods\n\nWe consider a spatial network or high-order hypergraph where the nodes mean objects or particles, neurons and the links or edges between nodes represent the interaction between nodes. The distance between two nodes is directly associated with their interaction strength. Additionally, we assume that all functions of nodes are solely determined by the network structure. Therefore, functional predictions can be carried out with the structural information without resorting to the ultimate interactions. We build up a connectivity matrix from the interactive network, and we represent the dynamics of each node by a nonlinear oscillator, and couple nodes with the connectivity matrix extracted from the data. Finally, we review persistent Laplacian and propose a new filtration method, Laplacian filtration, instead of a conventional filtration method. In this section, we discuss the details of our main methods, mapping interaction to topology and persistent Laplacian analysis. A brief discussion of stability analysis of coupled chaotic systems and the details of residue-similarity scores are given in SectionsS1.2 and S9 of the Supporting Information, respectively."
+    },
+    {
+      "heading_path": [
+        "Machine learning predictions from unpredictable chaos",
+        "4 Methods",
+        "4.1 Mapping interaction to topology"
+      ],
+      "text": "### 4.1 Mapping interaction to topology\n\nTopological relations or connectivities among network nodes are basic ingredients in network nonlinear dynamics models. As discussed above, this topological information can be extracted from the interaction of a given node of interest in an nn-dimensional space. Let us consider a network of NN nodes located on different regions 𝕣1,𝕣2,⋯,𝕣N{\\mathbb{r}\\_{1}},{\\mathbb{r}\\_{2}},\\cdots,{\\mathbb{r}\\_{N}}, (𝕣j∈ℝn\\mathbb{r}\\_{j}\\in{\\mathbb{R}^{n}}), where nodes can be neurons, atoms, amino acids residues in a molecule, or people in society if applied in other scenarios. The distance between the iith and jjth nodes is given by di​j​(ri,rj)=‖𝕣i−𝕣j‖2d\\_{ij}(r\\_{i},r\\_{j})=\\left\\|{{\\mathbb{r}\\_{i}}-{\\mathbb{r}\\_{j}}}\\right\\|\\_{2}. The connectivity matrix must agree with the driven and response relation between two dynamics systems. Moreover, we suppose that all nodes in the network are mutually linked and their interactions decay as a function of their distance 𝔸i​j​(di​j)\\mathbb{A}\\_{ij}(d\\_{ij}). The simplest form of the connectivity matrix is the Kirchoff (or connectivity) matrix generated by cutoff distance σi​j\\sigma\\_{ij}:\n\nnn\n\nNN\n\n𝕣1,𝕣2,⋯,𝕣N{\\mathbb{r}_{1}},{\\mathbb{r}_{2}},\\cdots,{\\mathbb{r}_{N}}\n\n𝕣j∈ℝn\\mathbb{r}_{j}\\in{\\mathbb{R}^{n}}\n\nii\n\njj\n\ndi​j​(ri,rj)=‖𝕣i−𝕣j‖2d_{ij}(r_{i},r_{j})=\\left\\|{{\\mathbb{r}_{i}}-{\\mathbb{r}_{j}}}\\right\\|_{2}\n\n𝔸i​j​(di​j)\\mathbb{A}_{ij}(d_{ij})\n\nσi​j\\sigma_{ij}\n\n| | | | | | --- | --- | --- | --- | | | Ai​j={1,∀di​j≤σi​j,i≠j0,∀di​j>σi​j,i≠j−∑j≠iAi​j,∀i=j.{A\\_{ij}}=\\left\\{{\\begin{array}[]{\\*{20}{c}}{1,\\quad{\\rm{}}\\forall{d\\_{ij}}\\leq{\\sigma\\_{ij}},i\\neq j}\\\\ {0,\\quad{\\rm{}}\\forall{d\\_{ij}}>{\\sigma\\_{ij}},i\\neq j}\\\\ {-\\sum\\nolimits\\_{j\\neq i}{{A\\_{ij}},}\\quad{\\rm{}}\\forall i=j.}\\end{array}}\\right. | | (1) |\n\nAi​j={1,∀di​j≤σi​j,i≠j0,∀di​j>σi​j,i≠j−∑j≠iAi​j,∀i=j.{A_{ij}}=\\left\\{{\\begin{array}[]{*{20}{c}}{1,\\quad{\\rm{}}\\forall{d_{ij}}\\leq{\\sigma_{ij}},i\\neq j}\\\\ {0,\\quad{\\rm{}}\\forall{d_{ij}}>{\\sigma_{ij}},i\\neq j}\\\\ {-\\sum\\nolimits_{j\\neq i}{{A_{ij}},}\\quad{\\rm{}}\\forall i=j.}\\end{array}}\\right.\n\nIn order to take the distance effect in a more practical manner into the consideration, smooth and monotonically decreasing radial basis functions or the delta sequence kernels of positive type are often employed for convenience [[48](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib48)]. Here, generalized exponential functions\n\n| | | | | | --- | --- | --- | --- | | | Ai​j={e−di​jk​/​k​σi​jk,∀i≠j,k=1,2,⋯−∑j≠iAi​j,∀i=j{A\\_{ij}}=\\left\\{{\\begin{array}[]{\\*{20}{c}}{{e^{{{-d\\_{ij}^{k}}\\mathord{\\left/{\\vphantom{{-d\\_{ij}^{k}}{k\\sigma\\_{ij}^{k}}}}\\right.\\kern-1.2pt}{k\\sigma\\_{ij}^{k}}}}},\\quad{\\rm{}}\\forall i\\neq j,{\\rm{}}k=1,2,\\cdots}\\\\ {-\\sum\\nolimits\\_{j\\neq i}{{A\\_{ij}},}\\quad{\\rm{}}\\forall i=j}\\end{array}}\\right. | | (2) |\n\nAi​j={e−di​jk​/​k​σi​jk,∀i≠j,k=1,2,⋯−∑j≠iAi​j,∀i=j{A_{ij}}=\\left\\{{\\begin{array}[]{*{20}{c}}{{e^{{{-d_{ij}^{k}}\\mathord{\\left/{\\vphantom{{-d_{ij}^{k}}{k\\sigma_{ij}^{k}}}}\\right.\\kern-1.2pt}{k\\sigma_{ij}^{k}}}}},\\quad{\\rm{}}\\forall i\\neq j,{\\rm{}}k=1,2,\\cdots}\\\\ {-\\sum\\nolimits_{j\\neq i}{{A_{ij}},}\\quad{\\rm{}}\\forall i=j}\\end{array}}\\right.\n\nand power law functions are considered,\n\n| | | | | | --- | --- | --- | --- | | | Ai​j={(di​j​/​σi​j)−υ,∀i≠j,υ>1−∑j≠iAi​j,∀i=j,{A\\_{ij}}=\\left\\{{\\begin{array}[]{\\*{20}{c}}{{{\\left({{{{d\\_{ij}}}\\mathord{\\left/{\\vphantom{{{d\\_{ij}}}{{\\sigma\\_{ij}}}}}\\right.\\kern-1.2pt}{{\\sigma\\_{ij}}}}}\\right)}^{-\\upsilon}},\\quad{\\rm{}}\\forall i\\neq j,{\\rm{}}\\upsilon>1{\\rm{}}}\\\\ {-\\sum\\nolimits\\_{j\\neq i}{{A\\_{ij}},}\\quad{\\rm{}}\\forall i=j,}\\end{array}}\\right. | | (3) |\n\nAi​j={(di​j​/​σi​j)−υ,∀i≠j,υ>1−∑j≠iAi​j,∀i=j,{A_{ij}}=\\left\\{{\\begin{array}[]{*{20}{c}}{{{\\left({{{{d_{ij}}}\\mathord{\\left/{\\vphantom{{{d_{ij}}}{{\\sigma_{ij}}}}}\\right.\\kern-1.2pt}{{\\sigma_{ij}}}}}\\right)}^{-\\upsilon}},\\quad{\\rm{}}\\forall i\\neq j,{\\rm{}}\\upsilon>1{\\rm{}}}\\\\ {-\\sum\\nolimits_{j\\neq i}{{A_{ij}},}\\quad{\\rm{}}\\forall i=j,}\\end{array}}\\right.\n\nwhere σi​j\\sigma\\_{ij} are characteristic distance between nodes. In the present work, σi​j\\sigma\\_{ij} is a tuneable parameter. Note that the above matrix functions have already been applied to other methods, like flexibility analysis methods in biology system [[49](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib49), [50](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib50)]. But, the present construction of these functional forms is based on the driven and response relationship of coupled dynamical systems [[51](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib51)].\n\nσi​j\\sigma_{ij}\n\nσi​j\\sigma_{ij}\n\nFormulas ([1](https://ar5iv.labs.arxiv.org/html/2503.14956#S4.E1 \"In 4.1 Mapping interaction to topology ‣ 4 Methods ‣ Machine learning predictions from unpredictable chaos\"))-([3](https://ar5iv.labs.arxiv.org/html/2503.14956#S4.E3 \"In 4.1 Mapping interaction to topology ‣ 4 Methods ‣ Machine learning predictions from unpredictable chaos\")) can be used to map the geometry of a network into topological relations or connectivities. The connectivity matrix 𝐀\\bf A is an N×NN\\times N symmetric, diagonally dominant matrix, and the elements in the matrix are not interaction potentials among nodes. For simplify, we set that the characteristic distances of all nodes are the same σi​j=σ\\sigma\\_{ij}=\\sigma.\n\n𝐀\\bf A\n\nN×NN\\times N\n\nσi​j=σ\\sigma_{ij}=\\sigma"
+    },
+    {
+      "heading_path": [
+        "Machine learning predictions from unpredictable chaos",
+        "4 Methods",
+        "4.2 Persistent Laplacian analysis"
+      ],
+      "text": "### 4.2 Persistent Laplacian analysis\n\nPersistent homology (PH) is a new branch of algebraic topology and has been developed as a new multiscale representation of topological features applied successfully in various fields, including mathematics [[52](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib52)], chemistry [[53](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib53)], etc. It contains a filtration process to generate a family of topological spaces so that the system can be analyzed at multiscales. More discussion of PH theory is given in Section S8 of the Supporting Information. However, PH cannot detect the homotopic shape evolution of the system during filtration. Recently, persistent Laplacian (PL) or persistent spectral graph (PSG) is developed to fill the gap. PL not only retains the full set of topological invariants in their harmonic spectra as PH does but also captures the homotopic shape evolution of data during the filtration in their non-harmonic spectra that PH does not describe [[16](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib16)]. PL is a special case of persistent topological Lpalacians, including the persistent Hodge Laplacian defined on a Riemannian manifold [[54](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib54)], and a variety of other formulations defined on many topological spaces, such as cellular sheaf, hyperdigraphs, path complexes, etc. Like PH, PLs utilize a filtration process to generate a series of geometric shapes and associated topological spaces, on which persistent spectral graphs are defined. The change in the null space dimensions of the PLs during the filtration indicates the persistence of topological invariants, while the nonzero eigenvalues and related eigenfunctions of the PLs reveal the geometric shape evolution of the data during the filtration.\n\nAn oriented simplicial complex KK is a sequence of subcomplexes (Kt)t=0m(K\\_{t})\\_{t=0}^{m} of KK:\n\nKK\n\n(Kt)t=0m(K_{t})_{t=0}^{m}\n\nKK\n\n| | | | | | --- | --- | --- | --- | | | ∅=K0⊆K1⊆K2⊆⋯⊆Km=K.\\emptyset=K\\_{0}\\subseteq K\\_{1}\\subseteq K\\_{2}\\subseteq\\cdots\\subseteq K\\_{m}=K. | | (4) |\n\n∅=K0⊆K1⊆K2⊆⋯⊆Km=K.\\emptyset=K_{0}\\subseteq K_{1}\\subseteq K_{2}\\subseteq\\cdots\\subseteq K_{m}=K.\n\nConsidering the corresponding chain group of each subcomplex KtK\\_{t} and qq-boundary operator: Cq​(Kt)C\\_{q}(K\\_{t}) and ∂qt:Cq​(Kt)→Cq−1​(Kt)\\partial\\_{q}^{t}:C\\_{q}(K\\_{t})\\to C\\_{q-1}(K\\_{t}), if 0<q≤dimKt0<q\\leq\\dim K\\_{t}, we have\n\nKtK_{t}\n\nqq\n\nCq​(Kt)C_{q}(K_{t})\n\n∂qt:Cq​(Kt)→Cq−1​(Kt)\\partial_{q}^{t}:C_{q}(K_{t})\\to C_{q-1}(K_{t})\n\n0<q≤dimKt0<q\\leq\\dim K_{t}\n\n| | | | | | --- | --- | --- | --- | | | ∂qt(σq)=∑iq(−1)i​σq−1i,∀σq∈Kt,\\partial\\_{q}^{t}(\\sigma\\_{q})=\\sum\\_{i}^{q}(-1)^{i}\\sigma^{i}\\_{q-1},\\quad\\forall\\sigma\\_{q}\\in K\\_{t}, | | (5) |\n\n∂qt(σq)=∑iq(−1)i​σq−1i,∀σq∈Kt,\\partial_{q}^{t}(\\sigma_{q})=\\sum_{i}^{q}(-1)^{i}\\sigma^{i}_{q-1},\\quad\\forall\\sigma_{q}\\in K_{t},\n\nwhere σq=[v0,⋯,vq]\\sigma\\_{q}=[v\\_{0},\\cdots,v\\_{q}] is any qq-simplex and σq−1i=[v0,⋯,vi^,⋯,vq]\\sigma^{i}\\_{q-1}=[v\\_{0},\\cdots,\\hat{v\\_{i}},\\cdots,v\\_{q}] the oriented (q−1)(q\\!-\\!1)-simplex constructed by removing viv\\_{i}. It is important to define an adjoint operator of ∂qt\\partial\\_{q}^{t} as the coboundary operator ∂qt∗:Cq−1​(Kt)→Cq​(Kt)\\partial\\_{q}^{t^{\\ast}}:C^{q-1}(K\\_{t})\\to C^{q}(K\\_{t}), mapping from Cq−1​(Kt)C\\_{q-1}(K\\_{t}) to Cq​(Kt)C\\_{q}(K\\_{t}) by the isomorphism between cochain groups and chain groups Cq​(Kt)≅Cq​(Kt)C^{q}(K\\_{t})\\cong C\\_{q}(K\\_{t}).\n\nσq=[v0,⋯,vq]\\sigma_{q}=[v_{0},\\cdots,v_{q}]\n\nqq\n\nσq−1i=[v0,⋯,vi^,⋯,vq]\\sigma^{i}_{q-1}=[v_{0},\\cdots,\\hat{v_{i}},\\cdots,v_{q}]\n\n(q−1)(q\\!-\\!1)\n\nviv_{i}\n\n∂qt\\partial_{q}^{t}\n\n∂qt∗:Cq−1​(Kt)→Cq​(Kt)\\partial_{q}^{t^{\\ast}}:C^{q-1}(K_{t})\\to C^{q}(K_{t})\n\nCq−1​(Kt)C_{q-1}(K_{t})\n\nCq​(Kt)C_{q}(K_{t})\n\nCq​(Kt)≅Cq​(Kt)C^{q}(K_{t})\\cong C_{q}(K_{t})\n\nFor simplicity, denoting CqtC\\_{q}^{t} the chain group Cq​(Kt)C\\_{q}(K\\_{t}) and using the natural inclusion map from Cq−1tC\\_{q-1}^{t} to Cq−1t+pC\\_{q-1}^{t+p}, one defines the subset of Cqt+pC\\_{q}^{t+p} as ℂqt,p\\mathbb{C}\\_{q}^{t,p} with the boundary being in Cq−1tC\\_{q-1}^{t} as\n\nCqtC_{q}^{t}\n\nCq​(Kt)C_{q}(K_{t})\n\nCq−1tC_{q-1}^{t}\n\nCq−1t+pC_{q-1}^{t+p}\n\nCqt+pC_{q}^{t+p}\n\nℂqt,p\\mathbb{C}_{q}^{t,p}\n\nCq−1tC_{q-1}^{t}\n\n| | | | | | --- | --- | --- | --- | | | ℂqt,p≔{β∈Cqt+p∣∂qt+p(β)∈Cq−1t}.\\mathbb{C}\\_{q}^{t,p}\\coloneqq\\{\\beta\\in C\\_{q}^{t+p}\\mid\\ \\partial\\_{q}^{t+p}(\\beta)\\in C\\_{q-1}^{t}\\}. | | (6) |\n\nℂqt,p≔{β∈Cqt+p∣∂qt+p(β)∈Cq−1t}.\\mathbb{C}_{q}^{t,p}\\coloneqq\\{\\beta\\in C_{q}^{t+p}\\mid\\ \\partial_{q}^{t+p}(\\beta)\\in C_{q-1}^{t}\\}.\n\nOn this subset, we denote the pp-persistent qq-boundary operator by ðqt,p:ℂqt,p→Cq−1t\\eth\\_{q}^{t,p}:\\mathbb{C}\\_{q}^{t,p}\\to C\\_{q-1}^{t}and the corresponding adjoint operator by (ðqt,p)∗:Cq−1t→ℂqt,p(\\eth\\_{q}^{t,p})^{\\ast}:C\\_{q-1}^{t}\\to\\mathbb{C}\\_{q}^{t,p} via the determination of cochains with chains. We can define the qq-order pp-persistent Laplacian operator Δqt,p:Cqt→Cqt\\Delta\\_{q}^{t,p}:C\\_{q}^{t}\\to C\\_{q}^{t} in the filtration [[16](https://ar5iv.labs.arxiv.org/html/2503.14956#bib.bib16)]\n\npp\n\nqq\n\nðqt,p:ℂqt,p→Cq−1t\\eth_{q}^{t,p}:\\mathbb{C}_{q}^{t,p}\\to C_{q-1}^{t}\n\n(ðqt,p)∗:Cq−1t→ℂqt,p(\\eth_{q}^{t,p})^{\\ast}:C_{q-1}^{t}\\to\\mathbb{C}_{q}^{t,p}\n\nqq\n\npp\n\nΔqt,p:Cqt→Cqt\\Delta_{q}^{t,p}:C_{q}^{t}\\to C_{q}^{t}\n\n| | | | | | --- | --- | --- | --- | | | Δqt,p=ðq+1t,p(ðq+1t,p)∗+∂qt∗∂qt.\\Delta\\_{q}^{t,p}=\\eth\\_{q+1}^{t,p}\\left(\\eth\\_{q+1}^{t,p}\\right)^{\\ast}+\\partial\\_{q}^{t^{\\ast}}\\partial\\_{q}^{t}. | | (7) |\n\nThe matrix representation of Δqt,p\\Delta\\_{q}^{t,p} in the simplicial basis is\n\nΔqt,p\\Delta_{q}^{t,p}\n\n| | | | | | --- | --- | --- | --- | | | ℒqt,p=ℬq+1t,p​(ℬq+1t,p)T+(ℬqt)T​ℬqt.\\mathcal{L}\\_{q}^{t,p}=\\mathcal{B}\\_{q+1}^{t,p}(\\mathcal{B}\\_{q+1}^{t,p})^{T}+(\\mathcal{B}\\_{q}^{t})^{T}\\mathcal{B}\\_{q}^{t}. | | (8) |\n\nℒqt,p=ℬq+1t,p​(ℬq+1t,p)T+(ℬqt)T​ℬqt.\\mathcal{L}_{q}^{t,p}=\\mathcal{B}_{q+1}^{t,p}(\\mathcal{B}_{q+1}^{t,p})^{T}+(\\mathcal{B}_{q}^{t})^{T}\\mathcal{B}_{q}^{t}.\n\nThe topological invariants of the corresponding persistent homology defined by the same filtration can be recovered from the kernel of PL Eq. ([7](https://ar5iv.labs.arxiv.org/html/2503.14956#S4.E7 \"In 4.2 Persistent Laplacian analysis ‣ 4 Methods ‣ Machine learning predictions from unpredictable chaos\")):\n\n| | | | | | --- | --- | --- | --- | | | βqt,p=dimker∂qt−dimimðq+1t,p=dimkerℒqt,p=#0 eigenvalues of ℒqt,p.\\displaystyle\\beta\\_{q}^{t,p}=\\dim\\ker\\partial\\_{q}^{t}-\\dim\\im\\eth\\_{q+1}^{t,p}=\\dim\\ker\\mathcal{L}\\_{q}^{t,p}=\\#\\text{0 eigenvalues of }\\mathcal{L}\\_{q}^{t,p}. | | (9) |\n\nβqt,p=dimker∂qt−dimimðq+1t,p=dimkerℒqt,p=#0 eigenvalues of ℒqt,p.\\displaystyle\\beta_{q}^{t,p}=\\dim\\ker\\partial_{q}^{t}-\\dim\\im\\eth_{q+1}^{t,p}=\\dim\\ker\\mathcal{L}_{q}^{t,p}=\\#\\text{0 eigenvalues of }\\mathcal{L}_{q}^{t,p}.\n\nIn this study, we only focus on the 0, 1, and 2nd-order PLs for brain neural network data. Mathematically, βqt,p\\beta\\_{q}^{t,p} from the null space of LPs tracks the number of independent qq-dimensional holes in KtK\\_{t} that are still alive in Kt+pK\\_{t+p}. Therefore, it gives the same topological information as PH does. However, the non-zero eigenvalues of the PLs reveal the homotopic shape evolution of data during filtration.\n\nβqt,p\\beta_{q}^{t,p}\n\nqq\n\nKtK_{t}\n\nKt+pK_{t+p}\n\nIt is worth noting that rather than conventional filtration method directly by studying the simplicial complexes themselves in PH or PL, in the present work, we implement a Laplacian filtration procedure on our weighted Laplacian matrix to construct a family a subgraphs based on an accumulation threshold. The function of the weighted Laplacian matrix is as following:\n\n| | | | | | --- | --- | --- | --- | | | L=(li​j),li​j={li​j,i≠j,i,j=1,…,nli​i=−∑j=1nli​j.\\begin{split}L=(l\\_{ij}),l\\_{ij}=\\left\\{\\begin{array}[]{cc}l\\_{ij},&i\\neq j,i,j=1,\\dots,n\\\\ l\\_{ii}=-\\sum\\_{j=1}^{n}l\\_{ij}.&\\end{array}\\right.\\end{split} | | (10) |\n\nL=(li​j),li​j={li​j,i≠j,i,j=1,…,nli​i=−∑j=1nli​j.\\begin{split}L=(l_{ij}),l_{ij}=\\left\\{\\begin{array}[]{cc}l_{ij},&i\\neq j,i,j=1,\\dots,n\\\\ l_{ii}=-\\sum_{j=1}^{n}l_{ij}.&\\end{array}\\right.\\end{split}\n\nFor i≠ji\\neq j, let lmax=max​(li​j)l\\_{\\text{max}}=\\text{max}(l\\_{ij}), lmin=min​(li​j)l\\_{\\text{min}}=\\text{min}(l\\_{ij}), and d=lmax−lmind=l\\_{\\text{max}}-l\\_{\\text{min}}. We set the kkth Persistent Laplacian Lk,k=1,…,pL^{k},k=1,\\dots,p:\n\ni≠ji\\neq j\n\nlmax=max​(li​j)l_{\\text{max}}=\\text{max}(l_{ij})\n\nlmin=min​(li​j)l_{\\text{min}}=\\text{min}(l_{ij})\n\nd=lmax−lmind=l_{\\text{max}}-l_{\\text{min}}\n\nkk\n\nLk,k=1,…,pL^{k},k=1,\\dots,p\n\n| | | | | | --- | --- | --- | --- | | | Lk=(li​jk),li​jk={0,if​li​j≤(k/p)​d+lmin−1otherwiseli​ik=−∑j=1nli​jk.\\begin{split}L^{k}=(l^{k}\\_{ij}),l^{k}\\_{ij}=\\left\\{\\begin{array}[]{cc}0,&\\text{if}\\ l\\_{ij}\\leq(k/p)d+l\\_{\\text{min}}\\\\ -1&\\text{otherwise}\\\\ l\\_{ii}^{k}=-\\sum\\_{j=1}^{n}l\\_{ij}^{k}.&\\\\ \\end{array}\\right.\\end{split} | | (11) |\n\nLk=(li​jk),li​jk={0,if​li​j≤(k/p)​d+lmin−1otherwiseli​ik=−∑j=1nli​jk.\\begin{split}L^{k}=(l^{k}_{ij}),l^{k}_{ij}=\\left\\{\\begin{array}[]{cc}0,&\\text{if}\\ l_{ij}\\leq(k/p)d+l_{\\text{min}}\\\\ -1&\\text{otherwise}\\\\ l_{ii}^{k}=-\\sum_{j=1}^{n}l_{ij}^{k}.&\\\\ \\end{array}\\right.\\end{split}\n\nAdditionally, Fig. [4](https://ar5iv.labs.arxiv.org/html/2503.14956#S3.F4 \"Figure 4 ‣ 3.4 Residue-Similarity (R-S) plots ‣ 3 Discussion ‣ Machine learning predictions from unpredictable chaos\")d describes the topological representation of point clouds through Vietoris-Rips complexes with different filtration radius α\\alpha. The behaviors of Betti-0 and Betti-1 of persistent homology over filtration are illustrated as the red lines in Fig. [4](https://ar5iv.labs.arxiv.org/html/2503.14956#S3.F4 \"Figure 4 ‣ 3.4 Residue-Similarity (R-S) plots ‣ 3 Discussion ‣ Machine learning predictions from unpredictable chaos\")e. In contrast, the lowest nonzero eigenvalues (λ0α,0\\lambda^{\\alpha,0}\\_{0} and λ1α,0\\lambda^{\\alpha,0}\\_{1}) of persistent Laplacian over the same filtration are illustrated by blue lines in Fig. [4](https://ar5iv.labs.arxiv.org/html/2503.14956#S3.F4 \"Figure 4 ‣ 3.4 Residue-Similarity (R-S) plots ‣ 3 Discussion ‣ Machine learning predictions from unpredictable chaos\")e. Persistent Laplacian captures not only all topological changes but also homotopic geometric evolution during the filtration. The topological representation of point clouds in regular octagon can be found in the Supporting Information.\n\nα\\alpha\n\nλ0α,0\\lambda^{\\alpha,0}_{0}\n\nλ1α,0\\lambda^{\\alpha,0}_{1}"
+    },
+    {
+      "heading_path": [
+        "Machine learning predictions from unpredictable chaos",
+        "Data and code availability"
+      ],
+      "text": "## Data and code availability\n\nThe related codes studied in the present work are available at: <https://github.com/kelu0124/TEPC/tree/main>."
+    },
+    {
+      "heading_path": [
+        "Machine learning predictions from unpredictable chaos",
+        "Acknowledgment"
+      ],
+      "text": "## Acknowledgment\n\nThis work was supported in part by NIH grants R01GM126189 and R01AI164266, NSF grants DMS-2052983, DMS-1761320, and IIS-1900473, NASA grant 80NSSC21M0023, MSU Foundation, Bristol-Myers Squibb 65109, and Pfizer. The work of Huahai Qiu and Bengong Zhang was supported by the National Natural Science Foundation of China under Grant No.12271416 and No.12371500, respectively."
+    },
+    {
+      "heading_path": [
+        "Machine learning predictions from unpredictable chaos",
+        "Competing interests"
+      ],
+      "text": "## Competing interests\n\nThe authors declare no competing interests."
+    },
+    {
+      "heading_path": [
+        "Machine learning predictions from unpredictable chaos",
+        "References"
+      ],
+      "text": "## References\n\n* [1] Luis A Aguirre and Christophe Letellier. Modeling nonlinear dynamics and chaos: a review. Mathematical Problems in Engineering, 2009(1):238960, 2009. * [2] James P Crutchfield. Between order and chaos. Nature Physics, 8(1):17–24, 2012. * [3] Edward N Lorenz. Deterministic nonperiodic flow. Journal of atmospheric sciences, 20(2):130–141, 1963. * [4] Stefanos Boccaletti, Celso Grebogi, Y-C Lai, Hector Mancini, and Diego Maza. The control of chaos: theory and applications. Physics reports, 329(3):103–197, 2000. * [5] Tien-Yien Li and James A Yorke. Period three implies chaos. The American Mathematical Monthly, 82(10):985–992, 1975. * [6] Amujuri Mary Selvam and Amujuri Mary Selvam. Nonlinear dynamics and chaos: applications in meteorology and atmospheric physics. Self-organized Criticality and Predictability in Atmospheric Flows: The Quantum World of Clouds and Rain, pages 1–40, 2017. * [7] Yujiao Dong, Shuting Yang, Yan Liang, and Guangyi Wang. Neuromorphic dynamics near the edge of chaos in memristive neurons. Chaos, Solitons & Fractals, 160:112241, 2022. * [8] Mathias L Heltberg, Sandeep Krishna, Leo P Kadanoff, and Mogens H Jensen. A tale of two rhythms: Locked clocks and chaos in biology. Cell Systems, 12(4):291–303, 2021. * [9] Andrés Fernández-Díaz. Overview and perspectives of chaos theory and its applications in economics. Mathematics, 12(1):92, 2023. * [10] Bowen Zhang and Lingfeng Liu. Chaos-based image encryption: Review, application, and challenges. Mathematics, 11(11):2585, 2023. * [11] Ashraf A Zaher and Abdulnasser Abu-Rezq. On the design of chaos-based secure communication systems. Communications in Nonlinear Science and Numerical Simulation, 16(9):3721–3737, 2011. * [12] Jaideep Pathak, Brian Hunt, Michelle Girvan, Zhixin Lu, and Edward Ott. Model-free prediction of large spatiotemporally chaotic systems from data: A reservoir computing approach. Physical review letters, 120(2):024102, 2018. * [13] Bhukya Ramadevi and Kishore Bingi. Chaotic time series forecasting approaches using machine learning techniques: A review. Symmetry, 14(5):955, 2022. * [14] Huawei Fan, Junjie Jiang, Chun Zhang, Xingang Wang, and Ying-Cheng Lai. Long-term prediction of chaotic systems with machine learning. Physical Review Research, 2(1):012080, 2020. * [15] Tongfeng Weng, Huijie Yang, Jie Zhang, and Michael Small. Modeling chaotic systems: Dynamical equations vs machine learning approach. Communications in Nonlinear Science and Numerical Simulation, 114:106452, 2022. * [16] Rui Wang, Duc Duy Nguyen, and Guo-Wei Wei. Persistent spectral graph. Int J Numer Meth Biomed Engng., 36(9):e3376, 2020. * [17] Xiaoqi Wei and Guo-Wei Wei. Persistent sheaf laplacians. Foundations of Data Science, doi:10.3934/fods.2024033, 2025. * [18] Grigory V Osipov, Arkady S Pikovsky, Michael G Rosenblum, and Jürgen Kurths. Phase synchronization effects in a lattice of nonidentical rössler oscillators. Physical Review E, 55(3):2353, 1997. * [19] Ralph G Andrzejak, Klaus Lehnertz, Florian Mormann, Christoph Rieke, Peter David, and Christian E Elger. Indications of nonlinear deterministic and finite-dimensional structures in time series of brain electrical activity: Dependence on recording region and brain state. Physical Review E, 64(6):061907, 2001. * [20] U Rajendra Acharya, S Vinitha Sree, Peng Chuan Alvin Ang, Ratna Yanti, and Jasjit S Suri. Application of non-linear and wavelet based features for the automated identification of epileptic eeg signals. International journal of neural systems, 22(02):1250002, 2012. * [21] Abhijit Bhattacharyya and Ram Bilas Pachori. A multivariate approach for patient-specific eeg seizure detection using empirical wavelet transform. IEEE Transactions on Biomedical Engineering, 64(9):2003–2015, 2017. * [22] Samanwoy Ghosh-Dastidar, Hojjat Adeli, and Nahid Dadmehr. Mixed-band wavelet-chaos-neural network methodology for epilepsy and epileptic seizure detection. IEEE transactions on biomedical engineering, 54(9):1545–1551, 2007. * [23] Abhijit Bhattacharyya, Ram Bilas Pachori, Abhay Upadhyay, and U Rajendra Acharya. Tunable-q wavelet transform based multiscale entropy measure for automated classification of epileptic eeg signals. Applied Sciences, 7(4):385, 2017. * [24] U Rajendra Acharya, Filippo Molinari, S Vinitha Sree, Subhagata Chattopadhyay, Kwan-Hoong Ng, and Jasjit S Suri. Automated diagnosis of epileptic eeg using entropies. Biomedical signal processing and control, 7(4):401–408, 2012. * [25] Samanwoy Ghosh-Dastidar and Hojjat Adeli. A new supervised learning algorithm for multiple spiking neural networks with application in epilepsy and seizure detection. Neural networks, 22(10):1419–1431, 2009. * [26] U Rajendra Acharya, S Vinitha Sree, Ang Peng Chuan Alvin, and Jasjit S Suri. Use of principal component analysis for automatic classification of epileptic eeg activities in wavelet framework. Expert Systems with Applications, 39(10):9072–9078, 2012. * [27] U Rajendra Acharya, S Vinitha Sree, and Jasjit S Suri. Automatic detection of epileptic eeg signals using higher order cumulant features. International journal of neural systems, 21(05):403–414, 2011. * [28] Acharya UR, Sree VS, Martis RJ, and Suri JS. Automated diagnosis of epileptic electroencephalogram using independent component analysis and discrete wavelet transform for different electroencephalogram durations. Proceedings of the Institution of Mechanical Engineers, Part H: Journal of Engineering in Medicine, 227(3):234–244, 2013. * [29] U Rajendra Acharya, S Vinitha Sree, Subhagata Chattopadhyay, Wenwei Yu, and Peng Chuan Alvin Ang. Application of recurrence quantification analysis for the automated identification of epileptic eeg signals. International journal of neural systems, 21(03):199–211, 2011. * [30] Roshan Joy Martis, U Rajendra Acharya, Jen Hong Tan, Andrea Petznick, Ratna Yanti, Chua Kuang Chua, EY Kwee Ng, and Louis Tong. Application of empirical mode decomposition (emd) for automated detection of epilepsy using eeg signals. International journal of neural systems, 22(06):1250027, 2012. * [31] Samanwoy Ghosh-Dastidar and Hojjat Adeli. Spiking neural networks. International journal of neural systems, 19(04):295–308, 2009. * [32] Ling Guo, Daniel Rivero, Julián Dorado, Cristian R Munteanu, and Alejandro Pazos. Automatic feature extraction using genetic programming: An application to epileptic eeg classification. Expert Systems with Applications, 38(8):10425–10436, 2011. * [33] Oliver Faust, U Rajendra Acharya, Lim Choo Min, and Bernhard HC Sputh. Automatic identification of epileptic and background eeg signals using frequency domain parameters. International journal of neural systems, 20(02):159–176, 2010. * [34] KC Chua, Vinod Chandran, U Rajendra Acharya, and CM Lim. Automatic identification of epileptic electroencephalography signals using higher-order spectra. Proceedings of the Institution of Mechanical Engineers, Part H: Journal of Engineering in Medicine, 223(4):485–495, 2009. * [35] Kuang Chua Chua, Vinod Chandran, U Rajendra Acharya, and Choo Min Lim. Application of higher order spectra to identify epileptic eeg. Journal of medical systems, 35:1563–1571, 2011. * [36] Samanwoy Ghosh-Dastidar and Hojjat Adeli. Improved spiking neural networks for eeg classification and epilepsy and seizure detection. Integrated Computer-Aided Engineering, 14(3):187–212, 2007. * [37] U Rajendra Acharya, Shu Lih Oh, Yuki Hagiwara, Jen Hong Tan, and Hojjat Adeli. Deep convolutional neural network for the automated detection and diagnosis of seizure using eeg signals. Computers in biology and medicine, 100:270–278, 2018. * [38] Turkan Haliloglu, Ivet Bahar, and Burak Erman. Gaussian dynamics of folded proteins. Physical review letters, 79(16):3090, 1997. * [39] Jun-Koo Park, Robert Jernigan, and Zhijun Wu. Coarse grained normal mode analysis vs. refined gaussian network model for protein residue-level structural fluctuations. Bulletin of mathematical biology, 75:124–160, 2013. * [40] Nobuhiro Go, Tosiyuki Noguti, and Testuo Nishikawa. Dynamics of a small globular protein in terms of low-frequency vibrational modes. Proceedings of the National Academy of Sciences, 80(12):3696–3700, 1983. * [41] Kelin Xia, Kristopher Opron, and Guo-Wei Wei. Multiscale gaussian network model (mgnm) and multiscale anisotropic network model (manm). The Journal of chemical physics, 143(204106), 2015. * [42] Kristopher Opron, Kelin Xia, and Guo-Wei Wei. Communication: Capturing protein multiscale thermal fluctuations. The Journal of chemical physics, 142(21), 2015. * [43] Zixuan Cang, Elizabeth Munch, and Guo-Wei Wei. Evolutionary homology on coupled dynamical systems with applications to protein flexibility analysis. Journal of applied and computational topology, 4:481–507, 2020. * [44] Kristopher Opron, Kelin Xia, and Guo-Wei Wei. Fast and anisotropic flexibility-rigidity index for protein flexibility and fluctuation analysis. The Journal of chemical physics, 140(23), 2014. * [45] Kelin Xia and Guo-Wei Wei. Molecular nonlinear dynamics and protein thermal uncertainty quantification. Chaos: An Interdisciplinary Journal of Nonlinear Science, 24(1), 2014. * [46] Sameer A Nene, Shree K Nayar, Hiroshi Murase, et al. Columbia object image library (coil-20). 1996. * [47] Yuta Hozumi, Kiyoto Aramis Tanemura, and Guo-Wei Wei. Preprocessing of single cell rna sequencing data using correlated clustering and projection. Journal of Chemical Information and Modeling, 64(7):2829–2838, 2024. * [48] GW Wei. Wavelets generated by using discrete singular convolution kernels. Journal of Physics A: Mathematical and General, 33(47):8577, 2000. * [49] Ivet Bahar, Ali Rana Atilgan, Melik C Demirel, and Burak Erman. Vibrational dynamics of folded proteins: significance of slow and fast motions in relation to function and stability. Physical review letters, 80(12):2733, 1998. * [50] Ali Rana Atilgan, SR Durell, Robert L Jernigan, Melik C Demirel, O Keskin, and Ivet Bahar. Anisotropy of fluctuation dynamics of proteins with an elastic network model. Biophysical journal, 80(1):505–515, 2001. * [51] Louis M Pecora, Thomas L Carroll, Gregg A Johnson, Douglas J Mar, and James F Heagy. Fundamentals of synchronization in chaotic systems, concepts, and applications. Chaos: An Interdisciplinary Journal of Nonlinear Science, 7(4):520–543, 1997. * [52] Herbert Edelsbrunner, John Harer, et al. Persistent homology-a survey. Contemporary mathematics, 453(26):257–282, 2008. * [53] Jacob Townsend, Cassie Putman Micucci, John H Hymel, Vasileios Maroulas, and Konstantinos D Vogiatzis. Representation of molecular structures with persistent homology for machine learning applications in chemistry. Nature communications, 11(1):3230, 2020. * [54] Jiahui Chen, Rundong Zhao, Yiying Tong, and Guo-Wei Wei. Evolutionary de rham-hodge method. Discrete and continuous dynamical systems. Series B, 26(7):3785, 2021."
+    }
+  ]
+}
