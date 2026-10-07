@@ -1,0 +1,1381 @@
+{
+  "title": "[2606.08714] Hybrid Neural Network and Conventional Controller Approach for Robust Control of Highly Unstable Systems: Application to Tilt-Rotor Control",
+  "sections": [
+    {
+      "heading": "Hybrid Neural Network and Conventional Controller Approach for Robust Control of Highly Unstable Systems: Application to Tilt-Rotor Control",
+      "level": 1,
+      "content": [],
+      "children": [
+        {
+          "heading": "Abstract",
+          "level": 6,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "Multirotors are widely used in applications ranging from surveillance to precision agriculture, yet conventional designs remain limited by their under-actuation. Tilt-rotor configurations overcome this limitation by enabling full actuation. This paper investigates neural-network-based control strategies for a fully actuated tilt-rotor system with four thrust-vectoring inputs. Our work is structured in two parts. First, we deliberately present a negative result by evaluating a direct input–output control approach. In this method, multilayer perceptrons (MLPs), long short-term memory (LSTM) networks, and transformer models are trained to map system states and their desired values directly to control signals. We show that this strategy fails to stabilize the system, highlighting the inherent difficulty of applying direct input–output learning to highly unstable plants. Second, as the main contribution, we propose a neural-network-enhanced sliding mode controller (SMC). The method decomposes the system dynamics into input-independent and input-dependent components, with the former learned from a small dataset using lightweight networks, thereby reducing real-time computational demands. Moreover, the proposed method can be trained using flight logs collected from low-performance controllers, and the resulting dynamic model learned from real-world data can be used in simulation. We further compare MLP- and LSTM-based implementations under model uncertainties and external disturbances, demonstrating the robustness and effectiveness of the proposed approach; in particular, the controller with the LSTM plant dynamics predictor achieves superior performance to its MLP-based counterpart while also exhibiting lower runtime."
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "Index Terms:",
+          "level": 6,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "The rapid growth of multirotor applications [[1](https://ar5iv.labs.arxiv.org/html/2606.08714v1#bib.bib1), [2](https://ar5iv.labs.arxiv.org/html/2606.08714v1#bib.bib2), [3](https://ar5iv.labs.arxiv.org/html/2606.08714v1#bib.bib3), [4](https://ar5iv.labs.arxiv.org/html/2606.08714v1#bib.bib4), [5](https://ar5iv.labs.arxiv.org/html/2606.08714v1#bib.bib5), [6](https://ar5iv.labs.arxiv.org/html/2606.08714v1#bib.bib6), [7](https://ar5iv.labs.arxiv.org/html/2606.08714v1#bib.bib7), [8](https://ar5iv.labs.arxiv.org/html/2606.08714v1#bib.bib8), [9](https://ar5iv.labs.arxiv.org/html/2606.08714v1#bib.bib9), [10](https://ar5iv.labs.arxiv.org/html/2606.08714v1#bib.bib10), [11](https://ar5iv.labs.arxiv.org/html/2606.08714v1#bib.bib11)], coupled with advances in deep learning, has encouraged researchers to integrate artificial neural networks into quadrotor control. Neural networks have been combined with diverse control strategies, such as PID [[12](https://ar5iv.labs.arxiv.org/html/2606.08714v1#bib.bib12), [13](https://ar5iv.labs.arxiv.org/html/2606.08714v1#bib.bib13)], sliding mode control (SMC) [[14](https://ar5iv.labs.arxiv.org/html/2606.08714v1#bib.bib14)], model predictive control (MPC) [[15](https://ar5iv.labs.arxiv.org/html/2606.08714v1#bib.bib15)], model reference adaptive control (MRAC) [[16](https://ar5iv.labs.arxiv.org/html/2606.08714v1#bib.bib16)], fuzzy-PID [[17](https://ar5iv.labs.arxiv.org/html/2606.08714v1#bib.bib17)], and adaptive control schemes [[18](https://ar5iv.labs.arxiv.org/html/2606.08714v1#bib.bib18)]."
+            },
+            {
+              "type": "paragraph",
+              "text": "At the same time, the under-actuation of conventional multirotors has motivated research on tilt-rotor designs, where rotors are tilted to achieve full actuation. Although these systems offer increased maneuverability, they also introduce additional complexity, and most studies have relied on conventional controllers to manage it [[19](https://ar5iv.labs.arxiv.org/html/2606.08714v1#bib.bib19), [20](https://ar5iv.labs.arxiv.org/html/2606.08714v1#bib.bib20), [21](https://ar5iv.labs.arxiv.org/html/2606.08714v1#bib.bib21), [22](https://ar5iv.labs.arxiv.org/html/2606.08714v1#bib.bib22), [23](https://ar5iv.labs.arxiv.org/html/2606.08714v1#bib.bib23), [24](https://ar5iv.labs.arxiv.org/html/2606.08714v1#bib.bib24)]."
+            },
+            {
+              "type": "paragraph",
+              "text": "In this paper, we investigate a tilt-rotor system with four thrust-vectoring inputs, allowing independent control over all degrees of freedom (DoF). A conceptual design is shown in Fig. [1](https://ar5iv.labs.arxiv.org/html/2606.08714v1#S0.F1 \"Fig. 1 ‣ Hybrid Neural Network and Conventional Controller Approach for Robust Control of Highly Unstable Systems: Application to Tilt-Rotor Control\"). Our work is structured into two parts:"
+            },
+            {
+              "type": "paragraph",
+              "text": "First, we present a deliberately negative result by attempting to control the system using a direct input–output learning strategy. In this approach, multilayer perceptrons (MLPs), long short-term memory (LSTM) networks, and transformer models are trained to map the system states and their desired values to control inputs. We show that this method fails to stabilize the highly unstable tilt-rotor dynamics, illustrating the fundamental limitations of direct input–output learning for such complex systems. While unsuccessful, these results serve an important role: they highlight the challenges involved and may still inspire further work on more stable platforms."
+            },
+            {
+              "type": "paragraph",
+              "text": "Second, as the main contribution of this paper, we introduce a neural-network-enhanced sliding mode control (SMC) method to robustly control the fully actuated tilt-rotor drone. In this approach, the system dynamics are decomposed into input-independent and input-dependent components, with the former learned efficiently from a small dataset using lightweight networks. This design lowers real-time computational requirements and enables deployment on low-cost microcontrollers. Embedding this learned model within the SMC framework ensures reliable and generalized control of the unstable system. Furthermore, we compare the performance of MLP- and LSTM-based controllers within this framework under uncertainties and external disturbances, demonstrating the robustness and effectiveness of the proposed method. An additional advantage of this method is its ability to train on flight logs collected with low-performance, attitude-only controllers, as it focuses on learning plant parameters rather than control actions. Furthermore, this scheme can provide a dynamic model derived from real flights, which is useful for accurate simulations."
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "I Dynamic Modeling",
+          "level": 2,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "Here, we derive a mathematical model for system which is vital for our simulations. To have a manageable article length, we briefly discuss this section. A study by Gavgani et.al [[25](https://ar5iv.labs.arxiv.org/html/2606.08714v1#bib.bib25)] can be referred for more details in dynamic modeling of the system. The coordinate systems and physical parameters are shown in [2](https://ar5iv.labs.arxiv.org/html/2606.08714v1#S1.F2 \"Fig. 2 ‣ I Dynamic Modeling ‣ Hybrid Neural Network and Conventional Controller Approach for Robust Control of Highly Unstable Systems: Application to Tilt-Rotor Control\"). The thrust forces fn=kf​ωn2f\\_{n}=k\\_{f}\\omega\\_{n}^{2} and the drag torques τn=km​ωn2\\tau\\_{n}=k\\_{m}\\omega\\_{n}^{2} , n=1,2,3,4n=1,2,3,4 are executed by rotation of the propellers where kfk\\_{f} and kmk\\_{m} denote the aerodynamic characteristics of the propellers. ωn\\omega\\_{n} is the angular velocity of the impeller nn and βn\\beta\\_{n} represents the hedral angle of the rotor axis nn. mm indicates the mass of the body. The general form of Newton-Euler equation is as following:"
+            },
+            {
+              "type": "formula",
+              "text": "fn=kf​ωn2f_{n}=k_{f}\\omega_{n}^{2}"
+            },
+            {
+              "type": "formula",
+              "text": "τn=km​ωn2\\tau_{n}=k_{m}\\omega_{n}^{2}"
+            },
+            {
+              "type": "formula",
+              "text": "n=1,2,3,4n=1,2,3,4"
+            },
+            {
+              "type": "formula",
+              "text": "kfk_{f}"
+            },
+            {
+              "type": "formula",
+              "text": "kmk_{m}"
+            },
+            {
+              "type": "formula",
+              "text": "ωn\\omega_{n}"
+            },
+            {
+              "type": "formula",
+              "text": "nn"
+            },
+            {
+              "type": "formula",
+              "text": "βn\\beta_{n}"
+            },
+            {
+              "type": "formula",
+              "text": "nn"
+            },
+            {
+              "type": "formula",
+              "text": "mm"
+            },
+            {
+              "type": "table",
+              "text": "| | | | | | --- | --- | --- | --- | | | mI𝒑¨=I𝒇+mI𝒈,m\\mathchoice{\\mathop{}\\kern 4.58821pt\\mathopen{\\vphantom{\\ddot{\\bm{p}}}}\\_{\\mathmakebox[0pt][r]{I}}}{\\mathop{}\\kern 4.58821pt\\mathopen{\\vphantom{\\ddot{\\bm{p}}}}\\_{\\mathmakebox[0pt][r]{I}}}{\\mathop{}\\kern 4.01738pt\\mathopen{\\vphantom{\\ddot{\\bm{p}}}}\\_{\\mathmakebox[0pt][r]{I}}}{\\mathop{}\\kern 4.01738pt\\mathopen{\\vphantom{\\ddot{\\bm{p}}}}\\_{\\mathmakebox[0pt][r]{I}}}\\ddot{\\bm{p}}=\\mathchoice{\\mathop{}\\kern 4.58821pt\\mathopen{\\vphantom{\\bm{f}}}\\_{\\mathmakebox[0pt][r]{I}}}{\\mathop{}\\kern 4.58821pt\\mathopen{\\vphantom{\\bm{f}}}\\_{\\mathmakebox[0pt][r]{I}}}{\\mathop{}\\kern 4.01738pt\\mathopen{\\vphantom{\\bm{f}}}\\_{\\mathmakebox[0pt][r]{I}}}{\\mathop{}\\kern 4.01738pt\\mathopen{\\vphantom{\\bm{f}}}\\_{\\mathmakebox[0pt][r]{I}}}\\bm{f}+m\\mathchoice{\\mathop{}\\kern 4.58821pt\\mathopen{\\vphantom{\\bm{g}}}\\_{\\mathmakebox[0pt][r]{I}}}{\\mathop{}\\kern 4.58821pt\\mathopen{\\vphantom{\\bm{g}}}\\_{\\mathmakebox[0pt][r]{I}}}{\\mathop{}\\kern 4.01738pt\\mathopen{\\vphantom{\\bm{g}}}\\_{\\mathmakebox[0pt][r]{I}}}{\\mathop{}\\kern 4.01738pt\\mathopen{\\vphantom{\\bm{g}}}\\_{\\mathmakebox[0pt][r]{I}}}\\bm{g}, | | (1) |"
+            },
+            {
+              "type": "table",
+              "text": "| | | | | | --- | --- | --- | --- | | | 𝑱B𝝎˙=−B𝛀𝑱B𝝎+B𝝉,\\bm{J}\\mathchoice{\\mathop{}\\kern 6.883pt\\mathopen{\\vphantom{\\dot{\\bm{\\omega}}}}\\_{\\mathmakebox[0pt][r]{B}}}{\\mathop{}\\kern 6.883pt\\mathopen{\\vphantom{\\dot{\\bm{\\omega}}}}\\_{\\mathmakebox[0pt][r]{B}}}{\\mathop{}\\kern 5.91846pt\\mathopen{\\vphantom{\\dot{\\bm{\\omega}}}}\\_{\\mathmakebox[0pt][r]{B}}}{\\mathop{}\\kern 5.91846pt\\mathopen{\\vphantom{\\dot{\\bm{\\omega}}}}\\_{\\mathmakebox[0pt][r]{B}}}\\dot{\\bm{\\omega}}=-\\mathchoice{\\mathop{}\\kern 6.883pt\\mathopen{\\vphantom{\\bm{\\Omega}}}\\_{\\mathmakebox[0pt][r]{B}}}{\\mathop{}\\kern 6.883pt\\mathopen{\\vphantom{\\bm{\\Omega}}}\\_{\\mathmakebox[0pt][r]{B}}}{\\mathop{}\\kern 5.91846pt\\mathopen{\\vphantom{\\bm{\\Omega}}}\\_{\\mathmakebox[0pt][r]{B}}}{\\mathop{}\\kern 5.91846pt\\mathopen{\\vphantom{\\bm{\\Omega}}}\\_{\\mathmakebox[0pt][r]{B}}}\\bm{\\Omega}\\bm{J}\\mathchoice{\\mathop{}\\kern 6.883pt\\mathopen{\\vphantom{\\bm{\\omega}}}\\_{\\mathmakebox[0pt][r]{B}}}{\\mathop{}\\kern 6.883pt\\mathopen{\\vphantom{\\bm{\\omega}}}\\_{\\mathmakebox[0pt][r]{B}}}{\\mathop{}\\kern 5.91846pt\\mathopen{\\vphantom{\\bm{\\omega}}}\\_{\\mathmakebox[0pt][r]{B}}}{\\mathop{}\\kern 5.91846pt\\mathopen{\\vphantom{\\bm{\\omega}}}\\_{\\mathmakebox[0pt][r]{B}}}\\bm{\\omega}+\\mathchoice{\\mathop{}\\kern 6.883pt\\mathopen{\\vphantom{\\bm{\\tau}}}\\_{\\mathmakebox[0pt][r]{B}}}{\\mathop{}\\kern 6.883pt\\mathopen{\\vphantom{\\bm{\\tau}}}\\_{\\mathmakebox[0pt][r]{B}}}{\\mathop{}\\kern 5.91846pt\\mathopen{\\vphantom{\\bm{\\tau}}}\\_{\\mathmakebox[0pt][r]{B}}}{\\mathop{}\\kern 5.91846pt\\mathopen{\\vphantom{\\bm{\\tau}}}\\_{\\mathmakebox[0pt][r]{B}}}\\bm{\\tau}, | | (2) |"
+            },
+            {
+              "type": "paragraph",
+              "text": "where II and BB indices respectively denote the inertia and body frames. The rotation sequence from the inertia to the body frame involves the Euler angles ψ\\psi, θ\\theta, and ϕ\\phi, corresponding to rotations about the ZZ, y′y^{\\prime}, and x′′x^{\\prime\\prime} axes in that order. I𝒑¨=[X¨Y¨Z¨]T\\mathchoice{\\mathop{}\\kern 4.58821pt\\mathopen{\\vphantom{\\ddot{\\bm{p}}}}\\_{\\mathmakebox[0pt][r]{I}}}{\\mathop{}\\kern 4.58821pt\\mathopen{\\vphantom{\\ddot{\\bm{p}}}}\\_{\\mathmakebox[0pt][r]{I}}}{\\mathop{}\\kern 4.01738pt\\mathopen{\\vphantom{\\ddot{\\bm{p}}}}\\_{\\mathmakebox[0pt][r]{I}}}{\\mathop{}\\kern 4.01738pt\\mathopen{\\vphantom{\\ddot{\\bm{p}}}}\\_{\\mathmakebox[0pt][r]{I}}}\\ddot{\\bm{p}}=[\\ddot{X}\\quad\\ddot{Y}\\quad\\ddot{Z}]^{T} is the acceleration vector in the inertia frame. 𝒇\\bm{f} and 𝝉\\bm{\\tau} respectively represent the thrust and torque vectors produced by rotation of propellers. 𝒈\\bm{g} is the gravity constant vector and 𝑱\\bm{J} denotes the inertial moment matrix expressed in the body frame. 𝝎\\bm{\\omega} indicates the rotational velocity of the body and 𝛀\\bm{\\Omega} represents the skew-symmetric matrix of the 𝝎\\bm{\\omega}."
+            },
+            {
+              "type": "formula",
+              "text": "II"
+            },
+            {
+              "type": "formula",
+              "text": "BB"
+            },
+            {
+              "type": "formula",
+              "text": "ψ\\psi"
+            },
+            {
+              "type": "formula",
+              "text": "θ\\theta"
+            },
+            {
+              "type": "formula",
+              "text": "ϕ\\phi"
+            },
+            {
+              "type": "formula",
+              "text": "ZZ"
+            },
+            {
+              "type": "formula",
+              "text": "y′y^{\\prime}"
+            },
+            {
+              "type": "formula",
+              "text": "x′′x^{\\prime\\prime}"
+            },
+            {
+              "type": "formula",
+              "text": "𝒇\\bm{f}"
+            },
+            {
+              "type": "formula",
+              "text": "𝝉\\bm{\\tau}"
+            },
+            {
+              "type": "formula",
+              "text": "𝒈\\bm{g}"
+            },
+            {
+              "type": "formula",
+              "text": "𝑱\\bm{J}"
+            },
+            {
+              "type": "formula",
+              "text": "𝝎\\bm{\\omega}"
+            },
+            {
+              "type": "formula",
+              "text": "𝛀\\bm{\\Omega}"
+            },
+            {
+              "type": "formula",
+              "text": "𝝎\\bm{\\omega}"
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "II Sliding Mode Controller Design",
+          "level": 2,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "Let"
+            },
+            {
+              "type": "table",
+              "text": "| | | | | | --- | --- | --- | --- | | | 𝒙¯=[XYZϕθψ]⊺,\\bm{\\bar{x}}=\\begin{array}[]{cccccc}[X&Y&Z&\\phi&\\theta&\\psi]^{\\intercal}\\end{array}, | | (3) |"
+            },
+            {
+              "type": "formula",
+              "text": "𝒙¯=[XYZϕθψ]⊺,\\bm{\\bar{x}}=\\begin{array}[]{cccccc}[X&Y&Z&\\phi&\\theta&\\psi]^{\\intercal}\\end{array},"
+            },
+            {
+              "type": "paragraph",
+              "text": "Control input vector for Hedral quadrotor including the inputs for BLDC (BLDC) and servo motors is expressed as"
+            },
+            {
+              "type": "table",
+              "text": "| | | | | | --- | --- | --- | --- | | | 𝒖=[ω1ω2ω3ω4β1β2β3β4]⊺.\\displaystyle\\bm{u}=[\\begin{array}[]{l l l l l l l l}\\omega\\_{1}&\\omega\\_{2}&\\omega\\_{3}&\\omega\\_{4}&\\beta\\_{1}&\\beta\\_{2}&\\beta\\_{3}&\\beta\\_{4}\\\\ \\end{array}]^{\\intercal}. | | (4) |"
+            },
+            {
+              "type": "formula",
+              "text": "𝒖=[ω1ω2ω3ω4β1β2β3β4]⊺.\\displaystyle\\bm{u}=[\\begin{array}[]{l l l l l l l l}\\omega_{1}&\\omega_{2}&\\omega_{3}&\\omega_{4}&\\beta_{1}&\\beta_{2}&\\beta_{3}&\\beta_{4}\\\\ \\end{array}]^{\\intercal}."
+            },
+            {
+              "type": "paragraph",
+              "text": "The dynamic equations for Hedral quadrotor are not affine in input, causing the problem with the allocation of control signals to the actuators directly. To solve this problem, [[23](https://ar5iv.labs.arxiv.org/html/2606.08714v1#bib.bib23)] offered the use of a virtual intermediary input set 𝒗\\bm{v} to make the equations input-affine."
+            },
+            {
+              "type": "formula",
+              "text": "𝒗\\bm{v}"
+            },
+            {
+              "type": "table",
+              "text": "| | | | | | --- | --- | --- | --- | | | 𝒗=[v1v2...v8]⊺,\\bm{v}=\\left[\\begin{array}[]{cccc}v\\_{1}&v\\_{2}&...&v\\_{8}\\end{array}\\right]^{\\intercal}, | | (5) |"
+            },
+            {
+              "type": "formula",
+              "text": "𝒗=[v1v2...v8]⊺,\\bm{v}=\\left[\\begin{array}[]{cccc}v_{1}&v_{2}&...&v_{8}\\end{array}\\right]^{\\intercal},"
+            },
+            {
+              "type": "paragraph",
+              "text": "where"
+            },
+            {
+              "type": "table",
+              "text": "| | | | | | --- | --- | --- | --- | | | vi=ωi2sinβi,vi+4=ωi2cosβi,i=1,2,3,4.v\\_{i}=\\omega\\_{i}^{2}\\sin\\beta\\_{i},\\quad v\\_{i+4}=\\omega\\_{i}^{2}\\cos\\beta\\_{i},\\quad i=1,2,3,4. | | (6) |"
+            },
+            {
+              "type": "paragraph",
+              "text": "Thus the equations of motion for Hedral quadrotor can be described in the input-affine form"
+            },
+            {
+              "type": "table",
+              "text": "| | | | | | --- | --- | --- | --- | | | 𝒙¯¨=𝒂+𝑮​𝒗,\\ddot{{\\bar{\\bm{x}}}}=\\bm{a}+\\bm{G}\\bm{v}, | | (7) |"
+            },
+            {
+              "type": "formula",
+              "text": "𝒙¯¨=𝒂+𝑮​𝒗,\\ddot{{\\bar{\\bm{x}}}}=\\bm{a}+\\bm{G}\\bm{v},"
+            },
+            {
+              "type": "paragraph",
+              "text": "where"
+            },
+            {
+              "type": "table",
+              "text": "| | | | | | --- | --- | --- | --- | | | 𝑮=∂𝒙¯¨∂𝒗,𝒂=𝒙¯¨−∂𝒙¯¨∂𝒗​𝒗.\\bm{G}=\\frac{\\partial\\ddot{\\bm{\\bar{x}}}}{\\partial\\bm{v}}\\quad,\\quad\\bm{a}=\\ddot{\\bm{\\bar{x}}}-\\frac{\\partial\\ddot{\\bm{\\bar{x}}}}{\\partial\\bm{v}}\\bm{v}. | | (8) |"
+            },
+            {
+              "type": "formula",
+              "text": "𝑮=∂𝒙¯¨∂𝒗,𝒂=𝒙¯¨−∂𝒙¯¨∂𝒗​𝒗.\\bm{G}=\\frac{\\partial\\ddot{\\bm{\\bar{x}}}}{\\partial\\bm{v}}\\quad,\\quad\\bm{a}=\\ddot{\\bm{\\bar{x}}}-\\frac{\\partial\\ddot{\\bm{\\bar{x}}}}{\\partial\\bm{v}}\\bm{v}."
+            },
+            {
+              "type": "paragraph",
+              "text": "Defining the sliding surfaces as"
+            },
+            {
+              "type": "table",
+              "text": "| | | | | | --- | --- | --- | --- | | | 𝒔=𝒙¯˙−𝒙¯˙d+𝝀⁡(𝒙¯−𝒙¯d),\\bm{s}=\\bm{\\dot{\\bar{x}}}-\\bm{\\dot{\\bar{x}}}\\_{d}+\\bm{\\lambda}(\\bm{\\bar{x}}-\\bm{\\bar{x}}\\_{d}), | | (9) |"
+            },
+            {
+              "type": "formula",
+              "text": "𝒔=𝒙¯˙−𝒙¯˙d+𝝀⁡(𝒙¯−𝒙¯d),\\bm{s}=\\bm{\\dot{\\bar{x}}}-\\bm{\\dot{\\bar{x}}}_{d}+\\bm{\\lambda}(\\bm{\\bar{x}}-\\bm{\\bar{x}}_{d}),"
+            },
+            {
+              "type": "paragraph",
+              "text": "where 𝒙¯d\\bm{\\bar{x}}\\_{d} represents the desired state of 𝒙¯\\bm{\\bar{x}} and 𝝀\\bm{\\lambda} is a 6×66\\times 6 diagonal matrix with positive constant values on its diagonal [[26](https://ar5iv.labs.arxiv.org/html/2606.08714v1#bib.bib26)]."
+            },
+            {
+              "type": "formula",
+              "text": "𝒙¯d\\bm{\\bar{x}}_{d}"
+            },
+            {
+              "type": "formula",
+              "text": "𝒙¯\\bm{\\bar{x}}"
+            },
+            {
+              "type": "formula",
+              "text": "𝝀\\bm{\\lambda}"
+            },
+            {
+              "type": "formula",
+              "text": "6×66\\times 6"
+            },
+            {
+              "type": "paragraph",
+              "text": "The asymptotic stability condition of the system is"
+            },
+            {
+              "type": "table",
+              "text": "| | | | | | --- | --- | --- | --- | | | 12​dd​t​si2≤−ηi​|si|i=1,2,3,4,\\frac{1}{2}\\frac{d}{dt}s\\_{i}^{2}\\leq-\\eta\\_{i}|s\\_{i}|\\quad i=1,2,3,4\\quad, | | (10) |"
+            },
+            {
+              "type": "formula",
+              "text": "12​dd​t​si2≤−ηi​|si|i=1,2,3,4,\\frac{1}{2}\\frac{d}{dt}s_{i}^{2}\\leq-\\eta_{i}|s_{i}|\\quad i=1,2,3,4\\quad,"
+            },
+            {
+              "type": "paragraph",
+              "text": "where sis\\_{i} corresponds to the i-th element of 𝒔\\bm{s} and ηi\\eta\\_{i} denotes a strictly positive constant [[26](https://ar5iv.labs.arxiv.org/html/2606.08714v1#bib.bib26)]. The control law is formulated by"
+            },
+            {
+              "type": "formula",
+              "text": "sis_{i}"
+            },
+            {
+              "type": "formula",
+              "text": "𝒔\\bm{s}"
+            },
+            {
+              "type": "formula",
+              "text": "ηi\\eta_{i}"
+            },
+            {
+              "type": "table",
+              "text": "| | | | | | --- | --- | --- | --- | | | 𝑮​𝒗=𝒙¯¨d+𝝀⁡(𝒙¯˙d−𝒙¯˙)−𝒂−𝑲​tanh⁡(σ​𝒔)=𝒘.\\bm{G}\\bm{v}=\\ddot{\\bar{\\bm{x}}}\\_{d}+\\bm{\\lambda}(\\dot{\\bar{\\bm{x}}}\\_{d}-\\dot{\\bar{\\bm{x}}})-\\bm{a}-\\bm{K}\\tanh{(\\sigma\\bm{s})}=\\bm{w}. | | (11) |"
+            },
+            {
+              "type": "formula",
+              "text": "𝑮​𝒗=𝒙¯¨d+𝝀⁡(𝒙¯˙d−𝒙¯˙)−𝒂−𝑲​tanh⁡(σ​𝒔)=𝒘.\\bm{G}\\bm{v}=\\ddot{\\bar{\\bm{x}}}_{d}+\\bm{\\lambda}(\\dot{\\bar{\\bm{x}}}_{d}-\\dot{\\bar{\\bm{x}}})-\\bm{a}-\\bm{K}\\tanh{(\\sigma\\bm{s})}=\\bm{w}."
+            },
+            {
+              "type": "paragraph",
+              "text": "𝑮\\bm{G} is a none-square matrix, disabling directly calculation of 𝑮−1\\bm{G}^{-1} to obtain 𝒗\\bm{v}. The equation ([12](https://ar5iv.labs.arxiv.org/html/2606.08714v1#S2.E12 \"In II Sliding Mode Controller Design ‣ Hybrid Neural Network and Conventional Controller Approach for Robust Control of Highly Unstable Systems: Application to Tilt-Rotor Control\")) is used to solve the system 𝑮6×8​𝒗8×1=𝒘6×1\\bm{G}\\_{6\\times 8}\\bm{v}\\_{8\\times 1}=\\bm{w}\\_{6\\times 1}. This approach extracts the minimum-normed solution from the infinite set of solutions, minimizing the power consumption considering ([13](https://ar5iv.labs.arxiv.org/html/2606.08714v1#S2.E13 \"In II Sliding Mode Controller Design ‣ Hybrid Neural Network and Conventional Controller Approach for Robust Control of Highly Unstable Systems: Application to Tilt-Rotor Control\")) [[23](https://ar5iv.labs.arxiv.org/html/2606.08714v1#bib.bib23)]."
+            },
+            {
+              "type": "formula",
+              "text": "𝑮\\bm{G}"
+            },
+            {
+              "type": "formula",
+              "text": "𝑮−1\\bm{G}^{-1}"
+            },
+            {
+              "type": "formula",
+              "text": "𝒗\\bm{v}"
+            },
+            {
+              "type": "formula",
+              "text": "𝑮6×8​𝒗8×1=𝒘6×1\\bm{G}_{6\\times 8}\\bm{v}_{8\\times 1}=\\bm{w}_{6\\times 1}"
+            },
+            {
+              "type": "table",
+              "text": "| | | | | | --- | --- | --- | --- | | | 𝒗=𝑮⊺​(𝑮​𝑮⊺)−1​𝒘.\\bm{v}=\\bm{G}^{\\intercal}(\\bm{G}\\bm{G}^{\\intercal})^{-1}\\bm{w}. | | (12) |"
+            },
+            {
+              "type": "formula",
+              "text": "𝒗=𝑮⊺​(𝑮​𝑮⊺)−1​𝒘.\\bm{v}=\\bm{G}^{\\intercal}(\\bm{G}\\bm{G}^{\\intercal})^{-1}\\bm{w}."
+            },
+            {
+              "type": "paragraph",
+              "text": "Norm of 𝒗\\bm{v} is derived as"
+            },
+            {
+              "type": "formula",
+              "text": "𝒗\\bm{v}"
+            },
+            {
+              "type": "table",
+              "text": "| | | | | | --- | --- | --- | --- | | | ‖𝒗‖=(v12+v22+…+v82)1/2=(ω14+ω24+ω34+ω44)1/2.\\|\\bm{v}\\|=(v\\_{1}^{2}+v\\_{2}^{2}+...+v\\_{8}^{2})^{1/2}=(\\omega\\_{1}^{4}+\\omega\\_{2}^{4}+\\omega\\_{3}^{4}+\\omega\\_{4}^{4})^{1/2}. | | (13) |"
+            },
+            {
+              "type": "formula",
+              "text": "‖𝒗‖=(v12+v22+…+v82)1/2=(ω14+ω24+ω34+ω44)1/2.\\|\\bm{v}\\|=(v_{1}^{2}+v_{2}^{2}+...+v_{8}^{2})^{1/2}=(\\omega_{1}^{4}+\\omega_{2}^{4}+\\omega_{3}^{4}+\\omega_{4}^{4})^{1/2}."
+            },
+            {
+              "type": "paragraph",
+              "text": "Finally, the primary control signals for actuators would be obtained as"
+            },
+            {
+              "type": "table",
+              "text": "| | | | | | | --- | --- | --- | --- | --- | | | | βi=tan−1⁡(vivi+4),\\displaystyle\\beta\\_{i}=\\tan^{-1}(\\frac{v\\_{i}}{v\\_{i+4}}), | | (14) | | | | ωi=(vi2+vi+42)1/4,i=1,2,3,4.\\displaystyle\\omega\\_{i}=(v\\_{i}^{2}+v\\_{i+4}^{2})^{1/4}\\quad,i=1,2,3,4. | |"
+            },
+            {
+              "type": "formula",
+              "text": "βi=tan−1⁡(vivi+4),\\displaystyle\\beta_{i}=\\tan^{-1}(\\frac{v_{i}}{v_{i+4}}),"
+            },
+            {
+              "type": "formula",
+              "text": "ωi=(vi2+vi+42)1/4,i=1,2,3,4.\\displaystyle\\omega_{i}=(v_{i}^{2}+v_{i+4}^{2})^{1/4}\\quad,i=1,2,3,4."
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "III Direct Input-Output Training Method for Control",
+          "level": 2,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "In this section, we train several networks to replicate the behavior of the controller we designed. Inputs to the network are 𝒙¯\\bar{\\bm{x}} as illustrated by ([3](https://ar5iv.labs.arxiv.org/html/2606.08714v1#S2.E3 \"In II Sliding Mode Controller Design ‣ Hybrid Neural Network and Conventional Controller Approach for Robust Control of Highly Unstable Systems: Application to Tilt-Rotor Control\")) and its desired vector 𝒙¯d\\bar{\\bm{x}}\\_{d} for each time step. The outputs of the network are the control signals for the next step, denoted by 𝒖\\bm{u} as represented in ([4](https://ar5iv.labs.arxiv.org/html/2606.08714v1#S2.E4 \"In II Sliding Mode Controller Design ‣ Hybrid Neural Network and Conventional Controller Approach for Robust Control of Highly Unstable Systems: Application to Tilt-Rotor Control\")). Given the multi-level control allocation required for a conventional controller, the direct input-output control method may offer the advantage of reduced computational cost."
+            },
+            {
+              "type": "formula",
+              "text": "𝒙¯\\bar{\\bm{x}}"
+            },
+            {
+              "type": "formula",
+              "text": "𝒙¯d\\bar{\\bm{x}}_{d}"
+            },
+            {
+              "type": "formula",
+              "text": "𝒖\\bm{u}"
+            },
+            {
+              "type": "paragraph",
+              "text": "We aim to investigate three key aspects:"
+            },
+            {
+              "type": "list",
+              "text": "* • Whether such a system can be properly trained to achieve acceptable test results, even without application to the dynamic system. * • Whether this methodology is applicable to such an unstable and intricate dynamic system. * • Whether this controller has a lower computational cost compared to a conventional one."
+            },
+            {
+              "type": "paragraph",
+              "text": "Whether such a system can be properly trained to achieve acceptable test results, even without application to the dynamic system."
+            },
+            {
+              "type": "paragraph",
+              "text": "Whether this methodology is applicable to such an unstable and intricate dynamic system."
+            },
+            {
+              "type": "paragraph",
+              "text": "Whether this controller has a lower computational cost compared to a conventional one."
+            }
+          ],
+          "children": [
+            {
+              "heading": "III-A Data Collection",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "The dataset should cover a large combination of input values with as much as possible small number of samples. To achieve this, we set sinusoidal trajectories with different frequencies. This makes various combination of values for the elements of input vector. Also, five different maneuvers are taken into account, making the trajectories discontinuous to include some hard initial values in the dataset, along with refining the data with more various samples. The system with the controller designed in section [II](https://ar5iv.labs.arxiv.org/html/2606.08714v1#S2 \"II Sliding Mode Controller Design ‣ Hybrid Neural Network and Conventional Controller Approach for Robust Control of Highly Unstable Systems: Application to Tilt-Rotor Control\") is simulated for 200 seconds for each maneuver with a time step of 0.1 seconds, resulting in 10,000 samples. The maneuvers are represented by ([15](https://ar5iv.labs.arxiv.org/html/2606.08714v1#S3.E15 \"In III-A Data Collection ‣ III Direct Input-Output Training Method for Control ‣ Hybrid Neural Network and Conventional Controller Approach for Robust Control of Highly Unstable Systems: Application to Tilt-Rotor Control\")) and detailed in Table [I](https://ar5iv.labs.arxiv.org/html/2606.08714v1#S3.T1 \"TABLE I ‣ III-A Data Collection ‣ III Direct Input-Output Training Method for Control ‣ Hybrid Neural Network and Conventional Controller Approach for Robust Control of Highly Unstable Systems: Application to Tilt-Rotor Control\")."
+                },
+                {
+                  "type": "table",
+                  "text": "| | | | | | | --- | --- | --- | --- | --- | | | | trajectoryi=Aisinνit\\displaystyle trajectory\\_{i}=A\\_{i}\\sin\\nu\\_{i}t | | (15) | | | | f​o​ri=X,Y,Z,ϕ,θ,ψ\\displaystyle for\\quad i=X,Y,Z,\\phi,\\theta,\\psi | |"
+                },
+                {
+                  "type": "formula",
+                  "text": "trajectoryi=Aisinνit\\displaystyle trajectory_{i}=A_{i}\\sin\\nu_{i}t"
+                },
+                {
+                  "type": "formula",
+                  "text": "f​o​ri=X,Y,Z,ϕ,θ,ψ\\displaystyle for\\quad i=X,Y,Z,\\phi,\\theta,\\psi"
+                },
+                {
+                  "type": "table",
+                  "text": "| | | | | | | | | | --- | --- | --- | --- | --- | --- | --- | --- | | man. | AXA\\_{X} νX\\nu\\_{X} | AYA\\_{Y} νY\\nu\\_{Y} | AZA\\_{Z} νZ\\nu\\_{Z} | AϕA\\_{\\phi} νϕ\\nu\\_{\\phi} | AθA\\_{\\theta} νθ\\nu\\_{\\theta} | AψA\\_{\\psi} νψ\\nu\\_{\\psi} | usage samples | | 1 | 3 0.3 | 3 0.4 | 3 0.1 | 30∘30^{\\circ} 0.4 | 30∘30^{\\circ} 0.3 | 360∘360^{\\circ} 0.2 | t​r​a​i​ntrain 20002000 | | 2 | 3 0.4 | 4 0.35 | 5 0.25 | 25∘25^{\\circ} 0.3 | 30∘30^{\\circ} 0.2 | 360∘360^{\\circ} 0.1 | t​r​a​i​ntrain 50005000 | | 3 | 5 0.3 | 5 0.2 | 5 0.1 | 25∘25^{\\circ} 0.15 | 25∘25^{\\circ} 0.35 | 360∘360^{\\circ} 0.15 | t​r​a​i​ntrain 10001000 | | 4 | 4 0.4 | 3.5 0.3 | 4 0.15 | 30∘30^{\\circ} 0.4 | 30∘30^{\\circ} 0.2 | 360∘360^{\\circ} 0.3 | v​a​l​i​d​a​t​i​o​nvalidation 10001000 | | 5 | 3 0.5 | 3 0.3 | 4 0.2 | 30∘30^{\\circ} 0.2 | 30∘30^{\\circ} 0.4 | 360∘360^{\\circ} 0.2 | t​e​s​ttest 10001000 |"
+                },
+                {
+                  "type": "formula",
+                  "text": "AXA_{X}"
+                },
+                {
+                  "type": "formula",
+                  "text": "νX\\nu_{X}"
+                },
+                {
+                  "type": "formula",
+                  "text": "AYA_{Y}"
+                },
+                {
+                  "type": "formula",
+                  "text": "νY\\nu_{Y}"
+                },
+                {
+                  "type": "formula",
+                  "text": "AZA_{Z}"
+                },
+                {
+                  "type": "formula",
+                  "text": "νZ\\nu_{Z}"
+                },
+                {
+                  "type": "formula",
+                  "text": "AϕA_{\\phi}"
+                },
+                {
+                  "type": "formula",
+                  "text": "νϕ\\nu_{\\phi}"
+                },
+                {
+                  "type": "formula",
+                  "text": "AθA_{\\theta}"
+                },
+                {
+                  "type": "formula",
+                  "text": "νθ\\nu_{\\theta}"
+                },
+                {
+                  "type": "formula",
+                  "text": "AψA_{\\psi}"
+                },
+                {
+                  "type": "formula",
+                  "text": "νψ\\nu_{\\psi}"
+                },
+                {
+                  "type": "formula",
+                  "text": "30∘30^{\\circ}"
+                },
+                {
+                  "type": "formula",
+                  "text": "30∘30^{\\circ}"
+                },
+                {
+                  "type": "formula",
+                  "text": "360∘360^{\\circ}"
+                },
+                {
+                  "type": "formula",
+                  "text": "t​r​a​i​ntrain"
+                },
+                {
+                  "type": "formula",
+                  "text": "20002000"
+                },
+                {
+                  "type": "formula",
+                  "text": "25∘25^{\\circ}"
+                },
+                {
+                  "type": "formula",
+                  "text": "30∘30^{\\circ}"
+                },
+                {
+                  "type": "formula",
+                  "text": "360∘360^{\\circ}"
+                },
+                {
+                  "type": "formula",
+                  "text": "t​r​a​i​ntrain"
+                },
+                {
+                  "type": "formula",
+                  "text": "50005000"
+                },
+                {
+                  "type": "formula",
+                  "text": "25∘25^{\\circ}"
+                },
+                {
+                  "type": "formula",
+                  "text": "25∘25^{\\circ}"
+                },
+                {
+                  "type": "formula",
+                  "text": "360∘360^{\\circ}"
+                },
+                {
+                  "type": "formula",
+                  "text": "t​r​a​i​ntrain"
+                },
+                {
+                  "type": "formula",
+                  "text": "10001000"
+                },
+                {
+                  "type": "formula",
+                  "text": "30∘30^{\\circ}"
+                },
+                {
+                  "type": "formula",
+                  "text": "30∘30^{\\circ}"
+                },
+                {
+                  "type": "formula",
+                  "text": "360∘360^{\\circ}"
+                },
+                {
+                  "type": "formula",
+                  "text": "v​a​l​i​d​a​t​i​o​nvalidation"
+                },
+                {
+                  "type": "formula",
+                  "text": "10001000"
+                },
+                {
+                  "type": "formula",
+                  "text": "30∘30^{\\circ}"
+                },
+                {
+                  "type": "formula",
+                  "text": "30∘30^{\\circ}"
+                },
+                {
+                  "type": "formula",
+                  "text": "360∘360^{\\circ}"
+                },
+                {
+                  "type": "formula",
+                  "text": "t​e​s​ttest"
+                },
+                {
+                  "type": "formula",
+                  "text": "10001000"
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "III-B MLP Network",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "A MLP (MLP) network with the architecture represented in Fig. [3](https://ar5iv.labs.arxiv.org/html/2606.08714v1#S3.F3 \"Fig. 3 ‣ III-B MLP Network ‣ III Direct Input-Output Training Method for Control ‣ Hybrid Neural Network and Conventional Controller Approach for Robust Control of Highly Unstable Systems: Application to Tilt-Rotor Control\") is incorporated. ADAM optimizer is used in training process for 1400 epochs. This network exhibited 3.86 and 10.85 MAE (MAE) in train and test respectively."
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "III-C LSTM-Based Network",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "The architecture of the LSTM (LSTM)-based network is visualized in Fig. [4](https://ar5iv.labs.arxiv.org/html/2606.08714v1#S3.F4 \"Fig. 4 ‣ III-C LSTM-Based Network ‣ III Direct Input-Output Training Method for Control ‣ Hybrid Neural Network and Conventional Controller Approach for Robust Control of Highly Unstable Systems: Application to Tilt-Rotor Control\"). The network is trained using ADAM optimizer in 300 epochs. MAE metric for train and test equals respectively to 2.62 and 10.61."
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "III-D Transformer-Based Network",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "The transformer network is well-designed for capturing long dependencies, making it ideal for applications like text processing. Although dynamic systems typically exhibit shorter dependencies, we explored the applicability of the transformer network in training our system."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "The transformer model is designed with the following layers:"
+                },
+                {
+                  "type": "list",
+                  "text": "* • Input Layer: Shape (1,12)(1,12) * • Transformer Encoder Layer: + – Normalization and Multi-Head Attention: - \\* Head Size: 64 - \\* Number of Heads: 4 + – Feed Forward Dimension: 4 + – Dropout: 0.3 + – Feed Forward Network: - \\* Dense Layer with ReLU activation and 4 units - \\* Dropout: 0.3 - \\* Dense Layer to match the input shape * • Flatten Layer * • Dense Layers: + – Dense Layer with 64 units and ReLU activation + – Dropout: 0.05 * • Output Layer: Dense Layer with 8 units"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Input Layer: Shape (1,12)(1,12)"
+                },
+                {
+                  "type": "formula",
+                  "text": "(1,12)(1,12)"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Transformer Encoder Layer:"
+                },
+                {
+                  "type": "list",
+                  "text": "* – Normalization and Multi-Head Attention: + \\* Head Size: 64 + \\* Number of Heads: 4 * – Feed Forward Dimension: 4 * – Dropout: 0.3 * – Feed Forward Network: + \\* Dense Layer with ReLU activation and 4 units + \\* Dropout: 0.3 + \\* Dense Layer to match the input shape"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Normalization and Multi-Head Attention:"
+                },
+                {
+                  "type": "list",
+                  "text": "* \\* Head Size: 64 * \\* Number of Heads: 4"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Head Size: 64"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Number of Heads: 4"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Feed Forward Dimension: 4"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Dropout: 0.3"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Feed Forward Network:"
+                },
+                {
+                  "type": "list",
+                  "text": "* \\* Dense Layer with ReLU activation and 4 units * \\* Dropout: 0.3 * \\* Dense Layer to match the input shape"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Dense Layer with ReLU activation and 4 units"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Dropout: 0.3"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Dense Layer to match the input shape"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Flatten Layer"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Dense Layers:"
+                },
+                {
+                  "type": "list",
+                  "text": "* – Dense Layer with 64 units and ReLU activation * – Dropout: 0.05"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Dense Layer with 64 units and ReLU activation"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Dropout: 0.05"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Output Layer: Dense Layer with 8 units"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "The network is trained using ADAM optimizer in 10000 epochs. MAE metric for train and test equals respectively to 5.26 and 9.49."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "The prediction results for 1000 train samples and the whole test dataset are illustrated respectively in Fig. [5](https://ar5iv.labs.arxiv.org/html/2606.08714v1#S3.F5 \"Fig. 5 ‣ III-D Transformer-Based Network ‣ III Direct Input-Output Training Method for Control ‣ Hybrid Neural Network and Conventional Controller Approach for Robust Control of Highly Unstable Systems: Application to Tilt-Rotor Control\") and Fig. [6](https://ar5iv.labs.arxiv.org/html/2606.08714v1#S3.F6 \"Fig. 6 ‣ III-D Transformer-Based Network ‣ III Direct Input-Output Training Method for Control ‣ Hybrid Neural Network and Conventional Controller Approach for Robust Control of Highly Unstable Systems: Application to Tilt-Rotor Control\"). Table [II](https://ar5iv.labs.arxiv.org/html/2606.08714v1#S3.T2 \"TABLE II ‣ III-D Transformer-Based Network ‣ III Direct Input-Output Training Method for Control ‣ Hybrid Neural Network and Conventional Controller Approach for Robust Control of Highly Unstable Systems: Application to Tilt-Rotor Control\") represents the Summary of the networks used for training direct input-output controller. As indicated by this table, the transformer network exhibited better results in predicting control signals based on state feedback and the desired state. However, overall, there is no significant difference between their results on the test set."
+                },
+                {
+                  "type": "table",
+                  "text": "| | | | | | | --- | --- | --- | --- | --- | | Network | Train Epochs | Parameters | Train MAE | Test MAE | | MLP | 1400 | 45000 | 3.86 | 10.85 | | LSTM | 300 | 257864 | 2.62 | 10.61 | | Transformer | 10000 | 14580 | 5.26 | 9.49 |"
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "III-E Implementation on the Dynamic System",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "To evaluate the feasibility of the direct input-output control approach, we initially applied it to a trained trajectory using the LSTM-based network, which exhibited the best results for this purpose. The parameters for simulation are represented in Table [III](https://ar5iv.labs.arxiv.org/html/2606.08714v1#S3.T3 \"TABLE III ‣ III-E Implementation on the Dynamic System ‣ III Direct Input-Output Training Method for Control ‣ Hybrid Neural Network and Conventional Controller Approach for Robust Control of Highly Unstable Systems: Application to Tilt-Rotor Control\"). As illustrated in Fig. [7](https://ar5iv.labs.arxiv.org/html/2606.08714v1#S3.F7 \"Fig. 7 ‣ III-E Implementation on the Dynamic System ‣ III Direct Input-Output Training Method for Control ‣ Hybrid Neural Network and Conventional Controller Approach for Robust Control of Highly Unstable Systems: Application to Tilt-Rotor Control\"), the direct input-output control method proves ineffective for our dynamic system, even with a well-fitted function as shown in Fig. [5](https://ar5iv.labs.arxiv.org/html/2606.08714v1#S3.F5 \"Fig. 5 ‣ III-D Transformer-Based Network ‣ III Direct Input-Output Training Method for Control ‣ Hybrid Neural Network and Conventional Controller Approach for Robust Control of Highly Unstable Systems: Application to Tilt-Rotor Control\") for the control signal. This ineffectiveness arises because the network does not aim to minimize the error value in real-time, leading to the accumulation of small error values that ultimately cause divergence. Due to this issue, it is not feasible to compare the real-time computational cost between the conventional controller and those based on different neural networks."
+                },
+                {
+                  "type": "table",
+                  "text": "| | | | | --- | --- | --- | | Parameter | Value | Unit | | gg | 9.819.81 | m/s2m/s^{2} | | mm | 11 | k​gkg | | ll | 0.30.3 | mm | | ee | 00 | mm | | Ix​xI\\_{xx} | 10×10−310\\times 10^{-3} | k​g.m2kg.m^{2} | | Iy​yI\\_{yy} | 10×10−310\\times 10^{-3} | k​g.m2kg.m^{2} | | Iz​zI\\_{zz} | 17×10−317\\times 10^{-3} | k​g.m2kg.m^{2} | | kfk\\_{f} | 6×10−66\\times 10^{-6} | N.s2N.s^{2} | | kmk\\_{m} | 4×10−74\\times 10^{-7} | N.m.s2N.m.s^{2} |"
+                },
+                {
+                  "type": "formula",
+                  "text": "gg"
+                },
+                {
+                  "type": "formula",
+                  "text": "9.819.81"
+                },
+                {
+                  "type": "formula",
+                  "text": "m/s2m/s^{2}"
+                },
+                {
+                  "type": "formula",
+                  "text": "mm"
+                },
+                {
+                  "type": "formula",
+                  "text": "11"
+                },
+                {
+                  "type": "formula",
+                  "text": "k​gkg"
+                },
+                {
+                  "type": "formula",
+                  "text": "ll"
+                },
+                {
+                  "type": "formula",
+                  "text": "0.30.3"
+                },
+                {
+                  "type": "formula",
+                  "text": "mm"
+                },
+                {
+                  "type": "formula",
+                  "text": "ee"
+                },
+                {
+                  "type": "formula",
+                  "text": "00"
+                },
+                {
+                  "type": "formula",
+                  "text": "mm"
+                },
+                {
+                  "type": "formula",
+                  "text": "Ix​xI_{xx}"
+                },
+                {
+                  "type": "formula",
+                  "text": "10×10−310\\times 10^{-3}"
+                },
+                {
+                  "type": "formula",
+                  "text": "k​g.m2kg.m^{2}"
+                },
+                {
+                  "type": "formula",
+                  "text": "Iy​yI_{yy}"
+                },
+                {
+                  "type": "formula",
+                  "text": "10×10−310\\times 10^{-3}"
+                },
+                {
+                  "type": "formula",
+                  "text": "k​g.m2kg.m^{2}"
+                },
+                {
+                  "type": "formula",
+                  "text": "Iz​zI_{zz}"
+                },
+                {
+                  "type": "formula",
+                  "text": "17×10−317\\times 10^{-3}"
+                },
+                {
+                  "type": "formula",
+                  "text": "k​g.m2kg.m^{2}"
+                },
+                {
+                  "type": "formula",
+                  "text": "kfk_{f}"
+                },
+                {
+                  "type": "formula",
+                  "text": "6×10−66\\times 10^{-6}"
+                },
+                {
+                  "type": "formula",
+                  "text": "N.s2N.s^{2}"
+                },
+                {
+                  "type": "formula",
+                  "text": "kmk_{m}"
+                },
+                {
+                  "type": "formula",
+                  "text": "4×10−74\\times 10^{-7}"
+                },
+                {
+                  "type": "formula",
+                  "text": "N.m.s2N.m.s^{2}"
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "III-F Challenges and Limitations",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "The methodology introduced in this section has several issues for our application, which will be addressed in the next section. Despite these limitations, the results obtained here can be useful for other dynamic systems or future research. The key challenges and limitations are summarized as follows:"
+                },
+                {
+                  "type": "list",
+                  "text": "* • Convergence issues even on the trained trajectories. * • Inability to train over a wide range of positions. * • Requirement of a large training dataset for accurate predictions. * • Lack of robustness. * • Inability to incorporate an effective unit to enhance control robustness due to the complex nature of the system dynamics."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Convergence issues even on the trained trajectories."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Inability to train over a wide range of positions."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Requirement of a large training dataset for accurate predictions."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Lack of robustness."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Inability to incorporate an effective unit to enhance control robustness due to the complex nature of the system dynamics."
+                }
+              ],
+              "children": []
+            }
+          ]
+        },
+        {
+          "heading": "IV A Neural Network- Based Sliding Mode Control",
+          "level": 2,
+          "content": [],
+          "children": [
+            {
+              "heading": "IV-A Methodology",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "A precise identification of our plant dynamics is not possible by training a network using input-output pairs without a controller. This is due to the system’s instability, which leads to divergence and failure within a few seconds. Therefore, in the last section, we attempted to control the system using a network without relying on its dynamics. However, we encountered some issues. If we can approximate the dynamic model of the plant, we can incorporate it into a robust model-based controller to achieve precise control. The main idea of this section is to decompose the plant’s dynamics into parts that are independent of control inputs and solely dependent on the system’s states, and integrate them into a SMC (SMC). By incorporating vector 𝒗\\bm{v} introduced in Equation [5](https://ar5iv.labs.arxiv.org/html/2606.08714v1#S2.E5 \"In II Sliding Mode Controller Design ‣ Hybrid Neural Network and Conventional Controller Approach for Robust Control of Highly Unstable Systems: Application to Tilt-Rotor Control\"), the approximate dynamics of the plant can be written as:"
+                },
+                {
+                  "type": "formula",
+                  "text": "𝒗\\bm{v}"
+                },
+                {
+                  "type": "table",
+                  "text": "| | | | | | --- | --- | --- | --- | | | 𝒙¯¨^6×1=𝒂^6×1+𝑮^6×8​𝒗8×1,\\hat{{\\ddot{\\bar{\\bm{x}}}}}\\_{6\\times 1}=\\bm{\\hat{a}}\\_{6\\times 1}+\\bm{\\hat{G}}\\_{6\\times 8}\\bm{v}\\_{8\\times 1}, | | (16) |"
+                },
+                {
+                  "type": "formula",
+                  "text": "𝒙¯¨^6×1=𝒂^6×1+𝑮^6×8​𝒗8×1,\\hat{{\\ddot{\\bar{\\bm{x}}}}}_{6\\times 1}=\\bm{\\hat{a}}_{6\\times 1}+\\bm{\\hat{G}}_{6\\times 8}\\bm{v}_{8\\times 1},"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "where 𝒂^\\bm{\\hat{a}} and 𝑮^\\bm{\\hat{G}} are the approximations of 𝒂\\bm{a} and 𝑮\\bm{G}, respectively. 𝑮\\bm{G} is a matrix that relates the arrangement of the actuators to the dynamics. Thus, it is evident that 𝑮\\bm{G} varies with the attitude angles ϕ\\phi, θ\\theta, and ψ\\psi considering the fixed physical parameters of the plant-[III](https://ar5iv.labs.arxiv.org/html/2606.08714v1#S3.T3 \"TABLE III ‣ III-E Implementation on the Dynamic System ‣ III Direct Input-Output Training Method for Control ‣ Hybrid Neural Network and Conventional Controller Approach for Robust Control of Highly Unstable Systems: Application to Tilt-Rotor Control\"). Since XX, YY, and ZZ are position states expressed in the inertia frame, it is clear that 𝒂\\bm{a} varies with ϕ\\phi, ϕ˙\\dot{\\phi}, θ\\theta, θ˙\\dot{\\theta}, ψ\\psi, and ψ˙\\dot{\\psi}. Therefore, we need to predict 48 items for 𝑮^\\bm{\\hat{G}} based on 3 inputs and 6 items for 𝒂^\\bm{\\hat{a}} based on 6 inputs. We use the dataset represented in [I](https://ar5iv.labs.arxiv.org/html/2606.08714v1#S3.T1 \"TABLE I ‣ III-A Data Collection ‣ III Direct Input-Output Training Method for Control ‣ Hybrid Neural Network and Conventional Controller Approach for Robust Control of Highly Unstable Systems: Application to Tilt-Rotor Control\"), but with half the number of data points for training."
+                },
+                {
+                  "type": "formula",
+                  "text": "𝒂^\\bm{\\hat{a}}"
+                },
+                {
+                  "type": "formula",
+                  "text": "𝑮^\\bm{\\hat{G}}"
+                },
+                {
+                  "type": "formula",
+                  "text": "𝒂\\bm{a}"
+                },
+                {
+                  "type": "formula",
+                  "text": "𝑮\\bm{G}"
+                },
+                {
+                  "type": "formula",
+                  "text": "𝑮\\bm{G}"
+                },
+                {
+                  "type": "formula",
+                  "text": "𝑮\\bm{G}"
+                },
+                {
+                  "type": "formula",
+                  "text": "ϕ\\phi"
+                },
+                {
+                  "type": "formula",
+                  "text": "θ\\theta"
+                },
+                {
+                  "type": "formula",
+                  "text": "ψ\\psi"
+                },
+                {
+                  "type": "formula",
+                  "text": "XX"
+                },
+                {
+                  "type": "formula",
+                  "text": "YY"
+                },
+                {
+                  "type": "formula",
+                  "text": "ZZ"
+                },
+                {
+                  "type": "formula",
+                  "text": "𝒂\\bm{a}"
+                },
+                {
+                  "type": "formula",
+                  "text": "ϕ\\phi"
+                },
+                {
+                  "type": "formula",
+                  "text": "ϕ˙\\dot{\\phi}"
+                },
+                {
+                  "type": "formula",
+                  "text": "θ\\theta"
+                },
+                {
+                  "type": "formula",
+                  "text": "θ˙\\dot{\\theta}"
+                },
+                {
+                  "type": "formula",
+                  "text": "ψ\\psi"
+                },
+                {
+                  "type": "formula",
+                  "text": "ψ˙\\dot{\\psi}"
+                },
+                {
+                  "type": "formula",
+                  "text": "𝑮^\\bm{\\hat{G}}"
+                },
+                {
+                  "type": "formula",
+                  "text": "𝒂^\\bm{\\hat{a}}"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Low cost computation is vital for real-time applications. Therefor, we considered to use simple architecture as possible. Also, 𝒂^\\bm{\\hat{a}} and 𝑮^\\bm{\\hat{G}} are not too intricate to predict, unlike the predictions discussed in the previous section. Not encountering the over-fitting issue enables the elimination of dropout layers."
+                },
+                {
+                  "type": "formula",
+                  "text": "𝒂^\\bm{\\hat{a}}"
+                },
+                {
+                  "type": "formula",
+                  "text": "𝑮^\\bm{\\hat{G}}"
+                }
+              ],
+              "children": [
+                {
+                  "heading": "IV-A1 MLP Network",
+                  "level": 4,
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "text": "For train and prediction of 𝑮^\\bm{\\hat{G}}, 2 dense layers with 128 and 64 neurons are incorporated, along with the output layer of 48 neurons. For 𝒂^\\bm{\\hat{a}}, 3 dense layers with 32,16, and 8 neurons are used, along with the output layer."
+                    },
+                    {
+                      "type": "formula",
+                      "text": "𝑮^\\bm{\\hat{G}}"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "𝒂^\\bm{\\hat{a}}"
+                    }
+                  ],
+                  "children": []
+                },
+                {
+                  "heading": "IV-A2 LSTM Network",
+                  "level": 4,
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "text": "A LSTM block with dimension of 64 is used for 𝑮^\\bm{\\hat{G}} and one with dimension of 16 is used for 𝒂^\\bm{\\hat{a}}."
+                    },
+                    {
+                      "type": "formula",
+                      "text": "𝑮^\\bm{\\hat{G}}"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "𝒂^\\bm{\\hat{a}}"
+                    }
+                  ],
+                  "children": []
+                },
+                {
+                  "heading": "IV-A3 Transformer Network",
+                  "level": 4,
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "text": "Using a Transformer for this specific application might not be appropriate choice, because they are computationally intensive and complex, adding unnecessary complexity without significant benefits for our straightforward relationships of 𝒂^\\bm{\\hat{a}} and 𝑮^\\bm{\\hat{G}}. Additionally, Transformers require a large amount of data to train effectively. Moreover, Transformers involve more overhead in terms of model size and inference time, which might not be suitable for our real-time application, along with the other high-cost computations needed for SMC."
+                    },
+                    {
+                      "type": "formula",
+                      "text": "𝒂^\\bm{\\hat{a}}"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "𝑮^\\bm{\\hat{G}}"
+                    }
+                  ],
+                  "children": []
+                }
+              ]
+            },
+            {
+              "heading": "IV-B Baseline System Simulation",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "The approximations of plant dynamics parameters, 𝒂^\\bm{\\hat{a}} and 𝑮^\\bm{\\hat{G}}, are predicted using neural networks based on necessary feedback in each loop and incorporated into the SMC controller designed in Section [II](https://ar5iv.labs.arxiv.org/html/2606.08714v1#S2 \"II Sliding Mode Controller Design ‣ Hybrid Neural Network and Conventional Controller Approach for Robust Control of Highly Unstable Systems: Application to Tilt-Rotor Control\"). The controller uses the predicted 𝒂^\\bm{\\hat{a}} and 𝑮^\\bm{\\hat{G}} in place of the unknown plant parameters 𝒂\\bm{a} and 𝑮\\bm{G} in Equation ([11](https://ar5iv.labs.arxiv.org/html/2606.08714v1#S2.E11 \"In II Sliding Mode Controller Design ‣ Hybrid Neural Network and Conventional Controller Approach for Robust Control of Highly Unstable Systems: Application to Tilt-Rotor Control\")). For the simulation, the controller is applied to the exact plant dynamics. The implementation results on test trajectory, using MLP and LSTM plant dynamics predictors are visualized in Fig. [8](https://ar5iv.labs.arxiv.org/html/2606.08714v1#S4.F8 \"Fig. 8 ‣ IV-B Baseline System Simulation ‣ IV A Neural Network- Based Sliding Mode Control ‣ Hybrid Neural Network and Conventional Controller Approach for Robust Control of Highly Unstable Systems: Application to Tilt-Rotor Control\") and Fig. [9](https://ar5iv.labs.arxiv.org/html/2606.08714v1#S4.F9 \"Fig. 9 ‣ IV-B Baseline System Simulation ‣ IV A Neural Network- Based Sliding Mode Control ‣ Hybrid Neural Network and Conventional Controller Approach for Robust Control of Highly Unstable Systems: Application to Tilt-Rotor Control\")."
+                },
+                {
+                  "type": "formula",
+                  "text": "𝒂^\\bm{\\hat{a}}"
+                },
+                {
+                  "type": "formula",
+                  "text": "𝑮^\\bm{\\hat{G}}"
+                },
+                {
+                  "type": "formula",
+                  "text": "𝒂^\\bm{\\hat{a}}"
+                },
+                {
+                  "type": "formula",
+                  "text": "𝑮^\\bm{\\hat{G}}"
+                },
+                {
+                  "type": "formula",
+                  "text": "𝒂\\bm{a}"
+                },
+                {
+                  "type": "formula",
+                  "text": "𝑮\\bm{G}"
+                },
+                {
+                  "type": "formula",
+                  "text": "𝒂\\bm{a}"
+                },
+                {
+                  "type": "formula",
+                  "text": "𝑮\\bm{G}"
+                },
+                {
+                  "type": "table",
+                  "text": "| | | | | | | --- | --- | --- | --- | --- | | Net | Item | Train MAE | Test MAE | Parameters | | MLP | 𝒂\\bm{a} | 0.0142 | 0.0155 | 942 | | 𝑮\\bm{G} | 0.219 | 0.222 | 11888 | | LSTM | 𝒂\\bm{a} | 0.0049 | 0.0046 | 1574 | | 𝑮\\bm{G} | 0.077 | 0.076 | 20528 |"
+                },
+                {
+                  "type": "formula",
+                  "text": "𝒂\\bm{a}"
+                },
+                {
+                  "type": "formula",
+                  "text": "𝑮\\bm{G}"
+                },
+                {
+                  "type": "formula",
+                  "text": "𝒂\\bm{a}"
+                },
+                {
+                  "type": "formula",
+                  "text": "𝑮\\bm{G}"
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "IV-C Challenged System Performance and Robustness Assessment",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "To assess the robustness of the control systems, we introduce various uncertainties and disturbances into the dynamic model to create discrepancies between the plant and the controller’s model:"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "a) A 100 μ\\mus first-order delay for BLDC motors and a 0.4 degrees per 60 seconds delay for servo motors."
+                },
+                {
+                  "type": "formula",
+                  "text": "μ\\mu"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "b) Random actuation errors ranging from 1-5 percent for servo motors and 4-10 percent for BLDC motors."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "c) Variations in physical parameters: mass increased by 5%, moments of inertia increased by 20%, aerodynamic coefficients of propellers decreased by 10%, and mass center eccentricity increased by 20%."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "d) Disturbance forces such as wind in the XX and YY directions, with a random resultant force amounting to 5-10 percent of the system’s weight."
+                },
+                {
+                  "type": "formula",
+                  "text": "XX"
+                },
+                {
+                  "type": "formula",
+                  "text": "YY"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Fig. [10](https://ar5iv.labs.arxiv.org/html/2606.08714v1#S4.F10 \"Fig. 10 ‣ IV-C Challenged System Performance and Robustness Assessment ‣ IV A Neural Network- Based Sliding Mode Control ‣ Hybrid Neural Network and Conventional Controller Approach for Robust Control of Highly Unstable Systems: Application to Tilt-Rotor Control\") and Fig. [11](https://ar5iv.labs.arxiv.org/html/2606.08714v1#S4.F11 \"Fig. 11 ‣ IV-C Challenged System Performance and Robustness Assessment ‣ IV A Neural Network- Based Sliding Mode Control ‣ Hybrid Neural Network and Conventional Controller Approach for Robust Control of Highly Unstable Systems: Application to Tilt-Rotor Control\") illustrate the challenged system simulation results."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "As shown in Figure [10](https://ar5iv.labs.arxiv.org/html/2606.08714v1#S4.F10 \"Fig. 10 ‣ IV-C Challenged System Performance and Robustness Assessment ‣ IV A Neural Network- Based Sliding Mode Control ‣ Hybrid Neural Network and Conventional Controller Approach for Robust Control of Highly Unstable Systems: Application to Tilt-Rotor Control\") and Table [V](https://ar5iv.labs.arxiv.org/html/2606.08714v1#S4.T5 \"TABLE V ‣ IV-C Challenged System Performance and Robustness Assessment ‣ IV A Neural Network- Based Sliding Mode Control ‣ Hybrid Neural Network and Conventional Controller Approach for Robust Control of Highly Unstable Systems: Application to Tilt-Rotor Control\"), the control system incorporating the LSTM PDP (PDP) demonstrates superior performance compared to the controller using MLP PDP, while maintaining nearly the same computational cost. However, the performance of the SMC-MLP system can be improved by increasing the layers of MLP, leading to a higher computational cost, which is not desirable for our real-time application."
+                },
+                {
+                  "type": "table",
+                  "text": "| | | | | | --- | --- | --- | --- | | PDP\\* | Baseline System TT-MAE\\* | Challenged System TT-MAE | Run Time (Baseline) | | MLP | 0.161 | 1.05 | 41.5 s | | LSTM | 0.156 | 0.21 | 38.5 s |"
+                }
+              ],
+              "children": []
+            }
+          ]
+        },
+        {
+          "heading": "V Conclusion",
+          "level": 2,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "This paper investigated neural-network-based control strategies for a fully actuated tilt-rotor multirotor. First, we presented a negative result by applying direct input–output learning with MLP, LSTM, and transformer models, showing its inability to stabilize highly unstable dynamics. As the main contribution, we proposed a neural-network-enhanced sliding mode controller (SMC), where input-independent dynamics are learned from a small dataset using lightweight networks. This reduces real-time computation, enables deployment on low-cost microcontrollers, and ensures robust control. The proposed method also has the advantage of being trainable using flight logs from low-performance, attitude-only controllers, without degrading the performance of the final control strategy. Comparisons of MLP- and LSTM-based implementations under uncertainties and disturbances confirmed the effectiveness of the proposed method; In particular, the controller with an LSTM plant dynamics predictor outperformed its MLP-based counterpart while also achieving lower runtime. In summary, while direct input–output strategies are unsuitable for unstable tilt-rotor systems, integrating lightweight neural networks into model-based control provides a robust, efficient, and generalizable solution. As future work, we plan to validate the outcomes of this study experimentally on an experimental tilt-rotor platform designed and constructed in our laboratory."
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "References",
+          "level": 2,
+          "content": [
+            {
+              "type": "list",
+              "text": "* [1] Z. Zaheer, A. Usmani, E. Khan, and M. A. Qadeer, “Aerial surveillance system using uav,” in *2016 thirteenth international conference on wireless and optical communications networks (WOCN)*. IEEE, 2016, pp. 1–7. * [2] H. Zhang, S. Veres, and A. Kolling, “Simultaneous search and monitoring by multiple aerial robots,” *Robotics and Autonomous Systems*, vol. 170, p. 104544, 2023. * [3] M. Sarkar, X. Yan, B. A. Erol, I. Raptis, and A. Homaifar, “A novel search and survey technique for unmanned aerial systems in detecting and estimating the area for wildfires,” *Robotics and Autonomous Systems*, vol. 145, p. 103848, 2021. * [4] W. Lee, B. Alkouz, B. Shahzaad, and A. Bouguettaya, “Package delivery using autonomous drones in skyways,” in *Adjunct Proceedings of the 2021 ACM International Joint Conference on Pervasive and Ubiquitous Computing and Proceedings of the 2021 ACM International Symposium on Wearable Computers*, 2021, pp. 48–50. * [5] A. Straubinger, H. L. de Groot, and E. T. Verhoef, “E-commerce, delivery drones and their impact on cities,” *Transportation Research Part A: Policy and Practice*, vol. 178, p. 103841, 2023. * [6] A. Kafili Gavgani, A. Talaeizadeh, A. Alasty, and H. N. Pishkenari, “A novel agricultural spraying aerial robot (agrohedral): Performance improvement in the presence of sloshing effect,” in *Innovative Agricultural Technologies*, L. Fu, J. Paliwal, H. H. Silleli, B. Sturm, and F. Auat Cheein, Eds. Cham: Springer Nature Switzerland, 2026, pp. 66–85. * [7] A. Rejeb, A. Abdollahi, K. Rejeb, and H. Treiblmaier, “Drones in agriculture: A review and bibliometric analysis,” *Computers and Electronics in Agriculture*, vol. 198, p. 107017, 2022. * [8] M. Shahrooz, A. Talaeizadeh, and A. Alasty, “Agricultural spraying drones: Advantages and disadvantages,” in *2020 Virtual Symposium in Plant Omics Sciences (OMICAS)*, 2020, pp. 1–5. * [9] J. Scherer, S. Yahyanejad, S. Hayat, E. Yanmaz, T. Andre, A. Khan, V. Vukadinovic, C. Bettstetter, H. Hellwagner, and B. Rinner, “An autonomous multi-uav system for search and rescue,” in *Proceedings of the first workshop on micro aerial vehicle networks, systems, and applications for civilian use*, 2015, pp. 33–38. * [10] P. Nooralishahi, C. Ibarra-Castanedo, S. Deane, F. López, S. Pant, M. Genest, N. P. Avdelidis, and X. P. Maldague, “Drone-based non-destructive inspection of industrial sites: A review and case studies,” *Drones*, vol. 5, no. 4, p. 106, 2021. * [11] S. D’Angelo, A. Corrado, F. Ruggiero, J. Cacace, and V. Lippiello, “Stabilization and control on a pipe-rack of a wheeled mobile manipulator with a snake-like arm,” *Robotics and Autonomous Systems*, vol. 171, p. 104554, 2024. * [12] J. Gómez-Avila, C. López-Franco, A. Y. Alanis, and N. Arana-Daniel, “Control of quadrotor using a neural network based pid,” in *2018 IEEE Latin American Conference on Computational Intelligence (LA-CCI)*, 2018, pp. 1–6. * [13] A. Rezaei, A. Talaeizadeh, and A. Alasty, “Self-tuning pid controller for an arm-angle adjustable quadrotor using an actor-critic-based neural network,” in *2024 19th Iranian Conference on Intelligent Systems (ICIS)*, 2024, pp. 205–210. * [14] N. P. Nguyen, N. X. Mung, H. L. N. N. Thanh, T. T. Huynh, N. T. Lam, and S. K. Hong, “Adaptive sliding mode control for attitude and altitude system of a quadcopter uav via neural network,” *IEEE Access*, vol. 9, pp. 40 076–40 085, 2021. * [15] B. Jiang, B. Li, W. Zhou, L.-Y. Lo, C.-K. Chen, and C.-Y. Wen, “Neural network based model predictive control for a quadrotor uav,” *Aerospace*, vol. 9, no. 8, 2022. [Online]. Available: https://www.mdpi.com/2226-4310/9/8/460 * [16] M. M. Madebo, C. M. Abdissa, L. N. Lemma, and D. S. Negash, “Robust tracking control for quadrotor uav with external disturbances and uncertainties using neural network based mrac,” *IEEE Access*, vol. 12, pp. 36 183–36 201, 2024. * [17] N. Wanore Madebo, C. Merga Abdissa, and L. Negash Lemma, “Enhanced trajectory control of quadrotor uav using fuzzy pid based recurrent neural network controller,” *IEEE Access*, vol. 12, pp. 190 454–190 469, 2024. * [18] G. Yu, J. Reis, and C. Silvestre, “Quadrotor neural network adaptive control: Design and experimental validation,” *IEEE Robotics and Automation Letters*, vol. 8, no. 5, pp. 2574–2581, 2023. * [19] M. Ryll, H. H. Bülthoff, and P. R. Giordano, “A novel overactuated quadrotor unmanned aerial vehicle: Modeling, control, and experimental validation,” *IEEE Transactions on Control Systems Technology*, vol. 23, no. 2, pp. 540–556, 2015. * [20] P. Zheng, X. Tan, B. B. Kocer, E. Yang, and M. Kovac, “Tiltdrone: A fully-actuated tilting quadrotor platform,” *IEEE Robotics and Automation Letters*, vol. 5, no. 4, pp. 6845–6852, 2020. * [21] P. Segui-Gasco, Y. Al-Rihani, H.-S. Shin, and A. Savvaris, “A novel actuation concept for a multi rotor uav,” *Journal of Intelligent & Robotic Systems*, vol. 74, pp. 173–191, 2014. * [22] M. Allenspach, K. Bodie, M. Brunner, L. Rinsoz, Z. Taylor, M. Kamel, R. Siegwart, and J. Nieto, “Design and optimal control of a tiltrotor micro-aerial vehicle for efficient omnidirectional flight,” *The International Journal of Robotics Research*, vol. 39, no. 10-11, pp. 1305–1325, 2020. * [23] A. K. Gavgani, A. Talaeizadeh, S. Heidarzadeh, A. Alasty, and H. Nejat Pishkenari, “Dynamic modeling and sliding mode control of an over-actuated quadrotor with variable hedral angle of propeller axes,” in *2024 2nd International Conference on Unmanned Vehicle Systems-Oman (UVS)*, 2024, pp. 1–6. * [24] M. Kamel, S. Verling, O. Elkhatib, C. Sprecher, P. Wulkop, Z. Taylor, R. Siegwart, and I. Gilitschenski, “The voliro omniorientational hexacopter: An agile and maneuverable tiltable-rotor aerial vehicle,” *IEEE Robotics & Automation Magazine*, vol. 25, no. 4, pp. 34–44, 2018. * [25] A. K. Gavgani, A. Talaeizadeh, A. Alasty, H. N. Pishkenari, and E. Najafi, “Next-generation aerial robots – omniorientational strategies: Dynamic modeling, control, and comparative analysis,” 2025. [Online]. Available: https://arxiv.org/abs/2509.21210 * [26] J.-J. E. Slotine, W. Li *et al.*, *Applied nonlinear control*. Prentice hall Englewood Cliffs, NJ, 1991, vol. 199, no. 1."
+            }
+          ],
+          "children": []
+        }
+      ]
+    }
+  ],
+  "chunks": [
+    {
+      "heading_path": [
+        "Hybrid Neural Network and Conventional Controller Approach for Robust Control of Highly Unstable Systems: Application to Tilt-Rotor Control"
+      ],
+      "text": "# Hybrid Neural Network and Conventional Controller Approach for Robust Control of Highly Unstable Systems: Application to Tilt-Rotor Control"
+    },
+    {
+      "heading_path": [
+        "Hybrid Neural Network and Conventional Controller Approach for Robust Control of Highly Unstable Systems: Application to Tilt-Rotor Control",
+        "Abstract"
+      ],
+      "text": "###### Abstract\n\nMultirotors are widely used in applications ranging from surveillance to precision agriculture, yet conventional designs remain limited by their under-actuation. Tilt-rotor configurations overcome this limitation by enabling full actuation. This paper investigates neural-network-based control strategies for a fully actuated tilt-rotor system with four thrust-vectoring inputs. Our work is structured in two parts. First, we deliberately present a negative result by evaluating a direct input–output control approach. In this method, multilayer perceptrons (MLPs), long short-term memory (LSTM) networks, and transformer models are trained to map system states and their desired values directly to control signals. We show that this strategy fails to stabilize the system, highlighting the inherent difficulty of applying direct input–output learning to highly unstable plants. Second, as the main contribution, we propose a neural-network-enhanced sliding mode controller (SMC). The method decomposes the system dynamics into input-independent and input-dependent components, with the former learned from a small dataset using lightweight networks, thereby reducing real-time computational demands. Moreover, the proposed method can be trained using flight logs collected from low-performance controllers, and the resulting dynamic model learned from real-world data can be used in simulation. We further compare MLP- and LSTM-based implementations under model uncertainties and external disturbances, demonstrating the robustness and effectiveness of the proposed approach; in particular, the controller with the LSTM plant dynamics predictor achieves superior performance to its MLP-based counterpart while also exhibiting lower runtime."
+    },
+    {
+      "heading_path": [
+        "Hybrid Neural Network and Conventional Controller Approach for Robust Control of Highly Unstable Systems: Application to Tilt-Rotor Control",
+        "Index Terms:"
+      ],
+      "text": "###### Index Terms:\n\nThe rapid growth of multirotor applications [[1](https://ar5iv.labs.arxiv.org/html/2606.08714v1#bib.bib1), [2](https://ar5iv.labs.arxiv.org/html/2606.08714v1#bib.bib2), [3](https://ar5iv.labs.arxiv.org/html/2606.08714v1#bib.bib3), [4](https://ar5iv.labs.arxiv.org/html/2606.08714v1#bib.bib4), [5](https://ar5iv.labs.arxiv.org/html/2606.08714v1#bib.bib5), [6](https://ar5iv.labs.arxiv.org/html/2606.08714v1#bib.bib6), [7](https://ar5iv.labs.arxiv.org/html/2606.08714v1#bib.bib7), [8](https://ar5iv.labs.arxiv.org/html/2606.08714v1#bib.bib8), [9](https://ar5iv.labs.arxiv.org/html/2606.08714v1#bib.bib9), [10](https://ar5iv.labs.arxiv.org/html/2606.08714v1#bib.bib10), [11](https://ar5iv.labs.arxiv.org/html/2606.08714v1#bib.bib11)], coupled with advances in deep learning, has encouraged researchers to integrate artificial neural networks into quadrotor control. Neural networks have been combined with diverse control strategies, such as PID [[12](https://ar5iv.labs.arxiv.org/html/2606.08714v1#bib.bib12), [13](https://ar5iv.labs.arxiv.org/html/2606.08714v1#bib.bib13)], sliding mode control (SMC) [[14](https://ar5iv.labs.arxiv.org/html/2606.08714v1#bib.bib14)], model predictive control (MPC) [[15](https://ar5iv.labs.arxiv.org/html/2606.08714v1#bib.bib15)], model reference adaptive control (MRAC) [[16](https://ar5iv.labs.arxiv.org/html/2606.08714v1#bib.bib16)], fuzzy-PID [[17](https://ar5iv.labs.arxiv.org/html/2606.08714v1#bib.bib17)], and adaptive control schemes [[18](https://ar5iv.labs.arxiv.org/html/2606.08714v1#bib.bib18)].\n\nAt the same time, the under-actuation of conventional multirotors has motivated research on tilt-rotor designs, where rotors are tilted to achieve full actuation. Although these systems offer increased maneuverability, they also introduce additional complexity, and most studies have relied on conventional controllers to manage it [[19](https://ar5iv.labs.arxiv.org/html/2606.08714v1#bib.bib19), [20](https://ar5iv.labs.arxiv.org/html/2606.08714v1#bib.bib20), [21](https://ar5iv.labs.arxiv.org/html/2606.08714v1#bib.bib21), [22](https://ar5iv.labs.arxiv.org/html/2606.08714v1#bib.bib22), [23](https://ar5iv.labs.arxiv.org/html/2606.08714v1#bib.bib23), [24](https://ar5iv.labs.arxiv.org/html/2606.08714v1#bib.bib24)].\n\nIn this paper, we investigate a tilt-rotor system with four thrust-vectoring inputs, allowing independent control over all degrees of freedom (DoF). A conceptual design is shown in Fig. [1](https://ar5iv.labs.arxiv.org/html/2606.08714v1#S0.F1 \"Fig. 1 ‣ Hybrid Neural Network and Conventional Controller Approach for Robust Control of Highly Unstable Systems: Application to Tilt-Rotor Control\"). Our work is structured into two parts:\n\nFirst, we present a deliberately negative result by attempting to control the system using a direct input–output learning strategy. In this approach, multilayer perceptrons (MLPs), long short-term memory (LSTM) networks, and transformer models are trained to map the system states and their desired values to control inputs. We show that this method fails to stabilize the highly unstable tilt-rotor dynamics, illustrating the fundamental limitations of direct input–output learning for such complex systems. While unsuccessful, these results serve an important role: they highlight the challenges involved and may still inspire further work on more stable platforms.\n\nSecond, as the main contribution of this paper, we introduce a neural-network-enhanced sliding mode control (SMC) method to robustly control the fully actuated tilt-rotor drone. In this approach, the system dynamics are decomposed into input-independent and input-dependent components, with the former learned efficiently from a small dataset using lightweight networks. This design lowers real-time computational requirements and enables deployment on low-cost microcontrollers. Embedding this learned model within the SMC framework ensures reliable and generalized control of the unstable system. Furthermore, we compare the performance of MLP- and LSTM-based controllers within this framework under uncertainties and external disturbances, demonstrating the robustness and effectiveness of the proposed method. An additional advantage of this method is its ability to train on flight logs collected with low-performance, attitude-only controllers, as it focuses on learning plant parameters rather than control actions. Furthermore, this scheme can provide a dynamic model derived from real flights, which is useful for accurate simulations."
+    },
+    {
+      "heading_path": [
+        "Hybrid Neural Network and Conventional Controller Approach for Robust Control of Highly Unstable Systems: Application to Tilt-Rotor Control",
+        "I Dynamic Modeling"
+      ],
+      "text": "## I Dynamic Modeling\n\nHere, we derive a mathematical model for system which is vital for our simulations. To have a manageable article length, we briefly discuss this section. A study by Gavgani et.al [[25](https://ar5iv.labs.arxiv.org/html/2606.08714v1#bib.bib25)] can be referred for more details in dynamic modeling of the system. The coordinate systems and physical parameters are shown in [2](https://ar5iv.labs.arxiv.org/html/2606.08714v1#S1.F2 \"Fig. 2 ‣ I Dynamic Modeling ‣ Hybrid Neural Network and Conventional Controller Approach for Robust Control of Highly Unstable Systems: Application to Tilt-Rotor Control\"). The thrust forces fn=kf​ωn2f\\_{n}=k\\_{f}\\omega\\_{n}^{2} and the drag torques τn=km​ωn2\\tau\\_{n}=k\\_{m}\\omega\\_{n}^{2} , n=1,2,3,4n=1,2,3,4 are executed by rotation of the propellers where kfk\\_{f} and kmk\\_{m} denote the aerodynamic characteristics of the propellers. ωn\\omega\\_{n} is the angular velocity of the impeller nn and βn\\beta\\_{n} represents the hedral angle of the rotor axis nn. mm indicates the mass of the body. The general form of Newton-Euler equation is as following:\n\nfn=kf​ωn2f_{n}=k_{f}\\omega_{n}^{2}\n\nτn=km​ωn2\\tau_{n}=k_{m}\\omega_{n}^{2}\n\nn=1,2,3,4n=1,2,3,4\n\nkfk_{f}\n\nkmk_{m}\n\nωn\\omega_{n}\n\nnn\n\nβn\\beta_{n}\n\nnn\n\nmm\n\n| | | | | | --- | --- | --- | --- | | | mI𝒑¨=I𝒇+mI𝒈,m\\mathchoice{\\mathop{}\\kern 4.58821pt\\mathopen{\\vphantom{\\ddot{\\bm{p}}}}\\_{\\mathmakebox[0pt][r]{I}}}{\\mathop{}\\kern 4.58821pt\\mathopen{\\vphantom{\\ddot{\\bm{p}}}}\\_{\\mathmakebox[0pt][r]{I}}}{\\mathop{}\\kern 4.01738pt\\mathopen{\\vphantom{\\ddot{\\bm{p}}}}\\_{\\mathmakebox[0pt][r]{I}}}{\\mathop{}\\kern 4.01738pt\\mathopen{\\vphantom{\\ddot{\\bm{p}}}}\\_{\\mathmakebox[0pt][r]{I}}}\\ddot{\\bm{p}}=\\mathchoice{\\mathop{}\\kern 4.58821pt\\mathopen{\\vphantom{\\bm{f}}}\\_{\\mathmakebox[0pt][r]{I}}}{\\mathop{}\\kern 4.58821pt\\mathopen{\\vphantom{\\bm{f}}}\\_{\\mathmakebox[0pt][r]{I}}}{\\mathop{}\\kern 4.01738pt\\mathopen{\\vphantom{\\bm{f}}}\\_{\\mathmakebox[0pt][r]{I}}}{\\mathop{}\\kern 4.01738pt\\mathopen{\\vphantom{\\bm{f}}}\\_{\\mathmakebox[0pt][r]{I}}}\\bm{f}+m\\mathchoice{\\mathop{}\\kern 4.58821pt\\mathopen{\\vphantom{\\bm{g}}}\\_{\\mathmakebox[0pt][r]{I}}}{\\mathop{}\\kern 4.58821pt\\mathopen{\\vphantom{\\bm{g}}}\\_{\\mathmakebox[0pt][r]{I}}}{\\mathop{}\\kern 4.01738pt\\mathopen{\\vphantom{\\bm{g}}}\\_{\\mathmakebox[0pt][r]{I}}}{\\mathop{}\\kern 4.01738pt\\mathopen{\\vphantom{\\bm{g}}}\\_{\\mathmakebox[0pt][r]{I}}}\\bm{g}, | | (1) |\n\n| | | | | | --- | --- | --- | --- | | | 𝑱B𝝎˙=−B𝛀𝑱B𝝎+B𝝉,\\bm{J}\\mathchoice{\\mathop{}\\kern 6.883pt\\mathopen{\\vphantom{\\dot{\\bm{\\omega}}}}\\_{\\mathmakebox[0pt][r]{B}}}{\\mathop{}\\kern 6.883pt\\mathopen{\\vphantom{\\dot{\\bm{\\omega}}}}\\_{\\mathmakebox[0pt][r]{B}}}{\\mathop{}\\kern 5.91846pt\\mathopen{\\vphantom{\\dot{\\bm{\\omega}}}}\\_{\\mathmakebox[0pt][r]{B}}}{\\mathop{}\\kern 5.91846pt\\mathopen{\\vphantom{\\dot{\\bm{\\omega}}}}\\_{\\mathmakebox[0pt][r]{B}}}\\dot{\\bm{\\omega}}=-\\mathchoice{\\mathop{}\\kern 6.883pt\\mathopen{\\vphantom{\\bm{\\Omega}}}\\_{\\mathmakebox[0pt][r]{B}}}{\\mathop{}\\kern 6.883pt\\mathopen{\\vphantom{\\bm{\\Omega}}}\\_{\\mathmakebox[0pt][r]{B}}}{\\mathop{}\\kern 5.91846pt\\mathopen{\\vphantom{\\bm{\\Omega}}}\\_{\\mathmakebox[0pt][r]{B}}}{\\mathop{}\\kern 5.91846pt\\mathopen{\\vphantom{\\bm{\\Omega}}}\\_{\\mathmakebox[0pt][r]{B}}}\\bm{\\Omega}\\bm{J}\\mathchoice{\\mathop{}\\kern 6.883pt\\mathopen{\\vphantom{\\bm{\\omega}}}\\_{\\mathmakebox[0pt][r]{B}}}{\\mathop{}\\kern 6.883pt\\mathopen{\\vphantom{\\bm{\\omega}}}\\_{\\mathmakebox[0pt][r]{B}}}{\\mathop{}\\kern 5.91846pt\\mathopen{\\vphantom{\\bm{\\omega}}}\\_{\\mathmakebox[0pt][r]{B}}}{\\mathop{}\\kern 5.91846pt\\mathopen{\\vphantom{\\bm{\\omega}}}\\_{\\mathmakebox[0pt][r]{B}}}\\bm{\\omega}+\\mathchoice{\\mathop{}\\kern 6.883pt\\mathopen{\\vphantom{\\bm{\\tau}}}\\_{\\mathmakebox[0pt][r]{B}}}{\\mathop{}\\kern 6.883pt\\mathopen{\\vphantom{\\bm{\\tau}}}\\_{\\mathmakebox[0pt][r]{B}}}{\\mathop{}\\kern 5.91846pt\\mathopen{\\vphantom{\\bm{\\tau}}}\\_{\\mathmakebox[0pt][r]{B}}}{\\mathop{}\\kern 5.91846pt\\mathopen{\\vphantom{\\bm{\\tau}}}\\_{\\mathmakebox[0pt][r]{B}}}\\bm{\\tau}, | | (2) |\n\nwhere II and BB indices respectively denote the inertia and body frames. The rotation sequence from the inertia to the body frame involves the Euler angles ψ\\psi, θ\\theta, and ϕ\\phi, corresponding to rotations about the ZZ, y′y^{\\prime}, and x′′x^{\\prime\\prime} axes in that order. I𝒑¨=[X¨Y¨Z¨]T\\mathchoice{\\mathop{}\\kern 4.58821pt\\mathopen{\\vphantom{\\ddot{\\bm{p}}}}\\_{\\mathmakebox[0pt][r]{I}}}{\\mathop{}\\kern 4.58821pt\\mathopen{\\vphantom{\\ddot{\\bm{p}}}}\\_{\\mathmakebox[0pt][r]{I}}}{\\mathop{}\\kern 4.01738pt\\mathopen{\\vphantom{\\ddot{\\bm{p}}}}\\_{\\mathmakebox[0pt][r]{I}}}{\\mathop{}\\kern 4.01738pt\\mathopen{\\vphantom{\\ddot{\\bm{p}}}}\\_{\\mathmakebox[0pt][r]{I}}}\\ddot{\\bm{p}}=[\\ddot{X}\\quad\\ddot{Y}\\quad\\ddot{Z}]^{T} is the acceleration vector in the inertia frame. 𝒇\\bm{f} and 𝝉\\bm{\\tau} respectively represent the thrust and torque vectors produced by rotation of propellers. 𝒈\\bm{g} is the gravity constant vector and 𝑱\\bm{J} denotes the inertial moment matrix expressed in the body frame. 𝝎\\bm{\\omega} indicates the rotational velocity of the body and 𝛀\\bm{\\Omega} represents the skew-symmetric matrix of the 𝝎\\bm{\\omega}.\n\nII\n\nBB\n\nψ\\psi\n\nθ\\theta\n\nϕ\\phi\n\nZZ\n\ny′y^{\\prime}\n\nx′′x^{\\prime\\prime}\n\n𝒇\\bm{f}\n\n𝝉\\bm{\\tau}\n\n𝒈\\bm{g}\n\n𝑱\\bm{J}\n\n𝝎\\bm{\\omega}\n\n𝛀\\bm{\\Omega}\n\n𝝎\\bm{\\omega}"
+    },
+    {
+      "heading_path": [
+        "Hybrid Neural Network and Conventional Controller Approach for Robust Control of Highly Unstable Systems: Application to Tilt-Rotor Control",
+        "II Sliding Mode Controller Design"
+      ],
+      "text": "## II Sliding Mode Controller Design\n\nLet\n\n| | | | | | --- | --- | --- | --- | | | 𝒙¯=[XYZϕθψ]⊺,\\bm{\\bar{x}}=\\begin{array}[]{cccccc}[X&Y&Z&\\phi&\\theta&\\psi]^{\\intercal}\\end{array}, | | (3) |\n\n𝒙¯=[XYZϕθψ]⊺,\\bm{\\bar{x}}=\\begin{array}[]{cccccc}[X&Y&Z&\\phi&\\theta&\\psi]^{\\intercal}\\end{array},\n\nControl input vector for Hedral quadrotor including the inputs for BLDC (BLDC) and servo motors is expressed as\n\n| | | | | | --- | --- | --- | --- | | | 𝒖=[ω1ω2ω3ω4β1β2β3β4]⊺.\\displaystyle\\bm{u}=[\\begin{array}[]{l l l l l l l l}\\omega\\_{1}&\\omega\\_{2}&\\omega\\_{3}&\\omega\\_{4}&\\beta\\_{1}&\\beta\\_{2}&\\beta\\_{3}&\\beta\\_{4}\\\\ \\end{array}]^{\\intercal}. | | (4) |\n\n𝒖=[ω1ω2ω3ω4β1β2β3β4]⊺.\\displaystyle\\bm{u}=[\\begin{array}[]{l l l l l l l l}\\omega_{1}&\\omega_{2}&\\omega_{3}&\\omega_{4}&\\beta_{1}&\\beta_{2}&\\beta_{3}&\\beta_{4}\\\\ \\end{array}]^{\\intercal}.\n\nThe dynamic equations for Hedral quadrotor are not affine in input, causing the problem with the allocation of control signals to the actuators directly. To solve this problem, [[23](https://ar5iv.labs.arxiv.org/html/2606.08714v1#bib.bib23)] offered the use of a virtual intermediary input set 𝒗\\bm{v} to make the equations input-affine.\n\n𝒗\\bm{v}\n\n| | | | | | --- | --- | --- | --- | | | 𝒗=[v1v2...v8]⊺,\\bm{v}=\\left[\\begin{array}[]{cccc}v\\_{1}&v\\_{2}&...&v\\_{8}\\end{array}\\right]^{\\intercal}, | | (5) |\n\n𝒗=[v1v2...v8]⊺,\\bm{v}=\\left[\\begin{array}[]{cccc}v_{1}&v_{2}&...&v_{8}\\end{array}\\right]^{\\intercal},\n\nwhere\n\n| | | | | | --- | --- | --- | --- | | | vi=ωi2sinβi,vi+4=ωi2cosβi,i=1,2,3,4.v\\_{i}=\\omega\\_{i}^{2}\\sin\\beta\\_{i},\\quad v\\_{i+4}=\\omega\\_{i}^{2}\\cos\\beta\\_{i},\\quad i=1,2,3,4. | | (6) |\n\nThus the equations of motion for Hedral quadrotor can be described in the input-affine form\n\n| | | | | | --- | --- | --- | --- | | | 𝒙¯¨=𝒂+𝑮​𝒗,\\ddot{{\\bar{\\bm{x}}}}=\\bm{a}+\\bm{G}\\bm{v}, | | (7) |\n\n𝒙¯¨=𝒂+𝑮​𝒗,\\ddot{{\\bar{\\bm{x}}}}=\\bm{a}+\\bm{G}\\bm{v},\n\nwhere\n\n| | | | | | --- | --- | --- | --- | | | 𝑮=∂𝒙¯¨∂𝒗,𝒂=𝒙¯¨−∂𝒙¯¨∂𝒗​𝒗.\\bm{G}=\\frac{\\partial\\ddot{\\bm{\\bar{x}}}}{\\partial\\bm{v}}\\quad,\\quad\\bm{a}=\\ddot{\\bm{\\bar{x}}}-\\frac{\\partial\\ddot{\\bm{\\bar{x}}}}{\\partial\\bm{v}}\\bm{v}. | | (8) |\n\n𝑮=∂𝒙¯¨∂𝒗,𝒂=𝒙¯¨−∂𝒙¯¨∂𝒗​𝒗.\\bm{G}=\\frac{\\partial\\ddot{\\bm{\\bar{x}}}}{\\partial\\bm{v}}\\quad,\\quad\\bm{a}=\\ddot{\\bm{\\bar{x}}}-\\frac{\\partial\\ddot{\\bm{\\bar{x}}}}{\\partial\\bm{v}}\\bm{v}.\n\nDefining the sliding surfaces as\n\n| | | | | | --- | --- | --- | --- | | | 𝒔=𝒙¯˙−𝒙¯˙d+𝝀⁡(𝒙¯−𝒙¯d),\\bm{s}=\\bm{\\dot{\\bar{x}}}-\\bm{\\dot{\\bar{x}}}\\_{d}+\\bm{\\lambda}(\\bm{\\bar{x}}-\\bm{\\bar{x}}\\_{d}), | | (9) |\n\n𝒔=𝒙¯˙−𝒙¯˙d+𝝀⁡(𝒙¯−𝒙¯d),\\bm{s}=\\bm{\\dot{\\bar{x}}}-\\bm{\\dot{\\bar{x}}}_{d}+\\bm{\\lambda}(\\bm{\\bar{x}}-\\bm{\\bar{x}}_{d}),\n\nwhere 𝒙¯d\\bm{\\bar{x}}\\_{d} represents the desired state of 𝒙¯\\bm{\\bar{x}} and 𝝀\\bm{\\lambda} is a 6×66\\times 6 diagonal matrix with positive constant values on its diagonal [[26](https://ar5iv.labs.arxiv.org/html/2606.08714v1#bib.bib26)].\n\n𝒙¯d\\bm{\\bar{x}}_{d}\n\n𝒙¯\\bm{\\bar{x}}\n\n𝝀\\bm{\\lambda}\n\n6×66\\times 6\n\nThe asymptotic stability condition of the system is\n\n| | | | | | --- | --- | --- | --- | | | 12​dd​t​si2≤−ηi​|si|i=1,2,3,4,\\frac{1}{2}\\frac{d}{dt}s\\_{i}^{2}\\leq-\\eta\\_{i}|s\\_{i}|\\quad i=1,2,3,4\\quad, | | (10) |\n\n12​dd​t​si2≤−ηi​|si|i=1,2,3,4,\\frac{1}{2}\\frac{d}{dt}s_{i}^{2}\\leq-\\eta_{i}|s_{i}|\\quad i=1,2,3,4\\quad,\n\nwhere sis\\_{i} corresponds to the i-th element of 𝒔\\bm{s} and ηi\\eta\\_{i} denotes a strictly positive constant [[26](https://ar5iv.labs.arxiv.org/html/2606.08714v1#bib.bib26)]. The control law is formulated by\n\nsis_{i}\n\n𝒔\\bm{s}\n\nηi\\eta_{i}\n\n| | | | | | --- | --- | --- | --- | | | 𝑮​𝒗=𝒙¯¨d+𝝀⁡(𝒙¯˙d−𝒙¯˙)−𝒂−𝑲​tanh⁡(σ​𝒔)=𝒘.\\bm{G}\\bm{v}=\\ddot{\\bar{\\bm{x}}}\\_{d}+\\bm{\\lambda}(\\dot{\\bar{\\bm{x}}}\\_{d}-\\dot{\\bar{\\bm{x}}})-\\bm{a}-\\bm{K}\\tanh{(\\sigma\\bm{s})}=\\bm{w}. | | (11) |\n\n𝑮​𝒗=𝒙¯¨d+𝝀⁡(𝒙¯˙d−𝒙¯˙)−𝒂−𝑲​tanh⁡(σ​𝒔)=𝒘.\\bm{G}\\bm{v}=\\ddot{\\bar{\\bm{x}}}_{d}+\\bm{\\lambda}(\\dot{\\bar{\\bm{x}}}_{d}-\\dot{\\bar{\\bm{x}}})-\\bm{a}-\\bm{K}\\tanh{(\\sigma\\bm{s})}=\\bm{w}.\n\n𝑮\\bm{G} is a none-square matrix, disabling directly calculation of 𝑮−1\\bm{G}^{-1} to obtain 𝒗\\bm{v}. The equation ([12](https://ar5iv.labs.arxiv.org/html/2606.08714v1#S2.E12 \"In II Sliding Mode Controller Design ‣ Hybrid Neural Network and Conventional Controller Approach for Robust Control of Highly Unstable Systems: Application to Tilt-Rotor Control\")) is used to solve the system 𝑮6×8​𝒗8×1=𝒘6×1\\bm{G}\\_{6\\times 8}\\bm{v}\\_{8\\times 1}=\\bm{w}\\_{6\\times 1}. This approach extracts the minimum-normed solution from the infinite set of solutions, minimizing the power consumption considering ([13](https://ar5iv.labs.arxiv.org/html/2606.08714v1#S2.E13 \"In II Sliding Mode Controller Design ‣ Hybrid Neural Network and Conventional Controller Approach for Robust Control of Highly Unstable Systems: Application to Tilt-Rotor Control\")) [[23](https://ar5iv.labs.arxiv.org/html/2606.08714v1#bib.bib23)].\n\n𝑮\\bm{G}\n\n𝑮−1\\bm{G}^{-1}\n\n𝒗\\bm{v}\n\n𝑮6×8​𝒗8×1=𝒘6×1\\bm{G}_{6\\times 8}\\bm{v}_{8\\times 1}=\\bm{w}_{6\\times 1}\n\n| | | | | | --- | --- | --- | --- | | | 𝒗=𝑮⊺​(𝑮​𝑮⊺)−1​𝒘.\\bm{v}=\\bm{G}^{\\intercal}(\\bm{G}\\bm{G}^{\\intercal})^{-1}\\bm{w}. | | (12) |\n\n𝒗=𝑮⊺​(𝑮​𝑮⊺)−1​𝒘.\\bm{v}=\\bm{G}^{\\intercal}(\\bm{G}\\bm{G}^{\\intercal})^{-1}\\bm{w}.\n\nNorm of 𝒗\\bm{v} is derived as\n\n𝒗\\bm{v}\n\n| | | | | | --- | --- | --- | --- | | | ‖𝒗‖=(v12+v22+…+v82)1/2=(ω14+ω24+ω34+ω44)1/2.\\|\\bm{v}\\|=(v\\_{1}^{2}+v\\_{2}^{2}+...+v\\_{8}^{2})^{1/2}=(\\omega\\_{1}^{4}+\\omega\\_{2}^{4}+\\omega\\_{3}^{4}+\\omega\\_{4}^{4})^{1/2}. | | (13) |\n\n‖𝒗‖=(v12+v22+…+v82)1/2=(ω14+ω24+ω34+ω44)1/2.\\|\\bm{v}\\|=(v_{1}^{2}+v_{2}^{2}+...+v_{8}^{2})^{1/2}=(\\omega_{1}^{4}+\\omega_{2}^{4}+\\omega_{3}^{4}+\\omega_{4}^{4})^{1/2}.\n\nFinally, the primary control signals for actuators would be obtained as\n\n| | | | | | | --- | --- | --- | --- | --- | | | | βi=tan−1⁡(vivi+4),\\displaystyle\\beta\\_{i}=\\tan^{-1}(\\frac{v\\_{i}}{v\\_{i+4}}), | | (14) | | | | ωi=(vi2+vi+42)1/4,i=1,2,3,4.\\displaystyle\\omega\\_{i}=(v\\_{i}^{2}+v\\_{i+4}^{2})^{1/4}\\quad,i=1,2,3,4. | |\n\nβi=tan−1⁡(vivi+4),\\displaystyle\\beta_{i}=\\tan^{-1}(\\frac{v_{i}}{v_{i+4}}),\n\nωi=(vi2+vi+42)1/4,i=1,2,3,4.\\displaystyle\\omega_{i}=(v_{i}^{2}+v_{i+4}^{2})^{1/4}\\quad,i=1,2,3,4."
+    },
+    {
+      "heading_path": [
+        "Hybrid Neural Network and Conventional Controller Approach for Robust Control of Highly Unstable Systems: Application to Tilt-Rotor Control",
+        "III Direct Input-Output Training Method for Control"
+      ],
+      "text": "## III Direct Input-Output Training Method for Control\n\nIn this section, we train several networks to replicate the behavior of the controller we designed. Inputs to the network are 𝒙¯\\bar{\\bm{x}} as illustrated by ([3](https://ar5iv.labs.arxiv.org/html/2606.08714v1#S2.E3 \"In II Sliding Mode Controller Design ‣ Hybrid Neural Network and Conventional Controller Approach for Robust Control of Highly Unstable Systems: Application to Tilt-Rotor Control\")) and its desired vector 𝒙¯d\\bar{\\bm{x}}\\_{d} for each time step. The outputs of the network are the control signals for the next step, denoted by 𝒖\\bm{u} as represented in ([4](https://ar5iv.labs.arxiv.org/html/2606.08714v1#S2.E4 \"In II Sliding Mode Controller Design ‣ Hybrid Neural Network and Conventional Controller Approach for Robust Control of Highly Unstable Systems: Application to Tilt-Rotor Control\")). Given the multi-level control allocation required for a conventional controller, the direct input-output control method may offer the advantage of reduced computational cost.\n\n𝒙¯\\bar{\\bm{x}}\n\n𝒙¯d\\bar{\\bm{x}}_{d}\n\n𝒖\\bm{u}\n\nWe aim to investigate three key aspects:\n\n* • Whether such a system can be properly trained to achieve acceptable test results, even without application to the dynamic system. * • Whether this methodology is applicable to such an unstable and intricate dynamic system. * • Whether this controller has a lower computational cost compared to a conventional one.\n\nWhether such a system can be properly trained to achieve acceptable test results, even without application to the dynamic system.\n\nWhether this methodology is applicable to such an unstable and intricate dynamic system.\n\nWhether this controller has a lower computational cost compared to a conventional one."
+    },
+    {
+      "heading_path": [
+        "Hybrid Neural Network and Conventional Controller Approach for Robust Control of Highly Unstable Systems: Application to Tilt-Rotor Control",
+        "III Direct Input-Output Training Method for Control",
+        "III-A Data Collection"
+      ],
+      "text": "### III-A Data Collection\n\nThe dataset should cover a large combination of input values with as much as possible small number of samples. To achieve this, we set sinusoidal trajectories with different frequencies. This makes various combination of values for the elements of input vector. Also, five different maneuvers are taken into account, making the trajectories discontinuous to include some hard initial values in the dataset, along with refining the data with more various samples. The system with the controller designed in section [II](https://ar5iv.labs.arxiv.org/html/2606.08714v1#S2 \"II Sliding Mode Controller Design ‣ Hybrid Neural Network and Conventional Controller Approach for Robust Control of Highly Unstable Systems: Application to Tilt-Rotor Control\") is simulated for 200 seconds for each maneuver with a time step of 0.1 seconds, resulting in 10,000 samples. The maneuvers are represented by ([15](https://ar5iv.labs.arxiv.org/html/2606.08714v1#S3.E15 \"In III-A Data Collection ‣ III Direct Input-Output Training Method for Control ‣ Hybrid Neural Network and Conventional Controller Approach for Robust Control of Highly Unstable Systems: Application to Tilt-Rotor Control\")) and detailed in Table [I](https://ar5iv.labs.arxiv.org/html/2606.08714v1#S3.T1 \"TABLE I ‣ III-A Data Collection ‣ III Direct Input-Output Training Method for Control ‣ Hybrid Neural Network and Conventional Controller Approach for Robust Control of Highly Unstable Systems: Application to Tilt-Rotor Control\").\n\n| | | | | | | --- | --- | --- | --- | --- | | | | trajectoryi=Aisinνit\\displaystyle trajectory\\_{i}=A\\_{i}\\sin\\nu\\_{i}t | | (15) | | | | f​o​ri=X,Y,Z,ϕ,θ,ψ\\displaystyle for\\quad i=X,Y,Z,\\phi,\\theta,\\psi | |\n\ntrajectoryi=Aisinνit\\displaystyle trajectory_{i}=A_{i}\\sin\\nu_{i}t\n\nf​o​ri=X,Y,Z,ϕ,θ,ψ\\displaystyle for\\quad i=X,Y,Z,\\phi,\\theta,\\psi\n\n| | | | | | | | | | --- | --- | --- | --- | --- | --- | --- | --- | | man. | AXA\\_{X} νX\\nu\\_{X} | AYA\\_{Y} νY\\nu\\_{Y} | AZA\\_{Z} νZ\\nu\\_{Z} | AϕA\\_{\\phi} νϕ\\nu\\_{\\phi} | AθA\\_{\\theta} νθ\\nu\\_{\\theta} | AψA\\_{\\psi} νψ\\nu\\_{\\psi} | usage samples | | 1 | 3 0.3 | 3 0.4 | 3 0.1 | 30∘30^{\\circ} 0.4 | 30∘30^{\\circ} 0.3 | 360∘360^{\\circ} 0.2 | t​r​a​i​ntrain 20002000 | | 2 | 3 0.4 | 4 0.35 | 5 0.25 | 25∘25^{\\circ} 0.3 | 30∘30^{\\circ} 0.2 | 360∘360^{\\circ} 0.1 | t​r​a​i​ntrain 50005000 | | 3 | 5 0.3 | 5 0.2 | 5 0.1 | 25∘25^{\\circ} 0.15 | 25∘25^{\\circ} 0.35 | 360∘360^{\\circ} 0.15 | t​r​a​i​ntrain 10001000 | | 4 | 4 0.4 | 3.5 0.3 | 4 0.15 | 30∘30^{\\circ} 0.4 | 30∘30^{\\circ} 0.2 | 360∘360^{\\circ} 0.3 | v​a​l​i​d​a​t​i​o​nvalidation 10001000 | | 5 | 3 0.5 | 3 0.3 | 4 0.2 | 30∘30^{\\circ} 0.2 | 30∘30^{\\circ} 0.4 | 360∘360^{\\circ} 0.2 | t​e​s​ttest 10001000 |\n\nAXA_{X}\n\nνX\\nu_{X}\n\nAYA_{Y}\n\nνY\\nu_{Y}\n\nAZA_{Z}\n\nνZ\\nu_{Z}\n\nAϕA_{\\phi}\n\nνϕ\\nu_{\\phi}\n\nAθA_{\\theta}\n\nνθ\\nu_{\\theta}\n\nAψA_{\\psi}\n\nνψ\\nu_{\\psi}\n\n30∘30^{\\circ}\n\n30∘30^{\\circ}\n\n360∘360^{\\circ}\n\nt​r​a​i​ntrain\n\n20002000\n\n25∘25^{\\circ}\n\n30∘30^{\\circ}\n\n360∘360^{\\circ}\n\nt​r​a​i​ntrain\n\n50005000\n\n25∘25^{\\circ}\n\n25∘25^{\\circ}\n\n360∘360^{\\circ}\n\nt​r​a​i​ntrain\n\n10001000\n\n30∘30^{\\circ}\n\n30∘30^{\\circ}\n\n360∘360^{\\circ}\n\nv​a​l​i​d​a​t​i​o​nvalidation\n\n10001000\n\n30∘30^{\\circ}\n\n30∘30^{\\circ}\n\n360∘360^{\\circ}\n\nt​e​s​ttest\n\n10001000"
+    },
+    {
+      "heading_path": [
+        "Hybrid Neural Network and Conventional Controller Approach for Robust Control of Highly Unstable Systems: Application to Tilt-Rotor Control",
+        "III Direct Input-Output Training Method for Control",
+        "III-B MLP Network"
+      ],
+      "text": "### III-B MLP Network\n\nA MLP (MLP) network with the architecture represented in Fig. [3](https://ar5iv.labs.arxiv.org/html/2606.08714v1#S3.F3 \"Fig. 3 ‣ III-B MLP Network ‣ III Direct Input-Output Training Method for Control ‣ Hybrid Neural Network and Conventional Controller Approach for Robust Control of Highly Unstable Systems: Application to Tilt-Rotor Control\") is incorporated. ADAM optimizer is used in training process for 1400 epochs. This network exhibited 3.86 and 10.85 MAE (MAE) in train and test respectively."
+    },
+    {
+      "heading_path": [
+        "Hybrid Neural Network and Conventional Controller Approach for Robust Control of Highly Unstable Systems: Application to Tilt-Rotor Control",
+        "III Direct Input-Output Training Method for Control",
+        "III-C LSTM-Based Network"
+      ],
+      "text": "### III-C LSTM-Based Network\n\nThe architecture of the LSTM (LSTM)-based network is visualized in Fig. [4](https://ar5iv.labs.arxiv.org/html/2606.08714v1#S3.F4 \"Fig. 4 ‣ III-C LSTM-Based Network ‣ III Direct Input-Output Training Method for Control ‣ Hybrid Neural Network and Conventional Controller Approach for Robust Control of Highly Unstable Systems: Application to Tilt-Rotor Control\"). The network is trained using ADAM optimizer in 300 epochs. MAE metric for train and test equals respectively to 2.62 and 10.61."
+    },
+    {
+      "heading_path": [
+        "Hybrid Neural Network and Conventional Controller Approach for Robust Control of Highly Unstable Systems: Application to Tilt-Rotor Control",
+        "III Direct Input-Output Training Method for Control",
+        "III-D Transformer-Based Network"
+      ],
+      "text": "### III-D Transformer-Based Network\n\nThe transformer network is well-designed for capturing long dependencies, making it ideal for applications like text processing. Although dynamic systems typically exhibit shorter dependencies, we explored the applicability of the transformer network in training our system.\n\nThe transformer model is designed with the following layers:\n\n* • Input Layer: Shape (1,12)(1,12) * • Transformer Encoder Layer: + – Normalization and Multi-Head Attention: - \\* Head Size: 64 - \\* Number of Heads: 4 + – Feed Forward Dimension: 4 + – Dropout: 0.3 + – Feed Forward Network: - \\* Dense Layer with ReLU activation and 4 units - \\* Dropout: 0.3 - \\* Dense Layer to match the input shape * • Flatten Layer * • Dense Layers: + – Dense Layer with 64 units and ReLU activation + – Dropout: 0.05 * • Output Layer: Dense Layer with 8 units\n\nInput Layer: Shape (1,12)(1,12)\n\n(1,12)(1,12)\n\nTransformer Encoder Layer:\n\n* – Normalization and Multi-Head Attention: + \\* Head Size: 64 + \\* Number of Heads: 4 * – Feed Forward Dimension: 4 * – Dropout: 0.3 * – Feed Forward Network: + \\* Dense Layer with ReLU activation and 4 units + \\* Dropout: 0.3 + \\* Dense Layer to match the input shape\n\nNormalization and Multi-Head Attention:\n\n* \\* Head Size: 64 * \\* Number of Heads: 4\n\nHead Size: 64\n\nNumber of Heads: 4\n\nFeed Forward Dimension: 4\n\nDropout: 0.3\n\nFeed Forward Network:\n\n* \\* Dense Layer with ReLU activation and 4 units * \\* Dropout: 0.3 * \\* Dense Layer to match the input shape\n\nDense Layer with ReLU activation and 4 units\n\nDropout: 0.3\n\nDense Layer to match the input shape\n\nFlatten Layer\n\nDense Layers:\n\n* – Dense Layer with 64 units and ReLU activation * – Dropout: 0.05\n\nDense Layer with 64 units and ReLU activation\n\nDropout: 0.05\n\nOutput Layer: Dense Layer with 8 units\n\nThe network is trained using ADAM optimizer in 10000 epochs. MAE metric for train and test equals respectively to 5.26 and 9.49.\n\nThe prediction results for 1000 train samples and the whole test dataset are illustrated respectively in Fig. [5](https://ar5iv.labs.arxiv.org/html/2606.08714v1#S3.F5 \"Fig. 5 ‣ III-D Transformer-Based Network ‣ III Direct Input-Output Training Method for Control ‣ Hybrid Neural Network and Conventional Controller Approach for Robust Control of Highly Unstable Systems: Application to Tilt-Rotor Control\") and Fig. [6](https://ar5iv.labs.arxiv.org/html/2606.08714v1#S3.F6 \"Fig. 6 ‣ III-D Transformer-Based Network ‣ III Direct Input-Output Training Method for Control ‣ Hybrid Neural Network and Conventional Controller Approach for Robust Control of Highly Unstable Systems: Application to Tilt-Rotor Control\"). Table [II](https://ar5iv.labs.arxiv.org/html/2606.08714v1#S3.T2 \"TABLE II ‣ III-D Transformer-Based Network ‣ III Direct Input-Output Training Method for Control ‣ Hybrid Neural Network and Conventional Controller Approach for Robust Control of Highly Unstable Systems: Application to Tilt-Rotor Control\") represents the Summary of the networks used for training direct input-output controller. As indicated by this table, the transformer network exhibited better results in predicting control signals based on state feedback and the desired state. However, overall, there is no significant difference between their results on the test set.\n\n| | | | | | | --- | --- | --- | --- | --- | | Network | Train Epochs | Parameters | Train MAE | Test MAE | | MLP | 1400 | 45000 | 3.86 | 10.85 | | LSTM | 300 | 257864 | 2.62 | 10.61 | | Transformer | 10000 | 14580 | 5.26 | 9.49 |"
+    },
+    {
+      "heading_path": [
+        "Hybrid Neural Network and Conventional Controller Approach for Robust Control of Highly Unstable Systems: Application to Tilt-Rotor Control",
+        "III Direct Input-Output Training Method for Control",
+        "III-E Implementation on the Dynamic System"
+      ],
+      "text": "### III-E Implementation on the Dynamic System\n\nTo evaluate the feasibility of the direct input-output control approach, we initially applied it to a trained trajectory using the LSTM-based network, which exhibited the best results for this purpose. The parameters for simulation are represented in Table [III](https://ar5iv.labs.arxiv.org/html/2606.08714v1#S3.T3 \"TABLE III ‣ III-E Implementation on the Dynamic System ‣ III Direct Input-Output Training Method for Control ‣ Hybrid Neural Network and Conventional Controller Approach for Robust Control of Highly Unstable Systems: Application to Tilt-Rotor Control\"). As illustrated in Fig. [7](https://ar5iv.labs.arxiv.org/html/2606.08714v1#S3.F7 \"Fig. 7 ‣ III-E Implementation on the Dynamic System ‣ III Direct Input-Output Training Method for Control ‣ Hybrid Neural Network and Conventional Controller Approach for Robust Control of Highly Unstable Systems: Application to Tilt-Rotor Control\"), the direct input-output control method proves ineffective for our dynamic system, even with a well-fitted function as shown in Fig. [5](https://ar5iv.labs.arxiv.org/html/2606.08714v1#S3.F5 \"Fig. 5 ‣ III-D Transformer-Based Network ‣ III Direct Input-Output Training Method for Control ‣ Hybrid Neural Network and Conventional Controller Approach for Robust Control of Highly Unstable Systems: Application to Tilt-Rotor Control\") for the control signal. This ineffectiveness arises because the network does not aim to minimize the error value in real-time, leading to the accumulation of small error values that ultimately cause divergence. Due to this issue, it is not feasible to compare the real-time computational cost between the conventional controller and those based on different neural networks.\n\n| | | | | --- | --- | --- | | Parameter | Value | Unit | | gg | 9.819.81 | m/s2m/s^{2} | | mm | 11 | k​gkg | | ll | 0.30.3 | mm | | ee | 00 | mm | | Ix​xI\\_{xx} | 10×10−310\\times 10^{-3} | k​g.m2kg.m^{2} | | Iy​yI\\_{yy} | 10×10−310\\times 10^{-3} | k​g.m2kg.m^{2} | | Iz​zI\\_{zz} | 17×10−317\\times 10^{-3} | k​g.m2kg.m^{2} | | kfk\\_{f} | 6×10−66\\times 10^{-6} | N.s2N.s^{2} | | kmk\\_{m} | 4×10−74\\times 10^{-7} | N.m.s2N.m.s^{2} |\n\ngg\n\n9.819.81\n\nm/s2m/s^{2}\n\nmm\n\n11\n\nk​gkg\n\nll\n\n0.30.3\n\nmm\n\nee\n\n00\n\nmm\n\nIx​xI_{xx}\n\n10×10−310\\times 10^{-3}\n\nk​g.m2kg.m^{2}\n\nIy​yI_{yy}\n\n10×10−310\\times 10^{-3}\n\nk​g.m2kg.m^{2}\n\nIz​zI_{zz}\n\n17×10−317\\times 10^{-3}\n\nk​g.m2kg.m^{2}\n\nkfk_{f}\n\n6×10−66\\times 10^{-6}\n\nN.s2N.s^{2}\n\nkmk_{m}\n\n4×10−74\\times 10^{-7}\n\nN.m.s2N.m.s^{2}"
+    },
+    {
+      "heading_path": [
+        "Hybrid Neural Network and Conventional Controller Approach for Robust Control of Highly Unstable Systems: Application to Tilt-Rotor Control",
+        "III Direct Input-Output Training Method for Control",
+        "III-F Challenges and Limitations"
+      ],
+      "text": "### III-F Challenges and Limitations\n\nThe methodology introduced in this section has several issues for our application, which will be addressed in the next section. Despite these limitations, the results obtained here can be useful for other dynamic systems or future research. The key challenges and limitations are summarized as follows:\n\n* • Convergence issues even on the trained trajectories. * • Inability to train over a wide range of positions. * • Requirement of a large training dataset for accurate predictions. * • Lack of robustness. * • Inability to incorporate an effective unit to enhance control robustness due to the complex nature of the system dynamics.\n\nConvergence issues even on the trained trajectories.\n\nInability to train over a wide range of positions.\n\nRequirement of a large training dataset for accurate predictions.\n\nLack of robustness.\n\nInability to incorporate an effective unit to enhance control robustness due to the complex nature of the system dynamics."
+    },
+    {
+      "heading_path": [
+        "Hybrid Neural Network and Conventional Controller Approach for Robust Control of Highly Unstable Systems: Application to Tilt-Rotor Control",
+        "IV A Neural Network- Based Sliding Mode Control"
+      ],
+      "text": "## IV A Neural Network- Based Sliding Mode Control"
+    },
+    {
+      "heading_path": [
+        "Hybrid Neural Network and Conventional Controller Approach for Robust Control of Highly Unstable Systems: Application to Tilt-Rotor Control",
+        "IV A Neural Network- Based Sliding Mode Control",
+        "IV-A Methodology"
+      ],
+      "text": "### IV-A Methodology\n\nA precise identification of our plant dynamics is not possible by training a network using input-output pairs without a controller. This is due to the system’s instability, which leads to divergence and failure within a few seconds. Therefore, in the last section, we attempted to control the system using a network without relying on its dynamics. However, we encountered some issues. If we can approximate the dynamic model of the plant, we can incorporate it into a robust model-based controller to achieve precise control. The main idea of this section is to decompose the plant’s dynamics into parts that are independent of control inputs and solely dependent on the system’s states, and integrate them into a SMC (SMC). By incorporating vector 𝒗\\bm{v} introduced in Equation [5](https://ar5iv.labs.arxiv.org/html/2606.08714v1#S2.E5 \"In II Sliding Mode Controller Design ‣ Hybrid Neural Network and Conventional Controller Approach for Robust Control of Highly Unstable Systems: Application to Tilt-Rotor Control\"), the approximate dynamics of the plant can be written as:\n\n𝒗\\bm{v}\n\n| | | | | | --- | --- | --- | --- | | | 𝒙¯¨^6×1=𝒂^6×1+𝑮^6×8​𝒗8×1,\\hat{{\\ddot{\\bar{\\bm{x}}}}}\\_{6\\times 1}=\\bm{\\hat{a}}\\_{6\\times 1}+\\bm{\\hat{G}}\\_{6\\times 8}\\bm{v}\\_{8\\times 1}, | | (16) |\n\n𝒙¯¨^6×1=𝒂^6×1+𝑮^6×8​𝒗8×1,\\hat{{\\ddot{\\bar{\\bm{x}}}}}_{6\\times 1}=\\bm{\\hat{a}}_{6\\times 1}+\\bm{\\hat{G}}_{6\\times 8}\\bm{v}_{8\\times 1},\n\nwhere 𝒂^\\bm{\\hat{a}} and 𝑮^\\bm{\\hat{G}} are the approximations of 𝒂\\bm{a} and 𝑮\\bm{G}, respectively. 𝑮\\bm{G} is a matrix that relates the arrangement of the actuators to the dynamics. Thus, it is evident that 𝑮\\bm{G} varies with the attitude angles ϕ\\phi, θ\\theta, and ψ\\psi considering the fixed physical parameters of the plant-[III](https://ar5iv.labs.arxiv.org/html/2606.08714v1#S3.T3 \"TABLE III ‣ III-E Implementation on the Dynamic System ‣ III Direct Input-Output Training Method for Control ‣ Hybrid Neural Network and Conventional Controller Approach for Robust Control of Highly Unstable Systems: Application to Tilt-Rotor Control\"). Since XX, YY, and ZZ are position states expressed in the inertia frame, it is clear that 𝒂\\bm{a} varies with ϕ\\phi, ϕ˙\\dot{\\phi}, θ\\theta, θ˙\\dot{\\theta}, ψ\\psi, and ψ˙\\dot{\\psi}. Therefore, we need to predict 48 items for 𝑮^\\bm{\\hat{G}} based on 3 inputs and 6 items for 𝒂^\\bm{\\hat{a}} based on 6 inputs. We use the dataset represented in [I](https://ar5iv.labs.arxiv.org/html/2606.08714v1#S3.T1 \"TABLE I ‣ III-A Data Collection ‣ III Direct Input-Output Training Method for Control ‣ Hybrid Neural Network and Conventional Controller Approach for Robust Control of Highly Unstable Systems: Application to Tilt-Rotor Control\"), but with half the number of data points for training.\n\n𝒂^\\bm{\\hat{a}}\n\n𝑮^\\bm{\\hat{G}}\n\n𝒂\\bm{a}\n\n𝑮\\bm{G}\n\n𝑮\\bm{G}\n\n𝑮\\bm{G}\n\nϕ\\phi\n\nθ\\theta\n\nψ\\psi\n\nXX\n\nYY\n\nZZ\n\n𝒂\\bm{a}\n\nϕ\\phi\n\nϕ˙\\dot{\\phi}\n\nθ\\theta\n\nθ˙\\dot{\\theta}\n\nψ\\psi\n\nψ˙\\dot{\\psi}\n\n𝑮^\\bm{\\hat{G}}\n\n𝒂^\\bm{\\hat{a}}\n\nLow cost computation is vital for real-time applications. Therefor, we considered to use simple architecture as possible. Also, 𝒂^\\bm{\\hat{a}} and 𝑮^\\bm{\\hat{G}} are not too intricate to predict, unlike the predictions discussed in the previous section. Not encountering the over-fitting issue enables the elimination of dropout layers.\n\n𝒂^\\bm{\\hat{a}}\n\n𝑮^\\bm{\\hat{G}}"
+    },
+    {
+      "heading_path": [
+        "Hybrid Neural Network and Conventional Controller Approach for Robust Control of Highly Unstable Systems: Application to Tilt-Rotor Control",
+        "IV A Neural Network- Based Sliding Mode Control",
+        "IV-A Methodology",
+        "IV-A1 MLP Network"
+      ],
+      "text": "#### IV-A1 MLP Network\n\nFor train and prediction of 𝑮^\\bm{\\hat{G}}, 2 dense layers with 128 and 64 neurons are incorporated, along with the output layer of 48 neurons. For 𝒂^\\bm{\\hat{a}}, 3 dense layers with 32,16, and 8 neurons are used, along with the output layer.\n\n𝑮^\\bm{\\hat{G}}\n\n𝒂^\\bm{\\hat{a}}"
+    },
+    {
+      "heading_path": [
+        "Hybrid Neural Network and Conventional Controller Approach for Robust Control of Highly Unstable Systems: Application to Tilt-Rotor Control",
+        "IV A Neural Network- Based Sliding Mode Control",
+        "IV-A Methodology",
+        "IV-A2 LSTM Network"
+      ],
+      "text": "#### IV-A2 LSTM Network\n\nA LSTM block with dimension of 64 is used for 𝑮^\\bm{\\hat{G}} and one with dimension of 16 is used for 𝒂^\\bm{\\hat{a}}.\n\n𝑮^\\bm{\\hat{G}}\n\n𝒂^\\bm{\\hat{a}}"
+    },
+    {
+      "heading_path": [
+        "Hybrid Neural Network and Conventional Controller Approach for Robust Control of Highly Unstable Systems: Application to Tilt-Rotor Control",
+        "IV A Neural Network- Based Sliding Mode Control",
+        "IV-A Methodology",
+        "IV-A3 Transformer Network"
+      ],
+      "text": "#### IV-A3 Transformer Network\n\nUsing a Transformer for this specific application might not be appropriate choice, because they are computationally intensive and complex, adding unnecessary complexity without significant benefits for our straightforward relationships of 𝒂^\\bm{\\hat{a}} and 𝑮^\\bm{\\hat{G}}. Additionally, Transformers require a large amount of data to train effectively. Moreover, Transformers involve more overhead in terms of model size and inference time, which might not be suitable for our real-time application, along with the other high-cost computations needed for SMC.\n\n𝒂^\\bm{\\hat{a}}\n\n𝑮^\\bm{\\hat{G}}"
+    },
+    {
+      "heading_path": [
+        "Hybrid Neural Network and Conventional Controller Approach for Robust Control of Highly Unstable Systems: Application to Tilt-Rotor Control",
+        "IV A Neural Network- Based Sliding Mode Control",
+        "IV-B Baseline System Simulation"
+      ],
+      "text": "### IV-B Baseline System Simulation\n\nThe approximations of plant dynamics parameters, 𝒂^\\bm{\\hat{a}} and 𝑮^\\bm{\\hat{G}}, are predicted using neural networks based on necessary feedback in each loop and incorporated into the SMC controller designed in Section [II](https://ar5iv.labs.arxiv.org/html/2606.08714v1#S2 \"II Sliding Mode Controller Design ‣ Hybrid Neural Network and Conventional Controller Approach for Robust Control of Highly Unstable Systems: Application to Tilt-Rotor Control\"). The controller uses the predicted 𝒂^\\bm{\\hat{a}} and 𝑮^\\bm{\\hat{G}} in place of the unknown plant parameters 𝒂\\bm{a} and 𝑮\\bm{G} in Equation ([11](https://ar5iv.labs.arxiv.org/html/2606.08714v1#S2.E11 \"In II Sliding Mode Controller Design ‣ Hybrid Neural Network and Conventional Controller Approach for Robust Control of Highly Unstable Systems: Application to Tilt-Rotor Control\")). For the simulation, the controller is applied to the exact plant dynamics. The implementation results on test trajectory, using MLP and LSTM plant dynamics predictors are visualized in Fig. [8](https://ar5iv.labs.arxiv.org/html/2606.08714v1#S4.F8 \"Fig. 8 ‣ IV-B Baseline System Simulation ‣ IV A Neural Network- Based Sliding Mode Control ‣ Hybrid Neural Network and Conventional Controller Approach for Robust Control of Highly Unstable Systems: Application to Tilt-Rotor Control\") and Fig. [9](https://ar5iv.labs.arxiv.org/html/2606.08714v1#S4.F9 \"Fig. 9 ‣ IV-B Baseline System Simulation ‣ IV A Neural Network- Based Sliding Mode Control ‣ Hybrid Neural Network and Conventional Controller Approach for Robust Control of Highly Unstable Systems: Application to Tilt-Rotor Control\").\n\n𝒂^\\bm{\\hat{a}}\n\n𝑮^\\bm{\\hat{G}}\n\n𝒂^\\bm{\\hat{a}}\n\n𝑮^\\bm{\\hat{G}}\n\n𝒂\\bm{a}\n\n𝑮\\bm{G}\n\n𝒂\\bm{a}\n\n𝑮\\bm{G}\n\n| | | | | | | --- | --- | --- | --- | --- | | Net | Item | Train MAE | Test MAE | Parameters | | MLP | 𝒂\\bm{a} | 0.0142 | 0.0155 | 942 | | 𝑮\\bm{G} | 0.219 | 0.222 | 11888 | | LSTM | 𝒂\\bm{a} | 0.0049 | 0.0046 | 1574 | | 𝑮\\bm{G} | 0.077 | 0.076 | 20528 |\n\n𝒂\\bm{a}\n\n𝑮\\bm{G}\n\n𝒂\\bm{a}\n\n𝑮\\bm{G}"
+    },
+    {
+      "heading_path": [
+        "Hybrid Neural Network and Conventional Controller Approach for Robust Control of Highly Unstable Systems: Application to Tilt-Rotor Control",
+        "IV A Neural Network- Based Sliding Mode Control",
+        "IV-C Challenged System Performance and Robustness Assessment"
+      ],
+      "text": "### IV-C Challenged System Performance and Robustness Assessment\n\nTo assess the robustness of the control systems, we introduce various uncertainties and disturbances into the dynamic model to create discrepancies between the plant and the controller’s model:\n\na) A 100 μ\\mus first-order delay for BLDC motors and a 0.4 degrees per 60 seconds delay for servo motors.\n\nμ\\mu\n\nb) Random actuation errors ranging from 1-5 percent for servo motors and 4-10 percent for BLDC motors.\n\nc) Variations in physical parameters: mass increased by 5%, moments of inertia increased by 20%, aerodynamic coefficients of propellers decreased by 10%, and mass center eccentricity increased by 20%.\n\nd) Disturbance forces such as wind in the XX and YY directions, with a random resultant force amounting to 5-10 percent of the system’s weight.\n\nXX\n\nYY\n\nFig. [10](https://ar5iv.labs.arxiv.org/html/2606.08714v1#S4.F10 \"Fig. 10 ‣ IV-C Challenged System Performance and Robustness Assessment ‣ IV A Neural Network- Based Sliding Mode Control ‣ Hybrid Neural Network and Conventional Controller Approach for Robust Control of Highly Unstable Systems: Application to Tilt-Rotor Control\") and Fig. [11](https://ar5iv.labs.arxiv.org/html/2606.08714v1#S4.F11 \"Fig. 11 ‣ IV-C Challenged System Performance and Robustness Assessment ‣ IV A Neural Network- Based Sliding Mode Control ‣ Hybrid Neural Network and Conventional Controller Approach for Robust Control of Highly Unstable Systems: Application to Tilt-Rotor Control\") illustrate the challenged system simulation results.\n\nAs shown in Figure [10](https://ar5iv.labs.arxiv.org/html/2606.08714v1#S4.F10 \"Fig. 10 ‣ IV-C Challenged System Performance and Robustness Assessment ‣ IV A Neural Network- Based Sliding Mode Control ‣ Hybrid Neural Network and Conventional Controller Approach for Robust Control of Highly Unstable Systems: Application to Tilt-Rotor Control\") and Table [V](https://ar5iv.labs.arxiv.org/html/2606.08714v1#S4.T5 \"TABLE V ‣ IV-C Challenged System Performance and Robustness Assessment ‣ IV A Neural Network- Based Sliding Mode Control ‣ Hybrid Neural Network and Conventional Controller Approach for Robust Control of Highly Unstable Systems: Application to Tilt-Rotor Control\"), the control system incorporating the LSTM PDP (PDP) demonstrates superior performance compared to the controller using MLP PDP, while maintaining nearly the same computational cost. However, the performance of the SMC-MLP system can be improved by increasing the layers of MLP, leading to a higher computational cost, which is not desirable for our real-time application.\n\n| | | | | | --- | --- | --- | --- | | PDP\\* | Baseline System TT-MAE\\* | Challenged System TT-MAE | Run Time (Baseline) | | MLP | 0.161 | 1.05 | 41.5 s | | LSTM | 0.156 | 0.21 | 38.5 s |"
+    },
+    {
+      "heading_path": [
+        "Hybrid Neural Network and Conventional Controller Approach for Robust Control of Highly Unstable Systems: Application to Tilt-Rotor Control",
+        "V Conclusion"
+      ],
+      "text": "## V Conclusion\n\nThis paper investigated neural-network-based control strategies for a fully actuated tilt-rotor multirotor. First, we presented a negative result by applying direct input–output learning with MLP, LSTM, and transformer models, showing its inability to stabilize highly unstable dynamics. As the main contribution, we proposed a neural-network-enhanced sliding mode controller (SMC), where input-independent dynamics are learned from a small dataset using lightweight networks. This reduces real-time computation, enables deployment on low-cost microcontrollers, and ensures robust control. The proposed method also has the advantage of being trainable using flight logs from low-performance, attitude-only controllers, without degrading the performance of the final control strategy. Comparisons of MLP- and LSTM-based implementations under uncertainties and disturbances confirmed the effectiveness of the proposed method; In particular, the controller with an LSTM plant dynamics predictor outperformed its MLP-based counterpart while also achieving lower runtime. In summary, while direct input–output strategies are unsuitable for unstable tilt-rotor systems, integrating lightweight neural networks into model-based control provides a robust, efficient, and generalizable solution. As future work, we plan to validate the outcomes of this study experimentally on an experimental tilt-rotor platform designed and constructed in our laboratory."
+    },
+    {
+      "heading_path": [
+        "Hybrid Neural Network and Conventional Controller Approach for Robust Control of Highly Unstable Systems: Application to Tilt-Rotor Control",
+        "References"
+      ],
+      "text": "## References\n\n* [1] Z. Zaheer, A. Usmani, E. Khan, and M. A. Qadeer, “Aerial surveillance system using uav,” in *2016 thirteenth international conference on wireless and optical communications networks (WOCN)*. IEEE, 2016, pp. 1–7. * [2] H. Zhang, S. Veres, and A. Kolling, “Simultaneous search and monitoring by multiple aerial robots,” *Robotics and Autonomous Systems*, vol. 170, p. 104544, 2023. * [3] M. Sarkar, X. Yan, B. A. Erol, I. Raptis, and A. Homaifar, “A novel search and survey technique for unmanned aerial systems in detecting and estimating the area for wildfires,” *Robotics and Autonomous Systems*, vol. 145, p. 103848, 2021. * [4] W. Lee, B. Alkouz, B. Shahzaad, and A. Bouguettaya, “Package delivery using autonomous drones in skyways,” in *Adjunct Proceedings of the 2021 ACM International Joint Conference on Pervasive and Ubiquitous Computing and Proceedings of the 2021 ACM International Symposium on Wearable Computers*, 2021, pp. 48–50. * [5] A. Straubinger, H. L. de Groot, and E. T. Verhoef, “E-commerce, delivery drones and their impact on cities,” *Transportation Research Part A: Policy and Practice*, vol. 178, p. 103841, 2023. * [6] A. Kafili Gavgani, A. Talaeizadeh, A. Alasty, and H. N. Pishkenari, “A novel agricultural spraying aerial robot (agrohedral): Performance improvement in the presence of sloshing effect,” in *Innovative Agricultural Technologies*, L. Fu, J. Paliwal, H. H. Silleli, B. Sturm, and F. Auat Cheein, Eds. Cham: Springer Nature Switzerland, 2026, pp. 66–85. * [7] A. Rejeb, A. Abdollahi, K. Rejeb, and H. Treiblmaier, “Drones in agriculture: A review and bibliometric analysis,” *Computers and Electronics in Agriculture*, vol. 198, p. 107017, 2022. * [8] M. Shahrooz, A. Talaeizadeh, and A. Alasty, “Agricultural spraying drones: Advantages and disadvantages,” in *2020 Virtual Symposium in Plant Omics Sciences (OMICAS)*, 2020, pp. 1–5. * [9] J. Scherer, S. Yahyanejad, S. Hayat, E. Yanmaz, T. Andre, A. Khan, V. Vukadinovic, C. Bettstetter, H. Hellwagner, and B. Rinner, “An autonomous multi-uav system for search and rescue,” in *Proceedings of the first workshop on micro aerial vehicle networks, systems, and applications for civilian use*, 2015, pp. 33–38. * [10] P. Nooralishahi, C. Ibarra-Castanedo, S. Deane, F. López, S. Pant, M. Genest, N. P. Avdelidis, and X. P. Maldague, “Drone-based non-destructive inspection of industrial sites: A review and case studies,” *Drones*, vol. 5, no. 4, p. 106, 2021. * [11] S. D’Angelo, A. Corrado, F. Ruggiero, J. Cacace, and V. Lippiello, “Stabilization and control on a pipe-rack of a wheeled mobile manipulator with a snake-like arm,” *Robotics and Autonomous Systems*, vol. 171, p. 104554, 2024. * [12] J. Gómez-Avila, C. López-Franco, A. Y. Alanis, and N. Arana-Daniel, “Control of quadrotor using a neural network based pid,” in *2018 IEEE Latin American Conference on Computational Intelligence (LA-CCI)*, 2018, pp. 1–6. * [13] A. Rezaei, A. Talaeizadeh, and A. Alasty, “Self-tuning pid controller for an arm-angle adjustable quadrotor using an actor-critic-based neural network,” in *2024 19th Iranian Conference on Intelligent Systems (ICIS)*, 2024, pp. 205–210. * [14] N. P. Nguyen, N. X. Mung, H. L. N. N. Thanh, T. T. Huynh, N. T. Lam, and S. K. Hong, “Adaptive sliding mode control for attitude and altitude system of a quadcopter uav via neural network,” *IEEE Access*, vol. 9, pp. 40 076–40 085, 2021. * [15] B. Jiang, B. Li, W. Zhou, L.-Y. Lo, C.-K. Chen, and C.-Y. Wen, “Neural network based model predictive control for a quadrotor uav,” *Aerospace*, vol. 9, no. 8, 2022. [Online]. Available: https://www.mdpi.com/2226-4310/9/8/460 * [16] M. M. Madebo, C. M. Abdissa, L. N. Lemma, and D. S. Negash, “Robust tracking control for quadrotor uav with external disturbances and uncertainties using neural network based mrac,” *IEEE Access*, vol. 12, pp. 36 183–36 201, 2024. * [17] N. Wanore Madebo, C. Merga Abdissa, and L. Negash Lemma, “Enhanced trajectory control of quadrotor uav using fuzzy pid based recurrent neural network controller,” *IEEE Access*, vol. 12, pp. 190 454–190 469, 2024. * [18] G. Yu, J. Reis, and C. Silvestre, “Quadrotor neural network adaptive control: Design and experimental validation,” *IEEE Robotics and Automation Letters*, vol. 8, no. 5, pp. 2574–2581, 2023. * [19] M. Ryll, H. H. Bülthoff, and P. R. Giordano, “A novel overactuated quadrotor unmanned aerial vehicle: Modeling, control, and experimental validation,” *IEEE Transactions on Control Systems Technology*, vol. 23, no. 2, pp. 540–556, 2015. * [20] P. Zheng, X. Tan, B. B. Kocer, E. Yang, and M. Kovac, “Tiltdrone: A fully-actuated tilting quadrotor platform,” *IEEE Robotics and Automation Letters*, vol. 5, no. 4, pp. 6845–6852, 2020. * [21] P. Segui-Gasco, Y. Al-Rihani, H.-S. Shin, and A. Savvaris, “A novel actuation concept for a multi rotor uav,” *Journal of Intelligent & Robotic Systems*, vol. 74, pp. 173–191, 2014. * [22] M. Allenspach, K. Bodie, M. Brunner, L. Rinsoz, Z. Taylor, M. Kamel, R. Siegwart, and J. Nieto, “Design and optimal control of a tiltrotor micro-aerial vehicle for efficient omnidirectional flight,” *The International Journal of Robotics Research*, vol. 39, no. 10-11, pp. 1305–1325, 2020. * [23] A. K. Gavgani, A. Talaeizadeh, S. Heidarzadeh, A. Alasty, and H. Nejat Pishkenari, “Dynamic modeling and sliding mode control of an over-actuated quadrotor with variable hedral angle of propeller axes,” in *2024 2nd International Conference on Unmanned Vehicle Systems-Oman (UVS)*, 2024, pp. 1–6. * [24] M. Kamel, S. Verling, O. Elkhatib, C. Sprecher, P. Wulkop, Z. Taylor, R. Siegwart, and I. Gilitschenski, “The voliro omniorientational hexacopter: An agile and maneuverable tiltable-rotor aerial vehicle,” *IEEE Robotics & Automation Magazine*, vol. 25, no. 4, pp. 34–44, 2018. * [25] A. K. Gavgani, A. Talaeizadeh, A. Alasty, H. N. Pishkenari, and E. Najafi, “Next-generation aerial robots – omniorientational strategies: Dynamic modeling, control, and comparative analysis,” 2025. [Online]. Available: https://arxiv.org/abs/2509.21210 * [26] J.-J. E. Slotine, W. Li *et al.*, *Applied nonlinear control*. Prentice hall Englewood Cliffs, NJ, 1991, vol. 199, no. 1."
+    }
+  ]
+}

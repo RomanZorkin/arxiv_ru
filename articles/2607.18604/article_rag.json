@@ -1,0 +1,1465 @@
+{
+  "title": "[2607.18604] Intelligent Multi-UAV Navigation in ITNTNs: A Hierarchical LLM Approach",
+  "sections": [
+    {
+      "heading": "Intelligent Multi-UAV Navigation in ITNTNs: A Hierarchical LLM Approach Emails: {zijiang, pingw, hinat}@yorku.ca, haozhou029@gmail.com, wael.jaafar@etsmtl.ca, jianhuapei98@gmail.com, halim@sce.carleton.ca.",
+      "level": 1,
+      "content": [],
+      "children": [
+        {
+          "heading": "Abstract",
+          "level": 6,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "The deployment of high-speed Uncrewed Aerial Vehicles (UAVs) in 3D aerial highways necessitates robust coordination of physical flight kinematics and multi-tier network handovers. While Deep Reinforcement Learning (DRL) offers rapid tactical control, it lacks the zero-shot strategic reasoning required to quickly adapt to dynamic Integrated Terrestrial and Non-Terrestrial Networks (ITNTNs). Conversely, Large Language Models (LLMs) excel at semantic reasoning but suffer from high inference latency, rendering them unsuitable for real-time aerodynamic control. To bridge this gap, we propose a novel Hierarchical LLM-driven control framework. A massive cloud-based LLM deployed on a High-Altitude Platform Station (HAPS) manages slow-timescale global load balancing, while lightweight edge-LLMs on individual UAVs translate local observations into tactical sub-goals. These sub-goals guide a fast-timescale physical DRL controller to execute collision-free, handover-aware trajectories. Simulation results demonstrate that our agentic architecture significantly reduces collision rates and improves aggregate system throughput compared to existing baselines."
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "Index Terms:",
+          "level": 6,
+          "content": [],
+          "children": []
+        },
+        {
+          "heading": "I Introduction",
+          "level": 2,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "The rapid proliferation of Uncrewed Aerial Vehicles (UAVs) is driving the conceptualization of 3D aerial highways, dedicated corridors designed to support dense, high-speed autonomous logistics [[2](https://ar5iv.labs.arxiv.org/html/2607.18604v1#bib.bib5)]. Operating safely in these environments requires uninterrupted Command and Control (C2) and telemetry links [[9](https://ar5iv.labs.arxiv.org/html/2607.18604v1#bib.bib4)]. To satisfy these stringent connectivity requirements, 6G architectures are shifting toward Integrated Terrestrial and Non-Terrestrial Networks (ITNTNs) [[7](https://ar5iv.labs.arxiv.org/html/2607.18604v1#bib.bib6)], leveraging High-Altitude Platform Stations (HAPS) to complement the terrestrial base stations’ (TBSs) coverage. However, as UAVs traverse these overlapping coverage tiers at high velocities, they inevitably trigger frequent network handovers (HOs) [[13](https://ar5iv.labs.arxiv.org/html/2607.18604v1#bib.bib2)], necessitating the joint optimization of physical flight kinematics and communication reliability."
+            },
+            {
+              "type": "paragraph",
+              "text": "Although Deep Reinforcement Learning (DRL) has been widely adopted for UAV trajectory planning and cell association [[3](https://ar5iv.labs.arxiv.org/html/2607.18604v1#bib.bib1)], it inherently relies on trial-and-error exploration [[9](https://ar5iv.labs.arxiv.org/html/2607.18604v1#bib.bib4)]. In multi-agent aerial corridors, such exploration often leads to localized and greedy optimization, which can result in the systemic depletion of shared resources. Uncoordinated agents may inadvertently overload specific TBSs or saturate the limited bandwidth of the HAPS, ultimately compromising both the aggregate system capacity and flight safety [[6](https://ar5iv.labs.arxiv.org/html/2607.18604v1#bib.bib7), [10](https://ar5iv.labs.arxiv.org/html/2607.18604v1#bib.bib12)]."
+            },
+            {
+              "type": "paragraph",
+              "text": "Recently, the integration of Generative AI, especially Large Language Models (LLMs), has emerged as a transformative approach for autonomous vehicle control [[5](https://ar5iv.labs.arxiv.org/html/2607.18604v1#bib.bib14)]. LLMs possess unparalleled zero-shot reasoning, enabling complex mission adaptation and global strategic planning [[11](https://ar5iv.labs.arxiv.org/html/2607.18604v1#bib.bib10)]. Yet, standard LLM inference suffers from significant latency bottlenecks. Relying purely on LLMs is fundamentally incompatible with the fast-timescale execution required for sub-millisecond RF channel handovers and high-frequency rotor control [[1](https://ar5iv.labs.arxiv.org/html/2607.18604v1#bib.bib13), [12](https://ar5iv.labs.arxiv.org/html/2607.18604v1#bib.bib9)]. Bridging the gap between slow-timescale semantic reasoning and fast-timescale physical execution is an open challenge."
+            },
+            {
+              "type": "paragraph",
+              "text": "To overcome these limitations, this paper proposes a novel Dual-Timescale Hierarchical LLM architecture that synergizes the cognitive reasoning of foundation models with the rapid execution of DRL. Indeed, given the potential of Agentic AI and the latency challenges inherent in dynamic aerial networks, we propose here a novel Cloud-Edge framework that jointly optimizes UAV mobility and handover management. In particular, we first formulate the problem as a Hierarchical Multi-Objective Partially Observable Markov Decision Process (H-MO-POMDP), which strictly accounts for high-fidelity 3D rigid-body kinematics and realistic ITNTN capacity constraints. To address this complex hierarchy, we introduce a dual-timescale architecture powered by LLMs. Specifically, a strategic meta-controller (Qwen3.5-122B [[15](https://ar5iv.labs.arxiv.org/html/2607.18604v1#bib.bib15)]) deployed on the HAPS operates at a slow timescale to dictate global load-balancing policies. Moreover, unlike previous studies that relied solely on trial-and-error DRL, we integrate here lightweight edge-agents (Qwen3.5-9B [[15](https://ar5iv.labs.arxiv.org/html/2607.18604v1#bib.bib15)]) directly on individual UAVs. The latter generate cognitive reflections to dynamically tune the reward functions of a fast-timescale Deep Double Q-Network (DDQN), successfully bridging semantic reasoning with real-time physical execution. Finally, extensive simulations in a high-fidelity 3D physics environment demonstrate that the proposed LLM-guided framework mitigates severe collision penalties and maximizes system throughput, thus outperforming baselines."
+            },
+            {
+              "type": "paragraph",
+              "text": "The remainder of this paper is organized as follows. Section [II](https://ar5iv.labs.arxiv.org/html/2607.18604v1#S2 \"II System Model ‣ Intelligent Multi-UAV Navigation in ITNTNs: A Hierarchical LLM Approach\") describes the ITNTN system model, including the high-fidelity 3D UAV kinematics and the multi-tier communication architecture. Section [III](https://ar5iv.labs.arxiv.org/html/2607.18604v1#S3 \"III Problem Formulation ‣ Intelligent Multi-UAV Navigation in ITNTNs: A Hierarchical LLM Approach\") formulates the joint optimization problem as a H-MO-POMDP. The proposed dual-timescale hierarchical LLM framework and its cognitive reasoning modules are introduced in Section [IV](https://ar5iv.labs.arxiv.org/html/2607.18604v1#S4 \"IV Proposed Hierarchical LLM Framework ‣ Intelligent Multi-UAV Navigation in ITNTNs: A Hierarchical LLM Approach\"). Section [V](https://ar5iv.labs.arxiv.org/html/2607.18604v1#S5 \"V Numerical Results ‣ Intelligent Multi-UAV Navigation in ITNTNs: A Hierarchical LLM Approach\") presents the numerical results and performance evaluations. Finally, Section [VI](https://ar5iv.labs.arxiv.org/html/2607.18604v1#S6 \"VI Conclusion ‣ Intelligent Multi-UAV Navigation in ITNTNs: A Hierarchical LLM Approach\") concludes the paper."
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "II System Model",
+          "level": 2,
+          "content": [],
+          "children": [
+            {
+              "heading": "II-A 3D Aerial Highway and ITNTN Architecture",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "As depicted in Fig. [1](https://ar5iv.labs.arxiv.org/html/2607.18604v1#S2.F1 \"Figure 1 ‣ II System Model ‣ Intelligent Multi-UAV Navigation in ITNTNs: A Hierarchical LLM Approach\"), we consider a dynamic 3D aerial highway where a set of MM UAVs, denoted by ℳ={1,2,…,M}\\mathcal{M}=\\{1,2,\\dots,M\\}, navigate a shared airspace. Each UAV m∈ℳm\\in\\mathcal{M} is assigned an independent transit mission to a unique 3D target waypoint, 𝐱targetm\\mathbf{x}\\_{\\text{target}}^{m}, and must continuously adjust its altitude and heading to bypass obstacles and avoid collisions."
+                },
+                {
+                  "type": "formula",
+                  "text": "MM"
+                },
+                {
+                  "type": "formula",
+                  "text": "ℳ={1,2,…,M}\\mathcal{M}=\\{1,2,\\dots,M\\}"
+                },
+                {
+                  "type": "formula",
+                  "text": "m∈ℳm\\in\\mathcal{M}"
+                },
+                {
+                  "type": "formula",
+                  "text": "𝐱targetm\\mathbf{x}_{\\text{target}}^{m}"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "To support mission-critical C2 and telemetry, the airspace is covered by an ITNTN. The network comprises a set of BB TBSs, denoted as ℬ={1,2,…,B}\\mathcal{B}=\\{1,2,\\dots,B\\}, and a one HAPS, denoted by HH. A UAV mm can connect to any serving node c∈ℬ∪{H}c\\in\\mathcal{B}\\cup\\{H\\}, but high-speed traversal triggers handovers."
+                },
+                {
+                  "type": "formula",
+                  "text": "BB"
+                },
+                {
+                  "type": "formula",
+                  "text": "ℬ={1,2,…,B}\\mathcal{B}=\\{1,2,\\dots,B\\}"
+                },
+                {
+                  "type": "formula",
+                  "text": "HH"
+                },
+                {
+                  "type": "formula",
+                  "text": "mm"
+                },
+                {
+                  "type": "formula",
+                  "text": "c∈ℬ∪{H}c\\in\\mathcal{B}\\cup\\{H\\}"
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "II-B Communication Model",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "To evaluate the reliability of the C2 links, we formulate the signal-to-interference-plus-noise ratio (SINR)[[4](https://ar5iv.labs.arxiv.org/html/2607.18604v1#bib.bib3)]. Let Gtm,cG\\_{t}^{m,c} denote the linear channel power gain between UAV mm and serving node cc at time tt, encapsulating both large-scale path loss and small-scale Rician fading. The received downlink SINR at UAV mm is given by"
+                },
+                {
+                  "type": "formula",
+                  "text": "Gtm,cG_{t}^{m,c}"
+                },
+                {
+                  "type": "formula",
+                  "text": "mm"
+                },
+                {
+                  "type": "formula",
+                  "text": "cc"
+                },
+                {
+                  "type": "formula",
+                  "text": "tt"
+                },
+                {
+                  "type": "formula",
+                  "text": "mm"
+                },
+                {
+                  "type": "table",
+                  "text": "| | | | | | --- | --- | --- | --- | | | SINRtm,c=Pc​Gtm,cN0​Bc+It,\\text{SINR}\\_{t}^{m,c}=\\frac{P\\_{c}G\\_{t}^{m,c}}{N\\_{0}B\\_{c}+I\\_{t}}, | | (1) |"
+                },
+                {
+                  "type": "formula",
+                  "text": "SINRtm,c=Pc​Gtm,cN0​Bc+It,\\text{SINR}_{t}^{m,c}=\\frac{P_{c}G_{t}^{m,c}}{N_{0}B_{c}+I_{t}},"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "where PcP\\_{c} is the transmit power of node cc, N0N\\_{0} is the noise power spectral density, and BcB\\_{c} is the allocated bandwidth. The term It=∑c′≠cPc′​Gtm,c′I\\_{t}=\\sum\\_{c^{\\prime}\\neq c}P\\_{c^{\\prime}}G\\_{t}^{m,c^{\\prime}} represents the aggregate interference from other active transmitting nodes in the tier."
+                },
+                {
+                  "type": "formula",
+                  "text": "PcP_{c}"
+                },
+                {
+                  "type": "formula",
+                  "text": "cc"
+                },
+                {
+                  "type": "formula",
+                  "text": "N0N_{0}"
+                },
+                {
+                  "type": "formula",
+                  "text": "BcB_{c}"
+                },
+                {
+                  "type": "formula",
+                  "text": "It=∑c′≠cPc′​Gtm,c′I_{t}=\\sum_{c^{\\prime}\\neq c}P_{c^{\\prime}}G_{t}^{m,c^{\\prime}}"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "The achievable data rate for UAV mm is calculated as"
+                },
+                {
+                  "type": "formula",
+                  "text": "mm"
+                },
+                {
+                  "type": "table",
+                  "text": "| | | | | | --- | --- | --- | --- | | | Rtm,c=Bc​log2⁡(1+SINRtm,c).R\\_{t}^{m,c}=B\\_{c}\\log\\_{2}\\left(1+\\text{SINR}\\_{t}^{m,c}\\right). | | (2) |"
+                },
+                {
+                  "type": "formula",
+                  "text": "Rtm,c=Bc​log2⁡(1+SINRtm,c).R_{t}^{m,c}=B_{c}\\log_{2}\\left(1+\\text{SINR}_{t}^{m,c}\\right)."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "To penalize the latency and packet drops associated with frequent network switching, we define the handover-aware weighted data rate as"
+                },
+                {
+                  "type": "table",
+                  "text": "| | | | | | --- | --- | --- | --- | | | WRtm,c=Rtm,c−γ​𝕀HO,tm,\\text{WR}\\_{t}^{m,c}=R\\_{t}^{m,c}-\\gamma\\mathbb{I}\\_{\\text{HO},t}^{m}, | | (3) |"
+                },
+                {
+                  "type": "formula",
+                  "text": "WRtm,c=Rtm,c−γ​𝕀HO,tm,\\text{WR}_{t}^{m,c}=R_{t}^{m,c}-\\gamma\\mathbb{I}_{\\text{HO},t}^{m},"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "where 𝕀HO,tm∈{0,1}\\mathbb{I}\\_{\\text{HO},t}^{m}\\in\\{0,1\\} is a binary indicator that equals 11 if a handover occurs at time tt, and γ\\gamma is the handover penalty coefficient. Also, the HAPS is constrained by a maximum aggregate capacity CmaxHAPSC\\_{\\max}^{\\mathrm{HAPS}} and any node cc has a users association capacity QcQ\\_{c}, ∀c∈ℬ∪{H}\\forall c\\in\\mathcal{B}\\cup\\{H\\}."
+                },
+                {
+                  "type": "formula",
+                  "text": "𝕀HO,tm∈{0,1}\\mathbb{I}_{\\text{HO},t}^{m}\\in\\{0,1\\}"
+                },
+                {
+                  "type": "formula",
+                  "text": "11"
+                },
+                {
+                  "type": "formula",
+                  "text": "tt"
+                },
+                {
+                  "type": "formula",
+                  "text": "γ\\gamma"
+                },
+                {
+                  "type": "formula",
+                  "text": "CmaxHAPSC_{\\max}^{\\mathrm{HAPS}}"
+                },
+                {
+                  "type": "formula",
+                  "text": "cc"
+                },
+                {
+                  "type": "formula",
+                  "text": "QcQ_{c}"
+                },
+                {
+                  "type": "formula",
+                  "text": "∀c∈ℬ∪{H}\\forall c\\in\\mathcal{B}\\cup\\{H\\}"
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "II-C Kinematic Model",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "We adopt a high-fidelity 3D rigid-body kinematics model, where the physical state of UAV mm at time tt is defined by its 3D position 𝐱tm∈ℝ3\\mathbf{x}\\_{t}^{m}\\in\\mathbb{R}^{3} and linear velocity 𝐯tm∈ℝ3\\mathbf{v}\\_{t}^{m}\\in\\mathbb{R}^{3}. The system evolves at a fast discrete timescale Δ​t\\Delta t (e.g., =0.05 s), and the continuous kinematic state updates are governed by [[8](https://ar5iv.labs.arxiv.org/html/2607.18604v1#bib.bib11)]"
+                },
+                {
+                  "type": "formula",
+                  "text": "mm"
+                },
+                {
+                  "type": "formula",
+                  "text": "tt"
+                },
+                {
+                  "type": "formula",
+                  "text": "𝐱tm∈ℝ3\\mathbf{x}_{t}^{m}\\in\\mathbb{R}^{3}"
+                },
+                {
+                  "type": "formula",
+                  "text": "𝐯tm∈ℝ3\\mathbf{v}_{t}^{m}\\in\\mathbb{R}^{3}"
+                },
+                {
+                  "type": "formula",
+                  "text": "Δ​t\\Delta t"
+                },
+                {
+                  "type": "table",
+                  "text": "| | | | | | --- | --- | --- | --- | | | 𝐱t+1m=𝐱tm+𝐯tm​Δ​t,\\mathbf{x}\\_{t+1}^{m}=\\mathbf{x}\\_{t}^{m}+\\mathbf{v}\\_{t}^{m}\\Delta t, | | (4) |"
+                },
+                {
+                  "type": "formula",
+                  "text": "𝐱t+1m=𝐱tm+𝐯tm​Δ​t,\\mathbf{x}_{t+1}^{m}=\\mathbf{x}_{t}^{m}+\\mathbf{v}_{t}^{m}\\Delta t,"
+                },
+                {
+                  "type": "table",
+                  "text": "| | | | | | --- | --- | --- | --- | | | 𝐯t+1m=𝐯tm+(𝐅T,mMu−𝐠−𝐝m)​Δ​t,\\mathbf{v}\\_{t+1}^{m}=\\mathbf{v}\\_{t}^{m}+\\left(\\frac{\\mathbf{F}\\_{T,m}}{M\\_{u}}-\\mathbf{g}-\\mathbf{d}\\_{m}\\right)\\Delta t, | | (5) |"
+                },
+                {
+                  "type": "formula",
+                  "text": "𝐯t+1m=𝐯tm+(𝐅T,mMu−𝐠−𝐝m)​Δ​t,\\mathbf{v}_{t+1}^{m}=\\mathbf{v}_{t}^{m}+\\left(\\frac{\\mathbf{F}_{T,m}}{M_{u}}-\\mathbf{g}-\\mathbf{d}_{m}\\right)\\Delta t,"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "where MuM\\_{u} is the UAV mass, 𝐠\\mathbf{g} is the gravitational acceleration vector, and 𝐝m\\mathbf{d}\\_{m} is the aerodynamic drag. The collective thrust vector 𝐅T,m\\mathbf{F}\\_{T,m} is derived from the real-time rotational speeds (RPM) of the four individual rotors. To ensure flight safety, a severe collision penalty is incurred if the 3D Euclidean distance between any two UAVs falls below the physical safety threshold: ‖𝐱tm−𝐱tj‖2<dsafe\\|\\mathbf{x}\\_{t}^{m}-\\mathbf{x}\\_{t}^{j}\\|\\_{2}<d\\_{\\text{safe}} for any m≠jm\\neq j."
+                },
+                {
+                  "type": "formula",
+                  "text": "MuM_{u}"
+                },
+                {
+                  "type": "formula",
+                  "text": "𝐠\\mathbf{g}"
+                },
+                {
+                  "type": "formula",
+                  "text": "𝐝m\\mathbf{d}_{m}"
+                },
+                {
+                  "type": "formula",
+                  "text": "𝐅T,m\\mathbf{F}_{T,m}"
+                },
+                {
+                  "type": "formula",
+                  "text": "‖𝐱tm−𝐱tj‖2<dsafe\\|\\mathbf{x}_{t}^{m}-\\mathbf{x}_{t}^{j}\\|_{2}<d_{\\text{safe}}"
+                },
+                {
+                  "type": "formula",
+                  "text": "m≠jm\\neq j"
+                }
+              ],
+              "children": []
+            }
+          ]
+        },
+        {
+          "heading": "III Problem Formulation",
+          "level": 2,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "To capture the coupled dynamics of flight kinematics and network handovers across different operational timescales, we formulate the system as a H-MO-POMDP consisting of a slow-timescale global meta-controller (HAPS) and fast-timescale tactical edge-agents (UAVs)."
+            }
+          ],
+          "children": [
+            {
+              "heading": "III-A State and Observation Spaces",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "Due to the limited sensing range of individual UAVs, the global environmental state 𝒮t\\mathcal{S}\\_{t} is partially observable. At the fast tactical timescale tt, each UAV mm receives a local observation 𝐨tm∈Ω\\mathbf{o}\\_{t}^{m}\\in\\Omega, defined as"
+                },
+                {
+                  "type": "formula",
+                  "text": "𝒮t\\mathcal{S}_{t}"
+                },
+                {
+                  "type": "formula",
+                  "text": "tt"
+                },
+                {
+                  "type": "formula",
+                  "text": "mm"
+                },
+                {
+                  "type": "formula",
+                  "text": "𝐨tm∈Ω\\mathbf{o}_{t}^{m}\\in\\Omega"
+                },
+                {
+                  "type": "table",
+                  "text": "| | | | | | --- | --- | --- | --- | | | 𝐨tm=[𝐱tm,𝐯tm,𝐱targetm,{𝐱tj,𝐯tj}j∈𝒩tm,ctm,WRtm,c],\\mathbf{o}\\_{t}^{m}=\\big[\\mathbf{x}\\_{t}^{m},\\mathbf{v}\\_{t}^{m},\\mathbf{x}\\_{\\text{target}}^{m},\\{\\mathbf{x}\\_{t}^{j},\\mathbf{v}\\_{t}^{j}\\}\\_{j\\in\\mathcal{N}\\_{t}^{m}},c\\_{t}^{m},\\text{WR}\\_{t}^{m,c}\\big], | | (6) |"
+                },
+                {
+                  "type": "formula",
+                  "text": "𝐨tm=[𝐱tm,𝐯tm,𝐱targetm,{𝐱tj,𝐯tj}j∈𝒩tm,ctm,WRtm,c],\\mathbf{o}_{t}^{m}=\\big[\\mathbf{x}_{t}^{m},\\mathbf{v}_{t}^{m},\\mathbf{x}_{\\text{target}}^{m},\\{\\mathbf{x}_{t}^{j},\\mathbf{v}_{t}^{j}\\}_{j\\in\\mathcal{N}_{t}^{m}},c_{t}^{m},\\text{WR}_{t}^{m,c}\\big],"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "where 𝒩tm\\mathcal{N}\\_{t}^{m} is the set of neighboring UAVs within sensing range, ctmc\\_{t}^{m} is the current serving node, and WRtm,c\\text{WR}\\_{t}^{m,c} is the handover-aware weighted data rate. Conversely, at the slow strategic timescale THAPST\\_{\\mathrm{HAPS}}, the HAPS receives a global meta-observation 𝐨THAPS\\mathbf{o}\\_{T}^{\\mathrm{HAPS}} comprising the aggregate traffic load on each TBS, the available HAPS backhaul capacity, and the spatial distribution of the UAV swarm."
+                },
+                {
+                  "type": "formula",
+                  "text": "𝒩tm\\mathcal{N}_{t}^{m}"
+                },
+                {
+                  "type": "formula",
+                  "text": "ctmc_{t}^{m}"
+                },
+                {
+                  "type": "formula",
+                  "text": "WRtm,c\\text{WR}_{t}^{m,c}"
+                },
+                {
+                  "type": "formula",
+                  "text": "THAPST_{\\mathrm{HAPS}}"
+                },
+                {
+                  "type": "formula",
+                  "text": "𝐨THAPS\\mathbf{o}_{T}^{\\mathrm{HAPS}}"
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "III-B Hybrid Action Spaces",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "The action space encompasses both continuous physical controls and discrete network decisions as follows."
+                }
+              ],
+              "children": [
+                {
+                  "heading": "III-B1 HAPS Strategic Action",
+                  "level": 4,
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "text": "At each macro-step THAPST\\_{\\mathrm{HAPS}}, the HAPS agent outputs a discrete meta-action 𝐚THAPS∈{Offload,Recall,Idle}\\mathbf{a}\\_{T}^{\\mathrm{HAPS}}\\in\\{\\text{Offload},\\text{Recall},\\text{Idle}\\}. These directives are broadcast to specific high-density congestion zones to enforce load-balancing before node capacities are breached."
+                    },
+                    {
+                      "type": "formula",
+                      "text": "THAPST_{\\mathrm{HAPS}}"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "𝐚THAPS∈{Offload,Recall,Idle}\\mathbf{a}_{T}^{\\mathrm{HAPS}}\\in\\{\\text{Offload},\\text{Recall},\\text{Idle}\\}"
+                    }
+                  ],
+                  "children": []
+                },
+                {
+                  "heading": "III-B2 UAV Tactical Action",
+                  "level": 4,
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "text": "At each micro-step tt, UAV mm executes a joint hybrid action 𝐚tm=[𝐚mot,tm,𝐚tele,tm]⊤\\mathbf{a}\\_{t}^{m}=[\\mathbf{a}\\_{\\text{mot},t}^{m},\\mathbf{a}\\_{\\text{tele},t}^{m}]^{\\top}. The continuous motion action 𝐚mot,tm∈[−1,1]4\\mathbf{a}\\_{\\text{mot},t}^{m}\\in[-1,1]^{4} regulates the RPM of the four individual rotors for physical 3D navigation. Concurrently, the discrete telecommunication action 𝐚tele,tm∈ℬ∪{H}\\mathbf{a}\\_{\\text{tele},t}^{m}\\in\\mathcal{B}\\cup\\{H\\} selects the target serving node, triggering a handover if atele,tm≠ctma\\_{\\text{tele},t}^{m}\\neq c\\_{t}^{m}."
+                    },
+                    {
+                      "type": "formula",
+                      "text": "tt"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "mm"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "𝐚tm=[𝐚mot,tm,𝐚tele,tm]⊤\\mathbf{a}_{t}^{m}=[\\mathbf{a}_{\\text{mot},t}^{m},\\mathbf{a}_{\\text{tele},t}^{m}]^{\\top}"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "𝐚mot,tm∈[−1,1]4\\mathbf{a}_{\\text{mot},t}^{m}\\in[-1,1]^{4}"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "𝐚tele,tm∈ℬ∪{H}\\mathbf{a}_{\\text{tele},t}^{m}\\in\\mathcal{B}\\cup\\{H\\}"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "atele,tm≠ctma_{\\text{tele},t}^{m}\\neq c_{t}^{m}"
+                    }
+                  ],
+                  "children": []
+                }
+              ]
+            },
+            {
+              "heading": "III-C Multi-Objective Reward Functions",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "To simultaneously optimize mobility and connectivity, we define scalarized reward structures for edge and HAPS levels."
+                }
+              ],
+              "children": [
+                {
+                  "heading": "III-C1 UAV Edge Reward",
+                  "level": 4,
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "text": "The objective of UAV mm is to safely navigate to its target while maintaining a robust C2 link. The reward is formulated as"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "mm"
+                    },
+                    {
+                      "type": "table",
+                      "text": "| | | | | | --- | --- | --- | --- | | | Rtm=α1​Rtran,tm+α2​WRtm,c+α3​ρcrash,R\\_{t}^{m}=\\alpha\\_{1}R\\_{\\text{tran},t}^{m}+\\alpha\\_{2}\\text{WR}\\_{t}^{m,c}+\\alpha\\_{3}\\rho\\_{\\text{crash}}, | | (7) |"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "Rtm=α1​Rtran,tm+α2​WRtm,c+α3​ρcrash,R_{t}^{m}=\\alpha_{1}R_{\\text{tran},t}^{m}+\\alpha_{2}\\text{WR}_{t}^{m,c}+\\alpha_{3}\\rho_{\\text{crash}},"
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "where Rtran,tm=exp⁡(−‖𝐱tm−𝐱targetm‖2)−λ​‖𝐚mot,tm‖22R\\_{\\text{tran},t}^{m}=\\exp(-\\|\\mathbf{x}^{m}\\_{t}-\\mathbf{x}\\_{\\text{target}}^{m}\\|\\_{2})-\\lambda\\|\\mathbf{a}\\_{\\text{mot},t}^{m}\\|\\_{2}^{2} rewards forward progression while penalizing aggressive, energy-consuming rotor maneuvers. The term WRtm,c\\text{WR}\\_{t}^{m,c} maximizes the data rate while penalizing handovers. Finally, ρcrash\\rho\\_{\\text{crash}} applies a severe negative penalty if the safety distance dsafed\\_{\\text{safe}} is violated. The weights α{1,2,3}\\alpha\\_{\\{1,2,3\\}} balance the rewrards/penalties."
+                    },
+                    {
+                      "type": "formula",
+                      "text": "Rtran,tm=exp⁡(−‖𝐱tm−𝐱targetm‖2)−λ​‖𝐚mot,tm‖22R_{\\text{tran},t}^{m}=\\exp(-\\|\\mathbf{x}^{m}_{t}-\\mathbf{x}_{\\text{target}}^{m}\\|_{2})-\\lambda\\|\\mathbf{a}_{\\text{mot},t}^{m}\\|_{2}^{2}"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "WRtm,c\\text{WR}_{t}^{m,c}"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "ρcrash\\rho_{\\text{crash}}"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "dsafed_{\\text{safe}}"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "α{1,2,3}\\alpha_{\\{1,2,3\\}}"
+                    }
+                  ],
+                  "children": []
+                },
+                {
+                  "heading": "III-C2 HAPS Reward",
+                  "level": 4,
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "text": "The objective of the HAPS meta-controller is to maximize aggregate system throughput while enforcing node capacity limits. Its reward is given by"
+                    },
+                    {
+                      "type": "table",
+                      "text": "| | | | | | --- | --- | --- | --- | | | RTHAPS=η1​∑m∈ℳRtm,c−η2​∑c∈ℬ∪{H}max⁡(0,nc,t−Qc),R\\_{T}^{\\mathrm{HAPS}}=\\eta\\_{1}\\sum\\_{m\\in\\mathcal{M}}R\\_{t}^{m,c}-\\eta\\_{2}\\sum\\_{c\\in\\mathcal{B}\\cup\\{H\\}}\\max(0,n\\_{c,t}-Q\\_{c}), | | (8) |"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "RTHAPS=η1​∑m∈ℳRtm,c−η2​∑c∈ℬ∪{H}max⁡(0,nc,t−Qc),R_{T}^{\\mathrm{HAPS}}=\\eta_{1}\\sum_{m\\in\\mathcal{M}}R_{t}^{m,c}-\\eta_{2}\\sum_{c\\in\\mathcal{B}\\cup\\{H\\}}\\max(0,n_{c,t}-Q_{c}),"
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "where nc,tn\\_{c,t} is the number of UAVs currently associated with node cc. The second term heavily penalizes any policy that results in network congestion (i.e., exceeding the capacity QcQ\\_{c}), balanced by the weights η{1,2}\\eta\\_{\\{1,2\\}}. To capture the coupled dynamics of 3D trajectory control and handover-aware cell association, we define the joint optimization problem 𝒫\\mathcal{P} below. The objective is to maximize the aggregate system utility while adhering to physical kinematics and network capacity constraints."
+                    },
+                    {
+                      "type": "formula",
+                      "text": "nc,tn_{c,t}"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "cc"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "QcQ_{c}"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "η{1,2}\\eta_{\\{1,2\\}}"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "𝒫\\mathcal{P}"
+                    },
+                    {
+                      "type": "table",
+                      "text": "| | | | | | --- | --- | --- | --- | | | 𝒫:max𝐀,𝜶𝔼⁡[∑t=0Tγt​∑m∈ℳℛtm​(𝐚tm,𝜶tm)]s.t.C1:𝐱t+1m=f⁡(𝐱tm,𝐯tm,𝐚mot,tm),∀m,t,C2:‖𝐱tm−𝐱tj‖2≥dsafe,∀m≠j,C3:∑c∈ℬ∪{H}utm,c=1,∀m,t,C4:∑m∈ℳutm,c≤Qc,∀c∈ℬ∪{H},C5:𝜶tm∈Δ3,∑i=13αt,im=1.\\begin{aligned} \\mathcal{P}:\\quad\\max\\_{\\mathbf{A},\\boldsymbol{\\alpha}}\\quad&\\mathbb{E}\\left[\\sum\\_{t=0}^{T}\\gamma^{t}\\sum\\_{m\\in\\mathcal{M}}\\mathcal{R}\\_{t}^{m}(\\mathbf{a}\\_{t}^{m},\\boldsymbol{\\alpha}\\_{t}^{m})\\right]\\\\ \\text{s.t.}\\quad&\\mathrm{C1}:\\penalty\\ \\mathbf{x}\\_{t+1}^{m}=f(\\mathbf{x}\\_{t}^{m},\\mathbf{v}\\_{t}^{m},\\mathbf{a}\\_{\\mathrm{mot},t}^{m}),&&\\forall m,t,\\\\ &\\mathrm{C2}:\\penalty\\ \\|\\mathbf{x}\\_{t}^{m}-\\mathbf{x}\\_{t}^{j}\\|\\_{2}\\geq d\\_{\\mathrm{safe}},&&\\forall m\\neq j,\\\\ &\\mathrm{C3}:\\penalty\\ \\sum\\_{c\\in\\mathcal{B}\\cup\\{H\\}}u\\_{t}^{m,c}=1,&&\\forall m,t,\\\\ &\\mathrm{C4}:\\penalty\\ \\sum\\_{m\\in\\mathcal{M}}u\\_{t}^{m,c}\\leq Q\\_{c},&&\\forall c\\in\\mathcal{B}\\cup\\{H\\},\\\\ &\\mathrm{C5}:\\penalty\\ \\boldsymbol{\\alpha}\\_{t}^{m}\\in\\Delta^{3},\\quad\\sum\\_{i=1}^{3}\\alpha\\_{t,i}^{m}=1.\\end{aligned} | | (9) |"
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "𝒫:max𝐀,𝜶𝔼⁡[∑t=0Tγt​∑m∈ℳℛtm​(𝐚tm,𝜶tm)]s.t.C1:𝐱t+1m=f⁡(𝐱tm,𝐯tm,𝐚mot,tm),∀m,t,C2:‖𝐱tm−𝐱tj‖2≥dsafe,∀m≠j,C3:∑c∈ℬ∪{H}utm,c=1,∀m,t,C4:∑m∈ℳutm,c≤Qc,∀c∈ℬ∪{H},C5:𝜶tm∈Δ3,∑i=13αt,im=1.\\begin{aligned} \\mathcal{P}:\\quad\\max\\_{\\mathbf{A},\\boldsymbol{\\alpha}}\\quad&\\mathbb{E}\\left[\\sum\\_{t=0}^{T}\\gamma^{t}\\sum\\_{m\\in\\mathcal{M}}\\mathcal{R}\\_{t}^{m}(\\mathbf{a}\\_{t}^{m},\\boldsymbol{\\alpha}\\_{t}^{m})\\right]\\\\ \\text{s.t.}\\quad&\\mathrm{C1}:\\penalty\\ \\mathbf{x}\\_{t+1}^{m}=f(\\mathbf{x}\\_{t}^{m},\\mathbf{v}\\_{t}^{m},\\mathbf{a}\\_{\\mathrm{mot},t}^{m}),&&\\forall m,t,\\\\ &\\mathrm{C2}:\\penalty\\ \\|\\mathbf{x}\\_{t}^{m}-\\mathbf{x}\\_{t}^{j}\\|\\_{2}\\geq d\\_{\\mathrm{safe}},&&\\forall m\\neq j,\\\\ &\\mathrm{C3}:\\penalty\\ \\sum\\_{c\\in\\mathcal{B}\\cup\\{H\\}}u\\_{t}^{m,c}=1,&&\\forall m,t,\\\\ &\\mathrm{C4}:\\penalty\\ \\sum\\_{m\\in\\mathcal{M}}u\\_{t}^{m,c}\\leq Q\\_{c},&&\\forall c\\in\\mathcal{B}\\cup\\{H\\},\\\\ &\\mathrm{C5}:\\penalty\\ \\boldsymbol{\\alpha}\\_{t}^{m}\\in\\Delta^{3},\\quad\\sum\\_{i=1}^{3}\\alpha\\_{t,i}^{m}=1.\\end{aligned}"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "𝒫:max𝐀,𝜶𝔼⁡[∑t=0Tγt​∑m∈ℳℛtm​(𝐚tm,𝜶tm)]s.t.C1:𝐱t+1m=f⁡(𝐱tm,𝐯tm,𝐚mot,tm),∀m,t,C2:‖𝐱tm−𝐱tj‖2≥dsafe,∀m≠j,C3:∑c∈ℬ∪{H}utm,c=1,∀m,t,C4:∑m∈ℳutm,c≤Qc,∀c∈ℬ∪{H},C5:𝜶tm∈Δ3,∑i=13αt,im=1.\\begin{aligned} \\mathcal{P}:\\quad\\max_{\\mathbf{A},\\boldsymbol{\\alpha}}\\quad&\\mathbb{E}\\left[\\sum_{t=0}^{T}\\gamma^{t}\\sum_{m\\in\\mathcal{M}}\\mathcal{R}_{t}^{m}(\\mathbf{a}_{t}^{m},\\boldsymbol{\\alpha}_{t}^{m})\\right]\\\\ \\text{s.t.}\\quad&\\mathrm{C1}:\\penalty\\ \\mathbf{x}_{t+1}^{m}=f(\\mathbf{x}_{t}^{m},\\mathbf{v}_{t}^{m},\\mathbf{a}_{\\mathrm{mot},t}^{m}),&&\\forall m,t,\\\\ &\\mathrm{C2}:\\penalty\\ \\|\\mathbf{x}_{t}^{m}-\\mathbf{x}_{t}^{j}\\|_{2}\\geq d_{\\mathrm{safe}},&&\\forall m\\neq j,\\\\ &\\mathrm{C3}:\\penalty\\ \\sum_{c\\in\\mathcal{B}\\cup\\{H\\}}u_{t}^{m,c}=1,&&\\forall m,t,\\\\ &\\mathrm{C4}:\\penalty\\ \\sum_{m\\in\\mathcal{M}}u_{t}^{m,c}\\leq Q_{c},&&\\forall c\\in\\mathcal{B}\\cup\\{H\\},\\\\ &\\mathrm{C5}:\\penalty\\ \\boldsymbol{\\alpha}_{t}^{m}\\in\\Delta^{3},\\quad\\sum_{i=1}^{3}\\alpha_{t,i}^{m}=1.\\end{aligned}"
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "In (𝒫\\mathcal{P}), 𝐀≜{𝐚tm}\\mathbf{A}\\triangleq\\{\\mathbf{a}\\_{t}^{m}\\} and 𝜶≜{𝜶tm}\\boldsymbol{\\alpha}\\triangleq\\{\\boldsymbol{\\alpha}\\_{t}^{m}\\} (∀m∈ℳ,∀t\\forall m\\in\\mathcal{M},\\forall t) denote the joint hybrid action policy and the dynamically tuned multi-objective reward weights across all UAVs over the operational horizon, respectively. 𝐚tm=[𝐚mot,tm,atele,tm]⊤\\mathbf{a}\\_{t}^{m}=[\\mathbf{a}\\_{\\text{mot},t}^{m},a\\_{\\text{tele},t}^{m}]^{\\top} represents the hybrid action vector. C1 ensures the trajectory updates follow the 3D rigid-body physics model defined in ([4](https://ar5iv.labs.arxiv.org/html/2607.18604v1#S2.E4 \"In II-C Kinematic Model ‣ II System Model ‣ Intelligent Multi-UAV Navigation in ITNTNs: A Hierarchical LLM Approach\"))-([5](https://ar5iv.labs.arxiv.org/html/2607.18604v1#S2.E5 \"In II-C Kinematic Model ‣ II System Model ‣ Intelligent Multi-UAV Navigation in ITNTNs: A Hierarchical LLM Approach\")). C2 maintains the physical safety separation between any two UAVs. C3 ensures that each UAV mm is associated with exactly one serving node (TBS or HAPS) at any time tt. C4 restricts the number of associated users per node to its capacity QcQ\\_{c} to prevent network saturation. C5 defines the simplex Δ3\\Delta^{3} for the cognitive reward weights α{1,2,3}\\alpha\\_{\\{1,2,3\\}} tuned by the edge-LLM."
+                    },
+                    {
+                      "type": "formula",
+                      "text": "𝒫\\mathcal{P}"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "𝐀≜{𝐚tm}\\mathbf{A}\\triangleq\\{\\mathbf{a}_{t}^{m}\\}"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "𝜶≜{𝜶tm}\\boldsymbol{\\alpha}\\triangleq\\{\\boldsymbol{\\alpha}_{t}^{m}\\}"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "∀m∈ℳ,∀t\\forall m\\in\\mathcal{M},\\forall t"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "𝐚tm=[𝐚mot,tm,atele,tm]⊤\\mathbf{a}_{t}^{m}=[\\mathbf{a}_{\\text{mot},t}^{m},a_{\\text{tele},t}^{m}]^{\\top}"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "mm"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "tt"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "QcQ_{c}"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "Δ3\\Delta^{3}"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "α{1,2,3}\\alpha_{\\{1,2,3\\}}"
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "Problem 𝒫\\mathcal{P} is a highly non-convex mixed-integer non-linear programming problem coupling flight kinematics and aerial communications. To enable real-time control, we decompose this optimization via a two-tier Hierarchical Multi-Objective POMDP framework, delegating specific constraints to distinct LLM cognitive tiers, as described in the next section."
+                    },
+                    {
+                      "type": "formula",
+                      "text": "𝒫\\mathcal{P}"
+                    }
+                  ],
+                  "children": []
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "heading": "IV Proposed Hierarchical LLM Framework",
+          "level": 2,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "To bridge the latency gap between semantic reasoning and real-time aerodynamic control, we propose a Cloud-Edge Agentic architecture, as illustrated in Fig. [2](https://ar5iv.labs.arxiv.org/html/2607.18604v1#S4.F2 \"Figure 2 ‣ IV Proposed Hierarchical LLM Framework ‣ Intelligent Multi-UAV Navigation in ITNTNs: A Hierarchical LLM Approach\"). The framework separates decision-making into three distinct timescales: 1) slow strategic meta-timescale (THAPST\\_{\\mathrm{HAPS}}), 2) intermediate tactical reasoning timescale (TLLMT\\_{\\mathrm{LLM}}), and 3) fast physical execution timescale (TfastT\\_{\\mathrm{fast}})."
+            },
+            {
+              "type": "formula",
+              "text": "THAPST_{\\mathrm{HAPS}}"
+            },
+            {
+              "type": "formula",
+              "text": "TLLMT_{\\mathrm{LLM}}"
+            },
+            {
+              "type": "formula",
+              "text": "TfastT_{\\mathrm{fast}}"
+            }
+          ],
+          "children": [
+            {
+              "heading": "IV-A HAPS Cloud Meta-Controller",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "At the highest level of the hierarchy, the HAPS acts as a global orchestrator. Since global load balancing requires complex spatial reasoning across the entire ITNTN, we deploy a large foundation model, i.e., Qwen3.5-122B, hosted in the cloud computing cluster of HAPS. Operating at THAPS=5.0T\\_{\\mathrm{HAPS}}=5.0 s, the HAPS meta-controller evaluates the global observation 𝐨THAPS\\mathbf{o}\\_{T}^{\\mathrm{HAPS}}. In particular, if the number of users associated with a specific TBS nc,tn\\_{c,t} is close to QcQ\\_{c}, the LLM generates zero-shot strategic directives (𝐚THAPS\\mathbf{a}\\_{T}^{\\mathrm{HAPS}}), forcing specific UAV edge-agents to offload their C2 links to neighboring TBSs or the HAPS."
+                },
+                {
+                  "type": "formula",
+                  "text": "THAPS=5.0T_{\\mathrm{HAPS}}=5.0"
+                },
+                {
+                  "type": "formula",
+                  "text": "𝐨THAPS\\mathbf{o}_{T}^{\\mathrm{HAPS}}"
+                },
+                {
+                  "type": "formula",
+                  "text": "nc,tn_{c,t}"
+                },
+                {
+                  "type": "formula",
+                  "text": "QcQ_{c}"
+                },
+                {
+                  "type": "formula",
+                  "text": "𝐚THAPS\\mathbf{a}_{T}^{\\mathrm{HAPS}}"
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "IV-B UAV Edge-Agent",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "Each UAV is equipped with a lightweight edge-LLM (i.e., Qwen3.5-9B) that operates at TLLM=1.0T\\_{\\mathrm{LLM}}=1.0 s. The cognitive edge-agent translates the localized observation (𝐨tm\\mathbf{o}\\_{t}^{m}) into a structured textual prompt. Rather than outputting direct motor controls, the edge-LLM performs cognitive reflection, i.e., if the UAV experiences severe handover penalties or is close to a collision threshold (dsafed\\_{\\text{safe}}), the LLM dynamically adjusts the weights α{1,2,3}\\alpha\\_{\\{1,2,3\\}} of the multi-objective reward vector. By doing so, this semantic reasoning guides the underlying DRL, shifting its priority between aggressive forward transit and conservative safety."
+                },
+                {
+                  "type": "formula",
+                  "text": "TLLM=1.0T_{\\mathrm{LLM}}=1.0"
+                },
+                {
+                  "type": "formula",
+                  "text": "𝐨tm\\mathbf{o}_{t}^{m}"
+                },
+                {
+                  "type": "formula",
+                  "text": "dsafed_{\\text{safe}}"
+                },
+                {
+                  "type": "formula",
+                  "text": "α{1,2,3}\\alpha_{\\{1,2,3\\}}"
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "IV-C Fast-Timescale DRL Execution",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "At the lowest level, a DDQN operates at the physics timescale Tfast=0.05T\\_{\\mathrm{fast}}=0.05 s (20 Hz). The DDQN receives the dynamic reward weights generated by the edge-LLM and executes the continuous motor commands (𝐚mot,tm\\mathbf{a}\\_{\\text{mot},t}^{m}) and discrete handover actions (𝐚tele,tm\\mathbf{a}\\_{\\text{tele},t}^{m}). By offloading semantic reasoning to the LLM, the DDQN acts purely as a high-speed, reflexive physical controller."
+                },
+                {
+                  "type": "formula",
+                  "text": "Tfast=0.05T_{\\mathrm{fast}}=0.05"
+                },
+                {
+                  "type": "formula",
+                  "text": "𝐚mot,tm\\mathbf{a}_{\\text{mot},t}^{m}"
+                },
+                {
+                  "type": "formula",
+                  "text": "𝐚tele,tm\\mathbf{a}_{\\text{tele},t}^{m}"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "The complete execution flow is summarized in Algorithm [1](https://ar5iv.labs.arxiv.org/html/2607.18604v1#alg1 \"In IV-C Fast-Timescale DRL Execution ‣ IV Proposed Hierarchical LLM Framework ‣ Intelligent Multi-UAV Navigation in ITNTNs: A Hierarchical LLM Approach\")."
+                },
+                {
+                  "type": "formula",
+                  "text": "𝒮0\\mathcal{S}_{0}"
+                },
+                {
+                  "type": "formula",
+                  "text": "t=1,2,…,Tmaxt=1,2,\\dots,T_{\\max}"
+                },
+                {
+                  "type": "formula",
+                  "text": "t(modTHAPS)==0t\\pmod{T_{\\mathrm{HAPS}}}==0"
+                },
+                {
+                  "type": "formula",
+                  "text": "𝐨THAPS\\mathbf{o}_{T}^{\\mathrm{HAPS}}"
+                },
+                {
+                  "type": "formula",
+                  "text": "𝐚THAPS\\mathbf{a}_{T}^{\\mathrm{HAPS}}"
+                },
+                {
+                  "type": "formula",
+                  "text": "QcQ_{c}"
+                },
+                {
+                  "type": "formula",
+                  "text": "m∈ℳm\\in\\mathcal{M}"
+                },
+                {
+                  "type": "formula",
+                  "text": "𝐨tm\\mathbf{o}_{t}^{m}"
+                },
+                {
+                  "type": "formula",
+                  "text": "t(modTLLM)==0t\\pmod{T_{\\mathrm{LLM}}}==0"
+                },
+                {
+                  "type": "formula",
+                  "text": "𝐨tm\\mathbf{o}_{t}^{m}"
+                },
+                {
+                  "type": "formula",
+                  "text": "𝐩tdyn\\mathbf{p}_{t}^{\\mathrm{dyn}}"
+                },
+                {
+                  "type": "formula",
+                  "text": "ρthresh\\rho_{\\text{thresh}}"
+                },
+                {
+                  "type": "formula",
+                  "text": "α{1,2,3}\\alpha_{\\{1,2,3\\}}"
+                },
+                {
+                  "type": "formula",
+                  "text": "𝐚tm=[𝐚mot,tm,𝐚tele,tm]⊤\\mathbf{a}_{t}^{m}=[\\mathbf{a}_{\\text{mot},t}^{m},\\mathbf{a}_{\\text{tele},t}^{m}]^{\\top}"
+                },
+                {
+                  "type": "formula",
+                  "text": "𝐚tm\\mathbf{a}_{t}^{m}"
+                },
+                {
+                  "type": "formula",
+                  "text": "TfastT_{\\mathrm{fast}}"
+                },
+                {
+                  "type": "formula",
+                  "text": "𝒟m\\mathcal{D}^{m}"
+                },
+                {
+                  "type": "formula",
+                  "text": "𝒟m\\mathcal{D}^{m}"
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "IV-D State Discretization and Prompt Engineering",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "To bridge the gap between numerical kinematics and the semantic reasoning of the Qwen3.5-9B edge-LLM, we leverage a structured prompt engineering methodology. Directly feeding high-precision floating-point arrays (e.g., 𝐯tm=[12.43,−3.21,0.5]\\mathbf{v}\\_{t}^{m}=[12.43,-3.21,0.5]) often degrades LLM reasoning and inflates inference latency. Therefore, we discretize the continuous observation 𝐨tm\\mathbf{o}\\_{t}^{m} into semantic language descriptors, denoted as ℒ⁡(𝐨tm)\\mathcal{L}(\\mathbf{o}\\_{t}^{m}). Specifically, the 3D relative distance to neighboring UAVs (‖𝐱tm−𝐱tj‖2\\|\\mathbf{x}\\_{t}^{m}-\\mathbf{x}\\_{t}^{j}\\|\\_{2}, ∀j∈ℳ\\{m}\\forall j\\in\\mathcal{M}\\backslash\\{m\\}) is categorized into predefined semantic zones: Safe (d>3​dsafed>3d\\_{\\text{safe}}), Warning (dsafe≤d≤3​dsafed\\_{\\text{safe}}\\leq d\\leq 3d\\_{\\text{safe}}), and Critical (d<dsafed<d\\_{\\text{safe}}). Similarly, the handover-aware network state WRtm,c\\text{WR}\\_{t}^{m,c} is mapped to Stable (when WRtm,c≥20\\text{WR}\\_{t}^{m,c}\\geq 20 Mbps, indicating an un-congested link), Degraded (when 0≤WRtm,c<200\\leq\\text{WR}\\_{t}^{m,c}<20 Mbps, indicating capacity saturation), or Hand-over (when WRtm,c<0\\text{WR}\\_{t}^{m,c}<0, triggered by the massive γ\\gamma penalty during network switching)."
+                },
+                {
+                  "type": "formula",
+                  "text": "𝐯tm=[12.43,−3.21,0.5]\\mathbf{v}_{t}^{m}=[12.43,-3.21,0.5]"
+                },
+                {
+                  "type": "formula",
+                  "text": "𝐨tm\\mathbf{o}_{t}^{m}"
+                },
+                {
+                  "type": "formula",
+                  "text": "ℒ⁡(𝐨tm)\\mathcal{L}(\\mathbf{o}_{t}^{m})"
+                },
+                {
+                  "type": "formula",
+                  "text": "‖𝐱tm−𝐱tj‖2\\|\\mathbf{x}_{t}^{m}-\\mathbf{x}_{t}^{j}\\|_{2}"
+                },
+                {
+                  "type": "formula",
+                  "text": "∀j∈ℳ\\{m}\\forall j\\in\\mathcal{M}\\backslash\\{m\\}"
+                },
+                {
+                  "type": "formula",
+                  "text": "d>3​dsafed>3d_{\\text{safe}}"
+                },
+                {
+                  "type": "formula",
+                  "text": "dsafe≤d≤3​dsafed_{\\text{safe}}\\leq d\\leq 3d_{\\text{safe}}"
+                },
+                {
+                  "type": "formula",
+                  "text": "d<dsafed<d_{\\text{safe}}"
+                },
+                {
+                  "type": "formula",
+                  "text": "WRtm,c\\text{WR}_{t}^{m,c}"
+                },
+                {
+                  "type": "formula",
+                  "text": "WRtm,c≥20\\text{WR}_{t}^{m,c}\\geq 20"
+                },
+                {
+                  "type": "formula",
+                  "text": "0≤WRtm,c<200\\leq\\text{WR}_{t}^{m,c}<20"
+                },
+                {
+                  "type": "formula",
+                  "text": "WRtm,c<0\\text{WR}_{t}^{m,c}<0"
+                },
+                {
+                  "type": "formula",
+                  "text": "γ\\gamma"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "To enhance the zero-shot generalization of the LLM, we utilize distance-based few-shot example selection. Rather than using static prompts, the edge-agent retrieves a set of KK historical states from its local memory buffer 𝒟m\\mathcal{D}^{m} that exhibit the shortest Euclidean distance to the current kinematic state. The successful reward-weight configurations from these retrieved states are appended as in-context learning examples."
+                },
+                {
+                  "type": "formula",
+                  "text": "KK"
+                },
+                {
+                  "type": "formula",
+                  "text": "𝒟m\\mathcal{D}^{m}"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "The final synthesized prompt strictly follows a modular template: [Role], [Current State], [Historical Examples], and [Task]. An illustrative example of the generated prompt is provided below:"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "[Role]: You are an autonomous UAV edge-agent navigating a 3D corridor. Your task is to dynamically tune the multi-objective DRL reward weights (α1,α2,α3)(\\alpha\\_{1},\\alpha\\_{2},\\alpha\\_{3}) for Transit Efficiency, Network Reliability, and Safety. [Current State]: Distance to target is Approaching. Neighbor UAV-3 is in the Warning zone (7.2m). Network link to TBS-2 is Stable. [Historical Example]: When Neighbor was Warning and Link was Stable, optimal weights were (0.2,0.1,0.7)(0.2,0.1,0.7) to heavily prioritize collision avoidance over forward transit. [Task]: Based on the current state, output the updated scalarization weights in the exact format [w1, w2, w3]. Do not output conversational text or explanations."
+                },
+                {
+                  "type": "formula",
+                  "text": "(α1,α2,α3)(\\alpha_{1},\\alpha_{2},\\alpha_{3})"
+                },
+                {
+                  "type": "formula",
+                  "text": "(0.2,0.1,0.7)(0.2,0.1,0.7)"
+                }
+              ],
+              "children": []
+            }
+          ]
+        },
+        {
+          "heading": "V Numerical Results",
+          "level": 2,
+          "content": [],
+          "children": [
+            {
+              "heading": "V-A Simulation Setup",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "We evaluate the proposed Cloud-Edge Agentic framework using a high-fidelity 3D multi-rotor physics simulator based on gym-pybullet-drones [[8](https://ar5iv.labs.arxiv.org/html/2607.18604v1#bib.bib11)]. The ITNTN environment consists of 4 TBSs and 1 HAPS serving a number of UAVs M∈{10,20,30}M\\in\\{10,20,30\\}. The Qwen-based LLMs interact with the physical simulation via structured API calls. The detailed simulation parameters are summarized in Table [I](https://ar5iv.labs.arxiv.org/html/2607.18604v1#S5.T1 \"Table I ‣ V-A Simulation Setup ‣ V Numerical Results ‣ Intelligent Multi-UAV Navigation in ITNTNs: A Hierarchical LLM Approach\")."
+                },
+                {
+                  "type": "formula",
+                  "text": "M∈{10,20,30}M\\in\\{10,20,30\\}"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "A key challenge in applying generative AI to high-speed UAV networks is LLM inference latency, which is incompatible with the fast reaction time required for aerodynamic stabilization. To address this issue, we adopted a two-level HAPS–UAV architecture with separated cognitive and control timescales. At the UAV edge, we consider a 4-bit quantized Qwen3.5-9B deployed on an edge-AI platform. With an average generation speed of about 2525 tokens/s, a structured prompt and a concise output yield an estimated edge latency of tedge=0.6t\\_{\\text{edge}}=0.6 s. At the HAPS layer, the larger Qwen3.5-122B meta-controller runs on a high-performance GPU cluster, with total delay modeled as tcloud=tinf+ttx=2.55t\\_{\\text{cloud}}=t\\_{\\text{inf}}+t\\_{\\text{tx}}=2.55 s."
+                },
+                {
+                  "type": "formula",
+                  "text": "2525"
+                },
+                {
+                  "type": "formula",
+                  "text": "tedge=0.6t_{\\text{edge}}=0.6"
+                },
+                {
+                  "type": "formula",
+                  "text": "tcloud=tinf+ttx=2.55t_{\\text{cloud}}=t_{\\text{inf}}+t_{\\text{tx}}=2.55"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "These values mathematically motivate our proposed timescale hierarchy. The fast aerodynamic loop runs at Tfast=0.05T\\_{\\mathrm{fast}}=0.05 s, making direct LLM inference in the control path physically impractical. We therefore set the UAV-level cognitive reflection interval to TLLM=1.0T\\_{\\mathrm{LLM}}=1.0 s and the HAPS-level coordination interval to THAPS=5.0T\\_{\\mathrm{HAPS}}=5.0 s, strictly satisfying the hardware bounds TLLM>tedgeT\\_{\\mathrm{LLM}}>t\\_{\\text{edge}} and THAPS≫tcloudT\\_{\\mathrm{HAPS}}\\gg t\\_{\\text{cloud}}. During one edge-LLM inference interval, the DDQN controller can still execute 20 fast, uninterrupted control steps using the latest validated reward configuration. This asynchronous decoupling avoids computation-induced crashes while enabling robust LLM strategic reasoning."
+                },
+                {
+                  "type": "formula",
+                  "text": "Tfast=0.05T_{\\mathrm{fast}}=0.05"
+                },
+                {
+                  "type": "formula",
+                  "text": "TLLM=1.0T_{\\mathrm{LLM}}=1.0"
+                },
+                {
+                  "type": "formula",
+                  "text": "THAPS=5.0T_{\\mathrm{HAPS}}=5.0"
+                },
+                {
+                  "type": "formula",
+                  "text": "TLLM>tedgeT_{\\mathrm{LLM}}>t_{\\text{edge}}"
+                },
+                {
+                  "type": "formula",
+                  "text": "THAPS≫tcloudT_{\\mathrm{HAPS}}\\gg t_{\\text{cloud}}"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "In our simulations, we compare the proposed Hierarchical LLM-DDQN framework against the “DDQN” baseline [[13](https://ar5iv.labs.arxiv.org/html/2607.18604v1#bib.bib2), [16](https://ar5iv.labs.arxiv.org/html/2607.18604v1#bib.bib16)], which relies on trial-and-error exploration without LLM cognitive reflection or HAPS load-balancing, and the “Envelope MORL” method proposed in [[14](https://ar5iv.labs.arxiv.org/html/2607.18604v1#bib.bib8)]."
+                },
+                {
+                  "type": "table",
+                  "text": "| | | | --- | --- | | Parameter | Value | | Physics & Airspace Parameters | | | Simulation airspace volume | 1000×1000×3001000\\times 1000\\times 300 m3 | | Number of UAVs (MM) | {5,10,15,20,25,30}\\{5,10,15,20,25,30\\} | | UAV Mass (MuM\\_{u}) | 1.51.5 kg | | Physical safety separation (dsafed\\_{\\text{safe}}) | 5.05.0 m | | Gravity (𝐠\\mathbf{g}) | 9.819.81 m/s2 | | Control frequency (1/Tfast1/T\\_{\\text{fast}}) | 2020 Hz (Δ​t=0.05\\Delta t=0.05 s) | | ITNTN Communication Parameters | | | Number of TBSs (BB) | 44 | | HAPS altitude | 2020 km | | Carrier frequencies | 2.02.0 GHz (HAPS), 2.12.1 GHz (TBS) | | Node bandwidth (BcB\\_{c}) | 2020 MHz | | HAPS total capacity (CmaxHAPSC^{\\text{HAPS}}\\_{\\max}) | 100100 Mbps | | Node transmit power (PcP\\_{c}) | 4040 dBm (10,00010,000 mW) | | TBS peak antenna gain (GmaxG\\_{\\max}) | 88 dBi | | Node capacity quota (QcQ\\_{c}) | 55 concurrent users | | Path loss exponents | ηLoS=2.0\\eta\\_{\\text{LoS}}=2.0, ηNLoS=3.5\\eta\\_{\\text{NLoS}}=3.5 | | Rician LoS factor | 1515 dB | | Noise power spectral density (N0N\\_{0}) | −174-174 dBm/Hz | | Algorithm & Cognitive Parameters | | | HAPS Meta-Controller LLM | Qwen3.5-122B | | UAV Edge-Agent LLM | Qwen3.5-9B | | HAPS strategic timescale (THAPST\\_{\\mathrm{HAPS}}) | 5.05.0 s | | UAV LLM reasoning interval (TLLMT\\_{\\text{LLM}}) | 1.01.0 s | | Edge inference latency (tedget\\_{\\text{edge}}) | 0.60.6 s | | Cloud inference latency (tcloudt\\_{\\text{cloud}}) | 2.552.55 s | | Reflection trigger threshold (ρthresh\\rho\\_{\\text{thresh}}) | −10.0-10.0 | | Collision crash penalty (ρcrash\\rho\\_{\\text{crash}}) | −100.0-100.0 | | HAPS reward weights (η{1,2}\\eta\\_{\\{1,2\\}}) | {1.0,50.0}\\{1.0,50.0\\} | | UAV reward weights (α{1,2,3}\\alpha\\_{\\{1,2,3\\}}) | {1.0,0.1,0.2}\\{1.0,0.1,0.2\\} | | Handover penalty coeff. (γ\\gamma) | 5.05.0 | | Energy penalty coeff. (λ\\lambda) | 0.10.1 | | Memory retrieval size (KK) | 55 experiences | | DDQN learning rate | 1×10−41\\times 10^{-4} | | Discount factor (γd\\gamma\\_{d}) | 0.990.99 | | Target update frequency | 500500 steps |"
+                },
+                {
+                  "type": "formula",
+                  "text": "1000×1000×3001000\\times 1000\\times 300"
+                },
+                {
+                  "type": "formula",
+                  "text": "MM"
+                },
+                {
+                  "type": "formula",
+                  "text": "{5,10,15,20,25,30}\\{5,10,15,20,25,30\\}"
+                },
+                {
+                  "type": "formula",
+                  "text": "MuM_{u}"
+                },
+                {
+                  "type": "formula",
+                  "text": "1.51.5"
+                },
+                {
+                  "type": "formula",
+                  "text": "dsafed_{\\text{safe}}"
+                },
+                {
+                  "type": "formula",
+                  "text": "5.05.0"
+                },
+                {
+                  "type": "formula",
+                  "text": "𝐠\\mathbf{g}"
+                },
+                {
+                  "type": "formula",
+                  "text": "9.819.81"
+                },
+                {
+                  "type": "formula",
+                  "text": "1/Tfast1/T_{\\text{fast}}"
+                },
+                {
+                  "type": "formula",
+                  "text": "2020"
+                },
+                {
+                  "type": "formula",
+                  "text": "Δ​t=0.05\\Delta t=0.05"
+                },
+                {
+                  "type": "formula",
+                  "text": "BB"
+                },
+                {
+                  "type": "formula",
+                  "text": "44"
+                },
+                {
+                  "type": "formula",
+                  "text": "2020"
+                },
+                {
+                  "type": "formula",
+                  "text": "2.02.0"
+                },
+                {
+                  "type": "formula",
+                  "text": "2.12.1"
+                },
+                {
+                  "type": "formula",
+                  "text": "BcB_{c}"
+                },
+                {
+                  "type": "formula",
+                  "text": "2020"
+                },
+                {
+                  "type": "formula",
+                  "text": "CmaxHAPSC^{\\text{HAPS}}_{\\max}"
+                },
+                {
+                  "type": "formula",
+                  "text": "100100"
+                },
+                {
+                  "type": "formula",
+                  "text": "PcP_{c}"
+                },
+                {
+                  "type": "formula",
+                  "text": "4040"
+                },
+                {
+                  "type": "formula",
+                  "text": "10,00010,000"
+                },
+                {
+                  "type": "formula",
+                  "text": "GmaxG_{\\max}"
+                },
+                {
+                  "type": "formula",
+                  "text": "88"
+                },
+                {
+                  "type": "formula",
+                  "text": "QcQ_{c}"
+                },
+                {
+                  "type": "formula",
+                  "text": "55"
+                },
+                {
+                  "type": "formula",
+                  "text": "ηLoS=2.0\\eta_{\\text{LoS}}=2.0"
+                },
+                {
+                  "type": "formula",
+                  "text": "ηNLoS=3.5\\eta_{\\text{NLoS}}=3.5"
+                },
+                {
+                  "type": "formula",
+                  "text": "1515"
+                },
+                {
+                  "type": "formula",
+                  "text": "N0N_{0}"
+                },
+                {
+                  "type": "formula",
+                  "text": "−174-174"
+                },
+                {
+                  "type": "formula",
+                  "text": "THAPST_{\\mathrm{HAPS}}"
+                },
+                {
+                  "type": "formula",
+                  "text": "5.05.0"
+                },
+                {
+                  "type": "formula",
+                  "text": "TLLMT_{\\text{LLM}}"
+                },
+                {
+                  "type": "formula",
+                  "text": "1.01.0"
+                },
+                {
+                  "type": "formula",
+                  "text": "tedget_{\\text{edge}}"
+                },
+                {
+                  "type": "formula",
+                  "text": "0.60.6"
+                },
+                {
+                  "type": "formula",
+                  "text": "tcloudt_{\\text{cloud}}"
+                },
+                {
+                  "type": "formula",
+                  "text": "2.552.55"
+                },
+                {
+                  "type": "formula",
+                  "text": "ρthresh\\rho_{\\text{thresh}}"
+                },
+                {
+                  "type": "formula",
+                  "text": "−10.0-10.0"
+                },
+                {
+                  "type": "formula",
+                  "text": "ρcrash\\rho_{\\text{crash}}"
+                },
+                {
+                  "type": "formula",
+                  "text": "−100.0-100.0"
+                },
+                {
+                  "type": "formula",
+                  "text": "η{1,2}\\eta_{\\{1,2\\}}"
+                },
+                {
+                  "type": "formula",
+                  "text": "{1.0,50.0}\\{1.0,50.0\\}"
+                },
+                {
+                  "type": "formula",
+                  "text": "α{1,2,3}\\alpha_{\\{1,2,3\\}}"
+                },
+                {
+                  "type": "formula",
+                  "text": "{1.0,0.1,0.2}\\{1.0,0.1,0.2\\}"
+                },
+                {
+                  "type": "formula",
+                  "text": "γ\\gamma"
+                },
+                {
+                  "type": "formula",
+                  "text": "5.05.0"
+                },
+                {
+                  "type": "formula",
+                  "text": "λ\\lambda"
+                },
+                {
+                  "type": "formula",
+                  "text": "0.10.1"
+                },
+                {
+                  "type": "formula",
+                  "text": "KK"
+                },
+                {
+                  "type": "formula",
+                  "text": "55"
+                },
+                {
+                  "type": "formula",
+                  "text": "1×10−41\\times 10^{-4}"
+                },
+                {
+                  "type": "formula",
+                  "text": "γd\\gamma_{d}"
+                },
+                {
+                  "type": "formula",
+                  "text": "0.990.99"
+                },
+                {
+                  "type": "formula",
+                  "text": "500500"
+                },
+                {
+                  "type": "formula",
+                  "text": "Rtran,tmR_{\\text{tran},t}^{m}"
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "V-B Simulation Results",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "To evaluate the robustness in congested aerial corridors, Fig. [3](https://ar5iv.labs.arxiv.org/html/2607.18604v1#S5.F3 \"Figure 3 ‣ V-A Simulation Setup ‣ V Numerical Results ‣ Intelligent Multi-UAV Navigation in ITNTNs: A Hierarchical LLM Approach\") reports key metrics, i.e., transportation reward, survival time, communication reward, and HO probability."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Fig. [3(a)](https://ar5iv.labs.arxiv.org/html/2607.18604v1#S5.F3.sf1 \"In Figure 3 ‣ V-A Simulation Setup ‣ V Numerical Results ‣ Intelligent Multi-UAV Navigation in ITNTNs: A Hierarchical LLM Approach\") and Fig. [3(b)](https://ar5iv.labs.arxiv.org/html/2607.18604v1#S5.F3.sf2 \"In Figure 3 ‣ V-A Simulation Setup ‣ V Numerical Results ‣ Intelligent Multi-UAV Navigation in ITNTNs: A Hierarchical LLM Approach\") illustrate the convergence of the transportation reward and the survival step count, respectively. As shown in Fig. [3(a)](https://ar5iv.labs.arxiv.org/html/2607.18604v1#S5.F3.sf1 \"In Figure 3 ‣ V-A Simulation Setup ‣ V Numerical Results ‣ Intelligent Multi-UAV Navigation in ITNTNs: A Hierarchical LLM Approach\"), the conventional DDQN baseline learns quickly but saturates at a suboptimal local minimum. This is because standard DRL struggles with the large and sparse exploration space of joint 3D kinematics and network selection. In contrast, the proposed framework exhibits a steeper, more sustained learning curve, overtaking DDQN near episode 1,500 and achieving the highest steady-state reward."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "This superiority is directly tied to physical safety, as reflected by the survival step count in Fig. [3(b)](https://ar5iv.labs.arxiv.org/html/2607.18604v1#S5.F3.sf2 \"In Figure 3 ‣ V-A Simulation Setup ‣ V Numerical Results ‣ Intelligent Multi-UAV Navigation in ITNTNs: A Hierarchical LLM Approach\"). Specifically, in DDQN, severe collisions cause early termination. Because the latter relies only on trial-and-error, it suffers from frequent early collisions. Conversely, when a UAV in our framework detects a high-risk state, the onboard edge-LLM immediately shifts the scalarization weights via cognitive reflection to prioritize the collision penalty (ρcrash\\rho\\_{\\text{crash}}). This zero-shot guidance avoids early terminations and allows the proposed framework to converge to near-maximum episode lengths."
+                },
+                {
+                  "type": "formula",
+                  "text": "ρcrash\\rho_{\\text{crash}}"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Fig. [3(c)](https://ar5iv.labs.arxiv.org/html/2607.18604v1#S5.F3.sf3 \"In Figure 3 ‣ V-A Simulation Setup ‣ V Numerical Results ‣ Intelligent Multi-UAV Navigation in ITNTNs: A Hierarchical LLM Approach\") evaluates the communication reward as a function of the number of TBSs. Initially, without any TBS, UAVs are connected to the HAPS without any attenuation in the link quality. However, introducing a single or 2 TBSs creates severe interference and uncoordinated handover opportunities between the TBSs and HAPS, causing a sharp drop in the communication reward for all methods. However, as more TBSs are added to provide continuous coverage, the reward recovers and better coordination is achieved. The proposed framework consistently maintains the highest communication reward since the HAPS meta-controller intelligently coordinates associations to minimize cross-tier interference."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Fig. [3(d)](https://ar5iv.labs.arxiv.org/html/2607.18604v1#S5.F3.sf4 \"In Figure 3 ‣ V-A Simulation Setup ‣ V Numerical Results ‣ Intelligent Multi-UAV Navigation in ITNTNs: A Hierarchical LLM Approach\") illustrates the handover probability as the UAV swarm density increases from M=5M=5 to 3030. As the airspace becomes congested, baseline DRL agents greedily chase the strongest instantaneous signal, resulting in erratic, high-frequency handovers. In contrast, the HAPS meta-controller anticipates congestion and issues zero-shot spatial offloading directives. This strategic coordination successfully suppresses unnecessary network switching, granting the proposed framework the lowest and most stable handover probability across all traffic densities."
+                },
+                {
+                  "type": "formula",
+                  "text": "M=5M=5"
+                },
+                {
+                  "type": "formula",
+                  "text": "3030"
+                }
+              ],
+              "children": []
+            }
+          ]
+        },
+        {
+          "heading": "VI Conclusion",
+          "level": 2,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "In this paper, we proposed a Cloud-Edge Agentic AI framework for jointly optimizing 3D UAV mobility and handover management in ITNTNs. By decoupling strategic reasoning and fast physical control across multiple timescales, the framework bridges LLM reasoning with real-time DRL execution. A HAPS-based meta-controller mitigates network congestion, while edge-LLMs improve local safety-aware decision-making. Simulation results show clear gains over conventional DRL in safety, learning efficiency, and system throughput. Future work will investigate lightweight quantization to reduce edge inference latency."
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "References",
+          "level": 2,
+          "content": [
+            {
+              "type": "list",
+              "text": "* [1] J. Chen et al. (2021) BDFL: a byzantine-fault-tolerance decentralized federated learning method for autonomous vehicle. IEEE Trans. Veh. Technol. 70 (9), pp. 8639–8652. Cited by: [§I](https://ar5iv.labs.arxiv.org/html/2607.18604v1#S1.p3.1 \"I Introduction ‣ Intelligent Multi-UAV Navigation in ITNTNs: A Hierarchical LLM Approach\"). * [2] N. Cherif et al. (2021) 3D aerial highway: the key enabler of the retail industry transformation. IEEE Commun. Mag. 59 (9), pp. 65–71. Cited by: [§I](https://ar5iv.labs.arxiv.org/html/2607.18604v1#S1.p1.1 \"I Introduction ‣ Intelligent Multi-UAV Navigation in ITNTNs: A Hierarchical LLM Approach\"). * [3] N. Cherif et al. (2024) RL-based cargo-UAV trajectory planning and cell association for minimum handoffs, disconnectivity, and energy consumption. IEEE Trans. Veh. Technol. 73 (5), pp. 7304–7309. External Links: [Document](https://dx.doi.org/10.1109/TVT.2023.3340177) Cited by: [§I](https://ar5iv.labs.arxiv.org/html/2607.18604v1#S1.p2.1 \"I Introduction ‣ Intelligent Multi-UAV Navigation in ITNTNs: A Hierarchical LLM Approach\"). * [4] N. Cherif (2022) Cellular-connected UAV in next-generation wireless networks. Ph.D. Thesis, Univ. Ottawa. Cited by: [§II-B](https://ar5iv.labs.arxiv.org/html/2607.18604v1#S2.SS2.p1.1 \"II-B Communication Model ‣ II System Model ‣ Intelligent Multi-UAV Navigation in ITNTNs: A Hierarchical LLM Approach\"). * [5] L. Dong et al. (2026) Aerial Agentic AI: Synergizing LLM and SLM for Low-Altitude Wireless Networks. arXiv preprint arXiv:2603.22866. Cited by: [§I](https://ar5iv.labs.arxiv.org/html/2607.18604v1#S1.p3.1 \"I Introduction ‣ Intelligent Multi-UAV Navigation in ITNTNs: A Hierarchical LLM Approach\"). * [6] W. Jaafar and H. Yanikomeroglu (2020) Dynamics of laser-charged UAVs: a battery perspective. IEEE Internet Things J. 8 (13), pp. 10573–10582. Cited by: [§I](https://ar5iv.labs.arxiv.org/html/2607.18604v1#S1.p2.1 \"I Introduction ‣ Intelligent Multi-UAV Navigation in ITNTNs: A Hierarchical LLM Approach\"). * [7] W. Jaafar and H. Yanikomeroglu (2022) HAPS-ITS: enabling future its services in trans-continental highways. IEEE Commun. Mag. 60 (10), pp. 80–86. External Links: [Document](https://dx.doi.org/10.1109/MCOM.001.2200025) Cited by: [§I](https://ar5iv.labs.arxiv.org/html/2607.18604v1#S1.p1.1 \"I Introduction ‣ Intelligent Multi-UAV Navigation in ITNTNs: A Hierarchical LLM Approach\"). * [8] J. Panerati et al. (2021) Learning to fly—a gym environment with pybullet physics for reinforcement learning of multi-agent quadcopter control. In Proc. IEEE/RSJ Int. Conf. Intell. Robots Syst. (IROS), pp. 7512–7519. Cited by: [§II-C](https://ar5iv.labs.arxiv.org/html/2607.18604v1#S2.SS3.p1.1 \"II-C Kinematic Model ‣ II System Model ‣ Intelligent Multi-UAV Navigation in ITNTNs: A Hierarchical LLM Approach\"), [§V-A](https://ar5iv.labs.arxiv.org/html/2607.18604v1#S5.SS1.p1.1 \"V-A Simulation Setup ‣ V Numerical Results ‣ Intelligent Multi-UAV Navigation in ITNTNs: A Hierarchical LLM Approach\"). * [9] Z. Yan et al. (2023) Multi-UAV speed control with collision avoidance and handover-aware cell association: DRL with action branching. In Proc. IEEE Global Commun. Conf. (GLOBECOM), pp. 5067–5072. Cited by: [§I](https://ar5iv.labs.arxiv.org/html/2607.18604v1#S1.p1.1 \"I Introduction ‣ Intelligent Multi-UAV Navigation in ITNTNs: A Hierarchical LLM Approach\"), [§I](https://ar5iv.labs.arxiv.org/html/2607.18604v1#S1.p2.1 \"I Introduction ‣ Intelligent Multi-UAV Navigation in ITNTNs: A Hierarchical LLM Approach\"). * [10] Z. Yan et al. (2025) CVaR-based variational quantum optimization for user association in handoff-aware vehicular networks. In Proc. IEEE Int. Conf. Commun. (ICC), pp. 6088–6093. Cited by: [§I](https://ar5iv.labs.arxiv.org/html/2607.18604v1#S1.p2.1 \"I Introduction ‣ Intelligent Multi-UAV Navigation in ITNTNs: A Hierarchical LLM Approach\"). * [11] Z. Yan et al. (2025) Hierarchical and Collaborative LLM-Based Control for Multi-UAV Motion and Communication in Integrated Terrestrial and Non-Terrestrial Networks. arXiv preprint arXiv:2506.06532. Cited by: [§I](https://ar5iv.labs.arxiv.org/html/2607.18604v1#S1.p3.1 \"I Introduction ‣ Intelligent Multi-UAV Navigation in ITNTNs: A Hierarchical LLM Approach\"). * [12] Z. Yan et al. (2025) Hybrid LLM-DDQN-Based Joint Optimization of V2I Communication and Autonomous Driving. IEEE Wireless Commun. Lett. 14 (4), pp. 1214–1218. External Links: [Document](https://dx.doi.org/10.1109/LWC.2025.3539638) Cited by: [§I](https://ar5iv.labs.arxiv.org/html/2607.18604v1#S1.p3.1 \"I Introduction ‣ Intelligent Multi-UAV Navigation in ITNTNs: A Hierarchical LLM Approach\"). * [13] Z. Yan and H. Tabassum (2022) Reinforcement learning for joint V2I network selection and autonomous driving policies. In Proc. IEEE Global Commun. Conf. (GLOBECOM), pp. 1241–1246. External Links: [Document](https://dx.doi.org/10.1109/GLOBECOM48099.2022.10001396) Cited by: [§I](https://ar5iv.labs.arxiv.org/html/2607.18604v1#S1.p1.1 \"I Introduction ‣ Intelligent Multi-UAV Navigation in ITNTNs: A Hierarchical LLM Approach\"), [§V-A](https://ar5iv.labs.arxiv.org/html/2607.18604v1#S5.SS1.p4.1 \"V-A Simulation Setup ‣ V Numerical Results ‣ Intelligent Multi-UAV Navigation in ITNTNs: A Hierarchical LLM Approach\"). * [14] Z. Yan and H. Tabassum (2025) Generalized multi-objective reinforcement learning with envelope updates in URLLC-enabled vehicular networks. IEEE Trans. Veh. Technol. 74 (11), pp. 17666–17682. External Links: [Document](https://dx.doi.org/10.1109/TVT.2025.3580502) Cited by: [§V-A](https://ar5iv.labs.arxiv.org/html/2607.18604v1#S5.SS1.p4.1 \"V-A Simulation Setup ‣ V Numerical Results ‣ Intelligent Multi-UAV Navigation in ITNTNs: A Hierarchical LLM Approach\"). * [15] A. Yang et al. (2025) Qwen3 technical report. arXiv preprint arXiv:2505.09388. Cited by: [§I](https://ar5iv.labs.arxiv.org/html/2607.18604v1#S1.p4.1 \"I Introduction ‣ Intelligent Multi-UAV Navigation in ITNTNs: A Hierarchical LLM Approach\"). * [16] K. Zhang et al. (2024) A machine learning-based toolbox for p4 programmable data-planes. IEEE Trans. Netw. Serv. Manag. 21 (4), pp. 4450–4465. Cited by: [§V-A](https://ar5iv.labs.arxiv.org/html/2607.18604v1#S5.SS1.p4.1 \"V-A Simulation Setup ‣ V Numerical Results ‣ Intelligent Multi-UAV Navigation in ITNTNs: A Hierarchical LLM Approach\")."
+            }
+          ],
+          "children": []
+        }
+      ]
+    }
+  ],
+  "chunks": [
+    {
+      "heading_path": [
+        "Intelligent Multi-UAV Navigation in ITNTNs: A Hierarchical LLM Approach Emails: {zijiang, pingw, hinat}@yorku.ca, haozhou029@gmail.com, wael.jaafar@etsmtl.ca, jianhuapei98@gmail.com, halim@sce.carleton.ca."
+      ],
+      "text": "# Intelligent Multi-UAV Navigation in ITNTNs: A Hierarchical LLM Approach Emails: {zijiang, pingw, hinat}@yorku.ca, haozhou029@gmail.com, wael.jaafar@etsmtl.ca, jianhuapei98@gmail.com, halim@sce.carleton.ca."
+    },
+    {
+      "heading_path": [
+        "Intelligent Multi-UAV Navigation in ITNTNs: A Hierarchical LLM Approach Emails: {zijiang, pingw, hinat}@yorku.ca, haozhou029@gmail.com, wael.jaafar@etsmtl.ca, jianhuapei98@gmail.com, halim@sce.carleton.ca.",
+        "Abstract"
+      ],
+      "text": "###### Abstract\n\nThe deployment of high-speed Uncrewed Aerial Vehicles (UAVs) in 3D aerial highways necessitates robust coordination of physical flight kinematics and multi-tier network handovers. While Deep Reinforcement Learning (DRL) offers rapid tactical control, it lacks the zero-shot strategic reasoning required to quickly adapt to dynamic Integrated Terrestrial and Non-Terrestrial Networks (ITNTNs). Conversely, Large Language Models (LLMs) excel at semantic reasoning but suffer from high inference latency, rendering them unsuitable for real-time aerodynamic control. To bridge this gap, we propose a novel Hierarchical LLM-driven control framework. A massive cloud-based LLM deployed on a High-Altitude Platform Station (HAPS) manages slow-timescale global load balancing, while lightweight edge-LLMs on individual UAVs translate local observations into tactical sub-goals. These sub-goals guide a fast-timescale physical DRL controller to execute collision-free, handover-aware trajectories. Simulation results demonstrate that our agentic architecture significantly reduces collision rates and improves aggregate system throughput compared to existing baselines."
+    },
+    {
+      "heading_path": [
+        "Intelligent Multi-UAV Navigation in ITNTNs: A Hierarchical LLM Approach Emails: {zijiang, pingw, hinat}@yorku.ca, haozhou029@gmail.com, wael.jaafar@etsmtl.ca, jianhuapei98@gmail.com, halim@sce.carleton.ca.",
+        "Index Terms:"
+      ],
+      "text": "###### Index Terms:"
+    },
+    {
+      "heading_path": [
+        "Intelligent Multi-UAV Navigation in ITNTNs: A Hierarchical LLM Approach Emails: {zijiang, pingw, hinat}@yorku.ca, haozhou029@gmail.com, wael.jaafar@etsmtl.ca, jianhuapei98@gmail.com, halim@sce.carleton.ca.",
+        "I Introduction"
+      ],
+      "text": "## I Introduction\n\nThe rapid proliferation of Uncrewed Aerial Vehicles (UAVs) is driving the conceptualization of 3D aerial highways, dedicated corridors designed to support dense, high-speed autonomous logistics [[2](https://ar5iv.labs.arxiv.org/html/2607.18604v1#bib.bib5)]. Operating safely in these environments requires uninterrupted Command and Control (C2) and telemetry links [[9](https://ar5iv.labs.arxiv.org/html/2607.18604v1#bib.bib4)]. To satisfy these stringent connectivity requirements, 6G architectures are shifting toward Integrated Terrestrial and Non-Terrestrial Networks (ITNTNs) [[7](https://ar5iv.labs.arxiv.org/html/2607.18604v1#bib.bib6)], leveraging High-Altitude Platform Stations (HAPS) to complement the terrestrial base stations’ (TBSs) coverage. However, as UAVs traverse these overlapping coverage tiers at high velocities, they inevitably trigger frequent network handovers (HOs) [[13](https://ar5iv.labs.arxiv.org/html/2607.18604v1#bib.bib2)], necessitating the joint optimization of physical flight kinematics and communication reliability.\n\nAlthough Deep Reinforcement Learning (DRL) has been widely adopted for UAV trajectory planning and cell association [[3](https://ar5iv.labs.arxiv.org/html/2607.18604v1#bib.bib1)], it inherently relies on trial-and-error exploration [[9](https://ar5iv.labs.arxiv.org/html/2607.18604v1#bib.bib4)]. In multi-agent aerial corridors, such exploration often leads to localized and greedy optimization, which can result in the systemic depletion of shared resources. Uncoordinated agents may inadvertently overload specific TBSs or saturate the limited bandwidth of the HAPS, ultimately compromising both the aggregate system capacity and flight safety [[6](https://ar5iv.labs.arxiv.org/html/2607.18604v1#bib.bib7), [10](https://ar5iv.labs.arxiv.org/html/2607.18604v1#bib.bib12)].\n\nRecently, the integration of Generative AI, especially Large Language Models (LLMs), has emerged as a transformative approach for autonomous vehicle control [[5](https://ar5iv.labs.arxiv.org/html/2607.18604v1#bib.bib14)]. LLMs possess unparalleled zero-shot reasoning, enabling complex mission adaptation and global strategic planning [[11](https://ar5iv.labs.arxiv.org/html/2607.18604v1#bib.bib10)]. Yet, standard LLM inference suffers from significant latency bottlenecks. Relying purely on LLMs is fundamentally incompatible with the fast-timescale execution required for sub-millisecond RF channel handovers and high-frequency rotor control [[1](https://ar5iv.labs.arxiv.org/html/2607.18604v1#bib.bib13), [12](https://ar5iv.labs.arxiv.org/html/2607.18604v1#bib.bib9)]. Bridging the gap between slow-timescale semantic reasoning and fast-timescale physical execution is an open challenge.\n\nTo overcome these limitations, this paper proposes a novel Dual-Timescale Hierarchical LLM architecture that synergizes the cognitive reasoning of foundation models with the rapid execution of DRL. Indeed, given the potential of Agentic AI and the latency challenges inherent in dynamic aerial networks, we propose here a novel Cloud-Edge framework that jointly optimizes UAV mobility and handover management. In particular, we first formulate the problem as a Hierarchical Multi-Objective Partially Observable Markov Decision Process (H-MO-POMDP), which strictly accounts for high-fidelity 3D rigid-body kinematics and realistic ITNTN capacity constraints. To address this complex hierarchy, we introduce a dual-timescale architecture powered by LLMs. Specifically, a strategic meta-controller (Qwen3.5-122B [[15](https://ar5iv.labs.arxiv.org/html/2607.18604v1#bib.bib15)]) deployed on the HAPS operates at a slow timescale to dictate global load-balancing policies. Moreover, unlike previous studies that relied solely on trial-and-error DRL, we integrate here lightweight edge-agents (Qwen3.5-9B [[15](https://ar5iv.labs.arxiv.org/html/2607.18604v1#bib.bib15)]) directly on individual UAVs. The latter generate cognitive reflections to dynamically tune the reward functions of a fast-timescale Deep Double Q-Network (DDQN), successfully bridging semantic reasoning with real-time physical execution. Finally, extensive simulations in a high-fidelity 3D physics environment demonstrate that the proposed LLM-guided framework mitigates severe collision penalties and maximizes system throughput, thus outperforming baselines.\n\nThe remainder of this paper is organized as follows. Section [II](https://ar5iv.labs.arxiv.org/html/2607.18604v1#S2 \"II System Model ‣ Intelligent Multi-UAV Navigation in ITNTNs: A Hierarchical LLM Approach\") describes the ITNTN system model, including the high-fidelity 3D UAV kinematics and the multi-tier communication architecture. Section [III](https://ar5iv.labs.arxiv.org/html/2607.18604v1#S3 \"III Problem Formulation ‣ Intelligent Multi-UAV Navigation in ITNTNs: A Hierarchical LLM Approach\") formulates the joint optimization problem as a H-MO-POMDP. The proposed dual-timescale hierarchical LLM framework and its cognitive reasoning modules are introduced in Section [IV](https://ar5iv.labs.arxiv.org/html/2607.18604v1#S4 \"IV Proposed Hierarchical LLM Framework ‣ Intelligent Multi-UAV Navigation in ITNTNs: A Hierarchical LLM Approach\"). Section [V](https://ar5iv.labs.arxiv.org/html/2607.18604v1#S5 \"V Numerical Results ‣ Intelligent Multi-UAV Navigation in ITNTNs: A Hierarchical LLM Approach\") presents the numerical results and performance evaluations. Finally, Section [VI](https://ar5iv.labs.arxiv.org/html/2607.18604v1#S6 \"VI Conclusion ‣ Intelligent Multi-UAV Navigation in ITNTNs: A Hierarchical LLM Approach\") concludes the paper."
+    },
+    {
+      "heading_path": [
+        "Intelligent Multi-UAV Navigation in ITNTNs: A Hierarchical LLM Approach Emails: {zijiang, pingw, hinat}@yorku.ca, haozhou029@gmail.com, wael.jaafar@etsmtl.ca, jianhuapei98@gmail.com, halim@sce.carleton.ca.",
+        "II System Model"
+      ],
+      "text": "## II System Model"
+    },
+    {
+      "heading_path": [
+        "Intelligent Multi-UAV Navigation in ITNTNs: A Hierarchical LLM Approach Emails: {zijiang, pingw, hinat}@yorku.ca, haozhou029@gmail.com, wael.jaafar@etsmtl.ca, jianhuapei98@gmail.com, halim@sce.carleton.ca.",
+        "II System Model",
+        "II-A 3D Aerial Highway and ITNTN Architecture"
+      ],
+      "text": "### II-A 3D Aerial Highway and ITNTN Architecture\n\nAs depicted in Fig. [1](https://ar5iv.labs.arxiv.org/html/2607.18604v1#S2.F1 \"Figure 1 ‣ II System Model ‣ Intelligent Multi-UAV Navigation in ITNTNs: A Hierarchical LLM Approach\"), we consider a dynamic 3D aerial highway where a set of MM UAVs, denoted by ℳ={1,2,…,M}\\mathcal{M}=\\{1,2,\\dots,M\\}, navigate a shared airspace. Each UAV m∈ℳm\\in\\mathcal{M} is assigned an independent transit mission to a unique 3D target waypoint, 𝐱targetm\\mathbf{x}\\_{\\text{target}}^{m}, and must continuously adjust its altitude and heading to bypass obstacles and avoid collisions.\n\nMM\n\nℳ={1,2,…,M}\\mathcal{M}=\\{1,2,\\dots,M\\}\n\nm∈ℳm\\in\\mathcal{M}\n\n𝐱targetm\\mathbf{x}_{\\text{target}}^{m}\n\nTo support mission-critical C2 and telemetry, the airspace is covered by an ITNTN. The network comprises a set of BB TBSs, denoted as ℬ={1,2,…,B}\\mathcal{B}=\\{1,2,\\dots,B\\}, and a one HAPS, denoted by HH. A UAV mm can connect to any serving node c∈ℬ∪{H}c\\in\\mathcal{B}\\cup\\{H\\}, but high-speed traversal triggers handovers.\n\nBB\n\nℬ={1,2,…,B}\\mathcal{B}=\\{1,2,\\dots,B\\}\n\nHH\n\nmm\n\nc∈ℬ∪{H}c\\in\\mathcal{B}\\cup\\{H\\}"
+    },
+    {
+      "heading_path": [
+        "Intelligent Multi-UAV Navigation in ITNTNs: A Hierarchical LLM Approach Emails: {zijiang, pingw, hinat}@yorku.ca, haozhou029@gmail.com, wael.jaafar@etsmtl.ca, jianhuapei98@gmail.com, halim@sce.carleton.ca.",
+        "II System Model",
+        "II-B Communication Model"
+      ],
+      "text": "### II-B Communication Model\n\nTo evaluate the reliability of the C2 links, we formulate the signal-to-interference-plus-noise ratio (SINR)[[4](https://ar5iv.labs.arxiv.org/html/2607.18604v1#bib.bib3)]. Let Gtm,cG\\_{t}^{m,c} denote the linear channel power gain between UAV mm and serving node cc at time tt, encapsulating both large-scale path loss and small-scale Rician fading. The received downlink SINR at UAV mm is given by\n\nGtm,cG_{t}^{m,c}\n\nmm\n\ncc\n\ntt\n\nmm\n\n| | | | | | --- | --- | --- | --- | | | SINRtm,c=Pc​Gtm,cN0​Bc+It,\\text{SINR}\\_{t}^{m,c}=\\frac{P\\_{c}G\\_{t}^{m,c}}{N\\_{0}B\\_{c}+I\\_{t}}, | | (1) |\n\nSINRtm,c=Pc​Gtm,cN0​Bc+It,\\text{SINR}_{t}^{m,c}=\\frac{P_{c}G_{t}^{m,c}}{N_{0}B_{c}+I_{t}},\n\nwhere PcP\\_{c} is the transmit power of node cc, N0N\\_{0} is the noise power spectral density, and BcB\\_{c} is the allocated bandwidth. The term It=∑c′≠cPc′​Gtm,c′I\\_{t}=\\sum\\_{c^{\\prime}\\neq c}P\\_{c^{\\prime}}G\\_{t}^{m,c^{\\prime}} represents the aggregate interference from other active transmitting nodes in the tier.\n\nPcP_{c}\n\ncc\n\nN0N_{0}\n\nBcB_{c}\n\nIt=∑c′≠cPc′​Gtm,c′I_{t}=\\sum_{c^{\\prime}\\neq c}P_{c^{\\prime}}G_{t}^{m,c^{\\prime}}\n\nThe achievable data rate for UAV mm is calculated as\n\nmm\n\n| | | | | | --- | --- | --- | --- | | | Rtm,c=Bc​log2⁡(1+SINRtm,c).R\\_{t}^{m,c}=B\\_{c}\\log\\_{2}\\left(1+\\text{SINR}\\_{t}^{m,c}\\right). | | (2) |\n\nRtm,c=Bc​log2⁡(1+SINRtm,c).R_{t}^{m,c}=B_{c}\\log_{2}\\left(1+\\text{SINR}_{t}^{m,c}\\right).\n\nTo penalize the latency and packet drops associated with frequent network switching, we define the handover-aware weighted data rate as\n\n| | | | | | --- | --- | --- | --- | | | WRtm,c=Rtm,c−γ​𝕀HO,tm,\\text{WR}\\_{t}^{m,c}=R\\_{t}^{m,c}-\\gamma\\mathbb{I}\\_{\\text{HO},t}^{m}, | | (3) |\n\nWRtm,c=Rtm,c−γ​𝕀HO,tm,\\text{WR}_{t}^{m,c}=R_{t}^{m,c}-\\gamma\\mathbb{I}_{\\text{HO},t}^{m},\n\nwhere 𝕀HO,tm∈{0,1}\\mathbb{I}\\_{\\text{HO},t}^{m}\\in\\{0,1\\} is a binary indicator that equals 11 if a handover occurs at time tt, and γ\\gamma is the handover penalty coefficient. Also, the HAPS is constrained by a maximum aggregate capacity CmaxHAPSC\\_{\\max}^{\\mathrm{HAPS}} and any node cc has a users association capacity QcQ\\_{c}, ∀c∈ℬ∪{H}\\forall c\\in\\mathcal{B}\\cup\\{H\\}.\n\n𝕀HO,tm∈{0,1}\\mathbb{I}_{\\text{HO},t}^{m}\\in\\{0,1\\}\n\n11\n\ntt\n\nγ\\gamma\n\nCmaxHAPSC_{\\max}^{\\mathrm{HAPS}}\n\ncc\n\nQcQ_{c}\n\n∀c∈ℬ∪{H}\\forall c\\in\\mathcal{B}\\cup\\{H\\}"
+    },
+    {
+      "heading_path": [
+        "Intelligent Multi-UAV Navigation in ITNTNs: A Hierarchical LLM Approach Emails: {zijiang, pingw, hinat}@yorku.ca, haozhou029@gmail.com, wael.jaafar@etsmtl.ca, jianhuapei98@gmail.com, halim@sce.carleton.ca.",
+        "II System Model",
+        "II-C Kinematic Model"
+      ],
+      "text": "### II-C Kinematic Model\n\nWe adopt a high-fidelity 3D rigid-body kinematics model, where the physical state of UAV mm at time tt is defined by its 3D position 𝐱tm∈ℝ3\\mathbf{x}\\_{t}^{m}\\in\\mathbb{R}^{3} and linear velocity 𝐯tm∈ℝ3\\mathbf{v}\\_{t}^{m}\\in\\mathbb{R}^{3}. The system evolves at a fast discrete timescale Δ​t\\Delta t (e.g., =0.05 s), and the continuous kinematic state updates are governed by [[8](https://ar5iv.labs.arxiv.org/html/2607.18604v1#bib.bib11)]\n\nmm\n\ntt\n\n𝐱tm∈ℝ3\\mathbf{x}_{t}^{m}\\in\\mathbb{R}^{3}\n\n𝐯tm∈ℝ3\\mathbf{v}_{t}^{m}\\in\\mathbb{R}^{3}\n\nΔ​t\\Delta t\n\n| | | | | | --- | --- | --- | --- | | | 𝐱t+1m=𝐱tm+𝐯tm​Δ​t,\\mathbf{x}\\_{t+1}^{m}=\\mathbf{x}\\_{t}^{m}+\\mathbf{v}\\_{t}^{m}\\Delta t, | | (4) |\n\n𝐱t+1m=𝐱tm+𝐯tm​Δ​t,\\mathbf{x}_{t+1}^{m}=\\mathbf{x}_{t}^{m}+\\mathbf{v}_{t}^{m}\\Delta t,\n\n| | | | | | --- | --- | --- | --- | | | 𝐯t+1m=𝐯tm+(𝐅T,mMu−𝐠−𝐝m)​Δ​t,\\mathbf{v}\\_{t+1}^{m}=\\mathbf{v}\\_{t}^{m}+\\left(\\frac{\\mathbf{F}\\_{T,m}}{M\\_{u}}-\\mathbf{g}-\\mathbf{d}\\_{m}\\right)\\Delta t, | | (5) |\n\n𝐯t+1m=𝐯tm+(𝐅T,mMu−𝐠−𝐝m)​Δ​t,\\mathbf{v}_{t+1}^{m}=\\mathbf{v}_{t}^{m}+\\left(\\frac{\\mathbf{F}_{T,m}}{M_{u}}-\\mathbf{g}-\\mathbf{d}_{m}\\right)\\Delta t,\n\nwhere MuM\\_{u} is the UAV mass, 𝐠\\mathbf{g} is the gravitational acceleration vector, and 𝐝m\\mathbf{d}\\_{m} is the aerodynamic drag. The collective thrust vector 𝐅T,m\\mathbf{F}\\_{T,m} is derived from the real-time rotational speeds (RPM) of the four individual rotors. To ensure flight safety, a severe collision penalty is incurred if the 3D Euclidean distance between any two UAVs falls below the physical safety threshold: ‖𝐱tm−𝐱tj‖2<dsafe\\|\\mathbf{x}\\_{t}^{m}-\\mathbf{x}\\_{t}^{j}\\|\\_{2}<d\\_{\\text{safe}} for any m≠jm\\neq j.\n\nMuM_{u}\n\n𝐠\\mathbf{g}\n\n𝐝m\\mathbf{d}_{m}\n\n𝐅T,m\\mathbf{F}_{T,m}\n\n‖𝐱tm−𝐱tj‖2<dsafe\\|\\mathbf{x}_{t}^{m}-\\mathbf{x}_{t}^{j}\\|_{2}<d_{\\text{safe}}\n\nm≠jm\\neq j"
+    },
+    {
+      "heading_path": [
+        "Intelligent Multi-UAV Navigation in ITNTNs: A Hierarchical LLM Approach Emails: {zijiang, pingw, hinat}@yorku.ca, haozhou029@gmail.com, wael.jaafar@etsmtl.ca, jianhuapei98@gmail.com, halim@sce.carleton.ca.",
+        "III Problem Formulation"
+      ],
+      "text": "## III Problem Formulation\n\nTo capture the coupled dynamics of flight kinematics and network handovers across different operational timescales, we formulate the system as a H-MO-POMDP consisting of a slow-timescale global meta-controller (HAPS) and fast-timescale tactical edge-agents (UAVs)."
+    },
+    {
+      "heading_path": [
+        "Intelligent Multi-UAV Navigation in ITNTNs: A Hierarchical LLM Approach Emails: {zijiang, pingw, hinat}@yorku.ca, haozhou029@gmail.com, wael.jaafar@etsmtl.ca, jianhuapei98@gmail.com, halim@sce.carleton.ca.",
+        "III Problem Formulation",
+        "III-A State and Observation Spaces"
+      ],
+      "text": "### III-A State and Observation Spaces\n\nDue to the limited sensing range of individual UAVs, the global environmental state 𝒮t\\mathcal{S}\\_{t} is partially observable. At the fast tactical timescale tt, each UAV mm receives a local observation 𝐨tm∈Ω\\mathbf{o}\\_{t}^{m}\\in\\Omega, defined as\n\n𝒮t\\mathcal{S}_{t}\n\ntt\n\nmm\n\n𝐨tm∈Ω\\mathbf{o}_{t}^{m}\\in\\Omega\n\n| | | | | | --- | --- | --- | --- | | | 𝐨tm=[𝐱tm,𝐯tm,𝐱targetm,{𝐱tj,𝐯tj}j∈𝒩tm,ctm,WRtm,c],\\mathbf{o}\\_{t}^{m}=\\big[\\mathbf{x}\\_{t}^{m},\\mathbf{v}\\_{t}^{m},\\mathbf{x}\\_{\\text{target}}^{m},\\{\\mathbf{x}\\_{t}^{j},\\mathbf{v}\\_{t}^{j}\\}\\_{j\\in\\mathcal{N}\\_{t}^{m}},c\\_{t}^{m},\\text{WR}\\_{t}^{m,c}\\big], | | (6) |\n\n𝐨tm=[𝐱tm,𝐯tm,𝐱targetm,{𝐱tj,𝐯tj}j∈𝒩tm,ctm,WRtm,c],\\mathbf{o}_{t}^{m}=\\big[\\mathbf{x}_{t}^{m},\\mathbf{v}_{t}^{m},\\mathbf{x}_{\\text{target}}^{m},\\{\\mathbf{x}_{t}^{j},\\mathbf{v}_{t}^{j}\\}_{j\\in\\mathcal{N}_{t}^{m}},c_{t}^{m},\\text{WR}_{t}^{m,c}\\big],\n\nwhere 𝒩tm\\mathcal{N}\\_{t}^{m} is the set of neighboring UAVs within sensing range, ctmc\\_{t}^{m} is the current serving node, and WRtm,c\\text{WR}\\_{t}^{m,c} is the handover-aware weighted data rate. Conversely, at the slow strategic timescale THAPST\\_{\\mathrm{HAPS}}, the HAPS receives a global meta-observation 𝐨THAPS\\mathbf{o}\\_{T}^{\\mathrm{HAPS}} comprising the aggregate traffic load on each TBS, the available HAPS backhaul capacity, and the spatial distribution of the UAV swarm.\n\n𝒩tm\\mathcal{N}_{t}^{m}\n\nctmc_{t}^{m}\n\nWRtm,c\\text{WR}_{t}^{m,c}\n\nTHAPST_{\\mathrm{HAPS}}\n\n𝐨THAPS\\mathbf{o}_{T}^{\\mathrm{HAPS}}"
+    },
+    {
+      "heading_path": [
+        "Intelligent Multi-UAV Navigation in ITNTNs: A Hierarchical LLM Approach Emails: {zijiang, pingw, hinat}@yorku.ca, haozhou029@gmail.com, wael.jaafar@etsmtl.ca, jianhuapei98@gmail.com, halim@sce.carleton.ca.",
+        "III Problem Formulation",
+        "III-B Hybrid Action Spaces"
+      ],
+      "text": "### III-B Hybrid Action Spaces\n\nThe action space encompasses both continuous physical controls and discrete network decisions as follows."
+    },
+    {
+      "heading_path": [
+        "Intelligent Multi-UAV Navigation in ITNTNs: A Hierarchical LLM Approach Emails: {zijiang, pingw, hinat}@yorku.ca, haozhou029@gmail.com, wael.jaafar@etsmtl.ca, jianhuapei98@gmail.com, halim@sce.carleton.ca.",
+        "III Problem Formulation",
+        "III-B Hybrid Action Spaces",
+        "III-B1 HAPS Strategic Action"
+      ],
+      "text": "#### III-B1 HAPS Strategic Action\n\nAt each macro-step THAPST\\_{\\mathrm{HAPS}}, the HAPS agent outputs a discrete meta-action 𝐚THAPS∈{Offload,Recall,Idle}\\mathbf{a}\\_{T}^{\\mathrm{HAPS}}\\in\\{\\text{Offload},\\text{Recall},\\text{Idle}\\}. These directives are broadcast to specific high-density congestion zones to enforce load-balancing before node capacities are breached.\n\nTHAPST_{\\mathrm{HAPS}}\n\n𝐚THAPS∈{Offload,Recall,Idle}\\mathbf{a}_{T}^{\\mathrm{HAPS}}\\in\\{\\text{Offload},\\text{Recall},\\text{Idle}\\}"
+    },
+    {
+      "heading_path": [
+        "Intelligent Multi-UAV Navigation in ITNTNs: A Hierarchical LLM Approach Emails: {zijiang, pingw, hinat}@yorku.ca, haozhou029@gmail.com, wael.jaafar@etsmtl.ca, jianhuapei98@gmail.com, halim@sce.carleton.ca.",
+        "III Problem Formulation",
+        "III-B Hybrid Action Spaces",
+        "III-B2 UAV Tactical Action"
+      ],
+      "text": "#### III-B2 UAV Tactical Action\n\nAt each micro-step tt, UAV mm executes a joint hybrid action 𝐚tm=[𝐚mot,tm,𝐚tele,tm]⊤\\mathbf{a}\\_{t}^{m}=[\\mathbf{a}\\_{\\text{mot},t}^{m},\\mathbf{a}\\_{\\text{tele},t}^{m}]^{\\top}. The continuous motion action 𝐚mot,tm∈[−1,1]4\\mathbf{a}\\_{\\text{mot},t}^{m}\\in[-1,1]^{4} regulates the RPM of the four individual rotors for physical 3D navigation. Concurrently, the discrete telecommunication action 𝐚tele,tm∈ℬ∪{H}\\mathbf{a}\\_{\\text{tele},t}^{m}\\in\\mathcal{B}\\cup\\{H\\} selects the target serving node, triggering a handover if atele,tm≠ctma\\_{\\text{tele},t}^{m}\\neq c\\_{t}^{m}.\n\ntt\n\nmm\n\n𝐚tm=[𝐚mot,tm,𝐚tele,tm]⊤\\mathbf{a}_{t}^{m}=[\\mathbf{a}_{\\text{mot},t}^{m},\\mathbf{a}_{\\text{tele},t}^{m}]^{\\top}\n\n𝐚mot,tm∈[−1,1]4\\mathbf{a}_{\\text{mot},t}^{m}\\in[-1,1]^{4}\n\n𝐚tele,tm∈ℬ∪{H}\\mathbf{a}_{\\text{tele},t}^{m}\\in\\mathcal{B}\\cup\\{H\\}\n\natele,tm≠ctma_{\\text{tele},t}^{m}\\neq c_{t}^{m}"
+    },
+    {
+      "heading_path": [
+        "Intelligent Multi-UAV Navigation in ITNTNs: A Hierarchical LLM Approach Emails: {zijiang, pingw, hinat}@yorku.ca, haozhou029@gmail.com, wael.jaafar@etsmtl.ca, jianhuapei98@gmail.com, halim@sce.carleton.ca.",
+        "III Problem Formulation",
+        "III-C Multi-Objective Reward Functions"
+      ],
+      "text": "### III-C Multi-Objective Reward Functions\n\nTo simultaneously optimize mobility and connectivity, we define scalarized reward structures for edge and HAPS levels."
+    },
+    {
+      "heading_path": [
+        "Intelligent Multi-UAV Navigation in ITNTNs: A Hierarchical LLM Approach Emails: {zijiang, pingw, hinat}@yorku.ca, haozhou029@gmail.com, wael.jaafar@etsmtl.ca, jianhuapei98@gmail.com, halim@sce.carleton.ca.",
+        "III Problem Formulation",
+        "III-C Multi-Objective Reward Functions",
+        "III-C1 UAV Edge Reward"
+      ],
+      "text": "#### III-C1 UAV Edge Reward\n\nThe objective of UAV mm is to safely navigate to its target while maintaining a robust C2 link. The reward is formulated as\n\nmm\n\n| | | | | | --- | --- | --- | --- | | | Rtm=α1​Rtran,tm+α2​WRtm,c+α3​ρcrash,R\\_{t}^{m}=\\alpha\\_{1}R\\_{\\text{tran},t}^{m}+\\alpha\\_{2}\\text{WR}\\_{t}^{m,c}+\\alpha\\_{3}\\rho\\_{\\text{crash}}, | | (7) |\n\nRtm=α1​Rtran,tm+α2​WRtm,c+α3​ρcrash,R_{t}^{m}=\\alpha_{1}R_{\\text{tran},t}^{m}+\\alpha_{2}\\text{WR}_{t}^{m,c}+\\alpha_{3}\\rho_{\\text{crash}},\n\nwhere Rtran,tm=exp⁡(−‖𝐱tm−𝐱targetm‖2)−λ​‖𝐚mot,tm‖22R\\_{\\text{tran},t}^{m}=\\exp(-\\|\\mathbf{x}^{m}\\_{t}-\\mathbf{x}\\_{\\text{target}}^{m}\\|\\_{2})-\\lambda\\|\\mathbf{a}\\_{\\text{mot},t}^{m}\\|\\_{2}^{2} rewards forward progression while penalizing aggressive, energy-consuming rotor maneuvers. The term WRtm,c\\text{WR}\\_{t}^{m,c} maximizes the data rate while penalizing handovers. Finally, ρcrash\\rho\\_{\\text{crash}} applies a severe negative penalty if the safety distance dsafed\\_{\\text{safe}} is violated. The weights α{1,2,3}\\alpha\\_{\\{1,2,3\\}} balance the rewrards/penalties.\n\nRtran,tm=exp⁡(−‖𝐱tm−𝐱targetm‖2)−λ​‖𝐚mot,tm‖22R_{\\text{tran},t}^{m}=\\exp(-\\|\\mathbf{x}^{m}_{t}-\\mathbf{x}_{\\text{target}}^{m}\\|_{2})-\\lambda\\|\\mathbf{a}_{\\text{mot},t}^{m}\\|_{2}^{2}\n\nWRtm,c\\text{WR}_{t}^{m,c}\n\nρcrash\\rho_{\\text{crash}}\n\ndsafed_{\\text{safe}}\n\nα{1,2,3}\\alpha_{\\{1,2,3\\}}"
+    },
+    {
+      "heading_path": [
+        "Intelligent Multi-UAV Navigation in ITNTNs: A Hierarchical LLM Approach Emails: {zijiang, pingw, hinat}@yorku.ca, haozhou029@gmail.com, wael.jaafar@etsmtl.ca, jianhuapei98@gmail.com, halim@sce.carleton.ca.",
+        "III Problem Formulation",
+        "III-C Multi-Objective Reward Functions",
+        "III-C2 HAPS Reward"
+      ],
+      "text": "#### III-C2 HAPS Reward\n\nThe objective of the HAPS meta-controller is to maximize aggregate system throughput while enforcing node capacity limits. Its reward is given by\n\n| | | | | | --- | --- | --- | --- | | | RTHAPS=η1​∑m∈ℳRtm,c−η2​∑c∈ℬ∪{H}max⁡(0,nc,t−Qc),R\\_{T}^{\\mathrm{HAPS}}=\\eta\\_{1}\\sum\\_{m\\in\\mathcal{M}}R\\_{t}^{m,c}-\\eta\\_{2}\\sum\\_{c\\in\\mathcal{B}\\cup\\{H\\}}\\max(0,n\\_{c,t}-Q\\_{c}), | | (8) |\n\nRTHAPS=η1​∑m∈ℳRtm,c−η2​∑c∈ℬ∪{H}max⁡(0,nc,t−Qc),R_{T}^{\\mathrm{HAPS}}=\\eta_{1}\\sum_{m\\in\\mathcal{M}}R_{t}^{m,c}-\\eta_{2}\\sum_{c\\in\\mathcal{B}\\cup\\{H\\}}\\max(0,n_{c,t}-Q_{c}),\n\nwhere nc,tn\\_{c,t} is the number of UAVs currently associated with node cc. The second term heavily penalizes any policy that results in network congestion (i.e., exceeding the capacity QcQ\\_{c}), balanced by the weights η{1,2}\\eta\\_{\\{1,2\\}}. To capture the coupled dynamics of 3D trajectory control and handover-aware cell association, we define the joint optimization problem 𝒫\\mathcal{P} below. The objective is to maximize the aggregate system utility while adhering to physical kinematics and network capacity constraints.\n\nnc,tn_{c,t}\n\ncc\n\nQcQ_{c}\n\nη{1,2}\\eta_{\\{1,2\\}}\n\n𝒫\\mathcal{P}\n\n| | | | | | --- | --- | --- | --- | | | 𝒫:max𝐀,𝜶𝔼⁡[∑t=0Tγt​∑m∈ℳℛtm​(𝐚tm,𝜶tm)]s.t.C1:𝐱t+1m=f⁡(𝐱tm,𝐯tm,𝐚mot,tm),∀m,t,C2:‖𝐱tm−𝐱tj‖2≥dsafe,∀m≠j,C3:∑c∈ℬ∪{H}utm,c=1,∀m,t,C4:∑m∈ℳutm,c≤Qc,∀c∈ℬ∪{H},C5:𝜶tm∈Δ3,∑i=13αt,im=1.\\begin{aligned} \\mathcal{P}:\\quad\\max\\_{\\mathbf{A},\\boldsymbol{\\alpha}}\\quad&\\mathbb{E}\\left[\\sum\\_{t=0}^{T}\\gamma^{t}\\sum\\_{m\\in\\mathcal{M}}\\mathcal{R}\\_{t}^{m}(\\mathbf{a}\\_{t}^{m},\\boldsymbol{\\alpha}\\_{t}^{m})\\right]\\\\ \\text{s.t.}\\quad&\\mathrm{C1}:\\penalty\\ \\mathbf{x}\\_{t+1}^{m}=f(\\mathbf{x}\\_{t}^{m},\\mathbf{v}\\_{t}^{m},\\mathbf{a}\\_{\\mathrm{mot},t}^{m}),&&\\forall m,t,\\\\ &\\mathrm{C2}:\\penalty\\ \\|\\mathbf{x}\\_{t}^{m}-\\mathbf{x}\\_{t}^{j}\\|\\_{2}\\geq d\\_{\\mathrm{safe}},&&\\forall m\\neq j,\\\\ &\\mathrm{C3}:\\penalty\\ \\sum\\_{c\\in\\mathcal{B}\\cup\\{H\\}}u\\_{t}^{m,c}=1,&&\\forall m,t,\\\\ &\\mathrm{C4}:\\penalty\\ \\sum\\_{m\\in\\mathcal{M}}u\\_{t}^{m,c}\\leq Q\\_{c},&&\\forall c\\in\\mathcal{B}\\cup\\{H\\},\\\\ &\\mathrm{C5}:\\penalty\\ \\boldsymbol{\\alpha}\\_{t}^{m}\\in\\Delta^{3},\\quad\\sum\\_{i=1}^{3}\\alpha\\_{t,i}^{m}=1.\\end{aligned} | | (9) |\n\n𝒫:max𝐀,𝜶𝔼⁡[∑t=0Tγt​∑m∈ℳℛtm​(𝐚tm,𝜶tm)]s.t.C1:𝐱t+1m=f⁡(𝐱tm,𝐯tm,𝐚mot,tm),∀m,t,C2:‖𝐱tm−𝐱tj‖2≥dsafe,∀m≠j,C3:∑c∈ℬ∪{H}utm,c=1,∀m,t,C4:∑m∈ℳutm,c≤Qc,∀c∈ℬ∪{H},C5:𝜶tm∈Δ3,∑i=13αt,im=1.\\begin{aligned} \\mathcal{P}:\\quad\\max\\_{\\mathbf{A},\\boldsymbol{\\alpha}}\\quad&\\mathbb{E}\\left[\\sum\\_{t=0}^{T}\\gamma^{t}\\sum\\_{m\\in\\mathcal{M}}\\mathcal{R}\\_{t}^{m}(\\mathbf{a}\\_{t}^{m},\\boldsymbol{\\alpha}\\_{t}^{m})\\right]\\\\ \\text{s.t.}\\quad&\\mathrm{C1}:\\penalty\\ \\mathbf{x}\\_{t+1}^{m}=f(\\mathbf{x}\\_{t}^{m},\\mathbf{v}\\_{t}^{m},\\mathbf{a}\\_{\\mathrm{mot},t}^{m}),&&\\forall m,t,\\\\ &\\mathrm{C2}:\\penalty\\ \\|\\mathbf{x}\\_{t}^{m}-\\mathbf{x}\\_{t}^{j}\\|\\_{2}\\geq d\\_{\\mathrm{safe}},&&\\forall m\\neq j,\\\\ &\\mathrm{C3}:\\penalty\\ \\sum\\_{c\\in\\mathcal{B}\\cup\\{H\\}}u\\_{t}^{m,c}=1,&&\\forall m,t,\\\\ &\\mathrm{C4}:\\penalty\\ \\sum\\_{m\\in\\mathcal{M}}u\\_{t}^{m,c}\\leq Q\\_{c},&&\\forall c\\in\\mathcal{B}\\cup\\{H\\},\\\\ &\\mathrm{C5}:\\penalty\\ \\boldsymbol{\\alpha}\\_{t}^{m}\\in\\Delta^{3},\\quad\\sum\\_{i=1}^{3}\\alpha\\_{t,i}^{m}=1.\\end{aligned}\n\n𝒫:max𝐀,𝜶𝔼⁡[∑t=0Tγt​∑m∈ℳℛtm​(𝐚tm,𝜶tm)]s.t.C1:𝐱t+1m=f⁡(𝐱tm,𝐯tm,𝐚mot,tm),∀m,t,C2:‖𝐱tm−𝐱tj‖2≥dsafe,∀m≠j,C3:∑c∈ℬ∪{H}utm,c=1,∀m,t,C4:∑m∈ℳutm,c≤Qc,∀c∈ℬ∪{H},C5:𝜶tm∈Δ3,∑i=13αt,im=1.\\begin{aligned} \\mathcal{P}:\\quad\\max_{\\mathbf{A},\\boldsymbol{\\alpha}}\\quad&\\mathbb{E}\\left[\\sum_{t=0}^{T}\\gamma^{t}\\sum_{m\\in\\mathcal{M}}\\mathcal{R}_{t}^{m}(\\mathbf{a}_{t}^{m},\\boldsymbol{\\alpha}_{t}^{m})\\right]\\\\ \\text{s.t.}\\quad&\\mathrm{C1}:\\penalty\\ \\mathbf{x}_{t+1}^{m}=f(\\mathbf{x}_{t}^{m},\\mathbf{v}_{t}^{m},\\mathbf{a}_{\\mathrm{mot},t}^{m}),&&\\forall m,t,\\\\ &\\mathrm{C2}:\\penalty\\ \\|\\mathbf{x}_{t}^{m}-\\mathbf{x}_{t}^{j}\\|_{2}\\geq d_{\\mathrm{safe}},&&\\forall m\\neq j,\\\\ &\\mathrm{C3}:\\penalty\\ \\sum_{c\\in\\mathcal{B}\\cup\\{H\\}}u_{t}^{m,c}=1,&&\\forall m,t,\\\\ &\\mathrm{C4}:\\penalty\\ \\sum_{m\\in\\mathcal{M}}u_{t}^{m,c}\\leq Q_{c},&&\\forall c\\in\\mathcal{B}\\cup\\{H\\},\\\\ &\\mathrm{C5}:\\penalty\\ \\boldsymbol{\\alpha}_{t}^{m}\\in\\Delta^{3},\\quad\\sum_{i=1}^{3}\\alpha_{t,i}^{m}=1.\\end{aligned}\n\nIn (𝒫\\mathcal{P}), 𝐀≜{𝐚tm}\\mathbf{A}\\triangleq\\{\\mathbf{a}\\_{t}^{m}\\} and 𝜶≜{𝜶tm}\\boldsymbol{\\alpha}\\triangleq\\{\\boldsymbol{\\alpha}\\_{t}^{m}\\} (∀m∈ℳ,∀t\\forall m\\in\\mathcal{M},\\forall t) denote the joint hybrid action policy and the dynamically tuned multi-objective reward weights across all UAVs over the operational horizon, respectively. 𝐚tm=[𝐚mot,tm,atele,tm]⊤\\mathbf{a}\\_{t}^{m}=[\\mathbf{a}\\_{\\text{mot},t}^{m},a\\_{\\text{tele},t}^{m}]^{\\top} represents the hybrid action vector. C1 ensures the trajectory updates follow the 3D rigid-body physics model defined in ([4](https://ar5iv.labs.arxiv.org/html/2607.18604v1#S2.E4 \"In II-C Kinematic Model ‣ II System Model ‣ Intelligent Multi-UAV Navigation in ITNTNs: A Hierarchical LLM Approach\"))-([5](https://ar5iv.labs.arxiv.org/html/2607.18604v1#S2.E5 \"In II-C Kinematic Model ‣ II System Model ‣ Intelligent Multi-UAV Navigation in ITNTNs: A Hierarchical LLM Approach\")). C2 maintains the physical safety separation between any two UAVs. C3 ensures that each UAV mm is associated with exactly one serving node (TBS or HAPS) at any time tt. C4 restricts the number of associated users per node to its capacity QcQ\\_{c} to prevent network saturation. C5 defines the simplex Δ3\\Delta^{3} for the cognitive reward weights α{1,2,3}\\alpha\\_{\\{1,2,3\\}} tuned by the edge-LLM.\n\n𝒫\\mathcal{P}\n\n𝐀≜{𝐚tm}\\mathbf{A}\\triangleq\\{\\mathbf{a}_{t}^{m}\\}\n\n𝜶≜{𝜶tm}\\boldsymbol{\\alpha}\\triangleq\\{\\boldsymbol{\\alpha}_{t}^{m}\\}\n\n∀m∈ℳ,∀t\\forall m\\in\\mathcal{M},\\forall t\n\n𝐚tm=[𝐚mot,tm,atele,tm]⊤\\mathbf{a}_{t}^{m}=[\\mathbf{a}_{\\text{mot},t}^{m},a_{\\text{tele},t}^{m}]^{\\top}\n\nmm\n\ntt\n\nQcQ_{c}\n\nΔ3\\Delta^{3}\n\nα{1,2,3}\\alpha_{\\{1,2,3\\}}\n\nProblem 𝒫\\mathcal{P} is a highly non-convex mixed-integer non-linear programming problem coupling flight kinematics and aerial communications. To enable real-time control, we decompose this optimization via a two-tier Hierarchical Multi-Objective POMDP framework, delegating specific constraints to distinct LLM cognitive tiers, as described in the next section.\n\n𝒫\\mathcal{P}"
+    },
+    {
+      "heading_path": [
+        "Intelligent Multi-UAV Navigation in ITNTNs: A Hierarchical LLM Approach Emails: {zijiang, pingw, hinat}@yorku.ca, haozhou029@gmail.com, wael.jaafar@etsmtl.ca, jianhuapei98@gmail.com, halim@sce.carleton.ca.",
+        "IV Proposed Hierarchical LLM Framework"
+      ],
+      "text": "## IV Proposed Hierarchical LLM Framework\n\nTo bridge the latency gap between semantic reasoning and real-time aerodynamic control, we propose a Cloud-Edge Agentic architecture, as illustrated in Fig. [2](https://ar5iv.labs.arxiv.org/html/2607.18604v1#S4.F2 \"Figure 2 ‣ IV Proposed Hierarchical LLM Framework ‣ Intelligent Multi-UAV Navigation in ITNTNs: A Hierarchical LLM Approach\"). The framework separates decision-making into three distinct timescales: 1) slow strategic meta-timescale (THAPST\\_{\\mathrm{HAPS}}), 2) intermediate tactical reasoning timescale (TLLMT\\_{\\mathrm{LLM}}), and 3) fast physical execution timescale (TfastT\\_{\\mathrm{fast}}).\n\nTHAPST_{\\mathrm{HAPS}}\n\nTLLMT_{\\mathrm{LLM}}\n\nTfastT_{\\mathrm{fast}}"
+    },
+    {
+      "heading_path": [
+        "Intelligent Multi-UAV Navigation in ITNTNs: A Hierarchical LLM Approach Emails: {zijiang, pingw, hinat}@yorku.ca, haozhou029@gmail.com, wael.jaafar@etsmtl.ca, jianhuapei98@gmail.com, halim@sce.carleton.ca.",
+        "IV Proposed Hierarchical LLM Framework",
+        "IV-A HAPS Cloud Meta-Controller"
+      ],
+      "text": "### IV-A HAPS Cloud Meta-Controller\n\nAt the highest level of the hierarchy, the HAPS acts as a global orchestrator. Since global load balancing requires complex spatial reasoning across the entire ITNTN, we deploy a large foundation model, i.e., Qwen3.5-122B, hosted in the cloud computing cluster of HAPS. Operating at THAPS=5.0T\\_{\\mathrm{HAPS}}=5.0 s, the HAPS meta-controller evaluates the global observation 𝐨THAPS\\mathbf{o}\\_{T}^{\\mathrm{HAPS}}. In particular, if the number of users associated with a specific TBS nc,tn\\_{c,t} is close to QcQ\\_{c}, the LLM generates zero-shot strategic directives (𝐚THAPS\\mathbf{a}\\_{T}^{\\mathrm{HAPS}}), forcing specific UAV edge-agents to offload their C2 links to neighboring TBSs or the HAPS.\n\nTHAPS=5.0T_{\\mathrm{HAPS}}=5.0\n\n𝐨THAPS\\mathbf{o}_{T}^{\\mathrm{HAPS}}\n\nnc,tn_{c,t}\n\nQcQ_{c}\n\n𝐚THAPS\\mathbf{a}_{T}^{\\mathrm{HAPS}}"
+    },
+    {
+      "heading_path": [
+        "Intelligent Multi-UAV Navigation in ITNTNs: A Hierarchical LLM Approach Emails: {zijiang, pingw, hinat}@yorku.ca, haozhou029@gmail.com, wael.jaafar@etsmtl.ca, jianhuapei98@gmail.com, halim@sce.carleton.ca.",
+        "IV Proposed Hierarchical LLM Framework",
+        "IV-B UAV Edge-Agent"
+      ],
+      "text": "### IV-B UAV Edge-Agent\n\nEach UAV is equipped with a lightweight edge-LLM (i.e., Qwen3.5-9B) that operates at TLLM=1.0T\\_{\\mathrm{LLM}}=1.0 s. The cognitive edge-agent translates the localized observation (𝐨tm\\mathbf{o}\\_{t}^{m}) into a structured textual prompt. Rather than outputting direct motor controls, the edge-LLM performs cognitive reflection, i.e., if the UAV experiences severe handover penalties or is close to a collision threshold (dsafed\\_{\\text{safe}}), the LLM dynamically adjusts the weights α{1,2,3}\\alpha\\_{\\{1,2,3\\}} of the multi-objective reward vector. By doing so, this semantic reasoning guides the underlying DRL, shifting its priority between aggressive forward transit and conservative safety.\n\nTLLM=1.0T_{\\mathrm{LLM}}=1.0\n\n𝐨tm\\mathbf{o}_{t}^{m}\n\ndsafed_{\\text{safe}}\n\nα{1,2,3}\\alpha_{\\{1,2,3\\}}"
+    },
+    {
+      "heading_path": [
+        "Intelligent Multi-UAV Navigation in ITNTNs: A Hierarchical LLM Approach Emails: {zijiang, pingw, hinat}@yorku.ca, haozhou029@gmail.com, wael.jaafar@etsmtl.ca, jianhuapei98@gmail.com, halim@sce.carleton.ca.",
+        "IV Proposed Hierarchical LLM Framework",
+        "IV-C Fast-Timescale DRL Execution"
+      ],
+      "text": "### IV-C Fast-Timescale DRL Execution\n\nAt the lowest level, a DDQN operates at the physics timescale Tfast=0.05T\\_{\\mathrm{fast}}=0.05 s (20 Hz). The DDQN receives the dynamic reward weights generated by the edge-LLM and executes the continuous motor commands (𝐚mot,tm\\mathbf{a}\\_{\\text{mot},t}^{m}) and discrete handover actions (𝐚tele,tm\\mathbf{a}\\_{\\text{tele},t}^{m}). By offloading semantic reasoning to the LLM, the DDQN acts purely as a high-speed, reflexive physical controller.\n\nTfast=0.05T_{\\mathrm{fast}}=0.05\n\n𝐚mot,tm\\mathbf{a}_{\\text{mot},t}^{m}\n\n𝐚tele,tm\\mathbf{a}_{\\text{tele},t}^{m}\n\nThe complete execution flow is summarized in Algorithm [1](https://ar5iv.labs.arxiv.org/html/2607.18604v1#alg1 \"In IV-C Fast-Timescale DRL Execution ‣ IV Proposed Hierarchical LLM Framework ‣ Intelligent Multi-UAV Navigation in ITNTNs: A Hierarchical LLM Approach\").\n\n𝒮0\\mathcal{S}_{0}\n\nt=1,2,…,Tmaxt=1,2,\\dots,T_{\\max}\n\nt(modTHAPS)==0t\\pmod{T_{\\mathrm{HAPS}}}==0\n\n𝐨THAPS\\mathbf{o}_{T}^{\\mathrm{HAPS}}\n\n𝐚THAPS\\mathbf{a}_{T}^{\\mathrm{HAPS}}\n\nQcQ_{c}\n\nm∈ℳm\\in\\mathcal{M}\n\n𝐨tm\\mathbf{o}_{t}^{m}\n\nt(modTLLM)==0t\\pmod{T_{\\mathrm{LLM}}}==0\n\n𝐨tm\\mathbf{o}_{t}^{m}\n\n𝐩tdyn\\mathbf{p}_{t}^{\\mathrm{dyn}}\n\nρthresh\\rho_{\\text{thresh}}\n\nα{1,2,3}\\alpha_{\\{1,2,3\\}}\n\n𝐚tm=[𝐚mot,tm,𝐚tele,tm]⊤\\mathbf{a}_{t}^{m}=[\\mathbf{a}_{\\text{mot},t}^{m},\\mathbf{a}_{\\text{tele},t}^{m}]^{\\top}\n\n𝐚tm\\mathbf{a}_{t}^{m}\n\nTfastT_{\\mathrm{fast}}\n\n𝒟m\\mathcal{D}^{m}\n\n𝒟m\\mathcal{D}^{m}"
+    },
+    {
+      "heading_path": [
+        "Intelligent Multi-UAV Navigation in ITNTNs: A Hierarchical LLM Approach Emails: {zijiang, pingw, hinat}@yorku.ca, haozhou029@gmail.com, wael.jaafar@etsmtl.ca, jianhuapei98@gmail.com, halim@sce.carleton.ca.",
+        "IV Proposed Hierarchical LLM Framework",
+        "IV-D State Discretization and Prompt Engineering"
+      ],
+      "text": "### IV-D State Discretization and Prompt Engineering\n\nTo bridge the gap between numerical kinematics and the semantic reasoning of the Qwen3.5-9B edge-LLM, we leverage a structured prompt engineering methodology. Directly feeding high-precision floating-point arrays (e.g., 𝐯tm=[12.43,−3.21,0.5]\\mathbf{v}\\_{t}^{m}=[12.43,-3.21,0.5]) often degrades LLM reasoning and inflates inference latency. Therefore, we discretize the continuous observation 𝐨tm\\mathbf{o}\\_{t}^{m} into semantic language descriptors, denoted as ℒ⁡(𝐨tm)\\mathcal{L}(\\mathbf{o}\\_{t}^{m}). Specifically, the 3D relative distance to neighboring UAVs (‖𝐱tm−𝐱tj‖2\\|\\mathbf{x}\\_{t}^{m}-\\mathbf{x}\\_{t}^{j}\\|\\_{2}, ∀j∈ℳ\\{m}\\forall j\\in\\mathcal{M}\\backslash\\{m\\}) is categorized into predefined semantic zones: Safe (d>3​dsafed>3d\\_{\\text{safe}}), Warning (dsafe≤d≤3​dsafed\\_{\\text{safe}}\\leq d\\leq 3d\\_{\\text{safe}}), and Critical (d<dsafed<d\\_{\\text{safe}}). Similarly, the handover-aware network state WRtm,c\\text{WR}\\_{t}^{m,c} is mapped to Stable (when WRtm,c≥20\\text{WR}\\_{t}^{m,c}\\geq 20 Mbps, indicating an un-congested link), Degraded (when 0≤WRtm,c<200\\leq\\text{WR}\\_{t}^{m,c}<20 Mbps, indicating capacity saturation), or Hand-over (when WRtm,c<0\\text{WR}\\_{t}^{m,c}<0, triggered by the massive γ\\gamma penalty during network switching).\n\n𝐯tm=[12.43,−3.21,0.5]\\mathbf{v}_{t}^{m}=[12.43,-3.21,0.5]\n\n𝐨tm\\mathbf{o}_{t}^{m}\n\nℒ⁡(𝐨tm)\\mathcal{L}(\\mathbf{o}_{t}^{m})\n\n‖𝐱tm−𝐱tj‖2\\|\\mathbf{x}_{t}^{m}-\\mathbf{x}_{t}^{j}\\|_{2}\n\n∀j∈ℳ\\{m}\\forall j\\in\\mathcal{M}\\backslash\\{m\\}\n\nd>3​dsafed>3d_{\\text{safe}}\n\ndsafe≤d≤3​dsafed_{\\text{safe}}\\leq d\\leq 3d_{\\text{safe}}\n\nd<dsafed<d_{\\text{safe}}\n\nWRtm,c\\text{WR}_{t}^{m,c}\n\nWRtm,c≥20\\text{WR}_{t}^{m,c}\\geq 20\n\n0≤WRtm,c<200\\leq\\text{WR}_{t}^{m,c}<20\n\nWRtm,c<0\\text{WR}_{t}^{m,c}<0\n\nγ\\gamma\n\nTo enhance the zero-shot generalization of the LLM, we utilize distance-based few-shot example selection. Rather than using static prompts, the edge-agent retrieves a set of KK historical states from its local memory buffer 𝒟m\\mathcal{D}^{m} that exhibit the shortest Euclidean distance to the current kinematic state. The successful reward-weight configurations from these retrieved states are appended as in-context learning examples.\n\nKK\n\n𝒟m\\mathcal{D}^{m}\n\nThe final synthesized prompt strictly follows a modular template: [Role], [Current State], [Historical Examples], and [Task]. An illustrative example of the generated prompt is provided below:\n\n[Role]: You are an autonomous UAV edge-agent navigating a 3D corridor. Your task is to dynamically tune the multi-objective DRL reward weights (α1,α2,α3)(\\alpha\\_{1},\\alpha\\_{2},\\alpha\\_{3}) for Transit Efficiency, Network Reliability, and Safety. [Current State]: Distance to target is Approaching. Neighbor UAV-3 is in the Warning zone (7.2m). Network link to TBS-2 is Stable. [Historical Example]: When Neighbor was Warning and Link was Stable, optimal weights were (0.2,0.1,0.7)(0.2,0.1,0.7) to heavily prioritize collision avoidance over forward transit. [Task]: Based on the current state, output the updated scalarization weights in the exact format [w1, w2, w3]. Do not output conversational text or explanations.\n\n(α1,α2,α3)(\\alpha_{1},\\alpha_{2},\\alpha_{3})\n\n(0.2,0.1,0.7)(0.2,0.1,0.7)"
+    },
+    {
+      "heading_path": [
+        "Intelligent Multi-UAV Navigation in ITNTNs: A Hierarchical LLM Approach Emails: {zijiang, pingw, hinat}@yorku.ca, haozhou029@gmail.com, wael.jaafar@etsmtl.ca, jianhuapei98@gmail.com, halim@sce.carleton.ca.",
+        "V Numerical Results"
+      ],
+      "text": "## V Numerical Results"
+    },
+    {
+      "heading_path": [
+        "Intelligent Multi-UAV Navigation in ITNTNs: A Hierarchical LLM Approach Emails: {zijiang, pingw, hinat}@yorku.ca, haozhou029@gmail.com, wael.jaafar@etsmtl.ca, jianhuapei98@gmail.com, halim@sce.carleton.ca.",
+        "V Numerical Results",
+        "V-A Simulation Setup"
+      ],
+      "text": "### V-A Simulation Setup\n\nWe evaluate the proposed Cloud-Edge Agentic framework using a high-fidelity 3D multi-rotor physics simulator based on gym-pybullet-drones [[8](https://ar5iv.labs.arxiv.org/html/2607.18604v1#bib.bib11)]. The ITNTN environment consists of 4 TBSs and 1 HAPS serving a number of UAVs M∈{10,20,30}M\\in\\{10,20,30\\}. The Qwen-based LLMs interact with the physical simulation via structured API calls. The detailed simulation parameters are summarized in Table [I](https://ar5iv.labs.arxiv.org/html/2607.18604v1#S5.T1 \"Table I ‣ V-A Simulation Setup ‣ V Numerical Results ‣ Intelligent Multi-UAV Navigation in ITNTNs: A Hierarchical LLM Approach\").\n\nM∈{10,20,30}M\\in\\{10,20,30\\}\n\nA key challenge in applying generative AI to high-speed UAV networks is LLM inference latency, which is incompatible with the fast reaction time required for aerodynamic stabilization. To address this issue, we adopted a two-level HAPS–UAV architecture with separated cognitive and control timescales. At the UAV edge, we consider a 4-bit quantized Qwen3.5-9B deployed on an edge-AI platform. With an average generation speed of about 2525 tokens/s, a structured prompt and a concise output yield an estimated edge latency of tedge=0.6t\\_{\\text{edge}}=0.6 s. At the HAPS layer, the larger Qwen3.5-122B meta-controller runs on a high-performance GPU cluster, with total delay modeled as tcloud=tinf+ttx=2.55t\\_{\\text{cloud}}=t\\_{\\text{inf}}+t\\_{\\text{tx}}=2.55 s.\n\n2525\n\ntedge=0.6t_{\\text{edge}}=0.6\n\ntcloud=tinf+ttx=2.55t_{\\text{cloud}}=t_{\\text{inf}}+t_{\\text{tx}}=2.55\n\nThese values mathematically motivate our proposed timescale hierarchy. The fast aerodynamic loop runs at Tfast=0.05T\\_{\\mathrm{fast}}=0.05 s, making direct LLM inference in the control path physically impractical. We therefore set the UAV-level cognitive reflection interval to TLLM=1.0T\\_{\\mathrm{LLM}}=1.0 s and the HAPS-level coordination interval to THAPS=5.0T\\_{\\mathrm{HAPS}}=5.0 s, strictly satisfying the hardware bounds TLLM>tedgeT\\_{\\mathrm{LLM}}>t\\_{\\text{edge}} and THAPS≫tcloudT\\_{\\mathrm{HAPS}}\\gg t\\_{\\text{cloud}}. During one edge-LLM inference interval, the DDQN controller can still execute 20 fast, uninterrupted control steps using the latest validated reward configuration. This asynchronous decoupling avoids computation-induced crashes while enabling robust LLM strategic reasoning.\n\nTfast=0.05T_{\\mathrm{fast}}=0.05\n\nTLLM=1.0T_{\\mathrm{LLM}}=1.0\n\nTHAPS=5.0T_{\\mathrm{HAPS}}=5.0\n\nTLLM>tedgeT_{\\mathrm{LLM}}>t_{\\text{edge}}\n\nTHAPS≫tcloudT_{\\mathrm{HAPS}}\\gg t_{\\text{cloud}}\n\nIn our simulations, we compare the proposed Hierarchical LLM-DDQN framework against the “DDQN” baseline [[13](https://ar5iv.labs.arxiv.org/html/2607.18604v1#bib.bib2), [16](https://ar5iv.labs.arxiv.org/html/2607.18604v1#bib.bib16)], which relies on trial-and-error exploration without LLM cognitive reflection or HAPS load-balancing, and the “Envelope MORL” method proposed in [[14](https://ar5iv.labs.arxiv.org/html/2607.18604v1#bib.bib8)].\n\n| | | | --- | --- | | Parameter | Value | | Physics & Airspace Parameters | | | Simulation airspace volume | 1000×1000×3001000\\times 1000\\times 300 m3 | | Number of UAVs (MM) | {5,10,15,20,25,30}\\{5,10,15,20,25,30\\} | | UAV Mass (MuM\\_{u}) | 1.51.5 kg | | Physical safety separation (dsafed\\_{\\text{safe}}) | 5.05.0 m | | Gravity (𝐠\\mathbf{g}) | 9.819.81 m/s2 | | Control frequency (1/Tfast1/T\\_{\\text{fast}}) | 2020 Hz (Δ​t=0.05\\Delta t=0.05 s) | | ITNTN Communication Parameters | | | Number of TBSs (BB) | 44 | | HAPS altitude | 2020 km | | Carrier frequencies | 2.02.0 GHz (HAPS), 2.12.1 GHz (TBS) | | Node bandwidth (BcB\\_{c}) | 2020 MHz | | HAPS total capacity (CmaxHAPSC^{\\text{HAPS}}\\_{\\max}) | 100100 Mbps | | Node transmit power (PcP\\_{c}) | 4040 dBm (10,00010,000 mW) | | TBS peak antenna gain (GmaxG\\_{\\max}) | 88 dBi | | Node capacity quota (QcQ\\_{c}) | 55 concurrent users | | Path loss exponents | ηLoS=2.0\\eta\\_{\\text{LoS}}=2.0, ηNLoS=3.5\\eta\\_{\\text{NLoS}}=3.5 | | Rician LoS factor | 1515 dB | | Noise power spectral density (N0N\\_{0}) | −174-174 dBm/Hz | | Algorithm & Cognitive Parameters | | | HAPS Meta-Controller LLM | Qwen3.5-122B | | UAV Edge-Agent LLM | Qwen3.5-9B | | HAPS strategic timescale (THAPST\\_{\\mathrm{HAPS}}) | 5.05.0 s | | UAV LLM reasoning interval (TLLMT\\_{\\text{LLM}}) | 1.01.0 s | | Edge inference latency (tedget\\_{\\text{edge}}) | 0.60.6 s | | Cloud inference latency (tcloudt\\_{\\text{cloud}}) | 2.552.55 s | | Reflection trigger threshold (ρthresh\\rho\\_{\\text{thresh}}) | −10.0-10.0 | | Collision crash penalty (ρcrash\\rho\\_{\\text{crash}}) | −100.0-100.0 | | HAPS reward weights (η{1,2}\\eta\\_{\\{1,2\\}}) | {1.0,50.0}\\{1.0,50.0\\} | | UAV reward weights (α{1,2,3}\\alpha\\_{\\{1,2,3\\}}) | {1.0,0.1,0.2}\\{1.0,0.1,0.2\\} | | Handover penalty coeff. (γ\\gamma) | 5.05.0 | | Energy penalty coeff. (λ\\lambda) | 0.10.1 | | Memory retrieval size (KK) | 55 experiences | | DDQN learning rate | 1×10−41\\times 10^{-4} | | Discount factor (γd\\gamma\\_{d}) | 0.990.99 | | Target update frequency | 500500 steps |\n\n1000×1000×3001000\\times 1000\\times 300\n\nMM\n\n{5,10,15,20,25,30}\\{5,10,15,20,25,30\\}\n\nMuM_{u}\n\n1.51.5\n\ndsafed_{\\text{safe}}\n\n5.05.0\n\n𝐠\\mathbf{g}\n\n9.819.81\n\n1/Tfast1/T_{\\text{fast}}\n\n2020\n\nΔ​t=0.05\\Delta t=0.05\n\nBB\n\n44\n\n2020\n\n2.02.0\n\n2.12.1\n\nBcB_{c}\n\n2020\n\nCmaxHAPSC^{\\text{HAPS}}_{\\max}\n\n100100\n\nPcP_{c}\n\n4040\n\n10,00010,000\n\nGmaxG_{\\max}\n\n88\n\nQcQ_{c}\n\n55\n\nηLoS=2.0\\eta_{\\text{LoS}}=2.0\n\nηNLoS=3.5\\eta_{\\text{NLoS}}=3.5\n\n1515\n\nN0N_{0}\n\n−174-174\n\nTHAPST_{\\mathrm{HAPS}}\n\n5.05.0\n\nTLLMT_{\\text{LLM}}\n\n1.01.0\n\ntedget_{\\text{edge}}\n\n0.60.6\n\ntcloudt_{\\text{cloud}}\n\n2.552.55\n\nρthresh\\rho_{\\text{thresh}}\n\n−10.0-10.0\n\nρcrash\\rho_{\\text{crash}}\n\n−100.0-100.0\n\nη{1,2}\\eta_{\\{1,2\\}}\n\n{1.0,50.0}\\{1.0,50.0\\}\n\nα{1,2,3}\\alpha_{\\{1,2,3\\}}\n\n{1.0,0.1,0.2}\\{1.0,0.1,0.2\\}\n\nγ\\gamma\n\n5.05.0\n\nλ\\lambda\n\n0.10.1\n\nKK\n\n55\n\n1×10−41\\times 10^{-4}\n\nγd\\gamma_{d}\n\n0.990.99\n\n500500\n\nRtran,tmR_{\\text{tran},t}^{m}"
+    },
+    {
+      "heading_path": [
+        "Intelligent Multi-UAV Navigation in ITNTNs: A Hierarchical LLM Approach Emails: {zijiang, pingw, hinat}@yorku.ca, haozhou029@gmail.com, wael.jaafar@etsmtl.ca, jianhuapei98@gmail.com, halim@sce.carleton.ca.",
+        "V Numerical Results",
+        "V-B Simulation Results"
+      ],
+      "text": "### V-B Simulation Results\n\nTo evaluate the robustness in congested aerial corridors, Fig. [3](https://ar5iv.labs.arxiv.org/html/2607.18604v1#S5.F3 \"Figure 3 ‣ V-A Simulation Setup ‣ V Numerical Results ‣ Intelligent Multi-UAV Navigation in ITNTNs: A Hierarchical LLM Approach\") reports key metrics, i.e., transportation reward, survival time, communication reward, and HO probability.\n\nFig. [3(a)](https://ar5iv.labs.arxiv.org/html/2607.18604v1#S5.F3.sf1 \"In Figure 3 ‣ V-A Simulation Setup ‣ V Numerical Results ‣ Intelligent Multi-UAV Navigation in ITNTNs: A Hierarchical LLM Approach\") and Fig. [3(b)](https://ar5iv.labs.arxiv.org/html/2607.18604v1#S5.F3.sf2 \"In Figure 3 ‣ V-A Simulation Setup ‣ V Numerical Results ‣ Intelligent Multi-UAV Navigation in ITNTNs: A Hierarchical LLM Approach\") illustrate the convergence of the transportation reward and the survival step count, respectively. As shown in Fig. [3(a)](https://ar5iv.labs.arxiv.org/html/2607.18604v1#S5.F3.sf1 \"In Figure 3 ‣ V-A Simulation Setup ‣ V Numerical Results ‣ Intelligent Multi-UAV Navigation in ITNTNs: A Hierarchical LLM Approach\"), the conventional DDQN baseline learns quickly but saturates at a suboptimal local minimum. This is because standard DRL struggles with the large and sparse exploration space of joint 3D kinematics and network selection. In contrast, the proposed framework exhibits a steeper, more sustained learning curve, overtaking DDQN near episode 1,500 and achieving the highest steady-state reward.\n\nThis superiority is directly tied to physical safety, as reflected by the survival step count in Fig. [3(b)](https://ar5iv.labs.arxiv.org/html/2607.18604v1#S5.F3.sf2 \"In Figure 3 ‣ V-A Simulation Setup ‣ V Numerical Results ‣ Intelligent Multi-UAV Navigation in ITNTNs: A Hierarchical LLM Approach\"). Specifically, in DDQN, severe collisions cause early termination. Because the latter relies only on trial-and-error, it suffers from frequent early collisions. Conversely, when a UAV in our framework detects a high-risk state, the onboard edge-LLM immediately shifts the scalarization weights via cognitive reflection to prioritize the collision penalty (ρcrash\\rho\\_{\\text{crash}}). This zero-shot guidance avoids early terminations and allows the proposed framework to converge to near-maximum episode lengths.\n\nρcrash\\rho_{\\text{crash}}\n\nFig. [3(c)](https://ar5iv.labs.arxiv.org/html/2607.18604v1#S5.F3.sf3 \"In Figure 3 ‣ V-A Simulation Setup ‣ V Numerical Results ‣ Intelligent Multi-UAV Navigation in ITNTNs: A Hierarchical LLM Approach\") evaluates the communication reward as a function of the number of TBSs. Initially, without any TBS, UAVs are connected to the HAPS without any attenuation in the link quality. However, introducing a single or 2 TBSs creates severe interference and uncoordinated handover opportunities between the TBSs and HAPS, causing a sharp drop in the communication reward for all methods. However, as more TBSs are added to provide continuous coverage, the reward recovers and better coordination is achieved. The proposed framework consistently maintains the highest communication reward since the HAPS meta-controller intelligently coordinates associations to minimize cross-tier interference.\n\nFig. [3(d)](https://ar5iv.labs.arxiv.org/html/2607.18604v1#S5.F3.sf4 \"In Figure 3 ‣ V-A Simulation Setup ‣ V Numerical Results ‣ Intelligent Multi-UAV Navigation in ITNTNs: A Hierarchical LLM Approach\") illustrates the handover probability as the UAV swarm density increases from M=5M=5 to 3030. As the airspace becomes congested, baseline DRL agents greedily chase the strongest instantaneous signal, resulting in erratic, high-frequency handovers. In contrast, the HAPS meta-controller anticipates congestion and issues zero-shot spatial offloading directives. This strategic coordination successfully suppresses unnecessary network switching, granting the proposed framework the lowest and most stable handover probability across all traffic densities.\n\nM=5M=5\n\n3030"
+    },
+    {
+      "heading_path": [
+        "Intelligent Multi-UAV Navigation in ITNTNs: A Hierarchical LLM Approach Emails: {zijiang, pingw, hinat}@yorku.ca, haozhou029@gmail.com, wael.jaafar@etsmtl.ca, jianhuapei98@gmail.com, halim@sce.carleton.ca.",
+        "VI Conclusion"
+      ],
+      "text": "## VI Conclusion\n\nIn this paper, we proposed a Cloud-Edge Agentic AI framework for jointly optimizing 3D UAV mobility and handover management in ITNTNs. By decoupling strategic reasoning and fast physical control across multiple timescales, the framework bridges LLM reasoning with real-time DRL execution. A HAPS-based meta-controller mitigates network congestion, while edge-LLMs improve local safety-aware decision-making. Simulation results show clear gains over conventional DRL in safety, learning efficiency, and system throughput. Future work will investigate lightweight quantization to reduce edge inference latency."
+    },
+    {
+      "heading_path": [
+        "Intelligent Multi-UAV Navigation in ITNTNs: A Hierarchical LLM Approach Emails: {zijiang, pingw, hinat}@yorku.ca, haozhou029@gmail.com, wael.jaafar@etsmtl.ca, jianhuapei98@gmail.com, halim@sce.carleton.ca.",
+        "References"
+      ],
+      "text": "## References\n\n* [1] J. Chen et al. (2021) BDFL: a byzantine-fault-tolerance decentralized federated learning method for autonomous vehicle. IEEE Trans. Veh. Technol. 70 (9), pp. 8639–8652. Cited by: [§I](https://ar5iv.labs.arxiv.org/html/2607.18604v1#S1.p3.1 \"I Introduction ‣ Intelligent Multi-UAV Navigation in ITNTNs: A Hierarchical LLM Approach\"). * [2] N. Cherif et al. (2021) 3D aerial highway: the key enabler of the retail industry transformation. IEEE Commun. Mag. 59 (9), pp. 65–71. Cited by: [§I](https://ar5iv.labs.arxiv.org/html/2607.18604v1#S1.p1.1 \"I Introduction ‣ Intelligent Multi-UAV Navigation in ITNTNs: A Hierarchical LLM Approach\"). * [3] N. Cherif et al. (2024) RL-based cargo-UAV trajectory planning and cell association for minimum handoffs, disconnectivity, and energy consumption. IEEE Trans. Veh. Technol. 73 (5), pp. 7304–7309. External Links: [Document](https://dx.doi.org/10.1109/TVT.2023.3340177) Cited by: [§I](https://ar5iv.labs.arxiv.org/html/2607.18604v1#S1.p2.1 \"I Introduction ‣ Intelligent Multi-UAV Navigation in ITNTNs: A Hierarchical LLM Approach\"). * [4] N. Cherif (2022) Cellular-connected UAV in next-generation wireless networks. Ph.D. Thesis, Univ. Ottawa. Cited by: [§II-B](https://ar5iv.labs.arxiv.org/html/2607.18604v1#S2.SS2.p1.1 \"II-B Communication Model ‣ II System Model ‣ Intelligent Multi-UAV Navigation in ITNTNs: A Hierarchical LLM Approach\"). * [5] L. Dong et al. (2026) Aerial Agentic AI: Synergizing LLM and SLM for Low-Altitude Wireless Networks. arXiv preprint arXiv:2603.22866. Cited by: [§I](https://ar5iv.labs.arxiv.org/html/2607.18604v1#S1.p3.1 \"I Introduction ‣ Intelligent Multi-UAV Navigation in ITNTNs: A Hierarchical LLM Approach\"). * [6] W. Jaafar and H. Yanikomeroglu (2020) Dynamics of laser-charged UAVs: a battery perspective. IEEE Internet Things J. 8 (13), pp. 10573–10582. Cited by: [§I](https://ar5iv.labs.arxiv.org/html/2607.18604v1#S1.p2.1 \"I Introduction ‣ Intelligent Multi-UAV Navigation in ITNTNs: A Hierarchical LLM Approach\"). * [7] W. Jaafar and H. Yanikomeroglu (2022) HAPS-ITS: enabling future its services in trans-continental highways. IEEE Commun. Mag. 60 (10), pp. 80–86. External Links: [Document](https://dx.doi.org/10.1109/MCOM.001.2200025) Cited by: [§I](https://ar5iv.labs.arxiv.org/html/2607.18604v1#S1.p1.1 \"I Introduction ‣ Intelligent Multi-UAV Navigation in ITNTNs: A Hierarchical LLM Approach\"). * [8] J. Panerati et al. (2021) Learning to fly—a gym environment with pybullet physics for reinforcement learning of multi-agent quadcopter control. In Proc. IEEE/RSJ Int. Conf. Intell. Robots Syst. (IROS), pp. 7512–7519. Cited by: [§II-C](https://ar5iv.labs.arxiv.org/html/2607.18604v1#S2.SS3.p1.1 \"II-C Kinematic Model ‣ II System Model ‣ Intelligent Multi-UAV Navigation in ITNTNs: A Hierarchical LLM Approach\"), [§V-A](https://ar5iv.labs.arxiv.org/html/2607.18604v1#S5.SS1.p1.1 \"V-A Simulation Setup ‣ V Numerical Results ‣ Intelligent Multi-UAV Navigation in ITNTNs: A Hierarchical LLM Approach\"). * [9] Z. Yan et al. (2023) Multi-UAV speed control with collision avoidance and handover-aware cell association: DRL with action branching. In Proc. IEEE Global Commun. Conf. (GLOBECOM), pp. 5067–5072. Cited by: [§I](https://ar5iv.labs.arxiv.org/html/2607.18604v1#S1.p1.1 \"I Introduction ‣ Intelligent Multi-UAV Navigation in ITNTNs: A Hierarchical LLM Approach\"), [§I](https://ar5iv.labs.arxiv.org/html/2607.18604v1#S1.p2.1 \"I Introduction ‣ Intelligent Multi-UAV Navigation in ITNTNs: A Hierarchical LLM Approach\"). * [10] Z. Yan et al. (2025) CVaR-based variational quantum optimization for user association in handoff-aware vehicular networks. In Proc. IEEE Int. Conf. Commun. (ICC), pp. 6088–6093. Cited by: [§I](https://ar5iv.labs.arxiv.org/html/2607.18604v1#S1.p2.1 \"I Introduction ‣ Intelligent Multi-UAV Navigation in ITNTNs: A Hierarchical LLM Approach\"). * [11] Z. Yan et al. (2025) Hierarchical and Collaborative LLM-Based Control for Multi-UAV Motion and Communication in Integrated Terrestrial and Non-Terrestrial Networks. arXiv preprint arXiv:2506.06532. Cited by: [§I](https://ar5iv.labs.arxiv.org/html/2607.18604v1#S1.p3.1 \"I Introduction ‣ Intelligent Multi-UAV Navigation in ITNTNs: A Hierarchical LLM Approach\"). * [12] Z. Yan et al. (2025) Hybrid LLM-DDQN-Based Joint Optimization of V2I Communication and Autonomous Driving. IEEE Wireless Commun. Lett. 14 (4), pp. 1214–1218. External Links: [Document](https://dx.doi.org/10.1109/LWC.2025.3539638) Cited by: [§I](https://ar5iv.labs.arxiv.org/html/2607.18604v1#S1.p3.1 \"I Introduction ‣ Intelligent Multi-UAV Navigation in ITNTNs: A Hierarchical LLM Approach\"). * [13] Z. Yan and H. Tabassum (2022) Reinforcement learning for joint V2I network selection and autonomous driving policies. In Proc. IEEE Global Commun. Conf. (GLOBECOM), pp. 1241–1246. External Links: [Document](https://dx.doi.org/10.1109/GLOBECOM48099.2022.10001396) Cited by: [§I](https://ar5iv.labs.arxiv.org/html/2607.18604v1#S1.p1.1 \"I Introduction ‣ Intelligent Multi-UAV Navigation in ITNTNs: A Hierarchical LLM Approach\"), [§V-A](https://ar5iv.labs.arxiv.org/html/2607.18604v1#S5.SS1.p4.1 \"V-A Simulation Setup ‣ V Numerical Results ‣ Intelligent Multi-UAV Navigation in ITNTNs: A Hierarchical LLM Approach\"). * [14] Z. Yan and H. Tabassum (2025) Generalized multi-objective reinforcement learning with envelope updates in URLLC-enabled vehicular networks. IEEE Trans. Veh. Technol. 74 (11), pp. 17666–17682. External Links: [Document](https://dx.doi.org/10.1109/TVT.2025.3580502) Cited by: [§V-A](https://ar5iv.labs.arxiv.org/html/2607.18604v1#S5.SS1.p4.1 \"V-A Simulation Setup ‣ V Numerical Results ‣ Intelligent Multi-UAV Navigation in ITNTNs: A Hierarchical LLM Approach\"). * [15] A. Yang et al. (2025) Qwen3 technical report. arXiv preprint arXiv:2505.09388. Cited by: [§I](https://ar5iv.labs.arxiv.org/html/2607.18604v1#S1.p4.1 \"I Introduction ‣ Intelligent Multi-UAV Navigation in ITNTNs: A Hierarchical LLM Approach\"). * [16] K. Zhang et al. (2024) A machine learning-based toolbox for p4 programmable data-planes. IEEE Trans. Netw. Serv. Manag. 21 (4), pp. 4450–4465. Cited by: [§V-A](https://ar5iv.labs.arxiv.org/html/2607.18604v1#S5.SS1.p4.1 \"V-A Simulation Setup ‣ V Numerical Results ‣ Intelligent Multi-UAV Navigation in ITNTNs: A Hierarchical LLM Approach\")."
+    }
+  ]
+}
