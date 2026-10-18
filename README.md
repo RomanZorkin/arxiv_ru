@@ -80,87 +80,101 @@ LLM должна начинать работу с этих файлов, а не
 > Новые переводы и разборы arXiv-статей
 ---
 
-### StressDream: Управление видеомоделью мира для надежной оценки и улучшения стратегий
-[2606.00267] дата публикации в arXiv - 06.2026  
-📅 дата перевода 03.09.2026  
-🏷 `World Models` `Diffusion Models` `Inference-time Steering` `Robotics` `Autonomous Driving` `Policy Evaluation` `Vision-Language Models`
+### Оптимальное проектирование политики налога на сахар
+[1810.07243] дата публикации в arXiv - 10.2018  
+📅 дата перевода 18.10.2026  
+🏷 `economic regulation` `sugar tax` `three-level program` `social welfare` `pricing strategy` `consumer choice` `optimization algorithm`
 
-StressDream — это метод управления видеомоделью мира на этапе вывода, который оптимизирует начальный шум диффузионной модели для генерации правдоподобных, но критически важных сценариев (например, отказов). Это позволяет эффективно оценивать и улучшать стратегии роботов, выявляя рискованные действия.
+Статья предлагает математическую модель и алгоритм для расчета оптимальной ставки налога на сахар, максимизирующего общественное благосостояние через координацию интересов государства, производителей и потребителей.
 
-- [📖 Русская HTML версия](https://romanzorkin.github.io/arxiv_ru/articles/2606.00267/2606.00267_ru.html)
-- [📄 Оригинальная статья](https://arxiv.org/abs/2606.00267)
-- [🧠 Summary / README](articles/2606.00267/README.md)
-- [⚙ Metadata](articles/2606.00267/metadata.json)
-
----
-
-### Гибридный подход нейронных сетей и классического управления для робастного контроля нестабильных систем: применение к тилт-роторам
-[2606.08714] дата публикации в arXiv - 06.2026  
-📅 дата перевода 03.09.2026  
-🏷 `Robotics` `Control Systems` `Neural Networks` `Tilt-rotor UAV` `Sliding Mode Control` `Robust Control` `Deep Learning`
-
-Статья предлагает гибридный метод управления тилт-роторными БПЛА, объединяющий нейросетевое предсказание динамики с классическим скользящим режимом (SMC). Метод обеспечивает высокую робастность и эффективность, превосходя прямые методы обучения «вход-выход», которые оказались неспособны стабилизировать систему.
-
-- [📖 Русская HTML версия](https://romanzorkin.github.io/arxiv_ru/articles/2606.08714/2606.08714_ru.html)
-- [📄 Оригинальная статья](https://arxiv.org/abs/2606.08714)
-- [🧠 Summary / README](articles/2606.08714/README.md)
-- [⚙ Metadata](articles/2606.08714/metadata.json)
+- [📖 Русская HTML версия](https://romanzorkin.github.io/arxiv_ru/articles/1810.07243/1810.07243_ru.html)
+- [📄 Оригинальная статья](https://arxiv.org/abs/1810.07243)
+- [🧠 Summary / README](articles/1810.07243/README.md)
+- [⚙ Metadata](articles/1810.07243/metadata.json)
 
 ---
 
-### Устойчивость без складок: параллельное моделирование и робастное MPC для сертифицированного манипулирования деформируемыми объектами
-[2606.14188] дата публикации в arXiv - 06.2026  
-📅 дата перевода 03.09.2026  
-🏷 `Robotics` `Deformable Manipulation` `Differentiable Simulation` `Robust Control` `Model Predictive Control` `System Level Synthesis` `Conformal Prediction`
+### Классификация рациона коров по спектрам среднего инфракрасного диапазона молока: соревнование по анализу данных на семинаре 2022 года
+[2210.04479] дата публикации в arXiv - 10.2022  
+📅 дата перевода 18.10.2026  
+🏷 `chemometrics` `MIRS` `milk analysis` `machine learning` `dairy cattle diet` `classification` `spectroscopy`
 
-CORD-SLS — это метод управления в реальном времени для манипулирования веревками и тканью, использующий дифференцируемый GPU-симулятор и робастное MPC. Система обеспечивает высокую вероятность безопасности за счет калибровки неопределенностей через конформное предсказание.
+В работе исследуются методы машинного обучения для классификации рациона молочных коров (трава, клевер, комбикорм) по спектрам молока в среднем инфракрасном диапазоне. Удаление водных шумов и линейный дискриминатный анализ в сочетании со специфической генерацией признаков позволили достичь точности до 87.1%.
 
-- [📖 Русская HTML версия](https://romanzorkin.github.io/arxiv_ru/articles/2606.14188/2606.14188_ru.html)
-- [📄 Оригинальная статья](https://arxiv.org/abs/2606.14188)
-- [🧠 Summary / README](articles/2606.14188/README.md)
-- [⚙ Metadata](articles/2606.14188/metadata.json)
-
----
-
-### Нейроморфное энергоэффективное обучение для адаптивной глубокой стимуляции мозга
-[2606.28600] дата публикации в arXiv - 06.2026  
-📅 дата перевода 03.09.2026  
-🏷 `Neuromorphic Computing` `Deep Brain Stimulation` `Reinforcement Learning` `Spiking Neural Networks` `Energy Efficiency` `Parkinson Disease` `Edge AI`
-
-Авторы представляют систему адаптивной глубокой стимуляции мозга (DBS), использующую нейроморфный контроллер, который совместно оптимизирует терапевтическую эффективность и энергопотребление стимулятора. Система достигает значительного снижения заряда стимуляции при работе в субмилливаттном диапазоне мощности.
-
-- [📖 Русская HTML версия](https://romanzorkin.github.io/arxiv_ru/articles/2606.28600/2606.28600_ru.html)
-- [📄 Оригинальная статья](https://arxiv.org/abs/2606.28600)
-- [🧠 Summary / README](articles/2606.28600/README.md)
-- [⚙ Metadata](articles/2606.28600/metadata.json)
+- [📖 Русская HTML версия](https://romanzorkin.github.io/arxiv_ru/articles/2210.04479/2210.04479_ru.html)
+- [📄 Оригинальная статья](https://arxiv.org/abs/2210.04479)
+- [🧠 Summary / README](articles/2210.04479/README.md)
+- [⚙ Metadata](articles/2210.04479/metadata.json)
 
 ---
 
-### Оценка погрешности линеаризации на GPU для робастного оптимального управления в реальном времени
-[2607.01203] дата публикации в arXiv - 07.2026  
-📅 дата перевода 03.09.2026  
-🏷 `Robust Control` `Nonlinear Dynamics` `System Level Synthesis` `GPU Acceleration` `Neural Networks` `Reachability Analysis` `Optimal Control`
+### Оценка каузальных эффектов политических мер в условиях интерференции на примере налога на напитки в Филадельфии
+[2301.06697] дата публикации в arXiv - 01.2023  
+📅 дата перевода 18.10.2026  
+🏷 `causal inference` `difference in differences` `doubly robust estimation` `policy evaluation` `health policy` `spatial interference` `econometrics`
 
-Статья предлагает метод вычисления точных, дифференцируемых границ ошибки линеаризации для нелинейных и нейросетевых систем. Реализация на GPU позволяет решать задачи робастного оптимального управления в реальном времени с формальными гарантиями безопасности.
+Статья предлагает метод оценки причинно-следственных эффектов государственной политики с учетом интерференции между регионами (например, покупок в соседних не облагаемых налогами районах). Авторы расширяют подход "разность разностей" с помощью дважды робастных оценок для измерения прямого эффекта политики и побочных эффектов.
 
-- [📖 Русская HTML версия](https://romanzorkin.github.io/arxiv_ru/articles/2607.01203/2607.01203_ru.html)
-- [📄 Оригинальная статья](https://arxiv.org/abs/2607.01203)
-- [🧠 Summary / README](articles/2607.01203/README.md)
-- [⚙ Metadata](articles/2607.01203/metadata.json)
+- [📖 Русская HTML версия](https://romanzorkin.github.io/arxiv_ru/articles/2301.06697/2301.06697_ru.html)
+- [📄 Оригинальная статья](https://arxiv.org/abs/2301.06697)
+- [🧠 Summary / README](articles/2301.06697/README.md)
+- [⚙ Metadata](articles/2301.06697/metadata.json)
 
 ---
 
-### Интеллектуальная навигация мульти-БПЛА в сетях ITNTN: иерархический подход на базе LLM
-[2607.18604] дата публикации в arXiv - 07.2026  
-📅 дата перевода 03.09.2026  
-🏷 `Multi-UAV Navigation` `Hierarchical LLM` `ITNTN` `Reinforcement Learning` `Agentic AI` `Network Handover` `6G Networks`
+### Причинность в банке: влияние диетической колы на полноту
+[2405.10746] дата публикации в arXiv - 05.2024  
+📅 дата перевода 18.10.2026  
+🏷 `Causal Inference` `Structural Causal Models` `NHANES Dataset` `Diet Coke Obesity Impact` `Probability of Necessity and Sufficiency` `Public Health` `Nutritional Epidemiology`
 
-Авторы предлагают иерархическую архитектуру, объединяющую стратегическое мышление LLM с быстродействием DRL для управления БПЛА. Система использует облачные LLM для глобальной балансировки нагрузки и бортовые LLM для адаптивной настройки параметров управления в реальном времени.
+Исследование применяет структурные причинные модели и анализ вероятности необходимости и достаточности к данным NHANES для оценки влияния диетической колы на ожирение. Результаты показывают, что эффект существенно различается в зависимости от демографии и пищевых привычек.
 
-- [📖 Русская HTML версия](https://romanzorkin.github.io/arxiv_ru/articles/2607.18604/2607.18604_ru.html)
-- [📄 Оригинальная статья](https://arxiv.org/abs/2607.18604)
-- [🧠 Summary / README](articles/2607.18604/README.md)
-- [⚙ Metadata](articles/2607.18604/metadata.json)
+- [📖 Русская HTML версия](https://romanzorkin.github.io/arxiv_ru/articles/2405.10746/2405.10746_ru.html)
+- [📄 Оригинальная статья](https://arxiv.org/abs/2405.10746)
+- [🧠 Summary / README](articles/2405.10746/README.md)
+- [⚙ Metadata](articles/2405.10746/metadata.json)
+
+---
+
+### Модель выбора наборов товаров с эндогенными регрессорами: применение к налогу на газировку
+[2412.05794] дата публикации в arXiv - 12.2024  
+📅 дата перевода 18.10.2026  
+🏷 `bundle demand` `endogenous regressors` `Bayesian factor model` `panel data econometrics` `multinomial probit` `soda tax evaluation` `demand estimation`
+
+В статье предложена байесовская факторно-аугментированная модель выбора наборов товаров для панельных данных, учитывающая эндогенность цен и динамическую гетерогенность. Применение метода к налогу на сахаросодержащие напитки показало, что налог дополнительно снижает потребление соленых снеков как слабых комплементов, расширяя ожидаемый медицинский эффект.
+
+- [📖 Русская HTML версия](https://romanzorkin.github.io/arxiv_ru/articles/2412.05794/2412.05794_ru.html)
+- [📄 Оригинальная статья](https://arxiv.org/abs/2412.05794)
+- [🧠 Summary / README](articles/2412.05794/README.md)
+- [⚙ Metadata](articles/2412.05794/metadata.json)
+
+---
+
+### Точное культивирование: сравнительный анализ методов сенсорного мониторинга ферментации йогурта
+[2501.08781] дата публикации в arXiv - 01.2025  
+📅 дата перевода 18.10.2026  
+🏷 `fermentation monitoring` `sensor evaluation` `electrical impedance` `dairy technology` `smart appliances` `raspberry pi` `process control`
+
+В исследовании проводится систематическое сравнение семи различных методов сенсорного мониторинга ферментации йогурта в рамках единой экспериментальной установки. Результаты определяют сильные стороны и ограничения каждого подхода, закладывая основу для создания доступных и точных систем контроля.
+
+- [📖 Русская HTML версия](https://romanzorkin.github.io/arxiv_ru/articles/2501.08781/2501.08781_ru.html)
+- [📄 Оригинальная статья](https://arxiv.org/abs/2501.08781)
+- [🧠 Summary / README](articles/2501.08781/README.md)
+- [⚙ Metadata](articles/2501.08781/metadata.json)
+
+---
+
+### Оценка качества воды с помощью многомерного анализа данных машинного обучения
+[2512.02508] дата публикации в arXiv - 12.2025  
+📅 дата перевода 18.10.2026  
+🏷 `water quality assessment` `UV-Vis spectroscopy` `multilayer perceptron` `soft sensing` `multitarget regression` `SHAP interpretability` `environmental monitoring`
+
+Авторы предлагают подход для оценки качества воды в реальном времени путем объединения УФ-видимой спектроскопии и многоцелевой регрессии на базе многослойного перцептрона. Метод обеспечивает высокую точность прогнозирования ключевых химических параметров на основе реальных данных водопроводной сети.
+
+- [📖 Русская HTML версия](https://romanzorkin.github.io/arxiv_ru/articles/2512.02508/2512.02508_ru.html)
+- [📄 Оригинальная статья](https://arxiv.org/abs/2512.02508)
+- [🧠 Summary / README](articles/2512.02508/README.md)
+- [⚙ Metadata](articles/2512.02508/metadata.json)
 
 ---
 
@@ -175,6 +189,13 @@ CORD-SLS — это метод управления в реальном врем
 
 |id статьи|Месяц публикации|Дата перевода| Тема статьи | Ручной контроль|
 |---|---|---|---|---|
+| [1810.07243](articles/1810.07243/README.md) | 10.2018 | 18.10.2026 | Оптимальное проектирование политики налога на сахар (`Optimal policy design for the sugar tax`) ||
+| [2210.04479](articles/2210.04479/README.md) | 10.2022 | 18.10.2026 | Классификация рациона коров по спектрам среднего инфракрасного диапазона молока: соревнование по анализу данных на семинаре 2022 года (`Classification of cow diet based on milk Mid Infrared Spectra: a data analysis competition at the “International Workshop of Spectroscopy and Chemometrics 2022”`) ||
+| [2301.06697](articles/2301.06697/README.md) | 01.2023 | 18.10.2026 | Оценка каузальных эффектов политических мер в условиях интерференции на примере налога на напитки в Филадельфии (`Estimation of Policy-Relevant Causal Effects in the Presence of Interference with an Application to the Philadelphia Beverage Tax`) ||
+| [2405.10746](articles/2405.10746/README.md) | 05.2024 | 18.10.2026 | Причинность в банке: влияние диетической колы на полноту (`Causality in the Can: Diet Coke’s Impact on Fatness`) ||
+| [2412.05794](articles/2412.05794/README.md) | 12.2024 | 18.10.2026 | Модель выбора наборов товаров с эндогенными регрессорами: применение к налогу на газировку (`Bundle Choice Model with Endogenous Regressors: An Application to Soda Tax`) ||
+| [2501.08781](articles/2501.08781/README.md) | 01.2025 | 18.10.2026 | Точное культивирование: сравнительный анализ методов сенсорного мониторинга ферментации йогурта (`Cultivating Precision: Comparative Analysis of Sensor-Based Yogurt Fermentation Monitoring Techniques`) ||
+| [2512.02508](articles/2512.02508/README.md) | 12.2025 | 18.10.2026 | Оценка качества воды с помощью многомерного анализа данных машинного обучения (`Water Quality Estimation Through Machine Learning Multivariate Analysis`) ||
 | [2606.00267](articles/2606.00267/README.md) | 06.2026 | 03.09.2026 | StressDream: Управление видеомоделью мира для надежной оценки и улучшения стратегий (`StressDream : Steering Video World Models for Robust Policy Evaluation and Improvement`) ||
 | [2606.08714](articles/2606.08714/README.md) | 06.2026 | 03.09.2026 | Гибридный подход нейронных сетей и классического управления для робастного контроля нестабильных систем: применение к тилт-роторам (`Hybrid Neural Network and Conventional Controller Approach for Robust Control of Highly Unstable Systems: Application to Tilt-Rotor Control`) ||
 | [2606.14188](articles/2606.14188/README.md) | 06.2026 | 03.09.2026 | Устойчивость без складок: параллельное моделирование и робастное MPC для сертифицированного манипулирования деформируемыми объектами (`Robustness without Wrinkles: Parallel Simulation and Robust MPC for Certified Deformable Manipulation`) ||

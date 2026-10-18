@@ -1,0 +1,1575 @@
+{
+  "title": "Causality in the Can: Diet Coke’s Impact on Fatness",
+  "sections": [
+    {
+      "heading": "Report GitHub Issue",
+      "level": 5,
+      "content": [
+        {
+          "type": "paragraph",
+          "text": "Content selection saved. Describe the issue below:"
+        }
+      ],
+      "children": []
+    },
+    {
+      "heading": "Causality in the Can: Diet Coke’s Impact on Fatness",
+      "level": 1,
+      "content": [],
+      "children": [
+        {
+          "heading": "Abstract",
+          "level": 6,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "Artificially sweetened beverages like Diet Coke are often considered better alternatives to sugary drinks, but the debate over their impact on health, particularly in relation to obesity, continues. Previous research has predominantly used association-based methods with observational or Randomized Controlled Trial (RCT) data11 1 Randomized Controlled Trial (RCT), also known as an A/B test, is a type of scientific experiment commonly used in fields such as medicine, psychology, and social sciences. In an RCT, participants are randomly assigned to one of two or more groups: the treatment group, which receives the intervention being tested, and the control group, which either receives a placebo or no treatment at all. The data collected from an RCT is referred to as RCT/experimental data. In contrast, data collected from a survey or study where participants select their own treatment is known as observational data., which may not accurately capture the causal relationship between Diet Coke consumption and obesity, leading to potentially limited conclusions. In contrast, we employed causal inference methods using Structural Causal Models, integrating both observational and RCT data. Specifically, we utilized data from the National Health and Nutrition Examination Survey (NHANES), which includes diverse demographic information, as our observational data source. This data was then used to construct a causal graph, and the back-door criterion, along with its adjustment formula, was applied to estimate the RCT data. We then calculated the counterfactual quantity, the Probability of Necessity and Sufficiency (PNS), using both NHANES data and estimated RCT data. We propose that PNS is the essential metric for assessing the impact of Diet Coke on obesity. Our results indicate that between 20%20\\% to 50%50\\% of individuals, especially those with poor dietary habits, are more likely to gain weight from Diet Coke. Conversely, in groups like young females with healthier diets, only a small proportion experience weight gain due to Diet Coke. These findings highlight the influence of individual lifestyle and potential hormonal factors on the varied effects of Diet Coke, providing a new framework for understanding its nutritional impacts on public health."
+            },
+            {
+              "type": "formula",
+              "text": "20%20\\%"
+            },
+            {
+              "type": "formula",
+              "text": "50%50\\%"
+            },
+            {
+              "type": "paragraph",
+              "text": "1Soochow University, Suzhou, China"
+            },
+            {
+              "type": "paragraph",
+              "text": "2Florida State University, Tallahassee, FL, USA"
+            },
+            {
+              "type": "paragraph",
+              "text": "ycqi@stu.suda.edu.cn, angli@cs.fsu.edu"
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "Introduction",
+          "level": 2,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "As global health consciousness rises, low-calorie artificial sweetener beverages like Diet Coke have become popular choices in the beverage market. Since its launch in 1982 ([Spren 2023](https://arxiv.org/html/2405.10746v2#bib.bib31)), Diet Coke has quickly captivated a large consumer base with its zero-sugar or low-calorie profile. Statistics ([Mashed 2023](https://arxiv.org/html/2405.10746v2#bib.bib21)) show that Diet Coke holds a significant market share in the soft drink markets of many countries, particularly among those pursuing healthier lifestyles, where it has become the preferred daily beverage. Consumers primarily choose Diet Coke for its low-calorie properties and its potential benefits in weight management. Many people consume it as a substitute for high-sugar drinks, aiming to reduce sugar intake and control weight."
+            }
+          ],
+          "children": [
+            {
+              "heading": "Innovation and Contribution",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "Previous studies exploring the relationship between diet soda and obesity have various shortcomings. ([Ruanpeng et al. 2017](https://arxiv.org/html/2405.10746v2#bib.bib29)) conducted a systematic review and meta-analysis that found a significant association between artificially sweetened beverages and obesity but did not fully account for potential confounders. ([Peters et al. 2014](https://arxiv.org/html/2405.10746v2#bib.bib28)) suggested a positive role of diet beverages in weight loss but lacked detailed analysis across different demographic groups. ([Felstead 2023](https://arxiv.org/html/2405.10746v2#bib.bib11)) compared diet soda and water for weight loss, finding benefits for diet soda, but did not consider individual differences. ([Manaker 2024](https://arxiv.org/html/2405.10746v2#bib.bib20)) claimed diet soda does not lead to obesity and may help maintain a healthy weight but lacked control for confounding variables."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "These studies are all association-based, relying either solely on RCTs or observational data, and they fail to adequately account for confounders. To overcome these limitations and better analyze the causal relationship between diet soda consumption and obesity, this paper employs advanced causal inference techniques:"
+                },
+                {
+                  "type": "list",
+                  "text": "1. 1. Structured Causal Model (SCM): Using the IC\\* algorithm to construct a causal diagram that illustrates both direct and indirect relationships between diet soda consumption and obesity, considering potential confounders ([Pearl 1995](https://arxiv.org/html/2405.10746v2#bib.bib23); [Spirtes et al. 2000](https://arxiv.org/html/2405.10746v2#bib.bib30); [Pearl 2009](https://arxiv.org/html/2405.10746v2#bib.bib25); [Koller and Friedman 2009](https://arxiv.org/html/2405.10746v2#bib.bib16)). 2. 2. Back-Door Criterion Control: Identifying and controlling for back-door paths in the causal diagram to estimate the RCT distribution of diet soda’s effect using the back-door criterion and adjustment formula ([Pearl 1995](https://arxiv.org/html/2405.10746v2#bib.bib23)). 3. 3. Probability of Necessity and Sufficiency (PNS): By employing the probabilities of causation and their bounds as the decision criterion ([Tian and Pearl 2000](https://arxiv.org/html/2405.10746v2#bib.bib34)), and refining these bounds with covariates, we assess the effectiveness of diet soda on obesity rates across different population groups ([Mueller, Li, and Pearl 2022](https://arxiv.org/html/2405.10746v2#bib.bib22))."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Structured Causal Model (SCM): Using the IC\\* algorithm to construct a causal diagram that illustrates both direct and indirect relationships between diet soda consumption and obesity, considering potential confounders ([Pearl 1995](https://arxiv.org/html/2405.10746v2#bib.bib23); [Spirtes et al. 2000](https://arxiv.org/html/2405.10746v2#bib.bib30); [Pearl 2009](https://arxiv.org/html/2405.10746v2#bib.bib25); [Koller and Friedman 2009](https://arxiv.org/html/2405.10746v2#bib.bib16))."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Back-Door Criterion Control: Identifying and controlling for back-door paths in the causal diagram to estimate the RCT distribution of diet soda’s effect using the back-door criterion and adjustment formula ([Pearl 1995](https://arxiv.org/html/2405.10746v2#bib.bib23))."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Probability of Necessity and Sufficiency (PNS): By employing the probabilities of causation and their bounds as the decision criterion ([Tian and Pearl 2000](https://arxiv.org/html/2405.10746v2#bib.bib34)), and refining these bounds with covariates, we assess the effectiveness of diet soda on obesity rates across different population groups ([Mueller, Li, and Pearl 2022](https://arxiv.org/html/2405.10746v2#bib.bib22))."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Our results indicate that, overall, diet soda consumption may promote obesity, with significant variations across different demographic groups. For instance, individuals with poor dietary habits show a more pronounced weight gain effect from diet soda."
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "Advantages",
+              "level": 3,
+              "content": [
+                {
+                  "type": "list",
+                  "text": "1. 1. Methodological comprehensiveness: By employing advanced causal inference methods and integrating observational data with RCT estimates, this study overcomes biases inherent in single data sources, accurately accounts for the nature of counterfactual behavior in individuals, and thus reaches robust conclusions. 2. 2. Reliability of NHANES Data: This study utilizes NHANES data, known for its high representativeness and reliability due to strict multistage sampling and comprehensive data collection, with adjustments for sample weights, non-response, and population control ([CDC 2024](https://arxiv.org/html/2405.10746v2#bib.bib7)). 3. 3. Detailed Confounder Control: Through causal diagram construction, multiple potential confounders such as age, gender, race, education, smoking status, physical activity, hyperlipidemia, and diabetes are accurately identified and controlled, surpassing the variable control scope of existing studies."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Methodological comprehensiveness: By employing advanced causal inference methods and integrating observational data with RCT estimates, this study overcomes biases inherent in single data sources, accurately accounts for the nature of counterfactual behavior in individuals, and thus reaches robust conclusions."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Reliability of NHANES Data: This study utilizes NHANES data, known for its high representativeness and reliability due to strict multistage sampling and comprehensive data collection, with adjustments for sample weights, non-response, and population control ([CDC 2024](https://arxiv.org/html/2405.10746v2#bib.bib7))."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Detailed Confounder Control: Through causal diagram construction, multiple potential confounders such as age, gender, race, education, smoking status, physical activity, hyperlipidemia, and diabetes are accurately identified and controlled, surpassing the variable control scope of existing studies."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Through this paper, we aim to provide readers with a comprehensive perspective on the complex relationship between Diet Coke consumption and obesity, as well as the potential implications of these findings for health policies and individual choices."
+                }
+              ],
+              "children": []
+            }
+          ]
+        },
+        {
+          "heading": "Preliminaries & Related Works",
+          "level": 2,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "In this section, we review some fundamental methods of causal inference. First, we introduce the concept of the structural causal model, or S​C​MSCM, as outlined in ([Pearl 1995](https://arxiv.org/html/2405.10746v2#bib.bib23); [Spirtes et al. 2000](https://arxiv.org/html/2405.10746v2#bib.bib30); [Pearl 2009](https://arxiv.org/html/2405.10746v2#bib.bib25); [Koller and Friedman 2009](https://arxiv.org/html/2405.10746v2#bib.bib16)). Figure [1](https://arxiv.org/html/2405.10746v2#Sx2.F1 \"Figure 1 ‣ Preliminaries & Related Works ‣ Causality in the Can: Diet Coke’s Impact on Fatness\") exemplifies an appropriate causal diagram, which is essentially a directed acyclic graph (DAG)."
+            },
+            {
+              "type": "formula",
+              "text": "S​C​MSCM"
+            },
+            {
+              "type": "paragraph",
+              "text": "Formally, a S​C​MSCM consists of two sets of variables U and V, and a set of functions f that assigns each variable in V a value based on the values of the other variables in the model. In S​C​MSCM, exogenous variables (U) are external and have no ancestors, depicted as root nodes in graphs. Endogenous variables (V) depend on exogenous ones and can be predicted using functions in f if all exogenous values are known."
+            },
+            {
+              "type": "formula",
+              "text": "S​C​MSCM"
+            },
+            {
+              "type": "formula",
+              "text": "S​C​MSCM"
+            },
+            {
+              "type": "paragraph",
+              "text": "In S​C​MSCMs, the associated graphical model consists of nodes for each variable in U and V and directed edges that represent functional dependencies. If a variable X depends on Y, there is a directed edge from Y to X. These graphical models are typically directed acyclic graphs (DAGs). Causally, if Y is a parent of X in the graph, Y is a direct cause of X; if Y is an ancestor, it is a potential cause of X."
+            },
+            {
+              "type": "formula",
+              "text": "S​C​MSCM"
+            },
+            {
+              "type": "paragraph",
+              "text": "For instance, consider the following simple S​C​MSCM:"
+            },
+            {
+              "type": "formula",
+              "text": "S​C​MSCM"
+            },
+            {
+              "type": "table",
+              "text": "| | | | | --- | --- | --- | | | U={X,Y},V={Z},F={fZ}U=\\{X,Y\\},V=\\{Z\\},F=\\{f\\_{Z}\\} | |"
+            },
+            {
+              "type": "formula",
+              "text": "U={X,Y},V={Z},F={fZ}U=\\{X,Y\\},V=\\{Z\\},F=\\{f_{Z}\\}"
+            },
+            {
+              "type": "table",
+              "text": "| | | | | --- | --- | --- | | | fZ:Z=2​X+3​Yf\\_{Z}:Z=2X+3Y | |"
+            },
+            {
+              "type": "formula",
+              "text": "fZ:Z=2​X+3​Yf_{Z}:Z=2X+3Y"
+            },
+            {
+              "type": "paragraph",
+              "text": "This model represents the salary (ZZ) that an employer pays an individual with XX years of schooling and YY years in the profession. XX and YY both appear in fZf\\_{Z}, so XX and YY are both direct causes of ZZ. If XX and YY had any ancestors, those ancestors would be potential causes of ZZ."
+            },
+            {
+              "type": "formula",
+              "text": "ZZ"
+            },
+            {
+              "type": "formula",
+              "text": "XX"
+            },
+            {
+              "type": "formula",
+              "text": "YY"
+            },
+            {
+              "type": "formula",
+              "text": "XX"
+            },
+            {
+              "type": "formula",
+              "text": "YY"
+            },
+            {
+              "type": "formula",
+              "text": "fZf_{Z}"
+            },
+            {
+              "type": "formula",
+              "text": "XX"
+            },
+            {
+              "type": "formula",
+              "text": "YY"
+            },
+            {
+              "type": "formula",
+              "text": "ZZ"
+            },
+            {
+              "type": "formula",
+              "text": "XX"
+            },
+            {
+              "type": "formula",
+              "text": "YY"
+            },
+            {
+              "type": "formula",
+              "text": "ZZ"
+            },
+            {
+              "type": "paragraph",
+              "text": "The graphical model associated with it is illustrated in Figure 1."
+            },
+            {
+              "type": "formula",
+              "text": "S​C​MSCM"
+            },
+            {
+              "type": "paragraph",
+              "text": "One key concept of a causal diagram is called dd-separation ([Pearl, Glymour, and Jewell 2016](https://arxiv.org/html/2405.10746v2#bib.bib27))."
+            },
+            {
+              "type": "formula",
+              "text": "dd"
+            }
+          ],
+          "children": [
+            {
+              "heading": "Definition 1 (dd-separation)",
+              "level": 6,
+              "content": [
+                {
+                  "type": "formula",
+                  "text": "dd"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "In a causal diagram GG, a path pp is blocked by a set of nodes ZZ if and only if"
+                },
+                {
+                  "type": "formula",
+                  "text": "GG"
+                },
+                {
+                  "type": "formula",
+                  "text": "pp"
+                },
+                {
+                  "type": "formula",
+                  "text": "ZZ"
+                },
+                {
+                  "type": "list",
+                  "text": "1. 1. pp contains a chain of nodes A→B→CA\\rightarrow{}B\\rightarrow{}C or a fork A←B→CA\\leftarrow{}B\\rightarrow{}C such that the middle node BB is in ZZ (i.e., BB is conditioned on), or 2. 2. pp contains a collider A→B←CA\\rightarrow{}B\\leftarrow{}C such that the collision node BB is not in ZZ, and no descendant of BB is in ZZ."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "pp contains a chain of nodes A→B→CA\\rightarrow{}B\\rightarrow{}C or a fork A←B→CA\\leftarrow{}B\\rightarrow{}C such that the middle node BB is in ZZ (i.e., BB is conditioned on), or"
+                },
+                {
+                  "type": "formula",
+                  "text": "pp"
+                },
+                {
+                  "type": "formula",
+                  "text": "A→B→CA\\rightarrow{}B\\rightarrow{}C"
+                },
+                {
+                  "type": "formula",
+                  "text": "A←B→CA\\leftarrow{}B\\rightarrow{}C"
+                },
+                {
+                  "type": "formula",
+                  "text": "BB"
+                },
+                {
+                  "type": "formula",
+                  "text": "ZZ"
+                },
+                {
+                  "type": "formula",
+                  "text": "BB"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "pp contains a collider A→B←CA\\rightarrow{}B\\leftarrow{}C such that the collision node BB is not in ZZ, and no descendant of BB is in ZZ."
+                },
+                {
+                  "type": "formula",
+                  "text": "pp"
+                },
+                {
+                  "type": "formula",
+                  "text": "A→B←CA\\rightarrow{}B\\leftarrow{}C"
+                },
+                {
+                  "type": "formula",
+                  "text": "BB"
+                },
+                {
+                  "type": "formula",
+                  "text": "ZZ"
+                },
+                {
+                  "type": "formula",
+                  "text": "BB"
+                },
+                {
+                  "type": "formula",
+                  "text": "ZZ"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "If ZZ blocks every path between two nodes XX and YY, then XX and YY are dd-separated conditional on ZZ, and thus are independent conditional on ZZ, denoted as X⟂⟂Y|ZX\\perp\\!\\!\\!\\perp Y\\mid Z."
+                },
+                {
+                  "type": "formula",
+                  "text": "ZZ"
+                },
+                {
+                  "type": "formula",
+                  "text": "XX"
+                },
+                {
+                  "type": "formula",
+                  "text": "YY"
+                },
+                {
+                  "type": "formula",
+                  "text": "XX"
+                },
+                {
+                  "type": "formula",
+                  "text": "YY"
+                },
+                {
+                  "type": "formula",
+                  "text": "dd"
+                },
+                {
+                  "type": "formula",
+                  "text": "ZZ"
+                },
+                {
+                  "type": "formula",
+                  "text": "ZZ"
+                },
+                {
+                  "type": "formula",
+                  "text": "X⟂⟂Y|ZX\\perp\\!\\!\\!\\perp Y\\mid Z"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "With the concept of dd-separation in a causal diagram, Pearl proposed the back-door criteria and its associated adjustment formula ([Pearl 1995](https://arxiv.org/html/2405.10746v2#bib.bib23)) as follows:"
+                },
+                {
+                  "type": "formula",
+                  "text": "dd"
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "Definition 2 (Back-Door Criterion)",
+              "level": 6,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "Given an ordered pair of variables (X,Y)(X,Y) in a directed acyclic graph GG, a set of variables ZZ satisfies the back-door criterion relative to (X,Y)(X,Y), if no node in ZZ is a descendant of XX, and ZZ blocks every path between XX and YY that contains an arrow into XX."
+                },
+                {
+                  "type": "formula",
+                  "text": "(X,Y)(X,Y)"
+                },
+                {
+                  "type": "formula",
+                  "text": "GG"
+                },
+                {
+                  "type": "formula",
+                  "text": "ZZ"
+                },
+                {
+                  "type": "formula",
+                  "text": "(X,Y)(X,Y)"
+                },
+                {
+                  "type": "formula",
+                  "text": "ZZ"
+                },
+                {
+                  "type": "formula",
+                  "text": "XX"
+                },
+                {
+                  "type": "formula",
+                  "text": "ZZ"
+                },
+                {
+                  "type": "formula",
+                  "text": "XX"
+                },
+                {
+                  "type": "formula",
+                  "text": "YY"
+                },
+                {
+                  "type": "formula",
+                  "text": "XX"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "If a set of variables ZZ satisfies the back-door criterion for XX and YY, the causal effects of XX on YY are given by the adjustment formula:"
+                },
+                {
+                  "type": "formula",
+                  "text": "ZZ"
+                },
+                {
+                  "type": "formula",
+                  "text": "XX"
+                },
+                {
+                  "type": "formula",
+                  "text": "YY"
+                },
+                {
+                  "type": "formula",
+                  "text": "XX"
+                },
+                {
+                  "type": "formula",
+                  "text": "YY"
+                },
+                {
+                  "type": "table",
+                  "text": "| | | | | | --- | --- | --- | --- | | | P⁡(y|d​o​(x))=∑zP⁡(y|x,z)​P​(z).\\displaystyle P(y|do(x))=\\sum\\_{z}P(y|x,z)P(z). | | (1) |"
+                },
+                {
+                  "type": "formula",
+                  "text": "P⁡(y|d​o​(x))=∑zP⁡(y|x,z)​P​(z).\\displaystyle P(y|do(x))=\\sum_{z}P(y|x,z)P(z)."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Next, we review the definitions for the three aspects of causation as defined in ([Pearl 1999](https://arxiv.org/html/2405.10746v2#bib.bib24)). We use the causal diagrams ([Pearl 1995](https://arxiv.org/html/2405.10746v2#bib.bib23); [Spirtes et al. 2000](https://arxiv.org/html/2405.10746v2#bib.bib30); [Pearl 2009](https://arxiv.org/html/2405.10746v2#bib.bib25); [Koller and Friedman 2009](https://arxiv.org/html/2405.10746v2#bib.bib16)) and the language of counterfactuals in its structural model semantics, as given in ([Balke and Pearl 2013](https://arxiv.org/html/2405.10746v2#bib.bib3); [Pearl 1999](https://arxiv.org/html/2405.10746v2#bib.bib24); [Halpern 2000](https://arxiv.org/html/2405.10746v2#bib.bib15))."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "We use Yx=yY\\_{x}=y to denote the counterfactual sentence “Variable YY would have the value yy, had XX been xx”. For simplicity purposes, in the rest of the paper, we use yxy\\_{x} to denote the event Yx=yY\\_{x}=y, yx′y\\_{x^{\\prime}} to denote the event Yx′=yY\\_{x^{\\prime}}=y, yx′y^{\\prime}\\_{x} to denote the event Yx=y′Y\\_{x}=y^{\\prime}, and yx′′y^{\\prime}\\_{x^{\\prime}} to denote the event Yx′=y′Y\\_{x^{\\prime}}=y^{\\prime}. For notational simplicity, we limit the discussion to binary XX and YY, extension to multi-valued variables are straightforward ([Pearl 2009](https://arxiv.org/html/2405.10746v2#bib.bib25))."
+                },
+                {
+                  "type": "formula",
+                  "text": "Yx=yY_{x}=y"
+                },
+                {
+                  "type": "formula",
+                  "text": "YY"
+                },
+                {
+                  "type": "formula",
+                  "text": "yy"
+                },
+                {
+                  "type": "formula",
+                  "text": "XX"
+                },
+                {
+                  "type": "formula",
+                  "text": "xx"
+                },
+                {
+                  "type": "formula",
+                  "text": "yxy_{x}"
+                },
+                {
+                  "type": "formula",
+                  "text": "Yx=yY_{x}=y"
+                },
+                {
+                  "type": "formula",
+                  "text": "yx′y_{x^{\\prime}}"
+                },
+                {
+                  "type": "formula",
+                  "text": "Yx′=yY_{x^{\\prime}}=y"
+                },
+                {
+                  "type": "formula",
+                  "text": "yx′y^{\\prime}_{x}"
+                },
+                {
+                  "type": "formula",
+                  "text": "Yx=y′Y_{x}=y^{\\prime}"
+                },
+                {
+                  "type": "formula",
+                  "text": "yx′′y^{\\prime}_{x^{\\prime}}"
+                },
+                {
+                  "type": "formula",
+                  "text": "Yx′=y′Y_{x^{\\prime}}=y^{\\prime}"
+                },
+                {
+                  "type": "formula",
+                  "text": "XX"
+                },
+                {
+                  "type": "formula",
+                  "text": "YY"
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "Definition 3 (Probability of necessity and sufficiency (PNS))",
+              "level": 6,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "([Pearl 1999](https://arxiv.org/html/2405.10746v2#bib.bib24))"
+                },
+                {
+                  "type": "table",
+                  "text": "| | | | | | --- | --- | --- | --- | | | PNS=P⁡(yx,yx′′)\\displaystyle\\text{PNS}=P(y\\_{x},y^{\\prime}\\_{x^{\\prime}}) | | (2) |"
+                },
+                {
+                  "type": "formula",
+                  "text": "PNS=P⁡(yx,yx′′)\\displaystyle\\text{PNS}=P(y_{x},y^{\\prime}_{x^{\\prime}})"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "PNS stands for the probability that yy would respond to xx both ways, and therefore measures both the sufficiency and necessity of xx to produce yy."
+                },
+                {
+                  "type": "formula",
+                  "text": "yy"
+                },
+                {
+                  "type": "formula",
+                  "text": "xx"
+                },
+                {
+                  "type": "formula",
+                  "text": "xx"
+                },
+                {
+                  "type": "formula",
+                  "text": "yy"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Tian and Pearl ([Tian and Pearl 2000](https://arxiv.org/html/2405.10746v2#bib.bib34)) provide a tight bound for PNS without a causal diagram. Li and Pearl ([Li and Pearl 2019](https://arxiv.org/html/2405.10746v2#bib.bib18)) provide a theoretical proof of the tight bound for PNS, and other probabilities of causation without a causal diagram."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "PNS has the following tight bounds:"
+                },
+                {
+                  "type": "table",
+                  "text": "| | | | | --- | --- | --- | | | max⁡{0P⁡(yx)−P⁡(yx′)P⁡(y)−P⁡(yx′)P⁡(yx)−P⁡(y)}≤PNS\\displaystyle\\max\\left\\{\\begin{array}[]{cc}0\\\\ P(y\\_{x})-P(y\\_{x^{\\prime}})\\\\ P(y)-P(y\\_{x^{\\prime}})\\\\ P(y\\_{x})-P(y)\\\\ \\end{array}\\right\\}\\leq\\text{PNS} | |"
+                },
+                {
+                  "type": "formula",
+                  "text": "max⁡{0P⁡(yx)−P⁡(yx′)P⁡(y)−P⁡(yx′)P⁡(yx)−P⁡(y)}≤PNS\\displaystyle\\max\\left\\{\\begin{array}[]{cc}0\\\\ P(y_{x})-P(y_{x^{\\prime}})\\\\ P(y)-P(y_{x^{\\prime}})\\\\ P(y_{x})-P(y)\\\\ \\end{array}\\right\\}\\leq\\text{PNS}"
+                },
+                {
+                  "type": "table",
+                  "text": "| | | | | --- | --- | --- | | | PNS≤min⁡{P⁡(yx)P⁡(yx′′)P⁡(x,y)+P⁡(x′,y′)P⁡(yx)−P⁡(yx′)++P⁡(x,y′)+P⁡(x′,y)}\\displaystyle\\text{PNS}\\leq\\min\\left\\{\\begin{array}[]{cc}P(y\\_{x})\\\\ P(y^{\\prime}\\_{x^{\\prime}})\\\\ P(x,y)+P(x^{\\prime},y^{\\prime})\\\\ P(y\\_{x})-P(y\\_{x^{\\prime}})+\\\\ +P(x,y^{\\prime})+P(x^{\\prime},y)\\end{array}\\right\\} | |"
+                },
+                {
+                  "type": "formula",
+                  "text": "PNS≤min⁡{P⁡(yx)P⁡(yx′′)P⁡(x,y)+P⁡(x′,y′)P⁡(yx)−P⁡(yx′)++P⁡(x,y′)+P⁡(x′,y)}\\displaystyle\\text{PNS}\\leq\\min\\left\\{\\begin{array}[]{cc}P(y_{x})\\\\ P(y^{\\prime}_{x^{\\prime}})\\\\ P(x,y)+P(x^{\\prime},y^{\\prime})\\\\ P(y_{x})-P(y_{x^{\\prime}})+\\\\ +P(x,y^{\\prime})+P(x^{\\prime},y)\\end{array}\\right\\}"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Theorems [19](https://arxiv.org/html/2405.10746v2#Sx2.E19 \"In Theorem 1 ‣ Preliminaries & Related Works ‣ Causality in the Can: Diet Coke’s Impact on Fatness\") and [2](https://arxiv.org/html/2405.10746v2#Thmtheorem2 \"Theorem 2 ‣ Preliminaries & Related Works ‣ Causality in the Can: Diet Coke’s Impact on Fatness\") below provide bounds for PNS when a set ZZ of variables can be measured which satisfy only one simple condition: ZZ contains no descendant of XX."
+                },
+                {
+                  "type": "formula",
+                  "text": "ZZ"
+                },
+                {
+                  "type": "formula",
+                  "text": "ZZ"
+                },
+                {
+                  "type": "formula",
+                  "text": "XX"
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "Theorem 1",
+              "level": 6,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "Given a causal diagram GG and distribution compatible with GG, let ZZ be a set of variables that does not contain any descendant of XX in GG, then PNS is bounded as follows:"
+                },
+                {
+                  "type": "formula",
+                  "text": "GG"
+                },
+                {
+                  "type": "formula",
+                  "text": "GG"
+                },
+                {
+                  "type": "formula",
+                  "text": "ZZ"
+                },
+                {
+                  "type": "formula",
+                  "text": "XX"
+                },
+                {
+                  "type": "formula",
+                  "text": "GG"
+                },
+                {
+                  "type": "table",
+                  "text": "| | | | | --- | --- | --- | | | ∑zmax⁡{0,P⁡(yx|z)−P⁡(yx′|z),P⁡(y|z)−P⁡(yx′|z),P⁡(yx|z)−P⁡(y|z)}×P⁡(z)≤PNS\\displaystyle\\sum\\_{z}\\max\\left\\{\\begin{array}[]{c}0,\\\\ P(y\\_{x}|z)-P(y\\_{x^{\\prime}}|z),\\\\ P(y|z)-P(y\\_{x^{\\prime}}|z),\\\\ P(y\\_{x}|z)-P(y|z)\\end{array}\\right\\}\\times P(z)\\leq\\text{PNS} | |"
+                },
+                {
+                  "type": "formula",
+                  "text": "∑zmax⁡{0,P⁡(yx|z)−P⁡(yx′|z),P⁡(y|z)−P⁡(yx′|z),P⁡(yx|z)−P⁡(y|z)}×P⁡(z)≤PNS\\displaystyle\\sum_{z}\\max\\left\\{\\begin{array}[]{c}0,\\\\ P(y_{x}|z)-P(y_{x^{\\prime}}|z),\\\\ P(y|z)-P(y_{x^{\\prime}}|z),\\\\ P(y_{x}|z)-P(y|z)\\end{array}\\right\\}\\times P(z)\\leq\\text{PNS}"
+                },
+                {
+                  "type": "table",
+                  "text": "| | | | | | --- | --- | --- | --- | | | ∑zmin⁡{P⁡(yx|z),P⁡(yx′′|z),P⁡(y,x|z)+P⁡(y′,x′|z),P⁡(yx|z)−P⁡(yx′|z)++P⁡(y,x′|z)+P⁡(y′,x|z)}×P⁡(z)≥PNS\\sum\\_{z}\\min\\left\\{\\begin{array}[]{c}P(y\\_{x}|z),\\\\ P(y^{\\prime}\\_{x^{\\prime}}|z),\\\\ P(y,x|z)+P(y^{\\prime},x^{\\prime}|z),\\\\ P(y\\_{x}|z)-P(y\\_{x^{\\prime}}|z)+\\\\ +P(y,x^{\\prime}|z)+P(y^{\\prime},x|z)\\end{array}\\right\\}\\times P(z)\\geq\\text{PNS} | | (19) |"
+                },
+                {
+                  "type": "formula",
+                  "text": "∑zmin⁡{P⁡(yx|z),P⁡(yx′′|z),P⁡(y,x|z)+P⁡(y′,x′|z),P⁡(yx|z)−P⁡(yx′|z)++P⁡(y,x′|z)+P⁡(y′,x|z)}×P⁡(z)≥PNS\\sum_{z}\\min\\left\\{\\begin{array}[]{c}P(y_{x}|z),\\\\ P(y^{\\prime}_{x^{\\prime}}|z),\\\\ P(y,x|z)+P(y^{\\prime},x^{\\prime}|z),\\\\ P(y_{x}|z)-P(y_{x^{\\prime}}|z)+\\\\ +P(y,x^{\\prime}|z)+P(y^{\\prime},x|z)\\end{array}\\right\\}\\times P(z)\\geq\\text{PNS}"
+                },
+                {
+                  "type": "formula",
+                  "text": "ZZ"
+                },
+                {
+                  "type": "formula",
+                  "text": "ZZ"
+                },
+                {
+                  "type": "formula",
+                  "text": "ZZ"
+                },
+                {
+                  "type": "formula",
+                  "text": "XX"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "In figures [2(a)](https://arxiv.org/html/2405.10746v2#Sx2.F2.sf1 \"In Figure 2 ‣ Preliminaries & Related Works ‣ Causality in the Can: Diet Coke’s Impact on Fatness\") and [2(b)](https://arxiv.org/html/2405.10746v2#Sx2.F2.sf2 \"In Figure 2 ‣ Preliminaries & Related Works ‣ Causality in the Can: Diet Coke’s Impact on Fatness\"), ZZ is not a descendant of XX and further satisfies the back-door criterion. For such cases the PNS bounds can be simplified to read:"
+                },
+                {
+                  "type": "formula",
+                  "text": "ZZ"
+                },
+                {
+                  "type": "formula",
+                  "text": "XX"
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "Theorem 2",
+              "level": 6,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "Given a causal diagram GG and distribution compatible with GG, let ZZ be a set of variables satisfying the back-door criterion ([Pearl 2011](https://arxiv.org/html/2405.10746v2#bib.bib26)) in GG, then the PNS is bounded as follows:"
+                },
+                {
+                  "type": "formula",
+                  "text": "GG"
+                },
+                {
+                  "type": "formula",
+                  "text": "GG"
+                },
+                {
+                  "type": "formula",
+                  "text": "ZZ"
+                },
+                {
+                  "type": "formula",
+                  "text": "GG"
+                },
+                {
+                  "type": "table",
+                  "text": "| | | | | | --- | --- | --- | --- | | | ∑zmax⁡{0,P⁡(y|x,z)−P⁡(y|x′,z)}×P⁡(z)≤PNS\\displaystyle\\sum\\_{z}\\max\\{0,P(y|x,z)-P(y|x^{\\prime},z)\\}\\times P(z)\\leq\\text{PNS} | | (20) |"
+                },
+                {
+                  "type": "formula",
+                  "text": "∑zmax⁡{0,P⁡(y|x,z)−P⁡(y|x′,z)}×P⁡(z)≤PNS\\displaystyle\\sum_{z}\\max\\{0,P(y|x,z)-P(y|x^{\\prime},z)\\}\\times P(z)\\leq\\text{PNS}"
+                },
+                {
+                  "type": "table",
+                  "text": "| | | | | | --- | --- | --- | --- | | | ∑zmin⁡{P⁡(y|x,z),P⁡(y′|x′,z)}×P⁡(z)≥PNS\\displaystyle\\sum\\_{z}\\min\\{P(y|x,z),P(y^{\\prime}|x^{\\prime},z)\\}\\times P(z)\\geq\\text{PNS} | | (21) |"
+                },
+                {
+                  "type": "formula",
+                  "text": "∑zmin⁡{P⁡(y|x,z),P⁡(y′|x′,z)}×P⁡(z)≥PNS\\displaystyle\\sum_{z}\\min\\{P(y|x,z),P(y^{\\prime}|x^{\\prime},z)\\}\\times P(z)\\geq\\text{PNS}"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "The significance of Theorem [2](https://arxiv.org/html/2405.10746v2#Thmtheorem2 \"Theorem 2 ‣ Preliminaries & Related Works ‣ Causality in the Can: Diet Coke’s Impact on Fatness\") lies in the ability to compute bounds using purely observational data, which is the situation we will face in this paper."
+                }
+              ],
+              "children": []
+            }
+          ]
+        },
+        {
+          "heading": "Methodology",
+          "level": 2,
+          "content": [],
+          "children": [
+            {
+              "heading": "Data Collection",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "All data in this paper is sourced from the NHANES program ([CDC 2024](https://arxiv.org/html/2405.10746v2#bib.bib6)). The National Health and Nutrition Examination Survey (NHANES), run by the CDC’s National Center for Health Statistics (NCHS), assesses the health and nutritional status of the U.S. population. Annually, NHANES examines about 5,000 nationally representative individuals through interviews and physical exams, collecting data on demographics, socioeconomic factors, diet, and health, along with medical measurements and lab tests."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "We thoroughly reviewed NHANES data, focusing on health information from various reports. The diet section surveys the frequency of consumption of various foods, including soft drinks, alcohol, hamburgers, and salads. The examination section provides physical measurements like blood pressure and body weight, while the lab section includes biomarker assays such as blood sugar levels."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "For the topic under discussion, our initial step involves sourcing data relevant to Diet Coke consumption and its association with fatness. Numerous studies ([Adab, Pallan, and Whincup 2018](https://arxiv.org/html/2405.10746v2#bib.bib1); [Freedman and Sherry 2009](https://arxiv.org/html/2405.10746v2#bib.bib12); [Goulding et al. 1996](https://arxiv.org/html/2405.10746v2#bib.bib14)), have validated the Body Mass Index (BMI) as an optimal measure for assessing obesity, hence we will utilize BMI data as our indicator of obesity in this paper. However, regarding the intake of Diet Coke, due to changes in dietary survey questionnaires, relevant data was collected only during two survey cycles between 2003 and 2006. Nonetheless, the formulation of Diet Coke has not altered over the past twenty years ([The Coca-Cola Company 2023](https://arxiv.org/html/2405.10746v2#bib.bib33)), making the use of this data both reasonable and valid for our analysis."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "We hypothesize that the relationship between Diet Coke consumption and obesity is not straightforward but influenced by multiple factors. Thus, identifying key indicators impacting obesity is crucial. ([Visser et al. 1997](https://arxiv.org/html/2405.10746v2#bib.bib35)) suggests that age, race, and gender may affect obesity due to differences in body density. ([Brown and Biosca 2016](https://arxiv.org/html/2405.10746v2#bib.bib4)) argues that education can influence body fat through changes in savings behavior. ([Akbartabartoori, Lean, and Hankey 2005](https://arxiv.org/html/2405.10746v2#bib.bib2)) indicates a link between smoking and obesity, moderated by waist circumference (WC), hip circumference (HC), and waist-to-hip ratio (WHR). ([Elagizi et al. 2020](https://arxiv.org/html/2405.10746v2#bib.bib10)) states that physical activity impacts weight by affecting the cardiovascular system. ([Zhou et al. 2018](https://arxiv.org/html/2405.10746v2#bib.bib37))’s analysis shows that within a normal BMI range, leaner individuals have a lower risk of hypertension. ([Carr and Brunzell 2004](https://arxiv.org/html/2405.10746v2#bib.bib5)) highlights that abdominal fat, an obesity marker, is closely associated with the risks of hyperlipidemia and Type 2 diabetes linked to metabolic syndrome."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Based on the aforementioned studies, the factors identified as influencing fatness include age, gender, race/ethnicity, educational level, smoking status, average daily physical activity level, hyperlipidemia, and diabetes mellitus."
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "Data Processing",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "We extracted the necessary data for constructing the causal diagram and clarified the data types for each variable. As shown in Figure [3](https://arxiv.org/html/2405.10746v2#Sx3.F3 \"Figure 3 ‣ Data Processing ‣ Methodology ‣ Causality in the Can: Diet Coke’s Impact on Fatness\"), Diet Coke consumption frequency is categorized into five levels, coded from 1 to 5, ranging from “Almost never or never” to “Almost always or always,” with corresponding respondent counts. Special cases like non-responses (“Blank”) and data entry errors (“Error”) are also noted."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "In contrast, the fatness variable, represented by BMI, consists of continuous values providing precise measurements, as illustrated in Figure [4](https://arxiv.org/html/2405.10746v2#Sx3.F4 \"Figure 4 ‣ Data Processing ‣ Methodology ‣ Causality in the Can: Diet Coke’s Impact on Fatness\"). Other influencing factors are classified as either discrete or continuous. With this data, we can now construct the causal diagram."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "To clearly define the relationships among variables and ensure methodological accuracy, we identify the independent variable (XX), the dependent variable (YY), and relevant covariates:"
+                },
+                {
+                  "type": "formula",
+                  "text": "XX"
+                },
+                {
+                  "type": "formula",
+                  "text": "YY"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "The independent variable (XX) is “Diet Coke consumption frequency,” quantifying how often participants consume Diet Coke."
+                },
+                {
+                  "type": "formula",
+                  "text": "XX"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "The dependent variable (YY) is “fatness,” measured by BMI, calculated from participants’ weight and height."
+                },
+                {
+                  "type": "formula",
+                  "text": "YY"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Additional covariates include age, gender, race/ethnicity, education, and health factors like smoking and physical activity. These covariates help us better understand the relationship between Diet Coke consumption and fatness."
+                },
+                {
+                  "type": "table",
+                  "text": "| Category | Variable Description | | --- | --- | | XX | Diet Coke Consumption Frequency | | YY | Fatness (BMI) | | | Age | | | Gender | | | Race / Ethnicity | | | Education Level | | | Smoking Status | | | Average Daily Physical Activity Level | | | Hyperlipidemia | | Covariates | Diabetes Mellitus |"
+                },
+                {
+                  "type": "formula",
+                  "text": "XX"
+                },
+                {
+                  "type": "formula",
+                  "text": "YY"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "For the measurement of various health indicators, authoritative standards are essential. According to ([Centers for Disease Control and Prevention 2022](https://arxiv.org/html/2405.10746v2#bib.bib8)), a Body Mass Index (BMI) of 30.0 or higher categorizes an individual within the obesity range. Hyperlipidemia, or high cholesterol, is characterized by certain thresholds in cholesterol measurements ([Clinic 2024](https://arxiv.org/html/2405.10746v2#bib.bib9)). It is considered high when total cholesterol exceeds 240 mg/dL, LDL (low-density lipoprotein) cholesterol is 160 mg/dL or higher, and triglycerides are above 200 mg/dL. HDL (high-density lipoprotein) cholesterol is ideally above 60 mg/dL, as lower levels may also indicate risk. The A1C test measures the percentage of glycated hemoglobin, providing an average blood glucose level over three months. Levels of 5.7%5.7\\% to 6.4%6.4\\% indicate prediabetes, while 6.5%6.5\\% or higher confirms diabetes."
+                },
+                {
+                  "type": "formula",
+                  "text": "5.7%5.7\\%"
+                },
+                {
+                  "type": "formula",
+                  "text": "6.4%6.4\\%"
+                },
+                {
+                  "type": "formula",
+                  "text": "6.5%6.5\\%"
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "Causal Diagram",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "In the field of causal inference, the I​C∗IC^{\\ast} algorithm is a pivotal tool for identifying causal relationships among variables from observational data ([Pearl 2009](https://arxiv.org/html/2405.10746v2#bib.bib25)). This study employs the I​C∗IC^{\\ast} algorithm to construct a causal graph, delineating the causal structures between variables XX,YY, and several covariates. The initial step of the I​C∗IC^{\\ast} algorithm involves conducting conditional independence tests to analyze relationships among all pairs of variables within the dataset. This process relies on statistical tests to evaluate whether different combinations of variables are independent; if two variables are found to be dependent given other variables, an undirected edge is established between them."
+                },
+                {
+                  "type": "formula",
+                  "text": "I​C∗IC^{\\ast}"
+                },
+                {
+                  "type": "formula",
+                  "text": "I​C∗IC^{\\ast}"
+                },
+                {
+                  "type": "formula",
+                  "text": "XX"
+                },
+                {
+                  "type": "formula",
+                  "text": "YY"
+                },
+                {
+                  "type": "formula",
+                  "text": "I​C∗IC^{\\ast}"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Subsequently, the algorithm enters the structure identification phase, utilizing conditional independence tests, specifically the Robust Regression Test, to detect `​`​V−s​t​r​u​c​t​u​r​e​s′′``V-structures^{\\prime\\prime} within the data. These structures are unique triplets where one variable is a common cause of the other two variables, which do not directly interact with each other. Identifying these V-structures is crucial for determining the direction of the edges in the graph, as they reveal the causal pathways, either direct or through intermediary variables."
+                },
+                {
+                  "type": "formula",
+                  "text": "`​`​V−s​t​r​u​c​t​u​r​e​s′′``V-structures^{\\prime\\prime}"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Furthermore, the I​C∗IC^{\\ast} algorithm is capable of identifying latent variables within the causal graph and refining the graph structure through iterative optimization processes. In each iteration, the algorithm evaluates whether adding or adjusting the direction of edges better conforms to the evidence of conditional independence from the data. This method allows the algorithm to gradually construct a detailed and accurate map of the causal relationships between the variables. By applying the I​C∗IC^{\\ast} algorithm, we successfully portray the complex causal network among variables XX, YY, and the covariates, providing a solid foundation for further analysis and model construction.The resulting causal graph is depicted in Figure [5](https://arxiv.org/html/2405.10746v2#Sx3.F5 \"Figure 5 ‣ Causal Diagram ‣ Methodology ‣ Causality in the Can: Diet Coke’s Impact on Fatness\"). Red arrows denote clear causal chains, while solid black lines indicate potential but uncertain connections."
+                },
+                {
+                  "type": "formula",
+                  "text": "I​C∗IC^{\\ast}"
+                },
+                {
+                  "type": "formula",
+                  "text": "I​C∗IC^{\\ast}"
+                },
+                {
+                  "type": "formula",
+                  "text": "XX"
+                },
+                {
+                  "type": "formula",
+                  "text": "YY"
+                },
+                {
+                  "type": "formula",
+                  "text": "I​C∗IC^{\\ast}"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "To ensure the accuracy of this causal diagram, we used the reliable DAG with NO TEARS algorithm ([Zheng et al. 2018](https://arxiv.org/html/2405.10746v2#bib.bib36)). By comparing the diagrams generated by both methods, we found them nearly identical, further validating the correctness of our causal graph from the I​C∗IC^{\\ast} algorithm."
+                },
+                {
+                  "type": "formula",
+                  "text": "I​C∗IC^{\\ast}"
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "RCT Calculation",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "In this section, we focus on calculating counterfactual values ([Pearl, Glymour, and Jewell 2016](https://arxiv.org/html/2405.10746v2#bib.bib27)), which represent potential outcomes under the theoretical full control of a specific variable, such as the frequency of Diet Coke consumption. Counterfactual analysis is a central concept in causal inference, enabling us to explore the potential relationships between variables under various interventional scenarios. This means assessing the outcomes when one factor is altered while all others are held constant."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "For variable XX, representing the frequency of Diet Coke consumption, the original data categorize consumption into five levels ranging from 1 to 5. For computational convenience, we binarized these data, designating those who never drink Diet Coke as 0, and marking all other levels as 1. For YY (fatness), individuals are classified as 0 for non-obese and 1 for obese, following the criteria previously described."
+                },
+                {
+                  "type": "formula",
+                  "text": "XX"
+                },
+                {
+                  "type": "formula",
+                  "text": "YY"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Upon analyzing the causal diagram derived earlier, we identified a single backdoor pathway as shown in Figure [6](https://arxiv.org/html/2405.10746v2#Sx3.F6 \"Figure 6 ‣ RCT Calculation ‣ Methodology ‣ Causality in the Can: Diet Coke’s Impact on Fatness\"), which is characterized by the pathway D​i​e​t​C​o​k​e→D​i​a​b​e​t​e​s←f​a​t​n​e​s​sDietCoke\\rightarrow{}Diabetes\\leftarrow{}fatness. This aligns with the findings of ([Gardener et al. 2018](https://arxiv.org/html/2405.10746v2#bib.bib13)), which demonstrated a significant association between Diet Coke consumption and an increased risk of diabetes. Consequently, controlling for diabetes, the only confounder in this pathway, allows us to use the adjustment formula ([Pearl 1995](https://arxiv.org/html/2405.10746v2#bib.bib23)) to compute the experimental data. This calculation estimates the causal impact of Diet Coke consumption on fatness, controlled for diabetes status. These are denoted as P​(Y=1∣do​(X=1))P(Y=1\\mid\\text{do}(X=1)) and P​(Y=1∣do​(X=0))P(Y=1\\mid\\text{do}(X=0)), also represented in our notation as yxy\\_{x} and yx′y\\_{x^{\\prime}}."
+                },
+                {
+                  "type": "formula",
+                  "text": "D​i​e​t​C​o​k​e→D​i​a​b​e​t​e​s←f​a​t​n​e​s​sDietCoke\\rightarrow{}Diabetes\\leftarrow{}fatness"
+                },
+                {
+                  "type": "formula",
+                  "text": "P​(Y=1∣do​(X=1))P(Y=1\\mid\\text{do}(X=1))"
+                },
+                {
+                  "type": "formula",
+                  "text": "P​(Y=1∣do​(X=0))P(Y=1\\mid\\text{do}(X=0))"
+                },
+                {
+                  "type": "formula",
+                  "text": "yxy_{x}"
+                },
+                {
+                  "type": "formula",
+                  "text": "yx′y_{x^{\\prime}}"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "The challenge of discerning the actual effectiveness in these sensitive contexts stems from their counterfactual22 2 Counterfactuals are statements or scenarios that express what might have happened if circumstances had been different from what actually occurred. nature; outcomes of interest are inferred through hypothetical scenarios rather than directly observed. For example, if an individual consumes Diet Coke, the outcome had they not consumed it will never be observable."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "RCT may seem sufficient to handle this counterfactual nature, but they fall short because no two individuals are exactly the same. Individuals may belong to subpopulations unknown to the investigator, each responding to a given treatment markedly differently ([Li and Pearl 2022](https://arxiv.org/html/2405.10746v2#bib.bib19)). Therefore, a more sophisticated approach is required to accommodate individual differences."
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "PNS Calculation",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "First of all, We define the following variables and their states:"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "XX: Represents the consumption status of Diet Coke. This is a binary variable where:"
+                },
+                {
+                  "type": "formula",
+                  "text": "XX"
+                },
+                {
+                  "type": "list",
+                  "text": "* • x=1x=1 indicates that Diet Coke is consumed. * • x′=0x^{\\prime}=0 or x′x^{\\prime} indicates that Diet Coke is not consumed."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "x=1x=1 indicates that Diet Coke is consumed."
+                },
+                {
+                  "type": "formula",
+                  "text": "x=1x=1"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "x′=0x^{\\prime}=0 or x′x^{\\prime} indicates that Diet Coke is not consumed."
+                },
+                {
+                  "type": "formula",
+                  "text": "x′=0x^{\\prime}=0"
+                },
+                {
+                  "type": "formula",
+                  "text": "x′x^{\\prime}"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "YY: Represents the obesity status of an individual. This is also a binary variable where:"
+                },
+                {
+                  "type": "formula",
+                  "text": "YY"
+                },
+                {
+                  "type": "list",
+                  "text": "* • y=1y=1 indicates that the individual is obese. * • y′=0y^{\\prime}=0 or y′y^{\\prime} indicates that the individual is not obese."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "y=1y=1 indicates that the individual is obese."
+                },
+                {
+                  "type": "formula",
+                  "text": "y=1y=1"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "y′=0y^{\\prime}=0 or y′y^{\\prime} indicates that the individual is not obese."
+                },
+                {
+                  "type": "formula",
+                  "text": "y′=0y^{\\prime}=0"
+                },
+                {
+                  "type": "formula",
+                  "text": "y′y^{\\prime}"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "With the basic variables and states defined, we use counterfactual notation to explore hypothetical changes in these states and their impact on outcomes:"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Yx=yY\\_{x}=y: This expression is used to describe a scenario where if XX were set to xx (consuming Diet Coke), then YY would take the value yy (obese)."
+                },
+                {
+                  "type": "formula",
+                  "text": "Yx=yY_{x}=y"
+                },
+                {
+                  "type": "formula",
+                  "text": "XX"
+                },
+                {
+                  "type": "formula",
+                  "text": "xx"
+                },
+                {
+                  "type": "formula",
+                  "text": "YY"
+                },
+                {
+                  "type": "formula",
+                  "text": "yy"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Yx′=yY\\_{x^{\\prime}}=y: This expression describes another scenario where, even without consuming Diet Coke (X=x′X=x^{\\prime}), the individual still reaches an obese state (Y=yY=y)."
+                },
+                {
+                  "type": "formula",
+                  "text": "Yx′=yY_{x^{\\prime}}=y"
+                },
+                {
+                  "type": "formula",
+                  "text": "X=x′X=x^{\\prime}"
+                },
+                {
+                  "type": "formula",
+                  "text": "Y=yY=y"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Building on the foundation laid by the clear definitions and the use of counterfactual notation, the computation of the Probability of Necessity and Sufficiency (PNS) in our study is pivotal for understanding the causal impact of Diet Coke consumption on obesity."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "PNS evaluates the likelihood that consuming Diet Coke is both necessary and sufficient for the occurrence of obesity within various demographics. Specifically, it measures the probability that obesity would occur with Diet Coke consumption and would not otherwise. By calculating PNS, we aim to determine the extent to which Diet Coke consumption can be considered a direct causal factor in obesity."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "With the experimental data estimated, we are now positioned to apply the model developed by ([Tian and Pearl 2000](https://arxiv.org/html/2405.10746v2#bib.bib34)) to compute the bounds of the Probability of Necessity and Sufficiency (P​N​SPNS) across the general population. Furthermore, employing the method outlined by ([Mueller, Li, and Pearl 2022](https://arxiv.org/html/2405.10746v2#bib.bib22)), we will refine these estimates by narrowing the bounds, as elaborated in Formulas (3)(4)(7)(8) of the P​r​e​l​i​m​i​n​a​r​i​e​sPreliminaries section of this paper."
+                },
+                {
+                  "type": "formula",
+                  "text": "P​N​SPNS"
+                },
+                {
+                  "type": "formula",
+                  "text": "P​r​e​l​i​m​i​n​a​r​i​e​sPreliminaries"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Building on this foundational analysis, we segment the population into various subgroups based on covariates related to demographic characteristics and dietary habits to compute the P​N​SPNS within these subgroups. Each subgroup is formed with at least 385 individuals to ensure a margin of error of no more than 0.05 for the 95%95\\% confidence interval ([Li, Mao, and Pearl 2022](https://arxiv.org/html/2405.10746v2#bib.bib17))."
+                },
+                {
+                  "type": "formula",
+                  "text": "P​N​SPNS"
+                },
+                {
+                  "type": "formula",
+                  "text": "95%95\\%"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "This stratification is essential as different dietary habits can bias outcomes. For instance, those who frequently consume beer, burgers, and doughnuts may have a higher risk of obesity, which shouldn’t be solely linked to Diet Coke. While Diet Coke has no sugar, it may still contribute to obesity by stimulating hormonal secretions or misleading brain mechanisms."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "By carefully considering these factors, our aim is to identify specific demographics where Diet Coke consumption significantly leads to obesity (indicating a high lower bound of PNS) or demographics where Diet Coke has virtually no impact on obesity levels (reflecting a low upper bound of PNS). This nuanced approach allows us to deliver a more precise understanding of the causal dynamics between Diet Coke consumption and obesity across different subpopulations."
+                }
+              ],
+              "children": []
+            }
+          ]
+        },
+        {
+          "heading": "Results",
+          "level": 2,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "A/B testing, like Randomized Controlled Trials (RCTs), is the gold standard for establishing causality in clinical and behavioral research. RCTs provide a controlled environment to directly compare and demonstrate the impact of interventions, such as Diet Coke consumption. Therefore, we initially estimated the counterfactual data for the general population, providing a clear and statistically robust basis for assessing the effects of Diet Coke on obesity prevalence."
+            },
+            {
+              "type": "table",
+              "text": "| | | | | --- | --- | --- | | | P⁡(Y=1∣do​(X=1))=0.4157292166,\\displaystyle P(Y=1\\mid\\text{do}(X=1))=0.4157292166, | | | | | | | --- | --- | --- | | | P⁡(Y=1∣do​(X=0))=0.3198820277.\\displaystyle P(Y=1\\mid\\text{do}(X=0))=0.3198820277. | |"
+            },
+            {
+              "type": "formula",
+              "text": "P⁡(Y=1∣do​(X=1))=0.4157292166,\\displaystyle P(Y=1\\mid\\text{do}(X=1))=0.4157292166,"
+            },
+            {
+              "type": "formula",
+              "text": "P⁡(Y=1∣do​(X=0))=0.3198820277.\\displaystyle P(Y=1\\mid\\text{do}(X=0))=0.3198820277."
+            },
+            {
+              "type": "paragraph",
+              "text": "Based on the analysis of simulated RCT data, we observed a significant correlation between the consumption of Diet Coke and obesity. Specifically, the probability of obesity among participants who consumed Diet Coke was 41.57%41.57\\%, compared to 31.99%31.99\\% among those who did not consume Diet Coke. This indicates that the consumption of Diet Coke can increase the likelihood of obesity by approximately 9.58%9.58\\%. While this data suggests that Diet Coke may be a potential risk factor for obesity, the modest increase of less than 10%10\\% across the general population may not be entirely convincing in complex real-world scenarios. In this context, the method of calculating the Probability of Necessity and Sufficiency (PNS) boundaries used in this study offers a more detailed and comprehensive analysis, revealing further nuances and complexities associated with Diet Coke’s impact on obesity."
+            },
+            {
+              "type": "formula",
+              "text": "41.57%41.57\\%"
+            },
+            {
+              "type": "formula",
+              "text": "31.99%31.99\\%"
+            },
+            {
+              "type": "formula",
+              "text": "9.58%9.58\\%"
+            },
+            {
+              "type": "formula",
+              "text": "10%10\\%"
+            },
+            {
+              "type": "paragraph",
+              "text": "Following the methods described previously, we computed and refined the boundaries of the Probability of Necessity and Sufficiency (PNS) for the general population:"
+            },
+            {
+              "type": "table",
+              "text": "| | | | | --- | --- | --- | | | 0.096≤P​N​S≤0.405.\\displaystyle 0.096\\leq PNS\\leq 0.405. | |"
+            },
+            {
+              "type": "formula",
+              "text": "0.096≤P​N​S≤0.405.\\displaystyle 0.096\\leq PNS\\leq 0.405."
+            },
+            {
+              "type": "paragraph",
+              "text": "The calculated Probability of Necessity and Sufficiency (PNS) for obesity attributable to Diet Coke consumption ranges from 0.096 to 0.405. The lower bound of approximately 10%\\% suggests that there indeed exists a subset of individuals for whom consuming Diet Coke contributes to obesity. However, the broad range of this boundary indicates variability in the causal impact across the population."
+            },
+            {
+              "type": "formula",
+              "text": "%\\%"
+            },
+            {
+              "type": "paragraph",
+              "text": "To refine our understanding and identify potentially more characteristic subgroups, we will next calculate the PNS boundaries for various subpopulations. This approach aims to discover specific demographics or behavioral patterns that might exhibit a stronger or more distinct causal relationship between Diet Coke consumption and obesity."
+            },
+            {
+              "type": "paragraph",
+              "text": "We have selected some subpopulations where the effects are particularly pronounced, as shown in Table 2. After controlling for certain covariates, the PNS boundaries underwent significant changes. For instance, in the subgroup labeled as O​l​d​\\_​M​a​n​\\_​A​c​t​i​v​i​t​y​\\_​L​o​wOld\\\\_Man\\\\_Activity\\\\_Low, which refers to men over the age of 60 with low physical activity levels, the lower boundary of PNS increased by more than double compared to the general population. This indicates that the impact of Diet Coke on weight is more significant in this subgroup."
+            },
+            {
+              "type": "formula",
+              "text": "O​l​d​_​M​a​n​_​A​c​t​i​v​i​t​y​_​L​o​wOld\\_Man\\_Activity\\_Low"
+            },
+            {
+              "type": "paragraph",
+              "text": "As shown in Table 3, we further subdivided the population based on dietary habits, yielding significant results. Among individuals with poor dietary habits, such as the subgroup `​`​O​l​d​\\_​M​a​n​\\_​H​a​m​b​u​r​g​e​r​\"``Old\\\\_Man\\\\_Hamburger\", which includes elderly males who frequently consume hamburgers, the lower boundary of PNS rose to nearly 30%30\\%.This suggests that a higher proportion of individuals in this group experience obesity potentially linked to consuming Diet Coke, illustrating the significant probability that obesity would occur with Diet Coke consumption and would not otherwise. However, it is likely not the consumption of Diet Coke itself that leads to obesity, but rather the association of Diet Coke with a range of unhealthy dietary behaviors."
+            },
+            {
+              "type": "formula",
+              "text": "`​`​O​l​d​_​M​a​n​_​H​a​m​b​u​r​g​e​r​\"``Old\\_Man\\_Hamburger\""
+            },
+            {
+              "type": "formula",
+              "text": "30%30\\%"
+            },
+            {
+              "type": "paragraph",
+              "text": "Conversely, in subgroups with healthier eating habits, such as `​`​Y​o​u​n​g​\\_​W​o​m​a​n​\\_​N​o​\\_​H​o​t​d​o​g​\"``Young\\\\_Woman\\\\_No\\\\_Hotdog\", the upper boundary being 20%20\\% indicates that only a small fraction of this population might become obese due to Diet Coke consumption. In these cases, the practice of consuming Diet Coke while maintaining weight stability appears to be more credible. This differential impact underscores the complex interactions between dietary habits and the effects of specific dietary choices such as Diet Coke on health outcomes."
+            },
+            {
+              "type": "formula",
+              "text": "`​`​Y​o​u​n​g​_​W​o​m​a​n​_​N​o​_​H​o​t​d​o​g​\"``Young\\_Woman\\_No\\_Hotdog\""
+            },
+            {
+              "type": "formula",
+              "text": "20%20\\%"
+            },
+            {
+              "type": "table",
+              "text": "| Subpopulation | Bounds of PNS | | --- | --- | | Activity\\_High | 0.10122, 0.39544 | | Man | 0.12298, 0.40726 | | Age60+ | 0.14792, 0.43166 | | Old\\_Man | 0.16865, 0.41567 | | Old\\_Activity\\_Low | 0.14637, 0.47675 | | Old\\_Hyperlipidemia\\_Yes | 0.15442, 0.40864 | | Old\\_Man\\_Education\\_Low | 0.16102, 0.41829 | | Old\\_Man\\_Activity\\_Low | 0.22938, 0.53263 | | Woman | 0.08430, 0.39075 | | Age60- | 0.09140, 0.37639 | | Young\\_Woman | 0.07391, 0.37845 | | Young\\_Woman\\_Activity\\_High | 0.05077, 0.34600 |"
+            },
+            {
+              "type": "table",
+              "text": "| Subpopulation | Bounds of PNS | | --- | --- | | Old\\_Man\\_Hamburger | 0.29909, 0.57860 | | Old\\_Man\\_Hotdog | 0.24406, 0.48335 | | Old\\_Man\\_Fries | 0.20028, 0.47119 | | Old\\_Man\\_Icecream | 0.18539, 0.47663 | | Old\\_Man\\_Candy | 0.16524, 0.37878 | | Old\\_Man\\_Beer | 0.14397, 0.42206 | | Young\\_Woman\\_No\\_Hamburger | 0.00905, 0.22395 | | Young\\_Woman\\_No\\_Popcorn | 0.02081, 0.29678 | | Young\\_woman\\_Salad | 0.07663, 0.29593 | | Young\\_Woman\\_No\\_Syrup | 0.01923, 0.23076 | | Young\\_Woman\\_No\\_Fries | 0.00198, 0.21941 | | Young\\_Woman\\_No\\_Hotdog | 0.00000, 0.19487 |"
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "Discussion",
+          "level": 2,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "In this paper, we employed Structured Causal Models (SCM) and the I​C∗IC^{\\ast} algorithm to construct causal diagrams and calculate the probability of interventional effects using adjustment formulas. We then assessed the likelihood of obesity with and without Diet Coke consumption. However, our study has some limitations."
+            },
+            {
+              "type": "formula",
+              "text": "I​C∗IC^{\\ast}"
+            },
+            {
+              "type": "paragraph",
+              "text": "One key limitation is the constrained sample size, which required each subgroup to have at least 385 individuals to ensure reliable statistical results ([Li, Mao, and Pearl 2022](https://arxiv.org/html/2405.10746v2#bib.bib17)). This constraint limited our ability to perform more detailed subgroup analyses, making it difficult to precisely identify which populations are more or less affected by Diet Coke consumption. Future research should expand the sample size and include a broader range of regions and populations to improve the generalizability and accuracy of the findings."
+            },
+            {
+              "type": "paragraph",
+              "text": "Additionally, our study may have relied on self-reported data, particularly regarding dietary habits, which can be prone to bias. For instance, a participant’s recent increase in Diet Coke consumption might lead to overestimations of their usual intake, introducing inaccuracies. Incorporating more objective measures, such as biomarkers or direct observations, in future studies could enhance data reliability and research validity."
+            },
+            {
+              "type": "paragraph",
+              "text": "Furthermore, although studies ([Sylvetsky et al. 2020](https://arxiv.org/html/2405.10746v2#bib.bib32)) suggest that Diet Coke may influence obesity through hormone secretion, we lacked specific hormone data, limiting our understanding of these potential mechanisms. Future research should explore the effects of Diet Coke on hormones like insulin and leptin to clarify its relationship with obesity and metabolic health. Additionally, examining the connections between Diet Coke consumption and other chronic diseases, such as cardiovascular disease and diabetes, would provide a more comprehensive view of its health implications."
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "Conclusion",
+          "level": 2,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "Through the application of causal inference methods, our study has determined that Diet Coke consumption indeed poses a risk of increased obesity; however, the impact varies significantly across different demographics. Different subgroups experience varying rates of weight gain after consuming Diet Coke, suggesting that the influence of Diet Coke on weight is not a straightforward causal relationship but is likely mediated through multiple factors. These findings emphasize the importance of considering individual differences and dietary habits when assessing the health impacts of foods or beverages. This complexity highlights that the effect of Diet Coke on weight gain is the result of multifaceted interactions, underscoring the necessity to take into account personal health profiles and lifestyles in dietary recommendations."
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "References",
+          "level": 2,
+          "content": [
+            {
+              "type": "list",
+              "text": "* Adab, Pallan, and Whincup (2018) Adab, P.; Pallan, M.; and Whincup, P. H. 2018. Is BMI the best measure of obesity? *BMJ*, 360. * Akbartabartoori, Lean, and Hankey (2005) Akbartabartoori, M.; Lean, M.; and Hankey, C. 2005. Relationships between cigarette smoking, body size and body shape. *International journal of obesity*, 29(2): 236–243. * Balke and Pearl (2013) Balke, A.; and Pearl, J. 2013. Counterfactuals and Policy Analysis in Structural Models. arXiv:1302.4929. * Brown and Biosca (2016) Brown, H.; and Biosca, O. 2016. Exploring the relationship between time preference, body fatness, and educational attainment. *Social science & medicine*, 158: 75–85. * Carr and Brunzell (2004) Carr, M. C.; and Brunzell, J. D. 2004. Abdominal obesity and dyslipidemia in the metabolic syndrome: importance of type 2 diabetes and familial combined hyperlipidemia in coronary artery disease risk. *The journal of clinical endocrinology & metabolism*, 89(6): 2601–2607. * CDC (2024) CDC. 2024. About the National Health and Nutrition Examination Survey. Accessed: 2024-05-09. * CDC (2024) CDC. 2024. NHANES - National Health and Nutrition Examination Survey: Reliability of Estimates and Factsheet. Accessed: 2024-08-05. * Centers for Disease Control and Prevention (2022) Centers for Disease Control and Prevention. 2022. Assessing Your Weight: Adult BMI. https://www.cdc.gov/healthyweight/assessing/bmi/adult˙bmi/index.html. Accessed: 2024-05-11. * Clinic (2024) Clinic, M. 2024. High blood cholesterol - Diagnosis and treatment. Accessed: 2024-05-14. * Elagizi et al. (2020) Elagizi, A.; Kachur, S.; Carbone, S.; Lavie, C. J.; and Blair, S. N. 2020. A review of obesity, physical activity, and cardiovascular disease. *Current obesity reports*, 9: 571–581. * Felstead (2023) Felstead, S. 2023. New Study Compares Diet Soda vs. Water For Weight Loss. *BarBend*. Last updated on November 16th, 2023. * Freedman and Sherry (2009) Freedman, D. S.; and Sherry, B. 2009. The Validity of BMI as an Indicator of Body Fatness and Risk Among Children. *Pediatrics*, 124(Supplement): S23–S34. * Gardener et al. (2018) Gardener, H.; Moon, Y. P.; Rundek, T.; Elkind, M. S.; and Sacco, R. L. 2018. Diet Soda and Sugar-Sweetened Soda Consumption in Relation to Incident Diabetes in the Northern Manhattan Study. *Current Developments in Nutrition*, 2(5): nzy008. * Goulding et al. (1996) Goulding, A.; Gold, E.; Cannan, R.; Taylor, R.; Williams, S.; and Lewis-Barned, N. 1996. DEXA supports the use of BMI as a measure of fatness in young girls. *International journal of obesity and related metabolic disorders: journal of the International Association for the Study of Obesity*, 20(11): 1014–1021. * Halpern (2000) Halpern, J. Y. 2000. Axiomatizing causal reasoning. *Journal of Artificial Intelligence Research*, 12: 317–337. * Koller and Friedman (2009) Koller, D.; and Friedman, N. 2009. *Probabilistic Graphical Models: Principles and Techniques*. MIT Press. * Li, Mao, and Pearl (2022) Li, A.; Mao, R.; and Pearl, J. 2022. Probabilities of Causation: Adequate Size of Experimental and Observational Samples. arXiv:2210.05027. * Li and Pearl (2019) Li, A.; and Pearl, J. 2019. Unit Selection Based on Counterfactual Logic. In *Proceedings of the Twenty-Eighth International Joint Conference on Artificial Intelligence, IJCAI-19*, 1793–1799. International Joint Conferences on Artificial Intelligence Organization. * Li and Pearl (2022) Li, A.; and Pearl, J. 2022. Unit Selection: Case Study and Comparison with A/B Test Heuristic. arXiv:2210.05030. * Manaker (2024) Manaker, L. 2024. This Is What Happens to Your Body When You Drink Diet Soda. *Eat This, Not That!* Reviewed by Dietitian Christa Brown, M.S., RDN, LD. * Mashed (2023) Mashed. 2023. The Untold Truth Of Diet Coke. https://www.mashed.com/the-untold-truth-of-diet-coke. Accessed: 2024-05-08. * Mueller, Li, and Pearl (2022) Mueller, S.; Li, A.; and Pearl, J. 2022. Causes of Effects: Learning Individual Responses from Population Data. In Raedt, L. D., ed., *Proceedings of the Thirty-First International Joint Conference on Artificial Intelligence, IJCAI-22*, 2712–2718. International Joint Conferences on Artificial Intelligence Organization. Main Track. * Pearl (1995) Pearl, J. 1995. Causal diagrams for empirical research. *Biometrika*, 82(4): 669–688. * Pearl (1999) Pearl, J. 1999. Probabilities of Causation: Three counterfactual interpretations and their identification. *Synthese*, 121(1-2): 93–149. * Pearl (2009) Pearl, J. 2009. *Causality*. Cambridge University Press, 2 edition. * Pearl (2011) Pearl, J. 2011. Aspects of Graphical Models Connected with Causality. Technical report, Department of Statistics, UCLA. Retrieved from https://escholarship.org/uc/item/9zx0h8k6. * Pearl, Glymour, and Jewell (2016) Pearl, J.; Glymour, M.; and Jewell, N. P. 2016. *Causal inference in statistics: A primer*. John Wiley & Sons. * Peters et al. (2014) Peters, J. C.; Wyatt, H. R.; Foster, G. D.; Pan, Z.; Wojtanowski, A. C.; Veur, S. S. V.; Herring, S. J.; Brill, C.; and Hill, J. O. 2014. The effects of water and non-nutritive sweetened beverages on weight loss during a 12-week weight loss treatment program. *Obesity*, 22(6): 1415. * Ruanpeng et al. (2017) Ruanpeng, D.; Thongprayoon, C.; Cheungpasitporn, W.; and Harindhanavudhi, T. 2017. Sugar and artificially sweetened beverages linked to obesity: a systematic review and meta-analysis. *QJM*, 110(8): 513–520. * Spirtes et al. (2000) Spirtes, P.; Glymour, C. N.; Scheines, R.; and Heckerman, D. 2000. *Causation, Prediction, and Search*. MIT Press. * Spren (2023) Spren. 2023. Brief History of Coke Zero and Diet Coke. https://www.spren.com/brief-history-of-coke-zero-and-diet-coke. Accessed: 2024-05-08. * Sylvetsky et al. (2020) Sylvetsky, A. C.; Sen, S.; Merkel, P.; Dore, F.; Stern, D. B.; Henry, C. J.; Cai, H.; Walter, P. J.; Crandall, K. A.; Rother, K. I.; et al. 2020. Consumption of diet soda sweetened with sucralose and acesulfame-potassium alters inflammatory transcriptome pathways in females with overweight and obesity. *Molecular nutrition & food research*, 64(11): 1901166. * The Coca-Cola Company (2023) The Coca-Cola Company. 2023. Is the Diet Coke recipe changing? Accessed: 2024-05-09. * Tian and Pearl (2000) Tian, J.; and Pearl, J. 2000. Probabilities of causation: Bounds and identification. *Annals of Mathematics and Artificial Intelligence*, 28: 287–313. * Visser et al. (1997) Visser, M.; Gallagher, D.; Deurenberg, P.; Wang, J.; Pierson Jr, R.; and Heymsfield, S. 1997. Density of fat-free body mass: relationship with race, age, and level of body fatness. *American Journal of Physiology-Endocrinology and Metabolism*, 272(5): E781–E787. * Zheng et al. (2018) Zheng, X.; Aragam, B.; Ravikumar, P.; and Xing, E. P. 2018. DAGs with NO TEARS: Continuous Optimization for Structure Learning. arXiv:1803.01422. * Zhou et al. (2018) Zhou, W.; Shi, Y.; Li, Y.-q.; Ping, Z.; Wang, C.; Liu, X.; Lu, J.; Mao, Z.-x.; Zhao, J.; Yin, L.; et al. 2018. Body mass index, abdominal fatness, and hypertension incidence: a dose-response meta-analysis of prospective studies. *Journal of human hypertension*, 32(5): 321–333."
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "Reproducibility Checklist",
+          "level": 2,
+          "content": [],
+          "children": [
+            {
+              "heading": "This paper:",
+              "level": 3,
+              "content": [
+                {
+                  "type": "list",
+                  "text": "* • Includes a conceptual outline and/or pseudocode description of AI methods introduced: yes * • Clearly delineates statements that are opinions, hypotheses, and speculation from objective facts and results: yes * • Provides well-marked pedagogical references for less-familiar readers to gain background necessary to replicate the paper: yes"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Includes a conceptual outline and/or pseudocode description of AI methods introduced: yes"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Clearly delineates statements that are opinions, hypotheses, and speculation from objective facts and results: yes"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Provides well-marked pedagogical references for less-familiar readers to gain background necessary to replicate the paper: yes"
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "Does this paper make theoretical contributions? No",
+              "level": 3,
+              "content": [],
+              "children": []
+            },
+            {
+              "heading": "Does this paper rely on one or more datasets? yes",
+              "level": 3,
+              "content": [
+                {
+                  "type": "list",
+                  "text": "* • A motivation is given for why the experiments are conducted on the selected datasets: yes * • All novel datasets introduced in this paper are included in a data appendix: yes * • All novel datasets introduced in this paper will be made publicly available upon publication of the paper with a license that allows free usage for research purposes: yes * • All datasets drawn from the existing literature (potentially including authors’ own previously published work) are accompanied by appropriate citations: yes * • All datasets drawn from the existing literature (potentially including authors’ own previously published work) are publicly available: yes * • All datasets that are not publicly available are described in detail, with an explanation of why publicly available alternatives are not scientifically satisfying: NA"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "A motivation is given for why the experiments are conducted on the selected datasets: yes"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "All novel datasets introduced in this paper are included in a data appendix: yes"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "All novel datasets introduced in this paper will be made publicly available upon publication of the paper with a license that allows free usage for research purposes: yes"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "All datasets drawn from the existing literature (potentially including authors’ own previously published work) are accompanied by appropriate citations: yes"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "All datasets drawn from the existing literature (potentially including authors’ own previously published work) are publicly available: yes"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "All datasets that are not publicly available are described in detail, with an explanation of why publicly available alternatives are not scientifically satisfying: NA"
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "Does this paper include computational experiments? No",
+              "level": 3,
+              "content": [],
+              "children": []
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "chunks": [
+    {
+      "heading_path": [
+        "Report GitHub Issue"
+      ],
+      "text": "##### Report GitHub Issue\n\nContent selection saved. Describe the issue below:"
+    },
+    {
+      "heading_path": [
+        "Causality in the Can: Diet Coke’s Impact on Fatness"
+      ],
+      "text": "# Causality in the Can: Diet Coke’s Impact on Fatness"
+    },
+    {
+      "heading_path": [
+        "Causality in the Can: Diet Coke’s Impact on Fatness",
+        "Abstract"
+      ],
+      "text": "###### Abstract\n\nArtificially sweetened beverages like Diet Coke are often considered better alternatives to sugary drinks, but the debate over their impact on health, particularly in relation to obesity, continues. Previous research has predominantly used association-based methods with observational or Randomized Controlled Trial (RCT) data11 1 Randomized Controlled Trial (RCT), also known as an A/B test, is a type of scientific experiment commonly used in fields such as medicine, psychology, and social sciences. In an RCT, participants are randomly assigned to one of two or more groups: the treatment group, which receives the intervention being tested, and the control group, which either receives a placebo or no treatment at all. The data collected from an RCT is referred to as RCT/experimental data. In contrast, data collected from a survey or study where participants select their own treatment is known as observational data., which may not accurately capture the causal relationship between Diet Coke consumption and obesity, leading to potentially limited conclusions. In contrast, we employed causal inference methods using Structural Causal Models, integrating both observational and RCT data. Specifically, we utilized data from the National Health and Nutrition Examination Survey (NHANES), which includes diverse demographic information, as our observational data source. This data was then used to construct a causal graph, and the back-door criterion, along with its adjustment formula, was applied to estimate the RCT data. We then calculated the counterfactual quantity, the Probability of Necessity and Sufficiency (PNS), using both NHANES data and estimated RCT data. We propose that PNS is the essential metric for assessing the impact of Diet Coke on obesity. Our results indicate that between 20%20\\% to 50%50\\% of individuals, especially those with poor dietary habits, are more likely to gain weight from Diet Coke. Conversely, in groups like young females with healthier diets, only a small proportion experience weight gain due to Diet Coke. These findings highlight the influence of individual lifestyle and potential hormonal factors on the varied effects of Diet Coke, providing a new framework for understanding its nutritional impacts on public health.\n\n20%20\\%\n\n50%50\\%\n\n1Soochow University, Suzhou, China\n\n2Florida State University, Tallahassee, FL, USA\n\nycqi@stu.suda.edu.cn, angli@cs.fsu.edu"
+    },
+    {
+      "heading_path": [
+        "Causality in the Can: Diet Coke’s Impact on Fatness",
+        "Introduction"
+      ],
+      "text": "## Introduction\n\nAs global health consciousness rises, low-calorie artificial sweetener beverages like Diet Coke have become popular choices in the beverage market. Since its launch in 1982 ([Spren 2023](https://arxiv.org/html/2405.10746v2#bib.bib31)), Diet Coke has quickly captivated a large consumer base with its zero-sugar or low-calorie profile. Statistics ([Mashed 2023](https://arxiv.org/html/2405.10746v2#bib.bib21)) show that Diet Coke holds a significant market share in the soft drink markets of many countries, particularly among those pursuing healthier lifestyles, where it has become the preferred daily beverage. Consumers primarily choose Diet Coke for its low-calorie properties and its potential benefits in weight management. Many people consume it as a substitute for high-sugar drinks, aiming to reduce sugar intake and control weight."
+    },
+    {
+      "heading_path": [
+        "Causality in the Can: Diet Coke’s Impact on Fatness",
+        "Introduction",
+        "Innovation and Contribution"
+      ],
+      "text": "### Innovation and Contribution\n\nPrevious studies exploring the relationship between diet soda and obesity have various shortcomings. ([Ruanpeng et al. 2017](https://arxiv.org/html/2405.10746v2#bib.bib29)) conducted a systematic review and meta-analysis that found a significant association between artificially sweetened beverages and obesity but did not fully account for potential confounders. ([Peters et al. 2014](https://arxiv.org/html/2405.10746v2#bib.bib28)) suggested a positive role of diet beverages in weight loss but lacked detailed analysis across different demographic groups. ([Felstead 2023](https://arxiv.org/html/2405.10746v2#bib.bib11)) compared diet soda and water for weight loss, finding benefits for diet soda, but did not consider individual differences. ([Manaker 2024](https://arxiv.org/html/2405.10746v2#bib.bib20)) claimed diet soda does not lead to obesity and may help maintain a healthy weight but lacked control for confounding variables.\n\nThese studies are all association-based, relying either solely on RCTs or observational data, and they fail to adequately account for confounders. To overcome these limitations and better analyze the causal relationship between diet soda consumption and obesity, this paper employs advanced causal inference techniques:\n\n1. 1. Structured Causal Model (SCM): Using the IC\\* algorithm to construct a causal diagram that illustrates both direct and indirect relationships between diet soda consumption and obesity, considering potential confounders ([Pearl 1995](https://arxiv.org/html/2405.10746v2#bib.bib23); [Spirtes et al. 2000](https://arxiv.org/html/2405.10746v2#bib.bib30); [Pearl 2009](https://arxiv.org/html/2405.10746v2#bib.bib25); [Koller and Friedman 2009](https://arxiv.org/html/2405.10746v2#bib.bib16)). 2. 2. Back-Door Criterion Control: Identifying and controlling for back-door paths in the causal diagram to estimate the RCT distribution of diet soda’s effect using the back-door criterion and adjustment formula ([Pearl 1995](https://arxiv.org/html/2405.10746v2#bib.bib23)). 3. 3. Probability of Necessity and Sufficiency (PNS): By employing the probabilities of causation and their bounds as the decision criterion ([Tian and Pearl 2000](https://arxiv.org/html/2405.10746v2#bib.bib34)), and refining these bounds with covariates, we assess the effectiveness of diet soda on obesity rates across different population groups ([Mueller, Li, and Pearl 2022](https://arxiv.org/html/2405.10746v2#bib.bib22)).\n\nStructured Causal Model (SCM): Using the IC\\* algorithm to construct a causal diagram that illustrates both direct and indirect relationships between diet soda consumption and obesity, considering potential confounders ([Pearl 1995](https://arxiv.org/html/2405.10746v2#bib.bib23); [Spirtes et al. 2000](https://arxiv.org/html/2405.10746v2#bib.bib30); [Pearl 2009](https://arxiv.org/html/2405.10746v2#bib.bib25); [Koller and Friedman 2009](https://arxiv.org/html/2405.10746v2#bib.bib16)).\n\nBack-Door Criterion Control: Identifying and controlling for back-door paths in the causal diagram to estimate the RCT distribution of diet soda’s effect using the back-door criterion and adjustment formula ([Pearl 1995](https://arxiv.org/html/2405.10746v2#bib.bib23)).\n\nProbability of Necessity and Sufficiency (PNS): By employing the probabilities of causation and their bounds as the decision criterion ([Tian and Pearl 2000](https://arxiv.org/html/2405.10746v2#bib.bib34)), and refining these bounds with covariates, we assess the effectiveness of diet soda on obesity rates across different population groups ([Mueller, Li, and Pearl 2022](https://arxiv.org/html/2405.10746v2#bib.bib22)).\n\nOur results indicate that, overall, diet soda consumption may promote obesity, with significant variations across different demographic groups. For instance, individuals with poor dietary habits show a more pronounced weight gain effect from diet soda."
+    },
+    {
+      "heading_path": [
+        "Causality in the Can: Diet Coke’s Impact on Fatness",
+        "Introduction",
+        "Advantages"
+      ],
+      "text": "### Advantages\n\n1. 1. Methodological comprehensiveness: By employing advanced causal inference methods and integrating observational data with RCT estimates, this study overcomes biases inherent in single data sources, accurately accounts for the nature of counterfactual behavior in individuals, and thus reaches robust conclusions. 2. 2. Reliability of NHANES Data: This study utilizes NHANES data, known for its high representativeness and reliability due to strict multistage sampling and comprehensive data collection, with adjustments for sample weights, non-response, and population control ([CDC 2024](https://arxiv.org/html/2405.10746v2#bib.bib7)). 3. 3. Detailed Confounder Control: Through causal diagram construction, multiple potential confounders such as age, gender, race, education, smoking status, physical activity, hyperlipidemia, and diabetes are accurately identified and controlled, surpassing the variable control scope of existing studies.\n\nMethodological comprehensiveness: By employing advanced causal inference methods and integrating observational data with RCT estimates, this study overcomes biases inherent in single data sources, accurately accounts for the nature of counterfactual behavior in individuals, and thus reaches robust conclusions.\n\nReliability of NHANES Data: This study utilizes NHANES data, known for its high representativeness and reliability due to strict multistage sampling and comprehensive data collection, with adjustments for sample weights, non-response, and population control ([CDC 2024](https://arxiv.org/html/2405.10746v2#bib.bib7)).\n\nDetailed Confounder Control: Through causal diagram construction, multiple potential confounders such as age, gender, race, education, smoking status, physical activity, hyperlipidemia, and diabetes are accurately identified and controlled, surpassing the variable control scope of existing studies.\n\nThrough this paper, we aim to provide readers with a comprehensive perspective on the complex relationship between Diet Coke consumption and obesity, as well as the potential implications of these findings for health policies and individual choices."
+    },
+    {
+      "heading_path": [
+        "Causality in the Can: Diet Coke’s Impact on Fatness",
+        "Preliminaries & Related Works"
+      ],
+      "text": "## Preliminaries & Related Works\n\nIn this section, we review some fundamental methods of causal inference. First, we introduce the concept of the structural causal model, or S​C​MSCM, as outlined in ([Pearl 1995](https://arxiv.org/html/2405.10746v2#bib.bib23); [Spirtes et al. 2000](https://arxiv.org/html/2405.10746v2#bib.bib30); [Pearl 2009](https://arxiv.org/html/2405.10746v2#bib.bib25); [Koller and Friedman 2009](https://arxiv.org/html/2405.10746v2#bib.bib16)). Figure [1](https://arxiv.org/html/2405.10746v2#Sx2.F1 \"Figure 1 ‣ Preliminaries & Related Works ‣ Causality in the Can: Diet Coke’s Impact on Fatness\") exemplifies an appropriate causal diagram, which is essentially a directed acyclic graph (DAG).\n\nS​C​MSCM\n\nFormally, a S​C​MSCM consists of two sets of variables U and V, and a set of functions f that assigns each variable in V a value based on the values of the other variables in the model. In S​C​MSCM, exogenous variables (U) are external and have no ancestors, depicted as root nodes in graphs. Endogenous variables (V) depend on exogenous ones and can be predicted using functions in f if all exogenous values are known.\n\nS​C​MSCM\n\nS​C​MSCM\n\nIn S​C​MSCMs, the associated graphical model consists of nodes for each variable in U and V and directed edges that represent functional dependencies. If a variable X depends on Y, there is a directed edge from Y to X. These graphical models are typically directed acyclic graphs (DAGs). Causally, if Y is a parent of X in the graph, Y is a direct cause of X; if Y is an ancestor, it is a potential cause of X.\n\nS​C​MSCM\n\nFor instance, consider the following simple S​C​MSCM:\n\nS​C​MSCM\n\n| | | | | --- | --- | --- | | | U={X,Y},V={Z},F={fZ}U=\\{X,Y\\},V=\\{Z\\},F=\\{f\\_{Z}\\} | |\n\nU={X,Y},V={Z},F={fZ}U=\\{X,Y\\},V=\\{Z\\},F=\\{f_{Z}\\}\n\n| | | | | --- | --- | --- | | | fZ:Z=2​X+3​Yf\\_{Z}:Z=2X+3Y | |\n\nfZ:Z=2​X+3​Yf_{Z}:Z=2X+3Y\n\nThis model represents the salary (ZZ) that an employer pays an individual with XX years of schooling and YY years in the profession. XX and YY both appear in fZf\\_{Z}, so XX and YY are both direct causes of ZZ. If XX and YY had any ancestors, those ancestors would be potential causes of ZZ.\n\nZZ\n\nXX\n\nYY\n\nXX\n\nYY\n\nfZf_{Z}\n\nXX\n\nYY\n\nZZ\n\nXX\n\nYY\n\nZZ\n\nThe graphical model associated with it is illustrated in Figure 1.\n\nS​C​MSCM\n\nOne key concept of a causal diagram is called dd-separation ([Pearl, Glymour, and Jewell 2016](https://arxiv.org/html/2405.10746v2#bib.bib27)).\n\ndd"
+    },
+    {
+      "heading_path": [
+        "Causality in the Can: Diet Coke’s Impact on Fatness",
+        "Preliminaries & Related Works",
+        "Definition 1 (dd-separation)"
+      ],
+      "text": "###### Definition 1 (dd-separation)\n\ndd\n\nIn a causal diagram GG, a path pp is blocked by a set of nodes ZZ if and only if\n\nGG\n\npp\n\nZZ\n\n1. 1. pp contains a chain of nodes A→B→CA\\rightarrow{}B\\rightarrow{}C or a fork A←B→CA\\leftarrow{}B\\rightarrow{}C such that the middle node BB is in ZZ (i.e., BB is conditioned on), or 2. 2. pp contains a collider A→B←CA\\rightarrow{}B\\leftarrow{}C such that the collision node BB is not in ZZ, and no descendant of BB is in ZZ.\n\npp contains a chain of nodes A→B→CA\\rightarrow{}B\\rightarrow{}C or a fork A←B→CA\\leftarrow{}B\\rightarrow{}C such that the middle node BB is in ZZ (i.e., BB is conditioned on), or\n\npp\n\nA→B→CA\\rightarrow{}B\\rightarrow{}C\n\nA←B→CA\\leftarrow{}B\\rightarrow{}C\n\nBB\n\nZZ\n\nBB\n\npp contains a collider A→B←CA\\rightarrow{}B\\leftarrow{}C such that the collision node BB is not in ZZ, and no descendant of BB is in ZZ.\n\npp\n\nA→B←CA\\rightarrow{}B\\leftarrow{}C\n\nBB\n\nZZ\n\nBB\n\nZZ\n\nIf ZZ blocks every path between two nodes XX and YY, then XX and YY are dd-separated conditional on ZZ, and thus are independent conditional on ZZ, denoted as X⟂⟂Y|ZX\\perp\\!\\!\\!\\perp Y\\mid Z.\n\nZZ\n\nXX\n\nYY\n\nXX\n\nYY\n\ndd\n\nZZ\n\nZZ\n\nX⟂⟂Y|ZX\\perp\\!\\!\\!\\perp Y\\mid Z\n\nWith the concept of dd-separation in a causal diagram, Pearl proposed the back-door criteria and its associated adjustment formula ([Pearl 1995](https://arxiv.org/html/2405.10746v2#bib.bib23)) as follows:\n\ndd"
+    },
+    {
+      "heading_path": [
+        "Causality in the Can: Diet Coke’s Impact on Fatness",
+        "Preliminaries & Related Works",
+        "Definition 2 (Back-Door Criterion)"
+      ],
+      "text": "###### Definition 2 (Back-Door Criterion)\n\nGiven an ordered pair of variables (X,Y)(X,Y) in a directed acyclic graph GG, a set of variables ZZ satisfies the back-door criterion relative to (X,Y)(X,Y), if no node in ZZ is a descendant of XX, and ZZ blocks every path between XX and YY that contains an arrow into XX.\n\n(X,Y)(X,Y)\n\nGG\n\nZZ\n\n(X,Y)(X,Y)\n\nZZ\n\nXX\n\nZZ\n\nXX\n\nYY\n\nXX\n\nIf a set of variables ZZ satisfies the back-door criterion for XX and YY, the causal effects of XX on YY are given by the adjustment formula:\n\nZZ\n\nXX\n\nYY\n\nXX\n\nYY\n\n| | | | | | --- | --- | --- | --- | | | P⁡(y|d​o​(x))=∑zP⁡(y|x,z)​P​(z).\\displaystyle P(y|do(x))=\\sum\\_{z}P(y|x,z)P(z). | | (1) |\n\nP⁡(y|d​o​(x))=∑zP⁡(y|x,z)​P​(z).\\displaystyle P(y|do(x))=\\sum_{z}P(y|x,z)P(z).\n\nNext, we review the definitions for the three aspects of causation as defined in ([Pearl 1999](https://arxiv.org/html/2405.10746v2#bib.bib24)). We use the causal diagrams ([Pearl 1995](https://arxiv.org/html/2405.10746v2#bib.bib23); [Spirtes et al. 2000](https://arxiv.org/html/2405.10746v2#bib.bib30); [Pearl 2009](https://arxiv.org/html/2405.10746v2#bib.bib25); [Koller and Friedman 2009](https://arxiv.org/html/2405.10746v2#bib.bib16)) and the language of counterfactuals in its structural model semantics, as given in ([Balke and Pearl 2013](https://arxiv.org/html/2405.10746v2#bib.bib3); [Pearl 1999](https://arxiv.org/html/2405.10746v2#bib.bib24); [Halpern 2000](https://arxiv.org/html/2405.10746v2#bib.bib15)).\n\nWe use Yx=yY\\_{x}=y to denote the counterfactual sentence “Variable YY would have the value yy, had XX been xx”. For simplicity purposes, in the rest of the paper, we use yxy\\_{x} to denote the event Yx=yY\\_{x}=y, yx′y\\_{x^{\\prime}} to denote the event Yx′=yY\\_{x^{\\prime}}=y, yx′y^{\\prime}\\_{x} to denote the event Yx=y′Y\\_{x}=y^{\\prime}, and yx′′y^{\\prime}\\_{x^{\\prime}} to denote the event Yx′=y′Y\\_{x^{\\prime}}=y^{\\prime}. For notational simplicity, we limit the discussion to binary XX and YY, extension to multi-valued variables are straightforward ([Pearl 2009](https://arxiv.org/html/2405.10746v2#bib.bib25)).\n\nYx=yY_{x}=y\n\nYY\n\nyy\n\nXX\n\nxx\n\nyxy_{x}\n\nYx=yY_{x}=y\n\nyx′y_{x^{\\prime}}\n\nYx′=yY_{x^{\\prime}}=y\n\nyx′y^{\\prime}_{x}\n\nYx=y′Y_{x}=y^{\\prime}\n\nyx′′y^{\\prime}_{x^{\\prime}}\n\nYx′=y′Y_{x^{\\prime}}=y^{\\prime}\n\nXX\n\nYY"
+    },
+    {
+      "heading_path": [
+        "Causality in the Can: Diet Coke’s Impact on Fatness",
+        "Preliminaries & Related Works",
+        "Definition 3 (Probability of necessity and sufficiency (PNS))"
+      ],
+      "text": "###### Definition 3 (Probability of necessity and sufficiency (PNS))\n\n([Pearl 1999](https://arxiv.org/html/2405.10746v2#bib.bib24))\n\n| | | | | | --- | --- | --- | --- | | | PNS=P⁡(yx,yx′′)\\displaystyle\\text{PNS}=P(y\\_{x},y^{\\prime}\\_{x^{\\prime}}) | | (2) |\n\nPNS=P⁡(yx,yx′′)\\displaystyle\\text{PNS}=P(y_{x},y^{\\prime}_{x^{\\prime}})\n\nPNS stands for the probability that yy would respond to xx both ways, and therefore measures both the sufficiency and necessity of xx to produce yy.\n\nyy\n\nxx\n\nxx\n\nyy\n\nTian and Pearl ([Tian and Pearl 2000](https://arxiv.org/html/2405.10746v2#bib.bib34)) provide a tight bound for PNS without a causal diagram. Li and Pearl ([Li and Pearl 2019](https://arxiv.org/html/2405.10746v2#bib.bib18)) provide a theoretical proof of the tight bound for PNS, and other probabilities of causation without a causal diagram.\n\nPNS has the following tight bounds:\n\n| | | | | --- | --- | --- | | | max⁡{0P⁡(yx)−P⁡(yx′)P⁡(y)−P⁡(yx′)P⁡(yx)−P⁡(y)}≤PNS\\displaystyle\\max\\left\\{\\begin{array}[]{cc}0\\\\ P(y\\_{x})-P(y\\_{x^{\\prime}})\\\\ P(y)-P(y\\_{x^{\\prime}})\\\\ P(y\\_{x})-P(y)\\\\ \\end{array}\\right\\}\\leq\\text{PNS} | |\n\nmax⁡{0P⁡(yx)−P⁡(yx′)P⁡(y)−P⁡(yx′)P⁡(yx)−P⁡(y)}≤PNS\\displaystyle\\max\\left\\{\\begin{array}[]{cc}0\\\\ P(y_{x})-P(y_{x^{\\prime}})\\\\ P(y)-P(y_{x^{\\prime}})\\\\ P(y_{x})-P(y)\\\\ \\end{array}\\right\\}\\leq\\text{PNS}\n\n| | | | | --- | --- | --- | | | PNS≤min⁡{P⁡(yx)P⁡(yx′′)P⁡(x,y)+P⁡(x′,y′)P⁡(yx)−P⁡(yx′)++P⁡(x,y′)+P⁡(x′,y)}\\displaystyle\\text{PNS}\\leq\\min\\left\\{\\begin{array}[]{cc}P(y\\_{x})\\\\ P(y^{\\prime}\\_{x^{\\prime}})\\\\ P(x,y)+P(x^{\\prime},y^{\\prime})\\\\ P(y\\_{x})-P(y\\_{x^{\\prime}})+\\\\ +P(x,y^{\\prime})+P(x^{\\prime},y)\\end{array}\\right\\} | |\n\nPNS≤min⁡{P⁡(yx)P⁡(yx′′)P⁡(x,y)+P⁡(x′,y′)P⁡(yx)−P⁡(yx′)++P⁡(x,y′)+P⁡(x′,y)}\\displaystyle\\text{PNS}\\leq\\min\\left\\{\\begin{array}[]{cc}P(y_{x})\\\\ P(y^{\\prime}_{x^{\\prime}})\\\\ P(x,y)+P(x^{\\prime},y^{\\prime})\\\\ P(y_{x})-P(y_{x^{\\prime}})+\\\\ +P(x,y^{\\prime})+P(x^{\\prime},y)\\end{array}\\right\\}\n\nTheorems [19](https://arxiv.org/html/2405.10746v2#Sx2.E19 \"In Theorem 1 ‣ Preliminaries & Related Works ‣ Causality in the Can: Diet Coke’s Impact on Fatness\") and [2](https://arxiv.org/html/2405.10746v2#Thmtheorem2 \"Theorem 2 ‣ Preliminaries & Related Works ‣ Causality in the Can: Diet Coke’s Impact on Fatness\") below provide bounds for PNS when a set ZZ of variables can be measured which satisfy only one simple condition: ZZ contains no descendant of XX.\n\nZZ\n\nZZ\n\nXX"
+    },
+    {
+      "heading_path": [
+        "Causality in the Can: Diet Coke’s Impact on Fatness",
+        "Preliminaries & Related Works",
+        "Theorem 1"
+      ],
+      "text": "###### Theorem 1\n\nGiven a causal diagram GG and distribution compatible with GG, let ZZ be a set of variables that does not contain any descendant of XX in GG, then PNS is bounded as follows:\n\nGG\n\nGG\n\nZZ\n\nXX\n\nGG\n\n| | | | | --- | --- | --- | | | ∑zmax⁡{0,P⁡(yx|z)−P⁡(yx′|z),P⁡(y|z)−P⁡(yx′|z),P⁡(yx|z)−P⁡(y|z)}×P⁡(z)≤PNS\\displaystyle\\sum\\_{z}\\max\\left\\{\\begin{array}[]{c}0,\\\\ P(y\\_{x}|z)-P(y\\_{x^{\\prime}}|z),\\\\ P(y|z)-P(y\\_{x^{\\prime}}|z),\\\\ P(y\\_{x}|z)-P(y|z)\\end{array}\\right\\}\\times P(z)\\leq\\text{PNS} | |\n\n∑zmax⁡{0,P⁡(yx|z)−P⁡(yx′|z),P⁡(y|z)−P⁡(yx′|z),P⁡(yx|z)−P⁡(y|z)}×P⁡(z)≤PNS\\displaystyle\\sum_{z}\\max\\left\\{\\begin{array}[]{c}0,\\\\ P(y_{x}|z)-P(y_{x^{\\prime}}|z),\\\\ P(y|z)-P(y_{x^{\\prime}}|z),\\\\ P(y_{x}|z)-P(y|z)\\end{array}\\right\\}\\times P(z)\\leq\\text{PNS}\n\n| | | | | | --- | --- | --- | --- | | | ∑zmin⁡{P⁡(yx|z),P⁡(yx′′|z),P⁡(y,x|z)+P⁡(y′,x′|z),P⁡(yx|z)−P⁡(yx′|z)++P⁡(y,x′|z)+P⁡(y′,x|z)}×P⁡(z)≥PNS\\sum\\_{z}\\min\\left\\{\\begin{array}[]{c}P(y\\_{x}|z),\\\\ P(y^{\\prime}\\_{x^{\\prime}}|z),\\\\ P(y,x|z)+P(y^{\\prime},x^{\\prime}|z),\\\\ P(y\\_{x}|z)-P(y\\_{x^{\\prime}}|z)+\\\\ +P(y,x^{\\prime}|z)+P(y^{\\prime},x|z)\\end{array}\\right\\}\\times P(z)\\geq\\text{PNS} | | (19) |\n\n∑zmin⁡{P⁡(yx|z),P⁡(yx′′|z),P⁡(y,x|z)+P⁡(y′,x′|z),P⁡(yx|z)−P⁡(yx′|z)++P⁡(y,x′|z)+P⁡(y′,x|z)}×P⁡(z)≥PNS\\sum_{z}\\min\\left\\{\\begin{array}[]{c}P(y_{x}|z),\\\\ P(y^{\\prime}_{x^{\\prime}}|z),\\\\ P(y,x|z)+P(y^{\\prime},x^{\\prime}|z),\\\\ P(y_{x}|z)-P(y_{x^{\\prime}}|z)+\\\\ +P(y,x^{\\prime}|z)+P(y^{\\prime},x|z)\\end{array}\\right\\}\\times P(z)\\geq\\text{PNS}\n\nZZ\n\nZZ\n\nZZ\n\nXX\n\nIn figures [2(a)](https://arxiv.org/html/2405.10746v2#Sx2.F2.sf1 \"In Figure 2 ‣ Preliminaries & Related Works ‣ Causality in the Can: Diet Coke’s Impact on Fatness\") and [2(b)](https://arxiv.org/html/2405.10746v2#Sx2.F2.sf2 \"In Figure 2 ‣ Preliminaries & Related Works ‣ Causality in the Can: Diet Coke’s Impact on Fatness\"), ZZ is not a descendant of XX and further satisfies the back-door criterion. For such cases the PNS bounds can be simplified to read:\n\nZZ\n\nXX"
+    },
+    {
+      "heading_path": [
+        "Causality in the Can: Diet Coke’s Impact on Fatness",
+        "Preliminaries & Related Works",
+        "Theorem 2"
+      ],
+      "text": "###### Theorem 2\n\nGiven a causal diagram GG and distribution compatible with GG, let ZZ be a set of variables satisfying the back-door criterion ([Pearl 2011](https://arxiv.org/html/2405.10746v2#bib.bib26)) in GG, then the PNS is bounded as follows:\n\nGG\n\nGG\n\nZZ\n\nGG\n\n| | | | | | --- | --- | --- | --- | | | ∑zmax⁡{0,P⁡(y|x,z)−P⁡(y|x′,z)}×P⁡(z)≤PNS\\displaystyle\\sum\\_{z}\\max\\{0,P(y|x,z)-P(y|x^{\\prime},z)\\}\\times P(z)\\leq\\text{PNS} | | (20) |\n\n∑zmax⁡{0,P⁡(y|x,z)−P⁡(y|x′,z)}×P⁡(z)≤PNS\\displaystyle\\sum_{z}\\max\\{0,P(y|x,z)-P(y|x^{\\prime},z)\\}\\times P(z)\\leq\\text{PNS}\n\n| | | | | | --- | --- | --- | --- | | | ∑zmin⁡{P⁡(y|x,z),P⁡(y′|x′,z)}×P⁡(z)≥PNS\\displaystyle\\sum\\_{z}\\min\\{P(y|x,z),P(y^{\\prime}|x^{\\prime},z)\\}\\times P(z)\\geq\\text{PNS} | | (21) |\n\n∑zmin⁡{P⁡(y|x,z),P⁡(y′|x′,z)}×P⁡(z)≥PNS\\displaystyle\\sum_{z}\\min\\{P(y|x,z),P(y^{\\prime}|x^{\\prime},z)\\}\\times P(z)\\geq\\text{PNS}\n\nThe significance of Theorem [2](https://arxiv.org/html/2405.10746v2#Thmtheorem2 \"Theorem 2 ‣ Preliminaries & Related Works ‣ Causality in the Can: Diet Coke’s Impact on Fatness\") lies in the ability to compute bounds using purely observational data, which is the situation we will face in this paper."
+    },
+    {
+      "heading_path": [
+        "Causality in the Can: Diet Coke’s Impact on Fatness",
+        "Methodology"
+      ],
+      "text": "## Methodology"
+    },
+    {
+      "heading_path": [
+        "Causality in the Can: Diet Coke’s Impact on Fatness",
+        "Methodology",
+        "Data Collection"
+      ],
+      "text": "### Data Collection\n\nAll data in this paper is sourced from the NHANES program ([CDC 2024](https://arxiv.org/html/2405.10746v2#bib.bib6)). The National Health and Nutrition Examination Survey (NHANES), run by the CDC’s National Center for Health Statistics (NCHS), assesses the health and nutritional status of the U.S. population. Annually, NHANES examines about 5,000 nationally representative individuals through interviews and physical exams, collecting data on demographics, socioeconomic factors, diet, and health, along with medical measurements and lab tests.\n\nWe thoroughly reviewed NHANES data, focusing on health information from various reports. The diet section surveys the frequency of consumption of various foods, including soft drinks, alcohol, hamburgers, and salads. The examination section provides physical measurements like blood pressure and body weight, while the lab section includes biomarker assays such as blood sugar levels.\n\nFor the topic under discussion, our initial step involves sourcing data relevant to Diet Coke consumption and its association with fatness. Numerous studies ([Adab, Pallan, and Whincup 2018](https://arxiv.org/html/2405.10746v2#bib.bib1); [Freedman and Sherry 2009](https://arxiv.org/html/2405.10746v2#bib.bib12); [Goulding et al. 1996](https://arxiv.org/html/2405.10746v2#bib.bib14)), have validated the Body Mass Index (BMI) as an optimal measure for assessing obesity, hence we will utilize BMI data as our indicator of obesity in this paper. However, regarding the intake of Diet Coke, due to changes in dietary survey questionnaires, relevant data was collected only during two survey cycles between 2003 and 2006. Nonetheless, the formulation of Diet Coke has not altered over the past twenty years ([The Coca-Cola Company 2023](https://arxiv.org/html/2405.10746v2#bib.bib33)), making the use of this data both reasonable and valid for our analysis.\n\nWe hypothesize that the relationship between Diet Coke consumption and obesity is not straightforward but influenced by multiple factors. Thus, identifying key indicators impacting obesity is crucial. ([Visser et al. 1997](https://arxiv.org/html/2405.10746v2#bib.bib35)) suggests that age, race, and gender may affect obesity due to differences in body density. ([Brown and Biosca 2016](https://arxiv.org/html/2405.10746v2#bib.bib4)) argues that education can influence body fat through changes in savings behavior. ([Akbartabartoori, Lean, and Hankey 2005](https://arxiv.org/html/2405.10746v2#bib.bib2)) indicates a link between smoking and obesity, moderated by waist circumference (WC), hip circumference (HC), and waist-to-hip ratio (WHR). ([Elagizi et al. 2020](https://arxiv.org/html/2405.10746v2#bib.bib10)) states that physical activity impacts weight by affecting the cardiovascular system. ([Zhou et al. 2018](https://arxiv.org/html/2405.10746v2#bib.bib37))’s analysis shows that within a normal BMI range, leaner individuals have a lower risk of hypertension. ([Carr and Brunzell 2004](https://arxiv.org/html/2405.10746v2#bib.bib5)) highlights that abdominal fat, an obesity marker, is closely associated with the risks of hyperlipidemia and Type 2 diabetes linked to metabolic syndrome.\n\nBased on the aforementioned studies, the factors identified as influencing fatness include age, gender, race/ethnicity, educational level, smoking status, average daily physical activity level, hyperlipidemia, and diabetes mellitus."
+    },
+    {
+      "heading_path": [
+        "Causality in the Can: Diet Coke’s Impact on Fatness",
+        "Methodology",
+        "Data Processing"
+      ],
+      "text": "### Data Processing\n\nWe extracted the necessary data for constructing the causal diagram and clarified the data types for each variable. As shown in Figure [3](https://arxiv.org/html/2405.10746v2#Sx3.F3 \"Figure 3 ‣ Data Processing ‣ Methodology ‣ Causality in the Can: Diet Coke’s Impact on Fatness\"), Diet Coke consumption frequency is categorized into five levels, coded from 1 to 5, ranging from “Almost never or never” to “Almost always or always,” with corresponding respondent counts. Special cases like non-responses (“Blank”) and data entry errors (“Error”) are also noted.\n\nIn contrast, the fatness variable, represented by BMI, consists of continuous values providing precise measurements, as illustrated in Figure [4](https://arxiv.org/html/2405.10746v2#Sx3.F4 \"Figure 4 ‣ Data Processing ‣ Methodology ‣ Causality in the Can: Diet Coke’s Impact on Fatness\"). Other influencing factors are classified as either discrete or continuous. With this data, we can now construct the causal diagram.\n\nTo clearly define the relationships among variables and ensure methodological accuracy, we identify the independent variable (XX), the dependent variable (YY), and relevant covariates:\n\nXX\n\nYY\n\nThe independent variable (XX) is “Diet Coke consumption frequency,” quantifying how often participants consume Diet Coke.\n\nXX\n\nThe dependent variable (YY) is “fatness,” measured by BMI, calculated from participants’ weight and height.\n\nYY\n\nAdditional covariates include age, gender, race/ethnicity, education, and health factors like smoking and physical activity. These covariates help us better understand the relationship between Diet Coke consumption and fatness.\n\n| Category | Variable Description | | --- | --- | | XX | Diet Coke Consumption Frequency | | YY | Fatness (BMI) | | | Age | | | Gender | | | Race / Ethnicity | | | Education Level | | | Smoking Status | | | Average Daily Physical Activity Level | | | Hyperlipidemia | | Covariates | Diabetes Mellitus |\n\nXX\n\nYY\n\nFor the measurement of various health indicators, authoritative standards are essential. According to ([Centers for Disease Control and Prevention 2022](https://arxiv.org/html/2405.10746v2#bib.bib8)), a Body Mass Index (BMI) of 30.0 or higher categorizes an individual within the obesity range. Hyperlipidemia, or high cholesterol, is characterized by certain thresholds in cholesterol measurements ([Clinic 2024](https://arxiv.org/html/2405.10746v2#bib.bib9)). It is considered high when total cholesterol exceeds 240 mg/dL, LDL (low-density lipoprotein) cholesterol is 160 mg/dL or higher, and triglycerides are above 200 mg/dL. HDL (high-density lipoprotein) cholesterol is ideally above 60 mg/dL, as lower levels may also indicate risk. The A1C test measures the percentage of glycated hemoglobin, providing an average blood glucose level over three months. Levels of 5.7%5.7\\% to 6.4%6.4\\% indicate prediabetes, while 6.5%6.5\\% or higher confirms diabetes.\n\n5.7%5.7\\%\n\n6.4%6.4\\%\n\n6.5%6.5\\%"
+    },
+    {
+      "heading_path": [
+        "Causality in the Can: Diet Coke’s Impact on Fatness",
+        "Methodology",
+        "Causal Diagram"
+      ],
+      "text": "### Causal Diagram\n\nIn the field of causal inference, the I​C∗IC^{\\ast} algorithm is a pivotal tool for identifying causal relationships among variables from observational data ([Pearl 2009](https://arxiv.org/html/2405.10746v2#bib.bib25)). This study employs the I​C∗IC^{\\ast} algorithm to construct a causal graph, delineating the causal structures between variables XX,YY, and several covariates. The initial step of the I​C∗IC^{\\ast} algorithm involves conducting conditional independence tests to analyze relationships among all pairs of variables within the dataset. This process relies on statistical tests to evaluate whether different combinations of variables are independent; if two variables are found to be dependent given other variables, an undirected edge is established between them.\n\nI​C∗IC^{\\ast}\n\nI​C∗IC^{\\ast}\n\nXX\n\nYY\n\nI​C∗IC^{\\ast}\n\nSubsequently, the algorithm enters the structure identification phase, utilizing conditional independence tests, specifically the Robust Regression Test, to detect `​`​V−s​t​r​u​c​t​u​r​e​s′′``V-structures^{\\prime\\prime} within the data. These structures are unique triplets where one variable is a common cause of the other two variables, which do not directly interact with each other. Identifying these V-structures is crucial for determining the direction of the edges in the graph, as they reveal the causal pathways, either direct or through intermediary variables.\n\n`​`​V−s​t​r​u​c​t​u​r​e​s′′``V-structures^{\\prime\\prime}\n\nFurthermore, the I​C∗IC^{\\ast} algorithm is capable of identifying latent variables within the causal graph and refining the graph structure through iterative optimization processes. In each iteration, the algorithm evaluates whether adding or adjusting the direction of edges better conforms to the evidence of conditional independence from the data. This method allows the algorithm to gradually construct a detailed and accurate map of the causal relationships between the variables. By applying the I​C∗IC^{\\ast} algorithm, we successfully portray the complex causal network among variables XX, YY, and the covariates, providing a solid foundation for further analysis and model construction.The resulting causal graph is depicted in Figure [5](https://arxiv.org/html/2405.10746v2#Sx3.F5 \"Figure 5 ‣ Causal Diagram ‣ Methodology ‣ Causality in the Can: Diet Coke’s Impact on Fatness\"). Red arrows denote clear causal chains, while solid black lines indicate potential but uncertain connections.\n\nI​C∗IC^{\\ast}\n\nI​C∗IC^{\\ast}\n\nXX\n\nYY\n\nI​C∗IC^{\\ast}\n\nTo ensure the accuracy of this causal diagram, we used the reliable DAG with NO TEARS algorithm ([Zheng et al. 2018](https://arxiv.org/html/2405.10746v2#bib.bib36)). By comparing the diagrams generated by both methods, we found them nearly identical, further validating the correctness of our causal graph from the I​C∗IC^{\\ast} algorithm.\n\nI​C∗IC^{\\ast}"
+    },
+    {
+      "heading_path": [
+        "Causality in the Can: Diet Coke’s Impact on Fatness",
+        "Methodology",
+        "RCT Calculation"
+      ],
+      "text": "### RCT Calculation\n\nIn this section, we focus on calculating counterfactual values ([Pearl, Glymour, and Jewell 2016](https://arxiv.org/html/2405.10746v2#bib.bib27)), which represent potential outcomes under the theoretical full control of a specific variable, such as the frequency of Diet Coke consumption. Counterfactual analysis is a central concept in causal inference, enabling us to explore the potential relationships between variables under various interventional scenarios. This means assessing the outcomes when one factor is altered while all others are held constant.\n\nFor variable XX, representing the frequency of Diet Coke consumption, the original data categorize consumption into five levels ranging from 1 to 5. For computational convenience, we binarized these data, designating those who never drink Diet Coke as 0, and marking all other levels as 1. For YY (fatness), individuals are classified as 0 for non-obese and 1 for obese, following the criteria previously described.\n\nXX\n\nYY\n\nUpon analyzing the causal diagram derived earlier, we identified a single backdoor pathway as shown in Figure [6](https://arxiv.org/html/2405.10746v2#Sx3.F6 \"Figure 6 ‣ RCT Calculation ‣ Methodology ‣ Causality in the Can: Diet Coke’s Impact on Fatness\"), which is characterized by the pathway D​i​e​t​C​o​k​e→D​i​a​b​e​t​e​s←f​a​t​n​e​s​sDietCoke\\rightarrow{}Diabetes\\leftarrow{}fatness. This aligns with the findings of ([Gardener et al. 2018](https://arxiv.org/html/2405.10746v2#bib.bib13)), which demonstrated a significant association between Diet Coke consumption and an increased risk of diabetes. Consequently, controlling for diabetes, the only confounder in this pathway, allows us to use the adjustment formula ([Pearl 1995](https://arxiv.org/html/2405.10746v2#bib.bib23)) to compute the experimental data. This calculation estimates the causal impact of Diet Coke consumption on fatness, controlled for diabetes status. These are denoted as P​(Y=1∣do​(X=1))P(Y=1\\mid\\text{do}(X=1)) and P​(Y=1∣do​(X=0))P(Y=1\\mid\\text{do}(X=0)), also represented in our notation as yxy\\_{x} and yx′y\\_{x^{\\prime}}.\n\nD​i​e​t​C​o​k​e→D​i​a​b​e​t​e​s←f​a​t​n​e​s​sDietCoke\\rightarrow{}Diabetes\\leftarrow{}fatness\n\nP​(Y=1∣do​(X=1))P(Y=1\\mid\\text{do}(X=1))\n\nP​(Y=1∣do​(X=0))P(Y=1\\mid\\text{do}(X=0))\n\nyxy_{x}\n\nyx′y_{x^{\\prime}}\n\nThe challenge of discerning the actual effectiveness in these sensitive contexts stems from their counterfactual22 2 Counterfactuals are statements or scenarios that express what might have happened if circumstances had been different from what actually occurred. nature; outcomes of interest are inferred through hypothetical scenarios rather than directly observed. For example, if an individual consumes Diet Coke, the outcome had they not consumed it will never be observable.\n\nRCT may seem sufficient to handle this counterfactual nature, but they fall short because no two individuals are exactly the same. Individuals may belong to subpopulations unknown to the investigator, each responding to a given treatment markedly differently ([Li and Pearl 2022](https://arxiv.org/html/2405.10746v2#bib.bib19)). Therefore, a more sophisticated approach is required to accommodate individual differences."
+    },
+    {
+      "heading_path": [
+        "Causality in the Can: Diet Coke’s Impact on Fatness",
+        "Methodology",
+        "PNS Calculation"
+      ],
+      "text": "### PNS Calculation\n\nFirst of all, We define the following variables and their states:\n\nXX: Represents the consumption status of Diet Coke. This is a binary variable where:\n\nXX\n\n* • x=1x=1 indicates that Diet Coke is consumed. * • x′=0x^{\\prime}=0 or x′x^{\\prime} indicates that Diet Coke is not consumed.\n\nx=1x=1 indicates that Diet Coke is consumed.\n\nx=1x=1\n\nx′=0x^{\\prime}=0 or x′x^{\\prime} indicates that Diet Coke is not consumed.\n\nx′=0x^{\\prime}=0\n\nx′x^{\\prime}\n\nYY: Represents the obesity status of an individual. This is also a binary variable where:\n\nYY\n\n* • y=1y=1 indicates that the individual is obese. * • y′=0y^{\\prime}=0 or y′y^{\\prime} indicates that the individual is not obese.\n\ny=1y=1 indicates that the individual is obese.\n\ny=1y=1\n\ny′=0y^{\\prime}=0 or y′y^{\\prime} indicates that the individual is not obese.\n\ny′=0y^{\\prime}=0\n\ny′y^{\\prime}\n\nWith the basic variables and states defined, we use counterfactual notation to explore hypothetical changes in these states and their impact on outcomes:\n\nYx=yY\\_{x}=y: This expression is used to describe a scenario where if XX were set to xx (consuming Diet Coke), then YY would take the value yy (obese).\n\nYx=yY_{x}=y\n\nXX\n\nxx\n\nYY\n\nyy\n\nYx′=yY\\_{x^{\\prime}}=y: This expression describes another scenario where, even without consuming Diet Coke (X=x′X=x^{\\prime}), the individual still reaches an obese state (Y=yY=y).\n\nYx′=yY_{x^{\\prime}}=y\n\nX=x′X=x^{\\prime}\n\nY=yY=y\n\nBuilding on the foundation laid by the clear definitions and the use of counterfactual notation, the computation of the Probability of Necessity and Sufficiency (PNS) in our study is pivotal for understanding the causal impact of Diet Coke consumption on obesity.\n\nPNS evaluates the likelihood that consuming Diet Coke is both necessary and sufficient for the occurrence of obesity within various demographics. Specifically, it measures the probability that obesity would occur with Diet Coke consumption and would not otherwise. By calculating PNS, we aim to determine the extent to which Diet Coke consumption can be considered a direct causal factor in obesity.\n\nWith the experimental data estimated, we are now positioned to apply the model developed by ([Tian and Pearl 2000](https://arxiv.org/html/2405.10746v2#bib.bib34)) to compute the bounds of the Probability of Necessity and Sufficiency (P​N​SPNS) across the general population. Furthermore, employing the method outlined by ([Mueller, Li, and Pearl 2022](https://arxiv.org/html/2405.10746v2#bib.bib22)), we will refine these estimates by narrowing the bounds, as elaborated in Formulas (3)(4)(7)(8) of the P​r​e​l​i​m​i​n​a​r​i​e​sPreliminaries section of this paper.\n\nP​N​SPNS\n\nP​r​e​l​i​m​i​n​a​r​i​e​sPreliminaries\n\nBuilding on this foundational analysis, we segment the population into various subgroups based on covariates related to demographic characteristics and dietary habits to compute the P​N​SPNS within these subgroups. Each subgroup is formed with at least 385 individuals to ensure a margin of error of no more than 0.05 for the 95%95\\% confidence interval ([Li, Mao, and Pearl 2022](https://arxiv.org/html/2405.10746v2#bib.bib17)).\n\nP​N​SPNS\n\n95%95\\%\n\nThis stratification is essential as different dietary habits can bias outcomes. For instance, those who frequently consume beer, burgers, and doughnuts may have a higher risk of obesity, which shouldn’t be solely linked to Diet Coke. While Diet Coke has no sugar, it may still contribute to obesity by stimulating hormonal secretions or misleading brain mechanisms.\n\nBy carefully considering these factors, our aim is to identify specific demographics where Diet Coke consumption significantly leads to obesity (indicating a high lower bound of PNS) or demographics where Diet Coke has virtually no impact on obesity levels (reflecting a low upper bound of PNS). This nuanced approach allows us to deliver a more precise understanding of the causal dynamics between Diet Coke consumption and obesity across different subpopulations."
+    },
+    {
+      "heading_path": [
+        "Causality in the Can: Diet Coke’s Impact on Fatness",
+        "Results"
+      ],
+      "text": "## Results\n\nA/B testing, like Randomized Controlled Trials (RCTs), is the gold standard for establishing causality in clinical and behavioral research. RCTs provide a controlled environment to directly compare and demonstrate the impact of interventions, such as Diet Coke consumption. Therefore, we initially estimated the counterfactual data for the general population, providing a clear and statistically robust basis for assessing the effects of Diet Coke on obesity prevalence.\n\n| | | | | --- | --- | --- | | | P⁡(Y=1∣do​(X=1))=0.4157292166,\\displaystyle P(Y=1\\mid\\text{do}(X=1))=0.4157292166, | | | | | | | --- | --- | --- | | | P⁡(Y=1∣do​(X=0))=0.3198820277.\\displaystyle P(Y=1\\mid\\text{do}(X=0))=0.3198820277. | |\n\nP⁡(Y=1∣do​(X=1))=0.4157292166,\\displaystyle P(Y=1\\mid\\text{do}(X=1))=0.4157292166,\n\nP⁡(Y=1∣do​(X=0))=0.3198820277.\\displaystyle P(Y=1\\mid\\text{do}(X=0))=0.3198820277.\n\nBased on the analysis of simulated RCT data, we observed a significant correlation between the consumption of Diet Coke and obesity. Specifically, the probability of obesity among participants who consumed Diet Coke was 41.57%41.57\\%, compared to 31.99%31.99\\% among those who did not consume Diet Coke. This indicates that the consumption of Diet Coke can increase the likelihood of obesity by approximately 9.58%9.58\\%. While this data suggests that Diet Coke may be a potential risk factor for obesity, the modest increase of less than 10%10\\% across the general population may not be entirely convincing in complex real-world scenarios. In this context, the method of calculating the Probability of Necessity and Sufficiency (PNS) boundaries used in this study offers a more detailed and comprehensive analysis, revealing further nuances and complexities associated with Diet Coke’s impact on obesity.\n\n41.57%41.57\\%\n\n31.99%31.99\\%\n\n9.58%9.58\\%\n\n10%10\\%\n\nFollowing the methods described previously, we computed and refined the boundaries of the Probability of Necessity and Sufficiency (PNS) for the general population:\n\n| | | | | --- | --- | --- | | | 0.096≤P​N​S≤0.405.\\displaystyle 0.096\\leq PNS\\leq 0.405. | |\n\n0.096≤P​N​S≤0.405.\\displaystyle 0.096\\leq PNS\\leq 0.405.\n\nThe calculated Probability of Necessity and Sufficiency (PNS) for obesity attributable to Diet Coke consumption ranges from 0.096 to 0.405. The lower bound of approximately 10%\\% suggests that there indeed exists a subset of individuals for whom consuming Diet Coke contributes to obesity. However, the broad range of this boundary indicates variability in the causal impact across the population.\n\n%\\%\n\nTo refine our understanding and identify potentially more characteristic subgroups, we will next calculate the PNS boundaries for various subpopulations. This approach aims to discover specific demographics or behavioral patterns that might exhibit a stronger or more distinct causal relationship between Diet Coke consumption and obesity.\n\nWe have selected some subpopulations where the effects are particularly pronounced, as shown in Table 2. After controlling for certain covariates, the PNS boundaries underwent significant changes. For instance, in the subgroup labeled as O​l​d​\\_​M​a​n​\\_​A​c​t​i​v​i​t​y​\\_​L​o​wOld\\\\_Man\\\\_Activity\\\\_Low, which refers to men over the age of 60 with low physical activity levels, the lower boundary of PNS increased by more than double compared to the general population. This indicates that the impact of Diet Coke on weight is more significant in this subgroup.\n\nO​l​d​_​M​a​n​_​A​c​t​i​v​i​t​y​_​L​o​wOld\\_Man\\_Activity\\_Low\n\nAs shown in Table 3, we further subdivided the population based on dietary habits, yielding significant results. Among individuals with poor dietary habits, such as the subgroup `​`​O​l​d​\\_​M​a​n​\\_​H​a​m​b​u​r​g​e​r​\"``Old\\\\_Man\\\\_Hamburger\", which includes elderly males who frequently consume hamburgers, the lower boundary of PNS rose to nearly 30%30\\%.This suggests that a higher proportion of individuals in this group experience obesity potentially linked to consuming Diet Coke, illustrating the significant probability that obesity would occur with Diet Coke consumption and would not otherwise. However, it is likely not the consumption of Diet Coke itself that leads to obesity, but rather the association of Diet Coke with a range of unhealthy dietary behaviors.\n\n`​`​O​l​d​_​M​a​n​_​H​a​m​b​u​r​g​e​r​\"``Old\\_Man\\_Hamburger\"\n\n30%30\\%\n\nConversely, in subgroups with healthier eating habits, such as `​`​Y​o​u​n​g​\\_​W​o​m​a​n​\\_​N​o​\\_​H​o​t​d​o​g​\"``Young\\\\_Woman\\\\_No\\\\_Hotdog\", the upper boundary being 20%20\\% indicates that only a small fraction of this population might become obese due to Diet Coke consumption. In these cases, the practice of consuming Diet Coke while maintaining weight stability appears to be more credible. This differential impact underscores the complex interactions between dietary habits and the effects of specific dietary choices such as Diet Coke on health outcomes.\n\n`​`​Y​o​u​n​g​_​W​o​m​a​n​_​N​o​_​H​o​t​d​o​g​\"``Young\\_Woman\\_No\\_Hotdog\"\n\n20%20\\%\n\n| Subpopulation | Bounds of PNS | | --- | --- | | Activity\\_High | 0.10122, 0.39544 | | Man | 0.12298, 0.40726 | | Age60+ | 0.14792, 0.43166 | | Old\\_Man | 0.16865, 0.41567 | | Old\\_Activity\\_Low | 0.14637, 0.47675 | | Old\\_Hyperlipidemia\\_Yes | 0.15442, 0.40864 | | Old\\_Man\\_Education\\_Low | 0.16102, 0.41829 | | Old\\_Man\\_Activity\\_Low | 0.22938, 0.53263 | | Woman | 0.08430, 0.39075 | | Age60- | 0.09140, 0.37639 | | Young\\_Woman | 0.07391, 0.37845 | | Young\\_Woman\\_Activity\\_High | 0.05077, 0.34600 |\n\n| Subpopulation | Bounds of PNS | | --- | --- | | Old\\_Man\\_Hamburger | 0.29909, 0.57860 | | Old\\_Man\\_Hotdog | 0.24406, 0.48335 | | Old\\_Man\\_Fries | 0.20028, 0.47119 | | Old\\_Man\\_Icecream | 0.18539, 0.47663 | | Old\\_Man\\_Candy | 0.16524, 0.37878 | | Old\\_Man\\_Beer | 0.14397, 0.42206 | | Young\\_Woman\\_No\\_Hamburger | 0.00905, 0.22395 | | Young\\_Woman\\_No\\_Popcorn | 0.02081, 0.29678 | | Young\\_woman\\_Salad | 0.07663, 0.29593 | | Young\\_Woman\\_No\\_Syrup | 0.01923, 0.23076 | | Young\\_Woman\\_No\\_Fries | 0.00198, 0.21941 | | Young\\_Woman\\_No\\_Hotdog | 0.00000, 0.19487 |"
+    },
+    {
+      "heading_path": [
+        "Causality in the Can: Diet Coke’s Impact on Fatness",
+        "Discussion"
+      ],
+      "text": "## Discussion\n\nIn this paper, we employed Structured Causal Models (SCM) and the I​C∗IC^{\\ast} algorithm to construct causal diagrams and calculate the probability of interventional effects using adjustment formulas. We then assessed the likelihood of obesity with and without Diet Coke consumption. However, our study has some limitations.\n\nI​C∗IC^{\\ast}\n\nOne key limitation is the constrained sample size, which required each subgroup to have at least 385 individuals to ensure reliable statistical results ([Li, Mao, and Pearl 2022](https://arxiv.org/html/2405.10746v2#bib.bib17)). This constraint limited our ability to perform more detailed subgroup analyses, making it difficult to precisely identify which populations are more or less affected by Diet Coke consumption. Future research should expand the sample size and include a broader range of regions and populations to improve the generalizability and accuracy of the findings.\n\nAdditionally, our study may have relied on self-reported data, particularly regarding dietary habits, which can be prone to bias. For instance, a participant’s recent increase in Diet Coke consumption might lead to overestimations of their usual intake, introducing inaccuracies. Incorporating more objective measures, such as biomarkers or direct observations, in future studies could enhance data reliability and research validity.\n\nFurthermore, although studies ([Sylvetsky et al. 2020](https://arxiv.org/html/2405.10746v2#bib.bib32)) suggest that Diet Coke may influence obesity through hormone secretion, we lacked specific hormone data, limiting our understanding of these potential mechanisms. Future research should explore the effects of Diet Coke on hormones like insulin and leptin to clarify its relationship with obesity and metabolic health. Additionally, examining the connections between Diet Coke consumption and other chronic diseases, such as cardiovascular disease and diabetes, would provide a more comprehensive view of its health implications."
+    },
+    {
+      "heading_path": [
+        "Causality in the Can: Diet Coke’s Impact on Fatness",
+        "Conclusion"
+      ],
+      "text": "## Conclusion\n\nThrough the application of causal inference methods, our study has determined that Diet Coke consumption indeed poses a risk of increased obesity; however, the impact varies significantly across different demographics. Different subgroups experience varying rates of weight gain after consuming Diet Coke, suggesting that the influence of Diet Coke on weight is not a straightforward causal relationship but is likely mediated through multiple factors. These findings emphasize the importance of considering individual differences and dietary habits when assessing the health impacts of foods or beverages. This complexity highlights that the effect of Diet Coke on weight gain is the result of multifaceted interactions, underscoring the necessity to take into account personal health profiles and lifestyles in dietary recommendations."
+    },
+    {
+      "heading_path": [
+        "Causality in the Can: Diet Coke’s Impact on Fatness",
+        "References"
+      ],
+      "text": "## References\n\n* Adab, Pallan, and Whincup (2018) Adab, P.; Pallan, M.; and Whincup, P. H. 2018. Is BMI the best measure of obesity? *BMJ*, 360. * Akbartabartoori, Lean, and Hankey (2005) Akbartabartoori, M.; Lean, M.; and Hankey, C. 2005. Relationships between cigarette smoking, body size and body shape. *International journal of obesity*, 29(2): 236–243. * Balke and Pearl (2013) Balke, A.; and Pearl, J. 2013. Counterfactuals and Policy Analysis in Structural Models. arXiv:1302.4929. * Brown and Biosca (2016) Brown, H.; and Biosca, O. 2016. Exploring the relationship between time preference, body fatness, and educational attainment. *Social science & medicine*, 158: 75–85. * Carr and Brunzell (2004) Carr, M. C.; and Brunzell, J. D. 2004. Abdominal obesity and dyslipidemia in the metabolic syndrome: importance of type 2 diabetes and familial combined hyperlipidemia in coronary artery disease risk. *The journal of clinical endocrinology & metabolism*, 89(6): 2601–2607. * CDC (2024) CDC. 2024. About the National Health and Nutrition Examination Survey. Accessed: 2024-05-09. * CDC (2024) CDC. 2024. NHANES - National Health and Nutrition Examination Survey: Reliability of Estimates and Factsheet. Accessed: 2024-08-05. * Centers for Disease Control and Prevention (2022) Centers for Disease Control and Prevention. 2022. Assessing Your Weight: Adult BMI. https://www.cdc.gov/healthyweight/assessing/bmi/adult˙bmi/index.html. Accessed: 2024-05-11. * Clinic (2024) Clinic, M. 2024. High blood cholesterol - Diagnosis and treatment. Accessed: 2024-05-14. * Elagizi et al. (2020) Elagizi, A.; Kachur, S.; Carbone, S.; Lavie, C. J.; and Blair, S. N. 2020. A review of obesity, physical activity, and cardiovascular disease. *Current obesity reports*, 9: 571–581. * Felstead (2023) Felstead, S. 2023. New Study Compares Diet Soda vs. Water For Weight Loss. *BarBend*. Last updated on November 16th, 2023. * Freedman and Sherry (2009) Freedman, D. S.; and Sherry, B. 2009. The Validity of BMI as an Indicator of Body Fatness and Risk Among Children. *Pediatrics*, 124(Supplement): S23–S34. * Gardener et al. (2018) Gardener, H.; Moon, Y. P.; Rundek, T.; Elkind, M. S.; and Sacco, R. L. 2018. Diet Soda and Sugar-Sweetened Soda Consumption in Relation to Incident Diabetes in the Northern Manhattan Study. *Current Developments in Nutrition*, 2(5): nzy008. * Goulding et al. (1996) Goulding, A.; Gold, E.; Cannan, R.; Taylor, R.; Williams, S.; and Lewis-Barned, N. 1996. DEXA supports the use of BMI as a measure of fatness in young girls. *International journal of obesity and related metabolic disorders: journal of the International Association for the Study of Obesity*, 20(11): 1014–1021. * Halpern (2000) Halpern, J. Y. 2000. Axiomatizing causal reasoning. *Journal of Artificial Intelligence Research*, 12: 317–337. * Koller and Friedman (2009) Koller, D.; and Friedman, N. 2009. *Probabilistic Graphical Models: Principles and Techniques*. MIT Press. * Li, Mao, and Pearl (2022) Li, A.; Mao, R.; and Pearl, J. 2022. Probabilities of Causation: Adequate Size of Experimental and Observational Samples. arXiv:2210.05027. * Li and Pearl (2019) Li, A.; and Pearl, J. 2019. Unit Selection Based on Counterfactual Logic. In *Proceedings of the Twenty-Eighth International Joint Conference on Artificial Intelligence, IJCAI-19*, 1793–1799. International Joint Conferences on Artificial Intelligence Organization. * Li and Pearl (2022) Li, A.; and Pearl, J. 2022. Unit Selection: Case Study and Comparison with A/B Test Heuristic. arXiv:2210.05030. * Manaker (2024) Manaker, L. 2024. This Is What Happens to Your Body When You Drink Diet Soda. *Eat This, Not That!* Reviewed by Dietitian Christa Brown, M.S., RDN, LD. * Mashed (2023) Mashed. 2023. The Untold Truth Of Diet Coke. https://www.mashed.com/the-untold-truth-of-diet-coke. Accessed: 2024-05-08. * Mueller, Li, and Pearl (2022) Mueller, S.; Li, A.; and Pearl, J. 2022. Causes of Effects: Learning Individual Responses from Population Data. In Raedt, L. D., ed., *Proceedings of the Thirty-First International Joint Conference on Artificial Intelligence, IJCAI-22*, 2712–2718. International Joint Conferences on Artificial Intelligence Organization. Main Track. * Pearl (1995) Pearl, J. 1995. Causal diagrams for empirical research. *Biometrika*, 82(4): 669–688. * Pearl (1999) Pearl, J. 1999. Probabilities of Causation: Three counterfactual interpretations and their identification. *Synthese*, 121(1-2): 93–149. * Pearl (2009) Pearl, J. 2009. *Causality*. Cambridge University Press, 2 edition. * Pearl (2011) Pearl, J. 2011. Aspects of Graphical Models Connected with Causality. Technical report, Department of Statistics, UCLA. Retrieved from https://escholarship.org/uc/item/9zx0h8k6. * Pearl, Glymour, and Jewell (2016) Pearl, J.; Glymour, M.; and Jewell, N. P. 2016. *Causal inference in statistics: A primer*. John Wiley & Sons. * Peters et al. (2014) Peters, J. C.; Wyatt, H. R.; Foster, G. D.; Pan, Z.; Wojtanowski, A. C.; Veur, S. S. V.; Herring, S. J.; Brill, C.; and Hill, J. O. 2014. The effects of water and non-nutritive sweetened beverages on weight loss during a 12-week weight loss treatment program. *Obesity*, 22(6): 1415. * Ruanpeng et al. (2017) Ruanpeng, D.; Thongprayoon, C.; Cheungpasitporn, W.; and Harindhanavudhi, T. 2017. Sugar and artificially sweetened beverages linked to obesity: a systematic review and meta-analysis. *QJM*, 110(8): 513–520. * Spirtes et al. (2000) Spirtes, P.; Glymour, C. N.; Scheines, R.; and Heckerman, D. 2000. *Causation, Prediction, and Search*. MIT Press. * Spren (2023) Spren. 2023. Brief History of Coke Zero and Diet Coke. https://www.spren.com/brief-history-of-coke-zero-and-diet-coke. Accessed: 2024-05-08. * Sylvetsky et al. (2020) Sylvetsky, A. C.; Sen, S.; Merkel, P.; Dore, F.; Stern, D. B.; Henry, C. J.; Cai, H.; Walter, P. J.; Crandall, K. A.; Rother, K. I.; et al. 2020. Consumption of diet soda sweetened with sucralose and acesulfame-potassium alters inflammatory transcriptome pathways in females with overweight and obesity. *Molecular nutrition & food research*, 64(11): 1901166. * The Coca-Cola Company (2023) The Coca-Cola Company. 2023. Is the Diet Coke recipe changing? Accessed: 2024-05-09. * Tian and Pearl (2000) Tian, J.; and Pearl, J. 2000. Probabilities of causation: Bounds and identification. *Annals of Mathematics and Artificial Intelligence*, 28: 287–313. * Visser et al. (1997) Visser, M.; Gallagher, D.; Deurenberg, P.; Wang, J.; Pierson Jr, R.; and Heymsfield, S. 1997. Density of fat-free body mass: relationship with race, age, and level of body fatness. *American Journal of Physiology-Endocrinology and Metabolism*, 272(5): E781–E787. * Zheng et al. (2018) Zheng, X.; Aragam, B.; Ravikumar, P.; and Xing, E. P. 2018. DAGs with NO TEARS: Continuous Optimization for Structure Learning. arXiv:1803.01422. * Zhou et al. (2018) Zhou, W.; Shi, Y.; Li, Y.-q.; Ping, Z.; Wang, C.; Liu, X.; Lu, J.; Mao, Z.-x.; Zhao, J.; Yin, L.; et al. 2018. Body mass index, abdominal fatness, and hypertension incidence: a dose-response meta-analysis of prospective studies. *Journal of human hypertension*, 32(5): 321–333."
+    },
+    {
+      "heading_path": [
+        "Causality in the Can: Diet Coke’s Impact on Fatness",
+        "Reproducibility Checklist"
+      ],
+      "text": "## Reproducibility Checklist"
+    },
+    {
+      "heading_path": [
+        "Causality in the Can: Diet Coke’s Impact on Fatness",
+        "Reproducibility Checklist",
+        "This paper:"
+      ],
+      "text": "### This paper:\n\n* • Includes a conceptual outline and/or pseudocode description of AI methods introduced: yes * • Clearly delineates statements that are opinions, hypotheses, and speculation from objective facts and results: yes * • Provides well-marked pedagogical references for less-familiar readers to gain background necessary to replicate the paper: yes\n\nIncludes a conceptual outline and/or pseudocode description of AI methods introduced: yes\n\nClearly delineates statements that are opinions, hypotheses, and speculation from objective facts and results: yes\n\nProvides well-marked pedagogical references for less-familiar readers to gain background necessary to replicate the paper: yes"
+    },
+    {
+      "heading_path": [
+        "Causality in the Can: Diet Coke’s Impact on Fatness",
+        "Reproducibility Checklist",
+        "Does this paper make theoretical contributions? No"
+      ],
+      "text": "### Does this paper make theoretical contributions? No"
+    },
+    {
+      "heading_path": [
+        "Causality in the Can: Diet Coke’s Impact on Fatness",
+        "Reproducibility Checklist",
+        "Does this paper rely on one or more datasets? yes"
+      ],
+      "text": "### Does this paper rely on one or more datasets? yes\n\n* • A motivation is given for why the experiments are conducted on the selected datasets: yes * • All novel datasets introduced in this paper are included in a data appendix: yes * • All novel datasets introduced in this paper will be made publicly available upon publication of the paper with a license that allows free usage for research purposes: yes * • All datasets drawn from the existing literature (potentially including authors’ own previously published work) are accompanied by appropriate citations: yes * • All datasets drawn from the existing literature (potentially including authors’ own previously published work) are publicly available: yes * • All datasets that are not publicly available are described in detail, with an explanation of why publicly available alternatives are not scientifically satisfying: NA\n\nA motivation is given for why the experiments are conducted on the selected datasets: yes\n\nAll novel datasets introduced in this paper are included in a data appendix: yes\n\nAll novel datasets introduced in this paper will be made publicly available upon publication of the paper with a license that allows free usage for research purposes: yes\n\nAll datasets drawn from the existing literature (potentially including authors’ own previously published work) are accompanied by appropriate citations: yes\n\nAll datasets drawn from the existing literature (potentially including authors’ own previously published work) are publicly available: yes\n\nAll datasets that are not publicly available are described in detail, with an explanation of why publicly available alternatives are not scientifically satisfying: NA"
+    },
+    {
+      "heading_path": [
+        "Causality in the Can: Diet Coke’s Impact on Fatness",
+        "Reproducibility Checklist",
+        "Does this paper include computational experiments? No"
+      ],
+      "text": "### Does this paper include computational experiments? No"
+    }
+  ]
+}

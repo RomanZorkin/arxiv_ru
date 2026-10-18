@@ -1,0 +1,1551 @@
+{
+  "title": "Optimal policy design for the sugar tax",
+  "sections": [
+    {
+      "heading": "Report GitHub Issue",
+      "level": 5,
+      "content": [
+        {
+          "type": "paragraph",
+          "text": "Content selection saved. Describe the issue below:"
+        }
+      ],
+      "children": []
+    },
+    {
+      "heading": "Optimal policy design for the sugar tax",
+      "level": 1,
+      "content": [],
+      "children": [
+        {
+          "heading": "Abstract",
+          "level": 6,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "Healthy nutrition promotions and regulations have long been regarded as a tool for increasing social welfare. One of the avenues taken in the past decade is sugar consumption regulation by introducing a sugar tax. Such a tax increases the price of extensive sugar containment in products such as soft drinks. In this article we consider a typical problem of optimal regulatory policy design, where the task is to determine the sugar tax rate maximizing the social welfare. We model the problem as a sequential game represented by the three-level mathematical program. On the upper level, the government decides upon the tax rate. On the middle level, producers decide on the product pricing. On the lower level, consumers decide upon their preferences towards the products. While the general problem is computationally intractable, the problem with a few product types is polynomially solvable, even for an arbitrary number of heterogeneous consumers. This paper presents a simple, intuitive and easily implementable framework for computing optimal sugar tax in a market with a few products types. This resembles the reality as the soft drinks, for instance, are typically categorized in either regular or no-sugar drinks, e.g. Coca-Cola and Coca-Cola Zero. We illustrate the algorithm using an example based on the real data and draw conclusions for a specific local market."
+            },
+            {
+              "type": "paragraph",
+              "text": "Keywords: Three-level mathematical program, nutrition promotion, social welfare optimization, governmental regulations, enumeration algorithms"
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "1 Introduction",
+          "level": 2,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "Since the 2000s, interest in the proper nutrition promotion has dramatically increased in many countries. According to the World Health Organization (WHO), worldwide obesity has nearly tripled since 1975. In 2016, more than 1.9 billion adults were overweight, with over 650 million of these adults being obese. Moreover, 41 million children under the age of 5 were overweight or obese in 2016 [[FAO and WHO, 2017](https://arxiv.org/html/1810.07243v1#bib.bibx4)]. In addition to obesity, adults, children and adolescents often face risks such as depletion, stunted growth, lack of vitamins and minerals, nutritional non-communicable diseases (heart disease, stroke, diabetes, certain cancers) that affect their health in the short and long term periods [[FAO and WHO, 2017](https://arxiv.org/html/1810.07243v1#bib.bibx4)]. Therefore, the formation of a proper nutrition culture is very important, especially in youth, since all the human habits and life values are formed at a young age [[Ferreira et al., 2007](https://arxiv.org/html/1810.07243v1#bib.bibx5)]. During adolescence, young people adjust their lifestyle easier than adults. Thereby, nutrition habit is one of the basic elements for their health in future."
+            },
+            {
+              "type": "paragraph",
+              "text": "Solving obesity problems is also a challenging task for the governments, as inadequate nutrition increases health care costs, reduces productivity and slows economic growth. These consequences, in turn, are the basis for permanent poverty and poor population health [[FAO and WHO, 2017](https://arxiv.org/html/1810.07243v1#bib.bibx4)]."
+            },
+            {
+              "type": "paragraph",
+              "text": "In contrast, the main concern of the companies is the average market share and/or profit [[Smith et al., 2013](https://arxiv.org/html/1810.07243v1#bib.bibx14)]. This incentives are not always directed at healthy products, and it is always a challenge for a government to introduce and to maintain mechanisms stimulating the companies to promote proper nutrition. Clearly, there might exist opposing interests, when the companies focus on purely financial indicators, while the government seeks to improve the social welfare. In this interaction, the end-consumers play crucial role. On the one hand, consumers choose products guided by various marketing stimuli such as advertising, pricing, and branding [[Solomon et al., 2012](https://arxiv.org/html/1810.07243v1#bib.bibx15)]. This way consumers strongly support the companies. On the other hand, the governmental and societal information provision programs create awareness of proper nutrition importance, shift the demand towards healthy products and, as a result, customer valuations for healthy products become higher than for unhealthy ones. This way consumers strongly support the government. Therefore, a combination of information provision and direct regulations, e.g. extra taxation for unhealthy products, is a powerful instrument of the government to improve the social welfare."
+            }
+          ],
+          "children": [
+            {
+              "heading": "1.1 Nutrition promotion instruments",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "In this section we describe possible nutrition promotion mechanisms for a government and for a company/firm. Later, some of the mechanisms, namely, taxes and prices, will be explicitly introduced as variables in the utility functions of the companies and consumers, respectively."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "The government is typically the first mover which sets monetary and/or non-monetary product/market regulations. Among monetary regulations, the most popular ones are *taxes* (for unhealthy products), *subsidies* (for healthy products), and *caps* (maximal price for a product). These regulations directly influence the utility function of a company and rarely affect the consumer utility functions. Furthermore, government can use non-monetary instruments to stimulate nutrition consumption, e.g., certification, labeling, obligatory description of ingredients and nutritional value on the packages [[Stevenson and Ingwersen, 2012](https://arxiv.org/html/1810.07243v1#bib.bibx16), [Minkov et al., 2015](https://arxiv.org/html/1810.07243v1#bib.bibx10)]. More specifically, the government can impose an obligation on firms to use particular size, color and shape for nutritious food packages or for price tags. For instance, recent research shows that the consumers perceive products in vivid packaging as less healthy than food in muted color packages [[Mead and Richerson, 2018](https://arxiv.org/html/1810.07243v1#bib.bibx9)]. *Minimal font size* of ingredients’ inscription and nutritional value also can be used by government as non-monetary regulation. This tool may attract consumers’ attention on containment of harmful to health ingredients such as sugar, preservatives and dyes. The last but not the least tool is *point-of-sales merchandising*. One study showed that joint presentation of healthy and unhealthy products forces consumers to choose the first one because such way increases guilt and the difficulty of social justification [[Okada, 2005](https://arxiv.org/html/1810.07243v1#bib.bibx12)]. Consequently, merchandising can be an effective instrument which may force people to buy healthy products. These non-monetary regulatory mechanisms serve for information provision and do have influence on the consumer utility functions, though the effect of the information provision is sometimes is not immediate. The company utility functions are rarely directly affected by the non-monetary governmental regulations."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "In turn, a company/firm (producer or retailer) is the follower. Knowing the governmental regulations, companies maximize the profit applying their toolkit to influence the consumer behavior. It should be noted that interests of producers and retailers can be different, but within the framework of this research we do not distinguish these two players. It is widely accepted that the most powerful tool of a firm is the *price* set for a product. Next to the price, *discounts* is the most popular instrument. To illustrate the possible efficiency of this tool, prior research has provided results of experiments where price reduction can be a reason of increased consumption [[Geliebter et al., 2013](https://arxiv.org/html/1810.07243v1#bib.bibx6), [Ball et al., 2015](https://arxiv.org/html/1810.07243v1#bib.bibx1)]. For example, [[Ball et al., 2015](https://arxiv.org/html/1810.07243v1#bib.bibx1)] have found that a 20% discount for fruit and vegetables categories caused increased purchasing per household of 35% for fruit and 15% for vegetables. Furthermore, it is proved that even temporary discounts can stimulate proper nutrition consumption. In one study [[Geliebter et al., 2013](https://arxiv.org/html/1810.07243v1#bib.bibx6)], there were three periods (baseline - no discount, intervention - 50% discount, follow-up - no discount) during which obese respondents were buying fruits and vegetables during this periods. As a result, purchasing of fruits and vegetables during follow-up period became higher than during baseline. This research demonstrates effectiveness of applying discounts to increase proper nutrition consumption. At the same time, firms may use such non-monetary instruments as *availability in stores*, *merchandising*, and *package design* [[Glanz et al., 2012](https://arxiv.org/html/1810.07243v1#bib.bibx7)]. Availability in stores means that wide access to proper nutrition food increase nutrition consumption. It happens because people prefer to buy what is in every supermarket instead of trying to find something special for everyday meals [[Desai and Ratneshwar, 2003](https://arxiv.org/html/1810.07243v1#bib.bibx3), [Morales, 2005](https://arxiv.org/html/1810.07243v1#bib.bibx11)]. Merchandising was already discussed in the context of the governmental tools and it can also be effective on the company’s level. Moreover, unusual packages can be used by marketers to increase demand for proper nutrition [[Rettie and Brewer, 2000](https://arxiv.org/html/1810.07243v1#bib.bibx13)]."
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "1.2 Problem statement and basic assumptions",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "In this study we assume that (1) effective information provision programs take place; (2) consumers are aware of proper nutrition importance; and (3) consumers already formed their utility functions (product valuations) and in the near future they are not going to change their preferences significantly. Notice, without these assumptions the efficiency of direct regulations is questionable. We take the consumer utility functions as granted. This is also a valid assumption, given a number and variety of consumer behavior models available in the literature. In the end of the paper, we provide an insightful example and analysis based on a specific consumer behavior model and actual purchase data. Such data can be routinely obtained from the market research agencies such as Nielsen, GfK and Kantar. We base our example and experiments on the data provided by the latter party."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Specifically targeting the optimal regulations of the soft drinks markets, this research focuses on the most popular, powerful and long-run instruments of the government and of the firm, namely on the sugar tax and prices, respectively. In the past decade, many countries initiated sugar consumption regulation by introducing a sugar tax. Such a tax increases the price of extensive sugar containment in products such as soft drinks. In this article we consider a typical problem of optimal regulatory policy design, where the task is to determine the sugar tax rate maximizing the social welfare. We model the problem as a sequential game represented by the three-level mathematical program. On the upper level, given the utility functions of the soft drink producer/retailer and consumers, the government decides upon the sugar tax rate with the goal to optimize the social welfare. On the middle level, given the sugar tax rate and the utility functions of the consumers, a company decides on the product prices maximizing the company utility. On the lower level, given the product prices, consumers decide upon their preferences towards either sugar containing or sugar-free products. All utility functions and the social welfare are taken from the classic economic literature. This ensures the generality of the approach and applicability to not only the soft drinks markets and sugar taxes, but rather to a broad variety of the markets needing governmental regulations."
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "1.3 Contemporary sugar tax practices",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "The sugar tax means each liter of sugary drink will have an extra tax charge up to 50%, depending on how much sugar is in the drink11 1 https://www.bbc.com/news/health-35824071. Tax rates depend on government policy in a country and can be expressed in percentage or in monetary units. Moreover, taxation schemes vary from country to country, see Table [1](https://arxiv.org/html/1810.07243v1#S1.T1 \"Table 1 ‣ 1.3 Contemporary sugar tax practices ‣ 1 Introduction ‣ Optimal policy design for the sugar tax\"). Nowadays, there are two common schemes: a one-level tax rate and a multi-level tax rate. In the case of a one-level tax rate, government establishes a single tax rate for all drinks containing sugar, or for drinks with a sugar containment above a specific threshold. Such approaches are used in France, Chile, Mexico, Belgium, Colombia, India, Portugal, Saudi Arabia, UAE, USA, South Africa. Alternatively, several countries (e.g. Thailand, Ireland, UK) apply a multi-level taxation scheme, which assumes different tax rates according to sugar content22 2 https://www.beveragedaily.com/Article/2017/12/20/Sugar-taxes-The-global-picture-in-2017, see Table [1](https://arxiv.org/html/1810.07243v1#S1.T1 \"Table 1 ‣ 1.3 Contemporary sugar tax practices ‣ 1 Introduction ‣ Optimal policy design for the sugar tax\")."
+                },
+                {
+                  "type": "table",
+                  "text": "| | | | | --- | --- | --- | | Country | Tax rate | Effective | | | | since | | France | 7.53 euro per 100 liters | 2013 | | Chile | >6,25>6,25 grams of sugar per 0.1 liter →\\rightarrow 16% | 2014 | | Mexico | 1 peso per liter | 2014 | | Belgium | 3.7284 euro per 100 liters | 2013 | | Colombia | 20% per liter | 2016 | | India | 40% | 2017 | | Portugal | >80>80 grams of sugar per liter →\\rightarrow 16% | 2017 | | Thailand | 14% + 5-stage sugar tax according to | 2017 | | | sugar content | | | Saudi Arabia | 50% | 2017 | | UAE | 50% | 2017 | | USA (several cities) | 1–2 cents per ounce | 2017 | | Ireland | 5–8 grams of sugar per 0.1 liter →\\rightarrow 21 cents; | | | | >8>8 grams of sugar per 0.1 liter →\\rightarrow 31 cents | 2018 | | South Africa | >4>4 grams of sugar per 0.1 liter →\\rightarrow 2.1 cents | | | | per gram of sugar per 0.1 liter | 2018 | | UK | 5–8 grams of sugar per 0.1 liter →\\rightarrow 18%; | | | | >8>8 grams of sugar per 0.1 liter→\\rightarrow 24% | 2018 |"
+                },
+                {
+                  "type": "formula",
+                  "text": ">6,25>6,25"
+                },
+                {
+                  "type": "formula",
+                  "text": "→\\rightarrow"
+                },
+                {
+                  "type": "formula",
+                  "text": ">80>80"
+                },
+                {
+                  "type": "formula",
+                  "text": "→\\rightarrow"
+                },
+                {
+                  "type": "formula",
+                  "text": "→\\rightarrow"
+                },
+                {
+                  "type": "formula",
+                  "text": ">8>8"
+                },
+                {
+                  "type": "formula",
+                  "text": "→\\rightarrow"
+                },
+                {
+                  "type": "formula",
+                  "text": ">4>4"
+                },
+                {
+                  "type": "formula",
+                  "text": "→\\rightarrow"
+                },
+                {
+                  "type": "formula",
+                  "text": "→\\rightarrow"
+                },
+                {
+                  "type": "formula",
+                  "text": ">8>8"
+                },
+                {
+                  "type": "formula",
+                  "text": "→\\rightarrow"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "In this paper we assume a one-level tax rate for any positive sugar containment in the drink. This is the current sugar tax practice in many countries, e.g., France, Mexico, Belgium, Colombia, India, Saudi Arabia, UAE and USA.The approach is straightforwardly extendable to a multi-level tax rate with a constant number of (a few) levels."
+                }
+              ],
+              "children": []
+            }
+          ]
+        },
+        {
+          "heading": "2 Definitions and mathematical model",
+          "level": 2,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "Since the tax per cent varies widely from country to country, it makes sense to develop a general mathematical model determining the taxation mechanism maximizing the social welfare. Such a model should coordinate the interests across the three players: government, firms and consumers. As a starting point for the model the utility functions of the players are defined. The government utility is usually understood as *social welfare*, see [[Bernoulli, 2011](https://arxiv.org/html/1810.07243v1#bib.bibx2)]. Let the social welfare be referred as WW. It is expressed as the total utility of consumers and firms plus the tax:"
+            },
+            {
+              "type": "formula",
+              "text": "WW"
+            },
+            {
+              "type": "table",
+              "text": "| | | | | --- | --- | --- | | | W=Uc+Uf+T,W=U\\_{c}+U\\_{f}+T, | |"
+            },
+            {
+              "type": "formula",
+              "text": "W=Uc+Uf+T,W=U_{c}+U_{f}+T,"
+            },
+            {
+              "type": "paragraph",
+              "text": "where UcU\\_{c} is the total utility of all consumers, UfU\\_{f} is the total utility of all firms, and TT is the total tax collected."
+            },
+            {
+              "type": "formula",
+              "text": "UcU_{c}"
+            },
+            {
+              "type": "formula",
+              "text": "UfU_{f}"
+            },
+            {
+              "type": "formula",
+              "text": "TT"
+            },
+            {
+              "type": "paragraph",
+              "text": "The total utility of the consumers UcU\\_{c} is defined as follows. Let the set of consumers be denoted by NN. For simplicity of presentation, consider a market with only two products: one is containing sugar and another one is sugar-free. Let the product containing sugar be indexed with 1, and the sugar-free product be indexed with 0, and let M={0,1}M=\\{0,1\\} be the product index set. Later we explain how to generalize the model and how to adjust the algorithms in the case of several (a constant number of) products. Let ui,ju\\_{i,j} be an individual utility of consumer i∈Ni\\in N for product j∈Mj\\in M, and let xi,jx\\_{i,j} be a binary decision variable taking value 1 if consumer ii prefers product jj to any other products and 0 otherwise. Assuming consumer’s rationality, we have xi,k=1,i∈N,k∈Mx\\_{i,k}=1,\\ i\\in N,k\\in M, if only if ui,k=maxj∈M⁡ui,ju\\_{i,k}=\\max\\_{j\\in M}u\\_{i,j} and ui,k≥0u\\_{i,k}\\geq 0. Here, for all consumers i∈Ni\\in N we assume that ∑j∈Mxi,j≤1\\sum\\_{j\\in M}x\\_{i,j}\\leq 1. For this assumption to be true, the ties on the maximal utilities are broken in favor of the company revenue — this is also a folklore economic assumption. Clearly, if a consumer has negative utilities for all products, she does not purchase anything, i.e., ∑j∈Mxi,j=0\\sum\\_{j\\in M}x\\_{i,j}=0."
+            },
+            {
+              "type": "formula",
+              "text": "UcU_{c}"
+            },
+            {
+              "type": "formula",
+              "text": "NN"
+            },
+            {
+              "type": "formula",
+              "text": "M={0,1}M=\\{0,1\\}"
+            },
+            {
+              "type": "formula",
+              "text": "ui,ju_{i,j}"
+            },
+            {
+              "type": "formula",
+              "text": "i∈Ni\\in N"
+            },
+            {
+              "type": "formula",
+              "text": "j∈Mj\\in M"
+            },
+            {
+              "type": "formula",
+              "text": "xi,jx_{i,j}"
+            },
+            {
+              "type": "formula",
+              "text": "ii"
+            },
+            {
+              "type": "formula",
+              "text": "jj"
+            },
+            {
+              "type": "formula",
+              "text": "xi,k=1,i∈N,k∈Mx_{i,k}=1,\\ i\\in N,k\\in M"
+            },
+            {
+              "type": "formula",
+              "text": "ui,k=maxj∈M⁡ui,ju_{i,k}=\\max_{j\\in M}u_{i,j}"
+            },
+            {
+              "type": "formula",
+              "text": "ui,k≥0u_{i,k}\\geq 0"
+            },
+            {
+              "type": "formula",
+              "text": "i∈Ni\\in N"
+            },
+            {
+              "type": "formula",
+              "text": "∑j∈Mxi,j≤1\\sum_{j\\in M}x_{i,j}\\leq 1"
+            },
+            {
+              "type": "formula",
+              "text": "∑j∈Mxi,j=0\\sum_{j\\in M}x_{i,j}=0"
+            },
+            {
+              "type": "paragraph",
+              "text": "In the literature on marketing, there are various models describing behavior and individual utilities of the consumers for a product. Vast majority of the models are linear in the product price. For instance, consumer utility function suggested in [[Holtrop et al., 2017](https://arxiv.org/html/1810.07243v1#bib.bibx8)] consists of (1) a constant which includes different psychological, economical, and sociological factors such as brand loyalty, consumer’s budget, readiness to pay etc; (2) a term depending on the number of claims and nutritional values which are written on product packages, e.g., labels as ”low in fat”, ”high in fiber” and other which may influence consumer’s choice; and (3) deduction of the price related factor:"
+            },
+            {
+              "type": "table",
+              "text": "| | | | | --- | --- | --- | | | ui,j=(βi,j+β1⋅N​r​C​l​a​i​m​s¯+β2⋅N​u​t​r​V​a​l¯−β3⋅pj)+.u\\_{i,j}=\\left(\\beta\\_{i,j}+\\beta\\_{1}\\cdot\\overline{NrClaims}+\\beta\\_{2}\\cdot\\overline{NutrVal}-\\beta\\_{3}\\cdot p\\_{j}\\right)^{+}.\\ | |"
+            },
+            {
+              "type": "formula",
+              "text": "ui,j=(βi,j+β1⋅N​r​C​l​a​i​m​s¯+β2⋅N​u​t​r​V​a​l¯−β3⋅pj)+.u_{i,j}=\\left(\\beta_{i,j}+\\beta_{1}\\cdot\\overline{NrClaims}+\\beta_{2}\\cdot\\overline{NutrVal}-\\beta_{3}\\cdot p_{j}\\right)^{+}.\\"
+            },
+            {
+              "type": "paragraph",
+              "text": "Here, βi,j,β1,β2,β3\\beta\\_{i,j},\\ \\beta\\_{1},\\ \\beta\\_{2},\\ \\beta\\_{3} are the coefficients determined by a multinominal choice model33 3 https://eml.berkeley.edu/books/choice2.html, N​r​C​l​a​i​m​s¯\\overline{NrClaims} is the average number of claims on product packages in category, N​u​t​r​V​a​l¯\\overline{NutrVal} is the average nutritional value in category, and pkp\\_{k} is the price of product jj. Notice, the intercept βi,j\\beta\\_{i,j} is a constant including factors causing heterogeneity across the consumers. Finally,"
+            },
+            {
+              "type": "formula",
+              "text": "βi,j,β1,β2,β3\\beta_{i,j},\\ \\beta_{1},\\ \\beta_{2},\\ \\beta_{3}"
+            },
+            {
+              "type": "formula",
+              "text": "N​r​C​l​a​i​m​s¯\\overline{NrClaims}"
+            },
+            {
+              "type": "formula",
+              "text": "N​u​t​r​V​a​l¯\\overline{NutrVal}"
+            },
+            {
+              "type": "formula",
+              "text": "pkp_{k}"
+            },
+            {
+              "type": "formula",
+              "text": "jj"
+            },
+            {
+              "type": "formula",
+              "text": "βi,j\\beta_{i,j}"
+            },
+            {
+              "type": "table",
+              "text": "| | | | | --- | --- | --- | | | Uc=∑i∈N∑j∈Mln⁡(1+ui,j)⋅xi,j,U\\_{c}=\\sum\\_{i\\in N}\\sum\\_{j\\in M}\\ln(1+u\\_{i,j})\\cdot x\\_{i,j}, | |"
+            },
+            {
+              "type": "formula",
+              "text": "Uc=∑i∈N∑j∈Mln⁡(1+ui,j)⋅xi,j,U_{c}=\\sum_{i\\in N}\\sum_{j\\in M}\\ln(1+u_{i,j})\\cdot x_{i,j},"
+            },
+            {
+              "type": "paragraph",
+              "text": "under a classic assumption of diminishing marginal utilities of consumers, see, e.g., [[Bernoulli, 2011](https://arxiv.org/html/1810.07243v1#bib.bibx2)]."
+            },
+            {
+              "type": "paragraph",
+              "text": "The consumer behavior model in [[Holtrop et al., 2017](https://arxiv.org/html/1810.07243v1#bib.bibx8)] does not assume price elasticity of the demand. This is a reasonable assumption for the present research as for the soft drinks, the volume of purchase depends rather on the preferences and demographic characteristics of the consumer’s household than on the product price. Therefore, we may assume that the demand of a consumer i∈Ni\\in N is given in two quantities: if the consumer prefers sugar-free drink, the realized demand is Di,0D\\_{i,0}, and if the sugary drink is preferred, the demand is Di,1D\\_{i,1}. Then, the utility of a company UfU\\_{f} is defined by its revenue"
+            },
+            {
+              "type": "formula",
+              "text": "i∈Ni\\in N"
+            },
+            {
+              "type": "formula",
+              "text": "Di,0D_{i,0}"
+            },
+            {
+              "type": "formula",
+              "text": "Di,1D_{i,1}"
+            },
+            {
+              "type": "formula",
+              "text": "UfU_{f}"
+            },
+            {
+              "type": "table",
+              "text": "| | | | | --- | --- | --- | | | Uf=(∑i∈N∑j∈MDi,j⋅pj⋅xi,j)−T,U\\_{f}=\\left(\\sum\\_{i\\in N}\\sum\\_{j\\in M}\\ D\\_{i,j}\\cdot p\\_{j}\\cdot x\\_{i,j}\\right)\\ -\\ T, | |"
+            },
+            {
+              "type": "formula",
+              "text": "Uf=(∑i∈N∑j∈MDi,j⋅pj⋅xi,j)−T,U_{f}=\\left(\\sum_{i\\in N}\\sum_{j\\in M}\\ D_{i,j}\\cdot p_{j}\\cdot x_{i,j}\\right)\\ -\\ T,"
+            },
+            {
+              "type": "paragraph",
+              "text": "while the tax TT is defined by"
+            },
+            {
+              "type": "formula",
+              "text": "TT"
+            },
+            {
+              "type": "table",
+              "text": "| | | | | --- | --- | --- | | | T=α⋅∑i∈NDi,1⋅p1⋅xi,1,T=\\alpha\\cdot\\sum\\_{i\\in N}\\ D\\_{i,1}\\cdot p\\_{1}\\cdot x\\_{i,1}, | |"
+            },
+            {
+              "type": "formula",
+              "text": "T=α⋅∑i∈NDi,1⋅p1⋅xi,1,T=\\alpha\\cdot\\sum_{i\\in N}\\ D_{i,1}\\cdot p_{1}\\cdot x_{i,1},"
+            },
+            {
+              "type": "paragraph",
+              "text": "where 0≤α≤10\\leq\\alpha\\leq 1 is the sugar tax rate established by the government."
+            },
+            {
+              "type": "formula",
+              "text": "0≤α≤10\\leq\\alpha\\leq 1"
+            },
+            {
+              "type": "paragraph",
+              "text": "Thus, the entire mathematical model is represented by the three-level program:"
+            },
+            {
+              "type": "table",
+              "text": "| | | | | | --- | --- | --- | --- | | | max0≤α≤1∑i∈N∑j∈M(ln(1+ui,j)+Di,j⋅pj∗)⋅xi,j∗\\max\\_{0\\leq\\alpha\\leq 1}\\ \\sum\\_{i\\in N}\\sum\\_{j\\in M}\\ \\left(\\ln(1+u\\_{i,j})\\ +\\ D\\_{i,j}\\cdot p^{\\*}\\_{j}\\right)\\cdot x^{\\*}\\_{i,j} | | (1) |"
+            },
+            {
+              "type": "paragraph",
+              "text": "subject to"
+            },
+            {
+              "type": "table",
+              "text": "| | | | | | --- | --- | --- | --- | | | p∗=arg⁡maxp≥0⁡(∑i∈NDi,0⋅p0⋅xi,0∗)+(1−α)⋅(∑i∈NDi,1⋅p1⋅xi,1∗)p^{\\*}\\ =\\ \\arg\\max\\_{p\\geq 0}\\ \\left(\\sum\\_{i\\in N}\\ D\\_{i,0}\\cdot p\\_{0}\\cdot x^{\\*}\\_{i,0}\\right)\\ +\\ (1-\\alpha)\\cdot\\left(\\sum\\_{i\\in N}\\ D\\_{i,1}\\cdot p\\_{1}\\cdot x^{\\*}\\_{i,1}\\right) | | (2) |"
+            },
+            {
+              "type": "formula",
+              "text": "p∗=arg⁡maxp≥0⁡(∑i∈NDi,0⋅p0⋅xi,0∗)+(1−α)⋅(∑i∈NDi,1⋅p1⋅xi,1∗)p^{*}\\ =\\ \\arg\\max_{p\\geq 0}\\ \\left(\\sum_{i\\in N}\\ D_{i,0}\\cdot p_{0}\\cdot x^{*}_{i,0}\\right)\\ +\\ (1-\\alpha)\\cdot\\left(\\sum_{i\\in N}\\ D_{i,1}\\cdot p_{1}\\cdot x^{*}_{i,1}\\right)"
+            },
+            {
+              "type": "paragraph",
+              "text": "subject to"
+            },
+            {
+              "type": "table",
+              "text": "| | | | | | --- | --- | --- | --- | | | x∗=arg⁡maxx​∑i∈N∑j∈Mui,j⋅xi,jx^{\\*}\\ =\\ \\arg\\max\\_{x}\\ \\sum\\_{i\\in N}\\sum\\_{j\\in M}\\ u\\_{i,j}\\cdot x\\_{i,j} | | (3) |"
+            },
+            {
+              "type": "formula",
+              "text": "x∗=arg⁡maxx​∑i∈N∑j∈Mui,j⋅xi,jx^{*}\\ =\\ \\arg\\max_{x}\\ \\sum_{i\\in N}\\sum_{j\\in M}\\ u_{i,j}\\cdot x_{i,j}"
+            },
+            {
+              "type": "paragraph",
+              "text": "subject to"
+            },
+            {
+              "type": "table",
+              "text": "| | | | | | --- | --- | --- | --- | | | ui,j=(βi,j+β1⋅N​r​C​l​a​i​m​s¯+β2⋅N​u​t​r​V​a​l¯−β3⋅pj)+,u\\_{i,j}=\\left(\\beta\\_{i,j}+\\beta\\_{1}\\cdot\\overline{NrClaims}+\\beta\\_{2}\\cdot\\overline{NutrVal}-\\beta\\_{3}\\cdot p\\_{j}\\right)^{+},\\ | | (4) |"
+            },
+            {
+              "type": "formula",
+              "text": "ui,j=(βi,j+β1⋅N​r​C​l​a​i​m​s¯+β2⋅N​u​t​r​V​a​l¯−β3⋅pj)+,u_{i,j}=\\left(\\beta_{i,j}+\\beta_{1}\\cdot\\overline{NrClaims}+\\beta_{2}\\cdot\\overline{NutrVal}-\\beta_{3}\\cdot p_{j}\\right)^{+},\\"
+            },
+            {
+              "type": "table",
+              "text": "| | | | | | --- | --- | --- | --- | | | ∑j∈Mxi,j≤1∀i∈N,\\sum\\_{j\\in M}x\\_{i,j}\\leq 1\\ \\ \\ \\ \\ \\forall i\\in N, | | (5) |"
+            },
+            {
+              "type": "formula",
+              "text": "∑j∈Mxi,j≤1∀i∈N,\\sum_{j\\in M}x_{i,j}\\leq 1\\ \\ \\ \\ \\ \\forall i\\in N,"
+            },
+            {
+              "type": "table",
+              "text": "| | | | | | --- | --- | --- | --- | | | xi,j∈{0,1}∀i∈N,j∈M.x\\_{i,j}\\in\\{0,1\\}\\ \\ \\ \\ \\ \\forall i\\in N,j\\in M. | | (6) |"
+            },
+            {
+              "type": "formula",
+              "text": "xi,j∈{0,1}∀i∈N,j∈M.x_{i,j}\\in\\{0,1\\}\\ \\ \\ \\ \\ \\forall i\\in N,j\\in M."
+            },
+            {
+              "type": "paragraph",
+              "text": "On the first level, the government decides upon the sugar tax rate 0≤α≤10\\leq\\alpha\\leq 1 to maximize the social welfare. On the second level, given the tax rate α\\alpha, the company decides on the prices p0≥0p\\_{0}\\geq 0 and p1≥0p\\_{1}\\geq 0 to maximize the company’s revenue. On the third level, given the prices pp, the consumers select preferred products maximizing their utility."
+            },
+            {
+              "type": "formula",
+              "text": "0≤α≤10\\leq\\alpha\\leq 1"
+            },
+            {
+              "type": "formula",
+              "text": "α\\alpha"
+            },
+            {
+              "type": "formula",
+              "text": "p0≥0p_{0}\\geq 0"
+            },
+            {
+              "type": "formula",
+              "text": "p1≥0p_{1}\\geq 0"
+            },
+            {
+              "type": "formula",
+              "text": "pp"
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "3 Solution of the three-level program",
+          "level": 2,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "In this section we provide intuition and sketch the algorithms solving the three-level mathematical problem (1)-(6). Then, we present the formal pseudo-codes of the algorithms. As the algorithms are rather straightforward and very intuitive, we leave it for a reader to prove their correctness."
+            },
+            {
+              "type": "paragraph",
+              "text": "To find the optimal tax rate, we first suggest to find all potentially optimal pricing strategies of the company. Notice, the consumer utility functions are linear in prices. Therefore, for every consumer i∈Ni\\in N, the *preference half-spaces* are determined by inequalities βi,0−β3​p0≥βi,1−β3​p1,\\beta\\_{i,0}-\\beta\\_{3}p\\_{0}\\geq\\beta\\_{i,1}-\\beta\\_{3}p\\_{1}, where the consumer prefers the sugar-free drink, and βi,0−β3​p0≤βi,1−β3​p1,\\beta\\_{i,0}-\\beta\\_{3}p\\_{0}\\leq\\beta\\_{i,1}-\\beta\\_{3}p\\_{1}, where the consumer might prefer the sugary drink. The *indifference hyperplane* βi,0−β3​p0=βi,1−β3​p1\\beta\\_{i,0}-\\beta\\_{3}p\\_{0}=\\beta\\_{i,1}-\\beta\\_{3}p\\_{1} does, actually, represent the prices where the consumer is indifferent which product to purchase. Next to indifference hyperplanes, let us introduce the *budget hyperplanes*: βi,0=β3​p0\\beta\\_{i,0}=\\beta\\_{3}p\\_{0} and βi,1=β3​p1\\beta\\_{i,1}=\\beta\\_{3}p\\_{1}, as the consumer purchases a product only if her utility for the product is non-negative, i.e., βi,0≥β3​p0\\beta\\_{i,0}\\geq\\beta\\_{3}p\\_{0} or βi,1≥β3​p1\\beta\\_{i,1}\\geq\\beta\\_{3}p\\_{1}. The union of all indifference and budget hyperplanes splits the price space in many polyhedras. Let us refer to a polyhedra as a *choice region* if the interior of the polyhedra is not intersected by any of the indifference or budget hyperplanes."
+            },
+            {
+              "type": "formula",
+              "text": "i∈Ni\\in N"
+            },
+            {
+              "type": "formula",
+              "text": "βi,0−β3​p0≥βi,1−β3​p1,\\beta_{i,0}-\\beta_{3}p_{0}\\geq\\beta_{i,1}-\\beta_{3}p_{1},"
+            },
+            {
+              "type": "formula",
+              "text": "βi,0−β3​p0≤βi,1−β3​p1,\\beta_{i,0}-\\beta_{3}p_{0}\\leq\\beta_{i,1}-\\beta_{3}p_{1},"
+            },
+            {
+              "type": "formula",
+              "text": "βi,0−β3​p0=βi,1−β3​p1\\beta_{i,0}-\\beta_{3}p_{0}=\\beta_{i,1}-\\beta_{3}p_{1}"
+            },
+            {
+              "type": "formula",
+              "text": "βi,0=β3​p0\\beta_{i,0}=\\beta_{3}p_{0}"
+            },
+            {
+              "type": "formula",
+              "text": "βi,1=β3​p1\\beta_{i,1}=\\beta_{3}p_{1}"
+            },
+            {
+              "type": "formula",
+              "text": "βi,0≥β3​p0\\beta_{i,0}\\geq\\beta_{3}p_{0}"
+            },
+            {
+              "type": "formula",
+              "text": "βi,1≥β3​p1\\beta_{i,1}\\geq\\beta_{3}p_{1}"
+            },
+            {
+              "type": "paragraph",
+              "text": "By construction, for all consumers, their preferences for a product remain the same for any prices taken from the same choice region. Then, by linearity of the revenue function in prices, only vertices of the choice regions might become optimal pricing strategies of the company. Therefore, having O⁡(n)O(n) indifference and budget hyperplanes for only two products, where nn is the number of consumers, we may have at most O⁡(n2)O(n^{2}) potentially optimal pricing strategies. When the number of products increases to mm, the number of potentially optimal strategies increases to O⁡(nm)O(n^{m}). Thus, keeping mm a small constant, brute-force enumeration of potentially optimal pricing strategies remains polynomial and can be efficiently implemented. Moreover, since the consumer utilities are independent on the sugar tax, for any choice of the tax rate, one of the computed pricing strategies will be optimal. Hence, the first step towards the optimal policy design is computing all potentially optimal prices, which is done by Algorithm 1 below."
+            },
+            {
+              "type": "formula",
+              "text": "O⁡(n)O(n)"
+            },
+            {
+              "type": "formula",
+              "text": "nn"
+            },
+            {
+              "type": "formula",
+              "text": "O⁡(n2)O(n^{2})"
+            },
+            {
+              "type": "formula",
+              "text": "mm"
+            },
+            {
+              "type": "formula",
+              "text": "O⁡(nm)O(n^{m})"
+            },
+            {
+              "type": "formula",
+              "text": "mm"
+            },
+            {
+              "type": "formula",
+              "text": "N​r​C​l​a​i​m​s¯\\overline{NrClaims}"
+            },
+            {
+              "type": "formula",
+              "text": "N​u​t​r​V​a​l¯\\overline{NutrVal}"
+            },
+            {
+              "type": "formula",
+              "text": "β1\\beta_{1}"
+            },
+            {
+              "type": "formula",
+              "text": "β2\\beta_{2}"
+            },
+            {
+              "type": "formula",
+              "text": "β3\\beta_{3}"
+            },
+            {
+              "type": "formula",
+              "text": "βi,j\\beta_{i,j}"
+            },
+            {
+              "type": "formula",
+              "text": "i∈N,j∈{0,1}i\\in N,\\ j\\in\\{0,1\\}"
+            },
+            {
+              "type": "formula",
+              "text": "𝒫:=∅\\mathcal{P}:=\\emptyset"
+            },
+            {
+              "type": "formula",
+              "text": "⊳\\triangleright"
+            },
+            {
+              "type": "formula",
+              "text": "ℬ\\mathcal{B}"
+            },
+            {
+              "type": "formula",
+              "text": "β3⋅pj=βi,j+β1⋅N​r​C​l​a​i​m​s¯+β2⋅N​u​t​r​V​a​l¯\\beta_{3}\\cdot p_{j}=\\beta_{i,j}+\\beta_{1}\\cdot\\overline{NrClaims}+\\beta_{2}\\cdot\\overline{NutrVal}"
+            },
+            {
+              "type": "formula",
+              "text": "i∈Ni\\in N"
+            },
+            {
+              "type": "formula",
+              "text": "j∈{0,1}j\\in\\{0,1\\}"
+            },
+            {
+              "type": "formula",
+              "text": "ℐ\\mathcal{I}"
+            },
+            {
+              "type": "formula",
+              "text": "βi,0−β3⋅p0=βi,1−β3⋅p1\\beta_{i,0}-\\beta_{3}\\cdot p_{0}=\\beta_{i,1}-\\beta_{3}\\cdot p_{1}"
+            },
+            {
+              "type": "formula",
+              "text": "i∈Ni\\in N"
+            },
+            {
+              "type": "formula",
+              "text": "h∈ℬ∪ℐh\\in\\mathcal{B}\\cup\\mathcal{I}"
+            },
+            {
+              "type": "formula",
+              "text": "h′∈ℬ∪ℐh^{\\prime}\\in\\mathcal{B}\\cup\\mathcal{I}"
+            },
+            {
+              "type": "formula",
+              "text": "h′≠hh^{\\prime}\\neq h"
+            },
+            {
+              "type": "formula",
+              "text": "p=h∩h′p=h\\cap h^{\\prime}"
+            },
+            {
+              "type": "formula",
+              "text": "𝒫:=𝒫∪p\\mathcal{P}:=\\mathcal{P}\\cup p"
+            },
+            {
+              "type": "formula",
+              "text": "𝒫\\mathcal{P}"
+            },
+            {
+              "type": "paragraph",
+              "text": "Given a set of potentially optimal pricing strategies of the company, it is possible to compute the optimal sugar tax rate. Since the number of pricing strategies and, consequently, the number of consumer responses is finite, the social welfare function is a staircase function in α\\alpha with break points possible only in the break-evens of the company’s revenue:"
+            },
+            {
+              "type": "formula",
+              "text": "α\\alpha"
+            },
+            {
+              "type": "table",
+              "text": "| | | | | --- | --- | --- | | | (∑i∈NDi,0⋅p0′⋅xi,0′)+(1−α)⋅(∑i∈NDi,1⋅p1′⋅xi,1′)=\\left(\\sum\\_{i\\in N}\\ D\\_{i,0}\\cdot p^{\\prime}\\_{0}\\cdot x^{\\prime}\\_{i,0}\\right)\\ +\\ (1-\\alpha)\\cdot\\left(\\sum\\_{i\\in N}\\ D\\_{i,1}\\cdot p^{\\prime}\\_{1}\\cdot x^{\\prime}\\_{i,1}\\right)= | |"
+            },
+            {
+              "type": "formula",
+              "text": "(∑i∈NDi,0⋅p0′⋅xi,0′)+(1−α)⋅(∑i∈NDi,1⋅p1′⋅xi,1′)=\\left(\\sum_{i\\in N}\\ D_{i,0}\\cdot p^{\\prime}_{0}\\cdot x^{\\prime}_{i,0}\\right)\\ +\\ (1-\\alpha)\\cdot\\left(\\sum_{i\\in N}\\ D_{i,1}\\cdot p^{\\prime}_{1}\\cdot x^{\\prime}_{i,1}\\right)="
+            },
+            {
+              "type": "table",
+              "text": "| | | | | --- | --- | --- | | | (∑i∈NDi,0⋅p0′′⋅xi,0′′)+(1−α)⋅(∑i∈NDi,1⋅p1′′⋅xi,1′′),\\left(\\sum\\_{i\\in N}\\ D\\_{i,0}\\cdot p^{\\prime\\prime}\\_{0}\\cdot x^{\\prime\\prime}\\_{i,0}\\right)\\ +\\ (1-\\alpha)\\cdot\\left(\\sum\\_{i\\in N}\\ D\\_{i,1}\\cdot p^{\\prime\\prime}\\_{1}\\cdot x^{\\prime\\prime}\\_{i,1}\\right), | |"
+            },
+            {
+              "type": "formula",
+              "text": "(∑i∈NDi,0⋅p0′′⋅xi,0′′)+(1−α)⋅(∑i∈NDi,1⋅p1′′⋅xi,1′′),\\left(\\sum_{i\\in N}\\ D_{i,0}\\cdot p^{\\prime\\prime}_{0}\\cdot x^{\\prime\\prime}_{i,0}\\right)\\ +\\ (1-\\alpha)\\cdot\\left(\\sum_{i\\in N}\\ D_{i,1}\\cdot p^{\\prime\\prime}_{1}\\cdot x^{\\prime\\prime}_{i,1}\\right),"
+            },
+            {
+              "type": "paragraph",
+              "text": "where p′p^{\\prime} and p′′p^{\\prime\\prime} are two potentially optimal pricing strategies, and x′x^{\\prime} and x′′x^{\\prime\\prime} are the respective consumer choices. Evaluating the social welfare in every break point, and choosing for α\\alpha the break point that maximizes the social welfare does solve the three-level mathematical program. We call this procedure Algorithm 2. Overall complexity of Algorithm 2 is O⁡(n2​m)O(n^{2m}) for nn consumers and mm products, which is still polynomial if the number of products mm is fixed."
+            },
+            {
+              "type": "formula",
+              "text": "p′p^{\\prime}"
+            },
+            {
+              "type": "formula",
+              "text": "p′′p^{\\prime\\prime}"
+            },
+            {
+              "type": "formula",
+              "text": "x′x^{\\prime}"
+            },
+            {
+              "type": "formula",
+              "text": "x′′x^{\\prime\\prime}"
+            },
+            {
+              "type": "formula",
+              "text": "α\\alpha"
+            },
+            {
+              "type": "formula",
+              "text": "O⁡(n2​m)O(n^{2m})"
+            },
+            {
+              "type": "formula",
+              "text": "nn"
+            },
+            {
+              "type": "formula",
+              "text": "mm"
+            },
+            {
+              "type": "formula",
+              "text": "mm"
+            },
+            {
+              "type": "formula",
+              "text": "𝒫\\mathcal{P}"
+            },
+            {
+              "type": "formula",
+              "text": "Di,jD_{i,j}"
+            },
+            {
+              "type": "formula",
+              "text": "i∈N,j∈{0,1}i\\in N,\\ j\\in\\{0,1\\}"
+            },
+            {
+              "type": "formula",
+              "text": "α∗:=0\\alpha^{*}:=0"
+            },
+            {
+              "type": "formula",
+              "text": "⊳\\triangleright"
+            },
+            {
+              "type": "formula",
+              "text": "p∈𝒫p\\in\\mathcal{P}"
+            },
+            {
+              "type": "formula",
+              "text": "i∈Ni\\in N"
+            },
+            {
+              "type": "formula",
+              "text": "ui,0​(p)≥ui,1​(p)u_{i,0}(p)\\geq u_{i,1}(p)"
+            },
+            {
+              "type": "formula",
+              "text": "xi,0​(p)=1x_{i,0}(p)=1"
+            },
+            {
+              "type": "formula",
+              "text": "xi,1​(p)=0x_{i,1}(p)=0"
+            },
+            {
+              "type": "formula",
+              "text": "xi,1​(p)=1x_{i,1}(p)=1"
+            },
+            {
+              "type": "formula",
+              "text": "xi,0​(p)=0x_{i,0}(p)=0"
+            },
+            {
+              "type": "formula",
+              "text": "maxj∈{0,1}⁡ui,j<0\\max_{j\\in\\{0,1\\}}u_{i,j}<0"
+            },
+            {
+              "type": "formula",
+              "text": "xi,0​(p)=0x_{i,0}(p)=0"
+            },
+            {
+              "type": "formula",
+              "text": "xi,1​(p)=0x_{i,1}(p)=0"
+            },
+            {
+              "type": "formula",
+              "text": "W∗:=maxp∈𝒫⁡Uc​(p,x⁡(p))+Uf​(p,x⁡(p))W^{*}:=\\max_{p\\in\\mathcal{P}}U_{c}(p,x(p))+U_{f}(p,x(p))"
+            },
+            {
+              "type": "formula",
+              "text": "⊳\\triangleright"
+            },
+            {
+              "type": "formula",
+              "text": "p′∈𝒫p^{\\prime}\\in\\mathcal{P}"
+            },
+            {
+              "type": "formula",
+              "text": "p′′∈𝒫p^{\\prime\\prime}\\in\\mathcal{P}"
+            },
+            {
+              "type": "formula",
+              "text": "0≤α≤10\\leq\\alpha\\leq 1"
+            },
+            {
+              "type": "table",
+              "text": "| | | | | --- | --- | --- | | | (∑i∈NDi,0⋅p0′⋅xi,0​(p′))+(1−α)⋅(∑i∈NDi,1⋅p1′⋅xi,1​(p′))=\\left(\\sum\\_{i\\in N}\\ D\\_{i,0}\\cdot p^{\\prime}\\_{0}\\cdot x\\_{i,0}(p^{\\prime})\\right)\\ +\\ (1-\\alpha)\\cdot\\left(\\sum\\_{i\\in N}\\ D\\_{i,1}\\cdot p^{\\prime}\\_{1}\\cdot x\\_{i,1}(p^{\\prime})\\right)= | |"
+            },
+            {
+              "type": "formula",
+              "text": "(∑i∈NDi,0⋅p0′⋅xi,0​(p′))+(1−α)⋅(∑i∈NDi,1⋅p1′⋅xi,1​(p′))=\\left(\\sum_{i\\in N}\\ D_{i,0}\\cdot p^{\\prime}_{0}\\cdot x_{i,0}(p^{\\prime})\\right)\\ +\\ (1-\\alpha)\\cdot\\left(\\sum_{i\\in N}\\ D_{i,1}\\cdot p^{\\prime}_{1}\\cdot x_{i,1}(p^{\\prime})\\right)="
+            },
+            {
+              "type": "table",
+              "text": "| | | | | --- | --- | --- | | | (∑i∈NDi,0⋅p0′′⋅xi,0​(p′′))+(1−α)⋅(∑i∈NDi,1⋅p1′′⋅xi,1​(p′′))\\left(\\sum\\_{i\\in N}\\ D\\_{i,0}\\cdot p^{\\prime\\prime}\\_{0}\\cdot x\\_{i,0}(p^{\\prime\\prime})\\right)\\ +\\ (1-\\alpha)\\cdot\\left(\\sum\\_{i\\in N}\\ D\\_{i,1}\\cdot p^{\\prime\\prime}\\_{1}\\cdot x\\_{i,1}(p^{\\prime\\prime})\\right) | |"
+            },
+            {
+              "type": "formula",
+              "text": "(∑i∈NDi,0⋅p0′′⋅xi,0​(p′′))+(1−α)⋅(∑i∈NDi,1⋅p1′′⋅xi,1​(p′′))\\left(\\sum_{i\\in N}\\ D_{i,0}\\cdot p^{\\prime\\prime}_{0}\\cdot x_{i,0}(p^{\\prime\\prime})\\right)\\ +\\ (1-\\alpha)\\cdot\\left(\\sum_{i\\in N}\\ D_{i,1}\\cdot p^{\\prime\\prime}_{1}\\cdot x_{i,1}(p^{\\prime\\prime})\\right)"
+            },
+            {
+              "type": "table",
+              "text": "| | | | | --- | --- | --- | | | p⁡(α):=arg⁡maxp∈𝒫​∑i∈NDi,0⋅p0⋅xi,0​(p)+(1−α)⋅∑i∈NDi,1⋅p1⋅xi,1​(p)p(\\alpha):=\\arg\\max\\_{p\\in\\mathcal{P}}\\sum\\_{i\\in N}\\ D\\_{i,0}\\cdot p\\_{0}\\cdot x\\_{i,0}(p)+(1-\\alpha)\\cdot\\sum\\_{i\\in N}\\ D\\_{i,1}\\cdot p\\_{1}\\cdot x\\_{i,1}(p) | |"
+            },
+            {
+              "type": "formula",
+              "text": "p⁡(α):=arg⁡maxp∈𝒫​∑i∈NDi,0⋅p0⋅xi,0​(p)+(1−α)⋅∑i∈NDi,1⋅p1⋅xi,1​(p)p(\\alpha):=\\arg\\max_{p\\in\\mathcal{P}}\\sum_{i\\in N}\\ D_{i,0}\\cdot p_{0}\\cdot x_{i,0}(p)+(1-\\alpha)\\cdot\\sum_{i\\in N}\\ D_{i,1}\\cdot p_{1}\\cdot x_{i,1}(p)"
+            },
+            {
+              "type": "table",
+              "text": "| | | | | --- | --- | --- | | | W⁡(α):=∑i∈N∑j∈M(ln⁡(1+ui,j​(p⁡(α)))+Di,j⋅pj​(α))⋅xi,j​(p⁡(α))W(\\alpha):=\\sum\\_{i\\in N}\\sum\\_{j\\in M}\\ \\left(\\ln(1+u\\_{i,j}(p(\\alpha)))+D\\_{i,j}\\cdot p\\_{j}(\\alpha)\\right)\\cdot x\\_{i,j}(p(\\alpha)) | |"
+            },
+            {
+              "type": "formula",
+              "text": "W⁡(α):=∑i∈N∑j∈M(ln⁡(1+ui,j​(p⁡(α)))+Di,j⋅pj​(α))⋅xi,j​(p⁡(α))W(\\alpha):=\\sum_{i\\in N}\\sum_{j\\in M}\\ \\left(\\ln(1+u_{i,j}(p(\\alpha)))+D_{i,j}\\cdot p_{j}(\\alpha)\\right)\\cdot x_{i,j}(p(\\alpha))"
+            },
+            {
+              "type": "formula",
+              "text": "W⁡(α)≥W∗W(\\alpha)\\geq W^{*}"
+            },
+            {
+              "type": "formula",
+              "text": "α∗=α\\alpha^{*}=\\alpha"
+            },
+            {
+              "type": "formula",
+              "text": "W∗:=W⁡(α)W^{*}:=W(\\alpha)"
+            },
+            {
+              "type": "formula",
+              "text": "α∗\\alpha^{*}"
+            },
+            {
+              "type": "formula",
+              "text": "W∗W^{*}"
+            },
+            {
+              "type": "paragraph",
+              "text": "Notice, the approach remains polynomial even for the multi-level sugar taxes if the number of levels LL is also fixed. In this case, one has to determine not a single optimal α\\alpha, but an optimal set of 2​L−12L-1 parameters: LL tax levels and L−1L-1 sugar containment percentages where the tax jumps from one level to another. A break-even for the company’s revenue is computed then similarly to the computation of the vertices of the choice regions in the price space, but now it is a vertex in the *regulatory space* R+2​L−1R^{2L-1}\\_{+}, where the revenues of 2​L2L potentially optimal pricing strategies meet each other. The overall time complexity of the algorithm in this case is O⁡(n2​m​L)O(n^{2mL}), which is still polynomial in the input size."
+            },
+            {
+              "type": "formula",
+              "text": "LL"
+            },
+            {
+              "type": "formula",
+              "text": "α\\alpha"
+            },
+            {
+              "type": "formula",
+              "text": "2​L−12L-1"
+            },
+            {
+              "type": "formula",
+              "text": "LL"
+            },
+            {
+              "type": "formula",
+              "text": "L−1L-1"
+            },
+            {
+              "type": "formula",
+              "text": "R+2​L−1R^{2L-1}_{+}"
+            },
+            {
+              "type": "formula",
+              "text": "2​L2L"
+            },
+            {
+              "type": "formula",
+              "text": "O⁡(n2​m​L)O(n^{2mL})"
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "4 Illustrative intuitive example",
+          "level": 2,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "The following example describes the process of obtaining an optimal sugar tax rate from the purchase data set. For simplicity of presentation, consider a market with two basic products, say Coca-Cola (j=1j=1) and Coca-Cola Zero (j=0j=0), where the first one contains sugar and the second one is sugar-free. For a generalization of this case one may consider two generic types of products and deal with the averages per product type. Given a purchase data set and applying multinomial choice model [[Holtrop et al., 2017](https://arxiv.org/html/1810.07243v1#bib.bibx8)], we obtain utility functions for three types of consumers, see Table [2](https://arxiv.org/html/1810.07243v1#S4.T2 \"Table 2 ‣ 4 Illustrative intuitive example ‣ Optimal policy design for the sugar tax\")."
+            },
+            {
+              "type": "formula",
+              "text": "j=1j=1"
+            },
+            {
+              "type": "formula",
+              "text": "j=0j=0"
+            },
+            {
+              "type": "table",
+              "text": "| | Coca-Cola | Coca-Cola Zero | | --- | --- | --- | | (H)igh sugar | uH,1=(0.94−0.2​p1)+u\\_{H,1}=(0.94-0.2p\\_{1})^{+} | uH,0=(0.41−0.26​p0)+u\\_{H,0}=(0.41-0.26p\\_{0})^{+} | | consumers | | | | (like sugar) | | | | (M)edium sugar | uM,1=(0.17−0.18​p1)+u\\_{M,1}=(0.17-0.18p\\_{1})^{+} | uM,0=(0.47−0.24​p0)+u\\_{M,0}=(0.47-0.24p\\_{0})^{+} | | consumers | | | | (indifferent to sugar) | | | | (L)ow sugar | uL,1=(0.53−0.23​p1)+u\\_{L,1}=(0.53-0.23p\\_{1})^{+} | uL,0=(0.93−0.17​p0)+u\\_{L,0}=(0.93-0.17p\\_{0})^{+} | | consumers | | | | (do not like sugar) | | |"
+            },
+            {
+              "type": "formula",
+              "text": "uH,1=(0.94−0.2​p1)+u_{H,1}=(0.94-0.2p_{1})^{+}"
+            },
+            {
+              "type": "formula",
+              "text": "uH,0=(0.41−0.26​p0)+u_{H,0}=(0.41-0.26p_{0})^{+}"
+            },
+            {
+              "type": "formula",
+              "text": "uM,1=(0.17−0.18​p1)+u_{M,1}=(0.17-0.18p_{1})^{+}"
+            },
+            {
+              "type": "formula",
+              "text": "uM,0=(0.47−0.24​p0)+u_{M,0}=(0.47-0.24p_{0})^{+}"
+            },
+            {
+              "type": "formula",
+              "text": "uL,1=(0.53−0.23​p1)+u_{L,1}=(0.53-0.23p_{1})^{+}"
+            },
+            {
+              "type": "formula",
+              "text": "uL,0=(0.93−0.17​p0)+u_{L,0}=(0.93-0.17p_{0})^{+}"
+            },
+            {
+              "type": "paragraph",
+              "text": "When all budget and indifference lines/hyperplanes are drawn in the price space (R2R^{2} in our case), we obtain the diagram as depicted in Figure [1](https://arxiv.org/html/1810.07243v1#S4.F1 \"Figure 1 ‣ 4 Illustrative intuitive example ‣ Optimal policy design for the sugar tax\"). The crossing points of the budget and indifference lines are the potential optimal pricing strategies of the company (Coca-Cola). Having three lines per consumer, we have nine lines in total, which might lead to at most 36 crossings, which will be the output of Algorithm 1. However, not all pairs of the lines cross each other, e.g., the budget lines for a product are parallel. This shrinks the number of potentially optimal pricing strategies to 27 points listed in Table [3](https://arxiv.org/html/1810.07243v1#S4.T3 \"Table 3 ‣ 4 Illustrative intuitive example ‣ Optimal policy design for the sugar tax\") together with consumer preferences (“CC” stands for Coca-Cola and “Z” stands for Coca-Cola Zero), realized utilities of consumers and respective company revenues. In the case at hands, “Low” consumers have demand 11441 units, “Medium” consumers have demand 9433 units, and “High” consumers have demand 9942 units independent on the product (Regular or Zero). This allows us to compute the revenue of the company for every potentially optimal pricing strategy. As an intermediate result, we obtain that if the sugar tax rate α=0\\alpha=0, then the maximal revenue is 1093019.67 currency units (CU) in the following point: Coca-Cola is priced at 4.7 CU and Coca-Cola Zero is priced at 5.47 CU."
+            },
+            {
+              "type": "formula",
+              "text": "R2R^{2}"
+            },
+            {
+              "type": "formula",
+              "text": "α=0\\alpha=0"
+            },
+            {
+              "type": "table",
+              "text": "| Nr | Coordinates | High sugar | Medium sugar | Low sugar | Revenue | | --- | --- | --- | --- | --- | --- | | 1 | (0; 1.25) | C​C:u=0.94CC:u=0.94 | C​C:u=0.17CC:u=0.17 | Z:u=0.72Z:u=0.72 | 14301.2514301.25 | | 2 | (0; 1.58) | C​C:u=0.94CC:u=0.94 | C​C:u=0.17CC:u=0.17 | Z:u=0.66Z:u=0.66 | 18076.7818076.78 | | 3 | (0; 1.96) | C​C:u=0.94CC:u=0.94 | C​C:u=0.17CC:u=0.17 | Z:u=0.6Z:u=0.6 | 22424.3622424.36 | | 4 | (0; 2.35) | C​C:u=0.94CC:u=0.94 | C​C:u=0.17CC:u=0.17 | C​C:u=0.53CC:u=0.53 | 00 | | 5 | (0; 5.47) | C​C:u=0.94CC:u=0.94 | C​C:u=0.17CC:u=0.17 | C​C:u=0.53CC:u=0.53 | 00 | | 6 | (0.44; 1.58) | C​C:u=0.85CC:u=0.85 | C​C:u=0.09CC:u=0.09 | Z:u=0.66Z:u=0.66 | 26601.7826601.78 | | 7 | (0.94; 0) | C​C:u=0.75CC:u=0.75 | Z:u=0.47Z:u=0.47 | Z:u=0.93Z:u=0.93 | 9345.489345.48 | | 8 | (0.94; 1.58) | C​C:u=0.75CC:u=0.75 | Z:u=0.0.9Z:u=0.0.9 | Z:0.66Z:0.66 | 42326.442326.4 | | 9 | (0.94; 1.96) | C​C:u=0.75CC:u=0.75 | C​C:u=0CC:u=0 | Z:0.6Z:0.6 | 40636.8640636.86 | | 10 | (0.94; 3.62) | C​C:u=0.75CC:u=0.75 | C​C:u=0CC:u=0 | C​C:0.31CC:0.31 | 28967.0428967.04 | | 11 | (0.94; 5.47) | C​C:u=0.75CC:u=0.75 | C​C:u=0CC:u=0 | C​C:u=0.31CC:u=0.31 | 28967.0428967.04 | | 12 | (2.13; 0) | C​C:u=0.51CC:u=0.51 | Z:u=0.47Z:u=0.47 | Z:u=0.93Z:u=0.93 | 21176.4621176.46 | | 13 | (2.13; 1.58) | C​C:u=0.51CC:u=0.51 | Z:u=0.09Z:u=0.09 | Z:u=0.66Z:u=0.66 | 54157.3854157.38 | | 14 | (2.13; 1.96) | C​C:u=0.51CC:u=0.51 | Z:u=0Z:u=0 | Z:u=0.6Z:u=0.6 | 62089.562089.5 | | 15 | (2.13; 2.85) | C​C:u=0.51CC:u=0.51 | –– | Z:u=0.45Z:u=0.45 | 53783.3153783.31 | | 16 | (2.13; 5.47) | C​C:u=0.51CC:u=0.51 | –– | C​C:u=0.04CC:u=0.04 | 45545.7945545.79 | | 17 | (2.65; 0) | C​C:u=0.41CC:u=0.41 | Z:u=0.47Z:u=0.47 | Z:u=0.93Z:u=0.93 | 26346.326346.3 | | 18 | (4.7; 0) | Z:u=0.41Z:u=0.41 | Z:u=0.47Z:u=0.47 | Z:u=0.93Z:u=0.93 | 00 | | 19 | (4.7; 1.58) | C​C:u=0CC:u=0 | Z:u=0.09Z:u=0.09 | Z:u=0.66Z:u=0.66 | 79708.3279708.32 | | 20 | (4.7; 1.96) | C​C:u=0CC:u=0 | Z:u=0Z:u=0 | Z:u=0.6Z:u=0.6 | 87640.4487640.44 | | 21 | (4.7; 4.78) | C​C:u=0CC:u=0 | –– | Z:u=0.12Z:u=0.12 | 101415.38101415.38 | | 22 | (4.7; 5.47) | C​C:u=0CC:u=0 | –– | Z:u=0Z:u=0 | 109309.67 | | 23 | (4.7; 8.7) | C​C:u=0CC:u=0 | –– | –– | 46727.446727.4 | | 24 | (5.19; 1.96) | –– | Z:u=0Z:u=0 | Z:u=0.6Z:u=0.6 | 4913.044913.04 | | 25 | (5.63; 5.47) | –– | –– | Z:u=0Z:u=0 | 62582.2762582.27 | | 26 | (9.75; 5.47) | –– | –– | Z:u=0Z:u=0 | 62582.2762582.27 | | 27 | (16.31; 5.47) | –– | –– | –– | –– |"
+            },
+            {
+              "type": "formula",
+              "text": "C​C:u=0.94CC:u=0.94"
+            },
+            {
+              "type": "formula",
+              "text": "C​C:u=0.17CC:u=0.17"
+            },
+            {
+              "type": "formula",
+              "text": "Z:u=0.72Z:u=0.72"
+            },
+            {
+              "type": "formula",
+              "text": "14301.2514301.25"
+            },
+            {
+              "type": "formula",
+              "text": "C​C:u=0.94CC:u=0.94"
+            },
+            {
+              "type": "formula",
+              "text": "C​C:u=0.17CC:u=0.17"
+            },
+            {
+              "type": "formula",
+              "text": "Z:u=0.66Z:u=0.66"
+            },
+            {
+              "type": "formula",
+              "text": "18076.7818076.78"
+            },
+            {
+              "type": "formula",
+              "text": "C​C:u=0.94CC:u=0.94"
+            },
+            {
+              "type": "formula",
+              "text": "C​C:u=0.17CC:u=0.17"
+            },
+            {
+              "type": "formula",
+              "text": "Z:u=0.6Z:u=0.6"
+            },
+            {
+              "type": "formula",
+              "text": "22424.3622424.36"
+            },
+            {
+              "type": "formula",
+              "text": "C​C:u=0.94CC:u=0.94"
+            },
+            {
+              "type": "formula",
+              "text": "C​C:u=0.17CC:u=0.17"
+            },
+            {
+              "type": "formula",
+              "text": "C​C:u=0.53CC:u=0.53"
+            },
+            {
+              "type": "formula",
+              "text": "00"
+            },
+            {
+              "type": "formula",
+              "text": "C​C:u=0.94CC:u=0.94"
+            },
+            {
+              "type": "formula",
+              "text": "C​C:u=0.17CC:u=0.17"
+            },
+            {
+              "type": "formula",
+              "text": "C​C:u=0.53CC:u=0.53"
+            },
+            {
+              "type": "formula",
+              "text": "00"
+            },
+            {
+              "type": "formula",
+              "text": "C​C:u=0.85CC:u=0.85"
+            },
+            {
+              "type": "formula",
+              "text": "C​C:u=0.09CC:u=0.09"
+            },
+            {
+              "type": "formula",
+              "text": "Z:u=0.66Z:u=0.66"
+            },
+            {
+              "type": "formula",
+              "text": "26601.7826601.78"
+            },
+            {
+              "type": "formula",
+              "text": "C​C:u=0.75CC:u=0.75"
+            },
+            {
+              "type": "formula",
+              "text": "Z:u=0.47Z:u=0.47"
+            },
+            {
+              "type": "formula",
+              "text": "Z:u=0.93Z:u=0.93"
+            },
+            {
+              "type": "formula",
+              "text": "9345.489345.48"
+            },
+            {
+              "type": "formula",
+              "text": "C​C:u=0.75CC:u=0.75"
+            },
+            {
+              "type": "formula",
+              "text": "Z:u=0.0.9Z:u=0.0.9"
+            },
+            {
+              "type": "formula",
+              "text": "Z:0.66Z:0.66"
+            },
+            {
+              "type": "formula",
+              "text": "42326.442326.4"
+            },
+            {
+              "type": "formula",
+              "text": "C​C:u=0.75CC:u=0.75"
+            },
+            {
+              "type": "formula",
+              "text": "C​C:u=0CC:u=0"
+            },
+            {
+              "type": "formula",
+              "text": "Z:0.6Z:0.6"
+            },
+            {
+              "type": "formula",
+              "text": "40636.8640636.86"
+            },
+            {
+              "type": "formula",
+              "text": "C​C:u=0.75CC:u=0.75"
+            },
+            {
+              "type": "formula",
+              "text": "C​C:u=0CC:u=0"
+            },
+            {
+              "type": "formula",
+              "text": "C​C:0.31CC:0.31"
+            },
+            {
+              "type": "formula",
+              "text": "28967.0428967.04"
+            },
+            {
+              "type": "formula",
+              "text": "C​C:u=0.75CC:u=0.75"
+            },
+            {
+              "type": "formula",
+              "text": "C​C:u=0CC:u=0"
+            },
+            {
+              "type": "formula",
+              "text": "C​C:u=0.31CC:u=0.31"
+            },
+            {
+              "type": "formula",
+              "text": "28967.0428967.04"
+            },
+            {
+              "type": "formula",
+              "text": "C​C:u=0.51CC:u=0.51"
+            },
+            {
+              "type": "formula",
+              "text": "Z:u=0.47Z:u=0.47"
+            },
+            {
+              "type": "formula",
+              "text": "Z:u=0.93Z:u=0.93"
+            },
+            {
+              "type": "formula",
+              "text": "21176.4621176.46"
+            },
+            {
+              "type": "formula",
+              "text": "C​C:u=0.51CC:u=0.51"
+            },
+            {
+              "type": "formula",
+              "text": "Z:u=0.09Z:u=0.09"
+            },
+            {
+              "type": "formula",
+              "text": "Z:u=0.66Z:u=0.66"
+            },
+            {
+              "type": "formula",
+              "text": "54157.3854157.38"
+            },
+            {
+              "type": "formula",
+              "text": "C​C:u=0.51CC:u=0.51"
+            },
+            {
+              "type": "formula",
+              "text": "Z:u=0Z:u=0"
+            },
+            {
+              "type": "formula",
+              "text": "Z:u=0.6Z:u=0.6"
+            },
+            {
+              "type": "formula",
+              "text": "62089.562089.5"
+            },
+            {
+              "type": "formula",
+              "text": "C​C:u=0.51CC:u=0.51"
+            },
+            {
+              "type": "formula",
+              "text": "––"
+            },
+            {
+              "type": "formula",
+              "text": "Z:u=0.45Z:u=0.45"
+            },
+            {
+              "type": "formula",
+              "text": "53783.3153783.31"
+            },
+            {
+              "type": "formula",
+              "text": "C​C:u=0.51CC:u=0.51"
+            },
+            {
+              "type": "formula",
+              "text": "––"
+            },
+            {
+              "type": "formula",
+              "text": "C​C:u=0.04CC:u=0.04"
+            },
+            {
+              "type": "formula",
+              "text": "45545.7945545.79"
+            },
+            {
+              "type": "formula",
+              "text": "C​C:u=0.41CC:u=0.41"
+            },
+            {
+              "type": "formula",
+              "text": "Z:u=0.47Z:u=0.47"
+            },
+            {
+              "type": "formula",
+              "text": "Z:u=0.93Z:u=0.93"
+            },
+            {
+              "type": "formula",
+              "text": "26346.326346.3"
+            },
+            {
+              "type": "formula",
+              "text": "Z:u=0.41Z:u=0.41"
+            },
+            {
+              "type": "formula",
+              "text": "Z:u=0.47Z:u=0.47"
+            },
+            {
+              "type": "formula",
+              "text": "Z:u=0.93Z:u=0.93"
+            },
+            {
+              "type": "formula",
+              "text": "00"
+            },
+            {
+              "type": "formula",
+              "text": "C​C:u=0CC:u=0"
+            },
+            {
+              "type": "formula",
+              "text": "Z:u=0.09Z:u=0.09"
+            },
+            {
+              "type": "formula",
+              "text": "Z:u=0.66Z:u=0.66"
+            },
+            {
+              "type": "formula",
+              "text": "79708.3279708.32"
+            },
+            {
+              "type": "formula",
+              "text": "C​C:u=0CC:u=0"
+            },
+            {
+              "type": "formula",
+              "text": "Z:u=0Z:u=0"
+            },
+            {
+              "type": "formula",
+              "text": "Z:u=0.6Z:u=0.6"
+            },
+            {
+              "type": "formula",
+              "text": "87640.4487640.44"
+            },
+            {
+              "type": "formula",
+              "text": "C​C:u=0CC:u=0"
+            },
+            {
+              "type": "formula",
+              "text": "––"
+            },
+            {
+              "type": "formula",
+              "text": "Z:u=0.12Z:u=0.12"
+            },
+            {
+              "type": "formula",
+              "text": "101415.38101415.38"
+            },
+            {
+              "type": "formula",
+              "text": "C​C:u=0CC:u=0"
+            },
+            {
+              "type": "formula",
+              "text": "––"
+            },
+            {
+              "type": "formula",
+              "text": "Z:u=0Z:u=0"
+            },
+            {
+              "type": "formula",
+              "text": "C​C:u=0CC:u=0"
+            },
+            {
+              "type": "formula",
+              "text": "––"
+            },
+            {
+              "type": "formula",
+              "text": "––"
+            },
+            {
+              "type": "formula",
+              "text": "46727.446727.4"
+            },
+            {
+              "type": "formula",
+              "text": "––"
+            },
+            {
+              "type": "formula",
+              "text": "Z:u=0Z:u=0"
+            },
+            {
+              "type": "formula",
+              "text": "Z:u=0.6Z:u=0.6"
+            },
+            {
+              "type": "formula",
+              "text": "4913.044913.04"
+            },
+            {
+              "type": "formula",
+              "text": "––"
+            },
+            {
+              "type": "formula",
+              "text": "––"
+            },
+            {
+              "type": "formula",
+              "text": "Z:u=0Z:u=0"
+            },
+            {
+              "type": "formula",
+              "text": "62582.2762582.27"
+            },
+            {
+              "type": "formula",
+              "text": "––"
+            },
+            {
+              "type": "formula",
+              "text": "––"
+            },
+            {
+              "type": "formula",
+              "text": "Z:u=0Z:u=0"
+            },
+            {
+              "type": "formula",
+              "text": "62582.2762582.27"
+            },
+            {
+              "type": "formula",
+              "text": "––"
+            },
+            {
+              "type": "formula",
+              "text": "––"
+            },
+            {
+              "type": "formula",
+              "text": "––"
+            },
+            {
+              "type": "formula",
+              "text": "––"
+            },
+            {
+              "type": "paragraph",
+              "text": "Now, we are ready to calculate the optimal sugar tax rate 0≤α≤10\\leq\\alpha\\leq 1. We compute all break points of the social welfare as described in Algorithm 2. For instance, take a pair of pricing strategies, say, 9 and 13: pricing strategy 9 is defined by p1′=0.94p^{\\prime}\\_{1}=0.94 and p0′=1.96p^{\\prime}\\_{0}=1.96, and pricing strategy 13 is defined by p1′′=2.13p^{\\prime\\prime}\\_{1}=2.13 and p0′′=1.58p^{\\prime\\prime}\\_{0}=1.58. In point 9, “High” and “Medium” consumers purchase Coca-Cola while “Low” consumer buys Zero. In point 13, “High” consumer purchases Coca-Cola, and “Medium” joins “Low” in her preference to Zero. The break-even in revenue under these two pricing strategies is achieved with α\\alpha being a solution to the equation:"
+            },
+            {
+              "type": "formula",
+              "text": "0≤α≤10\\leq\\alpha\\leq 1"
+            },
+            {
+              "type": "formula",
+              "text": "p1′=0.94p^{\\prime}_{1}=0.94"
+            },
+            {
+              "type": "formula",
+              "text": "p0′=1.96p^{\\prime}_{0}=1.96"
+            },
+            {
+              "type": "formula",
+              "text": "p1′′=2.13p^{\\prime\\prime}_{1}=2.13"
+            },
+            {
+              "type": "formula",
+              "text": "p0′′=1.58p^{\\prime\\prime}_{0}=1.58"
+            },
+            {
+              "type": "formula",
+              "text": "α\\alpha"
+            },
+            {
+              "type": "table",
+              "text": "| | | | | --- | --- | --- | | | 11441⋅1.96+(1−α)⋅(9433+9942)⋅0.94=(11441+9433)⋅1.58+(1−α)⋅9942⋅2.13,11441\\cdot 1.96+\\ (1-\\alpha)\\cdot(9433+9942)\\cdot 0.94=(11441+9433)\\cdot 1.58\\ +\\ (1-\\alpha)\\cdot 9942\\cdot 2.13, | |"
+            },
+            {
+              "type": "formula",
+              "text": "11441⋅1.96+(1−α)⋅(9433+9942)⋅0.94=(11441+9433)⋅1.58+(1−α)⋅9942⋅2.13,11441\\cdot 1.96+\\ (1-\\alpha)\\cdot(9433+9942)\\cdot 0.94=(11441+9433)\\cdot 1.58\\ +\\ (1-\\alpha)\\cdot 9942\\cdot 2.13,"
+            },
+            {
+              "type": "paragraph",
+              "text": "where the left hand side addresses the revenue at point 9 and the right hand side addresses the revenue at point 13. The solution to the equation is α=4.62\\alpha=4.62, which is beyond the global upper bound of 1 for the tax rate. Thus, this break point can be disregarded. We perform the same calculations for all pairs of the potentially optimal pricing strategies and derive all potentially optimal tax rates α\\alpha in interval [0,1][0,1]. We list all these potentially optimal tax rates in Table [4](https://arxiv.org/html/1810.07243v1#S4.T4 \"Table 4 ‣ 4 Illustrative intuitive example ‣ Optimal policy design for the sugar tax\")."
+            },
+            {
+              "type": "formula",
+              "text": "α=4.62\\alpha=4.62"
+            },
+            {
+              "type": "formula",
+              "text": "α\\alpha"
+            },
+            {
+              "type": "formula",
+              "text": "[0,1][0,1]"
+            },
+            {
+              "type": "table",
+              "text": "| | | | | | | | | --- | --- | --- | --- | --- | --- | --- | | 0.00 | 0.09 | 0.10 | 0.121 | 0.124 | 0.13 | 0.15 | | 0.15 | 0.16 | 0.18 | 0.21 | 0.23 | 0.31 | 0.32 | | 0.37 | 0.38 | 0.46 | 0.49 | 0.511 | 0.513 | 0.514 | | 0.52 | 0.53 | 0.54 | 0.60 | 0.61 | 0.62 | 0.63 | | 0.69 | 0.7 | 0.61 | 0.83 | 0.84 | 0.97 | 1.00 |"
+            },
+            {
+              "type": "formula",
+              "text": "α\\alpha"
+            },
+            {
+              "type": "paragraph",
+              "text": "For each potentially optimal tax rate, we calculate the company’s maximal utility (revenue minus tax) by enumerating over all potentially optimal pricing strategies. In the case at hands, for any 0≤α≤10\\leq\\alpha\\leq 1, the maximal utilities of the company appear only in three price points: (22) Coca-Cola is priced at 4.7 CU, Coca-Cola Zero is priced at 5.47 CU; (25) Coca-Cola is priced 5.63 CU, Coca-Cola Zero is priced at 5.47 CU; (26) Coca-Cola is priced at 9.75 CU, Coca-Cola Zero is priced at 5.47 CU. Moreover, points 25 and 26 are optimal only in α=0\\alpha=0, while point 22 is optimal on the entire interval [0;1][0;1]."
+            },
+            {
+              "type": "formula",
+              "text": "0≤α≤10\\leq\\alpha\\leq 1"
+            },
+            {
+              "type": "formula",
+              "text": "α=0\\alpha=0"
+            },
+            {
+              "type": "formula",
+              "text": "[0;1][0;1]"
+            },
+            {
+              "type": "paragraph",
+              "text": "Enumerating over all potentially optimal tax rates listed in Table [4](https://arxiv.org/html/1810.07243v1#S4.T4 \"Table 4 ‣ 4 Illustrative intuitive example ‣ Optimal policy design for the sugar tax\"), we derive that the maximum social welfare of 156037 CU is achieved with α=1\\alpha=1, when the company sets the prices 4.7 CU for Coca-Cola and 5.47 CU for Coca-Cola Zero."
+            },
+            {
+              "type": "formula",
+              "text": "α=1\\alpha=1"
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "5 Conclusion",
+          "level": 2,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "In this paper we develop a model for coordinating the interests of the government, companies and heterogeneous consumers. The model is based on a sequential game represented by a three-level mathematical program. We design an algorithm efficiently solving the program, i.e., obtaining a socially optimal solution in time polynomial in the input size of the problem."
+            },
+            {
+              "type": "paragraph",
+              "text": "Surprisingly, for the case known in the literature [[Holtrop et al., 2017](https://arxiv.org/html/1810.07243v1#bib.bibx8)], we obtain that the optimal sugar tax rate maximizing the commonly used social welfare function is equal to 100%. Furthermore, the real prices for Coca-Cola and Coca-Cola Zero are greatly underestimated compared to the prices that maximize the company (Coca-Cola) revenue. Moreover, the revenue maximizing prices with and without taxation are exactly the same. This phenomena might be caused by either oversimplification of the social welfare function, or by oversimplification of the consumer behavior model, or by inefficiency in the market caused by irrationality of the players, e.g., firms underpricing their products, or by a combination of the above factors. In this way, the approach proposed in the paper can be used in different contexts in order to benchmark the social welfare and also in order to check reasonability of the models/utilities of the players."
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "Acknowledgment",
+          "level": 2,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "We express our gratitude to Vladimir Kovalenok for the help in developing the example."
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "References",
+          "level": 2,
+          "content": [
+            {
+              "type": "list",
+              "text": "* [Ball et al., 2015] Ball, K., McNaughton, S. A., Le, H. N., Gold, L., Ni Mhurchu, C., Abbott, G., Pollard, C., and Crawford, D. (2015). Influence of price discounts and skill-building strategies on purchase and consumption of healthy food and beverages: outcomes of the supermarket healthy eating for life randomized controlled trial–. The American journal of clinical nutrition, 101(5):1055–1064. * [Bernoulli, 2011] Bernoulli, D. (2011). Exposition of a new theory on the measurement of risk. In The Kelly Capital Growth Investment Criterion: Theory and Practice, pages 11–24. World Scientific. * [Desai and Ratneshwar, 2003] Desai, K. K. and Ratneshwar, S. (2003). Consumer perceptions of product variants positioned on atypical attributes. Journal of the Academy of Marketing Science, 31(1):22–35. * [FAO and WHO, 2017] FAO, IFAD, U. W. and WHO (2017). The state of food security and nutrition in the world. Building climate resilience for food security and nutrition, page 201. * [Ferreira et al., 2007] Ferreira, I., Van Der Horst, K., Wendel-Vos, W., Kremers, S., Van Lenthe, F. J., and Brug, J. (2007). Environmental correlates of physical activity in youth–a review and update. Obesity reviews, 8(2):129–154. * [Geliebter et al., 2013] Geliebter, A., Atalayer, D., Flancbaum, L., and Gibson, C. D. (2013). Comparison of body adiposity index (bai) and bmi with estimations of% body fat in clinically severe obese women. Obesity, 21(3):493–498. * [Glanz et al., 2012] Glanz, K., Bader, M. D., and Iyer, S. (2012). Retail grocery store marketing strategies and obesity: an integrative review. American journal of preventive medicine, 42(5):503–512. * [Holtrop et al., 2017] Holtrop, N., Cleeren, K., Geyskens, K., and Verhoef, P. (2017). The impact of nutritional health claims on sku choice. In EMAC Conference. * [Mead and Richerson, 2018] Mead, J. A. and Richerson, R. (2018). Package color saturation and food healthfulness perceptions. Journal of Business Research, 82:10–18. * [Minkov et al., 2015] Minkov, N., Schneider, L., Lehmann, A., and Finkbeiner, M. (2015). Type iii environmental declaration programmes and harmonization of product category rules: status quo and practical challenges. Journal of Cleaner Production, 94:235–246. * [Morales, 2005] Morales, A. C. (2005). Giving firms an “e” for effort: Consumer responses to high-effort firms. Journal of Consumer Research, 31(4):806–812. * [Okada, 2005] Okada, E. M. (2005). Justification effects on consumer choice of hedonic and utilitarian goods. Journal of marketing research, 42(1):43–53. * [Rettie and Brewer, 2000] Rettie, R. and Brewer, C. (2000). The verbal and visual components of package design. Journal of product & brand management, 9(1):56–70. * [Smith et al., 2013] Smith, W. K., Gonin, M., and Besharov, M. L. (2013). Managing social-business tensions: A review and research agenda for social enterprise. Business Ethics Quarterly, 23(3):407–442. * [Solomon et al., 2012] Solomon, M., Russell-Bennett, R., and Previte, J. (2012). Consumer behaviour. Pearson Higher Education AU. * [Stevenson and Ingwersen, 2012] Stevenson, M. J. and Ingwersen, W. W. (2012). Environmental product claims and life cycle assessment. Life Cycle Assessment Handbook: A Guide for Environmentally Sustainable Products, pages 475–543."
+            }
+          ],
+          "children": []
+        }
+      ]
+    }
+  ],
+  "chunks": [
+    {
+      "heading_path": [
+        "Report GitHub Issue"
+      ],
+      "text": "##### Report GitHub Issue\n\nContent selection saved. Describe the issue below:"
+    },
+    {
+      "heading_path": [
+        "Optimal policy design for the sugar tax"
+      ],
+      "text": "# Optimal policy design for the sugar tax"
+    },
+    {
+      "heading_path": [
+        "Optimal policy design for the sugar tax",
+        "Abstract"
+      ],
+      "text": "###### Abstract\n\nHealthy nutrition promotions and regulations have long been regarded as a tool for increasing social welfare. One of the avenues taken in the past decade is sugar consumption regulation by introducing a sugar tax. Such a tax increases the price of extensive sugar containment in products such as soft drinks. In this article we consider a typical problem of optimal regulatory policy design, where the task is to determine the sugar tax rate maximizing the social welfare. We model the problem as a sequential game represented by the three-level mathematical program. On the upper level, the government decides upon the tax rate. On the middle level, producers decide on the product pricing. On the lower level, consumers decide upon their preferences towards the products. While the general problem is computationally intractable, the problem with a few product types is polynomially solvable, even for an arbitrary number of heterogeneous consumers. This paper presents a simple, intuitive and easily implementable framework for computing optimal sugar tax in a market with a few products types. This resembles the reality as the soft drinks, for instance, are typically categorized in either regular or no-sugar drinks, e.g. Coca-Cola and Coca-Cola Zero. We illustrate the algorithm using an example based on the real data and draw conclusions for a specific local market.\n\nKeywords: Three-level mathematical program, nutrition promotion, social welfare optimization, governmental regulations, enumeration algorithms"
+    },
+    {
+      "heading_path": [
+        "Optimal policy design for the sugar tax",
+        "1 Introduction"
+      ],
+      "text": "## 1 Introduction\n\nSince the 2000s, interest in the proper nutrition promotion has dramatically increased in many countries. According to the World Health Organization (WHO), worldwide obesity has nearly tripled since 1975. In 2016, more than 1.9 billion adults were overweight, with over 650 million of these adults being obese. Moreover, 41 million children under the age of 5 were overweight or obese in 2016 [[FAO and WHO, 2017](https://arxiv.org/html/1810.07243v1#bib.bibx4)]. In addition to obesity, adults, children and adolescents often face risks such as depletion, stunted growth, lack of vitamins and minerals, nutritional non-communicable diseases (heart disease, stroke, diabetes, certain cancers) that affect their health in the short and long term periods [[FAO and WHO, 2017](https://arxiv.org/html/1810.07243v1#bib.bibx4)]. Therefore, the formation of a proper nutrition culture is very important, especially in youth, since all the human habits and life values are formed at a young age [[Ferreira et al., 2007](https://arxiv.org/html/1810.07243v1#bib.bibx5)]. During adolescence, young people adjust their lifestyle easier than adults. Thereby, nutrition habit is one of the basic elements for their health in future.\n\nSolving obesity problems is also a challenging task for the governments, as inadequate nutrition increases health care costs, reduces productivity and slows economic growth. These consequences, in turn, are the basis for permanent poverty and poor population health [[FAO and WHO, 2017](https://arxiv.org/html/1810.07243v1#bib.bibx4)].\n\nIn contrast, the main concern of the companies is the average market share and/or profit [[Smith et al., 2013](https://arxiv.org/html/1810.07243v1#bib.bibx14)]. This incentives are not always directed at healthy products, and it is always a challenge for a government to introduce and to maintain mechanisms stimulating the companies to promote proper nutrition. Clearly, there might exist opposing interests, when the companies focus on purely financial indicators, while the government seeks to improve the social welfare. In this interaction, the end-consumers play crucial role. On the one hand, consumers choose products guided by various marketing stimuli such as advertising, pricing, and branding [[Solomon et al., 2012](https://arxiv.org/html/1810.07243v1#bib.bibx15)]. This way consumers strongly support the companies. On the other hand, the governmental and societal information provision programs create awareness of proper nutrition importance, shift the demand towards healthy products and, as a result, customer valuations for healthy products become higher than for unhealthy ones. This way consumers strongly support the government. Therefore, a combination of information provision and direct regulations, e.g. extra taxation for unhealthy products, is a powerful instrument of the government to improve the social welfare."
+    },
+    {
+      "heading_path": [
+        "Optimal policy design for the sugar tax",
+        "1 Introduction",
+        "1.1 Nutrition promotion instruments"
+      ],
+      "text": "### 1.1 Nutrition promotion instruments\n\nIn this section we describe possible nutrition promotion mechanisms for a government and for a company/firm. Later, some of the mechanisms, namely, taxes and prices, will be explicitly introduced as variables in the utility functions of the companies and consumers, respectively.\n\nThe government is typically the first mover which sets monetary and/or non-monetary product/market regulations. Among monetary regulations, the most popular ones are *taxes* (for unhealthy products), *subsidies* (for healthy products), and *caps* (maximal price for a product). These regulations directly influence the utility function of a company and rarely affect the consumer utility functions. Furthermore, government can use non-monetary instruments to stimulate nutrition consumption, e.g., certification, labeling, obligatory description of ingredients and nutritional value on the packages [[Stevenson and Ingwersen, 2012](https://arxiv.org/html/1810.07243v1#bib.bibx16), [Minkov et al., 2015](https://arxiv.org/html/1810.07243v1#bib.bibx10)]. More specifically, the government can impose an obligation on firms to use particular size, color and shape for nutritious food packages or for price tags. For instance, recent research shows that the consumers perceive products in vivid packaging as less healthy than food in muted color packages [[Mead and Richerson, 2018](https://arxiv.org/html/1810.07243v1#bib.bibx9)]. *Minimal font size* of ingredients’ inscription and nutritional value also can be used by government as non-monetary regulation. This tool may attract consumers’ attention on containment of harmful to health ingredients such as sugar, preservatives and dyes. The last but not the least tool is *point-of-sales merchandising*. One study showed that joint presentation of healthy and unhealthy products forces consumers to choose the first one because such way increases guilt and the difficulty of social justification [[Okada, 2005](https://arxiv.org/html/1810.07243v1#bib.bibx12)]. Consequently, merchandising can be an effective instrument which may force people to buy healthy products. These non-monetary regulatory mechanisms serve for information provision and do have influence on the consumer utility functions, though the effect of the information provision is sometimes is not immediate. The company utility functions are rarely directly affected by the non-monetary governmental regulations.\n\nIn turn, a company/firm (producer or retailer) is the follower. Knowing the governmental regulations, companies maximize the profit applying their toolkit to influence the consumer behavior. It should be noted that interests of producers and retailers can be different, but within the framework of this research we do not distinguish these two players. It is widely accepted that the most powerful tool of a firm is the *price* set for a product. Next to the price, *discounts* is the most popular instrument. To illustrate the possible efficiency of this tool, prior research has provided results of experiments where price reduction can be a reason of increased consumption [[Geliebter et al., 2013](https://arxiv.org/html/1810.07243v1#bib.bibx6), [Ball et al., 2015](https://arxiv.org/html/1810.07243v1#bib.bibx1)]. For example, [[Ball et al., 2015](https://arxiv.org/html/1810.07243v1#bib.bibx1)] have found that a 20% discount for fruit and vegetables categories caused increased purchasing per household of 35% for fruit and 15% for vegetables. Furthermore, it is proved that even temporary discounts can stimulate proper nutrition consumption. In one study [[Geliebter et al., 2013](https://arxiv.org/html/1810.07243v1#bib.bibx6)], there were three periods (baseline - no discount, intervention - 50% discount, follow-up - no discount) during which obese respondents were buying fruits and vegetables during this periods. As a result, purchasing of fruits and vegetables during follow-up period became higher than during baseline. This research demonstrates effectiveness of applying discounts to increase proper nutrition consumption. At the same time, firms may use such non-monetary instruments as *availability in stores*, *merchandising*, and *package design* [[Glanz et al., 2012](https://arxiv.org/html/1810.07243v1#bib.bibx7)]. Availability in stores means that wide access to proper nutrition food increase nutrition consumption. It happens because people prefer to buy what is in every supermarket instead of trying to find something special for everyday meals [[Desai and Ratneshwar, 2003](https://arxiv.org/html/1810.07243v1#bib.bibx3), [Morales, 2005](https://arxiv.org/html/1810.07243v1#bib.bibx11)]. Merchandising was already discussed in the context of the governmental tools and it can also be effective on the company’s level. Moreover, unusual packages can be used by marketers to increase demand for proper nutrition [[Rettie and Brewer, 2000](https://arxiv.org/html/1810.07243v1#bib.bibx13)]."
+    },
+    {
+      "heading_path": [
+        "Optimal policy design for the sugar tax",
+        "1 Introduction",
+        "1.2 Problem statement and basic assumptions"
+      ],
+      "text": "### 1.2 Problem statement and basic assumptions\n\nIn this study we assume that (1) effective information provision programs take place; (2) consumers are aware of proper nutrition importance; and (3) consumers already formed their utility functions (product valuations) and in the near future they are not going to change their preferences significantly. Notice, without these assumptions the efficiency of direct regulations is questionable. We take the consumer utility functions as granted. This is also a valid assumption, given a number and variety of consumer behavior models available in the literature. In the end of the paper, we provide an insightful example and analysis based on a specific consumer behavior model and actual purchase data. Such data can be routinely obtained from the market research agencies such as Nielsen, GfK and Kantar. We base our example and experiments on the data provided by the latter party.\n\nSpecifically targeting the optimal regulations of the soft drinks markets, this research focuses on the most popular, powerful and long-run instruments of the government and of the firm, namely on the sugar tax and prices, respectively. In the past decade, many countries initiated sugar consumption regulation by introducing a sugar tax. Such a tax increases the price of extensive sugar containment in products such as soft drinks. In this article we consider a typical problem of optimal regulatory policy design, where the task is to determine the sugar tax rate maximizing the social welfare. We model the problem as a sequential game represented by the three-level mathematical program. On the upper level, given the utility functions of the soft drink producer/retailer and consumers, the government decides upon the sugar tax rate with the goal to optimize the social welfare. On the middle level, given the sugar tax rate and the utility functions of the consumers, a company decides on the product prices maximizing the company utility. On the lower level, given the product prices, consumers decide upon their preferences towards either sugar containing or sugar-free products. All utility functions and the social welfare are taken from the classic economic literature. This ensures the generality of the approach and applicability to not only the soft drinks markets and sugar taxes, but rather to a broad variety of the markets needing governmental regulations."
+    },
+    {
+      "heading_path": [
+        "Optimal policy design for the sugar tax",
+        "1 Introduction",
+        "1.3 Contemporary sugar tax practices"
+      ],
+      "text": "### 1.3 Contemporary sugar tax practices\n\nThe sugar tax means each liter of sugary drink will have an extra tax charge up to 50%, depending on how much sugar is in the drink11 1 https://www.bbc.com/news/health-35824071. Tax rates depend on government policy in a country and can be expressed in percentage or in monetary units. Moreover, taxation schemes vary from country to country, see Table [1](https://arxiv.org/html/1810.07243v1#S1.T1 \"Table 1 ‣ 1.3 Contemporary sugar tax practices ‣ 1 Introduction ‣ Optimal policy design for the sugar tax\"). Nowadays, there are two common schemes: a one-level tax rate and a multi-level tax rate. In the case of a one-level tax rate, government establishes a single tax rate for all drinks containing sugar, or for drinks with a sugar containment above a specific threshold. Such approaches are used in France, Chile, Mexico, Belgium, Colombia, India, Portugal, Saudi Arabia, UAE, USA, South Africa. Alternatively, several countries (e.g. Thailand, Ireland, UK) apply a multi-level taxation scheme, which assumes different tax rates according to sugar content22 2 https://www.beveragedaily.com/Article/2017/12/20/Sugar-taxes-The-global-picture-in-2017, see Table [1](https://arxiv.org/html/1810.07243v1#S1.T1 \"Table 1 ‣ 1.3 Contemporary sugar tax practices ‣ 1 Introduction ‣ Optimal policy design for the sugar tax\").\n\n| | | | | --- | --- | --- | | Country | Tax rate | Effective | | | | since | | France | 7.53 euro per 100 liters | 2013 | | Chile | >6,25>6,25 grams of sugar per 0.1 liter →\\rightarrow 16% | 2014 | | Mexico | 1 peso per liter | 2014 | | Belgium | 3.7284 euro per 100 liters | 2013 | | Colombia | 20% per liter | 2016 | | India | 40% | 2017 | | Portugal | >80>80 grams of sugar per liter →\\rightarrow 16% | 2017 | | Thailand | 14% + 5-stage sugar tax according to | 2017 | | | sugar content | | | Saudi Arabia | 50% | 2017 | | UAE | 50% | 2017 | | USA (several cities) | 1–2 cents per ounce | 2017 | | Ireland | 5–8 grams of sugar per 0.1 liter →\\rightarrow 21 cents; | | | | >8>8 grams of sugar per 0.1 liter →\\rightarrow 31 cents | 2018 | | South Africa | >4>4 grams of sugar per 0.1 liter →\\rightarrow 2.1 cents | | | | per gram of sugar per 0.1 liter | 2018 | | UK | 5–8 grams of sugar per 0.1 liter →\\rightarrow 18%; | | | | >8>8 grams of sugar per 0.1 liter→\\rightarrow 24% | 2018 |\n\n>6,25>6,25\n\n→\\rightarrow\n\n>80>80\n\n→\\rightarrow\n\n→\\rightarrow\n\n>8>8\n\n→\\rightarrow\n\n>4>4\n\n→\\rightarrow\n\n→\\rightarrow\n\n>8>8\n\n→\\rightarrow\n\nIn this paper we assume a one-level tax rate for any positive sugar containment in the drink. This is the current sugar tax practice in many countries, e.g., France, Mexico, Belgium, Colombia, India, Saudi Arabia, UAE and USA.The approach is straightforwardly extendable to a multi-level tax rate with a constant number of (a few) levels."
+    },
+    {
+      "heading_path": [
+        "Optimal policy design for the sugar tax",
+        "2 Definitions and mathematical model"
+      ],
+      "text": "## 2 Definitions and mathematical model\n\nSince the tax per cent varies widely from country to country, it makes sense to develop a general mathematical model determining the taxation mechanism maximizing the social welfare. Such a model should coordinate the interests across the three players: government, firms and consumers. As a starting point for the model the utility functions of the players are defined. The government utility is usually understood as *social welfare*, see [[Bernoulli, 2011](https://arxiv.org/html/1810.07243v1#bib.bibx2)]. Let the social welfare be referred as WW. It is expressed as the total utility of consumers and firms plus the tax:\n\nWW\n\n| | | | | --- | --- | --- | | | W=Uc+Uf+T,W=U\\_{c}+U\\_{f}+T, | |\n\nW=Uc+Uf+T,W=U_{c}+U_{f}+T,\n\nwhere UcU\\_{c} is the total utility of all consumers, UfU\\_{f} is the total utility of all firms, and TT is the total tax collected.\n\nUcU_{c}\n\nUfU_{f}\n\nTT\n\nThe total utility of the consumers UcU\\_{c} is defined as follows. Let the set of consumers be denoted by NN. For simplicity of presentation, consider a market with only two products: one is containing sugar and another one is sugar-free. Let the product containing sugar be indexed with 1, and the sugar-free product be indexed with 0, and let M={0,1}M=\\{0,1\\} be the product index set. Later we explain how to generalize the model and how to adjust the algorithms in the case of several (a constant number of) products. Let ui,ju\\_{i,j} be an individual utility of consumer i∈Ni\\in N for product j∈Mj\\in M, and let xi,jx\\_{i,j} be a binary decision variable taking value 1 if consumer ii prefers product jj to any other products and 0 otherwise. Assuming consumer’s rationality, we have xi,k=1,i∈N,k∈Mx\\_{i,k}=1,\\ i\\in N,k\\in M, if only if ui,k=maxj∈M⁡ui,ju\\_{i,k}=\\max\\_{j\\in M}u\\_{i,j} and ui,k≥0u\\_{i,k}\\geq 0. Here, for all consumers i∈Ni\\in N we assume that ∑j∈Mxi,j≤1\\sum\\_{j\\in M}x\\_{i,j}\\leq 1. For this assumption to be true, the ties on the maximal utilities are broken in favor of the company revenue — this is also a folklore economic assumption. Clearly, if a consumer has negative utilities for all products, she does not purchase anything, i.e., ∑j∈Mxi,j=0\\sum\\_{j\\in M}x\\_{i,j}=0.\n\nUcU_{c}\n\nNN\n\nM={0,1}M=\\{0,1\\}\n\nui,ju_{i,j}\n\ni∈Ni\\in N\n\nj∈Mj\\in M\n\nxi,jx_{i,j}\n\nii\n\njj\n\nxi,k=1,i∈N,k∈Mx_{i,k}=1,\\ i\\in N,k\\in M\n\nui,k=maxj∈M⁡ui,ju_{i,k}=\\max_{j\\in M}u_{i,j}\n\nui,k≥0u_{i,k}\\geq 0\n\ni∈Ni\\in N\n\n∑j∈Mxi,j≤1\\sum_{j\\in M}x_{i,j}\\leq 1\n\n∑j∈Mxi,j=0\\sum_{j\\in M}x_{i,j}=0\n\nIn the literature on marketing, there are various models describing behavior and individual utilities of the consumers for a product. Vast majority of the models are linear in the product price. For instance, consumer utility function suggested in [[Holtrop et al., 2017](https://arxiv.org/html/1810.07243v1#bib.bibx8)] consists of (1) a constant which includes different psychological, economical, and sociological factors such as brand loyalty, consumer’s budget, readiness to pay etc; (2) a term depending on the number of claims and nutritional values which are written on product packages, e.g., labels as ”low in fat”, ”high in fiber” and other which may influence consumer’s choice; and (3) deduction of the price related factor:\n\n| | | | | --- | --- | --- | | | ui,j=(βi,j+β1⋅N​r​C​l​a​i​m​s¯+β2⋅N​u​t​r​V​a​l¯−β3⋅pj)+.u\\_{i,j}=\\left(\\beta\\_{i,j}+\\beta\\_{1}\\cdot\\overline{NrClaims}+\\beta\\_{2}\\cdot\\overline{NutrVal}-\\beta\\_{3}\\cdot p\\_{j}\\right)^{+}.\\ | |\n\nui,j=(βi,j+β1⋅N​r​C​l​a​i​m​s¯+β2⋅N​u​t​r​V​a​l¯−β3⋅pj)+.u_{i,j}=\\left(\\beta_{i,j}+\\beta_{1}\\cdot\\overline{NrClaims}+\\beta_{2}\\cdot\\overline{NutrVal}-\\beta_{3}\\cdot p_{j}\\right)^{+}.\\\n\nHere, βi,j,β1,β2,β3\\beta\\_{i,j},\\ \\beta\\_{1},\\ \\beta\\_{2},\\ \\beta\\_{3} are the coefficients determined by a multinominal choice model33 3 https://eml.berkeley.edu/books/choice2.html, N​r​C​l​a​i​m​s¯\\overline{NrClaims} is the average number of claims on product packages in category, N​u​t​r​V​a​l¯\\overline{NutrVal} is the average nutritional value in category, and pkp\\_{k} is the price of product jj. Notice, the intercept βi,j\\beta\\_{i,j} is a constant including factors causing heterogeneity across the consumers. Finally,\n\nβi,j,β1,β2,β3\\beta_{i,j},\\ \\beta_{1},\\ \\beta_{2},\\ \\beta_{3}\n\nN​r​C​l​a​i​m​s¯\\overline{NrClaims}\n\nN​u​t​r​V​a​l¯\\overline{NutrVal}\n\npkp_{k}\n\njj\n\nβi,j\\beta_{i,j}\n\n| | | | | --- | --- | --- | | | Uc=∑i∈N∑j∈Mln⁡(1+ui,j)⋅xi,j,U\\_{c}=\\sum\\_{i\\in N}\\sum\\_{j\\in M}\\ln(1+u\\_{i,j})\\cdot x\\_{i,j}, | |\n\nUc=∑i∈N∑j∈Mln⁡(1+ui,j)⋅xi,j,U_{c}=\\sum_{i\\in N}\\sum_{j\\in M}\\ln(1+u_{i,j})\\cdot x_{i,j},\n\nunder a classic assumption of diminishing marginal utilities of consumers, see, e.g., [[Bernoulli, 2011](https://arxiv.org/html/1810.07243v1#bib.bibx2)].\n\nThe consumer behavior model in [[Holtrop et al., 2017](https://arxiv.org/html/1810.07243v1#bib.bibx8)] does not assume price elasticity of the demand. This is a reasonable assumption for the present research as for the soft drinks, the volume of purchase depends rather on the preferences and demographic characteristics of the consumer’s household than on the product price. Therefore, we may assume that the demand of a consumer i∈Ni\\in N is given in two quantities: if the consumer prefers sugar-free drink, the realized demand is Di,0D\\_{i,0}, and if the sugary drink is preferred, the demand is Di,1D\\_{i,1}. Then, the utility of a company UfU\\_{f} is defined by its revenue\n\ni∈Ni\\in N\n\nDi,0D_{i,0}\n\nDi,1D_{i,1}\n\nUfU_{f}\n\n| | | | | --- | --- | --- | | | Uf=(∑i∈N∑j∈MDi,j⋅pj⋅xi,j)−T,U\\_{f}=\\left(\\sum\\_{i\\in N}\\sum\\_{j\\in M}\\ D\\_{i,j}\\cdot p\\_{j}\\cdot x\\_{i,j}\\right)\\ -\\ T, | |\n\nUf=(∑i∈N∑j∈MDi,j⋅pj⋅xi,j)−T,U_{f}=\\left(\\sum_{i\\in N}\\sum_{j\\in M}\\ D_{i,j}\\cdot p_{j}\\cdot x_{i,j}\\right)\\ -\\ T,\n\nwhile the tax TT is defined by\n\nTT\n\n| | | | | --- | --- | --- | | | T=α⋅∑i∈NDi,1⋅p1⋅xi,1,T=\\alpha\\cdot\\sum\\_{i\\in N}\\ D\\_{i,1}\\cdot p\\_{1}\\cdot x\\_{i,1}, | |\n\nT=α⋅∑i∈NDi,1⋅p1⋅xi,1,T=\\alpha\\cdot\\sum_{i\\in N}\\ D_{i,1}\\cdot p_{1}\\cdot x_{i,1},\n\nwhere 0≤α≤10\\leq\\alpha\\leq 1 is the sugar tax rate established by the government.\n\n0≤α≤10\\leq\\alpha\\leq 1\n\nThus, the entire mathematical model is represented by the three-level program:\n\n| | | | | | --- | --- | --- | --- | | | max0≤α≤1∑i∈N∑j∈M(ln(1+ui,j)+Di,j⋅pj∗)⋅xi,j∗\\max\\_{0\\leq\\alpha\\leq 1}\\ \\sum\\_{i\\in N}\\sum\\_{j\\in M}\\ \\left(\\ln(1+u\\_{i,j})\\ +\\ D\\_{i,j}\\cdot p^{\\*}\\_{j}\\right)\\cdot x^{\\*}\\_{i,j} | | (1) |\n\nsubject to\n\n| | | | | | --- | --- | --- | --- | | | p∗=arg⁡maxp≥0⁡(∑i∈NDi,0⋅p0⋅xi,0∗)+(1−α)⋅(∑i∈NDi,1⋅p1⋅xi,1∗)p^{\\*}\\ =\\ \\arg\\max\\_{p\\geq 0}\\ \\left(\\sum\\_{i\\in N}\\ D\\_{i,0}\\cdot p\\_{0}\\cdot x^{\\*}\\_{i,0}\\right)\\ +\\ (1-\\alpha)\\cdot\\left(\\sum\\_{i\\in N}\\ D\\_{i,1}\\cdot p\\_{1}\\cdot x^{\\*}\\_{i,1}\\right) | | (2) |\n\np∗=arg⁡maxp≥0⁡(∑i∈NDi,0⋅p0⋅xi,0∗)+(1−α)⋅(∑i∈NDi,1⋅p1⋅xi,1∗)p^{*}\\ =\\ \\arg\\max_{p\\geq 0}\\ \\left(\\sum_{i\\in N}\\ D_{i,0}\\cdot p_{0}\\cdot x^{*}_{i,0}\\right)\\ +\\ (1-\\alpha)\\cdot\\left(\\sum_{i\\in N}\\ D_{i,1}\\cdot p_{1}\\cdot x^{*}_{i,1}\\right)\n\nsubject to\n\n| | | | | | --- | --- | --- | --- | | | x∗=arg⁡maxx​∑i∈N∑j∈Mui,j⋅xi,jx^{\\*}\\ =\\ \\arg\\max\\_{x}\\ \\sum\\_{i\\in N}\\sum\\_{j\\in M}\\ u\\_{i,j}\\cdot x\\_{i,j} | | (3) |\n\nx∗=arg⁡maxx​∑i∈N∑j∈Mui,j⋅xi,jx^{*}\\ =\\ \\arg\\max_{x}\\ \\sum_{i\\in N}\\sum_{j\\in M}\\ u_{i,j}\\cdot x_{i,j}\n\nsubject to\n\n| | | | | | --- | --- | --- | --- | | | ui,j=(βi,j+β1⋅N​r​C​l​a​i​m​s¯+β2⋅N​u​t​r​V​a​l¯−β3⋅pj)+,u\\_{i,j}=\\left(\\beta\\_{i,j}+\\beta\\_{1}\\cdot\\overline{NrClaims}+\\beta\\_{2}\\cdot\\overline{NutrVal}-\\beta\\_{3}\\cdot p\\_{j}\\right)^{+},\\ | | (4) |\n\nui,j=(βi,j+β1⋅N​r​C​l​a​i​m​s¯+β2⋅N​u​t​r​V​a​l¯−β3⋅pj)+,u_{i,j}=\\left(\\beta_{i,j}+\\beta_{1}\\cdot\\overline{NrClaims}+\\beta_{2}\\cdot\\overline{NutrVal}-\\beta_{3}\\cdot p_{j}\\right)^{+},\\\n\n| | | | | | --- | --- | --- | --- | | | ∑j∈Mxi,j≤1∀i∈N,\\sum\\_{j\\in M}x\\_{i,j}\\leq 1\\ \\ \\ \\ \\ \\forall i\\in N, | | (5) |\n\n∑j∈Mxi,j≤1∀i∈N,\\sum_{j\\in M}x_{i,j}\\leq 1\\ \\ \\ \\ \\ \\forall i\\in N,\n\n| | | | | | --- | --- | --- | --- | | | xi,j∈{0,1}∀i∈N,j∈M.x\\_{i,j}\\in\\{0,1\\}\\ \\ \\ \\ \\ \\forall i\\in N,j\\in M. | | (6) |\n\nxi,j∈{0,1}∀i∈N,j∈M.x_{i,j}\\in\\{0,1\\}\\ \\ \\ \\ \\ \\forall i\\in N,j\\in M.\n\nOn the first level, the government decides upon the sugar tax rate 0≤α≤10\\leq\\alpha\\leq 1 to maximize the social welfare. On the second level, given the tax rate α\\alpha, the company decides on the prices p0≥0p\\_{0}\\geq 0 and p1≥0p\\_{1}\\geq 0 to maximize the company’s revenue. On the third level, given the prices pp, the consumers select preferred products maximizing their utility.\n\n0≤α≤10\\leq\\alpha\\leq 1\n\nα\\alpha\n\np0≥0p_{0}\\geq 0\n\np1≥0p_{1}\\geq 0\n\npp"
+    },
+    {
+      "heading_path": [
+        "Optimal policy design for the sugar tax",
+        "3 Solution of the three-level program"
+      ],
+      "text": "## 3 Solution of the three-level program\n\nIn this section we provide intuition and sketch the algorithms solving the three-level mathematical problem (1)-(6). Then, we present the formal pseudo-codes of the algorithms. As the algorithms are rather straightforward and very intuitive, we leave it for a reader to prove their correctness.\n\nTo find the optimal tax rate, we first suggest to find all potentially optimal pricing strategies of the company. Notice, the consumer utility functions are linear in prices. Therefore, for every consumer i∈Ni\\in N, the *preference half-spaces* are determined by inequalities βi,0−β3​p0≥βi,1−β3​p1,\\beta\\_{i,0}-\\beta\\_{3}p\\_{0}\\geq\\beta\\_{i,1}-\\beta\\_{3}p\\_{1}, where the consumer prefers the sugar-free drink, and βi,0−β3​p0≤βi,1−β3​p1,\\beta\\_{i,0}-\\beta\\_{3}p\\_{0}\\leq\\beta\\_{i,1}-\\beta\\_{3}p\\_{1}, where the consumer might prefer the sugary drink. The *indifference hyperplane* βi,0−β3​p0=βi,1−β3​p1\\beta\\_{i,0}-\\beta\\_{3}p\\_{0}=\\beta\\_{i,1}-\\beta\\_{3}p\\_{1} does, actually, represent the prices where the consumer is indifferent which product to purchase. Next to indifference hyperplanes, let us introduce the *budget hyperplanes*: βi,0=β3​p0\\beta\\_{i,0}=\\beta\\_{3}p\\_{0} and βi,1=β3​p1\\beta\\_{i,1}=\\beta\\_{3}p\\_{1}, as the consumer purchases a product only if her utility for the product is non-negative, i.e., βi,0≥β3​p0\\beta\\_{i,0}\\geq\\beta\\_{3}p\\_{0} or βi,1≥β3​p1\\beta\\_{i,1}\\geq\\beta\\_{3}p\\_{1}. The union of all indifference and budget hyperplanes splits the price space in many polyhedras. Let us refer to a polyhedra as a *choice region* if the interior of the polyhedra is not intersected by any of the indifference or budget hyperplanes.\n\ni∈Ni\\in N\n\nβi,0−β3​p0≥βi,1−β3​p1,\\beta_{i,0}-\\beta_{3}p_{0}\\geq\\beta_{i,1}-\\beta_{3}p_{1},\n\nβi,0−β3​p0≤βi,1−β3​p1,\\beta_{i,0}-\\beta_{3}p_{0}\\leq\\beta_{i,1}-\\beta_{3}p_{1},\n\nβi,0−β3​p0=βi,1−β3​p1\\beta_{i,0}-\\beta_{3}p_{0}=\\beta_{i,1}-\\beta_{3}p_{1}\n\nβi,0=β3​p0\\beta_{i,0}=\\beta_{3}p_{0}\n\nβi,1=β3​p1\\beta_{i,1}=\\beta_{3}p_{1}\n\nβi,0≥β3​p0\\beta_{i,0}\\geq\\beta_{3}p_{0}\n\nβi,1≥β3​p1\\beta_{i,1}\\geq\\beta_{3}p_{1}\n\nBy construction, for all consumers, their preferences for a product remain the same for any prices taken from the same choice region. Then, by linearity of the revenue function in prices, only vertices of the choice regions might become optimal pricing strategies of the company. Therefore, having O⁡(n)O(n) indifference and budget hyperplanes for only two products, where nn is the number of consumers, we may have at most O⁡(n2)O(n^{2}) potentially optimal pricing strategies. When the number of products increases to mm, the number of potentially optimal strategies increases to O⁡(nm)O(n^{m}). Thus, keeping mm a small constant, brute-force enumeration of potentially optimal pricing strategies remains polynomial and can be efficiently implemented. Moreover, since the consumer utilities are independent on the sugar tax, for any choice of the tax rate, one of the computed pricing strategies will be optimal. Hence, the first step towards the optimal policy design is computing all potentially optimal prices, which is done by Algorithm 1 below.\n\nO⁡(n)O(n)\n\nnn\n\nO⁡(n2)O(n^{2})\n\nmm\n\nO⁡(nm)O(n^{m})\n\nmm\n\nN​r​C​l​a​i​m​s¯\\overline{NrClaims}\n\nN​u​t​r​V​a​l¯\\overline{NutrVal}\n\nβ1\\beta_{1}\n\nβ2\\beta_{2}\n\nβ3\\beta_{3}\n\nβi,j\\beta_{i,j}\n\ni∈N,j∈{0,1}i\\in N,\\ j\\in\\{0,1\\}\n\n𝒫:=∅\\mathcal{P}:=\\emptyset\n\n⊳\\triangleright\n\nℬ\\mathcal{B}\n\nβ3⋅pj=βi,j+β1⋅N​r​C​l​a​i​m​s¯+β2⋅N​u​t​r​V​a​l¯\\beta_{3}\\cdot p_{j}=\\beta_{i,j}+\\beta_{1}\\cdot\\overline{NrClaims}+\\beta_{2}\\cdot\\overline{NutrVal}\n\ni∈Ni\\in N\n\nj∈{0,1}j\\in\\{0,1\\}\n\nℐ\\mathcal{I}\n\nβi,0−β3⋅p0=βi,1−β3⋅p1\\beta_{i,0}-\\beta_{3}\\cdot p_{0}=\\beta_{i,1}-\\beta_{3}\\cdot p_{1}\n\ni∈Ni\\in N\n\nh∈ℬ∪ℐh\\in\\mathcal{B}\\cup\\mathcal{I}\n\nh′∈ℬ∪ℐh^{\\prime}\\in\\mathcal{B}\\cup\\mathcal{I}\n\nh′≠hh^{\\prime}\\neq h\n\np=h∩h′p=h\\cap h^{\\prime}\n\n𝒫:=𝒫∪p\\mathcal{P}:=\\mathcal{P}\\cup p\n\n𝒫\\mathcal{P}\n\nGiven a set of potentially optimal pricing strategies of the company, it is possible to compute the optimal sugar tax rate. Since the number of pricing strategies and, consequently, the number of consumer responses is finite, the social welfare function is a staircase function in α\\alpha with break points possible only in the break-evens of the company’s revenue:\n\nα\\alpha\n\n| | | | | --- | --- | --- | | | (∑i∈NDi,0⋅p0′⋅xi,0′)+(1−α)⋅(∑i∈NDi,1⋅p1′⋅xi,1′)=\\left(\\sum\\_{i\\in N}\\ D\\_{i,0}\\cdot p^{\\prime}\\_{0}\\cdot x^{\\prime}\\_{i,0}\\right)\\ +\\ (1-\\alpha)\\cdot\\left(\\sum\\_{i\\in N}\\ D\\_{i,1}\\cdot p^{\\prime}\\_{1}\\cdot x^{\\prime}\\_{i,1}\\right)= | |\n\n(∑i∈NDi,0⋅p0′⋅xi,0′)+(1−α)⋅(∑i∈NDi,1⋅p1′⋅xi,1′)=\\left(\\sum_{i\\in N}\\ D_{i,0}\\cdot p^{\\prime}_{0}\\cdot x^{\\prime}_{i,0}\\right)\\ +\\ (1-\\alpha)\\cdot\\left(\\sum_{i\\in N}\\ D_{i,1}\\cdot p^{\\prime}_{1}\\cdot x^{\\prime}_{i,1}\\right)=\n\n| | | | | --- | --- | --- | | | (∑i∈NDi,0⋅p0′′⋅xi,0′′)+(1−α)⋅(∑i∈NDi,1⋅p1′′⋅xi,1′′),\\left(\\sum\\_{i\\in N}\\ D\\_{i,0}\\cdot p^{\\prime\\prime}\\_{0}\\cdot x^{\\prime\\prime}\\_{i,0}\\right)\\ +\\ (1-\\alpha)\\cdot\\left(\\sum\\_{i\\in N}\\ D\\_{i,1}\\cdot p^{\\prime\\prime}\\_{1}\\cdot x^{\\prime\\prime}\\_{i,1}\\right), | |\n\n(∑i∈NDi,0⋅p0′′⋅xi,0′′)+(1−α)⋅(∑i∈NDi,1⋅p1′′⋅xi,1′′),\\left(\\sum_{i\\in N}\\ D_{i,0}\\cdot p^{\\prime\\prime}_{0}\\cdot x^{\\prime\\prime}_{i,0}\\right)\\ +\\ (1-\\alpha)\\cdot\\left(\\sum_{i\\in N}\\ D_{i,1}\\cdot p^{\\prime\\prime}_{1}\\cdot x^{\\prime\\prime}_{i,1}\\right),\n\nwhere p′p^{\\prime} and p′′p^{\\prime\\prime} are two potentially optimal pricing strategies, and x′x^{\\prime} and x′′x^{\\prime\\prime} are the respective consumer choices. Evaluating the social welfare in every break point, and choosing for α\\alpha the break point that maximizes the social welfare does solve the three-level mathematical program. We call this procedure Algorithm 2. Overall complexity of Algorithm 2 is O⁡(n2​m)O(n^{2m}) for nn consumers and mm products, which is still polynomial if the number of products mm is fixed.\n\np′p^{\\prime}\n\np′′p^{\\prime\\prime}\n\nx′x^{\\prime}\n\nx′′x^{\\prime\\prime}\n\nα\\alpha\n\nO⁡(n2​m)O(n^{2m})\n\nnn\n\nmm\n\nmm\n\n𝒫\\mathcal{P}\n\nDi,jD_{i,j}\n\ni∈N,j∈{0,1}i\\in N,\\ j\\in\\{0,1\\}\n\nα∗:=0\\alpha^{*}:=0\n\n⊳\\triangleright\n\np∈𝒫p\\in\\mathcal{P}\n\ni∈Ni\\in N\n\nui,0​(p)≥ui,1​(p)u_{i,0}(p)\\geq u_{i,1}(p)\n\nxi,0​(p)=1x_{i,0}(p)=1\n\nxi,1​(p)=0x_{i,1}(p)=0\n\nxi,1​(p)=1x_{i,1}(p)=1\n\nxi,0​(p)=0x_{i,0}(p)=0\n\nmaxj∈{0,1}⁡ui,j<0\\max_{j\\in\\{0,1\\}}u_{i,j}<0\n\nxi,0​(p)=0x_{i,0}(p)=0\n\nxi,1​(p)=0x_{i,1}(p)=0\n\nW∗:=maxp∈𝒫⁡Uc​(p,x⁡(p))+Uf​(p,x⁡(p))W^{*}:=\\max_{p\\in\\mathcal{P}}U_{c}(p,x(p))+U_{f}(p,x(p))\n\n⊳\\triangleright\n\np′∈𝒫p^{\\prime}\\in\\mathcal{P}\n\np′′∈𝒫p^{\\prime\\prime}\\in\\mathcal{P}\n\n0≤α≤10\\leq\\alpha\\leq 1\n\n| | | | | --- | --- | --- | | | (∑i∈NDi,0⋅p0′⋅xi,0​(p′))+(1−α)⋅(∑i∈NDi,1⋅p1′⋅xi,1​(p′))=\\left(\\sum\\_{i\\in N}\\ D\\_{i,0}\\cdot p^{\\prime}\\_{0}\\cdot x\\_{i,0}(p^{\\prime})\\right)\\ +\\ (1-\\alpha)\\cdot\\left(\\sum\\_{i\\in N}\\ D\\_{i,1}\\cdot p^{\\prime}\\_{1}\\cdot x\\_{i,1}(p^{\\prime})\\right)= | |\n\n(∑i∈NDi,0⋅p0′⋅xi,0​(p′))+(1−α)⋅(∑i∈NDi,1⋅p1′⋅xi,1​(p′))=\\left(\\sum_{i\\in N}\\ D_{i,0}\\cdot p^{\\prime}_{0}\\cdot x_{i,0}(p^{\\prime})\\right)\\ +\\ (1-\\alpha)\\cdot\\left(\\sum_{i\\in N}\\ D_{i,1}\\cdot p^{\\prime}_{1}\\cdot x_{i,1}(p^{\\prime})\\right)=\n\n| | | | | --- | --- | --- | | | (∑i∈NDi,0⋅p0′′⋅xi,0​(p′′))+(1−α)⋅(∑i∈NDi,1⋅p1′′⋅xi,1​(p′′))\\left(\\sum\\_{i\\in N}\\ D\\_{i,0}\\cdot p^{\\prime\\prime}\\_{0}\\cdot x\\_{i,0}(p^{\\prime\\prime})\\right)\\ +\\ (1-\\alpha)\\cdot\\left(\\sum\\_{i\\in N}\\ D\\_{i,1}\\cdot p^{\\prime\\prime}\\_{1}\\cdot x\\_{i,1}(p^{\\prime\\prime})\\right) | |\n\n(∑i∈NDi,0⋅p0′′⋅xi,0​(p′′))+(1−α)⋅(∑i∈NDi,1⋅p1′′⋅xi,1​(p′′))\\left(\\sum_{i\\in N}\\ D_{i,0}\\cdot p^{\\prime\\prime}_{0}\\cdot x_{i,0}(p^{\\prime\\prime})\\right)\\ +\\ (1-\\alpha)\\cdot\\left(\\sum_{i\\in N}\\ D_{i,1}\\cdot p^{\\prime\\prime}_{1}\\cdot x_{i,1}(p^{\\prime\\prime})\\right)\n\n| | | | | --- | --- | --- | | | p⁡(α):=arg⁡maxp∈𝒫​∑i∈NDi,0⋅p0⋅xi,0​(p)+(1−α)⋅∑i∈NDi,1⋅p1⋅xi,1​(p)p(\\alpha):=\\arg\\max\\_{p\\in\\mathcal{P}}\\sum\\_{i\\in N}\\ D\\_{i,0}\\cdot p\\_{0}\\cdot x\\_{i,0}(p)+(1-\\alpha)\\cdot\\sum\\_{i\\in N}\\ D\\_{i,1}\\cdot p\\_{1}\\cdot x\\_{i,1}(p) | |\n\np⁡(α):=arg⁡maxp∈𝒫​∑i∈NDi,0⋅p0⋅xi,0​(p)+(1−α)⋅∑i∈NDi,1⋅p1⋅xi,1​(p)p(\\alpha):=\\arg\\max_{p\\in\\mathcal{P}}\\sum_{i\\in N}\\ D_{i,0}\\cdot p_{0}\\cdot x_{i,0}(p)+(1-\\alpha)\\cdot\\sum_{i\\in N}\\ D_{i,1}\\cdot p_{1}\\cdot x_{i,1}(p)\n\n| | | | | --- | --- | --- | | | W⁡(α):=∑i∈N∑j∈M(ln⁡(1+ui,j​(p⁡(α)))+Di,j⋅pj​(α))⋅xi,j​(p⁡(α))W(\\alpha):=\\sum\\_{i\\in N}\\sum\\_{j\\in M}\\ \\left(\\ln(1+u\\_{i,j}(p(\\alpha)))+D\\_{i,j}\\cdot p\\_{j}(\\alpha)\\right)\\cdot x\\_{i,j}(p(\\alpha)) | |\n\nW⁡(α):=∑i∈N∑j∈M(ln⁡(1+ui,j​(p⁡(α)))+Di,j⋅pj​(α))⋅xi,j​(p⁡(α))W(\\alpha):=\\sum_{i\\in N}\\sum_{j\\in M}\\ \\left(\\ln(1+u_{i,j}(p(\\alpha)))+D_{i,j}\\cdot p_{j}(\\alpha)\\right)\\cdot x_{i,j}(p(\\alpha))\n\nW⁡(α)≥W∗W(\\alpha)\\geq W^{*}\n\nα∗=α\\alpha^{*}=\\alpha\n\nW∗:=W⁡(α)W^{*}:=W(\\alpha)\n\nα∗\\alpha^{*}\n\nW∗W^{*}\n\nNotice, the approach remains polynomial even for the multi-level sugar taxes if the number of levels LL is also fixed. In this case, one has to determine not a single optimal α\\alpha, but an optimal set of 2​L−12L-1 parameters: LL tax levels and L−1L-1 sugar containment percentages where the tax jumps from one level to another. A break-even for the company’s revenue is computed then similarly to the computation of the vertices of the choice regions in the price space, but now it is a vertex in the *regulatory space* R+2​L−1R^{2L-1}\\_{+}, where the revenues of 2​L2L potentially optimal pricing strategies meet each other. The overall time complexity of the algorithm in this case is O⁡(n2​m​L)O(n^{2mL}), which is still polynomial in the input size.\n\nLL\n\nα\\alpha\n\n2​L−12L-1\n\nLL\n\nL−1L-1\n\nR+2​L−1R^{2L-1}_{+}\n\n2​L2L\n\nO⁡(n2​m​L)O(n^{2mL})"
+    },
+    {
+      "heading_path": [
+        "Optimal policy design for the sugar tax",
+        "4 Illustrative intuitive example"
+      ],
+      "text": "## 4 Illustrative intuitive example\n\nThe following example describes the process of obtaining an optimal sugar tax rate from the purchase data set. For simplicity of presentation, consider a market with two basic products, say Coca-Cola (j=1j=1) and Coca-Cola Zero (j=0j=0), where the first one contains sugar and the second one is sugar-free. For a generalization of this case one may consider two generic types of products and deal with the averages per product type. Given a purchase data set and applying multinomial choice model [[Holtrop et al., 2017](https://arxiv.org/html/1810.07243v1#bib.bibx8)], we obtain utility functions for three types of consumers, see Table [2](https://arxiv.org/html/1810.07243v1#S4.T2 \"Table 2 ‣ 4 Illustrative intuitive example ‣ Optimal policy design for the sugar tax\").\n\nj=1j=1\n\nj=0j=0\n\n| | Coca-Cola | Coca-Cola Zero | | --- | --- | --- | | (H)igh sugar | uH,1=(0.94−0.2​p1)+u\\_{H,1}=(0.94-0.2p\\_{1})^{+} | uH,0=(0.41−0.26​p0)+u\\_{H,0}=(0.41-0.26p\\_{0})^{+} | | consumers | | | | (like sugar) | | | | (M)edium sugar | uM,1=(0.17−0.18​p1)+u\\_{M,1}=(0.17-0.18p\\_{1})^{+} | uM,0=(0.47−0.24​p0)+u\\_{M,0}=(0.47-0.24p\\_{0})^{+} | | consumers | | | | (indifferent to sugar) | | | | (L)ow sugar | uL,1=(0.53−0.23​p1)+u\\_{L,1}=(0.53-0.23p\\_{1})^{+} | uL,0=(0.93−0.17​p0)+u\\_{L,0}=(0.93-0.17p\\_{0})^{+} | | consumers | | | | (do not like sugar) | | |\n\nuH,1=(0.94−0.2​p1)+u_{H,1}=(0.94-0.2p_{1})^{+}\n\nuH,0=(0.41−0.26​p0)+u_{H,0}=(0.41-0.26p_{0})^{+}\n\nuM,1=(0.17−0.18​p1)+u_{M,1}=(0.17-0.18p_{1})^{+}\n\nuM,0=(0.47−0.24​p0)+u_{M,0}=(0.47-0.24p_{0})^{+}\n\nuL,1=(0.53−0.23​p1)+u_{L,1}=(0.53-0.23p_{1})^{+}\n\nuL,0=(0.93−0.17​p0)+u_{L,0}=(0.93-0.17p_{0})^{+}\n\nWhen all budget and indifference lines/hyperplanes are drawn in the price space (R2R^{2} in our case), we obtain the diagram as depicted in Figure [1](https://arxiv.org/html/1810.07243v1#S4.F1 \"Figure 1 ‣ 4 Illustrative intuitive example ‣ Optimal policy design for the sugar tax\"). The crossing points of the budget and indifference lines are the potential optimal pricing strategies of the company (Coca-Cola). Having three lines per consumer, we have nine lines in total, which might lead to at most 36 crossings, which will be the output of Algorithm 1. However, not all pairs of the lines cross each other, e.g., the budget lines for a product are parallel. This shrinks the number of potentially optimal pricing strategies to 27 points listed in Table [3](https://arxiv.org/html/1810.07243v1#S4.T3 \"Table 3 ‣ 4 Illustrative intuitive example ‣ Optimal policy design for the sugar tax\") together with consumer preferences (“CC” stands for Coca-Cola and “Z” stands for Coca-Cola Zero), realized utilities of consumers and respective company revenues. In the case at hands, “Low” consumers have demand 11441 units, “Medium” consumers have demand 9433 units, and “High” consumers have demand 9942 units independent on the product (Regular or Zero). This allows us to compute the revenue of the company for every potentially optimal pricing strategy. As an intermediate result, we obtain that if the sugar tax rate α=0\\alpha=0, then the maximal revenue is 1093019.67 currency units (CU) in the following point: Coca-Cola is priced at 4.7 CU and Coca-Cola Zero is priced at 5.47 CU.\n\nR2R^{2}\n\nα=0\\alpha=0\n\n| Nr | Coordinates | High sugar | Medium sugar | Low sugar | Revenue | | --- | --- | --- | --- | --- | --- | | 1 | (0; 1.25) | C​C:u=0.94CC:u=0.94 | C​C:u=0.17CC:u=0.17 | Z:u=0.72Z:u=0.72 | 14301.2514301.25 | | 2 | (0; 1.58) | C​C:u=0.94CC:u=0.94 | C​C:u=0.17CC:u=0.17 | Z:u=0.66Z:u=0.66 | 18076.7818076.78 | | 3 | (0; 1.96) | C​C:u=0.94CC:u=0.94 | C​C:u=0.17CC:u=0.17 | Z:u=0.6Z:u=0.6 | 22424.3622424.36 | | 4 | (0; 2.35) | C​C:u=0.94CC:u=0.94 | C​C:u=0.17CC:u=0.17 | C​C:u=0.53CC:u=0.53 | 00 | | 5 | (0; 5.47) | C​C:u=0.94CC:u=0.94 | C​C:u=0.17CC:u=0.17 | C​C:u=0.53CC:u=0.53 | 00 | | 6 | (0.44; 1.58) | C​C:u=0.85CC:u=0.85 | C​C:u=0.09CC:u=0.09 | Z:u=0.66Z:u=0.66 | 26601.7826601.78 | | 7 | (0.94; 0) | C​C:u=0.75CC:u=0.75 | Z:u=0.47Z:u=0.47 | Z:u=0.93Z:u=0.93 | 9345.489345.48 | | 8 | (0.94; 1.58) | C​C:u=0.75CC:u=0.75 | Z:u=0.0.9Z:u=0.0.9 | Z:0.66Z:0.66 | 42326.442326.4 | | 9 | (0.94; 1.96) | C​C:u=0.75CC:u=0.75 | C​C:u=0CC:u=0 | Z:0.6Z:0.6 | 40636.8640636.86 | | 10 | (0.94; 3.62) | C​C:u=0.75CC:u=0.75 | C​C:u=0CC:u=0 | C​C:0.31CC:0.31 | 28967.0428967.04 | | 11 | (0.94; 5.47) | C​C:u=0.75CC:u=0.75 | C​C:u=0CC:u=0 | C​C:u=0.31CC:u=0.31 | 28967.0428967.04 | | 12 | (2.13; 0) | C​C:u=0.51CC:u=0.51 | Z:u=0.47Z:u=0.47 | Z:u=0.93Z:u=0.93 | 21176.4621176.46 | | 13 | (2.13; 1.58) | C​C:u=0.51CC:u=0.51 | Z:u=0.09Z:u=0.09 | Z:u=0.66Z:u=0.66 | 54157.3854157.38 | | 14 | (2.13; 1.96) | C​C:u=0.51CC:u=0.51 | Z:u=0Z:u=0 | Z:u=0.6Z:u=0.6 | 62089.562089.5 | | 15 | (2.13; 2.85) | C​C:u=0.51CC:u=0.51 | –– | Z:u=0.45Z:u=0.45 | 53783.3153783.31 | | 16 | (2.13; 5.47) | C​C:u=0.51CC:u=0.51 | –– | C​C:u=0.04CC:u=0.04 | 45545.7945545.79 | | 17 | (2.65; 0) | C​C:u=0.41CC:u=0.41 | Z:u=0.47Z:u=0.47 | Z:u=0.93Z:u=0.93 | 26346.326346.3 | | 18 | (4.7; 0) | Z:u=0.41Z:u=0.41 | Z:u=0.47Z:u=0.47 | Z:u=0.93Z:u=0.93 | 00 | | 19 | (4.7; 1.58) | C​C:u=0CC:u=0 | Z:u=0.09Z:u=0.09 | Z:u=0.66Z:u=0.66 | 79708.3279708.32 | | 20 | (4.7; 1.96) | C​C:u=0CC:u=0 | Z:u=0Z:u=0 | Z:u=0.6Z:u=0.6 | 87640.4487640.44 | | 21 | (4.7; 4.78) | C​C:u=0CC:u=0 | –– | Z:u=0.12Z:u=0.12 | 101415.38101415.38 | | 22 | (4.7; 5.47) | C​C:u=0CC:u=0 | –– | Z:u=0Z:u=0 | 109309.67 | | 23 | (4.7; 8.7) | C​C:u=0CC:u=0 | –– | –– | 46727.446727.4 | | 24 | (5.19; 1.96) | –– | Z:u=0Z:u=0 | Z:u=0.6Z:u=0.6 | 4913.044913.04 | | 25 | (5.63; 5.47) | –– | –– | Z:u=0Z:u=0 | 62582.2762582.27 | | 26 | (9.75; 5.47) | –– | –– | Z:u=0Z:u=0 | 62582.2762582.27 | | 27 | (16.31; 5.47) | –– | –– | –– | –– |\n\nC​C:u=0.94CC:u=0.94\n\nC​C:u=0.17CC:u=0.17\n\nZ:u=0.72Z:u=0.72\n\n14301.2514301.25\n\nC​C:u=0.94CC:u=0.94\n\nC​C:u=0.17CC:u=0.17\n\nZ:u=0.66Z:u=0.66\n\n18076.7818076.78\n\nC​C:u=0.94CC:u=0.94\n\nC​C:u=0.17CC:u=0.17\n\nZ:u=0.6Z:u=0.6\n\n22424.3622424.36\n\nC​C:u=0.94CC:u=0.94\n\nC​C:u=0.17CC:u=0.17\n\nC​C:u=0.53CC:u=0.53\n\n00\n\nC​C:u=0.94CC:u=0.94\n\nC​C:u=0.17CC:u=0.17\n\nC​C:u=0.53CC:u=0.53\n\n00\n\nC​C:u=0.85CC:u=0.85\n\nC​C:u=0.09CC:u=0.09\n\nZ:u=0.66Z:u=0.66\n\n26601.7826601.78\n\nC​C:u=0.75CC:u=0.75\n\nZ:u=0.47Z:u=0.47\n\nZ:u=0.93Z:u=0.93\n\n9345.489345.48\n\nC​C:u=0.75CC:u=0.75\n\nZ:u=0.0.9Z:u=0.0.9\n\nZ:0.66Z:0.66\n\n42326.442326.4\n\nC​C:u=0.75CC:u=0.75\n\nC​C:u=0CC:u=0\n\nZ:0.6Z:0.6\n\n40636.8640636.86\n\nC​C:u=0.75CC:u=0.75\n\nC​C:u=0CC:u=0\n\nC​C:0.31CC:0.31\n\n28967.0428967.04\n\nC​C:u=0.75CC:u=0.75\n\nC​C:u=0CC:u=0\n\nC​C:u=0.31CC:u=0.31\n\n28967.0428967.04\n\nC​C:u=0.51CC:u=0.51\n\nZ:u=0.47Z:u=0.47\n\nZ:u=0.93Z:u=0.93\n\n21176.4621176.46\n\nC​C:u=0.51CC:u=0.51\n\nZ:u=0.09Z:u=0.09\n\nZ:u=0.66Z:u=0.66\n\n54157.3854157.38\n\nC​C:u=0.51CC:u=0.51\n\nZ:u=0Z:u=0\n\nZ:u=0.6Z:u=0.6\n\n62089.562089.5\n\nC​C:u=0.51CC:u=0.51\n\n––\n\nZ:u=0.45Z:u=0.45\n\n53783.3153783.31\n\nC​C:u=0.51CC:u=0.51\n\n––\n\nC​C:u=0.04CC:u=0.04\n\n45545.7945545.79\n\nC​C:u=0.41CC:u=0.41\n\nZ:u=0.47Z:u=0.47\n\nZ:u=0.93Z:u=0.93\n\n26346.326346.3\n\nZ:u=0.41Z:u=0.41\n\nZ:u=0.47Z:u=0.47\n\nZ:u=0.93Z:u=0.93\n\n00\n\nC​C:u=0CC:u=0\n\nZ:u=0.09Z:u=0.09\n\nZ:u=0.66Z:u=0.66\n\n79708.3279708.32\n\nC​C:u=0CC:u=0\n\nZ:u=0Z:u=0\n\nZ:u=0.6Z:u=0.6\n\n87640.4487640.44\n\nC​C:u=0CC:u=0\n\n––\n\nZ:u=0.12Z:u=0.12\n\n101415.38101415.38\n\nC​C:u=0CC:u=0\n\n––\n\nZ:u=0Z:u=0\n\nC​C:u=0CC:u=0\n\n––\n\n––\n\n46727.446727.4\n\n––\n\nZ:u=0Z:u=0\n\nZ:u=0.6Z:u=0.6\n\n4913.044913.04\n\n––\n\n––\n\nZ:u=0Z:u=0\n\n62582.2762582.27\n\n––\n\n––\n\nZ:u=0Z:u=0\n\n62582.2762582.27\n\n––\n\n––\n\n––\n\n––\n\nNow, we are ready to calculate the optimal sugar tax rate 0≤α≤10\\leq\\alpha\\leq 1. We compute all break points of the social welfare as described in Algorithm 2. For instance, take a pair of pricing strategies, say, 9 and 13: pricing strategy 9 is defined by p1′=0.94p^{\\prime}\\_{1}=0.94 and p0′=1.96p^{\\prime}\\_{0}=1.96, and pricing strategy 13 is defined by p1′′=2.13p^{\\prime\\prime}\\_{1}=2.13 and p0′′=1.58p^{\\prime\\prime}\\_{0}=1.58. In point 9, “High” and “Medium” consumers purchase Coca-Cola while “Low” consumer buys Zero. In point 13, “High” consumer purchases Coca-Cola, and “Medium” joins “Low” in her preference to Zero. The break-even in revenue under these two pricing strategies is achieved with α\\alpha being a solution to the equation:\n\n0≤α≤10\\leq\\alpha\\leq 1\n\np1′=0.94p^{\\prime}_{1}=0.94\n\np0′=1.96p^{\\prime}_{0}=1.96\n\np1′′=2.13p^{\\prime\\prime}_{1}=2.13\n\np0′′=1.58p^{\\prime\\prime}_{0}=1.58\n\nα\\alpha\n\n| | | | | --- | --- | --- | | | 11441⋅1.96+(1−α)⋅(9433+9942)⋅0.94=(11441+9433)⋅1.58+(1−α)⋅9942⋅2.13,11441\\cdot 1.96+\\ (1-\\alpha)\\cdot(9433+9942)\\cdot 0.94=(11441+9433)\\cdot 1.58\\ +\\ (1-\\alpha)\\cdot 9942\\cdot 2.13, | |\n\n11441⋅1.96+(1−α)⋅(9433+9942)⋅0.94=(11441+9433)⋅1.58+(1−α)⋅9942⋅2.13,11441\\cdot 1.96+\\ (1-\\alpha)\\cdot(9433+9942)\\cdot 0.94=(11441+9433)\\cdot 1.58\\ +\\ (1-\\alpha)\\cdot 9942\\cdot 2.13,\n\nwhere the left hand side addresses the revenue at point 9 and the right hand side addresses the revenue at point 13. The solution to the equation is α=4.62\\alpha=4.62, which is beyond the global upper bound of 1 for the tax rate. Thus, this break point can be disregarded. We perform the same calculations for all pairs of the potentially optimal pricing strategies and derive all potentially optimal tax rates α\\alpha in interval [0,1][0,1]. We list all these potentially optimal tax rates in Table [4](https://arxiv.org/html/1810.07243v1#S4.T4 \"Table 4 ‣ 4 Illustrative intuitive example ‣ Optimal policy design for the sugar tax\").\n\nα=4.62\\alpha=4.62\n\nα\\alpha\n\n[0,1][0,1]\n\n| | | | | | | | | --- | --- | --- | --- | --- | --- | --- | | 0.00 | 0.09 | 0.10 | 0.121 | 0.124 | 0.13 | 0.15 | | 0.15 | 0.16 | 0.18 | 0.21 | 0.23 | 0.31 | 0.32 | | 0.37 | 0.38 | 0.46 | 0.49 | 0.511 | 0.513 | 0.514 | | 0.52 | 0.53 | 0.54 | 0.60 | 0.61 | 0.62 | 0.63 | | 0.69 | 0.7 | 0.61 | 0.83 | 0.84 | 0.97 | 1.00 |\n\nα\\alpha\n\nFor each potentially optimal tax rate, we calculate the company’s maximal utility (revenue minus tax) by enumerating over all potentially optimal pricing strategies. In the case at hands, for any 0≤α≤10\\leq\\alpha\\leq 1, the maximal utilities of the company appear only in three price points: (22) Coca-Cola is priced at 4.7 CU, Coca-Cola Zero is priced at 5.47 CU; (25) Coca-Cola is priced 5.63 CU, Coca-Cola Zero is priced at 5.47 CU; (26) Coca-Cola is priced at 9.75 CU, Coca-Cola Zero is priced at 5.47 CU. Moreover, points 25 and 26 are optimal only in α=0\\alpha=0, while point 22 is optimal on the entire interval [0;1][0;1].\n\n0≤α≤10\\leq\\alpha\\leq 1\n\nα=0\\alpha=0\n\n[0;1][0;1]\n\nEnumerating over all potentially optimal tax rates listed in Table [4](https://arxiv.org/html/1810.07243v1#S4.T4 \"Table 4 ‣ 4 Illustrative intuitive example ‣ Optimal policy design for the sugar tax\"), we derive that the maximum social welfare of 156037 CU is achieved with α=1\\alpha=1, when the company sets the prices 4.7 CU for Coca-Cola and 5.47 CU for Coca-Cola Zero.\n\nα=1\\alpha=1"
+    },
+    {
+      "heading_path": [
+        "Optimal policy design for the sugar tax",
+        "5 Conclusion"
+      ],
+      "text": "## 5 Conclusion\n\nIn this paper we develop a model for coordinating the interests of the government, companies and heterogeneous consumers. The model is based on a sequential game represented by a three-level mathematical program. We design an algorithm efficiently solving the program, i.e., obtaining a socially optimal solution in time polynomial in the input size of the problem.\n\nSurprisingly, for the case known in the literature [[Holtrop et al., 2017](https://arxiv.org/html/1810.07243v1#bib.bibx8)], we obtain that the optimal sugar tax rate maximizing the commonly used social welfare function is equal to 100%. Furthermore, the real prices for Coca-Cola and Coca-Cola Zero are greatly underestimated compared to the prices that maximize the company (Coca-Cola) revenue. Moreover, the revenue maximizing prices with and without taxation are exactly the same. This phenomena might be caused by either oversimplification of the social welfare function, or by oversimplification of the consumer behavior model, or by inefficiency in the market caused by irrationality of the players, e.g., firms underpricing their products, or by a combination of the above factors. In this way, the approach proposed in the paper can be used in different contexts in order to benchmark the social welfare and also in order to check reasonability of the models/utilities of the players."
+    },
+    {
+      "heading_path": [
+        "Optimal policy design for the sugar tax",
+        "Acknowledgment"
+      ],
+      "text": "## Acknowledgment\n\nWe express our gratitude to Vladimir Kovalenok for the help in developing the example."
+    },
+    {
+      "heading_path": [
+        "Optimal policy design for the sugar tax",
+        "References"
+      ],
+      "text": "## References\n\n* [Ball et al., 2015] Ball, K., McNaughton, S. A., Le, H. N., Gold, L., Ni Mhurchu, C., Abbott, G., Pollard, C., and Crawford, D. (2015). Influence of price discounts and skill-building strategies on purchase and consumption of healthy food and beverages: outcomes of the supermarket healthy eating for life randomized controlled trial–. The American journal of clinical nutrition, 101(5):1055–1064. * [Bernoulli, 2011] Bernoulli, D. (2011). Exposition of a new theory on the measurement of risk. In The Kelly Capital Growth Investment Criterion: Theory and Practice, pages 11–24. World Scientific. * [Desai and Ratneshwar, 2003] Desai, K. K. and Ratneshwar, S. (2003). Consumer perceptions of product variants positioned on atypical attributes. Journal of the Academy of Marketing Science, 31(1):22–35. * [FAO and WHO, 2017] FAO, IFAD, U. W. and WHO (2017). The state of food security and nutrition in the world. Building climate resilience for food security and nutrition, page 201. * [Ferreira et al., 2007] Ferreira, I., Van Der Horst, K., Wendel-Vos, W., Kremers, S., Van Lenthe, F. J., and Brug, J. (2007). Environmental correlates of physical activity in youth–a review and update. Obesity reviews, 8(2):129–154. * [Geliebter et al., 2013] Geliebter, A., Atalayer, D., Flancbaum, L., and Gibson, C. D. (2013). Comparison of body adiposity index (bai) and bmi with estimations of% body fat in clinically severe obese women. Obesity, 21(3):493–498. * [Glanz et al., 2012] Glanz, K., Bader, M. D., and Iyer, S. (2012). Retail grocery store marketing strategies and obesity: an integrative review. American journal of preventive medicine, 42(5):503–512. * [Holtrop et al., 2017] Holtrop, N., Cleeren, K., Geyskens, K., and Verhoef, P. (2017). The impact of nutritional health claims on sku choice. In EMAC Conference. * [Mead and Richerson, 2018] Mead, J. A. and Richerson, R. (2018). Package color saturation and food healthfulness perceptions. Journal of Business Research, 82:10–18. * [Minkov et al., 2015] Minkov, N., Schneider, L., Lehmann, A., and Finkbeiner, M. (2015). Type iii environmental declaration programmes and harmonization of product category rules: status quo and practical challenges. Journal of Cleaner Production, 94:235–246. * [Morales, 2005] Morales, A. C. (2005). Giving firms an “e” for effort: Consumer responses to high-effort firms. Journal of Consumer Research, 31(4):806–812. * [Okada, 2005] Okada, E. M. (2005). Justification effects on consumer choice of hedonic and utilitarian goods. Journal of marketing research, 42(1):43–53. * [Rettie and Brewer, 2000] Rettie, R. and Brewer, C. (2000). The verbal and visual components of package design. Journal of product & brand management, 9(1):56–70. * [Smith et al., 2013] Smith, W. K., Gonin, M., and Besharov, M. L. (2013). Managing social-business tensions: A review and research agenda for social enterprise. Business Ethics Quarterly, 23(3):407–442. * [Solomon et al., 2012] Solomon, M., Russell-Bennett, R., and Previte, J. (2012). Consumer behaviour. Pearson Higher Education AU. * [Stevenson and Ingwersen, 2012] Stevenson, M. J. and Ingwersen, W. W. (2012). Environmental product claims and life cycle assessment. Life Cycle Assessment Handbook: A Guide for Environmentally Sustainable Products, pages 475–543."
+    }
+  ]
+}
