@@ -1,0 +1,751 @@
+{
+  "title": "Employee turnover prediction and retention policies design: a case study.",
+  "sections": [
+    {
+      "heading": "Report GitHub Issue",
+      "level": 5,
+      "content": [
+        {
+          "type": "paragraph",
+          "text": "Content selection saved. Describe the issue below:"
+        }
+      ],
+      "children": []
+    },
+    {
+      "heading": "Employee turnover prediction and retention policies design: a case study.",
+      "level": 1,
+      "content": [],
+      "children": [
+        {
+          "heading": "Abstract",
+          "level": 6,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "This paper illustrates the similarities between the problems of customer churn and employee turnover. An example of employee turnover prediction model leveraging classical machine learning techniques is developed. Model outputs are then discussed to design & test employee retention policies. This type of retention discussion is, to our knowledge, innovative and constitutes the main value of this paper."
+            },
+            {
+              "type": "paragraph",
+              "text": "2010 Mathematics Subject Classification. Keywords and phrases. Churn prediction; Machine learning techniques; Employee Turnover; Classification; Retention Policy;Workforce Planning."
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "1 Introduction",
+          "level": 2,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "Machine learning algorithms are often showcased in customer churn study. Applications in fields such as telecommunication or product marketing (gaming, insurance etc..)(see [[1](https://arxiv.org/html/1707.01377v1#bib.bib1)],[[2](https://arxiv.org/html/1707.01377v1#bib.bib2)] for a recent review) are multiple. The implementation of these methods in Customer Relationship Management is becoming the new norm, as improving customer retention yields superior business results. We argue that this type of techniques can easily be applied to employee turnover. Note that the employee turnover can actually be subdivided in 3 buckets: involuntary turnover (induced by the company), voluntary turnover (employee resignation) and retirements. Retirement and an involuntary turnover are out of the scope of this paper. Retirement is indeed generally legally enforced through specific local schemes and does not require a prediction. As for firing decisions, they are a company decision aiming at achieving the right workforce sizing or productivity levels. Therefore they do not require any anticipation on workers behavior. On the other hand, voluntary turnover is employee dependent. Mitigating it can be of interest to companies. This is even, in our opinion, one of the key workforce dynamic to understand in order to manage a company in a sustainable fashion (see [[3](https://arxiv.org/html/1707.01377v1#bib.bib3)] for example). Assume that a company YY has a portion of its workforce in job jj that is deemed critical to achieve business results. Assume the job jj participates in a critical part of a product manufacturing process and is extremely difficult to source because of the required expertise and associated training time. Delays and/or failure in the manufacturing process can be extremely costly for the company, so that retention efforts may have to be considered to mitigate production risks. Retention is part of the standard Human Resources [HR] activity which is structured around the ”5 Bs”, namely : ”Buy” and ”Borrow”(=hire), ”Build”(=train), ”Bind”(=retain), ”Bounce”(=fire). Retention investments usually factor individual performance, potential to grow in a company and are conjugated with a leave risk assessment. Let’s assume that performance and potential are already assessed in a satisfactory fashion but that the leave risk is currently assessed by the employee’s manager based on personal intuition. This managerial assessment is in reality a classification problem. The manager will indeed flag each year its employees has having either a ”High Risk” (the employee will leave the company this year) or a ”Low Risk” (the employee will not leave the company this year) of departure. Assume that the company YY does not trust the managerial assessments because historically, they poorly correlate to the observed voluntary turnover fluxes. The company would therefore be interested in developing a prediction routine to structure its retention efforts. The use of machine learning techniques for turnover prediction purposes has risen lately (see[[4](https://arxiv.org/html/1707.01377v1#bib.bib4)] and [[5](https://arxiv.org/html/1707.01377v1#bib.bib5)] for recent examples). Yet, to our knowledge, nothing has been done to design and test retention policies. In this paper, we will therefore leverage HR domain knowledge to build a turnover predictor and test retention policies. This paper will first explain how features can be engineered to feed a machine learning algorithm. In a second part, several machine learning methods and training sample techniques will be discussed and analyzed in terms of performance. Finally a sensitivity analysis will be carried out to design and test specific retention policies."
+            },
+            {
+              "type": "formula",
+              "text": "YY"
+            },
+            {
+              "type": "formula",
+              "text": "jj"
+            },
+            {
+              "type": "formula",
+              "text": "jj"
+            },
+            {
+              "type": "formula",
+              "text": "YY"
+            },
+            {
+              "type": "paragraph",
+              "text": "Important Legal Remark. The findings and opinions expressed in this paper are those of the authors and do not reflect the positions from any company or institution. Finally, please bear in mind that for confidentiality reasons numbers have been disguised in a way that preserves the same conclusions as the actual case study."
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "2 Feature Engineering.",
+          "level": 2,
+          "content": [],
+          "children": [
+            {
+              "heading": "2.1 Previous Work.",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "Turnover is not easy to predict because it results from a combination of elements. So far, no consensus has been reached in terms of key elements to use. For example, an early review of voluntary turnover studies [[6](https://arxiv.org/html/1707.01377v1#bib.bib6)] has found that the strongest predictors for voluntary turnover were age, tenure, pay, overall job satisfaction, and employee’s perception of fairness. But other studies have also stressed the importance of job performance [[7](https://arxiv.org/html/1707.01377v1#bib.bib7)], job characteristics (role, seniority in role…) [[8](https://arxiv.org/html/1707.01377v1#bib.bib8)], enhanced individual demographic characteristics (age/experience, gender, ethnicity, education, marital status) ([[9](https://arxiv.org/html/1707.01377v1#bib.bib9)], [[10](https://arxiv.org/html/1707.01377v1#bib.bib10)], [[11](https://arxiv.org/html/1707.01377v1#bib.bib11)], [[12](https://arxiv.org/html/1707.01377v1#bib.bib12)], [[13](https://arxiv.org/html/1707.01377v1#bib.bib13)], [[14](https://arxiv.org/html/1707.01377v1#bib.bib14)]), structural characteristics (i.e. team size and performance) and geographical factors ([[15](https://arxiv.org/html/1707.01377v1#bib.bib15)] , [[16](https://arxiv.org/html/1707.01377v1#bib.bib16)]).Finally some studies have also set an emphasis on salary, working conditions, job satisfaction, supervision, advancement, recognition, growth potential, burnout etc. [[17](https://arxiv.org/html/1707.01377v1#bib.bib17)], [[18](https://arxiv.org/html/1707.01377v1#bib.bib18)],[[19](https://arxiv.org/html/1707.01377v1#bib.bib19)], [[20](https://arxiv.org/html/1707.01377v1#bib.bib20)]. And our list is far from being exhaustive… To our understanding, the key to successfully engineer features in machine learning exercises revolves around flexibility. Companies Human Resource Information Systems [HRIS] are famous for data inconsistency and quality issues. The absence of data standards thus calls for company specific engineering tasks."
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "2.2 Turnover Domain Knowledege & Data.",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "The dataset available for this study was discussed with a pool of peer-trusted experts among our clients group. The purpose of this discussion was to hand pick features that, in light of the previous bibliographical work, would be relevant for the given job jj and in the current historical context. Leveraging peer trusted experts was important because it enabled us to infuse domain knowledge to the project while creating buy-in in our client group for this kind of methodology. This was also critical as it helped us remove features that were considered non reliable. The selected features were:"
+                },
+                {
+                  "type": "formula",
+                  "text": "jj"
+                },
+                {
+                  "type": "list",
+                  "text": "* • Localization. Individuals from a given country were selected. This country was described by a categorical feature representing the regional area where the employee was working. This was used to account for local labor market specific dynamics. * • Knowledge. In order to account for specific domain expertise among job category jj, the type of business unit in which the individual was working was added to the feature mix. * • Individual data. Several features were suggested as far as individuals are concerned. First, time in the current position and tenure with a given company were added. Demographics in terms of age and gender were also highlighted. Additional elements specific to the dataset, such as performance & potential evaluation, were discussed. Hierarchical level according the dataset grading structure was finally added to the mix. * • Individual managerial data. Manager’s demographic information such as age and gender were added, as well as manager’s time in the current position and tenure in a given company. Manager’s performance over the last year and average performance over the last 3 years were also integrated. * • Individual team data. Team size and team percentage of high and low performers were added to the prepared mix."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Localization. Individuals from a given country were selected. This country was described by a categorical feature representing the regional area where the employee was working. This was used to account for local labor market specific dynamics."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Knowledge. In order to account for specific domain expertise among job category jj, the type of business unit in which the individual was working was added to the feature mix."
+                },
+                {
+                  "type": "formula",
+                  "text": "jj"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Individual data. Several features were suggested as far as individuals are concerned. First, time in the current position and tenure with a given company were added. Demographics in terms of age and gender were also highlighted. Additional elements specific to the dataset, such as performance & potential evaluation, were discussed. Hierarchical level according the dataset grading structure was finally added to the mix."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Individual managerial data. Manager’s demographic information such as age and gender were added, as well as manager’s time in the current position and tenure in a given company. Manager’s performance over the last year and average performance over the last 3 years were also integrated."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Individual team data. Team size and team percentage of high and low performers were added to the prepared mix."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "The population under study in the given job category jj accounted for about 1000 employees in a given country. 2 years (referred to as year 1 and year 2) of data were available. The problem was of a classification nature as employees were either tagged as ”Terminated” or ”Active”. Note that the dataset was curated of individuals who left involuntarily or because of retirement to respect the scope of the study. The full dataset was heavily unbalanced as the yearly number of people in job jj leaving voluntarily was about 20%20\\%.It was randomly split in a training and a test set, which were of equal size. Each of the two sets contained the same proportion of year 1 and year 2 information. This choice indeed yielded more robust performances than having the algorithms trained on one year and tested on the other."
+                },
+                {
+                  "type": "formula",
+                  "text": "jj"
+                },
+                {
+                  "type": "formula",
+                  "text": "jj"
+                },
+                {
+                  "type": "formula",
+                  "text": "20%20\\%"
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "2.3 Feature Selection.",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "After this pre-processing, a selection layer was deployed in order to keep only the most relevant elements to the current problem out of the ones mentioned by the experts and the literature. Limiting the number of features used in machine learning problems is indeed crucial to properly manage the complexity of the learning phase and to avoid over fitting. In this paper, the mutual information (MI) criterion was used to assess the “information content” of each individual feature. This type of feature selection method is indeed well acknowledged and has proven useful for such topics (see [[21](https://arxiv.org/html/1707.01377v1#bib.bib21)] for an early example, [[22](https://arxiv.org/html/1707.01377v1#bib.bib22)] for a customer churn example and [[23](https://arxiv.org/html/1707.01377v1#bib.bib23)] for a review.)."
+                }
+              ],
+              "children": [
+                {
+                  "heading": "Ranking with Mutual Information (MI).",
+                  "level": 4,
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "text": "Mutual Information (MI) is an essential metric of information and has been widely used for quantifying the mutual dependence of random variables (see [[24](https://arxiv.org/html/1707.01377v1#bib.bib24)] for details).Formally the MI between an output variable YY and an input variable XX is defined as:"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "YY"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "XX"
+                    },
+                    {
+                      "type": "table",
+                      "text": "| | | | | | --- | --- | --- | --- | | | M​I​(X,Y)=∑x∈X∑y∈YP⁡(x,y).log⁡P⁡(x,y)P⁡(x).P⁡(y)MI(X;Y)=\\sum\\_{x\\in X}\\sum\\_{y\\in Y}P(x,y).\\log{\\dfrac{P(x,y)}{P(x).P(y)}} | | (1) |"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "M​I​(X,Y)=∑x∈X∑y∈YP⁡(x,y).log⁡P⁡(x,y)P⁡(x).P⁡(y)MI(X;Y)=\\sum_{x\\in X}\\sum_{y\\in Y}P(x,y).\\log{\\dfrac{P(x,y)}{P(x).P(y)}}"
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "where P⁡(x)P(x) (resp. P⁡(y)P(y)) is the probability associated to XX (resp. YY), and P⁡(x,y)P(x,y) is the joint probability of having both XX and YY."
+                    },
+                    {
+                      "type": "formula",
+                      "text": "P⁡(x)P(x)"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "P⁡(y)P(y)"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "XX"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "YY"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "P⁡(x,y)P(x,y)"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "XX"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "YY"
+                    }
+                  ],
+                  "children": []
+                },
+                {
+                  "heading": "Features Filtering.",
+                  "level": 4,
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "text": "Several possibilities exist in order to select features. According to a recent survey [[25](https://arxiv.org/html/1707.01377v1#bib.bib25)], they can be summed up in three types of methods: filters, wrappers and embedded ones. Filter methods preprocess and rank features in order to keep only the best ones. In wrapper methods, the feature selection criterion is the performance of the predictor itself. The predictor is indeed wrapped on a search algorithm which will find a subset that gives the best predictor performance. Finally embedded methods include variable selection as part of the training process without splitting the data into training and testing sets. ![[Uncaptioned image]](./Employee turnover prediction and retention policies design_ a case study._files/ResultsMI.png) Fig 1. Features Mutual Information In this case, a filter method was used based on the previously described mutual information criterion. This choice was motivated by its simplicity and the empirical efficiency of the approach. For each feature XX, the mutual information M​I​(X,Y)MI(X,Y) was compiled and only the top 60% features were kept. Mutual information results are displayed below. Among the features of demographic nature, employee’s gender and age as well as manager’s gender were removed. Company bonus level information and structural hierarchical details proved useful but required granularity to be of use. Team size information disappeared. It is interesting to see that with the current dataset; only employee behavioral assessments relates to the turnover decision. Further investigation would be needed on this aspect of the dataset."
+                    },
+                    {
+                      "type": "formula",
+                      "text": "XX"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "M​I​(X,Y)MI(X,Y)"
+                    }
+                  ],
+                  "children": []
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "heading": "3 Machine Learning Methods.",
+          "level": 2,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "The analytical techniques deployed rely on well-known standards such as SVM, random forests or KNN that have been proposed to predict turnover (see [[26](https://arxiv.org/html/1707.01377v1#bib.bib26)] or [[4](https://arxiv.org/html/1707.01377v1#bib.bib4)] for examples). They have been adjusted to account for class imbalance and potential associated biases."
+            }
+          ],
+          "children": [
+            {
+              "heading": "3.1 Class Imbalance Correction.",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "Class Imbalance is a common theme on customer churn prediction ([[27](https://arxiv.org/html/1707.01377v1#bib.bib27)], [[28](https://arxiv.org/html/1707.01377v1#bib.bib28)]…), which is a topic similar to the one developed in this paper. Standard solutions involve subsampling techniques to smooth the disparities between the observed classes. In this paper, several methods were tested:"
+                },
+                {
+                  "type": "list",
+                  "text": "* • Down-sampling: sample the majority class to make its frequency closer to the rarest class. * • Up-sampling: resample the minority class to increase its frequency. * • Weighting: place a heavier penalty on misclassifying the minority class [[29](https://arxiv.org/html/1707.01377v1#bib.bib29)] by assigning a weight to each class, with the minority class being given a larger weight (i.e., higher misclassification cost). * • ”SMOTE”: over-sample the minority (rarest) class and under-sample the majority class ([[30](https://arxiv.org/html/1707.01377v1#bib.bib30)]). * • ”ROSE”: generate new artificial data from the classes to correct class imbalance according to a smoothed bootstrap approach [[31](https://arxiv.org/html/1707.01377v1#bib.bib31)]."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Down-sampling: sample the majority class to make its frequency closer to the rarest class."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Up-sampling: resample the minority class to increase its frequency."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Weighting: place a heavier penalty on misclassifying the minority class [[29](https://arxiv.org/html/1707.01377v1#bib.bib29)] by assigning a weight to each class, with the minority class being given a larger weight (i.e., higher misclassification cost)."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "”SMOTE”: over-sample the minority (rarest) class and under-sample the majority class ([[30](https://arxiv.org/html/1707.01377v1#bib.bib30)])."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "”ROSE”: generate new artificial data from the classes to correct class imbalance according to a smoothed bootstrap approach [[31](https://arxiv.org/html/1707.01377v1#bib.bib31)]."
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "3.2 Selected Classification Methods.",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "The classification problem was approached with the following techniques:"
+                },
+                {
+                  "type": "list",
+                  "text": "* • Naive Bayes (NB) classifiers (see [[32](https://arxiv.org/html/1707.01377v1#bib.bib32)] for an application) calculate the probability that a given input sample belongs to a certain class. Assuming a number of classes Y=(y​1,y​2,…,y​k)Y=(y1,y2,…,yk) and a given a unknown sample X, a Naive Bayes classifier assigns the sample X to the class with the highest probability C=A​r​g​M​a​xy∈(y​1​…​y​k)​(p⁡(y|X))C=ArgMax\\_{y\\in(y1...yk)}(p(y|X)) * • Linear Discriminant Analysis (LDA) is a generalization of Fisher’s linear discriminant analysis. It can be explained as computing a z-score, which is then used to estimate the probabilities that a particular member or observation belongs to a class. * • Support vector machines (SVMs) achieve class separation by finding (in their linear version) a hyper plane in a high dimensional space. The intuition is that a good separation is achieved by the hyper plane that has the largest distance to the nearest training data points of any class. The larger the margin is, the lower the generalization error of the classifier. For this reason, SVMs are also referred to as maximum margin classifiers. Multiple versions exists (linear, polynomials, gaussian…) (see [[33](https://arxiv.org/html/1707.01377v1#bib.bib33)]) * • Random Forests (RFs) [[34](https://arxiv.org/html/1707.01377v1#bib.bib34)] result from the combination of tree classifiers. Each tree depends in the values of a random vector sampled independently and with the same distribution for all trees in the forest. The generalization error of a forest of tree classifiers depends on the strength of the individual trees in the forest and the correlation between them. RF has empirically achieved very good classification performance in numerous cases and is robust against over-fitting."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Naive Bayes (NB) classifiers (see [[32](https://arxiv.org/html/1707.01377v1#bib.bib32)] for an application) calculate the probability that a given input sample belongs to a certain class. Assuming a number of classes Y=(y​1,y​2,…,y​k)Y=(y1,y2,…,yk) and a given a unknown sample X, a Naive Bayes classifier assigns the sample X to the class with the highest probability C=A​r​g​M​a​xy∈(y​1​…​y​k)​(p⁡(y|X))C=ArgMax\\_{y\\in(y1...yk)}(p(y|X))"
+                },
+                {
+                  "type": "formula",
+                  "text": "Y=(y​1,y​2,…,y​k)Y=(y1,y2,…,yk)"
+                },
+                {
+                  "type": "formula",
+                  "text": "C=A​r​g​M​a​xy∈(y​1​…​y​k)​(p⁡(y|X))C=ArgMax_{y\\in(y1...yk)}(p(y|X))"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Linear Discriminant Analysis (LDA) is a generalization of Fisher’s linear discriminant analysis. It can be explained as computing a z-score, which is then used to estimate the probabilities that a particular member or observation belongs to a class."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Support vector machines (SVMs) achieve class separation by finding (in their linear version) a hyper plane in a high dimensional space. The intuition is that a good separation is achieved by the hyper plane that has the largest distance to the nearest training data points of any class. The larger the margin is, the lower the generalization error of the classifier. For this reason, SVMs are also referred to as maximum margin classifiers. Multiple versions exists (linear, polynomials, gaussian…) (see [[33](https://arxiv.org/html/1707.01377v1#bib.bib33)])"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Random Forests (RFs) [[34](https://arxiv.org/html/1707.01377v1#bib.bib34)] result from the combination of tree classifiers. Each tree depends in the values of a random vector sampled independently and with the same distribution for all trees in the forest. The generalization error of a forest of tree classifiers depends on the strength of the individual trees in the forest and the correlation between them. RF has empirically achieved very good classification performance in numerous cases and is robust against over-fitting."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Note that the R Caret package [[35](https://arxiv.org/html/1707.01377v1#bib.bib35)] was the library used to support the study."
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "3.3 Evaluation & Results.",
+              "level": 3,
+              "content": [],
+              "children": [
+                {
+                  "heading": "Cross-Validation.",
+                  "level": 4,
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "text": "The dataset was split 80:20 into training and hold out sets in a 10-fold cross validation scheme. For each algorithm, a grid-search was performed over the tuning parameters, including regularization or penalty hyper-parameters."
+                    }
+                  ],
+                  "children": []
+                },
+                {
+                  "heading": "Performance Metric.",
+                  "level": 4,
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "text": "The Area under the receiver operating characteristic curve (ROC-AUC) was the chosen performance measure. The AUC is a general measure of accuracy. It decouples classifier assessment from operating conditions i.e., class distributions and misclassification costs [[36](https://arxiv.org/html/1707.01377v1#bib.bib36)]. It is better suited to non-balanced classification problems than standard accuracy or error test as it allows a graphical representation of specificity (false positive rate) and selectivity (true positive rate) of the classifiers on the dataset. Note that, in this case, the specificity can be interpreted as the percentage of workers flagged as leavers that really left, while the selectivity represents the percentage of workers appropriately flagged that stayed in their company."
+                    }
+                  ],
+                  "children": []
+                },
+                {
+                  "heading": "Results.",
+                  "level": 4,
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "text": "We obtained the following results: In terms of imbalance correction, we found that up sampling and ROSE sampling yielded the best performance in this case. As expected, when imbalance was not corrected, algorithms tended to favor the majority class to achieve the best performances. Table 1. Classification Performance among resampling methods. Sampling Best Algorithm ROC Spe. Sel. None LDA 0.73 0.94 0.19 Down LDA 0.74 0.61 0.67 Up RF 0.96 0.82 0.96 Rose RF 0.95 0.81 0.96 Smote RF 0.87 0.86 0.74 ![[Uncaptioned image]](./Employee turnover prediction and retention policies design_ a case study._files/ROCCurve.png) Fig 2. ROC Curves with ROSE resampling In terms of algorithms, we saw that the tree based ones performed best. The following performances were indeed recorded with ROSE resampling: Table 2. Classification Performance among algorithms. Algorithm ROC Specificity Selectivity LDA 0.75 0.67 0.74 SVM (Radial) 0.80 0.69 0.76 RF 0.95 0.81 0.96 Treebag 0.94 0.78 0.94 The corresponding ROC Curves have been reported to the left. As far as the variables of importance are concerned, we saw that the employee behavior and performance (especially when rated low) are important elements to the turnover behavior prediction. Structural elements in terms of compensation schemes and business units’ specificities were also rated high. The same goes for certain seniority in company and time in position year bands. According to the graph [3.3](https://arxiv.org/html/1707.01377v1#S3.SS3.SSS0.Px3 \"Results. ‣ 3.3 Evaluation & Results. ‣ 3 Machine Learning Methods. ‣ Employee turnover prediction and retention policies design: a case study.\"), new joiners in the company are at risk. So are people that have been in their roles for more than 4 years. This last element may relate to a perceived lack of career opportunity. This seems to be corroborated by the importance of managerial time in position. Interestingly managers’ importance in turnover decisions appears to be mainly related to their seniority in the company or their time on the job. Manager performance or behavior does not rate extremely high. Another interesting element is that remote jobs do not seem to be driving more turnover than other offices location. This would hint to local labor market specificities. ![[Uncaptioned image]](./Employee turnover prediction and retention policies design_ a case study._files/VarImp.png) Fig 3. Varibale Importance (RF with Rose Resampling) In this section, it has been showed that it possible to model voluntary turnover with a couple of standard variables. Even though this may not hold for all types of jobs, the announced performance proved replicable on the prepared test set. A discussion about the model use to deliver insights on retention policies is now in order."
+                    }
+                  ],
+                  "children": []
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "heading": "4 Retention Discussion.",
+          "level": 2,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "According to recent reviews in the field of employee retention (see [[37](https://arxiv.org/html/1707.01377v1#bib.bib37)], [[38](https://arxiv.org/html/1707.01377v1#bib.bib38)]), the results from the previous section are not surprising. A number of generic actions to bind people to firms have already been discussed over the years. Compensation topics, including rewards and recognition schemes are among the most popular (see [[39](https://arxiv.org/html/1707.01377v1#bib.bib39)] for an example). Other elements such as opportunity for growth & development, accountability and leadership structure have also been stressed. Some further elements regarding the workplace and work life balance have been raised too. But as stressed by the literature reviews retention efforts should be tied to an in depth turnover analysis, which will be the aim of this final part of our study. The previous results motivated us to test five simple possible programs. The first two are about reviewing the job locations: in the program P​1P1, remote jobs are reassigned to the location 1, while in P​2P2 jobs in location 3 are reassigned to location 1. The next ones are about the managers for the considered labor categories. In the program P​3P3, all managers were forced to have a first internal experience prior to their managerial role. This translated in reallocating all managers with company tenure between 0 and 2 years to a 3 to the 7 years band. In the program P​4P4, managers were assumed to rotate frequently between team so that their time in position would be kept below 2 years. Finally we tested an employee program P​5P5 that assume that people were bound to the company during their first 2 years in position."
+            },
+            {
+              "type": "formula",
+              "text": "P​1P1"
+            },
+            {
+              "type": "formula",
+              "text": "P​2P2"
+            },
+            {
+              "type": "formula",
+              "text": "P​3P3"
+            },
+            {
+              "type": "formula",
+              "text": "P​4P4"
+            },
+            {
+              "type": "formula",
+              "text": "P​5P5"
+            }
+          ],
+          "children": [
+            {
+              "heading": "4.1 Retention Policy Simulations.",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "The five programs mentioned (P​1P1 to P​5P5) were tested on a prediction set, which was built from the current year of data where no turnover indication was available. It was therefore different from both the test and training set mentioned earlier. Size and characteristics of the prediction set were similar. Certain parameters of the prediction set were altered to perform the sensitivity analysis required to simulate the retention programs as previously described. Two types of policies were investigated. It is indeed either possible to apply the program P​1P1 to P​5P5 to all the people in scope of the study or to target only the individuals flagged as leavers and adopt a policy that suits them best."
+                },
+                {
+                  "type": "formula",
+                  "text": "P​1P1"
+                },
+                {
+                  "type": "formula",
+                  "text": "P​5P5"
+                },
+                {
+                  "type": "formula",
+                  "text": "P​1P1"
+                },
+                {
+                  "type": "formula",
+                  "text": "P​5P5"
+                }
+              ],
+              "children": [
+                {
+                  "heading": "Mass Actions.",
+                  "level": 4,
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "text": "As far as mass actions are concerned, the following table summarizes our findings:"
+                    },
+                    {
+                      "type": "table",
+                      "text": "| Program Type | Program Details | %\\% of leavers | | --- | --- | --- | | None | No Retention Policy | 41.5%\\% | | P1.Location | Remote Job reassigned to Location 1 | 40.9%\\% | | P2.Location | Location 3 reassigned to Location 1 | 41.3%\\% | | P3.Manager | People Managers had 1 role internally | 39.7%\\% | | P4.Manager | Manager Rotation Program | 32.3%\\% | | P5.Employee | Bind newly assigned people | 30%\\% |"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "%\\%"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "%\\%"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "%\\%"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "%\\%"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "%\\%"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "%\\%"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "%\\%"
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "The results displayed above show that programs related to internal mobility are among the most efficient options to reduce turnover. If the program P​5P5 appears the most efficient, it also is the most difficult to set in place and offers little upside compared to the managerial rotation program. Interestingly location change offers little value from a retention standpoint. This could be explained in this case by the fact that the labor category at stake can work in a remote fashion. This indeed creates a country wide labor market to compete in."
+                    },
+                    {
+                      "type": "formula",
+                      "text": "P​5P5"
+                    }
+                  ],
+                  "children": []
+                },
+                {
+                  "heading": "Targeted Actions.",
+                  "level": 4,
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "text": "According to the algorithm results, about 40 % of the population is likely to leave and requires an action. The investigated course is now to test for each of the supposed leavers which of the programs(P​1P1 to P​5P5) is useful. This will limit the amount of effort required while optimizing the employee retention. This leads to a final % of leavers of 24%, which represents a significant mitigation of turnover. The results in terms of actions are summarized in the table below:"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "P​1P1"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "P​5P5"
+                    },
+                    {
+                      "type": "table",
+                      "text": "| | | | | --- | --- | --- | | Action Type | %\\% of the total | %\\% of the potential | | | Population concerned | leavers concerned | | None | 82,42% | 57,67% | | P1.Location | 0,88% | 2,12% | | P2.Location | 0% | 0% | | P3.Manager | 1,54% | 3,70% | | P4.Manager | 10,55% | 25,40% | | P5.Employee | 4,62% | 11,11% |"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "%\\%"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "%\\%"
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "These results show that to halve the turnover rate, actions only need to be started for 18% of the total population. In the end, about 25% of the population at risk of departure needs a new manager and 11% require an incentive to stay over the first two years of their role. This highlights solutions that the Human Resource organization and notably the talent management centers of expertise could deploy in in order to successfully contribute to one’s organization management."
+                    }
+                  ],
+                  "children": []
+                }
+              ]
+            },
+            {
+              "heading": "4.2 Discussion.",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "Several limitations to this study exist and are listed below:"
+                },
+                {
+                  "type": "list",
+                  "text": "* • Model Limits. First, we did not have a holistic vision on individual parameters. For instance, detailed compensation parameters were missing. It is completely possible that fed with another set of features, the algorithms would have yielded better performances and different interpretations, for instance in terms of importance ranking. The story developed in this study case results from insights driven discussion between experts. We argue that if advanced analytics are important, the key elements here were the discussions that resulted in a general buy in of the retention policies simulations. * • Emotional Component in the job relationship. The discussions held with our sounding board raised another issue. Turnover may stem from a mix of rational and emotional components. The dataset was mainly organized around standard organizational or labor indicators. Little to no indication regarding people profiles, behaviors or preferences was available. * • Stress Supply vs Demand Approach. The developed approach works well to propose turnover mitigation measures. However we believe that it should not be the first thing to do. Instead we recommend leading the turnover and retention discussion with thorough job level productivity discussion. This indeed helps companies navigate in the supply & demand type of environment that are labor markets and therefore helps them define what an acceptable turnover rate is. Productivity will indeed help defining the cost of the turnover related disruption while the supply demand equilibrium will help finding the right solution mix in terms of staffing vs retention efforts. We personally believe that the human resource function is a key operating body of companies. Yet it needs to tie its activity and services to tangible business outcomes (sales, cost, productivity) to prove its value. This wasn’t stress enough in our study and a review of productivity definition across functions appears mandatory to standardize this type of approach."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Model Limits. First, we did not have a holistic vision on individual parameters. For instance, detailed compensation parameters were missing. It is completely possible that fed with another set of features, the algorithms would have yielded better performances and different interpretations, for instance in terms of importance ranking. The story developed in this study case results from insights driven discussion between experts. We argue that if advanced analytics are important, the key elements here were the discussions that resulted in a general buy in of the retention policies simulations."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Emotional Component in the job relationship. The discussions held with our sounding board raised another issue. Turnover may stem from a mix of rational and emotional components. The dataset was mainly organized around standard organizational or labor indicators. Little to no indication regarding people profiles, behaviors or preferences was available."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Stress Supply vs Demand Approach. The developed approach works well to propose turnover mitigation measures. However we believe that it should not be the first thing to do. Instead we recommend leading the turnover and retention discussion with thorough job level productivity discussion. This indeed helps companies navigate in the supply & demand type of environment that are labor markets and therefore helps them define what an acceptable turnover rate is. Productivity will indeed help defining the cost of the turnover related disruption while the supply demand equilibrium will help finding the right solution mix in terms of staffing vs retention efforts. We personally believe that the human resource function is a key operating body of companies. Yet it needs to tie its activity and services to tangible business outcomes (sales, cost, productivity) to prove its value. This wasn’t stress enough in our study and a review of productivity definition across functions appears mandatory to standardize this type of approach."
+                }
+              ],
+              "children": []
+            }
+          ]
+        },
+        {
+          "heading": "5 Conclusion & Next Steps.",
+          "level": 2,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "In this paper, a method to approach employee retention has been proposed using standard machine learning techniques. In a first part, a literature review has shown how close this problem is from the customer churn one. Yet, to our knowledge, little has been done regarding employee turnover from a quantitative standpoint. This generated a discussion with experts on how to tackle this problem and generatemeaningful features. Those features were then fed to standard machine learning algorithms under various resampling schemes to account for classes’ imbalance. The best performing algorithm was retained to predict turnover and a sensitivity analysis was led to understand the effects of several retention policies. We found that for the data at hand, the most efficient retention practice was to develop talent mobility across positions. The principal next step to this study would be to include detailed compensation elements to the feature mix. The current model is indeed more around the employee perception of its internal environment than about rational economic tradeoffs. We indeed believe that such models have the potential to mimic an individual job related utility function."
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "References",
+          "level": 2,
+          "content": [
+            {
+              "type": "list",
+              "text": "* [1] E. Ngai, L. Xiu, and D. Chau, “Application of data mining techniques in customer relationship management: A literature review and classification,” Expert Systems with Applications, vol. 36, no. 2, Part 2, pp. 2592 – 2602, 2009. * [2] T. Vafeiadis, K. Diamantaras, G. Sarigiannidis, and K. Chatzisavvas, “A comparison of machine learning techniques for customer churn prediction,” Simulation Modelling Practice and Theory, vol. 55, pp. 1 – 9, 2015. * [3] M. Doumic, B. Perthame, E. Ribes, D. Salort, and N. Toubiana, “Toward an integrated workforce planning framework using structured equations,” European Journal of Operational Research, pp. –, 2017. * [4] R. Punnoose and P. Ajit, “Prediction of employee turnover in organizations using machine learning algorithms,” International Journal of Advanced Research in Artificial Intelligence(ijarai), vol. 5(9), 2016. * [5] H. yun Chang and H. yun Chang, “Employee turnover: a novel prediction solution with effective feature selection,” pp. 252–256, 2009. * [6] J. L. Cotton and J. M. Tuttle, “Employee turnover: A meta-analysis and review with implications for research,” The Academy of Management Review, vol. 11, no. 1, pp. 55–70, 1986. * [7] A. Susskind, C. Borchgrevink, K. Kacmar, and R. Brymer, “Customer service employees’ behavioral intentions and attitudes: An examination of construct validity and a path model,” International Journal of Hospitality Management, vol. 19, pp. 53–77, 3 2000. * [8] N. S. K. Hasan Zarei Matin and M. R. A. Anvari, “Do demographic variables moderate the relationship between job burnout and its consequences?,” Iranian Journal of Management Studies IJMS, vol. 5, no. 1, pp. 47–62, 2012. * [9] I. GABARRET, “Une analyse exploratoire du departvolontaire des cadres: Le cas de la sortie entrepreneuriale hors essaimage,” p. 22. * [10] K. M. R. E. K. L. M. Finkelstein, “What do the young (old) people think of me? content and accuracy of age-based metastereotypes,” European Journal of Work and Organizational Psychology, vol. 22(6), pp. 633–657, 2013. * [11] T. L. B. Holtom, T. Mitchell and M. Eberly, “Turnover and retention research: A glance at the past, a closer review of the present, and a venture into the future,” Academy of Management Annals, vol. 2, pp. 231–274, 2008. * [12] E. K. K. C. von Hippel and J. D. Henry, “Stereotype threat among older employees: Relationship with job attitudes and turnover intentions,” Psychology and aging, 2013. * [13] S. L. Peterson, “Toward a theoretical model of employee turnover: A human resource development perspective,” Human Resource Development Review, vol. 3(3), 2004. * [14] J. M. Sacco and N. Schmitt, “A dynamic multilevel model of demographic diversity and misfit effects,” Journal of Applied Psychology, vol. 90(2), 2005. * [15] C. Tanova, “Using Job Embeddedness Factors to Explain Voluntary Turnover in Five European Countries,” IRISS Working Paper Series 2006-04, IRISS at CEPS/INSTEAD, July 2006. * [16] S. M. Carraher, “Turnover prediction using attitudes towards benefits, pay, and pay satisfaction among employees and entrepreneurs in estonia, latvia, and lithuania,” Baltic Journal of Managementt, vol. 6, pp. 25 – 52, 2001. * [17] D. G. Allen and R. W. Griffeth, “Test of a mediated performance – turnover relationship highlighting the moderating roles of visibility and reward contingency,” Journal of Applied Psychology, vol. 86(5), 2001. * [18] T. W. L. B. C. H. D. Liu, T. R. Mitchell and T. R. Hinkin, “When employees are out of step with coworkers: How job satisfaction trajectory and dispersion influence individual-and unit-level voluntary turnover,” Academy of Management Journal, vol. 55(6), 2012. * [19] B. W. Swider and R. D. Zimmerman, “Born to burnout: A metaanalytic path model of personality, job burnout, and work outcomes,” Journal of Vocational Behavior, vol. 76(3), 2010. * [20] T. M. Heckert and A. M. Farabee, “Turnover intentions of the faculty at a teaching-focused university,” Psychological reports, vol. 99(1), 2006. * [21] R. Battiti, “Using mutual information for selecting features in supervised neural net learning,” IEEE Transactions on Neural Networks, vol. 5, pp. 537–550, Jul 1994. * [22] S. Moldovan, E. Muller, Y. Richter, and E. Yom-Tov, “Opinion leadership in small groups,” International Journal of Research in Marketing, pp. –, 2016. * [23] J. R. Vergara and P. A. Estévez, “A review of feature selection methods based on mutual information,” Neural Computing and Applications, vol. 24, no. 1, pp. 175–186, 2014. * [24] T. M. Cover and J. A. Thomas, Elements of Information Theory, vol. 2nd Edition. 2006. * [25] G. Chandrashekar and F. Sahin, “A survey on feature selection methods,” Computers and Electrical Engineering, vol. 40, no. 1, pp. 16 – 28, 2014. 40th-year commemorative issue. * [26] A. M. Esmaieeli Sikaroudi, R. Ghousi, and A. Sikaroudi, “A data mining approach to employee turnover prediction (case study: Arak automotive parts manufacturing),” Journal of Industrial and Systems Engineering, vol. 8, no. 4, pp. 106–121, 2015. * [27] K. W. Bowyer, N. V. Chawla, L. O. Hall, and W. P. Kegelmeyer, “SMOTE: synthetic minority over-sampling technique,” CoRR, vol. abs/1106.1813, 2011. * [28] A. Amin, F. Rahim, I. Ali, C. Khan, and S. Anwar, A Comparison of Two Oversampling Techniques (SMOTE vs MTDF) for Handling Class Imbalance Problem: A Case Study of Customer Churn Prediction, pp. 215–225. Cham: Springer International Publishing, 2015. * [29] L. A. . B. L. Chen, C., “Using random forests to learn imbalanced data,” Technical Report 666. Statistics Department of University of California at Berkeley., 2004. * [30] N. V. Chawla, K. W. Bowyer, L. O. Hall, and W. P. Kegelmeyer, “Smote: Synthetic minority over-sampling technique,” Journal of Artificial Intelligence Research, vol. 16, pp. 321–357, 2002. * [31] G. Menardi and N. Torelli, “Training and assessing classification rules with imbalanced data,” Data Mining and Knowledge Discovery, vol. 28, no. 1, pp. 92–122, 2014. * [32] G.-e. Xia and W.-d. Jin, “Model of customer churn prediction on support vector machine,” Systems Engineering-Theory & Practice, vol. 28, no. 1, pp. 71–77, 2008. * [33] B-Gent, K. Coussement, and D. V. D. Poel, “Churn prediction in subscription services: an application of support vector machines while comparing two parameter-selection techniques,” 2006. * [34] A. Liaw and M. Wiener, “Classification and regression by random forest,” R News, vol. 2, no. 3, pp. 18–22, 2002. * [35] M. K. C. from Jed Wing, S. Weston, A. Williams, C. Keefer, and A. Engelhardt, caret: Classification and Regression Training, 2012. R package version 5.15-044. * [36] S. Lessmann and S. Voß, “A reference model for customer-centric data mining with support vector machines,” European Journal of Operational Research, vol. 199, 2009. * [37] B. L. Das and M. Baruah, “Employee retention: A review of literature,” Journal of Business and Management, vol. 14, no. 2, pp. 08–16, 2013. * [38] S. Ramlall, “A review of employee motivation theories and their implications for employee retention within organizations,” Journal of American Academy of Business, vol. 5, no. 1/2, pp. 52–63, 2004. * [39] P. C. Bryant and D. G. Allen, “Compensation, benefits and employee turnover: Hr strategies for retaining top talent,” Compensation & Benefits Review, vol. 45, no. 3, pp. 171–175, 2013."
+            }
+          ],
+          "children": []
+        }
+      ]
+    }
+  ],
+  "chunks": [
+    {
+      "heading_path": [
+        "Report GitHub Issue"
+      ],
+      "text": "##### Report GitHub Issue\n\nContent selection saved. Describe the issue below:"
+    },
+    {
+      "heading_path": [
+        "Employee turnover prediction and retention policies design: a case study."
+      ],
+      "text": "# Employee turnover prediction and retention policies design: a case study."
+    },
+    {
+      "heading_path": [
+        "Employee turnover prediction and retention policies design: a case study.",
+        "Abstract"
+      ],
+      "text": "###### Abstract\n\nThis paper illustrates the similarities between the problems of customer churn and employee turnover. An example of employee turnover prediction model leveraging classical machine learning techniques is developed. Model outputs are then discussed to design & test employee retention policies. This type of retention discussion is, to our knowledge, innovative and constitutes the main value of this paper.\n\n2010 Mathematics Subject Classification. Keywords and phrases. Churn prediction; Machine learning techniques; Employee Turnover; Classification; Retention Policy;Workforce Planning."
+    },
+    {
+      "heading_path": [
+        "Employee turnover prediction and retention policies design: a case study.",
+        "1 Introduction"
+      ],
+      "text": "## 1 Introduction\n\nMachine learning algorithms are often showcased in customer churn study. Applications in fields such as telecommunication or product marketing (gaming, insurance etc..)(see [[1](https://arxiv.org/html/1707.01377v1#bib.bib1)],[[2](https://arxiv.org/html/1707.01377v1#bib.bib2)] for a recent review) are multiple. The implementation of these methods in Customer Relationship Management is becoming the new norm, as improving customer retention yields superior business results. We argue that this type of techniques can easily be applied to employee turnover. Note that the employee turnover can actually be subdivided in 3 buckets: involuntary turnover (induced by the company), voluntary turnover (employee resignation) and retirements. Retirement and an involuntary turnover are out of the scope of this paper. Retirement is indeed generally legally enforced through specific local schemes and does not require a prediction. As for firing decisions, they are a company decision aiming at achieving the right workforce sizing or productivity levels. Therefore they do not require any anticipation on workers behavior. On the other hand, voluntary turnover is employee dependent. Mitigating it can be of interest to companies. This is even, in our opinion, one of the key workforce dynamic to understand in order to manage a company in a sustainable fashion (see [[3](https://arxiv.org/html/1707.01377v1#bib.bib3)] for example). Assume that a company YY has a portion of its workforce in job jj that is deemed critical to achieve business results. Assume the job jj participates in a critical part of a product manufacturing process and is extremely difficult to source because of the required expertise and associated training time. Delays and/or failure in the manufacturing process can be extremely costly for the company, so that retention efforts may have to be considered to mitigate production risks. Retention is part of the standard Human Resources [HR] activity which is structured around the ”5 Bs”, namely : ”Buy” and ”Borrow”(=hire), ”Build”(=train), ”Bind”(=retain), ”Bounce”(=fire). Retention investments usually factor individual performance, potential to grow in a company and are conjugated with a leave risk assessment. Let’s assume that performance and potential are already assessed in a satisfactory fashion but that the leave risk is currently assessed by the employee’s manager based on personal intuition. This managerial assessment is in reality a classification problem. The manager will indeed flag each year its employees has having either a ”High Risk” (the employee will leave the company this year) or a ”Low Risk” (the employee will not leave the company this year) of departure. Assume that the company YY does not trust the managerial assessments because historically, they poorly correlate to the observed voluntary turnover fluxes. The company would therefore be interested in developing a prediction routine to structure its retention efforts. The use of machine learning techniques for turnover prediction purposes has risen lately (see[[4](https://arxiv.org/html/1707.01377v1#bib.bib4)] and [[5](https://arxiv.org/html/1707.01377v1#bib.bib5)] for recent examples). Yet, to our knowledge, nothing has been done to design and test retention policies. In this paper, we will therefore leverage HR domain knowledge to build a turnover predictor and test retention policies. This paper will first explain how features can be engineered to feed a machine learning algorithm. In a second part, several machine learning methods and training sample techniques will be discussed and analyzed in terms of performance. Finally a sensitivity analysis will be carried out to design and test specific retention policies.\n\nYY\n\njj\n\njj\n\nYY\n\nImportant Legal Remark. The findings and opinions expressed in this paper are those of the authors and do not reflect the positions from any company or institution. Finally, please bear in mind that for confidentiality reasons numbers have been disguised in a way that preserves the same conclusions as the actual case study."
+    },
+    {
+      "heading_path": [
+        "Employee turnover prediction and retention policies design: a case study.",
+        "2 Feature Engineering."
+      ],
+      "text": "## 2 Feature Engineering."
+    },
+    {
+      "heading_path": [
+        "Employee turnover prediction and retention policies design: a case study.",
+        "2 Feature Engineering.",
+        "2.1 Previous Work."
+      ],
+      "text": "### 2.1 Previous Work.\n\nTurnover is not easy to predict because it results from a combination of elements. So far, no consensus has been reached in terms of key elements to use. For example, an early review of voluntary turnover studies [[6](https://arxiv.org/html/1707.01377v1#bib.bib6)] has found that the strongest predictors for voluntary turnover were age, tenure, pay, overall job satisfaction, and employee’s perception of fairness. But other studies have also stressed the importance of job performance [[7](https://arxiv.org/html/1707.01377v1#bib.bib7)], job characteristics (role, seniority in role…) [[8](https://arxiv.org/html/1707.01377v1#bib.bib8)], enhanced individual demographic characteristics (age/experience, gender, ethnicity, education, marital status) ([[9](https://arxiv.org/html/1707.01377v1#bib.bib9)], [[10](https://arxiv.org/html/1707.01377v1#bib.bib10)], [[11](https://arxiv.org/html/1707.01377v1#bib.bib11)], [[12](https://arxiv.org/html/1707.01377v1#bib.bib12)], [[13](https://arxiv.org/html/1707.01377v1#bib.bib13)], [[14](https://arxiv.org/html/1707.01377v1#bib.bib14)]), structural characteristics (i.e. team size and performance) and geographical factors ([[15](https://arxiv.org/html/1707.01377v1#bib.bib15)] , [[16](https://arxiv.org/html/1707.01377v1#bib.bib16)]).Finally some studies have also set an emphasis on salary, working conditions, job satisfaction, supervision, advancement, recognition, growth potential, burnout etc. [[17](https://arxiv.org/html/1707.01377v1#bib.bib17)], [[18](https://arxiv.org/html/1707.01377v1#bib.bib18)],[[19](https://arxiv.org/html/1707.01377v1#bib.bib19)], [[20](https://arxiv.org/html/1707.01377v1#bib.bib20)]. And our list is far from being exhaustive… To our understanding, the key to successfully engineer features in machine learning exercises revolves around flexibility. Companies Human Resource Information Systems [HRIS] are famous for data inconsistency and quality issues. The absence of data standards thus calls for company specific engineering tasks."
+    },
+    {
+      "heading_path": [
+        "Employee turnover prediction and retention policies design: a case study.",
+        "2 Feature Engineering.",
+        "2.2 Turnover Domain Knowledege & Data."
+      ],
+      "text": "### 2.2 Turnover Domain Knowledege & Data.\n\nThe dataset available for this study was discussed with a pool of peer-trusted experts among our clients group. The purpose of this discussion was to hand pick features that, in light of the previous bibliographical work, would be relevant for the given job jj and in the current historical context. Leveraging peer trusted experts was important because it enabled us to infuse domain knowledge to the project while creating buy-in in our client group for this kind of methodology. This was also critical as it helped us remove features that were considered non reliable. The selected features were:\n\njj\n\n* • Localization. Individuals from a given country were selected. This country was described by a categorical feature representing the regional area where the employee was working. This was used to account for local labor market specific dynamics. * • Knowledge. In order to account for specific domain expertise among job category jj, the type of business unit in which the individual was working was added to the feature mix. * • Individual data. Several features were suggested as far as individuals are concerned. First, time in the current position and tenure with a given company were added. Demographics in terms of age and gender were also highlighted. Additional elements specific to the dataset, such as performance & potential evaluation, were discussed. Hierarchical level according the dataset grading structure was finally added to the mix. * • Individual managerial data. Manager’s demographic information such as age and gender were added, as well as manager’s time in the current position and tenure in a given company. Manager’s performance over the last year and average performance over the last 3 years were also integrated. * • Individual team data. Team size and team percentage of high and low performers were added to the prepared mix.\n\nLocalization. Individuals from a given country were selected. This country was described by a categorical feature representing the regional area where the employee was working. This was used to account for local labor market specific dynamics.\n\nKnowledge. In order to account for specific domain expertise among job category jj, the type of business unit in which the individual was working was added to the feature mix.\n\njj\n\nIndividual data. Several features were suggested as far as individuals are concerned. First, time in the current position and tenure with a given company were added. Demographics in terms of age and gender were also highlighted. Additional elements specific to the dataset, such as performance & potential evaluation, were discussed. Hierarchical level according the dataset grading structure was finally added to the mix.\n\nIndividual managerial data. Manager’s demographic information such as age and gender were added, as well as manager’s time in the current position and tenure in a given company. Manager’s performance over the last year and average performance over the last 3 years were also integrated.\n\nIndividual team data. Team size and team percentage of high and low performers were added to the prepared mix.\n\nThe population under study in the given job category jj accounted for about 1000 employees in a given country. 2 years (referred to as year 1 and year 2) of data were available. The problem was of a classification nature as employees were either tagged as ”Terminated” or ”Active”. Note that the dataset was curated of individuals who left involuntarily or because of retirement to respect the scope of the study. The full dataset was heavily unbalanced as the yearly number of people in job jj leaving voluntarily was about 20%20\\%.It was randomly split in a training and a test set, which were of equal size. Each of the two sets contained the same proportion of year 1 and year 2 information. This choice indeed yielded more robust performances than having the algorithms trained on one year and tested on the other.\n\njj\n\njj\n\n20%20\\%"
+    },
+    {
+      "heading_path": [
+        "Employee turnover prediction and retention policies design: a case study.",
+        "2 Feature Engineering.",
+        "2.3 Feature Selection."
+      ],
+      "text": "### 2.3 Feature Selection.\n\nAfter this pre-processing, a selection layer was deployed in order to keep only the most relevant elements to the current problem out of the ones mentioned by the experts and the literature. Limiting the number of features used in machine learning problems is indeed crucial to properly manage the complexity of the learning phase and to avoid over fitting. In this paper, the mutual information (MI) criterion was used to assess the “information content” of each individual feature. This type of feature selection method is indeed well acknowledged and has proven useful for such topics (see [[21](https://arxiv.org/html/1707.01377v1#bib.bib21)] for an early example, [[22](https://arxiv.org/html/1707.01377v1#bib.bib22)] for a customer churn example and [[23](https://arxiv.org/html/1707.01377v1#bib.bib23)] for a review.)."
+    },
+    {
+      "heading_path": [
+        "Employee turnover prediction and retention policies design: a case study.",
+        "2 Feature Engineering.",
+        "2.3 Feature Selection.",
+        "Ranking with Mutual Information (MI)."
+      ],
+      "text": "#### Ranking with Mutual Information (MI).\n\nMutual Information (MI) is an essential metric of information and has been widely used for quantifying the mutual dependence of random variables (see [[24](https://arxiv.org/html/1707.01377v1#bib.bib24)] for details).Formally the MI between an output variable YY and an input variable XX is defined as:\n\nYY\n\nXX\n\n| | | | | | --- | --- | --- | --- | | | M​I​(X,Y)=∑x∈X∑y∈YP⁡(x,y).log⁡P⁡(x,y)P⁡(x).P⁡(y)MI(X;Y)=\\sum\\_{x\\in X}\\sum\\_{y\\in Y}P(x,y).\\log{\\dfrac{P(x,y)}{P(x).P(y)}} | | (1) |\n\nM​I​(X,Y)=∑x∈X∑y∈YP⁡(x,y).log⁡P⁡(x,y)P⁡(x).P⁡(y)MI(X;Y)=\\sum_{x\\in X}\\sum_{y\\in Y}P(x,y).\\log{\\dfrac{P(x,y)}{P(x).P(y)}}\n\nwhere P⁡(x)P(x) (resp. P⁡(y)P(y)) is the probability associated to XX (resp. YY), and P⁡(x,y)P(x,y) is the joint probability of having both XX and YY.\n\nP⁡(x)P(x)\n\nP⁡(y)P(y)\n\nXX\n\nYY\n\nP⁡(x,y)P(x,y)\n\nXX\n\nYY"
+    },
+    {
+      "heading_path": [
+        "Employee turnover prediction and retention policies design: a case study.",
+        "2 Feature Engineering.",
+        "2.3 Feature Selection.",
+        "Features Filtering."
+      ],
+      "text": "#### Features Filtering.\n\nSeveral possibilities exist in order to select features. According to a recent survey [[25](https://arxiv.org/html/1707.01377v1#bib.bib25)], they can be summed up in three types of methods: filters, wrappers and embedded ones. Filter methods preprocess and rank features in order to keep only the best ones. In wrapper methods, the feature selection criterion is the performance of the predictor itself. The predictor is indeed wrapped on a search algorithm which will find a subset that gives the best predictor performance. Finally embedded methods include variable selection as part of the training process without splitting the data into training and testing sets. ![[Uncaptioned image]](./Employee turnover prediction and retention policies design_ a case study._files/ResultsMI.png) Fig 1. Features Mutual Information In this case, a filter method was used based on the previously described mutual information criterion. This choice was motivated by its simplicity and the empirical efficiency of the approach. For each feature XX, the mutual information M​I​(X,Y)MI(X,Y) was compiled and only the top 60% features were kept. Mutual information results are displayed below. Among the features of demographic nature, employee’s gender and age as well as manager’s gender were removed. Company bonus level information and structural hierarchical details proved useful but required granularity to be of use. Team size information disappeared. It is interesting to see that with the current dataset; only employee behavioral assessments relates to the turnover decision. Further investigation would be needed on this aspect of the dataset.\n\nXX\n\nM​I​(X,Y)MI(X,Y)"
+    },
+    {
+      "heading_path": [
+        "Employee turnover prediction and retention policies design: a case study.",
+        "3 Machine Learning Methods."
+      ],
+      "text": "## 3 Machine Learning Methods.\n\nThe analytical techniques deployed rely on well-known standards such as SVM, random forests or KNN that have been proposed to predict turnover (see [[26](https://arxiv.org/html/1707.01377v1#bib.bib26)] or [[4](https://arxiv.org/html/1707.01377v1#bib.bib4)] for examples). They have been adjusted to account for class imbalance and potential associated biases."
+    },
+    {
+      "heading_path": [
+        "Employee turnover prediction and retention policies design: a case study.",
+        "3 Machine Learning Methods.",
+        "3.1 Class Imbalance Correction."
+      ],
+      "text": "### 3.1 Class Imbalance Correction.\n\nClass Imbalance is a common theme on customer churn prediction ([[27](https://arxiv.org/html/1707.01377v1#bib.bib27)], [[28](https://arxiv.org/html/1707.01377v1#bib.bib28)]…), which is a topic similar to the one developed in this paper. Standard solutions involve subsampling techniques to smooth the disparities between the observed classes. In this paper, several methods were tested:\n\n* • Down-sampling: sample the majority class to make its frequency closer to the rarest class. * • Up-sampling: resample the minority class to increase its frequency. * • Weighting: place a heavier penalty on misclassifying the minority class [[29](https://arxiv.org/html/1707.01377v1#bib.bib29)] by assigning a weight to each class, with the minority class being given a larger weight (i.e., higher misclassification cost). * • ”SMOTE”: over-sample the minority (rarest) class and under-sample the majority class ([[30](https://arxiv.org/html/1707.01377v1#bib.bib30)]). * • ”ROSE”: generate new artificial data from the classes to correct class imbalance according to a smoothed bootstrap approach [[31](https://arxiv.org/html/1707.01377v1#bib.bib31)].\n\nDown-sampling: sample the majority class to make its frequency closer to the rarest class.\n\nUp-sampling: resample the minority class to increase its frequency.\n\nWeighting: place a heavier penalty on misclassifying the minority class [[29](https://arxiv.org/html/1707.01377v1#bib.bib29)] by assigning a weight to each class, with the minority class being given a larger weight (i.e., higher misclassification cost).\n\n”SMOTE”: over-sample the minority (rarest) class and under-sample the majority class ([[30](https://arxiv.org/html/1707.01377v1#bib.bib30)]).\n\n”ROSE”: generate new artificial data from the classes to correct class imbalance according to a smoothed bootstrap approach [[31](https://arxiv.org/html/1707.01377v1#bib.bib31)]."
+    },
+    {
+      "heading_path": [
+        "Employee turnover prediction and retention policies design: a case study.",
+        "3 Machine Learning Methods.",
+        "3.2 Selected Classification Methods."
+      ],
+      "text": "### 3.2 Selected Classification Methods.\n\nThe classification problem was approached with the following techniques:\n\n* • Naive Bayes (NB) classifiers (see [[32](https://arxiv.org/html/1707.01377v1#bib.bib32)] for an application) calculate the probability that a given input sample belongs to a certain class. Assuming a number of classes Y=(y​1,y​2,…,y​k)Y=(y1,y2,…,yk) and a given a unknown sample X, a Naive Bayes classifier assigns the sample X to the class with the highest probability C=A​r​g​M​a​xy∈(y​1​…​y​k)​(p⁡(y|X))C=ArgMax\\_{y\\in(y1...yk)}(p(y|X)) * • Linear Discriminant Analysis (LDA) is a generalization of Fisher’s linear discriminant analysis. It can be explained as computing a z-score, which is then used to estimate the probabilities that a particular member or observation belongs to a class. * • Support vector machines (SVMs) achieve class separation by finding (in their linear version) a hyper plane in a high dimensional space. The intuition is that a good separation is achieved by the hyper plane that has the largest distance to the nearest training data points of any class. The larger the margin is, the lower the generalization error of the classifier. For this reason, SVMs are also referred to as maximum margin classifiers. Multiple versions exists (linear, polynomials, gaussian…) (see [[33](https://arxiv.org/html/1707.01377v1#bib.bib33)]) * • Random Forests (RFs) [[34](https://arxiv.org/html/1707.01377v1#bib.bib34)] result from the combination of tree classifiers. Each tree depends in the values of a random vector sampled independently and with the same distribution for all trees in the forest. The generalization error of a forest of tree classifiers depends on the strength of the individual trees in the forest and the correlation between them. RF has empirically achieved very good classification performance in numerous cases and is robust against over-fitting.\n\nNaive Bayes (NB) classifiers (see [[32](https://arxiv.org/html/1707.01377v1#bib.bib32)] for an application) calculate the probability that a given input sample belongs to a certain class. Assuming a number of classes Y=(y​1,y​2,…,y​k)Y=(y1,y2,…,yk) and a given a unknown sample X, a Naive Bayes classifier assigns the sample X to the class with the highest probability C=A​r​g​M​a​xy∈(y​1​…​y​k)​(p⁡(y|X))C=ArgMax\\_{y\\in(y1...yk)}(p(y|X))\n\nY=(y​1,y​2,…,y​k)Y=(y1,y2,…,yk)\n\nC=A​r​g​M​a​xy∈(y​1​…​y​k)​(p⁡(y|X))C=ArgMax_{y\\in(y1...yk)}(p(y|X))\n\nLinear Discriminant Analysis (LDA) is a generalization of Fisher’s linear discriminant analysis. It can be explained as computing a z-score, which is then used to estimate the probabilities that a particular member or observation belongs to a class.\n\nSupport vector machines (SVMs) achieve class separation by finding (in their linear version) a hyper plane in a high dimensional space. The intuition is that a good separation is achieved by the hyper plane that has the largest distance to the nearest training data points of any class. The larger the margin is, the lower the generalization error of the classifier. For this reason, SVMs are also referred to as maximum margin classifiers. Multiple versions exists (linear, polynomials, gaussian…) (see [[33](https://arxiv.org/html/1707.01377v1#bib.bib33)])\n\nRandom Forests (RFs) [[34](https://arxiv.org/html/1707.01377v1#bib.bib34)] result from the combination of tree classifiers. Each tree depends in the values of a random vector sampled independently and with the same distribution for all trees in the forest. The generalization error of a forest of tree classifiers depends on the strength of the individual trees in the forest and the correlation between them. RF has empirically achieved very good classification performance in numerous cases and is robust against over-fitting.\n\nNote that the R Caret package [[35](https://arxiv.org/html/1707.01377v1#bib.bib35)] was the library used to support the study."
+    },
+    {
+      "heading_path": [
+        "Employee turnover prediction and retention policies design: a case study.",
+        "3 Machine Learning Methods.",
+        "3.3 Evaluation & Results."
+      ],
+      "text": "### 3.3 Evaluation & Results."
+    },
+    {
+      "heading_path": [
+        "Employee turnover prediction and retention policies design: a case study.",
+        "3 Machine Learning Methods.",
+        "3.3 Evaluation & Results.",
+        "Cross-Validation."
+      ],
+      "text": "#### Cross-Validation.\n\nThe dataset was split 80:20 into training and hold out sets in a 10-fold cross validation scheme. For each algorithm, a grid-search was performed over the tuning parameters, including regularization or penalty hyper-parameters."
+    },
+    {
+      "heading_path": [
+        "Employee turnover prediction and retention policies design: a case study.",
+        "3 Machine Learning Methods.",
+        "3.3 Evaluation & Results.",
+        "Performance Metric."
+      ],
+      "text": "#### Performance Metric.\n\nThe Area under the receiver operating characteristic curve (ROC-AUC) was the chosen performance measure. The AUC is a general measure of accuracy. It decouples classifier assessment from operating conditions i.e., class distributions and misclassification costs [[36](https://arxiv.org/html/1707.01377v1#bib.bib36)]. It is better suited to non-balanced classification problems than standard accuracy or error test as it allows a graphical representation of specificity (false positive rate) and selectivity (true positive rate) of the classifiers on the dataset. Note that, in this case, the specificity can be interpreted as the percentage of workers flagged as leavers that really left, while the selectivity represents the percentage of workers appropriately flagged that stayed in their company."
+    },
+    {
+      "heading_path": [
+        "Employee turnover prediction and retention policies design: a case study.",
+        "3 Machine Learning Methods.",
+        "3.3 Evaluation & Results.",
+        "Results."
+      ],
+      "text": "#### Results.\n\nWe obtained the following results: In terms of imbalance correction, we found that up sampling and ROSE sampling yielded the best performance in this case. As expected, when imbalance was not corrected, algorithms tended to favor the majority class to achieve the best performances. Table 1. Classification Performance among resampling methods. Sampling Best Algorithm ROC Spe. Sel. None LDA 0.73 0.94 0.19 Down LDA 0.74 0.61 0.67 Up RF 0.96 0.82 0.96 Rose RF 0.95 0.81 0.96 Smote RF 0.87 0.86 0.74 ![[Uncaptioned image]](./Employee turnover prediction and retention policies design_ a case study._files/ROCCurve.png) Fig 2. ROC Curves with ROSE resampling In terms of algorithms, we saw that the tree based ones performed best. The following performances were indeed recorded with ROSE resampling: Table 2. Classification Performance among algorithms. Algorithm ROC Specificity Selectivity LDA 0.75 0.67 0.74 SVM (Radial) 0.80 0.69 0.76 RF 0.95 0.81 0.96 Treebag 0.94 0.78 0.94 The corresponding ROC Curves have been reported to the left. As far as the variables of importance are concerned, we saw that the employee behavior and performance (especially when rated low) are important elements to the turnover behavior prediction. Structural elements in terms of compensation schemes and business units’ specificities were also rated high. The same goes for certain seniority in company and time in position year bands. According to the graph [3.3](https://arxiv.org/html/1707.01377v1#S3.SS3.SSS0.Px3 \"Results. ‣ 3.3 Evaluation & Results. ‣ 3 Machine Learning Methods. ‣ Employee turnover prediction and retention policies design: a case study.\"), new joiners in the company are at risk. So are people that have been in their roles for more than 4 years. This last element may relate to a perceived lack of career opportunity. This seems to be corroborated by the importance of managerial time in position. Interestingly managers’ importance in turnover decisions appears to be mainly related to their seniority in the company or their time on the job. Manager performance or behavior does not rate extremely high. Another interesting element is that remote jobs do not seem to be driving more turnover than other offices location. This would hint to local labor market specificities. ![[Uncaptioned image]](./Employee turnover prediction and retention policies design_ a case study._files/VarImp.png) Fig 3. Varibale Importance (RF with Rose Resampling) In this section, it has been showed that it possible to model voluntary turnover with a couple of standard variables. Even though this may not hold for all types of jobs, the announced performance proved replicable on the prepared test set. A discussion about the model use to deliver insights on retention policies is now in order."
+    },
+    {
+      "heading_path": [
+        "Employee turnover prediction and retention policies design: a case study.",
+        "4 Retention Discussion."
+      ],
+      "text": "## 4 Retention Discussion.\n\nAccording to recent reviews in the field of employee retention (see [[37](https://arxiv.org/html/1707.01377v1#bib.bib37)], [[38](https://arxiv.org/html/1707.01377v1#bib.bib38)]), the results from the previous section are not surprising. A number of generic actions to bind people to firms have already been discussed over the years. Compensation topics, including rewards and recognition schemes are among the most popular (see [[39](https://arxiv.org/html/1707.01377v1#bib.bib39)] for an example). Other elements such as opportunity for growth & development, accountability and leadership structure have also been stressed. Some further elements regarding the workplace and work life balance have been raised too. But as stressed by the literature reviews retention efforts should be tied to an in depth turnover analysis, which will be the aim of this final part of our study. The previous results motivated us to test five simple possible programs. The first two are about reviewing the job locations: in the program P​1P1, remote jobs are reassigned to the location 1, while in P​2P2 jobs in location 3 are reassigned to location 1. The next ones are about the managers for the considered labor categories. In the program P​3P3, all managers were forced to have a first internal experience prior to their managerial role. This translated in reallocating all managers with company tenure between 0 and 2 years to a 3 to the 7 years band. In the program P​4P4, managers were assumed to rotate frequently between team so that their time in position would be kept below 2 years. Finally we tested an employee program P​5P5 that assume that people were bound to the company during their first 2 years in position.\n\nP​1P1\n\nP​2P2\n\nP​3P3\n\nP​4P4\n\nP​5P5"
+    },
+    {
+      "heading_path": [
+        "Employee turnover prediction and retention policies design: a case study.",
+        "4 Retention Discussion.",
+        "4.1 Retention Policy Simulations."
+      ],
+      "text": "### 4.1 Retention Policy Simulations.\n\nThe five programs mentioned (P​1P1 to P​5P5) were tested on a prediction set, which was built from the current year of data where no turnover indication was available. It was therefore different from both the test and training set mentioned earlier. Size and characteristics of the prediction set were similar. Certain parameters of the prediction set were altered to perform the sensitivity analysis required to simulate the retention programs as previously described. Two types of policies were investigated. It is indeed either possible to apply the program P​1P1 to P​5P5 to all the people in scope of the study or to target only the individuals flagged as leavers and adopt a policy that suits them best.\n\nP​1P1\n\nP​5P5\n\nP​1P1\n\nP​5P5"
+    },
+    {
+      "heading_path": [
+        "Employee turnover prediction and retention policies design: a case study.",
+        "4 Retention Discussion.",
+        "4.1 Retention Policy Simulations.",
+        "Mass Actions."
+      ],
+      "text": "#### Mass Actions.\n\nAs far as mass actions are concerned, the following table summarizes our findings:\n\n| Program Type | Program Details | %\\% of leavers | | --- | --- | --- | | None | No Retention Policy | 41.5%\\% | | P1.Location | Remote Job reassigned to Location 1 | 40.9%\\% | | P2.Location | Location 3 reassigned to Location 1 | 41.3%\\% | | P3.Manager | People Managers had 1 role internally | 39.7%\\% | | P4.Manager | Manager Rotation Program | 32.3%\\% | | P5.Employee | Bind newly assigned people | 30%\\% |\n\n%\\%\n\n%\\%\n\n%\\%\n\n%\\%\n\n%\\%\n\n%\\%\n\n%\\%\n\nThe results displayed above show that programs related to internal mobility are among the most efficient options to reduce turnover. If the program P​5P5 appears the most efficient, it also is the most difficult to set in place and offers little upside compared to the managerial rotation program. Interestingly location change offers little value from a retention standpoint. This could be explained in this case by the fact that the labor category at stake can work in a remote fashion. This indeed creates a country wide labor market to compete in.\n\nP​5P5"
+    },
+    {
+      "heading_path": [
+        "Employee turnover prediction and retention policies design: a case study.",
+        "4 Retention Discussion.",
+        "4.1 Retention Policy Simulations.",
+        "Targeted Actions."
+      ],
+      "text": "#### Targeted Actions.\n\nAccording to the algorithm results, about 40 % of the population is likely to leave and requires an action. The investigated course is now to test for each of the supposed leavers which of the programs(P​1P1 to P​5P5) is useful. This will limit the amount of effort required while optimizing the employee retention. This leads to a final % of leavers of 24%, which represents a significant mitigation of turnover. The results in terms of actions are summarized in the table below:\n\nP​1P1\n\nP​5P5\n\n| | | | | --- | --- | --- | | Action Type | %\\% of the total | %\\% of the potential | | | Population concerned | leavers concerned | | None | 82,42% | 57,67% | | P1.Location | 0,88% | 2,12% | | P2.Location | 0% | 0% | | P3.Manager | 1,54% | 3,70% | | P4.Manager | 10,55% | 25,40% | | P5.Employee | 4,62% | 11,11% |\n\n%\\%\n\n%\\%\n\nThese results show that to halve the turnover rate, actions only need to be started for 18% of the total population. In the end, about 25% of the population at risk of departure needs a new manager and 11% require an incentive to stay over the first two years of their role. This highlights solutions that the Human Resource organization and notably the talent management centers of expertise could deploy in in order to successfully contribute to one’s organization management."
+    },
+    {
+      "heading_path": [
+        "Employee turnover prediction and retention policies design: a case study.",
+        "4 Retention Discussion.",
+        "4.2 Discussion."
+      ],
+      "text": "### 4.2 Discussion.\n\nSeveral limitations to this study exist and are listed below:\n\n* • Model Limits. First, we did not have a holistic vision on individual parameters. For instance, detailed compensation parameters were missing. It is completely possible that fed with another set of features, the algorithms would have yielded better performances and different interpretations, for instance in terms of importance ranking. The story developed in this study case results from insights driven discussion between experts. We argue that if advanced analytics are important, the key elements here were the discussions that resulted in a general buy in of the retention policies simulations. * • Emotional Component in the job relationship. The discussions held with our sounding board raised another issue. Turnover may stem from a mix of rational and emotional components. The dataset was mainly organized around standard organizational or labor indicators. Little to no indication regarding people profiles, behaviors or preferences was available. * • Stress Supply vs Demand Approach. The developed approach works well to propose turnover mitigation measures. However we believe that it should not be the first thing to do. Instead we recommend leading the turnover and retention discussion with thorough job level productivity discussion. This indeed helps companies navigate in the supply & demand type of environment that are labor markets and therefore helps them define what an acceptable turnover rate is. Productivity will indeed help defining the cost of the turnover related disruption while the supply demand equilibrium will help finding the right solution mix in terms of staffing vs retention efforts. We personally believe that the human resource function is a key operating body of companies. Yet it needs to tie its activity and services to tangible business outcomes (sales, cost, productivity) to prove its value. This wasn’t stress enough in our study and a review of productivity definition across functions appears mandatory to standardize this type of approach.\n\nModel Limits. First, we did not have a holistic vision on individual parameters. For instance, detailed compensation parameters were missing. It is completely possible that fed with another set of features, the algorithms would have yielded better performances and different interpretations, for instance in terms of importance ranking. The story developed in this study case results from insights driven discussion between experts. We argue that if advanced analytics are important, the key elements here were the discussions that resulted in a general buy in of the retention policies simulations.\n\nEmotional Component in the job relationship. The discussions held with our sounding board raised another issue. Turnover may stem from a mix of rational and emotional components. The dataset was mainly organized around standard organizational or labor indicators. Little to no indication regarding people profiles, behaviors or preferences was available.\n\nStress Supply vs Demand Approach. The developed approach works well to propose turnover mitigation measures. However we believe that it should not be the first thing to do. Instead we recommend leading the turnover and retention discussion with thorough job level productivity discussion. This indeed helps companies navigate in the supply & demand type of environment that are labor markets and therefore helps them define what an acceptable turnover rate is. Productivity will indeed help defining the cost of the turnover related disruption while the supply demand equilibrium will help finding the right solution mix in terms of staffing vs retention efforts. We personally believe that the human resource function is a key operating body of companies. Yet it needs to tie its activity and services to tangible business outcomes (sales, cost, productivity) to prove its value. This wasn’t stress enough in our study and a review of productivity definition across functions appears mandatory to standardize this type of approach."
+    },
+    {
+      "heading_path": [
+        "Employee turnover prediction and retention policies design: a case study.",
+        "5 Conclusion & Next Steps."
+      ],
+      "text": "## 5 Conclusion & Next Steps.\n\nIn this paper, a method to approach employee retention has been proposed using standard machine learning techniques. In a first part, a literature review has shown how close this problem is from the customer churn one. Yet, to our knowledge, little has been done regarding employee turnover from a quantitative standpoint. This generated a discussion with experts on how to tackle this problem and generatemeaningful features. Those features were then fed to standard machine learning algorithms under various resampling schemes to account for classes’ imbalance. The best performing algorithm was retained to predict turnover and a sensitivity analysis was led to understand the effects of several retention policies. We found that for the data at hand, the most efficient retention practice was to develop talent mobility across positions. The principal next step to this study would be to include detailed compensation elements to the feature mix. The current model is indeed more around the employee perception of its internal environment than about rational economic tradeoffs. We indeed believe that such models have the potential to mimic an individual job related utility function."
+    },
+    {
+      "heading_path": [
+        "Employee turnover prediction and retention policies design: a case study.",
+        "References"
+      ],
+      "text": "## References\n\n* [1] E. Ngai, L. Xiu, and D. Chau, “Application of data mining techniques in customer relationship management: A literature review and classification,” Expert Systems with Applications, vol. 36, no. 2, Part 2, pp. 2592 – 2602, 2009. * [2] T. Vafeiadis, K. Diamantaras, G. Sarigiannidis, and K. Chatzisavvas, “A comparison of machine learning techniques for customer churn prediction,” Simulation Modelling Practice and Theory, vol. 55, pp. 1 – 9, 2015. * [3] M. Doumic, B. Perthame, E. Ribes, D. Salort, and N. Toubiana, “Toward an integrated workforce planning framework using structured equations,” European Journal of Operational Research, pp. –, 2017. * [4] R. Punnoose and P. Ajit, “Prediction of employee turnover in organizations using machine learning algorithms,” International Journal of Advanced Research in Artificial Intelligence(ijarai), vol. 5(9), 2016. * [5] H. yun Chang and H. yun Chang, “Employee turnover: a novel prediction solution with effective feature selection,” pp. 252–256, 2009. * [6] J. L. Cotton and J. M. Tuttle, “Employee turnover: A meta-analysis and review with implications for research,” The Academy of Management Review, vol. 11, no. 1, pp. 55–70, 1986. * [7] A. Susskind, C. Borchgrevink, K. Kacmar, and R. Brymer, “Customer service employees’ behavioral intentions and attitudes: An examination of construct validity and a path model,” International Journal of Hospitality Management, vol. 19, pp. 53–77, 3 2000. * [8] N. S. K. Hasan Zarei Matin and M. R. A. Anvari, “Do demographic variables moderate the relationship between job burnout and its consequences?,” Iranian Journal of Management Studies IJMS, vol. 5, no. 1, pp. 47–62, 2012. * [9] I. GABARRET, “Une analyse exploratoire du departvolontaire des cadres: Le cas de la sortie entrepreneuriale hors essaimage,” p. 22. * [10] K. M. R. E. K. L. M. Finkelstein, “What do the young (old) people think of me? content and accuracy of age-based metastereotypes,” European Journal of Work and Organizational Psychology, vol. 22(6), pp. 633–657, 2013. * [11] T. L. B. Holtom, T. Mitchell and M. Eberly, “Turnover and retention research: A glance at the past, a closer review of the present, and a venture into the future,” Academy of Management Annals, vol. 2, pp. 231–274, 2008. * [12] E. K. K. C. von Hippel and J. D. Henry, “Stereotype threat among older employees: Relationship with job attitudes and turnover intentions,” Psychology and aging, 2013. * [13] S. L. Peterson, “Toward a theoretical model of employee turnover: A human resource development perspective,” Human Resource Development Review, vol. 3(3), 2004. * [14] J. M. Sacco and N. Schmitt, “A dynamic multilevel model of demographic diversity and misfit effects,” Journal of Applied Psychology, vol. 90(2), 2005. * [15] C. Tanova, “Using Job Embeddedness Factors to Explain Voluntary Turnover in Five European Countries,” IRISS Working Paper Series 2006-04, IRISS at CEPS/INSTEAD, July 2006. * [16] S. M. Carraher, “Turnover prediction using attitudes towards benefits, pay, and pay satisfaction among employees and entrepreneurs in estonia, latvia, and lithuania,” Baltic Journal of Managementt, vol. 6, pp. 25 – 52, 2001. * [17] D. G. Allen and R. W. Griffeth, “Test of a mediated performance – turnover relationship highlighting the moderating roles of visibility and reward contingency,” Journal of Applied Psychology, vol. 86(5), 2001. * [18] T. W. L. B. C. H. D. Liu, T. R. Mitchell and T. R. Hinkin, “When employees are out of step with coworkers: How job satisfaction trajectory and dispersion influence individual-and unit-level voluntary turnover,” Academy of Management Journal, vol. 55(6), 2012. * [19] B. W. Swider and R. D. Zimmerman, “Born to burnout: A metaanalytic path model of personality, job burnout, and work outcomes,” Journal of Vocational Behavior, vol. 76(3), 2010. * [20] T. M. Heckert and A. M. Farabee, “Turnover intentions of the faculty at a teaching-focused university,” Psychological reports, vol. 99(1), 2006. * [21] R. Battiti, “Using mutual information for selecting features in supervised neural net learning,” IEEE Transactions on Neural Networks, vol. 5, pp. 537–550, Jul 1994. * [22] S. Moldovan, E. Muller, Y. Richter, and E. Yom-Tov, “Opinion leadership in small groups,” International Journal of Research in Marketing, pp. –, 2016. * [23] J. R. Vergara and P. A. Estévez, “A review of feature selection methods based on mutual information,” Neural Computing and Applications, vol. 24, no. 1, pp. 175–186, 2014. * [24] T. M. Cover and J. A. Thomas, Elements of Information Theory, vol. 2nd Edition. 2006. * [25] G. Chandrashekar and F. Sahin, “A survey on feature selection methods,” Computers and Electrical Engineering, vol. 40, no. 1, pp. 16 – 28, 2014. 40th-year commemorative issue. * [26] A. M. Esmaieeli Sikaroudi, R. Ghousi, and A. Sikaroudi, “A data mining approach to employee turnover prediction (case study: Arak automotive parts manufacturing),” Journal of Industrial and Systems Engineering, vol. 8, no. 4, pp. 106–121, 2015. * [27] K. W. Bowyer, N. V. Chawla, L. O. Hall, and W. P. Kegelmeyer, “SMOTE: synthetic minority over-sampling technique,” CoRR, vol. abs/1106.1813, 2011. * [28] A. Amin, F. Rahim, I. Ali, C. Khan, and S. Anwar, A Comparison of Two Oversampling Techniques (SMOTE vs MTDF) for Handling Class Imbalance Problem: A Case Study of Customer Churn Prediction, pp. 215–225. Cham: Springer International Publishing, 2015. * [29] L. A. . B. L. Chen, C., “Using random forests to learn imbalanced data,” Technical Report 666. Statistics Department of University of California at Berkeley., 2004. * [30] N. V. Chawla, K. W. Bowyer, L. O. Hall, and W. P. Kegelmeyer, “Smote: Synthetic minority over-sampling technique,” Journal of Artificial Intelligence Research, vol. 16, pp. 321–357, 2002. * [31] G. Menardi and N. Torelli, “Training and assessing classification rules with imbalanced data,” Data Mining and Knowledge Discovery, vol. 28, no. 1, pp. 92–122, 2014. * [32] G.-e. Xia and W.-d. Jin, “Model of customer churn prediction on support vector machine,” Systems Engineering-Theory & Practice, vol. 28, no. 1, pp. 71–77, 2008. * [33] B-Gent, K. Coussement, and D. V. D. Poel, “Churn prediction in subscription services: an application of support vector machines while comparing two parameter-selection techniques,” 2006. * [34] A. Liaw and M. Wiener, “Classification and regression by random forest,” R News, vol. 2, no. 3, pp. 18–22, 2002. * [35] M. K. C. from Jed Wing, S. Weston, A. Williams, C. Keefer, and A. Engelhardt, caret: Classification and Regression Training, 2012. R package version 5.15-044. * [36] S. Lessmann and S. Voß, “A reference model for customer-centric data mining with support vector machines,” European Journal of Operational Research, vol. 199, 2009. * [37] B. L. Das and M. Baruah, “Employee retention: A review of literature,” Journal of Business and Management, vol. 14, no. 2, pp. 08–16, 2013. * [38] S. Ramlall, “A review of employee motivation theories and their implications for employee retention within organizations,” Journal of American Academy of Business, vol. 5, no. 1/2, pp. 52–63, 2004. * [39] P. C. Bryant and D. G. Allen, “Compensation, benefits and employee turnover: Hr strategies for retaining top talent,” Compensation & Benefits Review, vol. 45, no. 3, pp. 171–175, 2013."
+    }
+  ]
+}

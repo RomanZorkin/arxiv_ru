@@ -1,0 +1,1187 @@
+{
+  "title": "Large-Scale Analysis of New Employee Network Dynamics",
+  "sections": [
+    {
+      "heading": "Report GitHub Issue",
+      "level": 5,
+      "content": [
+        {
+          "type": "paragraph",
+          "text": "Content selection saved. Describe the issue below:"
+        }
+      ],
+      "children": []
+    },
+    {
+      "heading": "Large-Scale Analysis of New Employee Network Dynamics",
+      "level": 1,
+      "content": [],
+      "children": [
+        {
+          "heading": "Abstract.",
+          "level": 6,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "The COVID-19 pandemic has accelerated digital transformations across industries, but also introduced new challenges into workplaces, including the difficulties of effectively socializing with colleagues when working remotely. This challenge is exacerbated for new employees who need to develop workplace networks from the outset. In this paper, by analyzing a large-scale telemetry dataset of more than 10,000 Microsoft employees who joined the company in the first three months of 2022, we describe how new employees interact and telecommute with their colleagues during their “onboarding” period. Our results reveal that although new hires are gradually expanding networks over time, there still exists significant gaps between their network statistics and those of tenured employees even after the six-month onboarding phase. We also observe that heterogeneity exists among new employees in how their networks change over time, where employees whose job tasks do not necessarily require extensive and diverse connections could be at a disadvantaged position in this onboarding process. By investigating how web-based people recommendations in organizational knowledge base facilitate new employees naturally expand their networks, we also demonstrate the potential of web-based applications for addressing the aforementioned socialization challenges. Altogether, our findings provide insights on new employee network dynamics in remote and hybrid work environments, which may help guide organizational leaders and web application developers on quantifying and improving the socialization experiences of new employees in digital workplaces."
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "Keywords:",
+          "level": 6,
+          "content": [],
+          "children": []
+        },
+        {
+          "heading": "1. Introduction",
+          "level": 2,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "New employee onboarding often refers to the process where new hires are integrated into the organization. This process is widely acknowledged to be vital for organizations and positively related to employee satisfaction, productivity and retention ([Cable and Judge, 1996](https://arxiv.org/html/2304.03441v1#bib.bib15); [Cable et al., 2013b](https://arxiv.org/html/2304.03441v1#bib.bib14); [Caldwell and Peters, 2018](https://arxiv.org/html/2304.03441v1#bib.bib16); [Ellis et al., 2014](https://arxiv.org/html/2304.03441v1#bib.bib26)). A successful new employee onboarding process not only involves knowledge acquisition, skills training, function understanding, but also encourages new hires to adapt to the organizational culture and socialize with their authentic selves, therefore establishing the sense of belonging ([Cable and Judge, 1996](https://arxiv.org/html/2304.03441v1#bib.bib15)). Although there exist extensive studies on conceptualizing this organizational socialization process ([Ellis et al., 2014](https://arxiv.org/html/2304.03441v1#bib.bib26); [Katz et al., 1997](https://arxiv.org/html/2304.03441v1#bib.bib35); [Hall, 1996](https://arxiv.org/html/2304.03441v1#bib.bib31)), empirical evidence about how new hires communicate and socialize with other employees throughout their onboarding period is very limited to date."
+            },
+            {
+              "type": "paragraph",
+              "text": "The COVID-19 pandemic has caused a fundamental shift to remote work for many information workers ([Barrero et al., 2021](https://arxiv.org/html/2304.03441v1#bib.bib5)). It has accelerated the digital transformation of many workplaces, where employees became reliant on telecommunications such as remote meeting and instant messaging. Despite the flexibility introduced by this working paradigm change, it also brings new onboarding challenges, largely due to the lack of spontaneous and informal in-person conversations ([Butler and Jaffe, 2021](https://arxiv.org/html/2304.03441v1#bib.bib12); [Michel et al., 2021](https://arxiv.org/html/2304.03441v1#bib.bib40); [Brucks and Levav, 2022](https://arxiv.org/html/2304.03441v1#bib.bib10)). Studies reveal that the collaboration network of information workers became more static and siloed with the shift to firm-wide remote work, which makes it more difficult for employees to acquire and share novel information across the network ([Yang et al., 2021](https://arxiv.org/html/2304.03441v1#bib.bib58)). This struggle for organizational socialization can be aggravated on new employees who need to not only acquire necessary knowledge and skills in a short time, but also develop their workplace networks from scratch. For example, recent research on software developers indicates that new hires struggled to ask for help while working remotely (due to the isolation between teammates, scheduling difficulties, the lack of hallway conversations, etc.) and communicated with fewer people overall compared to those who joined pre-pandemic ([Rodeghero et al., 2021](https://arxiv.org/html/2304.03441v1#bib.bib44); [Teevan et al., 2020b](https://arxiv.org/html/2304.03441v1#bib.bib51))."
+            },
+            {
+              "type": "paragraph",
+              "text": "This implies the need for different tools and approaches to supporting onboarding in remote settings. Additionally, the shift to remote work enables new opportunities to explore the impact of such tools, by empirically quantifying the socialization behavior of new employees from their workplace digital traces, and the extent to which they can be augmented or improved by web applications. In this paper, we empirically study the socialization behavior of new employees on a large-scale post-pandemic workplace communication dataset from Microsoft, which includes rich telemetry data of employees on their remote video/audio meetings, emails, and instant messages. In addition, we measure the usage patterns of a web-based people recommendation engine in the workplace and demonstrate its potential in addressing onboarding challenges. The network characteristics we measure include:"
+            },
+            {
+              "type": "list",
+              "text": "* 1) The number of distinct connections (or social ties) each employee maintains in each week; * 2) The frequency in which each individual communicates with other employees every week; * 3) The extent to which an employee bridges communities within an organization."
+            },
+            {
+              "type": "paragraph",
+              "text": "The number of distinct connections (or social ties) each employee maintains in each week;"
+            },
+            {
+              "type": "paragraph",
+              "text": "The frequency in which each individual communicates with other employees every week;"
+            },
+            {
+              "type": "paragraph",
+              "text": "The extent to which an employee bridges communities within an organization."
+            },
+            {
+              "type": "paragraph",
+              "text": "The first two dimensions approximate the number of potential information sources and the total amount of information exchanged with the focal employee. The third dimension captures one’s network structural diversity, which has been shown to play a key role for multiple individual and organizational outcomes ([Granovetter, 1973](https://arxiv.org/html/2304.03441v1#bib.bib30); [Burt and Merluzzi, 2016](https://arxiv.org/html/2304.03441v1#bib.bib11); [Reagans and McEvily, 2003](https://arxiv.org/html/2304.03441v1#bib.bib43); [Uzzi and Spiro, 2005](https://arxiv.org/html/2304.03441v1#bib.bib55); [Argote and Ingram, 2000](https://arxiv.org/html/2304.03441v1#bib.bib4)). Specifically one’s neighborhood may consist of several disparate clusters, reflecting their co-workers from different organizational contexts. Prior studies indicate that having diversified connections to bridge different (“well-seperated”) organizational groups allows individuals to access novel and non-redundant information ([Ugander et al., 2012](https://arxiv.org/html/2304.03441v1#bib.bib53); [De Choudhury et al., 2010](https://arxiv.org/html/2304.03441v1#bib.bib21); [Granovetter, 1973](https://arxiv.org/html/2304.03441v1#bib.bib30); [Burt and Merluzzi, 2016](https://arxiv.org/html/2304.03441v1#bib.bib11); [Reagans and McEvily, 2003](https://arxiv.org/html/2304.03441v1#bib.bib43))."
+            },
+            {
+              "type": "paragraph",
+              "text": "The contributions of this paper are summarized as follows."
+            },
+            {
+              "type": "list",
+              "text": "* • We present the first large-scale, empirical study of the communication network dynamics of new employees in a multinational technology organization in the remote work environment. * • Results from our analysis 1) reveal the general time trends of new employee network dynamics across different communication media during remote onboarding, 2) identify the possibly disadvantaged communities in the onboarding network development process, and 3) demonstrate the potential of web-based applications to address employee socialization challenges. * • Our work points to several important insights, which may help guide organizational leaders and web application developers on how to quantitatively evaluate and improve the employee socialization experiences at digital workplaces."
+            },
+            {
+              "type": "paragraph",
+              "text": "We present the first large-scale, empirical study of the communication network dynamics of new employees in a multinational technology organization in the remote work environment."
+            },
+            {
+              "type": "paragraph",
+              "text": "Results from our analysis 1) reveal the general time trends of new employee network dynamics across different communication media during remote onboarding, 2) identify the possibly disadvantaged communities in the onboarding network development process, and 3) demonstrate the potential of web-based applications to address employee socialization challenges."
+            },
+            {
+              "type": "paragraph",
+              "text": "Our work points to several important insights, which may help guide organizational leaders and web application developers on how to quantitatively evaluate and improve the employee socialization experiences at digital workplaces."
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "2. Hypotheses",
+          "level": 2,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "Prior studies suggest that new employee socialization is an assimilation process where network development is arguably a key component ([Chen, 2005](https://arxiv.org/html/2304.03441v1#bib.bib19); [Ellis et al., 2014](https://arxiv.org/html/2304.03441v1#bib.bib26); [Pike, 2014](https://arxiv.org/html/2304.03441v1#bib.bib42)). This process may unfold over a newcomer’s first several months (or years) with an intense ramp-up period at the beginning ([Ellis et al., 2014](https://arxiv.org/html/2304.03441v1#bib.bib26)). On the other hand, recent studies suggest that asynchronous communications have largely increased with the broad shift to remote work ([Yang et al., 2021](https://arxiv.org/html/2304.03441v1#bib.bib58)). Therefore we speculate the network development patterns of new employees can be different across communication media. Together these inform us the following two hypotheses."
+            }
+          ],
+          "children": [
+            {
+              "heading": "Hypothesis 0 (H1: Time Trends Across Communication Media).",
+              "level": 6,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "There exists an onboarding period where communication networks of new employees are continually developing. These network developing trends may vary across different communication media (i.e., remote meetings, emails, and instant messages)."
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "Hypothesis 0 (H2: New Hires vs. Tenured Employees).",
+              "level": 6,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "New employees are less “connected” than tenured employees during their onboarding period in the organization (i.e., smaller network size, lower communication intensity, lower structural diversity). However, these differences shall reduce as the tenure of a new employee increases."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "We speculate there may exist heterogeneity among new employees because of the intrinsic differences of their job duties and social status, thus proposing the following hypothesis."
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "Hypothesis 0 (H3: Heterogeneity Among New Hires).",
+              "level": 6,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "There exists heterogeneity among new hires (across different managerial positions and different job functions) in how they develop their workplace networks during the onboarding period."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "In addition to the existing investment of human capital on the new employee onboarding process ([Labuschagne and Holmes, 2015](https://arxiv.org/html/2304.03441v1#bib.bib38); [Fagerholm et al., 2014a](https://arxiv.org/html/2304.03441v1#bib.bib27); [Steinmacher et al., 2015](https://arxiv.org/html/2304.03441v1#bib.bib48)), with the great workplace digital transformations, we are interested in if new web-based experiences can be enabled to help new employees develop their networks at digital workplaces. Previous studies demonstrate that knowledge acquisition and information seeking are key components in the onboarding process and positively relate to new employee socialization outcomes ([Ellis et al., 2014](https://arxiv.org/html/2304.03441v1#bib.bib26); [Bauer et al., 2007](https://arxiv.org/html/2304.03441v1#bib.bib6)). Therefore we start our exploration by investigating if embedding “people recommendations” into organizational knowledge management systems can facilitate new employees in connecting with colleagues they otherwise wouldn’t discover (i.e., bridging connections). In this way, knowledge itself serves as an information broker and triggers natural interactions between employees through knowledge sharing, thus improving the network structural diversity."
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "Hypothesis 0 (H4: Web-Based People Recommendations).",
+              "level": 6,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "New employees who have engaged with the “knowledge-based people recommendations” are likely to have more bridging connections."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "We leverage the user engagement data on an enterprise knowledge management product---Microsoft Viva Topics11 1 https://www.microsoft.com/en-us/microsoft-viva/topics—to verify the above hypothesis. Microsoft Viva Topics is a commercial product which leverages machine learning techniques to compile and surface knowledge within an organization. It not only surfaces the textual description, but also suggests people in the organizations who specialize in this given knowledge entity. By analyzing how new employees utilize the “people recommendation” feature (“Pinned People” and “Suggested People”) in this application, we are able to compare the potential differences of their network trends."
+                }
+              ],
+              "children": []
+            }
+          ]
+        },
+        {
+          "heading": "3. Data and Methods",
+          "level": 2,
+          "content": [],
+          "children": [
+            {
+              "heading": "3.1. Data Description",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "We collected a large-scale dataset from Microsoft’s full-time employees describing their communication activities from December 2021 to September 2022. The collected data contains anonymized events on major workplace communication platforms: Microsoft Teams for remote meeting and instant messaging, and Microsoft Outlook for email services. Meanwhile, we collected a user profile dataset containing the organizational group, job function, managerial status, location as well as the local team size of each individual user. Combining these two datasets, we identified two groups of users and conducted statistical analysis on their communication networks."
+                },
+                {
+                  "type": "list",
+                  "text": "* • New Hires. We use the first date of each user’s outbound communication activities (i.e., meetings joined, emails sent, instant messages sent) as the estimated employee start date. To mitigate potential biases introduced by the planned absences (e.g., planned vacations) for these start date estimations, December 2021 is used as a burn-in period to allow users populating in the dataset. After that we identified 11,083 users whose communication activities first started between 2022/01/01 and 2022/03/27 (12 weeks) as the new hire group in our analysis. For each individual user, we then construct weekly snapshots of their communication networks for 24 consecutive weeks from their start week.22 2 This onboarding window is selected because a) the telemetry data collection has to comply with our data retention policy and thus being restricted to a limited timeframe; and b) this 24-week window is where most onboarding activities take place. * • Matched Tenured Employees. In order to assess the network differences between new hires and tenured employees, we leveraged the above user profile information and identified a matched sample of tenured users in our dataset. For each identified new hire, we matched a tenured user who started before 2022/01/01 on the same profile features including organizational group (63 distinct values), job function (engineer or non-engineer), managerial status (individual contributor or manager), location (headquarter or non-headquarter), local team size (50 distinct values). Only 89 out of 11083 newcomers cannot be matched and are removed in the subsequent analysis. We then extracted their communication networks within exactly the same 24-week observation time window as the one for the paired new hire."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "New Hires. We use the first date of each user’s outbound communication activities (i.e., meetings joined, emails sent, instant messages sent) as the estimated employee start date. To mitigate potential biases introduced by the planned absences (e.g., planned vacations) for these start date estimations, December 2021 is used as a burn-in period to allow users populating in the dataset. After that we identified 11,083 users whose communication activities first started between 2022/01/01 and 2022/03/27 (12 weeks) as the new hire group in our analysis. For each individual user, we then construct weekly snapshots of their communication networks for 24 consecutive weeks from their start week.22 2 This onboarding window is selected because a) the telemetry data collection has to comply with our data retention policy and thus being restricted to a limited timeframe; and b) this 24-week window is where most onboarding activities take place."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Matched Tenured Employees. In order to assess the network differences between new hires and tenured employees, we leveraged the above user profile information and identified a matched sample of tenured users in our dataset. For each identified new hire, we matched a tenured user who started before 2022/01/01 on the same profile features including organizational group (63 distinct values), job function (engineer or non-engineer), managerial status (individual contributor or manager), location (headquarter or non-headquarter), local team size (50 distinct values). Only 89 out of 11083 newcomers cannot be matched and are removed in the subsequent analysis. We then extracted their communication networks within exactly the same 24-week observation time window as the one for the paired new hire."
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "3.2. Constructing Ego Networks",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "We’re interested in the ego network of each individual in the above identified user groups and how it changes over time. The notation and definitions are formally introduced as the follows."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Given an observation week tt, a communication medium (meeting, email, or instant messaging), for each individual kk, we define the undirected ego network as 𝒢k(t)={𝒱k(t),ℰk(t),𝒲k(t)}\\mathcal{G}^{(t)}\\_{k}=\\{\\mathcal{V}^{(t)}\\_{k},\\mathcal{E}^{(t)}\\_{k},\\mathcal{W}^{(t)}\\_{k}\\}. Here 𝒱k(t)={k}​⋃𝒩k(t)\\mathcal{V}^{(t)}\\_{k}=\\{k\\}\\bigcup\\mathcal{N}^{(t)}\\_{k} represents node kk as well as its immediate neighbors33 3 Note 𝒩k(t)\\mathcal{N}^{(t)}\\_{k} includes all Microsoft full-time employees who have connected with individual ii in the given week tt. The neighboring employees here are not restricted in the user groups identified in [Section 3.1](https://arxiv.org/html/2304.03441v1#S3.SS1 \"3.1. Data Description ‣ 3. Data and Methods ‣ Large-Scale Analysis of New Employee Network Dynamics\"). (𝒩k(t)\\mathcal{N}^{(t)}\\_{k}). ℰk(t)\\mathcal{E}^{(t)}\\_{k} is an undirected edge set which denotes the observed reciprocal connections among nodes in 𝒱k(t)\\mathcal{V}^{(t)}\\_{k} within the given time window tt. 𝒲k(t)\\mathcal{W}^{(t)}\\_{k} represents the corresponding edge weights."
+                },
+                {
+                  "type": "formula",
+                  "text": "tt"
+                },
+                {
+                  "type": "formula",
+                  "text": "kk"
+                },
+                {
+                  "type": "formula",
+                  "text": "𝒢k(t)={𝒱k(t),ℰk(t),𝒲k(t)}\\mathcal{G}^{(t)}_{k}=\\{\\mathcal{V}^{(t)}_{k},\\mathcal{E}^{(t)}_{k},\\mathcal{W}^{(t)}_{k}\\}"
+                },
+                {
+                  "type": "formula",
+                  "text": "𝒱k(t)={k}​⋃𝒩k(t)\\mathcal{V}^{(t)}_{k}=\\{k\\}\\bigcup\\mathcal{N}^{(t)}_{k}"
+                },
+                {
+                  "type": "formula",
+                  "text": "kk"
+                },
+                {
+                  "type": "formula",
+                  "text": "𝒩k(t)\\mathcal{N}^{(t)}_{k}"
+                },
+                {
+                  "type": "formula",
+                  "text": "ii"
+                },
+                {
+                  "type": "formula",
+                  "text": "tt"
+                },
+                {
+                  "type": "formula",
+                  "text": "𝒩k(t)\\mathcal{N}^{(t)}_{k}"
+                },
+                {
+                  "type": "formula",
+                  "text": "ℰk(t)\\mathcal{E}^{(t)}_{k}"
+                },
+                {
+                  "type": "formula",
+                  "text": "𝒱k(t)\\mathcal{V}^{(t)}_{k}"
+                },
+                {
+                  "type": "formula",
+                  "text": "tt"
+                },
+                {
+                  "type": "formula",
+                  "text": "𝒲k(t)\\mathcal{W}^{(t)}_{k}"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "We first focus on each individual’s one-on-one networks where ℰk(t)\\mathcal{E}^{(t)}\\_{k} is restricted on the communication interactions with only two participants. Following previous studies ([Kossinets and Watts, 2009](https://arxiv.org/html/2304.03441v1#bib.bib37); [De Choudhury et al., 2010](https://arxiv.org/html/2304.03441v1#bib.bib21)), we define the edge weight wi​j(t)=wi→j(t)×wj→i(t)w^{(t)}\\_{ij}=\\sqrt{w^{(t)}\\_{i\\rightarrow j}\\times w^{(t)}\\_{j\\rightarrow i}} between two individuals ii and jj as the geometric mean of the number of directed interactions during the observation time period tt. For example, for each employee’s email network, wi→j(t)w^{(t)}\\_{i\\rightarrow j} denotes the number of emails that ii sent to jj in week tt. To ensure the reciprocity of the observed connections, we define the ego network 𝒢k(t)\\mathcal{G}^{(t)}\\_{k} comprising the edges with only non-zero weights, i.e., wi​j(t)>0w^{(t)}\\_{ij}>0. We consider an alternative group interaction network for robustness test, which accounts for employees’ group communications with less than 10 participants.44 4 Edge weight (wi→j(t)w^{(t)}\\_{i\\rightarrow j}) in the group interaction network is relaxed as the number of directed interactions, normalized by the number of recipients within these interactions."
+                },
+                {
+                  "type": "formula",
+                  "text": "ℰk(t)\\mathcal{E}^{(t)}_{k}"
+                },
+                {
+                  "type": "formula",
+                  "text": "wi​j(t)=wi→j(t)×wj→i(t)w^{(t)}_{ij}=\\sqrt{w^{(t)}_{i\\rightarrow j}\\times w^{(t)}_{j\\rightarrow i}}"
+                },
+                {
+                  "type": "formula",
+                  "text": "ii"
+                },
+                {
+                  "type": "formula",
+                  "text": "jj"
+                },
+                {
+                  "type": "formula",
+                  "text": "tt"
+                },
+                {
+                  "type": "formula",
+                  "text": "wi→j(t)w^{(t)}_{i\\rightarrow j}"
+                },
+                {
+                  "type": "formula",
+                  "text": "ii"
+                },
+                {
+                  "type": "formula",
+                  "text": "jj"
+                },
+                {
+                  "type": "formula",
+                  "text": "tt"
+                },
+                {
+                  "type": "formula",
+                  "text": "𝒢k(t)\\mathcal{G}^{(t)}_{k}"
+                },
+                {
+                  "type": "formula",
+                  "text": "wi​j(t)>0w^{(t)}_{ij}>0"
+                },
+                {
+                  "type": "formula",
+                  "text": "wi→j(t)w^{(t)}_{i\\rightarrow j}"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Following prior studies ([Ugander et al., 2012](https://arxiv.org/html/2304.03441v1#bib.bib53); [De Choudhury et al., 2010](https://arxiv.org/html/2304.03441v1#bib.bib21); [Easley and Kleinberg, 2010](https://arxiv.org/html/2304.03441v1#bib.bib25)), we consider network metrics to characterize each individual’s ego network from three different perspectives: network size, intensity, and structural diversity."
+                },
+                {
+                  "type": "list",
+                  "text": "* • Number of distinct connections. This metric is defined as the total number of employees connected to the focal individual kk within the observation time window tt, which directly measures the size of one’s neighborhood, i.e., |𝒩k(t)||\\mathcal{N}^{(t)}\\_{k}|. * • Sum of edge weights. We sum over the weights of all edges connected to the ego node kk to assess its overall communication intensity, i.e., Wk(t)=∑j∈𝒩k(t)wi​j(t)W\\_{k}^{(t)}=\\sum\\_{j\\in\\mathcal{N}^{(t)}\\_{k}}w^{(t)}\\_{ij}. Note the units of edge weights vary in communication media, where the weights for meeting, email, and IM networks are calculated based on the number of joint meetings, emails exchanges, and joint chat sessions respectively. * • Number of ego components. We leverage the number of ego components (Ck(t)C\\_{k}^{(t)}) to measure how much each individual kk is bridging surrounding communities. This measure is defined as the number of connected components that remain in the ego network 𝒢k(t)\\mathcal{G}^{(t)}\\_{k} when the focal node kk as well as its incident edges are removed. This metric is frequently adopted in prior network science studies to describe the structural diversity of one’s ego network ([Ugander et al., 2012](https://arxiv.org/html/2304.03441v1#bib.bib53); [De Choudhury et al., 2010](https://arxiv.org/html/2304.03441v1#bib.bib21))."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Number of distinct connections. This metric is defined as the total number of employees connected to the focal individual kk within the observation time window tt, which directly measures the size of one’s neighborhood, i.e., |𝒩k(t)||\\mathcal{N}^{(t)}\\_{k}|."
+                },
+                {
+                  "type": "formula",
+                  "text": "kk"
+                },
+                {
+                  "type": "formula",
+                  "text": "tt"
+                },
+                {
+                  "type": "formula",
+                  "text": "|𝒩k(t)||\\mathcal{N}^{(t)}_{k}|"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Sum of edge weights. We sum over the weights of all edges connected to the ego node kk to assess its overall communication intensity, i.e., Wk(t)=∑j∈𝒩k(t)wi​j(t)W\\_{k}^{(t)}=\\sum\\_{j\\in\\mathcal{N}^{(t)}\\_{k}}w^{(t)}\\_{ij}. Note the units of edge weights vary in communication media, where the weights for meeting, email, and IM networks are calculated based on the number of joint meetings, emails exchanges, and joint chat sessions respectively."
+                },
+                {
+                  "type": "formula",
+                  "text": "kk"
+                },
+                {
+                  "type": "formula",
+                  "text": "Wk(t)=∑j∈𝒩k(t)wi​j(t)W_{k}^{(t)}=\\sum_{j\\in\\mathcal{N}^{(t)}_{k}}w^{(t)}_{ij}"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Number of ego components. We leverage the number of ego components (Ck(t)C\\_{k}^{(t)}) to measure how much each individual kk is bridging surrounding communities. This measure is defined as the number of connected components that remain in the ego network 𝒢k(t)\\mathcal{G}^{(t)}\\_{k} when the focal node kk as well as its incident edges are removed. This metric is frequently adopted in prior network science studies to describe the structural diversity of one’s ego network ([Ugander et al., 2012](https://arxiv.org/html/2304.03441v1#bib.bib53); [De Choudhury et al., 2010](https://arxiv.org/html/2304.03441v1#bib.bib21))."
+                },
+                {
+                  "type": "formula",
+                  "text": "Ck(t)C_{k}^{(t)}"
+                },
+                {
+                  "type": "formula",
+                  "text": "kk"
+                },
+                {
+                  "type": "formula",
+                  "text": "𝒢k(t)\\mathcal{G}^{(t)}_{k}"
+                },
+                {
+                  "type": "formula",
+                  "text": "kk"
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "3.3. Organizational Attributes",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "In addition to the above network metrics, we also consider the following organizational attributes as control variables or predictors in our analysis."
+                },
+                {
+                  "type": "list",
+                  "text": "* • Organizational Group. This attribute represents the highest-level organizational group within Microsoft that each individual employee belongs to. In our dataset, it is defined as the parent nodes one step below the CEO (the root node) in the formal organizational chart. * • Job Function. We consider a binary variable x(𝑒𝑛𝑔)x^{\\mathit{(eng)}} to represent if an individual is at the engineering function role, i.e., engineer (x(𝑒𝑛𝑔)=1x^{\\mathit{(eng)}}=1) versus non-engineer (x(𝑒𝑛𝑔)=0x^{\\mathit{(eng)}}=0). * • Managerial Status. This attribute is defined as an indicator x(𝑚𝑛𝑔𝑟)x^{\\mathit{(mngr)}} to reflect if the employee is in the management position, i.e., manager (x(𝑚𝑛𝑔𝑟)=1x^{\\mathit{(mngr)}}=1) versus individual contributor (x(𝑚𝑛𝑔𝑟)=0x^{\\mathit{(mngr)}}=0). * • Location. We introduce a binary variable to represent if each employee’s office (whether it is a home office or not) is located in the same metropolitan area as Microsoft’s headquarter office. * • Local Team Size. We calculate the number of employees who directly report to the same direct manager as the target individual and use this variable to assess the number of peer co-workers in one’s direct team."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Organizational Group. This attribute represents the highest-level organizational group within Microsoft that each individual employee belongs to. In our dataset, it is defined as the parent nodes one step below the CEO (the root node) in the formal organizational chart."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Job Function. We consider a binary variable x(𝑒𝑛𝑔)x^{\\mathit{(eng)}} to represent if an individual is at the engineering function role, i.e., engineer (x(𝑒𝑛𝑔)=1x^{\\mathit{(eng)}}=1) versus non-engineer (x(𝑒𝑛𝑔)=0x^{\\mathit{(eng)}}=0)."
+                },
+                {
+                  "type": "formula",
+                  "text": "x(𝑒𝑛𝑔)x^{\\mathit{(eng)}}"
+                },
+                {
+                  "type": "formula",
+                  "text": "x(𝑒𝑛𝑔)=1x^{\\mathit{(eng)}}=1"
+                },
+                {
+                  "type": "formula",
+                  "text": "x(𝑒𝑛𝑔)=0x^{\\mathit{(eng)}}=0"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Managerial Status. This attribute is defined as an indicator x(𝑚𝑛𝑔𝑟)x^{\\mathit{(mngr)}} to reflect if the employee is in the management position, i.e., manager (x(𝑚𝑛𝑔𝑟)=1x^{\\mathit{(mngr)}}=1) versus individual contributor (x(𝑚𝑛𝑔𝑟)=0x^{\\mathit{(mngr)}}=0)."
+                },
+                {
+                  "type": "formula",
+                  "text": "x(𝑚𝑛𝑔𝑟)x^{\\mathit{(mngr)}}"
+                },
+                {
+                  "type": "formula",
+                  "text": "x(𝑚𝑛𝑔𝑟)=1x^{\\mathit{(mngr)}}=1"
+                },
+                {
+                  "type": "formula",
+                  "text": "x(𝑚𝑛𝑔𝑟)=0x^{\\mathit{(mngr)}}=0"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Location. We introduce a binary variable to represent if each employee’s office (whether it is a home office or not) is located in the same metropolitan area as Microsoft’s headquarter office."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Local Team Size. We calculate the number of employees who directly report to the same direct manager as the target individual and use this variable to assess the number of peer co-workers in one’s direct team."
+                },
+                {
+                  "type": "table",
+                  "text": "| | | | | | | --- | --- | --- | --- | --- | | Hypothesis | Model | Scope | Variable(s) of Interests | Control Variables | | H1 | M1 | New hires only | Onboarding Week | Organizational Group, Job Function, Managerial Status, Location, Local Team Size | | H2 | M2 | New hires + tenured employees | Tenure Group | Organizational Group, Job Function, Managerial Status, Location, Local Team Size | | H3 | M3.a | New hires only | Managerial Status, Onboarding Week Managerial Status ×\\times Onboarding Week | Organizational Group, Job Function, Location, Local Team Size | | H3 | M3.b | New hires only | Job Function, Onboarding Week Job Function ×\\times Onboarding Week | Organizational Group, Managerial Status, Location, Local Team Size | | H4 | M4 | New hires only | People Recommendation, Onboarding Week People Recommendation ×\\times Onboarding Week | Organizational Group, Job Function, Managerial Status, Location, Local Team Size |"
+                },
+                {
+                  "type": "formula",
+                  "text": "×\\times"
+                },
+                {
+                  "type": "formula",
+                  "text": "×\\times"
+                },
+                {
+                  "type": "formula",
+                  "text": "×\\times"
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "3.4. Models",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "As described in [Section 3.1](https://arxiv.org/html/2304.03441v1#S3.SS1 \"3.1. Data Description ‣ 3. Data and Methods ‣ Large-Scale Analysis of New Employee Network Dynamics\"), we calculate the network statistics of each identified new hire and the matched tenured employee’s weekly ego networks across different communication platforms over 24 consecutive weeks. To examine our proposed hypotheses, we follow the mixed effect framework and perform a series of longitudinal ordinary least squares (OLS) regressions. The regression framework can be described as below"
+                },
+                {
+                  "type": "table",
+                  "text": "| | | | | | --- | --- | --- | --- | | (1) | | yk(t)∼𝑣𝑎𝑟𝑖𝑎𝑏𝑙𝑒𝑠​𝑜𝑓​𝑖𝑛𝑡𝑒𝑟𝑒𝑠𝑡𝑠+𝑐𝑜𝑛𝑡𝑟𝑜𝑙​𝑣𝑎𝑟𝑖𝑎𝑏𝑙𝑒𝑠+ηt+ϵk.y\\_{k}^{(t)}\\sim\\mathit{variables\\ of\\ interests}+\\mathit{control\\ variables}+\\eta\\_{t}+\\epsilon\\_{k}. | |"
+                },
+                {
+                  "type": "formula",
+                  "text": "yk(t)∼𝑣𝑎𝑟𝑖𝑎𝑏𝑙𝑒𝑠​𝑜𝑓​𝑖𝑛𝑡𝑒𝑟𝑒𝑠𝑡𝑠+𝑐𝑜𝑛𝑡𝑟𝑜𝑙​𝑣𝑎𝑟𝑖𝑎𝑏𝑙𝑒𝑠+ηt+ϵk.y_{k}^{(t)}\\sim\\mathit{variables\\ of\\ interests}+\\mathit{control\\ variables}+\\eta_{t}+\\epsilon_{k}."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "For each individual kk in the observation week tt, the dependent variable (yk(t)y\\_{k}^{(t)}) encodes one of the following three network metrics—the number of distinct connections (|𝒩k(t)||\\mathcal{N}^{(t)}\\_{k}|), the sum of edge weights (Wk(t)W^{(t)}\\_{k}), and the number of ego components (Ck(t)C^{(t)}\\_{k}). In order to control for the potential time unit-specific bias (e.g., the lack of activeness during the holiday week), a time-dummy variable ηt\\eta\\_{t} is included to capture these time fixed effects. To model the potential variations across different individuals, ϵk\\epsilon\\_{k} is introduced to capture the random effects. For each individual new hire kk, we also introduce Onboarding Week as a numeric time-varying variable. For each new hire kk within the given observation week tt, the corresponding Onboarding Week can be defined as t−t~kt-\\tilde{t}\\_{k}, where t~k\\tilde{t}\\_{k} denotes the start week of the individual kk. We discuss how we operationalize this framework to examine each hypothesis as the following. A summary of the detailed model designs are included in [Table 1](https://arxiv.org/html/2304.03441v1#S3.T1 \"In 3.3. Organizational Attributes ‣ 3. Data and Methods ‣ Large-Scale Analysis of New Employee Network Dynamics\")."
+                },
+                {
+                  "type": "formula",
+                  "text": "kk"
+                },
+                {
+                  "type": "formula",
+                  "text": "tt"
+                },
+                {
+                  "type": "formula",
+                  "text": "yk(t)y_{k}^{(t)}"
+                },
+                {
+                  "type": "formula",
+                  "text": "|𝒩k(t)||\\mathcal{N}^{(t)}_{k}|"
+                },
+                {
+                  "type": "formula",
+                  "text": "Wk(t)W^{(t)}_{k}"
+                },
+                {
+                  "type": "formula",
+                  "text": "Ck(t)C^{(t)}_{k}"
+                },
+                {
+                  "type": "formula",
+                  "text": "ηt\\eta_{t}"
+                },
+                {
+                  "type": "formula",
+                  "text": "ϵk\\epsilon_{k}"
+                },
+                {
+                  "type": "formula",
+                  "text": "kk"
+                },
+                {
+                  "type": "formula",
+                  "text": "kk"
+                },
+                {
+                  "type": "formula",
+                  "text": "tt"
+                },
+                {
+                  "type": "formula",
+                  "text": "t−t~kt-\\tilde{t}_{k}"
+                },
+                {
+                  "type": "formula",
+                  "text": "t~k\\tilde{t}_{k}"
+                },
+                {
+                  "type": "formula",
+                  "text": "kk"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "To test whether new hire’s network connectivity metrics increase over the monitored 24-week onboarding period and how these metrics differ across various communication platforms (H1), we perform the regression analysis on new hires’ meeting, email as well as instant messaging (IM) ego networks. We examine the Onboarding Week as the variable of interests in [Eq. 1](https://arxiv.org/html/2304.03441v1#S3.E1 \"In 3.4. Models ‣ 3. Data and Methods ‣ Large-Scale Analysis of New Employee Network Dynamics\"), and the organizational attributes (as defined in [Section 3.3](https://arxiv.org/html/2304.03441v1#S3.SS3 \"3.3. Organizational Attributes ‣ 3. Data and Methods ‣ Large-Scale Analysis of New Employee Network Dynamics\")) are utilized as control variables (M1). The estimated coefficient of Onboarding Week allows us to assess the direction as well as the speed of network connectivity changing over the new hire onboarding period."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "To test the potential differences between new hires and tenured employees’ networks (H2), we construct a combined dataset with both new hires as well as the matched tenured employees. We introduce a binary variable Tenure Group xk(𝑡𝑒𝑛𝑢𝑟𝑒)x\\_{k}^{\\mathit{(tenure)}}, where xk(𝑡𝑒𝑛𝑢𝑟𝑒)=1x\\_{k}^{\\mathit{(tenure)}}=1 indicates the individual kk belongs to the new hire user group and xk=0x\\_{k}=0 otherwise. We use all organizational attributes as control variables and test the effect of Tenure Group (M2). The estimated effect then corresponds to the average difference between the new hire group and the tenured employee group within the observation time window."
+                },
+                {
+                  "type": "formula",
+                  "text": "xk(𝑡𝑒𝑛𝑢𝑟𝑒)x_{k}^{\\mathit{(tenure)}}"
+                },
+                {
+                  "type": "formula",
+                  "text": "xk(𝑡𝑒𝑛𝑢𝑟𝑒)=1x_{k}^{\\mathit{(tenure)}}=1"
+                },
+                {
+                  "type": "formula",
+                  "text": "kk"
+                },
+                {
+                  "type": "formula",
+                  "text": "xk=0x_{k}=0"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "To examine the potential differences of network connectivity metrics as well as their growing speeds between new managers and new individual contributors (H3), we consider the Managerial Status, Onboarding Week as well as their interaction as the variables of interests (M3.a). All other organizational variables are used as the control variables. In this model, the estimated effect of the Managerial Status reflects the average difference between new managers and new individual contributors while the interaction between Managerial Status and Onboarding Week indicates the difference of growth rates of their networks over time. By switching the Managerial Status variable and the Job Function variable, we perform a similar regression analysis to examine the potential differences between engineers and non-engineers during their 24-week onboarding time (M3.b)."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "To test whether the adoption of the knowledge-based “people recommendation” application associates with a new hire’s networking behavior (H4), we introduce an additional binary variable People Recommendation xk(𝑟𝑒𝑐.)x\\_{k}^{\\mathit{(rec.)}} to categorize new hires based on their engagement behavior on these recommendations, where xk(𝑟𝑒𝑐.)=1x\\_{k}^{\\mathit{(rec.)}}=1 indicates the individual kk has clicked or viewed the “Pinned People” and “Suggested People” feature in Viva Topics within the tracked 24-week onboarding period and xk(𝑟𝑒𝑐.)=0x\\_{k}^{\\mathit{(rec.)}}=0 otherwise. Similar to the previous setup, we test People Recommendation, Onboarding Week as well as their first-order interaction and include all organizational attributes as control variables (M4). By testing People Recommendation, we aim to identify its potential correlation with one’s network connectivity metrics. By testing the interaction term (People Recommendation ×\\times Onboarding Week), we explore its potentials on one’s network connectivity growth rate during the onboarding period."
+                },
+                {
+                  "type": "formula",
+                  "text": "kk"
+                },
+                {
+                  "type": "formula",
+                  "text": "×\\times"
+                }
+              ],
+              "children": []
+            }
+          ]
+        },
+        {
+          "heading": "4. Results and Discussion",
+          "level": 2,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "Time trend comparisons on different communication media---meeting, email and instant messaging (IM)"
+            }
+          ],
+          "children": [
+            {
+              "heading": "4.1. Communication Trends",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "We start by presenting model-free time trends for different network metrics. These trends describe how the communication networks of new hires change across different communication media over the 24-week onboarding period. By comparing these new hires’ trends to the matched tenured employees within the same observation window, we highlight how new hires assimilate their communication behavior to tenured employees over time. Then we conduct a series of statistical regression analyses (as described in [Section 3.4](https://arxiv.org/html/2304.03441v1#S3.SS4 \"3.4. Models ‣ 3. Data and Methods ‣ Large-Scale Analysis of New Employee Network Dynamics\")) to formally examine our hypotheses."
+                }
+              ],
+              "children": [
+                {
+                  "heading": "Communication Media",
+                  "level": 4,
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "text": "[Figure 1](https://arxiv.org/html/2304.03441v1#S4.F1 \"In 4. Results and Discussion ‣ Large-Scale Analysis of New Employee Network Dynamics\") shows the average weekly time series for network connectivity statistics on different communication platforms across different tenure groups (new hires versus matched tenured employees). Focusing on the trends of new hires’ network statistics, we observe different onboarding patterns from this figure with respect to the use of communication media (H1). We find new hires’ one-on-one meeting and instant messaging (IM) networks are overall expanding over the 24-week onboarding period with respect to their network size, intensity, and structural diversity, where the size and the intensity of meeting networks rapidly converge in the first few weeks while the IM networks are continually growing on all three network metrics. On the other hand, we notice new hires generally started with larger and more intense email networks and these metrics quickly dropped in their first few onboarding weeks.55 5 A possible explanation for this observation is in the first few weeks, newcomers often engage with ad-hoc activities requiring formal written communications (e.g., introduction emails), thus leading to the bump in their email network trends. To validate these observations, we test the Onboarding Week variable in our statistical regression model (M1) over the 24-week onboarding window and present the corresponding coefficients with the 95% confidence intervals (CIs) in [Figure 2](https://arxiv.org/html/2304.03441v1#S4.F2 \"In Communication Media ‣ 4.1. Communication Trends ‣ 4. Results and Discussion ‣ Large-Scale Analysis of New Employee Network Dynamics\"). We find a statistically significant weekly growth of new hires’ IM networks on all three network metrics over the 24-week observation time (+0.131+0.131 per week on network size, p<0.001p<0.001; +0.257+0.257 per week on network intensity, p<0.001p<0.001; +0.037+0.037 per week on structural diversity, p<0.001p<0.001). These effects on IM networks appear to be significantly larger than those on other communication media, which confirms the fast-growing patterns we observed about new hires’ networking behavior via instant messaging."
+                    },
+                    {
+                      "type": "formula",
+                      "text": "+0.131+0.131"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "p<0.001p<0.001"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "+0.257+0.257"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "p<0.001p<0.001"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "+0.037+0.037"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "p<0.001p<0.001"
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "In addition to our observations about communication media choice among new hires, we also notice a strong preference from tenured employees on one-on-one communications over instant messages (i.e., larger communication network size, intensity, and diversity). Although employees’ choices on communication media can be affected by various factors, including both firm-wide guidelines and personal inclinations, this preference for instant messages is in fact consistent with the findings from recent studies where asynchronous and informal communications have increased among information workers with the shift to remote work ([Yang et al., 2021](https://arxiv.org/html/2304.03441v1#bib.bib58)). The growing trend of communicating through instant messages may also reflect new hires’ assimilation process, where they gradually adopt the communication media choice from tenured employees in the remote and hybrid work environment."
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "Weekly growth rates (with 95% CIs) of network statistics (M1)."
+                    }
+                  ],
+                  "children": []
+                },
+                {
+                  "heading": "New Hires vs. Tenured Employees",
+                  "level": 4,
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "text": "[Figure 1](https://arxiv.org/html/2304.03441v1#S4.F1 \"In 4. Results and Discussion ‣ Large-Scale Analysis of New Employee Network Dynamics\") also reveals clear differences between the communication networks of new hires and tenured employees (H2). Compared to new hires, tenured employees generally connect with more colleagues every week (larger network size), communicate more intensively with other colleagues (larger edge weights), and maintain more diversified connections within the company (higher structural diversity) across all communication media. Despite their time trend differences on different communication media in the first few onboarding weeks, we observe new hires’ network statistics eventually trend towards the states of tenured employees at the later stage of the tracked 24-week onboarding period. We investigate this pattern by conducting finer-grained statistical regressions to test the Tenure Group variable (M2) on every 6 onboarding weeks and report the results in [Figure 3](https://arxiv.org/html/2304.03441v1#S4.F3 \"In New Hires vs. Tenured Employees ‣ 4.1. Communication Trends ‣ 4. Results and Discussion ‣ Large-Scale Analysis of New Employee Network Dynamics\"). We notice the network statistics of new hires and tenured employees are significantly different (p<0.001p<0.001), while these differences are diminishing as the tenure of a new employee increases."
+                    },
+                    {
+                      "type": "formula",
+                      "text": "p<0.001p<0.001"
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "Differences of network statistics (with 95% CIs) between new hires and tenured employees within each 6-week testing window (M2)."
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "Through the above analysis, the socialization aspect of the organizational assimilation process can be reflected on these time trends of new hires’ communication networks, where their network size, intensity, and diversity are approaching the states of tenured employees in the organization. Regardless we still find statistically significant gaps on these metrics between different tenure groups at the latest state of the tracked onboarding period, implying it may take longer than 24 weeks (6 months) to have new employees fully “onboarded”, i.e., statistically indistinguishable from tenured employees on network size, intensity and diversity."
+                    }
+                  ],
+                  "children": []
+                }
+              ]
+            },
+            {
+              "heading": "4.2. Heterogeneity Among New Employees",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "While we observe a general trend that new hires are assimilating their networks to those of tenured employees, we hypothesize there may exist heterogeneity across new employees due to the fundamental differences of their job duties, social status, and day-to-day workflows ([Van de Ven et al., 1976](https://arxiv.org/html/2304.03441v1#bib.bib56); [Ruchinskas, 1983](https://arxiv.org/html/2304.03441v1#bib.bib46); [Diesner and Carley, 2005](https://arxiv.org/html/2304.03441v1#bib.bib22); [Romero et al., 2016](https://arxiv.org/html/2304.03441v1#bib.bib45)) (H3). We conduct descriptive analysis and statistical regressions to investigate their heterogeneity on the following two dimensions: managerial position (manager vs. individual contributor) and job function (engineer vs. non-engineer)."
+                }
+              ],
+              "children": [
+                {
+                  "heading": "Managers vs. Individual Contributors",
+                  "level": 4,
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "text": "Among the 11,083 new hires we identified, we observe 6.37% of them are managers and 93.63% of them are individual contributors. [Figure 4(a)](https://arxiv.org/html/2304.03441v1#S4.F4.sf1 \"In Figure 4 ‣ 4.2. Heterogeneity Among New Employees ‣ 4. Results and Discussion ‣ Large-Scale Analysis of New Employee Network Dynamics\") presents the weekly trends of network statistics for employees with different managerial statuses, where we observe a distinct pattern that compared to individual contributors (ICs), managers connect with more employees in the organization and their communication networks tend to be more intense and more structurally diverse. Note these differences are consistent across both new hires and tenured employees, reflecting the intrinsic nature of their role types: manager roles are usually obliged to conduct people coordination while IC roles are often expected to focus on “hands-on” work practices. We further investigate the differences among new hires and notice that managers’ communication networks generally grow and stabilize faster than individual contributors. To quantify the differences of their network growth rates, we test the first order interaction between Managerial Status and Onboarding Week (M3.a) and report these effects in [Figure 5(a)](https://arxiv.org/html/2304.03441v1#S4.F5.sf1 \"In Figure 5 ‣ Engineers vs. Non-Engineers. ‣ 4.2. Heterogeneity Among New Employees ‣ 4. Results and Discussion ‣ Large-Scale Analysis of New Employee Network Dynamics\"). We find the growth rates on various network metrics are significantly different across managers and ICs. In particular, we find new managers’ networks grow significantly and consistently faster than ICs on their structural diversity metrics across all communication media (+0.023+0.023 per week on remote meeting, p<0.001p<0.001; +0.032+0.032 per week on email, p<0.001p<0.001; +0.006+0.006 per week on instant messaging, p=0.002p=0.002)."
+                    },
+                    {
+                      "type": "formula",
+                      "text": "+0.023+0.023"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "p<0.001p<0.001"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "+0.032+0.032"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "p<0.001p<0.001"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "+0.006+0.006"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "p=0.002p=0.002"
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "A possible explanation here is in comparison with individual contributors, extensive communications and coordinations are required in managers’ daily work (e.g., host routine one-on-one meetings with their direct reports, maintain frequent check-ins with representatives from other groups), which creates both demands and opportunities for new hires who are in manager roles to rapidly develop their networks. On the contrary, individual contributors may be put on a disadvantaged position at their onboarding process regarding their social network building. Such a disadvantage can be worsen with the current shift to remote work due to the absence of spontaneous in-person connections at workplace (e.g., impromptu lunches, hallway conversations) ([Yang et al., 2021](https://arxiv.org/html/2304.03441v1#bib.bib58); [Bojinov et al., 2021a](https://arxiv.org/html/2304.03441v1#bib.bib7); [Cooper and Kurland, 2002](https://arxiv.org/html/2304.03441v1#bib.bib20); [Nardi and Whittaker, 2002](https://arxiv.org/html/2304.03441v1#bib.bib41); [Golden et al., 2006](https://arxiv.org/html/2304.03441v1#bib.bib29))."
+                    }
+                  ],
+                  "children": []
+                },
+                {
+                  "heading": "Engineers vs. Non-Engineers.",
+                  "level": 4,
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "text": "We observe that 35.67% of our identified new hires are engineers while the other 64.33% are in non-engineering roles (e.g., program managers, sales representatives). [Figure 4(b)](https://arxiv.org/html/2304.03441v1#S4.F4.sf2 \"In Figure 4 ‣ 4.2. Heterogeneity Among New Employees ‣ 4. Results and Discussion ‣ Large-Scale Analysis of New Employee Network Dynamics\") presents the weekly trends of network statistics for employees with different job functions. Similarly we observe a clear pattern that engineers connect with fewer employees, with less total communication intensity, and their networks tend to be less structurally diverse compared to non-engineers. We also notice that new engineers’ communication networks in general expand slower than non-engineering new hires, especially in terms of their network structural diversity. By testing the interaction between Job Function and Onboarding Week through regression analysis (M3.b), we are able to validate these observations (as shown in [Figure 5(b)](https://arxiv.org/html/2304.03441v1#S4.F5.sf2 \"In Figure 5 ‣ Engineers vs. Non-Engineers. ‣ 4.2. Heterogeneity Among New Employees ‣ 4. Results and Discussion ‣ Large-Scale Analysis of New Employee Network Dynamics\")). Notably we find engineering new hires’ network growth rates on structural diversity are significantly lower than non-engineers across all communication platforms (−0.017-0.017 per week on remote meeting, p<0.001p<0.001; −0.026-0.026 per week on email, p<0.001p<0.001; −0.033-0.033 per week on instant messaging, p<0.001p<0.001)."
+                    },
+                    {
+                      "type": "formula",
+                      "text": "−0.017-0.017"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "p<0.001p<0.001"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "−0.026-0.026"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "p<0.001p<0.001"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "−0.033-0.033"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "p<0.001p<0.001"
+                    },
+                    {
+                      "type": "paragraph",
+                      "text": "Relative to non-engineers (e.g., program managers, sales representatives), we conjecture new employees in the engineering role may be less in need of large and diverse communication networks in order to perform their daily jobs tasks, therefore lacking opportunities to organically grow their networks (especially on weak and bridging ties, which is reflected on the number of ego components)."
+                    }
+                  ],
+                  "children": []
+                }
+              ]
+            },
+            {
+              "heading": "4.3. Opportunities for Web-Based Applications",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "The above results reveal that it may take a long time (>24>24 weeks) to fully onboard new employees from the socialization perspective, and certain groups of new hires could be at a disadvantaged position in this process because of the limited opportunities to expand networks when performing day-to-day requirements of the job. Nevertheless, workplace digital transformations during COVID-19 pandemic also introduced opportunities to address this connectivity crisis by enabling new experiences on web-based digital applications. In addition to provide disruptive interventions such as intentionally hosting virtual “watercooler” sessions, we also investigate if web-based nudges can be seamlessly embedded into an employee’s day-to-day workflows, thus triggering natural interactions with colleagues whom they otherwise wouldn’t connect with and improving their network structural diversity."
+                },
+                {
+                  "type": "formula",
+                  "text": ">24>24"
+                }
+              ],
+              "children": [
+                {
+                  "heading": "Knowledge-Based People Recommendation",
+                  "level": 4,
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "text": "Given knowledge acquisition is a critical component of the onboarding process for information workers, we start by investigating if providing “people recommendations” in organizational knowledge management systems can help new employees connect with colleagues otherwise they wouldn’t know. Specifically, we test if there are differences of network dynamics between new employees who have or not engaged with (viewed or clicked) these “people recommendations” (i.e., the “Pinned People” and “Suggested People” feature in Microsoft Viva Topics) during their onboarding period. These statistical tests (M4) are performed on every 6 onboarding weeks and the results are presented in [Table 2](https://arxiv.org/html/2304.03441v1#S4.T2 \"In Knowledge-Based People Recommendation ‣ 4.3. Opportunities for Web-Based Applications ‣ 4. Results and Discussion ‣ Large-Scale Analysis of New Employee Network Dynamics\"), where we observe statistically significant differences regarding network diversity and the weekly growth rate of this metric in the first 12 onboarding weeks, indicating the potential positive effects of presenting “people recommendations” on new employees’ network diversity. However we find such effects become less significant in the late onboarding stage. A possible explanation is new hires in our dataset are normally leverage this organizational knowledge base (Microsoft Viva Topics) as an onboarding tool to explore the organizational knowledge taxonomy in their early days. As the onboarding process progresses, their workflows start shifting from exploring organizational knowledge to executing job tasks. This observation also implies future research directions on fully investigating potential canvases and approaches to present “people recommendations” based on the employee’s working context."
+                    },
+                    {
+                      "type": "table",
+                      "text": "| | | | | | --- | --- | --- | --- | | Onboarding Week | Email | IM | Meeting | | 0-6 | 0.194\\*\\*\\* | 0.141\\*\\*\\* | 0.028 | | 6-12 | 0.200\\* | 0.033 | -0.024 | | 12-18 | 0.120 | 0.140 | 0.051 | | 18-24 | 0.242 | 0.097 | 0.088 |"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "p<0.05p<0.05"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "p<0.01p<0.01"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "p<0.001p<0.001"
+                    },
+                    {
+                      "type": "table",
+                      "text": "| | | | | | --- | --- | --- | --- | | Onboarding Week | Email | IM | Meeting | | 0-6 | 0.026\\*\\* | 0.018\\*\\* | 0.029\\*\\*\\* | | 6-12 | 0.013 | 0.026\\*\\*\\* | 0.019\\*\\* | | 12-18 | 0.015 | 0.011 | 0.009 | | 18-24 | 0.005 | 0.011 | 0.005 |"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "p<0.05p<0.05"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "p<0.01p<0.01"
+                    },
+                    {
+                      "type": "formula",
+                      "text": "p<0.001p<0.001"
+                    }
+                  ],
+                  "children": []
+                }
+              ]
+            },
+            {
+              "heading": "4.4. Additional Analysis on Group Interaction",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "Our analysis thus far has considered the one-on-one communication patterns of newcomers during the virtual onboarding period. We also conducted a separate analysis for group communications (with less than 10 participants in each group interaction). Our findings remain consistent on the significant gaps of all network statistics between new hires and tenured employees after the six-month onboarding phase, the heterogeneity across different managerial positions and job functions, and the positive association between the usage of web-based people recommendations and the network structural diversity of new hires. More details are included in the appendix."
+                }
+              ],
+              "children": []
+            }
+          ]
+        },
+        {
+          "heading": "5. Related Work",
+          "level": 2,
+          "content": [],
+          "children": [
+            {
+              "heading": "Remote work",
+              "level": 4,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "Remote work is an important topic to study across academia and industry. Remote work-related studies have covered various areas, such as communication challenges ([Rodeghero et al., 2021](https://arxiv.org/html/2304.03441v1#bib.bib44); [He and Huang, 2014](https://arxiv.org/html/2304.03441v1#bib.bib32)), well-being ([Butler and Jaffe, 2021](https://arxiv.org/html/2304.03441v1#bib.bib12); [Michel et al., 2021](https://arxiv.org/html/2304.03441v1#bib.bib40)), management ([Teevan et al., 2020a](https://arxiv.org/html/2304.03441v1#bib.bib50)), etc. While most work focuses on distributed work or remote work due to geographical distance ([Hinds et al., 2002](https://arxiv.org/html/2304.03441v1#bib.bib33); [Koehne et al., 2012](https://arxiv.org/html/2304.03441v1#bib.bib36); [Nardi and Whittaker, 2002](https://arxiv.org/html/2304.03441v1#bib.bib41); [Leonardi et al., 2010](https://arxiv.org/html/2304.03441v1#bib.bib39); [Britto et al., 2018](https://arxiv.org/html/2304.03441v1#bib.bib9)), ours focuses on virtual trending caused by COVID-19. Related to our study, a stream of research emphasizes the impact of remote work on organizational workers’ connectivity in general. Most of them feature the strength of existing or new interpersonal ties ([Yang et al., 2021](https://arxiv.org/html/2304.03441v1#bib.bib58); [Yang et al., 2022](https://arxiv.org/html/2304.03441v1#bib.bib57); [Carmody et al., 2022](https://arxiv.org/html/2304.03441v1#bib.bib18); Wu2021-nz). For example, scholars find that firm-wide remote work triggered by COVID leads to a more siloed network among information works with the decrease weak and bridging ties ([Yang et al., 2021](https://arxiv.org/html/2304.03441v1#bib.bib58)) and in general, ties are more difficult to form in remote work settings ([Carmody et al., 2022](https://arxiv.org/html/2304.03441v1#bib.bib18))."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "This could have significant ramifications, as connections between workers in in-person settings have been associated with organizational outcomes such as building successful collaborations ([Kabo et al., 2014](https://arxiv.org/html/2304.03441v1#bib.bib34)), relationships, and with knowledge transfer ([Allen et al., 2015](https://arxiv.org/html/2304.03441v1#bib.bib3)). Organizational knowledge is inherently social, and is dependent on shared language, narratives, identification, norms, commitment and trust ([Ackerman and Halverson, 2004](https://arxiv.org/html/2304.03441v1#bib.bib2)). Additionally, the ability to build connections enables workers to self-organize and share expertise ([Ackerman and Halverson, 2004](https://arxiv.org/html/2304.03441v1#bib.bib2)). Research prior to the pandemic indicates that while face-to-face conversation is preferred for relationship building, ideation, and problem solving, communication technologies such as IM and social network sites perform complementary purposes including building and maintaining connections ([Turner et al., 2010](https://arxiv.org/html/2304.03441v1#bib.bib52)). In this paper, we focus on virtual onboarding rather than studying full-time tenured organizational workers, and study how use of a range of technologies, including one that highlights other organization members to the user, are related to workers’ connectivity."
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "Virtual onboarding",
+              "level": 4,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "While traditional, in-person onboarding has been frequently studied in the context of organization outcomes ([Chen, 2005](https://arxiv.org/html/2304.03441v1#bib.bib19); [Cable et al., 2013a](https://arxiv.org/html/2304.03441v1#bib.bib13); [Fagerholm et al., 2014b](https://arxiv.org/html/2304.03441v1#bib.bib28); [Steinmacher et al., 2019](https://arxiv.org/html/2304.03441v1#bib.bib49); [Snell, 2006](https://arxiv.org/html/2304.03441v1#bib.bib47)), virtual onboarding is still an open area. Most studies focus on virtual onboarding challenges related to specific job functions such as engineering ([Rodeghero et al., 2021](https://arxiv.org/html/2304.03441v1#bib.bib44); [Dominic et al., 2020a](https://arxiv.org/html/2304.03441v1#bib.bib23); [Britto et al., 2018](https://arxiv.org/html/2304.03441v1#bib.bib9); [Fagerholm et al., 2014b](https://arxiv.org/html/2304.03441v1#bib.bib28)). For example, a very relevant qualitative study by Rodeghero et al. indicates that remote work harms social connection, but changing the mode of interaction (such as turning on the camera during meetings) could potentially improve socialization ([Rodeghero et al., 2021](https://arxiv.org/html/2304.03441v1#bib.bib44)). Previous work also discusses AI tools (e.g., voice assistant tools) ([Upadhyay and Khandelwal, 2018](https://arxiv.org/html/2304.03441v1#bib.bib54); [Dominic et al., 2020b](https://arxiv.org/html/2304.03441v1#bib.bib24)), or human effort (e.g., hosting virtual watercooler events ([Bojinov et al., 2021b](https://arxiv.org/html/2304.03441v1#bib.bib8)), or providing checklists or mentorship ([Fagerholm et al., 2014b](https://arxiv.org/html/2304.03441v1#bib.bib28); [Canfora et al., 2012](https://arxiv.org/html/2304.03441v1#bib.bib17))) that can be used to improve onboarding. Our work further explores the remote onboarding process in the context of connectivity and provides potential web solutions that connect people with the expert knowledge needed to improve employee connectivity."
+                }
+              ],
+              "children": []
+            }
+          ]
+        },
+        {
+          "heading": "6. Conclusion and Future Work",
+          "level": 2,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "In this paper, we investigated the dynamics of new employees’ workplace communication networks throughout a 24-week onboarding period. We also explored the potential web-based applications to address the socialization challenge and summarize our findings as follows."
+            },
+            {
+              "type": "list",
+              "text": "* • While new hires are less connected with colleagues in the organizations compared to tenured employees in the 24-week onboarding period (smaller network size, lower communication intensity and lower structural diversity), their networks are gradually expanding over time. * • Time trends of new hires’ network statistics vary across different communication media, managerial positions, and job functions. We observed that new employees, whose day-to-day job tasks are not necessarily reliant on extensive and diverse collaborations (e.g., individual contributors, software engineers), can be put into a disadvantaged position regarding organizational socialization in the onboarding process. * • We explored the opportunities for web-based applications to address the new employee socialization challenges. Early evidence revealed that presenting “people recommendations” within employees’ workflows may benefit their workplace network development during the early onboarding period (first 12 weeks)."
+            },
+            {
+              "type": "paragraph",
+              "text": "While new hires are less connected with colleagues in the organizations compared to tenured employees in the 24-week onboarding period (smaller network size, lower communication intensity and lower structural diversity), their networks are gradually expanding over time."
+            },
+            {
+              "type": "paragraph",
+              "text": "Time trends of new hires’ network statistics vary across different communication media, managerial positions, and job functions. We observed that new employees, whose day-to-day job tasks are not necessarily reliant on extensive and diverse collaborations (e.g., individual contributors, software engineers), can be put into a disadvantaged position regarding organizational socialization in the onboarding process."
+            },
+            {
+              "type": "paragraph",
+              "text": "We explored the opportunities for web-based applications to address the new employee socialization challenges. Early evidence revealed that presenting “people recommendations” within employees’ workflows may benefit their workplace network development during the early onboarding period (first 12 weeks)."
+            },
+            {
+              "type": "paragraph",
+              "text": "This study, to the best of our knowledge, presents the first large-scale empirical investigation on communication network dynamics of new employees in the technology industry. This study is not without limitations. First, given the availability and retention policy of the dataset, our study was restricted to a 24-week onboarding window. This constraint can be further relaxed if more data become available since we empirically revealed that it may take longer than 24 weeks to observe new hires’ network statistics fully converge to the states of tenured employees. In this way, one can evidently document the convergence time of new employees with different job roles and empirically understand the dynamics of new hires’ networks in the long term. These quantitative analyses can also be complemented with qualitative studies to deeply understand new employees’ networking behavior. Second, new employees studied in this work mostly followed the remote onboarding guidelines within the organization, thus limiting our scope within the remote work context. We acknowledge that the current and future hybrid work policies could impact new employees’ socialization experiences. Therefore a future research direction is to extend the empirical analysis and investigate the potential onboarding challenges as well as opportunities induced by the emerging trend of hybrid work. Third, our study is limited to a single firm and, for the most part, information workers. A future direction could be expanding the analysis scope and investigating the potential heterogeneity regarding new employee network dynamics across different firms and industries."
+            },
+            {
+              "type": "paragraph",
+              "text": "We quantitatively described how new employees develop their workplace network over a 6-month onboarding period in this study. Our results confirmed the struggle and the need of “staying connected” from new employees in the remote work environment. Our study revealed there is no single network development path for all job functions. We also want to highlight that overlooking the socialization needs from disadvantaged employee groups may result in negative effects on individuals, organizations, and social fairness. In addition to the investments of human capitals on new employee onboarding experiences, we demonstrated that recent workplace digital transformations have introduced possibilities for web-based technologies to address the new employee socialization challenges. Here, we’d like to call for both human capital investments (e.g., host social events) and technical solutions (e.g., people recommendations, virtual “watercooler” sessions) on addressing the socialization needs of new hires. Network metrics in this study can also be leveraged as a toolkit to identify/self-identify newcomers who may need help. We hope our study can shed some lights on these opportunities and encourage future research efforts from the web community to keep advancing digital workplaces."
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "References",
+          "level": 2,
+          "content": [
+            {
+              "type": "list",
+              "text": "* Ackerman and Halverson (2004) Mark S Ackerman and Christine Halverson. 2004. Sharing Expertise: The Next Step for. *Social capital and information technology* (2004), 273. * Allen et al. (2015) Tammy D Allen, Timothy D Golden, and Kristen M Shockley. 2015. How effective is telecommuting? Assessing the status of our scientific findings. *Psychological science in the public interest* 16, 2 (2015), 40–68. * Argote and Ingram (2000) Linda Argote and Paul Ingram. 2000. Knowledge transfer: A basis for competitive advantage in firms. *Organizational behavior and human decision processes* 82, 1 (2000), 150–169. * Barrero et al. (2021) Jose Maria Barrero, Nicholas Bloom, and Steven J Davis. 2021. *Why working from home will stick*. Technical Report. National Bureau of Economic Research. * Bauer et al. (2007) Talya N Bauer, Todd Bodner, Berrin Erdogan, Donald M Truxillo, and Jennifer S Tucker. 2007. Newcomer adjustment during organizational socialization: a meta-analytic review of antecedents, outcomes, and methods. *Journal of applied psychology* 92, 3 (2007), 707. * Bojinov et al. (2021a) Iavor Bojinov, Prithwiraj Choudhury, and Jacqueline N. Lane. 2021a. Virtual Watercoolers: A Field Experiment on Virtual Synchronous Interactions and Performance of Organizational Newcomers. (May 2021). * Bojinov et al. (2021b) Iavor Bojinov, Prithwiraj Choudhury, and Jacqueline N Lane. 2021b. Virtual watercoolers: A field experiment on virtual synchronous interactions and performance of organizational newcomers. *Harvard Business School Technology & Operations Mgt. Unit Working Paper* 21-125 (2021). * Britto et al. (2018) Ricardo Britto, Daniela S Cruzes, Darja Smite, and Aivars Sablis. 2018. Onboarding software developers and teams in three globally distributed legacy projects: A multi-case study. *J. Softw. (Malden)* 30, 4 (April 2018), e1921. * Brucks and Levav (2022) Melanie S Brucks and Jonathan Levav. 2022. Virtual communication curbs creative idea generation. *Nature* 605, 7908 (2022), 108–112. * Burt and Merluzzi (2016) Ronald S Burt and Jennifer Merluzzi. 2016. Network Oscillation. *AMD* 2, 4 (Dec. 2016), 368–391. * Butler and Jaffe (2021) Jenna Butler and Sonia Jaffe. 2021. Challenges and gratitude: A diary study of software engineers working from home during covid-19 pandemic. In *2021 IEEE/ACM 43rd International Conference on Software Engineering: Software Engineering in Practice (ICSE-SEIP)*. IEEE, 362–363. * Cable et al. (2013a) Daniel M Cable, Francesca Gino, and Bradley R Staats. 2013a. Breaking them in or eliciting their best? Reframing socialization around newcomers’ authentic self-expression. *Adm. Sci. Q.* 58, 1 (March 2013), 1–36. * Cable et al. (2013b) Daniel M Cable, Francesca Gino, and Bradley R Staats. 2013b. Breaking them in or eliciting their best? Reframing socialization around newcomers’ authentic self-expression. *Administrative science quarterly* 58, 1 (2013), 1–36. * Cable and Judge (1996) Daniel M Cable and Timothy A Judge. 1996. Person–organization fit, job choice decisions, and organizational entry. *Organizational behavior and human decision processes* 67, 3 (1996), 294–311. * Caldwell and Peters (2018) Cam Caldwell and Ray Peters. 2018. New employee onboarding–psychological contracts and ethical perspectives. *Journal of Management Development* (2018). * Canfora et al. (2012) Gerardo Canfora, Massimiliano Di Penta, Rocco Oliveto, and Sebastiano Panichella. 2012. Who is going to mentor newcomers in open source projects?. In *Proceedings of the ACM SIGSOFT 20th International Symposium on the Foundations of Software Engineering* (Cary, North Carolina) *(FSE ’12, Article 44)*. Association for Computing Machinery, New York, NY, USA, 1–11. * Carmody et al. (2022) Daniel Carmody, Martina Mazzarello, Paolo Santi, Trevor Harris, Sune Lehmann, Timur Abbiasov, Robin Dunbar, and Carlo Ratti. 2022. The effect of co-location of human communication networks. *arXiv preprint arXiv:2201.02230* (2022). * Chen (2005) Gilad Chen. 2005. Newcomer Adaptation in Teams: Multilevel Antecedents and Outcomes. *AMJ* 48, 1 (Feb. 2005), 101–116. * Cooper and Kurland (2002) Cecily D Cooper and Nancy B Kurland. 2002. Telecommuting, professional isolation, and employee development in public and private organizations. *J. Organ. Behav.* 23, 4 (June 2002), 511–532. * De Choudhury et al. (2010) Munmun De Choudhury, Winter A Mason, Jake M Hofman, and Duncan J Watts. 2010. Inferring relevant social networks from interpersonal communication. In *Proceedings of the 19th international conference on World wide web* (Raleigh, North Carolina, USA) *(WWW ’10)*. Association for Computing Machinery, New York, NY, USA, 301–310. * Diesner and Carley (2005) Jana Diesner and Kathleen M Carley. 2005. Exploration of communication networks from the Enron email corpus. In *SIAM International Conference on Data Mining: Workshop on Link Analysis, Counterterrorism and Security, Newport Beach, CA*. Citeseer, 3–14. * Dominic et al. (2020a) James Dominic, Charles Ritter, and Paige Rodeghero. 2020a. Onboarding Bot for Newcomers to Software Engineering. In *Proceedings of the International Conference on Software and System Processes* (Seoul, Republic of Korea) *(ICSSP ’20)*. Association for Computing Machinery, New York, NY, USA, 91–94. * Dominic et al. (2020b) James Dominic, Charles Ritter, and Paige Rodeghero. 2020b. Onboarding bot for newcomers to software engineering. In *Proceedings of the International Conference on Software and System Processes*. 91–94. * Easley and Kleinberg (2010) David Easley and Jon Kleinberg. 2010. *Networks, crowds, and markets: Reasoning about a highly connected world*. Cambridge university press. * Ellis et al. (2014) Allison M Ellis, Talya N Bauer, and Berrin Erdogan. 2014. New Employee Organizational Socialization. *Handbook of socialization: Theory and research* 301 (2014). * Fagerholm et al. (2014a) Fabian Fagerholm, Alejandro S Guinea, Jürgen Münch, and Jay Borenstein. 2014a. The role of mentoring and project characteristics for onboarding in open source software projects. In *Proceedings of the 8th ACM/IEEE international symposium on empirical software engineering and measurement*. 1–10. * Fagerholm et al. (2014b) Fabian Fagerholm, Alejandro S Guinea, Jürgen Münch, and Jay Borenstein. 2014b. The role of mentoring and project characteristics for onboarding in open source software projects. In *Proceedings of the 8th ACM/IEEE International Symposium on Empirical Software Engineering and Measurement* (Torino, Italy) *(ESEM ’14, Article 55)*. Association for Computing Machinery, New York, NY, USA, 1–10. * Golden et al. (2006) Timothy D Golden, John F Veiga, and Zeki Simsek. 2006. Telecommuting’s differential impact on work-family conflict: is there no place like home? *J. Appl. Psychol.* 91, 6 (Nov. 2006), 1340–1350. * Granovetter (1973) M S Granovetter. 1973. The strength of weak ties. *Am. J. Sociol.* (1973). * Hall (1996) Douglas T Hall. 1996. Careers of the 21st century. *The Academy of Management Executive* 10, 4 (1996), 8–16. * He and Huang (2014) Helen Ai He and Elaine M Huang. 2014. A qualitative study of workplace intercultural communication tensions in dyadic face-to-face and computer-mediated interactions. In *Proceedings of the 2014 conference on Designing interactive systems*. 415–424. * Hinds et al. (2002) Pamela Hinds, Sara B Kiesler, and Sara Kiesler. 2002. *Distributed work*. MIT press. * Kabo et al. (2014) Felichism W Kabo, Natalie Cotton-Nessler, Yongha Hwang, Margaret C Levenstein, and Jason Owen-Smith. 2014. Proximity effects on the dynamics and outcomes of scientific collaborations. *Research Policy* 43, 9 (2014), 1469–1485. * Katz et al. (1997) Ralph Katz et al. 1997. *The human side of managing technological innovation: A collection of readings*. Oxford University Press, USA. * Koehne et al. (2012) Benjamin Koehne, Patrick C Shih, and Judith S Olson. 2012. Remote and alone: coping with being the remote member on the team. In *Proceedings of the ACM 2012 conference on Computer Supported Cooperative Work* (Seattle, Washington, USA) *(CSCW ’12)*. Association for Computing Machinery, New York, NY, USA, 1257–1266. * Kossinets and Watts (2009) Gueorgi Kossinets and Duncan J Watts. 2009. Origins of homophily in an evolving social network. *American journal of sociology* 115, 2 (2009), 405–450. * Labuschagne and Holmes (2015) Adriaan Labuschagne and Reid Holmes. 2015. Do onboarding programs work?. In *2015 IEEE/ACM 12th Working Conference on Mining Software Repositories*. IEEE, 381–385. * Leonardi et al. (2010) Paul M Leonardi, Jeffrey W Treem, and Michele H Jackson. 2010. The Connectivity Paradox: Using Technology to Both Decrease and Increase Perceptions of Distance in Distributed Work Arrangements. *J. Appl. Commun. Res.* 38, 1 (Feb. 2010), 85–105. * Michel et al. (2021) Jesse S Michel, Michael A Rotch, Jack E Carson, Nathan A Bowling, and Nicole V Shifrin. 2021. Flattening the latent growth curve? Explaining within-person changes in employee well-being during the COVID-19 pandemic. *Occupational Health Science* 5, 3 (2021), 247–275. * Nardi and Whittaker (2002) Bonnie A Nardi and Steve Whittaker. 2002. The place of face-to-face communication in distributed work. *Distributed work* 83, 112 (2002), 10–7551. * Pike (2014) Kaylee L Pike. 2014. New employee onboarding programs and person-organization fit: An examination of socialization tactics. (2014). * Reagans and McEvily (2003) Ray Reagans and Bill McEvily. 2003. Network Structure and Knowledge Transfer: The Effects of Cohesion and Range. *Adm. Sci. Q.* 48, 2 (June 2003), 240–267. * Rodeghero et al. (2021) Paige Rodeghero, Thomas Zimmermann, Brian Houck, and Denae Ford. 2021. Please Turn Your Cameras on: Remote Onboarding of Software Developers During a Pandemic. In *2021 IEEE/ACM 43rd International Conference on Software Engineering: Software Engineering in Practice (ICSE-SEIP)*. ieeexplore.ieee.org, 41–50. * Romero et al. (2016) D M Romero, B Uzzi, and J Kleinberg. 2016. Social networks under stress. *Proceedings of the 25th International* (2016). * Ruchinskas (1983) John Edward Ruchinskas. 1983. Communicating in Organizations: The Influence of Context, Job, Task, and Channel. (1983). * Snell (2006) Alice Snell. 2006. Researching onboarding best practice: Using research to connect onboarding processes with employee satisfaction. *Strategic HR Review* 5, 6 (Jan. 2006), 32–35. * Steinmacher et al. (2015) Igor Steinmacher, Tayana Conte, Marco Aurélio Gerosa, and David Redmiles. 2015. Social barriers faced by newcomers placing their first contribution in open source software projects. In *Proceedings of the 18th ACM conference on Computer supported cooperative work & social computing*. 1379–1392. * Steinmacher et al. (2019) Igor Steinmacher, Christoph Treude, and Marco Aurelio Gerosa. 2019. Let Me In: Guidelines for the Successful Onboarding of Newcomers to Open Source Projects. *IEEE Softw.* 36, 4 (July 2019), 41–49. * Teevan et al. (2020a) Jaime Teevan, B Hecht, and S Jaffe. 2020a. *The new future of work*. Technical Report. Microsoft internal report. * Teevan et al. (2020b) J Teevan, B Hecht, and S Jaffe. 2020b. The new future of work research from Microsoft into the pandemic’s impact on work practices. <https://www.londonfirst.co.uk/sites/default/files/documents/2021-05/NewFutureOfWorkReport.pdf>. Accessed: 2022-10-4. * Turner et al. (2010) Thea Turner, Pernilla Qvarfordt, Jacob T Biehl, Gene Golovchinsky, and Maribeth Back. 2010. Exploring the workplace communication ecology. In *Proceedings of the SIGCHI conference on human factors in computing systems*. 841–850. * Ugander et al. (2012) Johan Ugander, Lars Backstrom, Cameron Marlow, and Jon Kleinberg. 2012. Structural diversity in social contagion. *Proc. Natl. Acad. Sci. U. S. A.* 109, 16 (April 2012), 5962–5966. * Upadhyay and Khandelwal (2018) Ashwani Kumar Upadhyay and Komal Khandelwal. 2018. Applying artificial intelligence: implications for recruitment. *Strategic HR Review* (2018). * Uzzi and Spiro (2005) Brian Uzzi and Jarrett Spiro. 2005. Collaboration and creativity: The small world problem. *American journal of sociology* 111, 2 (2005), 447–504. * Van de Ven et al. (1976) Andrew H Van de Ven, Andre L Delbecq, and Richard Koenig Jr. 1976. Determinants of coordination modes within organizations. *American sociological review* (1976), 322–338. * Yang et al. (2022) Chi-Lan Yang, Naomi Yamashita, Hideaki Kuzuoka, Hao-Chuan Wang, and Eureka Foong. 2022. Distance Matters to Weak Ties: Exploring How Workers Perceive Their Strongly- and Weakly-Connected Collaborators in Remote Workplaces. *Proc. ACM Hum.-Comput. Interact.* 6, GROUP (Jan. 2022), 1–26. * Yang et al. (2021) Longqi Yang, David Holtz, Sonia Jaffe, Siddharth Suri, Shilpi Sinha, Jeffrey Weston, Connor Joyce, Neha Shah, Kevin Sherman, Brent Hecht, and Jaime Teevan. 2021. The effects of remote work on collaboration among information workers. *Nat Hum Behav* (Sept. 2021)."
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "Appendix A Appendix",
+          "level": 2,
+          "content": [
+            {
+              "type": "table",
+              "text": "| | | | | | | --- | --- | --- | --- | --- | | | | Num. of connections | Sum. of edge weights | Num. of ego components | | Meeting | Min | 1.00 | 1.00 | 1.00 | | Max | 38.00 | 79.00 | 26.00 | | Mean | 3.87 | 6.67 | 2.53 | | Email | Min | 1.00 | 1.00 | 1.00 | | Max | 79.00 | 168.89 | 57.00 | | Mean | 4.13 | 9.85 | 2.77 | | IM | Min | 1.00 | 1.00 | 1.00 | | Max | 138.00 | 220.45 | 77.00 | | Mean | 6.94 | 16.56 | 3.04 |"
+            },
+            {
+              "type": "table",
+              "text": "| | | | | | | --- | --- | --- | --- | --- | | | | Num. of connections | Sum. of edge weights | Num. of ego components | | Meeting | Min | 1.00 | 1.00 | 1.00 | | Max | 100.00 | 118.18 | 21.00 | | Mean | 12.68 | 10.99 | 1.76 | | Email | Min | 1.00 | 1.00 | 1.00 | | Max | 124.00 | 243.51 | 86.00 | | Mean | 7.56 | 14.11 | 2.35 | | IM | Min | 1.00 | 1.00 | 1.00 | | Max | 142.00 | 236.96 | 74.00 | | Mean | 9.76 | 20.53 | 2.59 |"
+            },
+            {
+              "type": "table",
+              "text": "| | | | | | --- | --- | --- | --- | | Onboarding Week | Email | IM | Meeting | | 0-6 | 0.147\\*\\*\\* | 0.138\\*\\*\\* | 0.035\\*\\* | | 6-12 | 0.192\\*\\*\\* | 0.019 | 0.005 | | 12-18 | -0.003 | 0.087 | 0.107 | | 18-24 | 0.320\\* | 0.117 | 0.080 |"
+            },
+            {
+              "type": "formula",
+              "text": "p<0.05p<0.05"
+            },
+            {
+              "type": "formula",
+              "text": "p<0.01p<0.01"
+            },
+            {
+              "type": "formula",
+              "text": "p<0.001p<0.001"
+            },
+            {
+              "type": "table",
+              "text": "| | | | | | --- | --- | --- | --- | | Onboarding Week | Email | IM | Meeting | | 0-6 | 0.019\\*\\*\\* | 0.008 | 0.015\\*\\*\\* | | 6-12 | 0.013 \\* | 0.021 \\*\\*\\* | 0.013\\*\\*\\* | | 12-18 | 0.024 \\*\\*\\* | 0.010 | 0.002 | | 18-24 | 0.002 | 0.006 | 0.002 |"
+            },
+            {
+              "type": "formula",
+              "text": "p<0.05p<0.05"
+            },
+            {
+              "type": "formula",
+              "text": "p<0.01p<0.01"
+            },
+            {
+              "type": "formula",
+              "text": "p<0.001p<0.001"
+            },
+            {
+              "type": "paragraph",
+              "text": "Differences of network statistics (with 95% CIs) between new hires and tenured employees within each 6-week testing window (M2)."
+            }
+          ],
+          "children": []
+        }
+      ]
+    }
+  ],
+  "chunks": [
+    {
+      "heading_path": [
+        "Report GitHub Issue"
+      ],
+      "text": "##### Report GitHub Issue\n\nContent selection saved. Describe the issue below:"
+    },
+    {
+      "heading_path": [
+        "Large-Scale Analysis of New Employee Network Dynamics"
+      ],
+      "text": "# Large-Scale Analysis of New Employee Network Dynamics"
+    },
+    {
+      "heading_path": [
+        "Large-Scale Analysis of New Employee Network Dynamics",
+        "Abstract."
+      ],
+      "text": "###### Abstract.\n\nThe COVID-19 pandemic has accelerated digital transformations across industries, but also introduced new challenges into workplaces, including the difficulties of effectively socializing with colleagues when working remotely. This challenge is exacerbated for new employees who need to develop workplace networks from the outset. In this paper, by analyzing a large-scale telemetry dataset of more than 10,000 Microsoft employees who joined the company in the first three months of 2022, we describe how new employees interact and telecommute with their colleagues during their “onboarding” period. Our results reveal that although new hires are gradually expanding networks over time, there still exists significant gaps between their network statistics and those of tenured employees even after the six-month onboarding phase. We also observe that heterogeneity exists among new employees in how their networks change over time, where employees whose job tasks do not necessarily require extensive and diverse connections could be at a disadvantaged position in this onboarding process. By investigating how web-based people recommendations in organizational knowledge base facilitate new employees naturally expand their networks, we also demonstrate the potential of web-based applications for addressing the aforementioned socialization challenges. Altogether, our findings provide insights on new employee network dynamics in remote and hybrid work environments, which may help guide organizational leaders and web application developers on quantifying and improving the socialization experiences of new employees in digital workplaces."
+    },
+    {
+      "heading_path": [
+        "Large-Scale Analysis of New Employee Network Dynamics",
+        "Keywords:"
+      ],
+      "text": "###### Keywords:"
+    },
+    {
+      "heading_path": [
+        "Large-Scale Analysis of New Employee Network Dynamics",
+        "1. Introduction"
+      ],
+      "text": "## 1. Introduction\n\nNew employee onboarding often refers to the process where new hires are integrated into the organization. This process is widely acknowledged to be vital for organizations and positively related to employee satisfaction, productivity and retention ([Cable and Judge, 1996](https://arxiv.org/html/2304.03441v1#bib.bib15); [Cable et al., 2013b](https://arxiv.org/html/2304.03441v1#bib.bib14); [Caldwell and Peters, 2018](https://arxiv.org/html/2304.03441v1#bib.bib16); [Ellis et al., 2014](https://arxiv.org/html/2304.03441v1#bib.bib26)). A successful new employee onboarding process not only involves knowledge acquisition, skills training, function understanding, but also encourages new hires to adapt to the organizational culture and socialize with their authentic selves, therefore establishing the sense of belonging ([Cable and Judge, 1996](https://arxiv.org/html/2304.03441v1#bib.bib15)). Although there exist extensive studies on conceptualizing this organizational socialization process ([Ellis et al., 2014](https://arxiv.org/html/2304.03441v1#bib.bib26); [Katz et al., 1997](https://arxiv.org/html/2304.03441v1#bib.bib35); [Hall, 1996](https://arxiv.org/html/2304.03441v1#bib.bib31)), empirical evidence about how new hires communicate and socialize with other employees throughout their onboarding period is very limited to date.\n\nThe COVID-19 pandemic has caused a fundamental shift to remote work for many information workers ([Barrero et al., 2021](https://arxiv.org/html/2304.03441v1#bib.bib5)). It has accelerated the digital transformation of many workplaces, where employees became reliant on telecommunications such as remote meeting and instant messaging. Despite the flexibility introduced by this working paradigm change, it also brings new onboarding challenges, largely due to the lack of spontaneous and informal in-person conversations ([Butler and Jaffe, 2021](https://arxiv.org/html/2304.03441v1#bib.bib12); [Michel et al., 2021](https://arxiv.org/html/2304.03441v1#bib.bib40); [Brucks and Levav, 2022](https://arxiv.org/html/2304.03441v1#bib.bib10)). Studies reveal that the collaboration network of information workers became more static and siloed with the shift to firm-wide remote work, which makes it more difficult for employees to acquire and share novel information across the network ([Yang et al., 2021](https://arxiv.org/html/2304.03441v1#bib.bib58)). This struggle for organizational socialization can be aggravated on new employees who need to not only acquire necessary knowledge and skills in a short time, but also develop their workplace networks from scratch. For example, recent research on software developers indicates that new hires struggled to ask for help while working remotely (due to the isolation between teammates, scheduling difficulties, the lack of hallway conversations, etc.) and communicated with fewer people overall compared to those who joined pre-pandemic ([Rodeghero et al., 2021](https://arxiv.org/html/2304.03441v1#bib.bib44); [Teevan et al., 2020b](https://arxiv.org/html/2304.03441v1#bib.bib51)).\n\nThis implies the need for different tools and approaches to supporting onboarding in remote settings. Additionally, the shift to remote work enables new opportunities to explore the impact of such tools, by empirically quantifying the socialization behavior of new employees from their workplace digital traces, and the extent to which they can be augmented or improved by web applications. In this paper, we empirically study the socialization behavior of new employees on a large-scale post-pandemic workplace communication dataset from Microsoft, which includes rich telemetry data of employees on their remote video/audio meetings, emails, and instant messages. In addition, we measure the usage patterns of a web-based people recommendation engine in the workplace and demonstrate its potential in addressing onboarding challenges. The network characteristics we measure include:\n\n* 1) The number of distinct connections (or social ties) each employee maintains in each week; * 2) The frequency in which each individual communicates with other employees every week; * 3) The extent to which an employee bridges communities within an organization.\n\nThe number of distinct connections (or social ties) each employee maintains in each week;\n\nThe frequency in which each individual communicates with other employees every week;\n\nThe extent to which an employee bridges communities within an organization.\n\nThe first two dimensions approximate the number of potential information sources and the total amount of information exchanged with the focal employee. The third dimension captures one’s network structural diversity, which has been shown to play a key role for multiple individual and organizational outcomes ([Granovetter, 1973](https://arxiv.org/html/2304.03441v1#bib.bib30); [Burt and Merluzzi, 2016](https://arxiv.org/html/2304.03441v1#bib.bib11); [Reagans and McEvily, 2003](https://arxiv.org/html/2304.03441v1#bib.bib43); [Uzzi and Spiro, 2005](https://arxiv.org/html/2304.03441v1#bib.bib55); [Argote and Ingram, 2000](https://arxiv.org/html/2304.03441v1#bib.bib4)). Specifically one’s neighborhood may consist of several disparate clusters, reflecting their co-workers from different organizational contexts. Prior studies indicate that having diversified connections to bridge different (“well-seperated”) organizational groups allows individuals to access novel and non-redundant information ([Ugander et al., 2012](https://arxiv.org/html/2304.03441v1#bib.bib53); [De Choudhury et al., 2010](https://arxiv.org/html/2304.03441v1#bib.bib21); [Granovetter, 1973](https://arxiv.org/html/2304.03441v1#bib.bib30); [Burt and Merluzzi, 2016](https://arxiv.org/html/2304.03441v1#bib.bib11); [Reagans and McEvily, 2003](https://arxiv.org/html/2304.03441v1#bib.bib43)).\n\nThe contributions of this paper are summarized as follows.\n\n* • We present the first large-scale, empirical study of the communication network dynamics of new employees in a multinational technology organization in the remote work environment. * • Results from our analysis 1) reveal the general time trends of new employee network dynamics across different communication media during remote onboarding, 2) identify the possibly disadvantaged communities in the onboarding network development process, and 3) demonstrate the potential of web-based applications to address employee socialization challenges. * • Our work points to several important insights, which may help guide organizational leaders and web application developers on how to quantitatively evaluate and improve the employee socialization experiences at digital workplaces.\n\nWe present the first large-scale, empirical study of the communication network dynamics of new employees in a multinational technology organization in the remote work environment.\n\nResults from our analysis 1) reveal the general time trends of new employee network dynamics across different communication media during remote onboarding, 2) identify the possibly disadvantaged communities in the onboarding network development process, and 3) demonstrate the potential of web-based applications to address employee socialization challenges.\n\nOur work points to several important insights, which may help guide organizational leaders and web application developers on how to quantitatively evaluate and improve the employee socialization experiences at digital workplaces."
+    },
+    {
+      "heading_path": [
+        "Large-Scale Analysis of New Employee Network Dynamics",
+        "2. Hypotheses"
+      ],
+      "text": "## 2. Hypotheses\n\nPrior studies suggest that new employee socialization is an assimilation process where network development is arguably a key component ([Chen, 2005](https://arxiv.org/html/2304.03441v1#bib.bib19); [Ellis et al., 2014](https://arxiv.org/html/2304.03441v1#bib.bib26); [Pike, 2014](https://arxiv.org/html/2304.03441v1#bib.bib42)). This process may unfold over a newcomer’s first several months (or years) with an intense ramp-up period at the beginning ([Ellis et al., 2014](https://arxiv.org/html/2304.03441v1#bib.bib26)). On the other hand, recent studies suggest that asynchronous communications have largely increased with the broad shift to remote work ([Yang et al., 2021](https://arxiv.org/html/2304.03441v1#bib.bib58)). Therefore we speculate the network development patterns of new employees can be different across communication media. Together these inform us the following two hypotheses."
+    },
+    {
+      "heading_path": [
+        "Large-Scale Analysis of New Employee Network Dynamics",
+        "2. Hypotheses",
+        "Hypothesis 0 (H1: Time Trends Across Communication Media)."
+      ],
+      "text": "###### Hypothesis 0 (H1: Time Trends Across Communication Media).\n\nThere exists an onboarding period where communication networks of new employees are continually developing. These network developing trends may vary across different communication media (i.e., remote meetings, emails, and instant messages)."
+    },
+    {
+      "heading_path": [
+        "Large-Scale Analysis of New Employee Network Dynamics",
+        "2. Hypotheses",
+        "Hypothesis 0 (H2: New Hires vs. Tenured Employees)."
+      ],
+      "text": "###### Hypothesis 0 (H2: New Hires vs. Tenured Employees).\n\nNew employees are less “connected” than tenured employees during their onboarding period in the organization (i.e., smaller network size, lower communication intensity, lower structural diversity). However, these differences shall reduce as the tenure of a new employee increases.\n\nWe speculate there may exist heterogeneity among new employees because of the intrinsic differences of their job duties and social status, thus proposing the following hypothesis."
+    },
+    {
+      "heading_path": [
+        "Large-Scale Analysis of New Employee Network Dynamics",
+        "2. Hypotheses",
+        "Hypothesis 0 (H3: Heterogeneity Among New Hires)."
+      ],
+      "text": "###### Hypothesis 0 (H3: Heterogeneity Among New Hires).\n\nThere exists heterogeneity among new hires (across different managerial positions and different job functions) in how they develop their workplace networks during the onboarding period.\n\nIn addition to the existing investment of human capital on the new employee onboarding process ([Labuschagne and Holmes, 2015](https://arxiv.org/html/2304.03441v1#bib.bib38); [Fagerholm et al., 2014a](https://arxiv.org/html/2304.03441v1#bib.bib27); [Steinmacher et al., 2015](https://arxiv.org/html/2304.03441v1#bib.bib48)), with the great workplace digital transformations, we are interested in if new web-based experiences can be enabled to help new employees develop their networks at digital workplaces. Previous studies demonstrate that knowledge acquisition and information seeking are key components in the onboarding process and positively relate to new employee socialization outcomes ([Ellis et al., 2014](https://arxiv.org/html/2304.03441v1#bib.bib26); [Bauer et al., 2007](https://arxiv.org/html/2304.03441v1#bib.bib6)). Therefore we start our exploration by investigating if embedding “people recommendations” into organizational knowledge management systems can facilitate new employees in connecting with colleagues they otherwise wouldn’t discover (i.e., bridging connections). In this way, knowledge itself serves as an information broker and triggers natural interactions between employees through knowledge sharing, thus improving the network structural diversity."
+    },
+    {
+      "heading_path": [
+        "Large-Scale Analysis of New Employee Network Dynamics",
+        "2. Hypotheses",
+        "Hypothesis 0 (H4: Web-Based People Recommendations)."
+      ],
+      "text": "###### Hypothesis 0 (H4: Web-Based People Recommendations).\n\nNew employees who have engaged with the “knowledge-based people recommendations” are likely to have more bridging connections.\n\nWe leverage the user engagement data on an enterprise knowledge management product---Microsoft Viva Topics11 1 https://www.microsoft.com/en-us/microsoft-viva/topics—to verify the above hypothesis. Microsoft Viva Topics is a commercial product which leverages machine learning techniques to compile and surface knowledge within an organization. It not only surfaces the textual description, but also suggests people in the organizations who specialize in this given knowledge entity. By analyzing how new employees utilize the “people recommendation” feature (“Pinned People” and “Suggested People”) in this application, we are able to compare the potential differences of their network trends."
+    },
+    {
+      "heading_path": [
+        "Large-Scale Analysis of New Employee Network Dynamics",
+        "3. Data and Methods"
+      ],
+      "text": "## 3. Data and Methods"
+    },
+    {
+      "heading_path": [
+        "Large-Scale Analysis of New Employee Network Dynamics",
+        "3. Data and Methods",
+        "3.1. Data Description"
+      ],
+      "text": "### 3.1. Data Description\n\nWe collected a large-scale dataset from Microsoft’s full-time employees describing their communication activities from December 2021 to September 2022. The collected data contains anonymized events on major workplace communication platforms: Microsoft Teams for remote meeting and instant messaging, and Microsoft Outlook for email services. Meanwhile, we collected a user profile dataset containing the organizational group, job function, managerial status, location as well as the local team size of each individual user. Combining these two datasets, we identified two groups of users and conducted statistical analysis on their communication networks.\n\n* • New Hires. We use the first date of each user’s outbound communication activities (i.e., meetings joined, emails sent, instant messages sent) as the estimated employee start date. To mitigate potential biases introduced by the planned absences (e.g., planned vacations) for these start date estimations, December 2021 is used as a burn-in period to allow users populating in the dataset. After that we identified 11,083 users whose communication activities first started between 2022/01/01 and 2022/03/27 (12 weeks) as the new hire group in our analysis. For each individual user, we then construct weekly snapshots of their communication networks for 24 consecutive weeks from their start week.22 2 This onboarding window is selected because a) the telemetry data collection has to comply with our data retention policy and thus being restricted to a limited timeframe; and b) this 24-week window is where most onboarding activities take place. * • Matched Tenured Employees. In order to assess the network differences between new hires and tenured employees, we leveraged the above user profile information and identified a matched sample of tenured users in our dataset. For each identified new hire, we matched a tenured user who started before 2022/01/01 on the same profile features including organizational group (63 distinct values), job function (engineer or non-engineer), managerial status (individual contributor or manager), location (headquarter or non-headquarter), local team size (50 distinct values). Only 89 out of 11083 newcomers cannot be matched and are removed in the subsequent analysis. We then extracted their communication networks within exactly the same 24-week observation time window as the one for the paired new hire.\n\nNew Hires. We use the first date of each user’s outbound communication activities (i.e., meetings joined, emails sent, instant messages sent) as the estimated employee start date. To mitigate potential biases introduced by the planned absences (e.g., planned vacations) for these start date estimations, December 2021 is used as a burn-in period to allow users populating in the dataset. After that we identified 11,083 users whose communication activities first started between 2022/01/01 and 2022/03/27 (12 weeks) as the new hire group in our analysis. For each individual user, we then construct weekly snapshots of their communication networks for 24 consecutive weeks from their start week.22 2 This onboarding window is selected because a) the telemetry data collection has to comply with our data retention policy and thus being restricted to a limited timeframe; and b) this 24-week window is where most onboarding activities take place.\n\nMatched Tenured Employees. In order to assess the network differences between new hires and tenured employees, we leveraged the above user profile information and identified a matched sample of tenured users in our dataset. For each identified new hire, we matched a tenured user who started before 2022/01/01 on the same profile features including organizational group (63 distinct values), job function (engineer or non-engineer), managerial status (individual contributor or manager), location (headquarter or non-headquarter), local team size (50 distinct values). Only 89 out of 11083 newcomers cannot be matched and are removed in the subsequent analysis. We then extracted their communication networks within exactly the same 24-week observation time window as the one for the paired new hire."
+    },
+    {
+      "heading_path": [
+        "Large-Scale Analysis of New Employee Network Dynamics",
+        "3. Data and Methods",
+        "3.2. Constructing Ego Networks"
+      ],
+      "text": "### 3.2. Constructing Ego Networks\n\nWe’re interested in the ego network of each individual in the above identified user groups and how it changes over time. The notation and definitions are formally introduced as the follows.\n\nGiven an observation week tt, a communication medium (meeting, email, or instant messaging), for each individual kk, we define the undirected ego network as 𝒢k(t)={𝒱k(t),ℰk(t),𝒲k(t)}\\mathcal{G}^{(t)}\\_{k}=\\{\\mathcal{V}^{(t)}\\_{k},\\mathcal{E}^{(t)}\\_{k},\\mathcal{W}^{(t)}\\_{k}\\}. Here 𝒱k(t)={k}​⋃𝒩k(t)\\mathcal{V}^{(t)}\\_{k}=\\{k\\}\\bigcup\\mathcal{N}^{(t)}\\_{k} represents node kk as well as its immediate neighbors33 3 Note 𝒩k(t)\\mathcal{N}^{(t)}\\_{k} includes all Microsoft full-time employees who have connected with individual ii in the given week tt. The neighboring employees here are not restricted in the user groups identified in [Section 3.1](https://arxiv.org/html/2304.03441v1#S3.SS1 \"3.1. Data Description ‣ 3. Data and Methods ‣ Large-Scale Analysis of New Employee Network Dynamics\"). (𝒩k(t)\\mathcal{N}^{(t)}\\_{k}). ℰk(t)\\mathcal{E}^{(t)}\\_{k} is an undirected edge set which denotes the observed reciprocal connections among nodes in 𝒱k(t)\\mathcal{V}^{(t)}\\_{k} within the given time window tt. 𝒲k(t)\\mathcal{W}^{(t)}\\_{k} represents the corresponding edge weights.\n\ntt\n\nkk\n\n𝒢k(t)={𝒱k(t),ℰk(t),𝒲k(t)}\\mathcal{G}^{(t)}_{k}=\\{\\mathcal{V}^{(t)}_{k},\\mathcal{E}^{(t)}_{k},\\mathcal{W}^{(t)}_{k}\\}\n\n𝒱k(t)={k}​⋃𝒩k(t)\\mathcal{V}^{(t)}_{k}=\\{k\\}\\bigcup\\mathcal{N}^{(t)}_{k}\n\nkk\n\n𝒩k(t)\\mathcal{N}^{(t)}_{k}\n\nii\n\ntt\n\n𝒩k(t)\\mathcal{N}^{(t)}_{k}\n\nℰk(t)\\mathcal{E}^{(t)}_{k}\n\n𝒱k(t)\\mathcal{V}^{(t)}_{k}\n\ntt\n\n𝒲k(t)\\mathcal{W}^{(t)}_{k}\n\nWe first focus on each individual’s one-on-one networks where ℰk(t)\\mathcal{E}^{(t)}\\_{k} is restricted on the communication interactions with only two participants. Following previous studies ([Kossinets and Watts, 2009](https://arxiv.org/html/2304.03441v1#bib.bib37); [De Choudhury et al., 2010](https://arxiv.org/html/2304.03441v1#bib.bib21)), we define the edge weight wi​j(t)=wi→j(t)×wj→i(t)w^{(t)}\\_{ij}=\\sqrt{w^{(t)}\\_{i\\rightarrow j}\\times w^{(t)}\\_{j\\rightarrow i}} between two individuals ii and jj as the geometric mean of the number of directed interactions during the observation time period tt. For example, for each employee’s email network, wi→j(t)w^{(t)}\\_{i\\rightarrow j} denotes the number of emails that ii sent to jj in week tt. To ensure the reciprocity of the observed connections, we define the ego network 𝒢k(t)\\mathcal{G}^{(t)}\\_{k} comprising the edges with only non-zero weights, i.e., wi​j(t)>0w^{(t)}\\_{ij}>0. We consider an alternative group interaction network for robustness test, which accounts for employees’ group communications with less than 10 participants.44 4 Edge weight (wi→j(t)w^{(t)}\\_{i\\rightarrow j}) in the group interaction network is relaxed as the number of directed interactions, normalized by the number of recipients within these interactions.\n\nℰk(t)\\mathcal{E}^{(t)}_{k}\n\nwi​j(t)=wi→j(t)×wj→i(t)w^{(t)}_{ij}=\\sqrt{w^{(t)}_{i\\rightarrow j}\\times w^{(t)}_{j\\rightarrow i}}\n\nii\n\njj\n\ntt\n\nwi→j(t)w^{(t)}_{i\\rightarrow j}\n\nii\n\njj\n\ntt\n\n𝒢k(t)\\mathcal{G}^{(t)}_{k}\n\nwi​j(t)>0w^{(t)}_{ij}>0\n\nwi→j(t)w^{(t)}_{i\\rightarrow j}\n\nFollowing prior studies ([Ugander et al., 2012](https://arxiv.org/html/2304.03441v1#bib.bib53); [De Choudhury et al., 2010](https://arxiv.org/html/2304.03441v1#bib.bib21); [Easley and Kleinberg, 2010](https://arxiv.org/html/2304.03441v1#bib.bib25)), we consider network metrics to characterize each individual’s ego network from three different perspectives: network size, intensity, and structural diversity.\n\n* • Number of distinct connections. This metric is defined as the total number of employees connected to the focal individual kk within the observation time window tt, which directly measures the size of one’s neighborhood, i.e., |𝒩k(t)||\\mathcal{N}^{(t)}\\_{k}|. * • Sum of edge weights. We sum over the weights of all edges connected to the ego node kk to assess its overall communication intensity, i.e., Wk(t)=∑j∈𝒩k(t)wi​j(t)W\\_{k}^{(t)}=\\sum\\_{j\\in\\mathcal{N}^{(t)}\\_{k}}w^{(t)}\\_{ij}. Note the units of edge weights vary in communication media, where the weights for meeting, email, and IM networks are calculated based on the number of joint meetings, emails exchanges, and joint chat sessions respectively. * • Number of ego components. We leverage the number of ego components (Ck(t)C\\_{k}^{(t)}) to measure how much each individual kk is bridging surrounding communities. This measure is defined as the number of connected components that remain in the ego network 𝒢k(t)\\mathcal{G}^{(t)}\\_{k} when the focal node kk as well as its incident edges are removed. This metric is frequently adopted in prior network science studies to describe the structural diversity of one’s ego network ([Ugander et al., 2012](https://arxiv.org/html/2304.03441v1#bib.bib53); [De Choudhury et al., 2010](https://arxiv.org/html/2304.03441v1#bib.bib21)).\n\nNumber of distinct connections. This metric is defined as the total number of employees connected to the focal individual kk within the observation time window tt, which directly measures the size of one’s neighborhood, i.e., |𝒩k(t)||\\mathcal{N}^{(t)}\\_{k}|.\n\nkk\n\ntt\n\n|𝒩k(t)||\\mathcal{N}^{(t)}_{k}|\n\nSum of edge weights. We sum over the weights of all edges connected to the ego node kk to assess its overall communication intensity, i.e., Wk(t)=∑j∈𝒩k(t)wi​j(t)W\\_{k}^{(t)}=\\sum\\_{j\\in\\mathcal{N}^{(t)}\\_{k}}w^{(t)}\\_{ij}. Note the units of edge weights vary in communication media, where the weights for meeting, email, and IM networks are calculated based on the number of joint meetings, emails exchanges, and joint chat sessions respectively.\n\nkk\n\nWk(t)=∑j∈𝒩k(t)wi​j(t)W_{k}^{(t)}=\\sum_{j\\in\\mathcal{N}^{(t)}_{k}}w^{(t)}_{ij}\n\nNumber of ego components. We leverage the number of ego components (Ck(t)C\\_{k}^{(t)}) to measure how much each individual kk is bridging surrounding communities. This measure is defined as the number of connected components that remain in the ego network 𝒢k(t)\\mathcal{G}^{(t)}\\_{k} when the focal node kk as well as its incident edges are removed. This metric is frequently adopted in prior network science studies to describe the structural diversity of one’s ego network ([Ugander et al., 2012](https://arxiv.org/html/2304.03441v1#bib.bib53); [De Choudhury et al., 2010](https://arxiv.org/html/2304.03441v1#bib.bib21)).\n\nCk(t)C_{k}^{(t)}\n\nkk\n\n𝒢k(t)\\mathcal{G}^{(t)}_{k}\n\nkk"
+    },
+    {
+      "heading_path": [
+        "Large-Scale Analysis of New Employee Network Dynamics",
+        "3. Data and Methods",
+        "3.3. Organizational Attributes"
+      ],
+      "text": "### 3.3. Organizational Attributes\n\nIn addition to the above network metrics, we also consider the following organizational attributes as control variables or predictors in our analysis.\n\n* • Organizational Group. This attribute represents the highest-level organizational group within Microsoft that each individual employee belongs to. In our dataset, it is defined as the parent nodes one step below the CEO (the root node) in the formal organizational chart. * • Job Function. We consider a binary variable x(𝑒𝑛𝑔)x^{\\mathit{(eng)}} to represent if an individual is at the engineering function role, i.e., engineer (x(𝑒𝑛𝑔)=1x^{\\mathit{(eng)}}=1) versus non-engineer (x(𝑒𝑛𝑔)=0x^{\\mathit{(eng)}}=0). * • Managerial Status. This attribute is defined as an indicator x(𝑚𝑛𝑔𝑟)x^{\\mathit{(mngr)}} to reflect if the employee is in the management position, i.e., manager (x(𝑚𝑛𝑔𝑟)=1x^{\\mathit{(mngr)}}=1) versus individual contributor (x(𝑚𝑛𝑔𝑟)=0x^{\\mathit{(mngr)}}=0). * • Location. We introduce a binary variable to represent if each employee’s office (whether it is a home office or not) is located in the same metropolitan area as Microsoft’s headquarter office. * • Local Team Size. We calculate the number of employees who directly report to the same direct manager as the target individual and use this variable to assess the number of peer co-workers in one’s direct team.\n\nOrganizational Group. This attribute represents the highest-level organizational group within Microsoft that each individual employee belongs to. In our dataset, it is defined as the parent nodes one step below the CEO (the root node) in the formal organizational chart.\n\nJob Function. We consider a binary variable x(𝑒𝑛𝑔)x^{\\mathit{(eng)}} to represent if an individual is at the engineering function role, i.e., engineer (x(𝑒𝑛𝑔)=1x^{\\mathit{(eng)}}=1) versus non-engineer (x(𝑒𝑛𝑔)=0x^{\\mathit{(eng)}}=0).\n\nx(𝑒𝑛𝑔)x^{\\mathit{(eng)}}\n\nx(𝑒𝑛𝑔)=1x^{\\mathit{(eng)}}=1\n\nx(𝑒𝑛𝑔)=0x^{\\mathit{(eng)}}=0\n\nManagerial Status. This attribute is defined as an indicator x(𝑚𝑛𝑔𝑟)x^{\\mathit{(mngr)}} to reflect if the employee is in the management position, i.e., manager (x(𝑚𝑛𝑔𝑟)=1x^{\\mathit{(mngr)}}=1) versus individual contributor (x(𝑚𝑛𝑔𝑟)=0x^{\\mathit{(mngr)}}=0).\n\nx(𝑚𝑛𝑔𝑟)x^{\\mathit{(mngr)}}\n\nx(𝑚𝑛𝑔𝑟)=1x^{\\mathit{(mngr)}}=1\n\nx(𝑚𝑛𝑔𝑟)=0x^{\\mathit{(mngr)}}=0\n\nLocation. We introduce a binary variable to represent if each employee’s office (whether it is a home office or not) is located in the same metropolitan area as Microsoft’s headquarter office.\n\nLocal Team Size. We calculate the number of employees who directly report to the same direct manager as the target individual and use this variable to assess the number of peer co-workers in one’s direct team.\n\n| | | | | | | --- | --- | --- | --- | --- | | Hypothesis | Model | Scope | Variable(s) of Interests | Control Variables | | H1 | M1 | New hires only | Onboarding Week | Organizational Group, Job Function, Managerial Status, Location, Local Team Size | | H2 | M2 | New hires + tenured employees | Tenure Group | Organizational Group, Job Function, Managerial Status, Location, Local Team Size | | H3 | M3.a | New hires only | Managerial Status, Onboarding Week Managerial Status ×\\times Onboarding Week | Organizational Group, Job Function, Location, Local Team Size | | H3 | M3.b | New hires only | Job Function, Onboarding Week Job Function ×\\times Onboarding Week | Organizational Group, Managerial Status, Location, Local Team Size | | H4 | M4 | New hires only | People Recommendation, Onboarding Week People Recommendation ×\\times Onboarding Week | Organizational Group, Job Function, Managerial Status, Location, Local Team Size |\n\n×\\times\n\n×\\times\n\n×\\times"
+    },
+    {
+      "heading_path": [
+        "Large-Scale Analysis of New Employee Network Dynamics",
+        "3. Data and Methods",
+        "3.4. Models"
+      ],
+      "text": "### 3.4. Models\n\nAs described in [Section 3.1](https://arxiv.org/html/2304.03441v1#S3.SS1 \"3.1. Data Description ‣ 3. Data and Methods ‣ Large-Scale Analysis of New Employee Network Dynamics\"), we calculate the network statistics of each identified new hire and the matched tenured employee’s weekly ego networks across different communication platforms over 24 consecutive weeks. To examine our proposed hypotheses, we follow the mixed effect framework and perform a series of longitudinal ordinary least squares (OLS) regressions. The regression framework can be described as below\n\n| | | | | | --- | --- | --- | --- | | (1) | | yk(t)∼𝑣𝑎𝑟𝑖𝑎𝑏𝑙𝑒𝑠​𝑜𝑓​𝑖𝑛𝑡𝑒𝑟𝑒𝑠𝑡𝑠+𝑐𝑜𝑛𝑡𝑟𝑜𝑙​𝑣𝑎𝑟𝑖𝑎𝑏𝑙𝑒𝑠+ηt+ϵk.y\\_{k}^{(t)}\\sim\\mathit{variables\\ of\\ interests}+\\mathit{control\\ variables}+\\eta\\_{t}+\\epsilon\\_{k}. | |\n\nyk(t)∼𝑣𝑎𝑟𝑖𝑎𝑏𝑙𝑒𝑠​𝑜𝑓​𝑖𝑛𝑡𝑒𝑟𝑒𝑠𝑡𝑠+𝑐𝑜𝑛𝑡𝑟𝑜𝑙​𝑣𝑎𝑟𝑖𝑎𝑏𝑙𝑒𝑠+ηt+ϵk.y_{k}^{(t)}\\sim\\mathit{variables\\ of\\ interests}+\\mathit{control\\ variables}+\\eta_{t}+\\epsilon_{k}.\n\nFor each individual kk in the observation week tt, the dependent variable (yk(t)y\\_{k}^{(t)}) encodes one of the following three network metrics—the number of distinct connections (|𝒩k(t)||\\mathcal{N}^{(t)}\\_{k}|), the sum of edge weights (Wk(t)W^{(t)}\\_{k}), and the number of ego components (Ck(t)C^{(t)}\\_{k}). In order to control for the potential time unit-specific bias (e.g., the lack of activeness during the holiday week), a time-dummy variable ηt\\eta\\_{t} is included to capture these time fixed effects. To model the potential variations across different individuals, ϵk\\epsilon\\_{k} is introduced to capture the random effects. For each individual new hire kk, we also introduce Onboarding Week as a numeric time-varying variable. For each new hire kk within the given observation week tt, the corresponding Onboarding Week can be defined as t−t~kt-\\tilde{t}\\_{k}, where t~k\\tilde{t}\\_{k} denotes the start week of the individual kk. We discuss how we operationalize this framework to examine each hypothesis as the following. A summary of the detailed model designs are included in [Table 1](https://arxiv.org/html/2304.03441v1#S3.T1 \"In 3.3. Organizational Attributes ‣ 3. Data and Methods ‣ Large-Scale Analysis of New Employee Network Dynamics\").\n\nkk\n\ntt\n\nyk(t)y_{k}^{(t)}\n\n|𝒩k(t)||\\mathcal{N}^{(t)}_{k}|\n\nWk(t)W^{(t)}_{k}\n\nCk(t)C^{(t)}_{k}\n\nηt\\eta_{t}\n\nϵk\\epsilon_{k}\n\nkk\n\nkk\n\ntt\n\nt−t~kt-\\tilde{t}_{k}\n\nt~k\\tilde{t}_{k}\n\nkk\n\nTo test whether new hire’s network connectivity metrics increase over the monitored 24-week onboarding period and how these metrics differ across various communication platforms (H1), we perform the regression analysis on new hires’ meeting, email as well as instant messaging (IM) ego networks. We examine the Onboarding Week as the variable of interests in [Eq. 1](https://arxiv.org/html/2304.03441v1#S3.E1 \"In 3.4. Models ‣ 3. Data and Methods ‣ Large-Scale Analysis of New Employee Network Dynamics\"), and the organizational attributes (as defined in [Section 3.3](https://arxiv.org/html/2304.03441v1#S3.SS3 \"3.3. Organizational Attributes ‣ 3. Data and Methods ‣ Large-Scale Analysis of New Employee Network Dynamics\")) are utilized as control variables (M1). The estimated coefficient of Onboarding Week allows us to assess the direction as well as the speed of network connectivity changing over the new hire onboarding period.\n\nTo test the potential differences between new hires and tenured employees’ networks (H2), we construct a combined dataset with both new hires as well as the matched tenured employees. We introduce a binary variable Tenure Group xk(𝑡𝑒𝑛𝑢𝑟𝑒)x\\_{k}^{\\mathit{(tenure)}}, where xk(𝑡𝑒𝑛𝑢𝑟𝑒)=1x\\_{k}^{\\mathit{(tenure)}}=1 indicates the individual kk belongs to the new hire user group and xk=0x\\_{k}=0 otherwise. We use all organizational attributes as control variables and test the effect of Tenure Group (M2). The estimated effect then corresponds to the average difference between the new hire group and the tenured employee group within the observation time window.\n\nxk(𝑡𝑒𝑛𝑢𝑟𝑒)x_{k}^{\\mathit{(tenure)}}\n\nxk(𝑡𝑒𝑛𝑢𝑟𝑒)=1x_{k}^{\\mathit{(tenure)}}=1\n\nkk\n\nxk=0x_{k}=0\n\nTo examine the potential differences of network connectivity metrics as well as their growing speeds between new managers and new individual contributors (H3), we consider the Managerial Status, Onboarding Week as well as their interaction as the variables of interests (M3.a). All other organizational variables are used as the control variables. In this model, the estimated effect of the Managerial Status reflects the average difference between new managers and new individual contributors while the interaction between Managerial Status and Onboarding Week indicates the difference of growth rates of their networks over time. By switching the Managerial Status variable and the Job Function variable, we perform a similar regression analysis to examine the potential differences between engineers and non-engineers during their 24-week onboarding time (M3.b).\n\nTo test whether the adoption of the knowledge-based “people recommendation” application associates with a new hire’s networking behavior (H4), we introduce an additional binary variable People Recommendation xk(𝑟𝑒𝑐.)x\\_{k}^{\\mathit{(rec.)}} to categorize new hires based on their engagement behavior on these recommendations, where xk(𝑟𝑒𝑐.)=1x\\_{k}^{\\mathit{(rec.)}}=1 indicates the individual kk has clicked or viewed the “Pinned People” and “Suggested People” feature in Viva Topics within the tracked 24-week onboarding period and xk(𝑟𝑒𝑐.)=0x\\_{k}^{\\mathit{(rec.)}}=0 otherwise. Similar to the previous setup, we test People Recommendation, Onboarding Week as well as their first-order interaction and include all organizational attributes as control variables (M4). By testing People Recommendation, we aim to identify its potential correlation with one’s network connectivity metrics. By testing the interaction term (People Recommendation ×\\times Onboarding Week), we explore its potentials on one’s network connectivity growth rate during the onboarding period.\n\nkk\n\n×\\times"
+    },
+    {
+      "heading_path": [
+        "Large-Scale Analysis of New Employee Network Dynamics",
+        "4. Results and Discussion"
+      ],
+      "text": "## 4. Results and Discussion\n\nTime trend comparisons on different communication media---meeting, email and instant messaging (IM)"
+    },
+    {
+      "heading_path": [
+        "Large-Scale Analysis of New Employee Network Dynamics",
+        "4. Results and Discussion",
+        "4.1. Communication Trends"
+      ],
+      "text": "### 4.1. Communication Trends\n\nWe start by presenting model-free time trends for different network metrics. These trends describe how the communication networks of new hires change across different communication media over the 24-week onboarding period. By comparing these new hires’ trends to the matched tenured employees within the same observation window, we highlight how new hires assimilate their communication behavior to tenured employees over time. Then we conduct a series of statistical regression analyses (as described in [Section 3.4](https://arxiv.org/html/2304.03441v1#S3.SS4 \"3.4. Models ‣ 3. Data and Methods ‣ Large-Scale Analysis of New Employee Network Dynamics\")) to formally examine our hypotheses."
+    },
+    {
+      "heading_path": [
+        "Large-Scale Analysis of New Employee Network Dynamics",
+        "4. Results and Discussion",
+        "4.1. Communication Trends",
+        "Communication Media"
+      ],
+      "text": "#### Communication Media\n\n[Figure 1](https://arxiv.org/html/2304.03441v1#S4.F1 \"In 4. Results and Discussion ‣ Large-Scale Analysis of New Employee Network Dynamics\") shows the average weekly time series for network connectivity statistics on different communication platforms across different tenure groups (new hires versus matched tenured employees). Focusing on the trends of new hires’ network statistics, we observe different onboarding patterns from this figure with respect to the use of communication media (H1). We find new hires’ one-on-one meeting and instant messaging (IM) networks are overall expanding over the 24-week onboarding period with respect to their network size, intensity, and structural diversity, where the size and the intensity of meeting networks rapidly converge in the first few weeks while the IM networks are continually growing on all three network metrics. On the other hand, we notice new hires generally started with larger and more intense email networks and these metrics quickly dropped in their first few onboarding weeks.55 5 A possible explanation for this observation is in the first few weeks, newcomers often engage with ad-hoc activities requiring formal written communications (e.g., introduction emails), thus leading to the bump in their email network trends. To validate these observations, we test the Onboarding Week variable in our statistical regression model (M1) over the 24-week onboarding window and present the corresponding coefficients with the 95% confidence intervals (CIs) in [Figure 2](https://arxiv.org/html/2304.03441v1#S4.F2 \"In Communication Media ‣ 4.1. Communication Trends ‣ 4. Results and Discussion ‣ Large-Scale Analysis of New Employee Network Dynamics\"). We find a statistically significant weekly growth of new hires’ IM networks on all three network metrics over the 24-week observation time (+0.131+0.131 per week on network size, p<0.001p<0.001; +0.257+0.257 per week on network intensity, p<0.001p<0.001; +0.037+0.037 per week on structural diversity, p<0.001p<0.001). These effects on IM networks appear to be significantly larger than those on other communication media, which confirms the fast-growing patterns we observed about new hires’ networking behavior via instant messaging.\n\n+0.131+0.131\n\np<0.001p<0.001\n\n+0.257+0.257\n\np<0.001p<0.001\n\n+0.037+0.037\n\np<0.001p<0.001\n\nIn addition to our observations about communication media choice among new hires, we also notice a strong preference from tenured employees on one-on-one communications over instant messages (i.e., larger communication network size, intensity, and diversity). Although employees’ choices on communication media can be affected by various factors, including both firm-wide guidelines and personal inclinations, this preference for instant messages is in fact consistent with the findings from recent studies where asynchronous and informal communications have increased among information workers with the shift to remote work ([Yang et al., 2021](https://arxiv.org/html/2304.03441v1#bib.bib58)). The growing trend of communicating through instant messages may also reflect new hires’ assimilation process, where they gradually adopt the communication media choice from tenured employees in the remote and hybrid work environment.\n\nWeekly growth rates (with 95% CIs) of network statistics (M1)."
+    },
+    {
+      "heading_path": [
+        "Large-Scale Analysis of New Employee Network Dynamics",
+        "4. Results and Discussion",
+        "4.1. Communication Trends",
+        "New Hires vs. Tenured Employees"
+      ],
+      "text": "#### New Hires vs. Tenured Employees\n\n[Figure 1](https://arxiv.org/html/2304.03441v1#S4.F1 \"In 4. Results and Discussion ‣ Large-Scale Analysis of New Employee Network Dynamics\") also reveals clear differences between the communication networks of new hires and tenured employees (H2). Compared to new hires, tenured employees generally connect with more colleagues every week (larger network size), communicate more intensively with other colleagues (larger edge weights), and maintain more diversified connections within the company (higher structural diversity) across all communication media. Despite their time trend differences on different communication media in the first few onboarding weeks, we observe new hires’ network statistics eventually trend towards the states of tenured employees at the later stage of the tracked 24-week onboarding period. We investigate this pattern by conducting finer-grained statistical regressions to test the Tenure Group variable (M2) on every 6 onboarding weeks and report the results in [Figure 3](https://arxiv.org/html/2304.03441v1#S4.F3 \"In New Hires vs. Tenured Employees ‣ 4.1. Communication Trends ‣ 4. Results and Discussion ‣ Large-Scale Analysis of New Employee Network Dynamics\"). We notice the network statistics of new hires and tenured employees are significantly different (p<0.001p<0.001), while these differences are diminishing as the tenure of a new employee increases.\n\np<0.001p<0.001\n\nDifferences of network statistics (with 95% CIs) between new hires and tenured employees within each 6-week testing window (M2).\n\nThrough the above analysis, the socialization aspect of the organizational assimilation process can be reflected on these time trends of new hires’ communication networks, where their network size, intensity, and diversity are approaching the states of tenured employees in the organization. Regardless we still find statistically significant gaps on these metrics between different tenure groups at the latest state of the tracked onboarding period, implying it may take longer than 24 weeks (6 months) to have new employees fully “onboarded”, i.e., statistically indistinguishable from tenured employees on network size, intensity and diversity."
+    },
+    {
+      "heading_path": [
+        "Large-Scale Analysis of New Employee Network Dynamics",
+        "4. Results and Discussion",
+        "4.2. Heterogeneity Among New Employees"
+      ],
+      "text": "### 4.2. Heterogeneity Among New Employees\n\nWhile we observe a general trend that new hires are assimilating their networks to those of tenured employees, we hypothesize there may exist heterogeneity across new employees due to the fundamental differences of their job duties, social status, and day-to-day workflows ([Van de Ven et al., 1976](https://arxiv.org/html/2304.03441v1#bib.bib56); [Ruchinskas, 1983](https://arxiv.org/html/2304.03441v1#bib.bib46); [Diesner and Carley, 2005](https://arxiv.org/html/2304.03441v1#bib.bib22); [Romero et al., 2016](https://arxiv.org/html/2304.03441v1#bib.bib45)) (H3). We conduct descriptive analysis and statistical regressions to investigate their heterogeneity on the following two dimensions: managerial position (manager vs. individual contributor) and job function (engineer vs. non-engineer)."
+    },
+    {
+      "heading_path": [
+        "Large-Scale Analysis of New Employee Network Dynamics",
+        "4. Results and Discussion",
+        "4.2. Heterogeneity Among New Employees",
+        "Managers vs. Individual Contributors"
+      ],
+      "text": "#### Managers vs. Individual Contributors\n\nAmong the 11,083 new hires we identified, we observe 6.37% of them are managers and 93.63% of them are individual contributors. [Figure 4(a)](https://arxiv.org/html/2304.03441v1#S4.F4.sf1 \"In Figure 4 ‣ 4.2. Heterogeneity Among New Employees ‣ 4. Results and Discussion ‣ Large-Scale Analysis of New Employee Network Dynamics\") presents the weekly trends of network statistics for employees with different managerial statuses, where we observe a distinct pattern that compared to individual contributors (ICs), managers connect with more employees in the organization and their communication networks tend to be more intense and more structurally diverse. Note these differences are consistent across both new hires and tenured employees, reflecting the intrinsic nature of their role types: manager roles are usually obliged to conduct people coordination while IC roles are often expected to focus on “hands-on” work practices. We further investigate the differences among new hires and notice that managers’ communication networks generally grow and stabilize faster than individual contributors. To quantify the differences of their network growth rates, we test the first order interaction between Managerial Status and Onboarding Week (M3.a) and report these effects in [Figure 5(a)](https://arxiv.org/html/2304.03441v1#S4.F5.sf1 \"In Figure 5 ‣ Engineers vs. Non-Engineers. ‣ 4.2. Heterogeneity Among New Employees ‣ 4. Results and Discussion ‣ Large-Scale Analysis of New Employee Network Dynamics\"). We find the growth rates on various network metrics are significantly different across managers and ICs. In particular, we find new managers’ networks grow significantly and consistently faster than ICs on their structural diversity metrics across all communication media (+0.023+0.023 per week on remote meeting, p<0.001p<0.001; +0.032+0.032 per week on email, p<0.001p<0.001; +0.006+0.006 per week on instant messaging, p=0.002p=0.002).\n\n+0.023+0.023\n\np<0.001p<0.001\n\n+0.032+0.032\n\np<0.001p<0.001\n\n+0.006+0.006\n\np=0.002p=0.002\n\nA possible explanation here is in comparison with individual contributors, extensive communications and coordinations are required in managers’ daily work (e.g., host routine one-on-one meetings with their direct reports, maintain frequent check-ins with representatives from other groups), which creates both demands and opportunities for new hires who are in manager roles to rapidly develop their networks. On the contrary, individual contributors may be put on a disadvantaged position at their onboarding process regarding their social network building. Such a disadvantage can be worsen with the current shift to remote work due to the absence of spontaneous in-person connections at workplace (e.g., impromptu lunches, hallway conversations) ([Yang et al., 2021](https://arxiv.org/html/2304.03441v1#bib.bib58); [Bojinov et al., 2021a](https://arxiv.org/html/2304.03441v1#bib.bib7); [Cooper and Kurland, 2002](https://arxiv.org/html/2304.03441v1#bib.bib20); [Nardi and Whittaker, 2002](https://arxiv.org/html/2304.03441v1#bib.bib41); [Golden et al., 2006](https://arxiv.org/html/2304.03441v1#bib.bib29))."
+    },
+    {
+      "heading_path": [
+        "Large-Scale Analysis of New Employee Network Dynamics",
+        "4. Results and Discussion",
+        "4.2. Heterogeneity Among New Employees",
+        "Engineers vs. Non-Engineers."
+      ],
+      "text": "#### Engineers vs. Non-Engineers.\n\nWe observe that 35.67% of our identified new hires are engineers while the other 64.33% are in non-engineering roles (e.g., program managers, sales representatives). [Figure 4(b)](https://arxiv.org/html/2304.03441v1#S4.F4.sf2 \"In Figure 4 ‣ 4.2. Heterogeneity Among New Employees ‣ 4. Results and Discussion ‣ Large-Scale Analysis of New Employee Network Dynamics\") presents the weekly trends of network statistics for employees with different job functions. Similarly we observe a clear pattern that engineers connect with fewer employees, with less total communication intensity, and their networks tend to be less structurally diverse compared to non-engineers. We also notice that new engineers’ communication networks in general expand slower than non-engineering new hires, especially in terms of their network structural diversity. By testing the interaction between Job Function and Onboarding Week through regression analysis (M3.b), we are able to validate these observations (as shown in [Figure 5(b)](https://arxiv.org/html/2304.03441v1#S4.F5.sf2 \"In Figure 5 ‣ Engineers vs. Non-Engineers. ‣ 4.2. Heterogeneity Among New Employees ‣ 4. Results and Discussion ‣ Large-Scale Analysis of New Employee Network Dynamics\")). Notably we find engineering new hires’ network growth rates on structural diversity are significantly lower than non-engineers across all communication platforms (−0.017-0.017 per week on remote meeting, p<0.001p<0.001; −0.026-0.026 per week on email, p<0.001p<0.001; −0.033-0.033 per week on instant messaging, p<0.001p<0.001).\n\n−0.017-0.017\n\np<0.001p<0.001\n\n−0.026-0.026\n\np<0.001p<0.001\n\n−0.033-0.033\n\np<0.001p<0.001\n\nRelative to non-engineers (e.g., program managers, sales representatives), we conjecture new employees in the engineering role may be less in need of large and diverse communication networks in order to perform their daily jobs tasks, therefore lacking opportunities to organically grow their networks (especially on weak and bridging ties, which is reflected on the number of ego components)."
+    },
+    {
+      "heading_path": [
+        "Large-Scale Analysis of New Employee Network Dynamics",
+        "4. Results and Discussion",
+        "4.3. Opportunities for Web-Based Applications"
+      ],
+      "text": "### 4.3. Opportunities for Web-Based Applications\n\nThe above results reveal that it may take a long time (>24>24 weeks) to fully onboard new employees from the socialization perspective, and certain groups of new hires could be at a disadvantaged position in this process because of the limited opportunities to expand networks when performing day-to-day requirements of the job. Nevertheless, workplace digital transformations during COVID-19 pandemic also introduced opportunities to address this connectivity crisis by enabling new experiences on web-based digital applications. In addition to provide disruptive interventions such as intentionally hosting virtual “watercooler” sessions, we also investigate if web-based nudges can be seamlessly embedded into an employee’s day-to-day workflows, thus triggering natural interactions with colleagues whom they otherwise wouldn’t connect with and improving their network structural diversity.\n\n>24>24"
+    },
+    {
+      "heading_path": [
+        "Large-Scale Analysis of New Employee Network Dynamics",
+        "4. Results and Discussion",
+        "4.3. Opportunities for Web-Based Applications",
+        "Knowledge-Based People Recommendation"
+      ],
+      "text": "#### Knowledge-Based People Recommendation\n\nGiven knowledge acquisition is a critical component of the onboarding process for information workers, we start by investigating if providing “people recommendations” in organizational knowledge management systems can help new employees connect with colleagues otherwise they wouldn’t know. Specifically, we test if there are differences of network dynamics between new employees who have or not engaged with (viewed or clicked) these “people recommendations” (i.e., the “Pinned People” and “Suggested People” feature in Microsoft Viva Topics) during their onboarding period. These statistical tests (M4) are performed on every 6 onboarding weeks and the results are presented in [Table 2](https://arxiv.org/html/2304.03441v1#S4.T2 \"In Knowledge-Based People Recommendation ‣ 4.3. Opportunities for Web-Based Applications ‣ 4. Results and Discussion ‣ Large-Scale Analysis of New Employee Network Dynamics\"), where we observe statistically significant differences regarding network diversity and the weekly growth rate of this metric in the first 12 onboarding weeks, indicating the potential positive effects of presenting “people recommendations” on new employees’ network diversity. However we find such effects become less significant in the late onboarding stage. A possible explanation is new hires in our dataset are normally leverage this organizational knowledge base (Microsoft Viva Topics) as an onboarding tool to explore the organizational knowledge taxonomy in their early days. As the onboarding process progresses, their workflows start shifting from exploring organizational knowledge to executing job tasks. This observation also implies future research directions on fully investigating potential canvases and approaches to present “people recommendations” based on the employee’s working context.\n\n| | | | | | --- | --- | --- | --- | | Onboarding Week | Email | IM | Meeting | | 0-6 | 0.194\\*\\*\\* | 0.141\\*\\*\\* | 0.028 | | 6-12 | 0.200\\* | 0.033 | -0.024 | | 12-18 | 0.120 | 0.140 | 0.051 | | 18-24 | 0.242 | 0.097 | 0.088 |\n\np<0.05p<0.05\n\np<0.01p<0.01\n\np<0.001p<0.001\n\n| | | | | | --- | --- | --- | --- | | Onboarding Week | Email | IM | Meeting | | 0-6 | 0.026\\*\\* | 0.018\\*\\* | 0.029\\*\\*\\* | | 6-12 | 0.013 | 0.026\\*\\*\\* | 0.019\\*\\* | | 12-18 | 0.015 | 0.011 | 0.009 | | 18-24 | 0.005 | 0.011 | 0.005 |\n\np<0.05p<0.05\n\np<0.01p<0.01\n\np<0.001p<0.001"
+    },
+    {
+      "heading_path": [
+        "Large-Scale Analysis of New Employee Network Dynamics",
+        "4. Results and Discussion",
+        "4.4. Additional Analysis on Group Interaction"
+      ],
+      "text": "### 4.4. Additional Analysis on Group Interaction\n\nOur analysis thus far has considered the one-on-one communication patterns of newcomers during the virtual onboarding period. We also conducted a separate analysis for group communications (with less than 10 participants in each group interaction). Our findings remain consistent on the significant gaps of all network statistics between new hires and tenured employees after the six-month onboarding phase, the heterogeneity across different managerial positions and job functions, and the positive association between the usage of web-based people recommendations and the network structural diversity of new hires. More details are included in the appendix."
+    },
+    {
+      "heading_path": [
+        "Large-Scale Analysis of New Employee Network Dynamics",
+        "5. Related Work"
+      ],
+      "text": "## 5. Related Work"
+    },
+    {
+      "heading_path": [
+        "Large-Scale Analysis of New Employee Network Dynamics",
+        "5. Related Work",
+        "Remote work"
+      ],
+      "text": "#### Remote work\n\nRemote work is an important topic to study across academia and industry. Remote work-related studies have covered various areas, such as communication challenges ([Rodeghero et al., 2021](https://arxiv.org/html/2304.03441v1#bib.bib44); [He and Huang, 2014](https://arxiv.org/html/2304.03441v1#bib.bib32)), well-being ([Butler and Jaffe, 2021](https://arxiv.org/html/2304.03441v1#bib.bib12); [Michel et al., 2021](https://arxiv.org/html/2304.03441v1#bib.bib40)), management ([Teevan et al., 2020a](https://arxiv.org/html/2304.03441v1#bib.bib50)), etc. While most work focuses on distributed work or remote work due to geographical distance ([Hinds et al., 2002](https://arxiv.org/html/2304.03441v1#bib.bib33); [Koehne et al., 2012](https://arxiv.org/html/2304.03441v1#bib.bib36); [Nardi and Whittaker, 2002](https://arxiv.org/html/2304.03441v1#bib.bib41); [Leonardi et al., 2010](https://arxiv.org/html/2304.03441v1#bib.bib39); [Britto et al., 2018](https://arxiv.org/html/2304.03441v1#bib.bib9)), ours focuses on virtual trending caused by COVID-19. Related to our study, a stream of research emphasizes the impact of remote work on organizational workers’ connectivity in general. Most of them feature the strength of existing or new interpersonal ties ([Yang et al., 2021](https://arxiv.org/html/2304.03441v1#bib.bib58); [Yang et al., 2022](https://arxiv.org/html/2304.03441v1#bib.bib57); [Carmody et al., 2022](https://arxiv.org/html/2304.03441v1#bib.bib18); Wu2021-nz). For example, scholars find that firm-wide remote work triggered by COVID leads to a more siloed network among information works with the decrease weak and bridging ties ([Yang et al., 2021](https://arxiv.org/html/2304.03441v1#bib.bib58)) and in general, ties are more difficult to form in remote work settings ([Carmody et al., 2022](https://arxiv.org/html/2304.03441v1#bib.bib18)).\n\nThis could have significant ramifications, as connections between workers in in-person settings have been associated with organizational outcomes such as building successful collaborations ([Kabo et al., 2014](https://arxiv.org/html/2304.03441v1#bib.bib34)), relationships, and with knowledge transfer ([Allen et al., 2015](https://arxiv.org/html/2304.03441v1#bib.bib3)). Organizational knowledge is inherently social, and is dependent on shared language, narratives, identification, norms, commitment and trust ([Ackerman and Halverson, 2004](https://arxiv.org/html/2304.03441v1#bib.bib2)). Additionally, the ability to build connections enables workers to self-organize and share expertise ([Ackerman and Halverson, 2004](https://arxiv.org/html/2304.03441v1#bib.bib2)). Research prior to the pandemic indicates that while face-to-face conversation is preferred for relationship building, ideation, and problem solving, communication technologies such as IM and social network sites perform complementary purposes including building and maintaining connections ([Turner et al., 2010](https://arxiv.org/html/2304.03441v1#bib.bib52)). In this paper, we focus on virtual onboarding rather than studying full-time tenured organizational workers, and study how use of a range of technologies, including one that highlights other organization members to the user, are related to workers’ connectivity."
+    },
+    {
+      "heading_path": [
+        "Large-Scale Analysis of New Employee Network Dynamics",
+        "5. Related Work",
+        "Virtual onboarding"
+      ],
+      "text": "#### Virtual onboarding\n\nWhile traditional, in-person onboarding has been frequently studied in the context of organization outcomes ([Chen, 2005](https://arxiv.org/html/2304.03441v1#bib.bib19); [Cable et al., 2013a](https://arxiv.org/html/2304.03441v1#bib.bib13); [Fagerholm et al., 2014b](https://arxiv.org/html/2304.03441v1#bib.bib28); [Steinmacher et al., 2019](https://arxiv.org/html/2304.03441v1#bib.bib49); [Snell, 2006](https://arxiv.org/html/2304.03441v1#bib.bib47)), virtual onboarding is still an open area. Most studies focus on virtual onboarding challenges related to specific job functions such as engineering ([Rodeghero et al., 2021](https://arxiv.org/html/2304.03441v1#bib.bib44); [Dominic et al., 2020a](https://arxiv.org/html/2304.03441v1#bib.bib23); [Britto et al., 2018](https://arxiv.org/html/2304.03441v1#bib.bib9); [Fagerholm et al., 2014b](https://arxiv.org/html/2304.03441v1#bib.bib28)). For example, a very relevant qualitative study by Rodeghero et al. indicates that remote work harms social connection, but changing the mode of interaction (such as turning on the camera during meetings) could potentially improve socialization ([Rodeghero et al., 2021](https://arxiv.org/html/2304.03441v1#bib.bib44)). Previous work also discusses AI tools (e.g., voice assistant tools) ([Upadhyay and Khandelwal, 2018](https://arxiv.org/html/2304.03441v1#bib.bib54); [Dominic et al., 2020b](https://arxiv.org/html/2304.03441v1#bib.bib24)), or human effort (e.g., hosting virtual watercooler events ([Bojinov et al., 2021b](https://arxiv.org/html/2304.03441v1#bib.bib8)), or providing checklists or mentorship ([Fagerholm et al., 2014b](https://arxiv.org/html/2304.03441v1#bib.bib28); [Canfora et al., 2012](https://arxiv.org/html/2304.03441v1#bib.bib17))) that can be used to improve onboarding. Our work further explores the remote onboarding process in the context of connectivity and provides potential web solutions that connect people with the expert knowledge needed to improve employee connectivity."
+    },
+    {
+      "heading_path": [
+        "Large-Scale Analysis of New Employee Network Dynamics",
+        "6. Conclusion and Future Work"
+      ],
+      "text": "## 6. Conclusion and Future Work\n\nIn this paper, we investigated the dynamics of new employees’ workplace communication networks throughout a 24-week onboarding period. We also explored the potential web-based applications to address the socialization challenge and summarize our findings as follows.\n\n* • While new hires are less connected with colleagues in the organizations compared to tenured employees in the 24-week onboarding period (smaller network size, lower communication intensity and lower structural diversity), their networks are gradually expanding over time. * • Time trends of new hires’ network statistics vary across different communication media, managerial positions, and job functions. We observed that new employees, whose day-to-day job tasks are not necessarily reliant on extensive and diverse collaborations (e.g., individual contributors, software engineers), can be put into a disadvantaged position regarding organizational socialization in the onboarding process. * • We explored the opportunities for web-based applications to address the new employee socialization challenges. Early evidence revealed that presenting “people recommendations” within employees’ workflows may benefit their workplace network development during the early onboarding period (first 12 weeks).\n\nWhile new hires are less connected with colleagues in the organizations compared to tenured employees in the 24-week onboarding period (smaller network size, lower communication intensity and lower structural diversity), their networks are gradually expanding over time.\n\nTime trends of new hires’ network statistics vary across different communication media, managerial positions, and job functions. We observed that new employees, whose day-to-day job tasks are not necessarily reliant on extensive and diverse collaborations (e.g., individual contributors, software engineers), can be put into a disadvantaged position regarding organizational socialization in the onboarding process.\n\nWe explored the opportunities for web-based applications to address the new employee socialization challenges. Early evidence revealed that presenting “people recommendations” within employees’ workflows may benefit their workplace network development during the early onboarding period (first 12 weeks).\n\nThis study, to the best of our knowledge, presents the first large-scale empirical investigation on communication network dynamics of new employees in the technology industry. This study is not without limitations. First, given the availability and retention policy of the dataset, our study was restricted to a 24-week onboarding window. This constraint can be further relaxed if more data become available since we empirically revealed that it may take longer than 24 weeks to observe new hires’ network statistics fully converge to the states of tenured employees. In this way, one can evidently document the convergence time of new employees with different job roles and empirically understand the dynamics of new hires’ networks in the long term. These quantitative analyses can also be complemented with qualitative studies to deeply understand new employees’ networking behavior. Second, new employees studied in this work mostly followed the remote onboarding guidelines within the organization, thus limiting our scope within the remote work context. We acknowledge that the current and future hybrid work policies could impact new employees’ socialization experiences. Therefore a future research direction is to extend the empirical analysis and investigate the potential onboarding challenges as well as opportunities induced by the emerging trend of hybrid work. Third, our study is limited to a single firm and, for the most part, information workers. A future direction could be expanding the analysis scope and investigating the potential heterogeneity regarding new employee network dynamics across different firms and industries.\n\nWe quantitatively described how new employees develop their workplace network over a 6-month onboarding period in this study. Our results confirmed the struggle and the need of “staying connected” from new employees in the remote work environment. Our study revealed there is no single network development path for all job functions. We also want to highlight that overlooking the socialization needs from disadvantaged employee groups may result in negative effects on individuals, organizations, and social fairness. In addition to the investments of human capitals on new employee onboarding experiences, we demonstrated that recent workplace digital transformations have introduced possibilities for web-based technologies to address the new employee socialization challenges. Here, we’d like to call for both human capital investments (e.g., host social events) and technical solutions (e.g., people recommendations, virtual “watercooler” sessions) on addressing the socialization needs of new hires. Network metrics in this study can also be leveraged as a toolkit to identify/self-identify newcomers who may need help. We hope our study can shed some lights on these opportunities and encourage future research efforts from the web community to keep advancing digital workplaces."
+    },
+    {
+      "heading_path": [
+        "Large-Scale Analysis of New Employee Network Dynamics",
+        "References"
+      ],
+      "text": "## References\n\n* Ackerman and Halverson (2004) Mark S Ackerman and Christine Halverson. 2004. Sharing Expertise: The Next Step for. *Social capital and information technology* (2004), 273. * Allen et al. (2015) Tammy D Allen, Timothy D Golden, and Kristen M Shockley. 2015. How effective is telecommuting? Assessing the status of our scientific findings. *Psychological science in the public interest* 16, 2 (2015), 40–68. * Argote and Ingram (2000) Linda Argote and Paul Ingram. 2000. Knowledge transfer: A basis for competitive advantage in firms. *Organizational behavior and human decision processes* 82, 1 (2000), 150–169. * Barrero et al. (2021) Jose Maria Barrero, Nicholas Bloom, and Steven J Davis. 2021. *Why working from home will stick*. Technical Report. National Bureau of Economic Research. * Bauer et al. (2007) Talya N Bauer, Todd Bodner, Berrin Erdogan, Donald M Truxillo, and Jennifer S Tucker. 2007. Newcomer adjustment during organizational socialization: a meta-analytic review of antecedents, outcomes, and methods. *Journal of applied psychology* 92, 3 (2007), 707. * Bojinov et al. (2021a) Iavor Bojinov, Prithwiraj Choudhury, and Jacqueline N. Lane. 2021a. Virtual Watercoolers: A Field Experiment on Virtual Synchronous Interactions and Performance of Organizational Newcomers. (May 2021). * Bojinov et al. (2021b) Iavor Bojinov, Prithwiraj Choudhury, and Jacqueline N Lane. 2021b. Virtual watercoolers: A field experiment on virtual synchronous interactions and performance of organizational newcomers. *Harvard Business School Technology & Operations Mgt. Unit Working Paper* 21-125 (2021). * Britto et al. (2018) Ricardo Britto, Daniela S Cruzes, Darja Smite, and Aivars Sablis. 2018. Onboarding software developers and teams in three globally distributed legacy projects: A multi-case study. *J. Softw. (Malden)* 30, 4 (April 2018), e1921. * Brucks and Levav (2022) Melanie S Brucks and Jonathan Levav. 2022. Virtual communication curbs creative idea generation. *Nature* 605, 7908 (2022), 108–112. * Burt and Merluzzi (2016) Ronald S Burt and Jennifer Merluzzi. 2016. Network Oscillation. *AMD* 2, 4 (Dec. 2016), 368–391. * Butler and Jaffe (2021) Jenna Butler and Sonia Jaffe. 2021. Challenges and gratitude: A diary study of software engineers working from home during covid-19 pandemic. In *2021 IEEE/ACM 43rd International Conference on Software Engineering: Software Engineering in Practice (ICSE-SEIP)*. IEEE, 362–363. * Cable et al. (2013a) Daniel M Cable, Francesca Gino, and Bradley R Staats. 2013a. Breaking them in or eliciting their best? Reframing socialization around newcomers’ authentic self-expression. *Adm. Sci. Q.* 58, 1 (March 2013), 1–36. * Cable et al. (2013b) Daniel M Cable, Francesca Gino, and Bradley R Staats. 2013b. Breaking them in or eliciting their best? Reframing socialization around newcomers’ authentic self-expression. *Administrative science quarterly* 58, 1 (2013), 1–36. * Cable and Judge (1996) Daniel M Cable and Timothy A Judge. 1996. Person–organization fit, job choice decisions, and organizational entry. *Organizational behavior and human decision processes* 67, 3 (1996), 294–311. * Caldwell and Peters (2018) Cam Caldwell and Ray Peters. 2018. New employee onboarding–psychological contracts and ethical perspectives. *Journal of Management Development* (2018). * Canfora et al. (2012) Gerardo Canfora, Massimiliano Di Penta, Rocco Oliveto, and Sebastiano Panichella. 2012. Who is going to mentor newcomers in open source projects?. In *Proceedings of the ACM SIGSOFT 20th International Symposium on the Foundations of Software Engineering* (Cary, North Carolina) *(FSE ’12, Article 44)*. Association for Computing Machinery, New York, NY, USA, 1–11. * Carmody et al. (2022) Daniel Carmody, Martina Mazzarello, Paolo Santi, Trevor Harris, Sune Lehmann, Timur Abbiasov, Robin Dunbar, and Carlo Ratti. 2022. The effect of co-location of human communication networks. *arXiv preprint arXiv:2201.02230* (2022). * Chen (2005) Gilad Chen. 2005. Newcomer Adaptation in Teams: Multilevel Antecedents and Outcomes. *AMJ* 48, 1 (Feb. 2005), 101–116. * Cooper and Kurland (2002) Cecily D Cooper and Nancy B Kurland. 2002. Telecommuting, professional isolation, and employee development in public and private organizations. *J. Organ. Behav.* 23, 4 (June 2002), 511–532. * De Choudhury et al. (2010) Munmun De Choudhury, Winter A Mason, Jake M Hofman, and Duncan J Watts. 2010. Inferring relevant social networks from interpersonal communication. In *Proceedings of the 19th international conference on World wide web* (Raleigh, North Carolina, USA) *(WWW ’10)*. Association for Computing Machinery, New York, NY, USA, 301–310. * Diesner and Carley (2005) Jana Diesner and Kathleen M Carley. 2005. Exploration of communication networks from the Enron email corpus. In *SIAM International Conference on Data Mining: Workshop on Link Analysis, Counterterrorism and Security, Newport Beach, CA*. Citeseer, 3–14. * Dominic et al. (2020a) James Dominic, Charles Ritter, and Paige Rodeghero. 2020a. Onboarding Bot for Newcomers to Software Engineering. In *Proceedings of the International Conference on Software and System Processes* (Seoul, Republic of Korea) *(ICSSP ’20)*. Association for Computing Machinery, New York, NY, USA, 91–94. * Dominic et al. (2020b) James Dominic, Charles Ritter, and Paige Rodeghero. 2020b. Onboarding bot for newcomers to software engineering. In *Proceedings of the International Conference on Software and System Processes*. 91–94. * Easley and Kleinberg (2010) David Easley and Jon Kleinberg. 2010. *Networks, crowds, and markets: Reasoning about a highly connected world*. Cambridge university press. * Ellis et al. (2014) Allison M Ellis, Talya N Bauer, and Berrin Erdogan. 2014. New Employee Organizational Socialization. *Handbook of socialization: Theory and research* 301 (2014). * Fagerholm et al. (2014a) Fabian Fagerholm, Alejandro S Guinea, Jürgen Münch, and Jay Borenstein. 2014a. The role of mentoring and project characteristics for onboarding in open source software projects. In *Proceedings of the 8th ACM/IEEE international symposium on empirical software engineering and measurement*. 1–10. * Fagerholm et al. (2014b) Fabian Fagerholm, Alejandro S Guinea, Jürgen Münch, and Jay Borenstein. 2014b. The role of mentoring and project characteristics for onboarding in open source software projects. In *Proceedings of the 8th ACM/IEEE International Symposium on Empirical Software Engineering and Measurement* (Torino, Italy) *(ESEM ’14, Article 55)*. Association for Computing Machinery, New York, NY, USA, 1–10. * Golden et al. (2006) Timothy D Golden, John F Veiga, and Zeki Simsek. 2006. Telecommuting’s differential impact on work-family conflict: is there no place like home? *J. Appl. Psychol.* 91, 6 (Nov. 2006), 1340–1350. * Granovetter (1973) M S Granovetter. 1973. The strength of weak ties. *Am. J. Sociol.* (1973). * Hall (1996) Douglas T Hall. 1996. Careers of the 21st century. *The Academy of Management Executive* 10, 4 (1996), 8–16. * He and Huang (2014) Helen Ai He and Elaine M Huang. 2014. A qualitative study of workplace intercultural communication tensions in dyadic face-to-face and computer-mediated interactions. In *Proceedings of the 2014 conference on Designing interactive systems*. 415–424. * Hinds et al. (2002) Pamela Hinds, Sara B Kiesler, and Sara Kiesler. 2002. *Distributed work*. MIT press. * Kabo et al. (2014) Felichism W Kabo, Natalie Cotton-Nessler, Yongha Hwang, Margaret C Levenstein, and Jason Owen-Smith. 2014. Proximity effects on the dynamics and outcomes of scientific collaborations. *Research Policy* 43, 9 (2014), 1469–1485. * Katz et al. (1997) Ralph Katz et al. 1997. *The human side of managing technological innovation: A collection of readings*. Oxford University Press, USA. * Koehne et al. (2012) Benjamin Koehne, Patrick C Shih, and Judith S Olson. 2012. Remote and alone: coping with being the remote member on the team. In *Proceedings of the ACM 2012 conference on Computer Supported Cooperative Work* (Seattle, Washington, USA) *(CSCW ’12)*. Association for Computing Machinery, New York, NY, USA, 1257–1266. * Kossinets and Watts (2009) Gueorgi Kossinets and Duncan J Watts. 2009. Origins of homophily in an evolving social network. *American journal of sociology* 115, 2 (2009), 405–450. * Labuschagne and Holmes (2015) Adriaan Labuschagne and Reid Holmes. 2015. Do onboarding programs work?. In *2015 IEEE/ACM 12th Working Conference on Mining Software Repositories*. IEEE, 381–385. * Leonardi et al. (2010) Paul M Leonardi, Jeffrey W Treem, and Michele H Jackson. 2010. The Connectivity Paradox: Using Technology to Both Decrease and Increase Perceptions of Distance in Distributed Work Arrangements. *J. Appl. Commun. Res.* 38, 1 (Feb. 2010), 85–105. * Michel et al. (2021) Jesse S Michel, Michael A Rotch, Jack E Carson, Nathan A Bowling, and Nicole V Shifrin. 2021. Flattening the latent growth curve? Explaining within-person changes in employee well-being during the COVID-19 pandemic. *Occupational Health Science* 5, 3 (2021), 247–275. * Nardi and Whittaker (2002) Bonnie A Nardi and Steve Whittaker. 2002. The place of face-to-face communication in distributed work. *Distributed work* 83, 112 (2002), 10–7551. * Pike (2014) Kaylee L Pike. 2014. New employee onboarding programs and person-organization fit: An examination of socialization tactics. (2014). * Reagans and McEvily (2003) Ray Reagans and Bill McEvily. 2003. Network Structure and Knowledge Transfer: The Effects of Cohesion and Range. *Adm. Sci. Q.* 48, 2 (June 2003), 240–267. * Rodeghero et al. (2021) Paige Rodeghero, Thomas Zimmermann, Brian Houck, and Denae Ford. 2021. Please Turn Your Cameras on: Remote Onboarding of Software Developers During a Pandemic. In *2021 IEEE/ACM 43rd International Conference on Software Engineering: Software Engineering in Practice (ICSE-SEIP)*. ieeexplore.ieee.org, 41–50. * Romero et al. (2016) D M Romero, B Uzzi, and J Kleinberg. 2016. Social networks under stress. *Proceedings of the 25th International* (2016). * Ruchinskas (1983) John Edward Ruchinskas. 1983. Communicating in Organizations: The Influence of Context, Job, Task, and Channel. (1983). * Snell (2006) Alice Snell. 2006. Researching onboarding best practice: Using research to connect onboarding processes with employee satisfaction. *Strategic HR Review* 5, 6 (Jan. 2006), 32–35. * Steinmacher et al. (2015) Igor Steinmacher, Tayana Conte, Marco Aurélio Gerosa, and David Redmiles. 2015. Social barriers faced by newcomers placing their first contribution in open source software projects. In *Proceedings of the 18th ACM conference on Computer supported cooperative work & social computing*. 1379–1392. * Steinmacher et al. (2019) Igor Steinmacher, Christoph Treude, and Marco Aurelio Gerosa. 2019. Let Me In: Guidelines for the Successful Onboarding of Newcomers to Open Source Projects. *IEEE Softw.* 36, 4 (July 2019), 41–49. * Teevan et al. (2020a) Jaime Teevan, B Hecht, and S Jaffe. 2020a. *The new future of work*. Technical Report. Microsoft internal report. * Teevan et al. (2020b) J Teevan, B Hecht, and S Jaffe. 2020b. The new future of work research from Microsoft into the pandemic’s impact on work practices. <https://www.londonfirst.co.uk/sites/default/files/documents/2021-05/NewFutureOfWorkReport.pdf>. Accessed: 2022-10-4. * Turner et al. (2010) Thea Turner, Pernilla Qvarfordt, Jacob T Biehl, Gene Golovchinsky, and Maribeth Back. 2010. Exploring the workplace communication ecology. In *Proceedings of the SIGCHI conference on human factors in computing systems*. 841–850. * Ugander et al. (2012) Johan Ugander, Lars Backstrom, Cameron Marlow, and Jon Kleinberg. 2012. Structural diversity in social contagion. *Proc. Natl. Acad. Sci. U. S. A.* 109, 16 (April 2012), 5962–5966. * Upadhyay and Khandelwal (2018) Ashwani Kumar Upadhyay and Komal Khandelwal. 2018. Applying artificial intelligence: implications for recruitment. *Strategic HR Review* (2018). * Uzzi and Spiro (2005) Brian Uzzi and Jarrett Spiro. 2005. Collaboration and creativity: The small world problem. *American journal of sociology* 111, 2 (2005), 447–504. * Van de Ven et al. (1976) Andrew H Van de Ven, Andre L Delbecq, and Richard Koenig Jr. 1976. Determinants of coordination modes within organizations. *American sociological review* (1976), 322–338. * Yang et al. (2022) Chi-Lan Yang, Naomi Yamashita, Hideaki Kuzuoka, Hao-Chuan Wang, and Eureka Foong. 2022. Distance Matters to Weak Ties: Exploring How Workers Perceive Their Strongly- and Weakly-Connected Collaborators in Remote Workplaces. *Proc. ACM Hum.-Comput. Interact.* 6, GROUP (Jan. 2022), 1–26. * Yang et al. (2021) Longqi Yang, David Holtz, Sonia Jaffe, Siddharth Suri, Shilpi Sinha, Jeffrey Weston, Connor Joyce, Neha Shah, Kevin Sherman, Brent Hecht, and Jaime Teevan. 2021. The effects of remote work on collaboration among information workers. *Nat Hum Behav* (Sept. 2021)."
+    },
+    {
+      "heading_path": [
+        "Large-Scale Analysis of New Employee Network Dynamics",
+        "Appendix A Appendix"
+      ],
+      "text": "## Appendix A Appendix\n\n| | | | | | | --- | --- | --- | --- | --- | | | | Num. of connections | Sum. of edge weights | Num. of ego components | | Meeting | Min | 1.00 | 1.00 | 1.00 | | Max | 38.00 | 79.00 | 26.00 | | Mean | 3.87 | 6.67 | 2.53 | | Email | Min | 1.00 | 1.00 | 1.00 | | Max | 79.00 | 168.89 | 57.00 | | Mean | 4.13 | 9.85 | 2.77 | | IM | Min | 1.00 | 1.00 | 1.00 | | Max | 138.00 | 220.45 | 77.00 | | Mean | 6.94 | 16.56 | 3.04 |\n\n| | | | | | | --- | --- | --- | --- | --- | | | | Num. of connections | Sum. of edge weights | Num. of ego components | | Meeting | Min | 1.00 | 1.00 | 1.00 | | Max | 100.00 | 118.18 | 21.00 | | Mean | 12.68 | 10.99 | 1.76 | | Email | Min | 1.00 | 1.00 | 1.00 | | Max | 124.00 | 243.51 | 86.00 | | Mean | 7.56 | 14.11 | 2.35 | | IM | Min | 1.00 | 1.00 | 1.00 | | Max | 142.00 | 236.96 | 74.00 | | Mean | 9.76 | 20.53 | 2.59 |\n\n| | | | | | --- | --- | --- | --- | | Onboarding Week | Email | IM | Meeting | | 0-6 | 0.147\\*\\*\\* | 0.138\\*\\*\\* | 0.035\\*\\* | | 6-12 | 0.192\\*\\*\\* | 0.019 | 0.005 | | 12-18 | -0.003 | 0.087 | 0.107 | | 18-24 | 0.320\\* | 0.117 | 0.080 |\n\np<0.05p<0.05\n\np<0.01p<0.01\n\np<0.001p<0.001\n\n| | | | | | --- | --- | --- | --- | | Onboarding Week | Email | IM | Meeting | | 0-6 | 0.019\\*\\*\\* | 0.008 | 0.015\\*\\*\\* | | 6-12 | 0.013 \\* | 0.021 \\*\\*\\* | 0.013\\*\\*\\* | | 12-18 | 0.024 \\*\\*\\* | 0.010 | 0.002 | | 18-24 | 0.002 | 0.006 | 0.002 |\n\np<0.05p<0.05\n\np<0.01p<0.01\n\np<0.001p<0.001\n\nDifferences of network statistics (with 95% CIs) between new hires and tenured employees within each 6-week testing window (M2)."
+    }
+  ]
+}

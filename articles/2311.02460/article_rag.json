@@ -1,0 +1,257 @@
+{
+  "title": "Extracting Network Structures from Corporate Organization Charts Using Heuristic Image Processing",
+  "sections": [
+    {
+      "heading": "Report GitHub Issue",
+      "level": 5,
+      "content": [
+        {
+          "type": "paragraph",
+          "text": "Content selection saved. Describe the issue below:"
+        }
+      ],
+      "children": []
+    },
+    {
+      "heading": "Extracting Network Structures from Corporate Organization Charts Using Heuristic Image Processing",
+      "level": 1,
+      "content": [],
+      "children": [
+        {
+          "heading": "Abstract",
+          "level": 6,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "Organizational structure of corporations has potential to provide implications for dynamics and performance of corporate operations. However, this subject has remained unexplored because of the lack of readily available organization network datasets. To overcome the this gap, we developed a new heuristic image-processing method to extract and reconstruct organization network data from published organization charts. Our method analyzes a PDF file of a corporate organization chart and detects text labels, boxes, connecting lines, and other objects through multiple steps of heuristically implemented image processing. The detected components are reorganized together into a Python’s NetworkX Graph object for visualization, validation and further network analysis. We applied the developed method to the organization charts of all the listed firms in Japan shown in the “Organization Chart/System Diagram Handbook” published by Diamond, Inc., from 2008 to 2011. Out of the 10,008 organization chart PDF files, our method was able to reconstruct 4,606 organization networks (data acquisition success rate: 46%). For each reconstructed organization network, we measured several network diagnostics, which will be used for further statistical analysis to investigate their potential correlations with corporate behavior and performance."
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "1 Introduction",
+          "level": 2,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "Formal organizational structure of corporations, which represents official relationships among members and formal pathways of corporate chains of command, has potential to provide implications for dynamics and performance of corporate operations [[1](https://arxiv.org/html/2311.02460v1#bib.bib1), [2](https://arxiv.org/html/2311.02460v1#bib.bib2), [3](https://arxiv.org/html/2311.02460v1#bib.bib3)]. However, this subject has not been fully explored computationally in the fields of organization science, management science, social network analysis, data science, and complex systems science, primarily because of the lack of readily available organization network datasets. Most of the information about corporate organizational structures are publicized in a graphical organization chart, which may be used for a small number of manual case studies but would not be suitable for large-scale quantitative statistical analysis. Because of this limitation in data availability, earlier studies typically used rather simple indirect information only (e.g., short description of management style [[4](https://arxiv.org/html/2311.02460v1#bib.bib4)], survey responses [[5](https://arxiv.org/html/2311.02460v1#bib.bib5)]) as a surrogate variable to represent organizational structure. Research on more detailed topological properties of organizational structure thus remains scarce and fragmented [[6](https://arxiv.org/html/2311.02460v1#bib.bib6), [7](https://arxiv.org/html/2311.02460v1#bib.bib7)]."
+            },
+            {
+              "type": "paragraph",
+              "text": "To overcome the above gap in corporate organization research, we developed a new heuristic image-processing method to extract and reconstruct organization network data from published organization charts. We expect that such computer-readable network datasets will be quite useful for investigations of corporate organizations, especially for seeking potential correlations between detailed organization network properties and corporate dynamics/performance. We also hope that this work presents a counterproposition to the current Artificial Intelligence (AI) / Machine Learning (ML) mainstream trends by providing a concrete example of what one can do when training data is not available for the problem to be solved."
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "2 Dataset",
+          "level": 2,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "The data we aim to extract network structures from are the organization charts of all the listed firms in Japan from 2008 to 2011, which were provided in the “Organization Chart/System Diagram Handbooks” (original Japanese title: “Soshikizu-Keitouzu Binran”) published by Diamond, Inc. These books (and their electronic CD-ROM versions) included a total of 10,008 organization chart PDF files. Those charts were apparently drawn manually in a free format without a strict template or annotations. Some examples of the organization charts are shown in Fig. [1](https://arxiv.org/html/2311.02460v1#S2.F1 \"Figure 1 ‣ 2 Dataset ‣ Extracting Network Structures from Corporate Organization Charts Using Heuristic Image Processing\"). Each of these charts was provided simply as a single PDF file in the dataset with no additional computer-readable annotations about its organization network structure."
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "3 Method",
+          "level": 2,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "The currently popular methods for information extraction from images are AI/ ML-based ones, typically involving convolutional neural networks (CNNs). Such methods, however, would not work in problems like the one we are trying to solve in this study, because of the lack of training datasets. In order to apply training-based AI/ML methods, we would need to have a large number of pairs of organization chart images and their annotated network representations. This limitation suggests that we need to take a different, more logic-based, manually designed, heuristic approach."
+            },
+            {
+              "type": "paragraph",
+              "text": "In this study, we designed and implemented a fully automated method that can analyze a PDF file of a corporate organization chart and detect text labels, boxes, connecting lines, and other objects through 10 steps of image processing. The application was written in Python 3 with several packages listed in Table [1](https://arxiv.org/html/2311.02460v1#S3.T1 \"Table 1 ‣ 3 Method ‣ Extracting Network Structures from Corporate Organization Charts Using Heuristic Image Processing\"). The detected components are reorganized together into a Python’s NetworkX Graph object for visualization, validation and further network analysis. Details of the 10 steps in the developed method are described below."
+            },
+            {
+              "type": "table",
+              "text": "| Name | Purpose | | --- | --- | | pdf2image | To convert a PDF to a bitmap image | | PIL | For image manipulation | | OpenCV | For image manipulation | | NetworkX | For network representation, visualization and analysis | | pdfminer | To extract text labels within a PDF |"
+            },
+            {
+              "type": "paragraph",
+              "text": "The first step is to convert the original PDF file into a bitmap image format (PNG) using pdf2image (Fig. [2](https://arxiv.org/html/2311.02460v1#S3.F2 \"Figure 2 ‣ 3 Method ‣ Extracting Network Structures from Corporate Organization Charts Using Heuristic Image Processing\")). This step automatically removes all Japanese characters from the image since the Japanese character set was not supported by pdf2image, which was a convenient property for further image analysis steps."
+            },
+            {
+              "type": "paragraph",
+              "text": "The second step is to use image dilation and erosion operations to connect dashed/dotted lines into solid lines (Fig. [3](https://arxiv.org/html/2311.02460v1#S3.F3 \"Figure 3 ‣ 3 Method ‣ Extracting Network Structures from Corporate Organization Charts Using Heuristic Image Processing\")). This step was necessary because many organization charts used dashed/dotted lines to represent connections and boxes."
+            },
+            {
+              "type": "paragraph",
+              "text": "The third step is to remove header and footer areas that do not contain organization chart information (Fig. [4](https://arxiv.org/html/2311.02460v1#S3.F4 \"Figure 4 ‣ 3 Method ‣ Extracting Network Structures from Corporate Organization Charts Using Heuristic Image Processing\")). The header size was the same for all the charts in this dataset, so we simply erased any content in the top portion of each image. Meanwhile, the footer size varied from chart to chart, so we scanned the image to detect a major separation gap (i.e., a substantial number of blank horizontal rows in the image) between the chart and the footer and erased any content beneath it. After this step, the resulting image contains only a wire diagram showing the organizational structure (Fig. [4](https://arxiv.org/html/2311.02460v1#S3.F4 \"Figure 4 ‣ 3 Method ‣ Extracting Network Structures from Corporate Organization Charts Using Heuristic Image Processing\"), right)."
+            },
+            {
+              "type": "paragraph",
+              "text": "The fourth step is to detect all the horizontal and vertical line segments as edges in the image. This was done by scanning the image twice, horizontally and vertically, and detecting all consecutive sequences of black pixels as edges (Fig. [5](https://arxiv.org/html/2311.02460v1#S3.F5 \"Figure 5 ‣ 3 Method ‣ Extracting Network Structures from Corporate Organization Charts Using Heuristic Image Processing\")). In this step, physically very close nodes were aggregated into a single node, and any accidentally created self-loops were removed. These corrections were repeated multiple times until no more such cases were present in the edges."
+            },
+            {
+              "type": "paragraph",
+              "text": "The fifth step is to insert new nodes to wherever horizontal and vertical edges intersect (Fig. [6](https://arxiv.org/html/2311.02460v1#S3.F6 \"Figure 6 ‣ 3 Method ‣ Extracting Network Structures from Corporate Organization Charts Using Heuristic Image Processing\"))."
+            },
+            {
+              "type": "paragraph",
+              "text": "The six step is to extend edges incidental to degree-1 nodes a little outwards (Fig. [7](https://arxiv.org/html/2311.02460v1#S3.F7 \"Figure 7 ‣ 3 Method ‣ Extracting Network Structures from Corporate Organization Charts Using Heuristic Image Processing\")). This step was needed in order to make the node-textbox matching (discussed later) more robust, especially for unboxed text labels."
+            },
+            {
+              "type": "paragraph",
+              "text": "The seventh step is to detect boxes (minimal cycles in the cycle basis) and replace them with single nodes appropriately (Fig. [8](https://arxiv.org/html/2311.02460v1#S3.F8 \"Figure 8 ‣ 3 Method ‣ Extracting Network Structures from Corporate Organization Charts Using Heuristic Image Processing\")). This step was needed because edges in such boxes were not about organizational structure but just for visual borders of boxes. More details of this step are as follows:"
+            },
+            {
+              "type": "list",
+              "text": "* • An external edge connecting to a rectangular circle were connected directly to the inside area of the rectangle. * • Two rectangles with a shared edge are replaced by a new edge connecting the two areas of the rectangles. * • Rectangles with no outside connection are represented as an isolated node. * • After all of the above, all minimal remaining cycles are removed."
+            },
+            {
+              "type": "paragraph",
+              "text": "An external edge connecting to a rectangular circle were connected directly to the inside area of the rectangle."
+            },
+            {
+              "type": "paragraph",
+              "text": "Two rectangles with a shared edge are replaced by a new edge connecting the two areas of the rectangles."
+            },
+            {
+              "type": "paragraph",
+              "text": "Rectangles with no outside connection are represented as an isolated node."
+            },
+            {
+              "type": "paragraph",
+              "text": "After all of the above, all minimal remaining cycles are removed."
+            },
+            {
+              "type": "paragraph",
+              "text": "The eighth step is to remove all degree-2 nodes and connect their neighbors directly (Fig. [9](https://arxiv.org/html/2311.02460v1#S3.F9 \"Figure 9 ‣ 3 Method ‣ Extracting Network Structures from Corporate Organization Charts Using Heuristic Image Processing\")). This was needed because such nodes were topologically unnecessary in organization network structure."
+            },
+            {
+              "type": "paragraph",
+              "text": "The ninth step is to detect all the textboxes in the original PDF and record their content, position and size (Fig. [10](https://arxiv.org/html/2311.02460v1#S3.F10 \"Figure 10 ‣ 3 Method ‣ Extracting Network Structures from Corporate Organization Charts Using Heuristic Image Processing\")). Some textboxes included multiple lines containing multiple node labels, which were automatically split into several textboxes."
+            },
+            {
+              "type": "paragraph",
+              "text": "Finally, the tenth step is to merge the detected network nodes and the textboxes according to their positions (Fig. [11](https://arxiv.org/html/2311.02460v1#S3.F11 \"Figure 11 ‣ 3 Method ‣ Extracting Network Structures from Corporate Organization Charts Using Heuristic Image Processing\")). This results in a single network representation of the original organization chart."
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "4 Results",
+          "level": 2,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "We applied the developed method to all the organization charts published in [[8](https://arxiv.org/html/2311.02460v1#bib.bib8)]. Many of the charts did not follow typical organizational diagram format and thus our method failed on them. However, out of the 10,008 organization chart PDF files, our method was able to reconstruct 4,606 organization networks, making the data acquisition success rate to be 46%. While there are no other methods to compare with, we consider this a very high success rate, given that the method was designed and implemented entirely based on logic and heuristics, without using any AI/ML tools. Some of the extracted networks are shown in Fig. [12](https://arxiv.org/html/2311.02460v1#S4.F12 \"Figure 12 ‣ 4 Results ‣ Extracting Network Structures from Corporate Organization Charts Using Heuristic Image Processing\")."
+            },
+            {
+              "type": "paragraph",
+              "text": "For each reconstructed organization network, we measured several network diagnostics, including number of nodes, number of edges, density, average clustering coefficient, number of connected components, average shortest path length, and algebraic connectivity. We are currently investigating potential correlations between those network diagnostics and corporate behavior and performance, which will be reported elsewhere [[9](https://arxiv.org/html/2311.02460v1#bib.bib9)]."
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "5 Conclusions",
+          "level": 2,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "Here we reported the algorithmic details of the heuristic image-processing method we developed for automated extraction of network structures from organization charts. It achieved a close-to-50% success rate of data acquisition on actual organization charts of listed firms in Japan, which serves as a proof that such logic-based approaches for tool development and data analysis can be useful when training data are missing or unavailable at all. We note that our method is still limited as it detects only horizontal/vertical lines as edges, and it was tested only with Japanese organization charts published in [[8](https://arxiv.org/html/2311.02460v1#bib.bib8)]. Similar tools should be developed and tested for more complicated, multilingual charts in the future."
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "Acknowledgments",
+          "level": 2,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "We thank Dr. Samiksha Shukla at Christ University for her continuous encouragement and support for preparation of this manuscript."
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "References",
+          "level": 2,
+          "content": [
+            {
+              "type": "list",
+              "text": "* (1) Mintzberg, H.: The Structuring of Organizations (pp. 322-352). Macmillan Education, UK (1989). * (2) Argyres, N. S., Silverman, B. S.: R&D, organization structure, and the development of corporate technological knowledge. Strategic Management Journal, 25(8‐9), 929–958 (2004). * (3) Reitzig, M. Get Better at Flatter. Springer International Publishing (2022). * (4) Csaszar, F. A.: Organizational structure as a determinant of performance: Evidence from mutual funds. Strategic Management Journal, 33(6), 611–632 (2012). * (5) Gentile-Lüdecke, S., Torres de Oliveira, R., Paul, J.: Does organizational structure facilitate inbound and outbound open innovation in SMEs?. Small Business Economics, 55(4), 1091–1112 (2020). * (6) Reitzig, M., Maciejovsky, B.: Corporate hierarchy and vertical information flow inside the firm—A behavioral view. Strategic Management Journal, 36(13), 1979–1999 (2015). * (7) Joseph, J., Gaba, V.: Organizational structure, information processing, and decision-making: A retrospective and road map for research. Academy of Management Annals 14(1), 267–302 (2020). * (8) Diamond, Inc.: Organization Chart/System Diagram Handbooks (2008-2011). Published in Japanese. [https://iss.ndl.go.jp/books?any=%E7%B5%84%E7%B9%94%E5%9B%B3%E3%83%BB%E7%B3%BB%E7%B5%B1%E5%9B%B3%E4%BE%BF%E8%A6%A7&mediatype=1&op˙id=1](https://iss.ndl.go.jp/books?any=%E7%B5%84%E7%B9%94%E5%9B%B3%E3%83%BB%E7%B3%BB%E7%B5%B1%E5%9B%B3%E4%BE%BF%E8%A6%A7&mediatype=1&op_id=1) * (9) Yamanoi, J., Sayama, H.: Manuscript in preparation."
+            }
+          ],
+          "children": []
+        }
+      ]
+    }
+  ],
+  "chunks": [
+    {
+      "heading_path": [
+        "Report GitHub Issue"
+      ],
+      "text": "##### Report GitHub Issue\n\nContent selection saved. Describe the issue below:"
+    },
+    {
+      "heading_path": [
+        "Extracting Network Structures from Corporate Organization Charts Using Heuristic Image Processing"
+      ],
+      "text": "# Extracting Network Structures from Corporate Organization Charts Using Heuristic Image Processing"
+    },
+    {
+      "heading_path": [
+        "Extracting Network Structures from Corporate Organization Charts Using Heuristic Image Processing",
+        "Abstract"
+      ],
+      "text": "###### Abstract\n\nOrganizational structure of corporations has potential to provide implications for dynamics and performance of corporate operations. However, this subject has remained unexplored because of the lack of readily available organization network datasets. To overcome the this gap, we developed a new heuristic image-processing method to extract and reconstruct organization network data from published organization charts. Our method analyzes a PDF file of a corporate organization chart and detects text labels, boxes, connecting lines, and other objects through multiple steps of heuristically implemented image processing. The detected components are reorganized together into a Python’s NetworkX Graph object for visualization, validation and further network analysis. We applied the developed method to the organization charts of all the listed firms in Japan shown in the “Organization Chart/System Diagram Handbook” published by Diamond, Inc., from 2008 to 2011. Out of the 10,008 organization chart PDF files, our method was able to reconstruct 4,606 organization networks (data acquisition success rate: 46%). For each reconstructed organization network, we measured several network diagnostics, which will be used for further statistical analysis to investigate their potential correlations with corporate behavior and performance."
+    },
+    {
+      "heading_path": [
+        "Extracting Network Structures from Corporate Organization Charts Using Heuristic Image Processing",
+        "1 Introduction"
+      ],
+      "text": "## 1 Introduction\n\nFormal organizational structure of corporations, which represents official relationships among members and formal pathways of corporate chains of command, has potential to provide implications for dynamics and performance of corporate operations [[1](https://arxiv.org/html/2311.02460v1#bib.bib1), [2](https://arxiv.org/html/2311.02460v1#bib.bib2), [3](https://arxiv.org/html/2311.02460v1#bib.bib3)]. However, this subject has not been fully explored computationally in the fields of organization science, management science, social network analysis, data science, and complex systems science, primarily because of the lack of readily available organization network datasets. Most of the information about corporate organizational structures are publicized in a graphical organization chart, which may be used for a small number of manual case studies but would not be suitable for large-scale quantitative statistical analysis. Because of this limitation in data availability, earlier studies typically used rather simple indirect information only (e.g., short description of management style [[4](https://arxiv.org/html/2311.02460v1#bib.bib4)], survey responses [[5](https://arxiv.org/html/2311.02460v1#bib.bib5)]) as a surrogate variable to represent organizational structure. Research on more detailed topological properties of organizational structure thus remains scarce and fragmented [[6](https://arxiv.org/html/2311.02460v1#bib.bib6), [7](https://arxiv.org/html/2311.02460v1#bib.bib7)].\n\nTo overcome the above gap in corporate organization research, we developed a new heuristic image-processing method to extract and reconstruct organization network data from published organization charts. We expect that such computer-readable network datasets will be quite useful for investigations of corporate organizations, especially for seeking potential correlations between detailed organization network properties and corporate dynamics/performance. We also hope that this work presents a counterproposition to the current Artificial Intelligence (AI) / Machine Learning (ML) mainstream trends by providing a concrete example of what one can do when training data is not available for the problem to be solved."
+    },
+    {
+      "heading_path": [
+        "Extracting Network Structures from Corporate Organization Charts Using Heuristic Image Processing",
+        "2 Dataset"
+      ],
+      "text": "## 2 Dataset\n\nThe data we aim to extract network structures from are the organization charts of all the listed firms in Japan from 2008 to 2011, which were provided in the “Organization Chart/System Diagram Handbooks” (original Japanese title: “Soshikizu-Keitouzu Binran”) published by Diamond, Inc. These books (and their electronic CD-ROM versions) included a total of 10,008 organization chart PDF files. Those charts were apparently drawn manually in a free format without a strict template or annotations. Some examples of the organization charts are shown in Fig. [1](https://arxiv.org/html/2311.02460v1#S2.F1 \"Figure 1 ‣ 2 Dataset ‣ Extracting Network Structures from Corporate Organization Charts Using Heuristic Image Processing\"). Each of these charts was provided simply as a single PDF file in the dataset with no additional computer-readable annotations about its organization network structure."
+    },
+    {
+      "heading_path": [
+        "Extracting Network Structures from Corporate Organization Charts Using Heuristic Image Processing",
+        "3 Method"
+      ],
+      "text": "## 3 Method\n\nThe currently popular methods for information extraction from images are AI/ ML-based ones, typically involving convolutional neural networks (CNNs). Such methods, however, would not work in problems like the one we are trying to solve in this study, because of the lack of training datasets. In order to apply training-based AI/ML methods, we would need to have a large number of pairs of organization chart images and their annotated network representations. This limitation suggests that we need to take a different, more logic-based, manually designed, heuristic approach.\n\nIn this study, we designed and implemented a fully automated method that can analyze a PDF file of a corporate organization chart and detect text labels, boxes, connecting lines, and other objects through 10 steps of image processing. The application was written in Python 3 with several packages listed in Table [1](https://arxiv.org/html/2311.02460v1#S3.T1 \"Table 1 ‣ 3 Method ‣ Extracting Network Structures from Corporate Organization Charts Using Heuristic Image Processing\"). The detected components are reorganized together into a Python’s NetworkX Graph object for visualization, validation and further network analysis. Details of the 10 steps in the developed method are described below.\n\n| Name | Purpose | | --- | --- | | pdf2image | To convert a PDF to a bitmap image | | PIL | For image manipulation | | OpenCV | For image manipulation | | NetworkX | For network representation, visualization and analysis | | pdfminer | To extract text labels within a PDF |\n\nThe first step is to convert the original PDF file into a bitmap image format (PNG) using pdf2image (Fig. [2](https://arxiv.org/html/2311.02460v1#S3.F2 \"Figure 2 ‣ 3 Method ‣ Extracting Network Structures from Corporate Organization Charts Using Heuristic Image Processing\")). This step automatically removes all Japanese characters from the image since the Japanese character set was not supported by pdf2image, which was a convenient property for further image analysis steps.\n\nThe second step is to use image dilation and erosion operations to connect dashed/dotted lines into solid lines (Fig. [3](https://arxiv.org/html/2311.02460v1#S3.F3 \"Figure 3 ‣ 3 Method ‣ Extracting Network Structures from Corporate Organization Charts Using Heuristic Image Processing\")). This step was necessary because many organization charts used dashed/dotted lines to represent connections and boxes.\n\nThe third step is to remove header and footer areas that do not contain organization chart information (Fig. [4](https://arxiv.org/html/2311.02460v1#S3.F4 \"Figure 4 ‣ 3 Method ‣ Extracting Network Structures from Corporate Organization Charts Using Heuristic Image Processing\")). The header size was the same for all the charts in this dataset, so we simply erased any content in the top portion of each image. Meanwhile, the footer size varied from chart to chart, so we scanned the image to detect a major separation gap (i.e., a substantial number of blank horizontal rows in the image) between the chart and the footer and erased any content beneath it. After this step, the resulting image contains only a wire diagram showing the organizational structure (Fig. [4](https://arxiv.org/html/2311.02460v1#S3.F4 \"Figure 4 ‣ 3 Method ‣ Extracting Network Structures from Corporate Organization Charts Using Heuristic Image Processing\"), right).\n\nThe fourth step is to detect all the horizontal and vertical line segments as edges in the image. This was done by scanning the image twice, horizontally and vertically, and detecting all consecutive sequences of black pixels as edges (Fig. [5](https://arxiv.org/html/2311.02460v1#S3.F5 \"Figure 5 ‣ 3 Method ‣ Extracting Network Structures from Corporate Organization Charts Using Heuristic Image Processing\")). In this step, physically very close nodes were aggregated into a single node, and any accidentally created self-loops were removed. These corrections were repeated multiple times until no more such cases were present in the edges.\n\nThe fifth step is to insert new nodes to wherever horizontal and vertical edges intersect (Fig. [6](https://arxiv.org/html/2311.02460v1#S3.F6 \"Figure 6 ‣ 3 Method ‣ Extracting Network Structures from Corporate Organization Charts Using Heuristic Image Processing\")).\n\nThe six step is to extend edges incidental to degree-1 nodes a little outwards (Fig. [7](https://arxiv.org/html/2311.02460v1#S3.F7 \"Figure 7 ‣ 3 Method ‣ Extracting Network Structures from Corporate Organization Charts Using Heuristic Image Processing\")). This step was needed in order to make the node-textbox matching (discussed later) more robust, especially for unboxed text labels.\n\nThe seventh step is to detect boxes (minimal cycles in the cycle basis) and replace them with single nodes appropriately (Fig. [8](https://arxiv.org/html/2311.02460v1#S3.F8 \"Figure 8 ‣ 3 Method ‣ Extracting Network Structures from Corporate Organization Charts Using Heuristic Image Processing\")). This step was needed because edges in such boxes were not about organizational structure but just for visual borders of boxes. More details of this step are as follows:\n\n* • An external edge connecting to a rectangular circle were connected directly to the inside area of the rectangle. * • Two rectangles with a shared edge are replaced by a new edge connecting the two areas of the rectangles. * • Rectangles with no outside connection are represented as an isolated node. * • After all of the above, all minimal remaining cycles are removed.\n\nAn external edge connecting to a rectangular circle were connected directly to the inside area of the rectangle.\n\nTwo rectangles with a shared edge are replaced by a new edge connecting the two areas of the rectangles.\n\nRectangles with no outside connection are represented as an isolated node.\n\nAfter all of the above, all minimal remaining cycles are removed.\n\nThe eighth step is to remove all degree-2 nodes and connect their neighbors directly (Fig. [9](https://arxiv.org/html/2311.02460v1#S3.F9 \"Figure 9 ‣ 3 Method ‣ Extracting Network Structures from Corporate Organization Charts Using Heuristic Image Processing\")). This was needed because such nodes were topologically unnecessary in organization network structure.\n\nThe ninth step is to detect all the textboxes in the original PDF and record their content, position and size (Fig. [10](https://arxiv.org/html/2311.02460v1#S3.F10 \"Figure 10 ‣ 3 Method ‣ Extracting Network Structures from Corporate Organization Charts Using Heuristic Image Processing\")). Some textboxes included multiple lines containing multiple node labels, which were automatically split into several textboxes.\n\nFinally, the tenth step is to merge the detected network nodes and the textboxes according to their positions (Fig. [11](https://arxiv.org/html/2311.02460v1#S3.F11 \"Figure 11 ‣ 3 Method ‣ Extracting Network Structures from Corporate Organization Charts Using Heuristic Image Processing\")). This results in a single network representation of the original organization chart."
+    },
+    {
+      "heading_path": [
+        "Extracting Network Structures from Corporate Organization Charts Using Heuristic Image Processing",
+        "4 Results"
+      ],
+      "text": "## 4 Results\n\nWe applied the developed method to all the organization charts published in [[8](https://arxiv.org/html/2311.02460v1#bib.bib8)]. Many of the charts did not follow typical organizational diagram format and thus our method failed on them. However, out of the 10,008 organization chart PDF files, our method was able to reconstruct 4,606 organization networks, making the data acquisition success rate to be 46%. While there are no other methods to compare with, we consider this a very high success rate, given that the method was designed and implemented entirely based on logic and heuristics, without using any AI/ML tools. Some of the extracted networks are shown in Fig. [12](https://arxiv.org/html/2311.02460v1#S4.F12 \"Figure 12 ‣ 4 Results ‣ Extracting Network Structures from Corporate Organization Charts Using Heuristic Image Processing\").\n\nFor each reconstructed organization network, we measured several network diagnostics, including number of nodes, number of edges, density, average clustering coefficient, number of connected components, average shortest path length, and algebraic connectivity. We are currently investigating potential correlations between those network diagnostics and corporate behavior and performance, which will be reported elsewhere [[9](https://arxiv.org/html/2311.02460v1#bib.bib9)]."
+    },
+    {
+      "heading_path": [
+        "Extracting Network Structures from Corporate Organization Charts Using Heuristic Image Processing",
+        "5 Conclusions"
+      ],
+      "text": "## 5 Conclusions\n\nHere we reported the algorithmic details of the heuristic image-processing method we developed for automated extraction of network structures from organization charts. It achieved a close-to-50% success rate of data acquisition on actual organization charts of listed firms in Japan, which serves as a proof that such logic-based approaches for tool development and data analysis can be useful when training data are missing or unavailable at all. We note that our method is still limited as it detects only horizontal/vertical lines as edges, and it was tested only with Japanese organization charts published in [[8](https://arxiv.org/html/2311.02460v1#bib.bib8)]. Similar tools should be developed and tested for more complicated, multilingual charts in the future."
+    },
+    {
+      "heading_path": [
+        "Extracting Network Structures from Corporate Organization Charts Using Heuristic Image Processing",
+        "Acknowledgments"
+      ],
+      "text": "## Acknowledgments\n\nWe thank Dr. Samiksha Shukla at Christ University for her continuous encouragement and support for preparation of this manuscript."
+    },
+    {
+      "heading_path": [
+        "Extracting Network Structures from Corporate Organization Charts Using Heuristic Image Processing",
+        "References"
+      ],
+      "text": "## References\n\n* (1) Mintzberg, H.: The Structuring of Organizations (pp. 322-352). Macmillan Education, UK (1989). * (2) Argyres, N. S., Silverman, B. S.: R&D, organization structure, and the development of corporate technological knowledge. Strategic Management Journal, 25(8‐9), 929–958 (2004). * (3) Reitzig, M. Get Better at Flatter. Springer International Publishing (2022). * (4) Csaszar, F. A.: Organizational structure as a determinant of performance: Evidence from mutual funds. Strategic Management Journal, 33(6), 611–632 (2012). * (5) Gentile-Lüdecke, S., Torres de Oliveira, R., Paul, J.: Does organizational structure facilitate inbound and outbound open innovation in SMEs?. Small Business Economics, 55(4), 1091–1112 (2020). * (6) Reitzig, M., Maciejovsky, B.: Corporate hierarchy and vertical information flow inside the firm—A behavioral view. Strategic Management Journal, 36(13), 1979–1999 (2015). * (7) Joseph, J., Gaba, V.: Organizational structure, information processing, and decision-making: A retrospective and road map for research. Academy of Management Annals 14(1), 267–302 (2020). * (8) Diamond, Inc.: Organization Chart/System Diagram Handbooks (2008-2011). Published in Japanese. [https://iss.ndl.go.jp/books?any=%E7%B5%84%E7%B9%94%E5%9B%B3%E3%83%BB%E7%B3%BB%E7%B5%B1%E5%9B%B3%E4%BE%BF%E8%A6%A7&mediatype=1&op˙id=1](https://iss.ndl.go.jp/books?any=%E7%B5%84%E7%B9%94%E5%9B%B3%E3%83%BB%E7%B3%BB%E7%B5%B1%E5%9B%B3%E4%BE%BF%E8%A6%A7&mediatype=1&op_id=1) * (9) Yamanoi, J., Sayama, H.: Manuscript in preparation."
+    }
+  ]
+}

@@ -1,0 +1,821 @@
+{
+  "title": "Network Contagion in Financial Labor Markets: Predicting Turnover in Hong Kong",
+  "sections": [
+    {
+      "heading": "Report GitHub Issue",
+      "level": 5,
+      "content": [
+        {
+          "type": "paragraph",
+          "text": "Content selection saved. Describe the issue below:"
+        }
+      ],
+      "children": []
+    },
+    {
+      "heading": "Network Contagion in Financial Labor Markets: Predicting Turnover in Hong Kong",
+      "level": 1,
+      "content": [],
+      "children": [
+        {
+          "heading": "Abstract",
+          "level": 6,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "Employee turnover is a critical challenge in financial markets, yet little is known about the role of professional networks in shaping career moves. Using the Hong Kong Securities and Futures Commission (SFC) public register (2007–2024), we construct temporal networks of 121,883 professionals and 4,979 firms to analyze and predict employee departures. We introduce a graph-based feature propagation framework that captures peer influence and organizational stability. Our analysis shows a contagion effect: professionals are 23% more likely to leave when over 30% of their peers depart within six months. Embedding these network signals into machine learning models improves turnover prediction by 30% over baselines. These results highlight the predictive power of temporal network effects in workforce dynamics, and demonstrate how network-based analytics can inform regulatory monitoring, talent management, and systemic risk assessment."
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "Keywords:",
+          "level": 6,
+          "content": [],
+          "children": []
+        },
+        {
+          "heading": "1 Introduction",
+          "level": 2,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "The financial services sector is central to Hong Kong’s economy, employing over 270,000 professionals and contributing 23% of GDP [[7](https://arxiv.org/html/2509.08001v1#bib.bib7)]. Yet beyond macroeconomic indicators, the micro-dynamics of professional mobility remain poorly understood. Employee turnover in particular represents both a systemic risk and a major operational cost, with annual rates exceeding 24%.11 1 [FSDC Report (2023)](https://www.fsdc.org.hk/media/52ulbcmf/20230824_-en-nurturing-the-young-talents-of-today-for-hk-s-fs-industry-of-tomorrow_fv.pdf)"
+            },
+            {
+              "type": "paragraph",
+              "text": "Recent work has begun to map Hong Kong’s financial ecosystem through the Securities and Futures Commission (SFC) register, revealing its large-scale network of professionals and firms [[1](https://arxiv.org/html/2509.08001v1#bib.bib1)]. In this paper, we move from mapping to forecasting: can we predict when a professional will leave their firm, and does the surrounding network structure improve predictive power?"
+            },
+            {
+              "type": "paragraph",
+              "text": "To address this, we construct temporal networks from 2007–2024, capturing career trajectories of 121,883 professionals across 4,979 firms. We develop a graph-based feature propagation framework to quantify peer influence and organizational stability, and integrate these signals into predictive models. Our approach tackles four challenges related to workforce analytics:"
+            },
+            {
+              "type": "list",
+              "text": "1. 1. Network contagion: capturing peer turnover cascades through temporal propagation; 2. 2. Temporal dynamics: evaluating models with strict walk-forward validation; 3. 3. Class imbalance: rare-event prediction with only 2.3% monthly turnover; 4. 4. Feature engineering: combining individual, organizational, and propagated network features."
+            },
+            {
+              "type": "paragraph",
+              "text": "Network contagion: capturing peer turnover cascades through temporal propagation;"
+            },
+            {
+              "type": "paragraph",
+              "text": "Temporal dynamics: evaluating models with strict walk-forward validation;"
+            },
+            {
+              "type": "paragraph",
+              "text": "Class imbalance: rare-event prediction with only 2.3% monthly turnover;"
+            },
+            {
+              "type": "paragraph",
+              "text": "Feature engineering: combining individual, organizational, and propagated network features."
+            },
+            {
+              "type": "paragraph",
+              "text": "We show that network-derived signals substantially improve predictive accuracy over non-network baselines, and that firm-level stability and peer influence dominate demographic attributes. These findings highlight the role of contagion in financial labor markets and open the door to network-based workforce analytics with applications in recruiting, talent management, systemic risk assessment, and even the design of immigration policies for skilled workers."
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "2 Related Work",
+          "level": 2,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "Our study connects four strands of research: (i) network and contagion mechanisms of employee turnover, (ii) temporal and diffusion methods from complex systems, (iii) digital-trace approaches to labor mobility, and (iv) machine-learning frameworks for attrition prediction."
+            }
+          ],
+          "children": [
+            {
+              "heading": "Turnover and organizational networks.",
+              "level": 4,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "Seminal work established that relational embeddedness predicts exits beyond individual traits: employees tied to leavers or located on network peripheries are more likely to depart [[4](https://arxiv.org/html/2509.08001v1#bib.bib4)]. Vardaman et al. further showed that network structure interacts with job embeddedness, especially *Simmelian ties* (strong ties embedded in triads that exert reinforcing social pressure), to determine whether turnover intentions translate into actual exits [[12](https://arxiv.org/html/2509.08001v1#bib.bib12)]. More recently, organizational network analysis has been operationalized for HR retention, with churn prediction models leveraging centrality, k-core structure, and cohesion to flag at-risk employees [[13](https://arxiv.org/html/2509.08001v1#bib.bib13)]. Our study is aligned with this tradition but differs in scale and source: we exploit a *regulatory registry* covering 121,883 individuals across 4,979 firms, and we quantify contagion through *temporal feature propagation* rather than static ego-network metrics."
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "Temporal and diffusion processes in complex networks.",
+              "level": 4,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "From the complex networks community, temporal networks provide the toolkit for constructing time-resolved graphs, measuring evolving connectivity, and avoiding leakage across time [[6](https://arxiv.org/html/2509.08001v1#bib.bib6), [8](https://arxiv.org/html/2509.08001v1#bib.bib8)]. Contagion and diffusion models, originally developed for epidemics and behavioral adoption, clarify how peer influence can exhibit thresholds and reinforcement (“complex contagion”) [[9](https://arxiv.org/html/2509.08001v1#bib.bib9), [3](https://arxiv.org/html/2509.08001v1#bib.bib3)]. We operationalize these ideas for labor mobility by creating monthly snapshots and propagating turnover signals over employee and firm graphs, thereby testing whether departures diffuse through professional ties."
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "Digital traces and labor mobility.",
+              "level": 4,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "Large-scale online platforms have also been mined for workforce mobility. State et al. analyzed LinkedIn career histories to study the migration of professionals to the United States, revealing macro-level flows of talent across countries [[11](https://arxiv.org/html/2509.08001v1#bib.bib11)]. Perrotta et al. extended this line of work by using LinkedIn Recruiter data to measure Europeans’ openness to international migration, combining descriptive flow analysis with gravity-type models [[10](https://arxiv.org/html/2509.08001v1#bib.bib10)]. While valuable for descriptive mapping of aspirations and flows, LinkedIn data are self-reported, can be retrospectively edited, and typically lag real events. In practice, it is *users* who strategically back-populate their profiles—sometimes months or even years later—whether to mask involuntary exits, to wait until a trial period is completed, or to gauge whether a new role is worth keeping before making it public. These properties make LinkedIn less suitable for *live prediction* of churn. By contrast, our regulator-sourced registry provides point-in-time accuracy with legal force, enabling forward-looking attrition forecasting rather than retrospective mapping."
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "ML for attrition and network-aware churn.",
+              "level": 4,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "In parallel, the machine learning literature has progressed from classic classifiers toward network-aware models. Recent evidence in multilayer settings shows that network embeddedness substantially improves prediction and supports explanation (e.g., SHAP-style attribution) compared to attribute-only baselines [[5](https://arxiv.org/html/2509.08001v1#bib.bib5)]. Related studies using internal communication or collaboration networks similarly report gains when network features are included. Our contribution is to bring these network-aware ML insights to a regulated financial labor market, using a comprehensive regulator-sourced registry that covers the entire Hong Kong financial center, with strict walk-forward validation. Methodologically, we contribute a lightweight *graph-based feature propagation* framework that yields complementary signals to individual and firm covariates, and we document when and where such signals are most predictive."
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "Positioning and novelty.",
+              "level": 4,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "Relative to prior work, we (i) shift from single-firm ONA or digital-trace platforms to market-wide, regulator-sourced temporal networks; (ii) formalize peer effects with an explicit propagation operator over monthly snapshots rather than relying only on static centralities; (iii) evaluate predictability *out-of-sample* across 169 months with class-imbalance–robust metrics; and (iv) show that firm stability and propagated peer effects dominate demographics (LLM-inferred) in feature importance. Together, these choices bridge complex network contagion and practical turnover forecasting in a high-stakes, regulated domain."
+                }
+              ],
+              "children": []
+            }
+          ]
+        },
+        {
+          "heading": "3 Dataset and Preprocessing",
+          "level": 2,
+          "content": [],
+          "children": [
+            {
+              "heading": "3.1 Origin of the Dataset",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "This study relies on the Public Register of Licensed Persons and Registered Institutions maintained by the Hong Kong Securities and Futures Commission (SFC).22 2 <https://www.sfc.hk/en/Regulatory-functions/Intermediaries/Licensing/Register-of-licensed-persons-and-registered-institutions> The register has systematically recorded licensed individuals and their employing firms since the implementation of the Securities and Futures Ordinance in 2003. It provides detailed information on employment periods, firm affiliations, and regulated activities, covering the core of Hong Kong’s financial workforce."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "The dataset used in this work spans April 2003 to March 2024 and contains 519,860 employment records across 121,883 unique professionals and 4,979 firms. A first descriptive analysis of this register, focusing on the structure of the financial ecosystem, was presented in our previous work [[1](https://arxiv.org/html/2509.08001v1#bib.bib1)]. Here we extend this line of research by constructing temporal networks to study and forecast employee turnover."
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "3.2 Temporal Structure and Target Variable",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "For predictive modeling, we create 206 monthly snapshots from 2007–2024, aligning all employment spells to a common temporal grid. At each month tt, we record whether a licensee’s employment ends in the subsequent month. This defines the binary target variable turnover, with a positive rate of only 2.3% per month (27.6% annual rate). This base rate of 2.3% underscores the difficulty of the prediction task and motivates specific strategies for class imbalance."
+                },
+                {
+                  "type": "formula",
+                  "text": "tt"
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "3.3 Feature Engineering Overview",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "We engineer four broad categories of features from the raw SFC register:"
+                },
+                {
+                  "type": "list",
+                  "text": "* • Individual-level features: career history (number of firms, mobility rate), tenure at the current employer, and licensing role (Representative or Responsible Officer). * • Firm-level features: organizational size (number of active employees), stability (average and quantile employee tenure), and longevity (firm age). * • Network-propagated features: signals derived from employee–employee and firm–firm networks, capturing peer turnover rates, organizational contagion, and industry-wide stability. * • Demographic features: inferred from names using large language models (LLMs), following the approach of [[2](https://arxiv.org/html/2509.08001v1#bib.bib2)]. This enrichment provided likely gender and country-of-origin attributes, allowing us to test whether demographic factors contribute to turnover prediction."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Individual-level features: career history (number of firms, mobility rate), tenure at the current employer, and licensing role (Representative or Responsible Officer)."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Firm-level features: organizational size (number of active employees), stability (average and quantile employee tenure), and longevity (firm age)."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Network-propagated features: signals derived from employee–employee and firm–firm networks, capturing peer turnover rates, organizational contagion, and industry-wide stability."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Demographic features: inferred from names using large language models (LLMs), following the approach of [[2](https://arxiv.org/html/2509.08001v1#bib.bib2)]. This enrichment provided likely gender and country-of-origin attributes, allowing us to test whether demographic factors contribute to turnover prediction."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Altogether, this results in 36 features per record, combining static descriptors with dynamic, network-based signals."
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "3.4 Descriptive Statistics",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "Table [1](https://arxiv.org/html/2509.08001v1#S3.T1 \"Table 1 ‣ 3.4 Descriptive Statistics ‣ 3 Dataset and Preprocessing ‣ Network Contagion in Financial Labor Markets: Predicting Turnover in Hong Kong\") reports key characteristics of the dataset. The median tenure of 1.5 years, together with the high annual turnover rate (above 25%), highlights the volatility of employment in Hong Kong’s financial sector. Figure [1](https://arxiv.org/html/2509.08001v1#S3.F1 \"Figure 1 ‣ 3.4 Descriptive Statistics ‣ 3 Dataset and Preprocessing ‣ Network Contagion in Financial Labor Markets: Predicting Turnover in Hong Kong\") shows the temporal evolution of hires and departures. In most years, new licenses exceed terminations, reflecting steady industry expansion. However, during systemic shocks such as the 2009 Global Financial Crisis and the 2020 COVID-19 pandemic, issuance and termination were nearly equal, indicating a halt in net job creation and highlighting periods of labor market stress that serve as natural stress tests for our models."
+                },
+                {
+                  "type": "table",
+                  "text": "| | | | --- | --- | | Total professionals | 121,883 | | Total firms | 4,979 | | Employment records | 519,860 | | Median license tenure | 1.5 years | | Monthly turnover rate | 2.3% | | Median number of employees per firm | 21 |"
+                }
+              ],
+              "children": []
+            }
+          ]
+        },
+        {
+          "heading": "4 Network Construction",
+          "level": 2,
+          "content": [],
+          "children": [
+            {
+              "heading": "4.1 Employee–Employee Network",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "We construct temporal employee networks where nodes represent licensed professionals and edges represent co-employment. Two employees are connected at time tt if they are simultaneously active at the same firm. Edge weights are proportional to the overlap in employment duration, normalized by career length to account for seniority differences."
+                },
+                {
+                  "type": "formula",
+                  "text": "tt"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "This network captures peer relationships formed through shared workplaces. As expected, the resulting graphs exhibit strong small-world characteristics, with average path lengths around 2–3 and clustering coefficients far above those of random graphs of similar size. Degree distributions follow a heavy-tailed pattern, reflecting the presence of highly connected professionals who have worked across multiple institutions. Community detection using the Louvain algorithm reveals clusters aligned with major industry segments such as investment banking, brokerage, and asset management."
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "4.2 Firm–Firm Network",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "We also build firm-level networks where nodes are institutions and edges represent shared employees. Two firms are linked if at least one professional has worked at both. Edge weights can be defined in several ways, including absolute counts of shared employees, normalized overlap, or recency-weighted flows."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "This network encodes organizational proximity in the labor market. In February 2024, for example, the firm network comprised over 3,000 active nodes and roughly 95,000 edges, forming a single giant connected component. The network is scale-free with a handful of global hubs (e.g., Morgan Stanley Asia, Goldman Sachs, Citigroup), each connected to hundreds of smaller firms. The clustering coefficient is significantly higher than in an Erdős–Rényi baseline, indicating the presence of industry sub-communities."
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "4.3 Temporal Dynamics",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "Both networks are constructed for each monthly snapshot from 2007–2024, yielding a dynamic sequence of graphs. This temporal perspective is essential for modeling turnover: professional ties weaken over time if not reinforced, while firms continuously enter, exit, or reorganize."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "By integrating network evolution with feature propagation (detailed in Section [5](https://arxiv.org/html/2509.08001v1#S5 \"5 Methodology ‣ Network Contagion in Financial Labor Markets: Predicting Turnover in Hong Kong\")), we capture how peer departures and organizational instability spread through the labor market. This provides the foundation for quantifying contagion effects in employee turnover."
+                }
+              ],
+              "children": []
+            }
+          ]
+        },
+        {
+          "heading": "5 Methodology",
+          "level": 2,
+          "content": [],
+          "children": [
+            {
+              "heading": "5.1 Feature Propagation Framework",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "To quantify peer influence and organizational stability, we apply a graph-based feature propagation procedure on the temporal networks. For each monthly snapshot, features are propagated across neighbors according to weighted averages:"
+                },
+                {
+                  "type": "table",
+                  "text": "| | | | | | --- | --- | --- | --- | | | fi′=∑j∈N⁡(i)wi​j⋅fj∑j∈N⁡(i)wi​j,f^{\\prime}\\_{i}=\\frac{\\sum\\_{j\\in N(i)}w\\_{ij}\\cdot f\\_{j}}{\\sum\\_{j\\in N(i)}w\\_{ij}}, | | (1) |"
+                },
+                {
+                  "type": "formula",
+                  "text": "fi′=∑j∈N⁡(i)wi​j⋅fj∑j∈N⁡(i)wi​j,f^{\\prime}_{i}=\\frac{\\sum_{j\\in N(i)}w_{ij}\\cdot f_{j}}{\\sum_{j\\in N(i)}w_{ij}},"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "where fjf\\_{j} is the original feature of neighbor jj, wi​jw\\_{ij} the edge weight, and N⁡(i)N(i) the neighborhood of node ii. This process transfers information about employee mobility, tenure, and firm stability through the network, capturing contagion effects beyond local attributes."
+                },
+                {
+                  "type": "formula",
+                  "text": "fjf_{j}"
+                },
+                {
+                  "type": "formula",
+                  "text": "jj"
+                },
+                {
+                  "type": "formula",
+                  "text": "wi​jw_{ij}"
+                },
+                {
+                  "type": "formula",
+                  "text": "N⁡(i)N(i)"
+                },
+                {
+                  "type": "formula",
+                  "text": "ii"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "More generally, the propagation can be implemented as an iterative procedure across kk steps, as described in Algorithm [1](https://arxiv.org/html/2509.08001v1#alg1 \"Algorithm 1 ‣ 5.1 Feature Propagation Framework ‣ 5 Methodology ‣ Network Contagion in Financial Labor Markets: Predicting Turnover in Hong Kong\"). This formulation allows repeated diffusion of features through neighborhoods, although in practice we find that a single iteration (k=1k=1) captures most of the predictive signal while avoiding oversmoothing."
+                },
+                {
+                  "type": "formula",
+                  "text": "kk"
+                },
+                {
+                  "type": "formula",
+                  "text": "k=1k=1"
+                },
+                {
+                  "type": "formula",
+                  "text": "G=(V,E,W)G=(V,E,W)"
+                },
+                {
+                  "type": "formula",
+                  "text": "𝐅\\mathbf{F}"
+                },
+                {
+                  "type": "formula",
+                  "text": "kk"
+                },
+                {
+                  "type": "formula",
+                  "text": "𝐅′\\mathbf{F}^{\\prime}"
+                },
+                {
+                  "type": "formula",
+                  "text": "𝐅(0)←𝐅\\mathbf{F}^{(0)}\\leftarrow\\mathbf{F}"
+                },
+                {
+                  "type": "formula",
+                  "text": "i=1i=1"
+                },
+                {
+                  "type": "formula",
+                  "text": "kk"
+                },
+                {
+                  "type": "formula",
+                  "text": "v∈Vv\\in V"
+                },
+                {
+                  "type": "formula",
+                  "text": "𝒩⁡(v)←neighbors of ​v\\mathcal{N}(v)\\leftarrow\\text{neighbors of }v"
+                },
+                {
+                  "type": "formula",
+                  "text": "ff"
+                },
+                {
+                  "type": "formula",
+                  "text": "𝐅v′(i)​[f]←∑u∈𝒩⁡(v)wv​u⋅𝐅u(i−1)​[f]∑u∈𝒩⁡(v)wv​u\\mathbf{F}^{\\prime(i)}_{v}[f]\\leftarrow\\frac{\\sum_{u\\in\\mathcal{N}(v)}w_{vu}\\cdot\\mathbf{F}^{(i-1)}_{u}[f]}{\\sum_{u\\in\\mathcal{N}(v)}w_{vu}}"
+                },
+                {
+                  "type": "formula",
+                  "text": "𝐅′(k)\\mathbf{F}^{\\prime(k)}"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "In practice, we apply this propagation to both employee–employee and firm–firm networks, generating new features that reflect peer mobility, organizational stability, and systemic influences. These network-derived signals are then integrated with individual and firm-level attributes in the predictive models."
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "5.2 Predictive Modeling Setup",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "We train predictive models to estimate the probability of turnover in the subsequent month. To ensure temporal validity, we adopt a strict walk-forward validation strategy spanning 169 monthly periods (2010–2024). At each step, models are trained on all past data and evaluated on the next month, with a one-month gap to prevent leakage. This results in 5.5 million individual predictions across varying market conditions."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "The severe class imbalance (2.3% turnover events) is handled through undersampling of the majority class and probability calibration via isotonic regression. We evaluate two ensemble methods well-suited for tabular data:"
+                },
+                {
+                  "type": "list",
+                  "text": "* • Random Forest: used as a baseline, capturing non-linear interactions but without temporal propagation. * • LightGBM: a gradient boosting method optimized for efficiency, used as our main model with hyperparameters tuned for depth, learning rate, and subsampling."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Random Forest: used as a baseline, capturing non-linear interactions but without temporal propagation."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "LightGBM: a gradient boosting method optimized for efficiency, used as our main model with hyperparameters tuned for depth, learning rate, and subsampling."
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "5.3 Link to Network Contagion",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "This framework allows us to test whether turnover is predictable beyond random chance, and whether network-derived features add explanatory power over individual and firm-level attributes. In particular, it enables the quantification of contagion effects: if a significant portion of a professional’s network departs, does their own probability of leaving increase? This is the central research question addressed in the results."
+                }
+              ],
+              "children": []
+            }
+          ]
+        },
+        {
+          "heading": "6 Results",
+          "level": 2,
+          "content": [],
+          "children": [
+            {
+              "heading": "6.1 Overall Predictive Performance",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "Across 169 walk-forward evaluations (2010–2024; 5.5M predictions), the network-augmented LightGBM model achieves an Average Precision (AP) of 0.0384 and an AUC of 0.6303, outperforming a non-network baseline by +30.2% AP and +9.1% AUC (Table [2](https://arxiv.org/html/2509.08001v1#S6.T2 \"Table 2 ‣ 6.1 Overall Predictive Performance ‣ 6 Results ‣ Network Contagion in Financial Labor Markets: Predicting Turnover in Hong Kong\")). Performance varies with market conditions but remains stable (AP coefficient of variation ≈\\approx 32%)."
+                },
+                {
+                  "type": "formula",
+                  "text": "≈\\approx"
+                },
+                {
+                  "type": "formula",
+                  "text": "±\\pm"
+                },
+                {
+                  "type": "table",
+                  "text": "| Model | AP | AUC | F1 | | --- | --- | --- | --- | | LightGBM (with network) | 0.0384 | 0.6303 | 0.0649 | | Random Forest (with network) | 0.0356 | 0.6146 | 0.0586 | | Random Forest (no network) | 0.0295 | 0.5777 | 0.0389 | | Improvement vs. no-network | +30.2% | +9.1% | +26.8% |"
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "6.2 Feature Importance Analysis",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "Feature attribution consistently shows that firm-level stability and network-propagated signals dominate predictive performance. Aggregated across all models, firm-level features account for 43.6% of total importance, network-propagated features 39.6%, individual employment history 12.5%, and demographics only 4.3% (Table [3](https://arxiv.org/html/2509.08001v1#S6.T3 \"Table 3 ‣ 6.2 Feature Importance Analysis ‣ 6 Results ‣ Network Contagion in Financial Labor Markets: Predicting Turnover in Hong Kong\"))."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Demographic attributes, enriched through LLM-based inference [[2](https://arxiv.org/html/2509.08001v1#bib.bib2)], account for less than 4.3% of importance. This indicates that turnover dynamics are not driven by gender or nationality, but primarily by organizational stability and peer contagion effects. In other words, while demographics were considered, their negligible contribution reinforces the dominance of structural and relational drivers of employee exits."
+                },
+                {
+                  "type": "table",
+                  "text": "| Category | Visual | Share | | --- | --- | --- | | Firm-level characteristics | | 43.6% | | Network-propagated features | | 39.6% | | Individual employment history | | 12.5% | | Demographic attributes | | 4.3% |"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "At the feature level, the top contributors include average employee tenure, upper quantiles of employee days (stability signals), and their propagated counterparts that capture peer and industry-level dynamics. Figure [2](https://arxiv.org/html/2509.08001v1#S6.F2 \"Figure 2 ‣ 6.2 Feature Importance Analysis ‣ 6 Results ‣ Network Contagion in Financial Labor Markets: Predicting Turnover in Hong Kong\") compares the top 25 features as ranked by LightGBM and Random Forest models."
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "6.3 Network Contagion and Threshold Effects",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "We quantify peer effects by conditioning on recent departures in a professional’s immediate network (employee–employee graph, six-month window). When more than 30% of a professional’s peers have departed within the past six months, the individual’s turnover probability increases by 23% relative to baseline."
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "6.4 Temporal Heterogeneity",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "Predictability declines over time (Figure [3](https://arxiv.org/html/2509.08001v1#S6.F3 \"Figure 3 ‣ 6.4 Temporal Heterogeneity ‣ 6 Results ‣ Network Contagion in Financial Labor Markets: Predicting Turnover in Hong Kong\")). AP peaks during post-crisis years (2010–2012: ∼\\sim0.045) and decreases toward 2023–2024 (∼\\sim0.031). This pattern is consistent with a *maturing* labor market in which shocks are less synchronized and departures less clustered, reducing the strength of exploitable network signals."
+                },
+                {
+                  "type": "formula",
+                  "text": "∼\\sim"
+                },
+                {
+                  "type": "formula",
+                  "text": "∼\\sim"
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "6.5 Robustness Checks",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "We verify that gains are not artifacts of imbalance handling or leakage: (i) undersampling ratios around the chosen setting yield similar AP (within ±\\pm0.002); (ii) adding a one-month gap between train and test prevents temporal leakage (removing it inflates AP and is therefore avoided); (iii) isotonic calibration improves probability quality (Brier score decrease) without materially changing ranking metrics."
+                },
+                {
+                  "type": "formula",
+                  "text": "±\\pm"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Importantly, employee-network propagation provides more unique information than firm-network propagation (lower correlations with originals), aligning with the intuition that peer decisions transmit more granular signals than organization-level aggregates."
+                }
+              ],
+              "children": []
+            }
+          ]
+        },
+        {
+          "heading": "7 Conclusion",
+          "level": 2,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "This paper demonstrates how temporal network analysis can be applied to predict employee turnover in Hong Kong’s financial sector. By constructing monthly networks of 121,883 professionals across 4,979 firms and propagating organizational and peer features, we achieve consistent improvements in predictive performance over non-network baselines. Our findings highlight three main insights: (i) professional turnover exhibits contagion-like dynamics, with a 23% increase in departure probability once 30% of peers leave; (ii) firm stability and network-propagated features dominate individual attributes, underscoring the structural rather than personal nature of turnover; and (iii) predictability has declined over time, consistent with a maturing labor market less prone to synchronized shocks."
+            },
+            {
+              "type": "paragraph",
+              "text": "Beyond methodological contributions, these results carry practical implications for regulation, workforce management, and policy design. Regulators can use network-informed risk scores to anticipate instability, firms can identify vulnerable teams for retention efforts, and policymakers can better calibrate skilled worker immigration programs."
+            },
+            {
+              "type": "paragraph",
+              "text": "Future work should explore richer network modeling approaches, including graph neural networks, multilayer representations (e.g., employment, education, social ties), and cross-market extensions to compare financial centers such as Singapore or London. By integrating network science and predictive analytics, this research contributes to the growing field of workforce analytics and illustrates how complex networks can illuminate the dynamics of modern financial labor markets."
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "References",
+          "level": 2,
+          "content": [
+            {
+              "type": "list",
+              "text": "* (1) AlKetbi, A., Marti, G., AlNuaimi, K., Jaradat, R., Henschel, A.: Mapping hong kong’s financial ecosystem: A network analysis of the sfc’s licensed professionals and institutions. In: Complex Networks and Their Applications (Complex Networks 2024) (2024). Accepted for presentation * (2) AlNuaimi, K., Marti, G., Ravaut, M., AlKetbi, A., Henschel, A., Jaradat, R.: Enriching datasets with demographics through large language models: What’s in a name? arXiv preprint arXiv:2409.11491 (2024) * (3) Centola, D.: The spread of behavior in an online social network experiment. science 329(5996), 1194–1197 (2010) * (4) Feeley, T.H., Hwang, J., Barnett, G.A.: Predicting employee turnover from friendship networks. Journal of Applied Communication Research 36(1), 56–73 (2008) * (5) Gadár, L., Abonyi, J.: Explainable prediction of node labels in multilayer networks: a case study of turnover prediction in organizations. Scientific Reports 14(1), 9036 (2024) * (6) Holme, P., Saramäki, J.: Temporal networks. Physics reports 519(3), 97–125 (2012) * (7) Hong Kong Monetary Authority: Hong Kong as an International Financial Centre. <https://www.hkma.gov.hk/eng/key-functions/international-financial-centre/hong-kong-as-an-international-financial-centre/>. Accessed: 2024-08-18 * (8) Masuda, N., Lambiotte, R.: A guide to temporal networks. World Scientific (2016) * (9) Pastor-Satorras, R., Vespignani, A.: Epidemic spreading in scale-free networks. Physical review letters 86(14), 3200 (2001) * (10) Perrotta, D., Johnson, S.C., Theile, T., Grow, A., de Valk, H., Zagheni, E.: Openness to migrate internationally for a job: evidence from linkedin data in europe. In: Proceedings of the International AAAI Conference on Web and Social Media, vol. 16, pp. 759–769 (2022) * (11) State, B., Rodriguez, M., Helbing, D., Zagheni, E.: Migration of professionals to the us: Evidence from linkedin data. In: International Conference on Social Informatics, pp. 531–543. Springer (2014) * (12) Vardaman, J.M., Taylor, S.G., Allen, D.G., Gondo, M.B., Amis, J.M.: Translating intentions to behavior: The interaction of network structure and behavioral intentions in understanding employee turnover. Organization Science 26(4), 1177–1191 (2015) * (13) Younis, S., Ahsan, A., Chatteur, F.M.: An employee retention model using organizational network analysis for voluntary turnover. Social Network Analysis and Mining 13(1), 28 (2023)"
+            }
+          ],
+          "children": []
+        }
+      ]
+    }
+  ],
+  "chunks": [
+    {
+      "heading_path": [
+        "Report GitHub Issue"
+      ],
+      "text": "##### Report GitHub Issue\n\nContent selection saved. Describe the issue below:"
+    },
+    {
+      "heading_path": [
+        "Network Contagion in Financial Labor Markets: Predicting Turnover in Hong Kong"
+      ],
+      "text": "# Network Contagion in Financial Labor Markets: Predicting Turnover in Hong Kong"
+    },
+    {
+      "heading_path": [
+        "Network Contagion in Financial Labor Markets: Predicting Turnover in Hong Kong",
+        "Abstract"
+      ],
+      "text": "###### Abstract\n\nEmployee turnover is a critical challenge in financial markets, yet little is known about the role of professional networks in shaping career moves. Using the Hong Kong Securities and Futures Commission (SFC) public register (2007–2024), we construct temporal networks of 121,883 professionals and 4,979 firms to analyze and predict employee departures. We introduce a graph-based feature propagation framework that captures peer influence and organizational stability. Our analysis shows a contagion effect: professionals are 23% more likely to leave when over 30% of their peers depart within six months. Embedding these network signals into machine learning models improves turnover prediction by 30% over baselines. These results highlight the predictive power of temporal network effects in workforce dynamics, and demonstrate how network-based analytics can inform regulatory monitoring, talent management, and systemic risk assessment."
+    },
+    {
+      "heading_path": [
+        "Network Contagion in Financial Labor Markets: Predicting Turnover in Hong Kong",
+        "Keywords:"
+      ],
+      "text": "###### Keywords:"
+    },
+    {
+      "heading_path": [
+        "Network Contagion in Financial Labor Markets: Predicting Turnover in Hong Kong",
+        "1 Introduction"
+      ],
+      "text": "## 1 Introduction\n\nThe financial services sector is central to Hong Kong’s economy, employing over 270,000 professionals and contributing 23% of GDP [[7](https://arxiv.org/html/2509.08001v1#bib.bib7)]. Yet beyond macroeconomic indicators, the micro-dynamics of professional mobility remain poorly understood. Employee turnover in particular represents both a systemic risk and a major operational cost, with annual rates exceeding 24%.11 1 [FSDC Report (2023)](https://www.fsdc.org.hk/media/52ulbcmf/20230824_-en-nurturing-the-young-talents-of-today-for-hk-s-fs-industry-of-tomorrow_fv.pdf)\n\nRecent work has begun to map Hong Kong’s financial ecosystem through the Securities and Futures Commission (SFC) register, revealing its large-scale network of professionals and firms [[1](https://arxiv.org/html/2509.08001v1#bib.bib1)]. In this paper, we move from mapping to forecasting: can we predict when a professional will leave their firm, and does the surrounding network structure improve predictive power?\n\nTo address this, we construct temporal networks from 2007–2024, capturing career trajectories of 121,883 professionals across 4,979 firms. We develop a graph-based feature propagation framework to quantify peer influence and organizational stability, and integrate these signals into predictive models. Our approach tackles four challenges related to workforce analytics:\n\n1. 1. Network contagion: capturing peer turnover cascades through temporal propagation; 2. 2. Temporal dynamics: evaluating models with strict walk-forward validation; 3. 3. Class imbalance: rare-event prediction with only 2.3% monthly turnover; 4. 4. Feature engineering: combining individual, organizational, and propagated network features.\n\nNetwork contagion: capturing peer turnover cascades through temporal propagation;\n\nTemporal dynamics: evaluating models with strict walk-forward validation;\n\nClass imbalance: rare-event prediction with only 2.3% monthly turnover;\n\nFeature engineering: combining individual, organizational, and propagated network features.\n\nWe show that network-derived signals substantially improve predictive accuracy over non-network baselines, and that firm-level stability and peer influence dominate demographic attributes. These findings highlight the role of contagion in financial labor markets and open the door to network-based workforce analytics with applications in recruiting, talent management, systemic risk assessment, and even the design of immigration policies for skilled workers."
+    },
+    {
+      "heading_path": [
+        "Network Contagion in Financial Labor Markets: Predicting Turnover in Hong Kong",
+        "2 Related Work"
+      ],
+      "text": "## 2 Related Work\n\nOur study connects four strands of research: (i) network and contagion mechanisms of employee turnover, (ii) temporal and diffusion methods from complex systems, (iii) digital-trace approaches to labor mobility, and (iv) machine-learning frameworks for attrition prediction."
+    },
+    {
+      "heading_path": [
+        "Network Contagion in Financial Labor Markets: Predicting Turnover in Hong Kong",
+        "2 Related Work",
+        "Turnover and organizational networks."
+      ],
+      "text": "#### Turnover and organizational networks.\n\nSeminal work established that relational embeddedness predicts exits beyond individual traits: employees tied to leavers or located on network peripheries are more likely to depart [[4](https://arxiv.org/html/2509.08001v1#bib.bib4)]. Vardaman et al. further showed that network structure interacts with job embeddedness, especially *Simmelian ties* (strong ties embedded in triads that exert reinforcing social pressure), to determine whether turnover intentions translate into actual exits [[12](https://arxiv.org/html/2509.08001v1#bib.bib12)]. More recently, organizational network analysis has been operationalized for HR retention, with churn prediction models leveraging centrality, k-core structure, and cohesion to flag at-risk employees [[13](https://arxiv.org/html/2509.08001v1#bib.bib13)]. Our study is aligned with this tradition but differs in scale and source: we exploit a *regulatory registry* covering 121,883 individuals across 4,979 firms, and we quantify contagion through *temporal feature propagation* rather than static ego-network metrics."
+    },
+    {
+      "heading_path": [
+        "Network Contagion in Financial Labor Markets: Predicting Turnover in Hong Kong",
+        "2 Related Work",
+        "Temporal and diffusion processes in complex networks."
+      ],
+      "text": "#### Temporal and diffusion processes in complex networks.\n\nFrom the complex networks community, temporal networks provide the toolkit for constructing time-resolved graphs, measuring evolving connectivity, and avoiding leakage across time [[6](https://arxiv.org/html/2509.08001v1#bib.bib6), [8](https://arxiv.org/html/2509.08001v1#bib.bib8)]. Contagion and diffusion models, originally developed for epidemics and behavioral adoption, clarify how peer influence can exhibit thresholds and reinforcement (“complex contagion”) [[9](https://arxiv.org/html/2509.08001v1#bib.bib9), [3](https://arxiv.org/html/2509.08001v1#bib.bib3)]. We operationalize these ideas for labor mobility by creating monthly snapshots and propagating turnover signals over employee and firm graphs, thereby testing whether departures diffuse through professional ties."
+    },
+    {
+      "heading_path": [
+        "Network Contagion in Financial Labor Markets: Predicting Turnover in Hong Kong",
+        "2 Related Work",
+        "Digital traces and labor mobility."
+      ],
+      "text": "#### Digital traces and labor mobility.\n\nLarge-scale online platforms have also been mined for workforce mobility. State et al. analyzed LinkedIn career histories to study the migration of professionals to the United States, revealing macro-level flows of talent across countries [[11](https://arxiv.org/html/2509.08001v1#bib.bib11)]. Perrotta et al. extended this line of work by using LinkedIn Recruiter data to measure Europeans’ openness to international migration, combining descriptive flow analysis with gravity-type models [[10](https://arxiv.org/html/2509.08001v1#bib.bib10)]. While valuable for descriptive mapping of aspirations and flows, LinkedIn data are self-reported, can be retrospectively edited, and typically lag real events. In practice, it is *users* who strategically back-populate their profiles—sometimes months or even years later—whether to mask involuntary exits, to wait until a trial period is completed, or to gauge whether a new role is worth keeping before making it public. These properties make LinkedIn less suitable for *live prediction* of churn. By contrast, our regulator-sourced registry provides point-in-time accuracy with legal force, enabling forward-looking attrition forecasting rather than retrospective mapping."
+    },
+    {
+      "heading_path": [
+        "Network Contagion in Financial Labor Markets: Predicting Turnover in Hong Kong",
+        "2 Related Work",
+        "ML for attrition and network-aware churn."
+      ],
+      "text": "#### ML for attrition and network-aware churn.\n\nIn parallel, the machine learning literature has progressed from classic classifiers toward network-aware models. Recent evidence in multilayer settings shows that network embeddedness substantially improves prediction and supports explanation (e.g., SHAP-style attribution) compared to attribute-only baselines [[5](https://arxiv.org/html/2509.08001v1#bib.bib5)]. Related studies using internal communication or collaboration networks similarly report gains when network features are included. Our contribution is to bring these network-aware ML insights to a regulated financial labor market, using a comprehensive regulator-sourced registry that covers the entire Hong Kong financial center, with strict walk-forward validation. Methodologically, we contribute a lightweight *graph-based feature propagation* framework that yields complementary signals to individual and firm covariates, and we document when and where such signals are most predictive."
+    },
+    {
+      "heading_path": [
+        "Network Contagion in Financial Labor Markets: Predicting Turnover in Hong Kong",
+        "2 Related Work",
+        "Positioning and novelty."
+      ],
+      "text": "#### Positioning and novelty.\n\nRelative to prior work, we (i) shift from single-firm ONA or digital-trace platforms to market-wide, regulator-sourced temporal networks; (ii) formalize peer effects with an explicit propagation operator over monthly snapshots rather than relying only on static centralities; (iii) evaluate predictability *out-of-sample* across 169 months with class-imbalance–robust metrics; and (iv) show that firm stability and propagated peer effects dominate demographics (LLM-inferred) in feature importance. Together, these choices bridge complex network contagion and practical turnover forecasting in a high-stakes, regulated domain."
+    },
+    {
+      "heading_path": [
+        "Network Contagion in Financial Labor Markets: Predicting Turnover in Hong Kong",
+        "3 Dataset and Preprocessing"
+      ],
+      "text": "## 3 Dataset and Preprocessing"
+    },
+    {
+      "heading_path": [
+        "Network Contagion in Financial Labor Markets: Predicting Turnover in Hong Kong",
+        "3 Dataset and Preprocessing",
+        "3.1 Origin of the Dataset"
+      ],
+      "text": "### 3.1 Origin of the Dataset\n\nThis study relies on the Public Register of Licensed Persons and Registered Institutions maintained by the Hong Kong Securities and Futures Commission (SFC).22 2 <https://www.sfc.hk/en/Regulatory-functions/Intermediaries/Licensing/Register-of-licensed-persons-and-registered-institutions> The register has systematically recorded licensed individuals and their employing firms since the implementation of the Securities and Futures Ordinance in 2003. It provides detailed information on employment periods, firm affiliations, and regulated activities, covering the core of Hong Kong’s financial workforce.\n\nThe dataset used in this work spans April 2003 to March 2024 and contains 519,860 employment records across 121,883 unique professionals and 4,979 firms. A first descriptive analysis of this register, focusing on the structure of the financial ecosystem, was presented in our previous work [[1](https://arxiv.org/html/2509.08001v1#bib.bib1)]. Here we extend this line of research by constructing temporal networks to study and forecast employee turnover."
+    },
+    {
+      "heading_path": [
+        "Network Contagion in Financial Labor Markets: Predicting Turnover in Hong Kong",
+        "3 Dataset and Preprocessing",
+        "3.2 Temporal Structure and Target Variable"
+      ],
+      "text": "### 3.2 Temporal Structure and Target Variable\n\nFor predictive modeling, we create 206 monthly snapshots from 2007–2024, aligning all employment spells to a common temporal grid. At each month tt, we record whether a licensee’s employment ends in the subsequent month. This defines the binary target variable turnover, with a positive rate of only 2.3% per month (27.6% annual rate). This base rate of 2.3% underscores the difficulty of the prediction task and motivates specific strategies for class imbalance.\n\ntt"
+    },
+    {
+      "heading_path": [
+        "Network Contagion in Financial Labor Markets: Predicting Turnover in Hong Kong",
+        "3 Dataset and Preprocessing",
+        "3.3 Feature Engineering Overview"
+      ],
+      "text": "### 3.3 Feature Engineering Overview\n\nWe engineer four broad categories of features from the raw SFC register:\n\n* • Individual-level features: career history (number of firms, mobility rate), tenure at the current employer, and licensing role (Representative or Responsible Officer). * • Firm-level features: organizational size (number of active employees), stability (average and quantile employee tenure), and longevity (firm age). * • Network-propagated features: signals derived from employee–employee and firm–firm networks, capturing peer turnover rates, organizational contagion, and industry-wide stability. * • Demographic features: inferred from names using large language models (LLMs), following the approach of [[2](https://arxiv.org/html/2509.08001v1#bib.bib2)]. This enrichment provided likely gender and country-of-origin attributes, allowing us to test whether demographic factors contribute to turnover prediction.\n\nIndividual-level features: career history (number of firms, mobility rate), tenure at the current employer, and licensing role (Representative or Responsible Officer).\n\nFirm-level features: organizational size (number of active employees), stability (average and quantile employee tenure), and longevity (firm age).\n\nNetwork-propagated features: signals derived from employee–employee and firm–firm networks, capturing peer turnover rates, organizational contagion, and industry-wide stability.\n\nDemographic features: inferred from names using large language models (LLMs), following the approach of [[2](https://arxiv.org/html/2509.08001v1#bib.bib2)]. This enrichment provided likely gender and country-of-origin attributes, allowing us to test whether demographic factors contribute to turnover prediction.\n\nAltogether, this results in 36 features per record, combining static descriptors with dynamic, network-based signals."
+    },
+    {
+      "heading_path": [
+        "Network Contagion in Financial Labor Markets: Predicting Turnover in Hong Kong",
+        "3 Dataset and Preprocessing",
+        "3.4 Descriptive Statistics"
+      ],
+      "text": "### 3.4 Descriptive Statistics\n\nTable [1](https://arxiv.org/html/2509.08001v1#S3.T1 \"Table 1 ‣ 3.4 Descriptive Statistics ‣ 3 Dataset and Preprocessing ‣ Network Contagion in Financial Labor Markets: Predicting Turnover in Hong Kong\") reports key characteristics of the dataset. The median tenure of 1.5 years, together with the high annual turnover rate (above 25%), highlights the volatility of employment in Hong Kong’s financial sector. Figure [1](https://arxiv.org/html/2509.08001v1#S3.F1 \"Figure 1 ‣ 3.4 Descriptive Statistics ‣ 3 Dataset and Preprocessing ‣ Network Contagion in Financial Labor Markets: Predicting Turnover in Hong Kong\") shows the temporal evolution of hires and departures. In most years, new licenses exceed terminations, reflecting steady industry expansion. However, during systemic shocks such as the 2009 Global Financial Crisis and the 2020 COVID-19 pandemic, issuance and termination were nearly equal, indicating a halt in net job creation and highlighting periods of labor market stress that serve as natural stress tests for our models.\n\n| | | | --- | --- | | Total professionals | 121,883 | | Total firms | 4,979 | | Employment records | 519,860 | | Median license tenure | 1.5 years | | Monthly turnover rate | 2.3% | | Median number of employees per firm | 21 |"
+    },
+    {
+      "heading_path": [
+        "Network Contagion in Financial Labor Markets: Predicting Turnover in Hong Kong",
+        "4 Network Construction"
+      ],
+      "text": "## 4 Network Construction"
+    },
+    {
+      "heading_path": [
+        "Network Contagion in Financial Labor Markets: Predicting Turnover in Hong Kong",
+        "4 Network Construction",
+        "4.1 Employee–Employee Network"
+      ],
+      "text": "### 4.1 Employee–Employee Network\n\nWe construct temporal employee networks where nodes represent licensed professionals and edges represent co-employment. Two employees are connected at time tt if they are simultaneously active at the same firm. Edge weights are proportional to the overlap in employment duration, normalized by career length to account for seniority differences.\n\ntt\n\nThis network captures peer relationships formed through shared workplaces. As expected, the resulting graphs exhibit strong small-world characteristics, with average path lengths around 2–3 and clustering coefficients far above those of random graphs of similar size. Degree distributions follow a heavy-tailed pattern, reflecting the presence of highly connected professionals who have worked across multiple institutions. Community detection using the Louvain algorithm reveals clusters aligned with major industry segments such as investment banking, brokerage, and asset management."
+    },
+    {
+      "heading_path": [
+        "Network Contagion in Financial Labor Markets: Predicting Turnover in Hong Kong",
+        "4 Network Construction",
+        "4.2 Firm–Firm Network"
+      ],
+      "text": "### 4.2 Firm–Firm Network\n\nWe also build firm-level networks where nodes are institutions and edges represent shared employees. Two firms are linked if at least one professional has worked at both. Edge weights can be defined in several ways, including absolute counts of shared employees, normalized overlap, or recency-weighted flows.\n\nThis network encodes organizational proximity in the labor market. In February 2024, for example, the firm network comprised over 3,000 active nodes and roughly 95,000 edges, forming a single giant connected component. The network is scale-free with a handful of global hubs (e.g., Morgan Stanley Asia, Goldman Sachs, Citigroup), each connected to hundreds of smaller firms. The clustering coefficient is significantly higher than in an Erdős–Rényi baseline, indicating the presence of industry sub-communities."
+    },
+    {
+      "heading_path": [
+        "Network Contagion in Financial Labor Markets: Predicting Turnover in Hong Kong",
+        "4 Network Construction",
+        "4.3 Temporal Dynamics"
+      ],
+      "text": "### 4.3 Temporal Dynamics\n\nBoth networks are constructed for each monthly snapshot from 2007–2024, yielding a dynamic sequence of graphs. This temporal perspective is essential for modeling turnover: professional ties weaken over time if not reinforced, while firms continuously enter, exit, or reorganize.\n\nBy integrating network evolution with feature propagation (detailed in Section [5](https://arxiv.org/html/2509.08001v1#S5 \"5 Methodology ‣ Network Contagion in Financial Labor Markets: Predicting Turnover in Hong Kong\")), we capture how peer departures and organizational instability spread through the labor market. This provides the foundation for quantifying contagion effects in employee turnover."
+    },
+    {
+      "heading_path": [
+        "Network Contagion in Financial Labor Markets: Predicting Turnover in Hong Kong",
+        "5 Methodology"
+      ],
+      "text": "## 5 Methodology"
+    },
+    {
+      "heading_path": [
+        "Network Contagion in Financial Labor Markets: Predicting Turnover in Hong Kong",
+        "5 Methodology",
+        "5.1 Feature Propagation Framework"
+      ],
+      "text": "### 5.1 Feature Propagation Framework\n\nTo quantify peer influence and organizational stability, we apply a graph-based feature propagation procedure on the temporal networks. For each monthly snapshot, features are propagated across neighbors according to weighted averages:\n\n| | | | | | --- | --- | --- | --- | | | fi′=∑j∈N⁡(i)wi​j⋅fj∑j∈N⁡(i)wi​j,f^{\\prime}\\_{i}=\\frac{\\sum\\_{j\\in N(i)}w\\_{ij}\\cdot f\\_{j}}{\\sum\\_{j\\in N(i)}w\\_{ij}}, | | (1) |\n\nfi′=∑j∈N⁡(i)wi​j⋅fj∑j∈N⁡(i)wi​j,f^{\\prime}_{i}=\\frac{\\sum_{j\\in N(i)}w_{ij}\\cdot f_{j}}{\\sum_{j\\in N(i)}w_{ij}},\n\nwhere fjf\\_{j} is the original feature of neighbor jj, wi​jw\\_{ij} the edge weight, and N⁡(i)N(i) the neighborhood of node ii. This process transfers information about employee mobility, tenure, and firm stability through the network, capturing contagion effects beyond local attributes.\n\nfjf_{j}\n\njj\n\nwi​jw_{ij}\n\nN⁡(i)N(i)\n\nii\n\nMore generally, the propagation can be implemented as an iterative procedure across kk steps, as described in Algorithm [1](https://arxiv.org/html/2509.08001v1#alg1 \"Algorithm 1 ‣ 5.1 Feature Propagation Framework ‣ 5 Methodology ‣ Network Contagion in Financial Labor Markets: Predicting Turnover in Hong Kong\"). This formulation allows repeated diffusion of features through neighborhoods, although in practice we find that a single iteration (k=1k=1) captures most of the predictive signal while avoiding oversmoothing.\n\nkk\n\nk=1k=1\n\nG=(V,E,W)G=(V,E,W)\n\n𝐅\\mathbf{F}\n\nkk\n\n𝐅′\\mathbf{F}^{\\prime}\n\n𝐅(0)←𝐅\\mathbf{F}^{(0)}\\leftarrow\\mathbf{F}\n\ni=1i=1\n\nkk\n\nv∈Vv\\in V\n\n𝒩⁡(v)←neighbors of ​v\\mathcal{N}(v)\\leftarrow\\text{neighbors of }v\n\nff\n\n𝐅v′(i)​[f]←∑u∈𝒩⁡(v)wv​u⋅𝐅u(i−1)​[f]∑u∈𝒩⁡(v)wv​u\\mathbf{F}^{\\prime(i)}_{v}[f]\\leftarrow\\frac{\\sum_{u\\in\\mathcal{N}(v)}w_{vu}\\cdot\\mathbf{F}^{(i-1)}_{u}[f]}{\\sum_{u\\in\\mathcal{N}(v)}w_{vu}}\n\n𝐅′(k)\\mathbf{F}^{\\prime(k)}\n\nIn practice, we apply this propagation to both employee–employee and firm–firm networks, generating new features that reflect peer mobility, organizational stability, and systemic influences. These network-derived signals are then integrated with individual and firm-level attributes in the predictive models."
+    },
+    {
+      "heading_path": [
+        "Network Contagion in Financial Labor Markets: Predicting Turnover in Hong Kong",
+        "5 Methodology",
+        "5.2 Predictive Modeling Setup"
+      ],
+      "text": "### 5.2 Predictive Modeling Setup\n\nWe train predictive models to estimate the probability of turnover in the subsequent month. To ensure temporal validity, we adopt a strict walk-forward validation strategy spanning 169 monthly periods (2010–2024). At each step, models are trained on all past data and evaluated on the next month, with a one-month gap to prevent leakage. This results in 5.5 million individual predictions across varying market conditions.\n\nThe severe class imbalance (2.3% turnover events) is handled through undersampling of the majority class and probability calibration via isotonic regression. We evaluate two ensemble methods well-suited for tabular data:\n\n* • Random Forest: used as a baseline, capturing non-linear interactions but without temporal propagation. * • LightGBM: a gradient boosting method optimized for efficiency, used as our main model with hyperparameters tuned for depth, learning rate, and subsampling.\n\nRandom Forest: used as a baseline, capturing non-linear interactions but without temporal propagation.\n\nLightGBM: a gradient boosting method optimized for efficiency, used as our main model with hyperparameters tuned for depth, learning rate, and subsampling."
+    },
+    {
+      "heading_path": [
+        "Network Contagion in Financial Labor Markets: Predicting Turnover in Hong Kong",
+        "5 Methodology",
+        "5.3 Link to Network Contagion"
+      ],
+      "text": "### 5.3 Link to Network Contagion\n\nThis framework allows us to test whether turnover is predictable beyond random chance, and whether network-derived features add explanatory power over individual and firm-level attributes. In particular, it enables the quantification of contagion effects: if a significant portion of a professional’s network departs, does their own probability of leaving increase? This is the central research question addressed in the results."
+    },
+    {
+      "heading_path": [
+        "Network Contagion in Financial Labor Markets: Predicting Turnover in Hong Kong",
+        "6 Results"
+      ],
+      "text": "## 6 Results"
+    },
+    {
+      "heading_path": [
+        "Network Contagion in Financial Labor Markets: Predicting Turnover in Hong Kong",
+        "6 Results",
+        "6.1 Overall Predictive Performance"
+      ],
+      "text": "### 6.1 Overall Predictive Performance\n\nAcross 169 walk-forward evaluations (2010–2024; 5.5M predictions), the network-augmented LightGBM model achieves an Average Precision (AP) of 0.0384 and an AUC of 0.6303, outperforming a non-network baseline by +30.2% AP and +9.1% AUC (Table [2](https://arxiv.org/html/2509.08001v1#S6.T2 \"Table 2 ‣ 6.1 Overall Predictive Performance ‣ 6 Results ‣ Network Contagion in Financial Labor Markets: Predicting Turnover in Hong Kong\")). Performance varies with market conditions but remains stable (AP coefficient of variation ≈\\approx 32%).\n\n≈\\approx\n\n±\\pm\n\n| Model | AP | AUC | F1 | | --- | --- | --- | --- | | LightGBM (with network) | 0.0384 | 0.6303 | 0.0649 | | Random Forest (with network) | 0.0356 | 0.6146 | 0.0586 | | Random Forest (no network) | 0.0295 | 0.5777 | 0.0389 | | Improvement vs. no-network | +30.2% | +9.1% | +26.8% |"
+    },
+    {
+      "heading_path": [
+        "Network Contagion in Financial Labor Markets: Predicting Turnover in Hong Kong",
+        "6 Results",
+        "6.2 Feature Importance Analysis"
+      ],
+      "text": "### 6.2 Feature Importance Analysis\n\nFeature attribution consistently shows that firm-level stability and network-propagated signals dominate predictive performance. Aggregated across all models, firm-level features account for 43.6% of total importance, network-propagated features 39.6%, individual employment history 12.5%, and demographics only 4.3% (Table [3](https://arxiv.org/html/2509.08001v1#S6.T3 \"Table 3 ‣ 6.2 Feature Importance Analysis ‣ 6 Results ‣ Network Contagion in Financial Labor Markets: Predicting Turnover in Hong Kong\")).\n\nDemographic attributes, enriched through LLM-based inference [[2](https://arxiv.org/html/2509.08001v1#bib.bib2)], account for less than 4.3% of importance. This indicates that turnover dynamics are not driven by gender or nationality, but primarily by organizational stability and peer contagion effects. In other words, while demographics were considered, their negligible contribution reinforces the dominance of structural and relational drivers of employee exits.\n\n| Category | Visual | Share | | --- | --- | --- | | Firm-level characteristics | | 43.6% | | Network-propagated features | | 39.6% | | Individual employment history | | 12.5% | | Demographic attributes | | 4.3% |\n\nAt the feature level, the top contributors include average employee tenure, upper quantiles of employee days (stability signals), and their propagated counterparts that capture peer and industry-level dynamics. Figure [2](https://arxiv.org/html/2509.08001v1#S6.F2 \"Figure 2 ‣ 6.2 Feature Importance Analysis ‣ 6 Results ‣ Network Contagion in Financial Labor Markets: Predicting Turnover in Hong Kong\") compares the top 25 features as ranked by LightGBM and Random Forest models."
+    },
+    {
+      "heading_path": [
+        "Network Contagion in Financial Labor Markets: Predicting Turnover in Hong Kong",
+        "6 Results",
+        "6.3 Network Contagion and Threshold Effects"
+      ],
+      "text": "### 6.3 Network Contagion and Threshold Effects\n\nWe quantify peer effects by conditioning on recent departures in a professional’s immediate network (employee–employee graph, six-month window). When more than 30% of a professional’s peers have departed within the past six months, the individual’s turnover probability increases by 23% relative to baseline."
+    },
+    {
+      "heading_path": [
+        "Network Contagion in Financial Labor Markets: Predicting Turnover in Hong Kong",
+        "6 Results",
+        "6.4 Temporal Heterogeneity"
+      ],
+      "text": "### 6.4 Temporal Heterogeneity\n\nPredictability declines over time (Figure [3](https://arxiv.org/html/2509.08001v1#S6.F3 \"Figure 3 ‣ 6.4 Temporal Heterogeneity ‣ 6 Results ‣ Network Contagion in Financial Labor Markets: Predicting Turnover in Hong Kong\")). AP peaks during post-crisis years (2010–2012: ∼\\sim0.045) and decreases toward 2023–2024 (∼\\sim0.031). This pattern is consistent with a *maturing* labor market in which shocks are less synchronized and departures less clustered, reducing the strength of exploitable network signals.\n\n∼\\sim\n\n∼\\sim"
+    },
+    {
+      "heading_path": [
+        "Network Contagion in Financial Labor Markets: Predicting Turnover in Hong Kong",
+        "6 Results",
+        "6.5 Robustness Checks"
+      ],
+      "text": "### 6.5 Robustness Checks\n\nWe verify that gains are not artifacts of imbalance handling or leakage: (i) undersampling ratios around the chosen setting yield similar AP (within ±\\pm0.002); (ii) adding a one-month gap between train and test prevents temporal leakage (removing it inflates AP and is therefore avoided); (iii) isotonic calibration improves probability quality (Brier score decrease) without materially changing ranking metrics.\n\n±\\pm\n\nImportantly, employee-network propagation provides more unique information than firm-network propagation (lower correlations with originals), aligning with the intuition that peer decisions transmit more granular signals than organization-level aggregates."
+    },
+    {
+      "heading_path": [
+        "Network Contagion in Financial Labor Markets: Predicting Turnover in Hong Kong",
+        "7 Conclusion"
+      ],
+      "text": "## 7 Conclusion\n\nThis paper demonstrates how temporal network analysis can be applied to predict employee turnover in Hong Kong’s financial sector. By constructing monthly networks of 121,883 professionals across 4,979 firms and propagating organizational and peer features, we achieve consistent improvements in predictive performance over non-network baselines. Our findings highlight three main insights: (i) professional turnover exhibits contagion-like dynamics, with a 23% increase in departure probability once 30% of peers leave; (ii) firm stability and network-propagated features dominate individual attributes, underscoring the structural rather than personal nature of turnover; and (iii) predictability has declined over time, consistent with a maturing labor market less prone to synchronized shocks.\n\nBeyond methodological contributions, these results carry practical implications for regulation, workforce management, and policy design. Regulators can use network-informed risk scores to anticipate instability, firms can identify vulnerable teams for retention efforts, and policymakers can better calibrate skilled worker immigration programs.\n\nFuture work should explore richer network modeling approaches, including graph neural networks, multilayer representations (e.g., employment, education, social ties), and cross-market extensions to compare financial centers such as Singapore or London. By integrating network science and predictive analytics, this research contributes to the growing field of workforce analytics and illustrates how complex networks can illuminate the dynamics of modern financial labor markets."
+    },
+    {
+      "heading_path": [
+        "Network Contagion in Financial Labor Markets: Predicting Turnover in Hong Kong",
+        "References"
+      ],
+      "text": "## References\n\n* (1) AlKetbi, A., Marti, G., AlNuaimi, K., Jaradat, R., Henschel, A.: Mapping hong kong’s financial ecosystem: A network analysis of the sfc’s licensed professionals and institutions. In: Complex Networks and Their Applications (Complex Networks 2024) (2024). Accepted for presentation * (2) AlNuaimi, K., Marti, G., Ravaut, M., AlKetbi, A., Henschel, A., Jaradat, R.: Enriching datasets with demographics through large language models: What’s in a name? arXiv preprint arXiv:2409.11491 (2024) * (3) Centola, D.: The spread of behavior in an online social network experiment. science 329(5996), 1194–1197 (2010) * (4) Feeley, T.H., Hwang, J., Barnett, G.A.: Predicting employee turnover from friendship networks. Journal of Applied Communication Research 36(1), 56–73 (2008) * (5) Gadár, L., Abonyi, J.: Explainable prediction of node labels in multilayer networks: a case study of turnover prediction in organizations. Scientific Reports 14(1), 9036 (2024) * (6) Holme, P., Saramäki, J.: Temporal networks. Physics reports 519(3), 97–125 (2012) * (7) Hong Kong Monetary Authority: Hong Kong as an International Financial Centre. <https://www.hkma.gov.hk/eng/key-functions/international-financial-centre/hong-kong-as-an-international-financial-centre/>. Accessed: 2024-08-18 * (8) Masuda, N., Lambiotte, R.: A guide to temporal networks. World Scientific (2016) * (9) Pastor-Satorras, R., Vespignani, A.: Epidemic spreading in scale-free networks. Physical review letters 86(14), 3200 (2001) * (10) Perrotta, D., Johnson, S.C., Theile, T., Grow, A., de Valk, H., Zagheni, E.: Openness to migrate internationally for a job: evidence from linkedin data in europe. In: Proceedings of the International AAAI Conference on Web and Social Media, vol. 16, pp. 759–769 (2022) * (11) State, B., Rodriguez, M., Helbing, D., Zagheni, E.: Migration of professionals to the us: Evidence from linkedin data. In: International Conference on Social Informatics, pp. 531–543. Springer (2014) * (12) Vardaman, J.M., Taylor, S.G., Allen, D.G., Gondo, M.B., Amis, J.M.: Translating intentions to behavior: The interaction of network structure and behavioral intentions in understanding employee turnover. Organization Science 26(4), 1177–1191 (2015) * (13) Younis, S., Ahsan, A., Chatteur, F.M.: An employee retention model using organizational network analysis for voluntary turnover. Social Network Analysis and Mining 13(1), 28 (2023)"
+    }
+  ]
+}

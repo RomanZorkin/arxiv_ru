@@ -1,0 +1,806 @@
+{
+  "title": "Can Large Language Model Predict Employee Attrition?",
+  "sections": [
+    {
+      "heading": "Report GitHub Issue",
+      "level": 5,
+      "content": [
+        {
+          "type": "paragraph",
+          "text": "Content selection saved. Describe the issue below:"
+        }
+      ],
+      "children": []
+    },
+    {
+      "heading": "Can Large Language Model Predict Employee Attrition?",
+      "level": 1,
+      "content": [],
+      "children": [
+        {
+          "heading": "Abstract.",
+          "level": 6,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "Employee attrition is a critical issue faced by organizations, with significant costs associated with turnover and the loss of valuable talent. Traditional methods for predicting attrition often rely on statistical techniques that, while useful, struggle to capture the complexity of modern workforces. Recent advancements in machine learning (ML) have provided more accurate, scalable solutions, allowing organizations to analyze diverse data points and predict attrition with greater precision. However, the emergence of large language models (LLMs) has opened new possibilities in human resource management by offering the ability to interpret contextual information from employee communications and detect subtle cues related to turnover."
+            },
+            {
+              "type": "paragraph",
+              "text": "In this paper, we leverage the IBM HR Analytics Employee Attrition dataset to evaluate the effectiveness of a fine-tuned GPT-3.5 model in comparison to traditional machine learning classifiers, including Logistic Regression, k-Nearest Neighbors (KNN), Support Vector Machine (SVM), Decision Tree, Random Forest, AdaBoost, and XGBoost. Our study focuses on assessing the predictive power, interpretability, and real-world applicability of each model. While traditional models offer ease of use and transparency, LLMs have the potential to uncover more nuanced patterns in employee behavior. Through our analysis, we aim to provide practical insights for organizations seeking to enhance their employee retention strategies with advanced predictive tools."
+            },
+            {
+              "type": "paragraph",
+              "text": "Our results show that the fine-tuned GPT-3.5 large language model (LLM) outperforms traditional machine learning approaches in terms of prediction accuracy, with an impressive precision of 0.91, recall of 0.94, and an F1-score of 0.92. In contrast, the best-performing traditional model, Support Vector Machine (SVM), achieved an F1-score of 0.82, while ensemble methods like Random Forest and XGBoost reached F1-scores of 0.80. These findings highlight the ability of GPT-3.5 to capture complex patterns in employee behavior and attrition risks, offering enhanced interpretability by identifying subtle linguistic cues and recurring themes. This demonstrates the potential of integrating LLMs into HR strategies to significantly improve predictive performance and decision-making in employee retention."
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "Keywords:",
+          "level": 6,
+          "content": [],
+          "children": []
+        },
+        {
+          "heading": "1. Introduction",
+          "level": 2,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "Employees are invaluable assets and investments for companies of all sizes, from small businesses to large multinational corporations. For instance, the average cost of a single interview in Switzerland is CHF 400, and the median cost to hire a skilled employee can reach CHF 9,738 ([Blatter et al., 2016](https://arxiv.org/html/2411.01353v1#bib.bib5)). While recruitment processes are designed to select the most suitable candidates, they do not always guarantee successful outcomes. Employee attrition has long been a challenge for human resource managers and employers, particularly in fast-growing economies ([Iqbal, 2010](https://arxiv.org/html/2411.01353v1#bib.bib14); [Alao and Adeyemo, 2013](https://arxiv.org/html/2411.01353v1#bib.bib3))."
+            },
+            {
+              "type": "paragraph",
+              "text": "Employee attrition is a multifaceted issue influenced by various factors that impact organizational performance. Common causes include the absence of career growth opportunities, inadequate compensation, and poor work-life balance, all of which contribute to dissatisfaction and burnout ([Latha, 2013](https://arxiv.org/html/2411.01353v1#bib.bib16); [Alao and Adeyemo, 2013](https://arxiv.org/html/2411.01353v1#bib.bib3)). Additionally, mismanagement, a mismatch between job responsibilities and employee skills, and cultural disconnects within the organization can further exacerbate turnover ([Pallathadka et al., 2022](https://arxiv.org/html/2411.01353v1#bib.bib19)). Employees may also leave due to better job offers, lack of recognition, unresolved workplace conflicts, or perceived job insecurity ([Raza et al., 2022](https://arxiv.org/html/2411.01353v1#bib.bib20); [Burgard et al., 2009](https://arxiv.org/html/2411.01353v1#bib.bib7)). Understanding these factors is crucial for organizations aiming to improve employee retention strategies."
+            },
+            {
+              "type": "paragraph",
+              "text": "Traditional approaches to predicting employee attrition typically involve the analysis of historical data using statistical methods to identify patterns and trends. These methods often require manual data analysis, such as reviewing exit interviews, employee surveys, and demographic information to detect common reasons for leaving. HR teams tend to focus on key indicators such as job tenure, performance reviews, and salary growth to assess the risk of turnover. However, these methods can be limited by their reliance on retrospective data and may struggle to capture the complexities of attrition dynamics in larger, more diverse workforces. They may also face challenges related to scalability and accuracy. Despite these limitations, traditional methods have served as foundational tools for understanding workforce trends and informing retention strategies before the advent of more advanced machine learning techniques."
+            },
+            {
+              "type": "paragraph",
+              "text": "To address these challenges, machine learning (ML) has gained traction as a more powerful method for employee attrition prediction. ML models can analyze vast amounts of data, uncover complex patterns, and make more accurate predictions than traditional approaches. By incorporating diverse data points, such as employee engagement levels, work performance, demographic characteristics, and external factors like market trends, ML models offer a more comprehensive view of attrition risks. These models—including classification algorithms like Logistic Regression, Decision Trees, Random Forests, and advanced techniques like XGBoost and neural networks—can continuously learn from new data, improving predictive performance over time."
+            },
+            {
+              "type": "paragraph",
+              "text": "Moreover, ML-based systems can handle large-scale, real-time data, making them highly adaptable to dynamic workforce environments. These systems can also detect early warning signs of attrition, enabling organizations to intervene proactively. By leveraging these predictive capabilities, businesses can take targeted actions, such as personalizing employee development programs, adjusting compensation structures, or addressing disengagement issues. In this way, ML offers a forward-looking, data-driven solution that empowers organizations to mitigate employee turnover and maintain a competitive edge in talent retention."
+            },
+            {
+              "type": "paragraph",
+              "text": "Recently, large language models (LLMs) have emerged as powerful tools in diverse fields, from natural language processing ([Achiam et al., 2023](https://arxiv.org/html/2411.01353v1#bib.bib2); [Team et al., 2023](https://arxiv.org/html/2411.01353v1#bib.bib22); [Touvron et al., 2023](https://arxiv.org/html/2411.01353v1#bib.bib23)) to scientific research ([Chen et al., 2023b](https://arxiv.org/html/2411.01353v1#bib.bib11); [Ding et al., 2023](https://arxiv.org/html/2411.01353v1#bib.bib13); [Chen et al., 2023a](https://arxiv.org/html/2411.01353v1#bib.bib10)), and their applications are now expanding into human resource management. LLMs enable organizations to go beyond numerical data and tap into the contextual richness present in employee communications. These models can analyze subtle linguistic patterns, shifts in tone, or recurring themes in employee communications to detect potential attrition risks. This deeper understanding of employee sentiment allows HR professionals to make more informed decisions about retention strategies. As LLMs continue to advance, their integration into employee attrition prediction models offers the potential to significantly enhance accuracy, scalability, and interpretability, thereby transforming workforce retention practices."
+            },
+            {
+              "type": "paragraph",
+              "text": "Despite the advantages of LLMs, their effectiveness in employee attrition prediction is still under scrutiny. In this work, we use the widely recognized IBM HR Analytics Employee Attrition dataset to compare the performance of a fine-tuned GPT-3.5 model with classic machine learning models, including Logistic Regression, k-Nearest Neighbors (KNN), Support Vector Machine (SVM), Decision Tree, Random Forest, AdaBoost, and XGBoost."
+            },
+            {
+              "type": "paragraph",
+              "text": "Our objective is to evaluate the predictive capabilities of the LLM against these traditional classifiers, with a particular focus on accuracy, interpretability, and real-world applicability. While traditional models have long been favored for attrition prediction due to their simplicity and interpretability, LLMs have the potential to uncover more complex patterns in employee behavior. This study aims to determine whether fine-tuned LLMs can outperform or complement traditional methods and provide unique insights into the drivers of employee turnover."
+            },
+            {
+              "type": "paragraph",
+              "text": "By evaluating the strengths and weaknesses of each model, we aim to offer practical guidance for organizations seeking to integrate advanced predictive tools into their human resource strategies. Additionally, we explore how model interpretability—crucial in HR decisions—differs across approaches, particularly in terms of transparency and decision-making between LLMs and more conventional machine learning methods."
+            },
+            {
+              "type": "paragraph",
+              "text": "The remainder of this paper is organized as follows. Section 2 provides an overview of existing research on employee attrition prediction, focusing on both traditional machine learning models and recent applications of large language models (LLMs). We discuss the strengths and limitations of various approaches and highlight the research gap that this study aims to address. Section 3 describes the IBM HR Analytics Employee Attrition dataset used in our analysis. We outline the key attributes of the dataset, including employee demographics, job satisfaction, and performance indicators. We also discuss the preprocessing steps, such as data cleaning, handling missing values, encoding categorical features, and normalizing the data to prepare it for model training. Section 4 details the methodology used to train and evaluate both the traditional machine learning models and the fine-tuned GPT-3.5 model. We explain the parameter tuning process, feature selection, and model training strategies. Additionally, we describe the evaluation metrics used to compare model performance, such as accuracy, precision, recall, and F1-score, as well as considerations for model interpretability. Section 5 presents the results of our experiments, comparing the performance of each model on the employee attrition prediction task. We provide a detailed analysis of the strengths and weaknesses of both traditional machine learning models and the LLM in terms of predictive accuracy, interpretability, and practical applicability in HR decision-making."
+            },
+            {
+              "type": "paragraph",
+              "text": "The main contributions of this paper are as follows:"
+            },
+            {
+              "type": "list",
+              "text": "* • detailed steps in processing the IBM HR Analytics Employee Attrition dataset for ML and LLM training. * • the pioneering effort to fine-tune GPT model for the task of employee attrition. * • practical insights for ML approach in HR Management."
+            },
+            {
+              "type": "paragraph",
+              "text": "detailed steps in processing the IBM HR Analytics Employee Attrition dataset for ML and LLM training."
+            },
+            {
+              "type": "paragraph",
+              "text": "the pioneering effort to fine-tune GPT model for the task of employee attrition."
+            },
+            {
+              "type": "paragraph",
+              "text": "practical insights for ML approach in HR Management."
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "2. Background",
+          "level": 2,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "This section provides background information on employee attrition and large language models."
+            }
+          ],
+          "children": [
+            {
+              "heading": "2.1. Employee Attrition",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "Employee attrition refers to the voluntary or involuntary departure of employees from an organization, and it is a significant concern for businesses due to its impact on operational efficiency and costs. High attrition rates can disrupt productivity, increase the financial burden of hiring and training new employees, and negatively affect overall employee morale. Attrition can be categorized into two main types: voluntary attrition, where employees leave by their own choice (e.g., for a better opportunity or dissatisfaction with the current role), and involuntary attrition, where the employer terminates the employee’s contract due to factors like poor performance or organizational restructuring."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Several factors contribute to employee attrition. These may include personal reasons such as lack of career development opportunities, inadequate compensation, poor work-life balance, and limited recognition for accomplishments. Organizational factors, such as unsatisfactory leadership, misalignment between job responsibilities and employee skills, toxic workplace culture, and perceived job insecurity, are also major drivers of turnover ([Pallathadka et al., 2022](https://arxiv.org/html/2411.01353v1#bib.bib19)). External factors, including changes in the job market or better offers from competing firms, further exacerbate this issue ([Raza et al., 2022](https://arxiv.org/html/2411.01353v1#bib.bib20))."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "For organizations, the consequences of attrition extend beyond the cost of replacing employees. The hiring process itself is expensive and time-consuming, as it involves recruitment, interviews, onboarding, and training. Additionally, the loss of experienced employees can lead to a temporary decline in organizational knowledge and productivity, especially if the departing employees hold critical positions. According to a 2016 report by the Society for Human Resource Management, the average cost of hiring a new employee exceeds $4,000, and the average annual turnover rate in the U.S. is estimated at 19% ([Blatter et al., 2016](https://arxiv.org/html/2411.01353v1#bib.bib5)). Therefore, predicting and preventing employee attrition has become a strategic priority for HR departments, prompting the development of more advanced analytical techniques to identify at-risk employees and implement targeted retention strategies."
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "2.2. Employee Attrition Prediction Approach",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "Traditional methods for predicting employee attrition involve manual analysis of historical data, such as exit interviews and performance reviews. However, these approaches are limited in scope, accuracy, and scalability, especially for large organizations with complex dynamics. Machine learning (ML) has emerged as a more advanced solution, offering higher accuracy and adaptability. ML algorithms can analyze large volumes of data, identifying complex, non-linear relationships between employee characteristics and turnover risks. Common ML techniques for attrition prediction include Logistic Regression, Decision Trees, Random Forests, and more advanced methods like Support Vector Machines and XGBoost. These models process various structured data points, including employee demographics, tenure, and performance evaluations, while also incorporating external factors such as market trends and economic conditions. This comprehensive approach allows organizations to build more robust predictive models. Several studies ([Raza et al., 2022](https://arxiv.org/html/2411.01353v1#bib.bib20); [Alduayj and Rajpoot, 2018](https://arxiv.org/html/2411.01353v1#bib.bib4); [Jain et al., 2020](https://arxiv.org/html/2411.01353v1#bib.bib15)) have demonstrated the efficacy of different ML approaches in predicting employee attrition."
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "2.3. Large Language Models",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "Large Language Models (LLMs) have revolutionized Natural Language Processing (NLP) since the introduction of transformer-based models by Vaswani et al. ([Vaswani, 2017](https://arxiv.org/html/2411.01353v1#bib.bib24)) in 2017. These models employ self-attention mechanisms to effectively capture long-range dependencies in text, outperforming traditional recurrent neural networks. The multi-head attention architecture enables parallel processing of multiple attention patterns, addressing issues like vanishing gradients and improving scalability. LLMs, built on transformer principles, are trained on vast datasets to model complex language distributions. Their exceptional performance in NLP ([Achiam et al., 2023](https://arxiv.org/html/2411.01353v1#bib.bib2); [Chen et al., 2024a](https://arxiv.org/html/2411.01353v1#bib.bib8)) and scientific applications ([Chen et al., 2024b](https://arxiv.org/html/2411.01353v1#bib.bib9); [Chen et al., 2022](https://arxiv.org/html/2411.01353v1#bib.bib12)) has led to increased exploration of their potential in human resource management, including applications in management consulting ([Mohan, 2024](https://arxiv.org/html/2411.01353v1#bib.bib18)), HR chatbots ([Singh, 2023](https://arxiv.org/html/2411.01353v1#bib.bib21)), and employee development ([Budhwar et al., 2023](https://arxiv.org/html/2411.01353v1#bib.bib6))."
+                }
+              ],
+              "children": []
+            }
+          ]
+        },
+        {
+          "heading": "3. Dataset Prepare",
+          "level": 2,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "This section introduces the dataset used in this work. We performed different analyses to present the data from different perspectives and detailed our methods to process the data for machine learning model training and testing."
+            }
+          ],
+          "children": [
+            {
+              "heading": "3.1. Dataset Introducation",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "The IBM HR Analytics Employee Attrition & Performance dataset is a well-structured collection of employee data aimed at identifying factors contributing to employee attrition. It contains detailed information on 1,470 employees, with 35 different attributes that offer a comprehensive overview of various aspects related to employee performance, demographics, and job satisfaction. This dataset provides a valuable foundation for HR analytics and predictive modeling, making it suitable for machine learning tasks focused on employee attrition prediction. The dataset has below basic characteristics:"
+                },
+                {
+                  "type": "list",
+                  "text": "* • Size: The dataset consists of 1,470 rows, each representing a unique employee, and 35 columns, each capturing specific attributes related to employee demographics, job roles, and performance metrics. * • Format: The dataset is provided in CSV format, making it easily accessible and compatible with most data processing tools and machine learning libraries. * • Missing Values: The dataset contains no missing values, with all columns having 1,470 non-null entries. This ensures data integrity and eliminates the need for extensive data cleaning, allowing for a more straightforward preprocessing pipeline."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Size: The dataset consists of 1,470 rows, each representing a unique employee, and 35 columns, each capturing specific attributes related to employee demographics, job roles, and performance metrics."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Format: The dataset is provided in CSV format, making it easily accessible and compatible with most data processing tools and machine learning libraries."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Missing Values: The dataset contains no missing values, with all columns having 1,470 non-null entries. This ensures data integrity and eliminates the need for extensive data cleaning, allowing for a more straightforward preprocessing pipeline."
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "3.2. Key Features",
+              "level": 3,
+              "content": [
+                {
+                  "type": "table",
+                  "text": "| Category | Features | | --- | --- | | Demographic Information | Age, Gender, Marital Status, Education, Education Field | | Job-related Attributes | Department, Job Role, Job Level, Job Involvement, Job Satisfaction, Years at Company, Years in Current Role, Years Since Last Promotion, Years with Current Manager | | Compensation and Benefits | Daily Rate, Hourly Rate, Monthly Income, Monthly Rate, Percent Salary Hike, Stock Option Level | | Performance Metrics | Performance Rating, Training Times Last Year | | Work Environment Factors | Business Travel, Environment Satisfaction, Work-Life Balance, Overtime | | Other Relevant Information | Distance from Home, Relationship Satisfaction, Total Working Years, Number of Companies Worked | | Target Variable | Attrition (Yes/No) |"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "The IBM HR Analytics Employee Attrition & Performance dataset, as summarized in Table [1](https://arxiv.org/html/2411.01353v1#S3.T1 \"Table 1 ‣ 3.2. Key Features ‣ 3. Dataset Prepare ‣ Can Large Language Model Predict Employee Attrition?\"), provides a comprehensive set of features for analyzing factors contributing to employee attrition. The dataset encompasses a wide array of information, from basic demographic data (such as age, gender, and marital status) to detailed job-related attributes (including department, job role, and tenure metrics). Additionally, it contains data on compensation, benefits, performance metrics, and work environment factors. Notably, features related to employee satisfaction, such as job satisfaction, work-life balance, and relationship satisfaction, offer insights into the non-monetary aspects of employee experience. Other variables like distance from home and the number of companies previously worked for may highlight less obvious influences on attrition. With attrition as the binary target variable, this feature set enables robust analysis and predictive modeling, helping HR professionals better understand and manage employee turnover."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Table [2](https://arxiv.org/html/2411.01353v1#S3.T2 \"Table 2 ‣ 3.2. Key Features ‣ 3. Dataset Prepare ‣ Can Large Language Model Predict Employee Attrition?\") presents descriptive statistics for key numerical features in the dataset, which may influence employee attrition. Each feature is described by its count, mean, standard deviation, and percentiles (minimum, 25th, 50th, 75th, and maximum values)."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "For example, the average employee age in the dataset is approximately 36.92 years, with a standard deviation of 9.14 years, while monthly income has a mean of $6,502.93, ranging from $1,009 to $19,999. These statistics provide a snapshot of the dataset’s distribution and will serve as the foundation for our predictive modeling of employee attrition patterns."
+                },
+                {
+                  "type": "table",
+                  "text": "| Feature | Count | Mean | Std | Min | 25% | 50% | 75% | Max | | --- | --- | --- | --- | --- | --- | --- | --- | --- | | Age | 1470 | 36.92 | 9.14 | 18 | 30 | 36 | 43 | 60 | | Daily Rate | 1470 | 802.49 | 403.51 | 102 | 465 | 802 | 1157 | 1499 | | Distance from Home | 1470 | 9.19 | 8.11 | 1 | 2 | 7 | 14 | 29 | | Education | 1470 | 2.91 | 1.02 | 1 | 2 | 3 | 4 | 5 | | Monthly Income | 1470 | 6502.93 | 4707.96 | 1009 | 2911 | 4919 | 8379 | 19999 | | Number of Companies Worked | 1470 | 2.69 | 2.50 | 0 | 1 | 2 | 4 | 9 | | Percent Salary Hike | 1470 | 15.21 | 3.66 | 11 | 12 | 14 | 18 | 25 | | Total Working Years | 1470 | 11.28 | 7.78 | 0 | 6 | 10 | 15 | 40 | | Training Times Last Year | 1470 | 2.80 | 1.29 | 0 | 2 | 3 | 3 | 6 | | Years at Company | 1470 | 7.01 | 6.13 | 0 | 3 | 5 | 9 | 40 | | Years in Current Role | 1470 | 4.23 | 3.62 | 0 | 2 | 3 | 7 | 18 | | Years Since Last Promotion | 1470 | 2.19 | 3.22 | 0 | 0 | 1 | 3 | 15 | | Years with Current Manager | 1470 | 4.12 | 3.57 | 0 | 2 | 3 | 7 | 17 |"
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "3.3. Data Cleaning and Reduction",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "To ensure the dataset is clean and relevant for our analysis, we performed several preprocessing steps. First, the dataset, which contains a variety of employee attributes, was loaded. Some of these attributes were redundant or not useful for predicting employee attrition."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "We reduced the dataset by removing the following features:"
+                },
+                {
+                  "type": "list",
+                  "text": "* • EmployeeCount: This feature is a constant value for all entries and thus provides no useful information for predictive modeling. * • StandardHours: Similar to EmployeeCount, this column contains the same value for every employee and does not contribute to the variability needed for classification tasks. * • Over18: This feature contains only a single value (“Yes”) across all instances, which does not provide any useful distinction between employees. * • EmployeeNumber: This is simply an identifier for each employee and does not influence the outcome of attrition prediction."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "EmployeeCount: This feature is a constant value for all entries and thus provides no useful information for predictive modeling."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "StandardHours: Similar to EmployeeCount, this column contains the same value for every employee and does not contribute to the variability needed for classification tasks."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Over18: This feature contains only a single value (“Yes”) across all instances, which does not provide any useful distinction between employees."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "EmployeeNumber: This is simply an identifier for each employee and does not influence the outcome of attrition prediction."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "By removing these features, we eliminated unnecessary columns and reduced the dimensionality of the data, which can improve the model’s performance by focusing only on the relevant attributes. This step is crucial for ensuring that the model is not overfitting on irrelevant or redundant data."
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "3.4. Data Analysis",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "Data Balance. Figure [1](https://arxiv.org/html/2411.01353v1#S3.F1 \"Figure 1 ‣ 3.4. Data Analysis ‣ 3. Dataset Prepare ‣ Can Large Language Model Predict Employee Attrition?\") illustrates the distribution of employee attrition within the dataset after cleaning and reduction. The majority of employees, 83.9%, have not left the company, while only 16.1% have. This substantial imbalance in the attrition classes highlights the need to address class imbalance when building predictive models."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "In particular, techniques such as oversampling the minority class or applying specialized algorithms for imbalanced data may be necessary to ensure that the model does not develop a bias towards predicting the majority class. Furthermore, the imbalance suggests that employee attrition is relatively uncommon, which could indicate either successful employee retention strategies or natural tendencies within the workforce."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Frequency Distribution. To better understand the distribution of the numerical features in the dataset, we generated the histogram plot to provide insights into the data distributions. A histogram visualizes the frequency distribution of a feature by dividing the data into bins. The height of each bin represents the number of observations that fall within the corresponding range of values. This helps to identify skewness and the overall spread of the data. Figure [2](https://arxiv.org/html/2411.01353v1#S3.F2 \"Figure 2 ‣ 3.4. Data Analysis ‣ 3. Dataset Prepare ‣ Can Large Language Model Predict Employee Attrition?\") listed the features that have skewness issue."
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "3.5. Skewed Data Handling",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "Figure [2](https://arxiv.org/html/2411.01353v1#S3.F2 \"Figure 2 ‣ 3.4. Data Analysis ‣ 3. Dataset Prepare ‣ Can Large Language Model Predict Employee Attrition?\") illustrated features that have skewed issues. In our dataset, several numerical features exhibited right-skewed distributions, where the majority of the data points are concentrated on the lower end of the scale, with a long tail extending to the right. Right-skewed distributions are common when certain features, such as income or years of experience, have a small number of very large values that disproportionately influence the distribution."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Skewed data can pose significant challenges in predictive modeling. Many machine learning algorithms, especially linear models and algorithms that assume normally distributed data, can be sensitive to skewness. Highly skewed features can result in models that are less accurate or biased toward the skewed data. By addressing skewness, we ensure that our models perform more effectively by learning from data that is better distributed, leading to more accurate predictions."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "To address the issue of right-skewness, we applied a logarithmic transformation to the affected features. For each numerical feature with a skewness greater than 0.5, we performed a log transformation using the log⁡(1+x)\\log(1+x) function. This method helps reduce skewness by compressing large values and spreading out smaller ones, bringing the distribution closer to normal. After applying the transformation, the features exhibit a more symmetric distribution, improving the model’s ability to generalize and make accurate predictions."
+                },
+                {
+                  "type": "formula",
+                  "text": "log⁡(1+x)\\log(1+x)"
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "3.6. Feature Engineering",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "To enhance the predictive power of the model and simplify the dataset, feature engineering was performed by creating two new composite features: WorkExperience and OverallSatisfaction. These features encapsulate important aspects of employees’ work experience and satisfaction, reducing redundancy in the dataset while maintaining essential information for modeling."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "The WorkExperience feature was derived by averaging several key experience-related variables, including TotalWorkingYears, YearsAtCompany, YearsInCurrentRole, YearsSinceLastPromotion, and YearsWithCurrManager. By consolidating these columns, a single metric representing an employee’s overall work experience was generated, simplifying the data without losing critical information."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Similarly, the OverallSatisfaction feature was created by averaging the JobSatisfaction, EnvironmentSatisfaction, RelationshipSatisfaction, and WorkLifeBalance columns. This new feature provides a comprehensive measure of an employee’s satisfaction with both their job and work environment."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "After generating these new features, the original columns used to create them were removed from the dataset. This step helped to reduce redundancy and improve the dataset’s efficiency, ensuring that the key information necessary for predictive modeling was retained in a more streamlined form."
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "3.7. Categorical Encoding",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "To prepare the categorical features for modeling, we applied label encoding to all categorical variables. Label encoding converts categorical values into numerical representations, which are required by most machine learning algorithms. Specifically, we identified the categorical columns in the dataset and used the LabelEncoder class from the sklearn library to encode each column. This process ensured that categorical features such as Department and JobRole were transformed into numerical values, enabling the machine learning model to process them effectively."
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "3.8. Train-Test Splitting",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "Once the data was prepared, we split it into training and test sets to evaluate the performance of the model. Using the train\\_test\\_split function from sklearn, we partitioned the dataset, reserving 80% of the data for training and 20% for testing. The target variable, Attrition, was stratified to ensure that the class distribution in the training and test sets remained consistent."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "The resulting split produced 1176 samples for training and 294 samples for testing, as shown in the following output:"
+                },
+                {
+                  "type": "list",
+                  "text": "* • X\\_train shape: (1176, 24) * • X\\_test shape: (294, 24) * • y\\_train shape: (1176,) * • y\\_test shape: (294,)"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "X\\_train shape: (1176, 24)"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "X\\_test shape: (294, 24)"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "y\\_train shape: (1176,)"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "y\\_test shape: (294,)"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "This splitting ensures that the model can be trained on the larger portion of the data while being evaluated on a separate, unseen test set, providing an accurate assessment of the model’s generalization performance."
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "3.9. Feature Scaling",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "Before training our machine learning model, it was essential to standardize the features to ensure that they are on the same scale. Standardization transforms features so that they have a mean of zero and a standard deviation of one. This process is particularly important for models that are sensitive to the magnitude of the input features, such as logistic regression and support vector machines. By standardizing the features, we ensure that the model does not place undue emphasis on features with larger ranges or units, which could negatively impact the performance of the model."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "The training data was used to compute the scaling factors (mean and standard deviation), and these factors were applied consistently to both the training and test datasets. This ensures that the model generalizes well to unseen data while maintaining consistency across datasets."
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "3.10. Imbalanced Data Handling",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "Our dataset exhibited a significant class imbalance, with the number of non-attrition cases far outnumbering the attrition cases. Imbalanced datasets can lead to biased models that perform well on the majority class but poorly on the minority class, which in our case is employee attrition. To address this imbalance, we applied the Synthetic Minority Over-sampling Technique (SMOTE)."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "SMOTE generates synthetic samples of the minority class by interpolating between existing samples, effectively increasing the number of minority class instances and balancing the class distribution. Before applying SMOTE, the training dataset contained 986 non-attrition samples and 190 attrition samples. After oversampling, the dataset was balanced, with 986 samples for each class."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "This balancing process ensures that the model has equal exposure to both classes, improving its ability to accurately detect instances of employee attrition and reducing bias toward the majority class. As a result, the model is better equipped to generalize to real-world scenarios where both classes are important."
+                }
+              ],
+              "children": []
+            }
+          ]
+        },
+        {
+          "heading": "4. Experiment",
+          "level": 2,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "This section details the experiments, covering model selection and result comparisons."
+            }
+          ],
+          "children": [
+            {
+              "heading": "4.1. Classic Models Used for Attrition Prediction",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "To build a robust and accurate predictive model for employee attrition, we employed a diverse set of machine learning algorithms. Each of these models offers unique strengths and approaches to classification, allowing us to compare their performance and identify the most suitable method for our dataset. The following models were used in our analysis:"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Logistic Regression estimates class probabilities using a logistic function on input features. This sklearn implementation uses default parameters: L2 regularization with C=1.0, ’lbfgs’ solver, and no penalty. It offers interpretable predictions by revealing feature contributions. The model is trained on X\\_train and y\\_train, then used to predict both training and test data outcomes."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "K-Nearest Neighbors (KNN) is a non-parametric algorithm classifying instances based on proximity to neighbors in feature space. We used 10 neighbors, uniform weights, and Minkowski distance (p=2, equivalent to Euclidean). The algorithm choice is automatic, with a leaf size of 50 for optimized tree searches. KNN works well for non-linear boundaries in smaller datasets but is sensitive to distance metrics and k values."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Support Vector Machine (SVM) finds the optimal hyperplane to separate classes in feature space. This implementation uses an RBF kernel with C=200, gamma=’scale’, and degree=5. It employs a ’one-vs-rest’ decision function, tolerance of 0.1, and no probability estimates. SVM excels in high-dimensional spaces and can handle non-linear classification through kernel functions. It’s particularly effective for datasets with clear class separation."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Decision Tree Classifier creates a tree structure by splitting data based on feature value. Decision Trees are easy to interpret and visualize but can be prone to overfitting, especially with small datasets. We limited tree depth to 5 levels, preventing overfitting."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Random Forest combines multiple decision trees to improve accuracy and reduce overfitting. Our implementation uses 200 trees, each with a maximum depth of 5. It employs ’sqrt’ max\\_features, selecting the square root of total features for each split. By averaging predictions from diverse trees, Random Forest handles complex feature relationships and outperforms single decision trees."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "AdaBoost Classifier combines weak classifiers to create a strong one, focusing on misclassified instances. Our implementation uses 150 estimators with a learning rate of 0.01. It employs the ’SAMME’ algorithm for multiclass problems. AdaBoost iteratively adjusts instance weights, improving overall accuracy and reducing bias. It’s effective for moderately complex datasets, balancing between weak classifiers to form a robust ensemble."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "XGBoost (Extreme Gradient Boosting) is an advanced gradient boosting implementation. Our configuration uses binary logistic regression for classification, with a learning rate of 0.01 and 350 estimators. Tree depth is limited to 3, and ’sqrt’ max\\_features is employed. XGBoost combines regularization and optimized computation, excelling in speed and accuracy for large, imbalanced datasets. Its flexibility allows for fine-tuning across various machine learning tasks."
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "4.2. GPT Model for Attrition Prediction",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "GPT-3.5 Turbo is a large language model that leverages the transformer architecture to perform predictive tasks. While it is predominantly used in natural language processing tasks, GPT-3.5 can be fine-tuned for various prediction and classification problems, including employee attrition prediction. We followed the process described in ([Liga and Robaldo, 2023](https://arxiv.org/html/2411.01353v1#bib.bib17)) to fine-tune GPT-3.5 turbo using prompt-response pairs constructed by the training set."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Data prepare. We constructed a JSONL format data, in which each line is a prompt-response pair for the model to learn from."
+                },
+                {
+                  "type": "code",
+                  "text": "{\n    \"prompt\": \"Analyze the employee information and\n    predict employee turnover: {Employee_Info}\",\n    \"completion\": \"{Attrition_result}\"\n}"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "GPT-3.5 Turbo Fine-tuning. We used the OpenAI library and API to fine-tune the GPT model with our data. We set the m​a​x​\\_​t​o​k​e​nmax\\\\_token to be 50 to save the cost as our predicted results are y​e​syes or n​ono."
+                },
+                {
+                  "type": "formula",
+                  "text": "m​a​x​_​t​o​k​e​nmax\\_token"
+                },
+                {
+                  "type": "formula",
+                  "text": "y​e​syes"
+                },
+                {
+                  "type": "formula",
+                  "text": "n​ono"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Inference. To generate predictions, we passed the test set to the fine-tuned GPT model using its fine-tuned ID."
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "4.3. Evaluation Metrics",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "To evaluate the predictive models’ performance, we used the classification metrics precision, recall, and F1-score, as defined in Equations [1](https://arxiv.org/html/2411.01353v1#S4.E1 \"In 4.3. Evaluation Metrics ‣ 4. Experiment ‣ Can Large Language Model Predict Employee Attrition?\"), [2](https://arxiv.org/html/2411.01353v1#S4.E2 \"In 4.3. Evaluation Metrics ‣ 4. Experiment ‣ Can Large Language Model Predict Employee Attrition?\"), and [3](https://arxiv.org/html/2411.01353v1#S4.E3 \"In 4.3. Evaluation Metrics ‣ 4. Experiment ‣ Can Large Language Model Predict Employee Attrition?\"):"
+                },
+                {
+                  "type": "table",
+                  "text": "| | | | | | --- | --- | --- | --- | | (1) | | Precision=True PositivesTrue Positives+False Positives\\text{Precision}=\\frac{\\text{True Positives}}{\\text{True Positives}+\\text{False Positives}} | |"
+                },
+                {
+                  "type": "formula",
+                  "text": "Precision=True PositivesTrue Positives+False Positives\\text{Precision}=\\frac{\\text{True Positives}}{\\text{True Positives}+\\text{False Positives}}"
+                },
+                {
+                  "type": "table",
+                  "text": "| | | | | | --- | --- | --- | --- | | (2) | | Recall=True PositivesTrue Positives+False Negatives\\text{Recall}=\\frac{\\text{True Positives}}{\\text{True Positives}+\\text{False Negatives}} | |"
+                },
+                {
+                  "type": "formula",
+                  "text": "Recall=True PositivesTrue Positives+False Negatives\\text{Recall}=\\frac{\\text{True Positives}}{\\text{True Positives}+\\text{False Negatives}}"
+                },
+                {
+                  "type": "table",
+                  "text": "| | | | | | --- | --- | --- | --- | | (3) | | F1-Score=2⋅Precision⋅RecallPrecision+Recall\\text{F1-Score}=2\\cdot\\frac{\\text{Precision}\\cdot\\text{Recall}}{\\text{Precision}+\\text{Recall}} | |"
+                },
+                {
+                  "type": "formula",
+                  "text": "F1-Score=2⋅Precision⋅RecallPrecision+Recall\\text{F1-Score}=2\\cdot\\frac{\\text{Precision}\\cdot\\text{Recall}}{\\text{Precision}+\\text{Recall}}"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "These metrics allow us to evaluate the trade-offs between precision and recall and help in determining the best performing model for employee attrition prediction."
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "4.4. Results",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "The comparative analysis of various machine learning models for this classification task revealed intriguing insights, as listed in Table [3](https://arxiv.org/html/2411.01353v1#S4.T3 \"Table 3 ‣ 4.4. Results ‣ 4. Experiment ‣ Can Large Language Model Predict Employee Attrition?\"). The fine-tuned GPT-3.5 model emerged as the superior performer, achieving exceptional metrics with a precision of 0.91, recall of 0.94, and an F1-score of 0.92. This performance significantly outpaced traditional machine learning algorithms, underscoring the potential of large language models in classification tasks when properly fine-tuned. Among conventional models, Support Vector Machine (SVM) demonstrated the strongest performance with an F1-score of 0.82, followed closely by ensemble methods such as Random Forest and XGBoost, both achieving an F1-score of 0.80. Logistic Regression and AdaBoost showed comparable efficacy with F1-scores of 0.78 and 0.79 respectively, while K-Nearest Neighbors (KNN) exhibited the lowest performance with an F1-score of 0.71. These results highlight the robust performance of ensemble methods and the particular suitability of SVM for this dataset. The marked superiority of the fine-tuned GPT-3.5 model suggests promising avenues for leveraging advanced language models in classification tasks, potentially revolutionizing approaches to similar problems in the field."
+                },
+                {
+                  "type": "table",
+                  "text": "| Model | Precision | Recall | F1-score | | --- | --- | --- | --- | | Logistic Regression | 0.84 | 0.76 | 0.78 | | KNN | 0.80 | 0.66 | 0.71 | | SVM | 0.81 | 0.83 | 0.82 | | Decision Tree | 0.83 | 0.78 | 0.80 | | Random Forest | 0.82 | 0.80 | 0.80 | | AdaBoost | 0.82 | 0.77 | 0.79 | | XGBoost | 0.80 | 0.80 | 0.80 | | GPT 3.5 Fine-tuned | 0.91 | 0.94 | 0.92 |"
+                }
+              ],
+              "children": []
+            }
+          ]
+        },
+        {
+          "heading": "5. Conclusion",
+          "level": 2,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "In this study, we explored the performance of various machine learning models for the task of employee attrition prediction, comparing traditional algorithms with the fine-tuned GPT-3.5 model. Our experiments demonstrated that the fine-tuned GPT-3.5 model significantly outperformed conventional machine learning techniques, achieving the highest precision, recall, and F1-score. This result underscores the potential of large language models in classification tasks, particularly when fine-tuned for domain-specific data."
+            },
+            {
+              "type": "paragraph",
+              "text": "Among traditional models, Support Vector Machine (SVM) exhibited the strongest performance, followed closely by ensemble methods such as Random Forest and XGBoost. These models also showed competitive results, validating their efficacy for this type of classification problem. However, simpler models like Logistic Regression and K-Nearest Neighbors (KNN) demonstrated lower predictive power, particularly in capturing the complexity of the data."
+            },
+            {
+              "type": "paragraph",
+              "text": "The superior performance of GPT-3.5 highlights the growing role that advanced language models can play in solving classification tasks beyond natural language processing. As machine learning techniques evolve, integrating large language models into predictive analytics pipelines holds immense potential for enhancing decision-making processes in fields like human resource management."
+            },
+            {
+              "type": "paragraph",
+              "text": "Future work could further explore the impact of different feature subsets on model performance for a comprehensive understanding of the factors influencing model performance. Additionally, investigating the interpretability of these models in real-world applications will be crucial for their broader adoption in business and operational environments. Overall, this study demonstrates the advantages of leveraging LLMs in classification tasks and points to promising avenues for future research in this area."
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "References",
+          "level": 2,
+          "content": [
+            {
+              "type": "list",
+              "text": "* Achiam et al. (2023) Josh Achiam, Steven Adler, Sandhini Agarwal, Lama Ahmad, Ilge Akkaya, Florencia Leoni Aleman, Diogo Almeida, Janko Altenschmidt, Sam Altman, Shyamal Anadkat, et al. 2023. Gpt-4 technical report. *arXiv preprint arXiv:2303.08774* (2023). * Alao and Adeyemo (2013) DABA Alao and AB Adeyemo. 2013. Analyzing employee attrition using decision tree algorithms. *Computing, Information Systems, Development Informatics and Allied Research Journal* 4, 1 (2013), 17–28. * Alduayj and Rajpoot (2018) Sarah S Alduayj and Kashif Rajpoot. 2018. Predicting employee attrition using machine learning. In *2018 international conference on innovations in information technology (iit)*. IEEE, 93–98. * Blatter et al. (2016) Marc Blatter, Samuel Muehlemann, Samuel Schenker, and Stefan C Wolter. 2016. Hiring costs for skilled workers and the supply of firm-provided training. *Oxford Economic Papers* 68, 1 (2016), 238–257. * Budhwar et al. (2023) Pawan Budhwar, Soumyadeb Chowdhury, Geoffrey Wood, Herman Aguinis, Greg J Bamber, Jose R Beltran, Paul Boselie, Fang Lee Cooke, Stephanie Decker, Angelo DeNisi, et al. 2023. Human resource management in the age of generative artificial intelligence: Perspectives and research directions on ChatGPT. *Human Resource Management Journal* 33, 3 (2023), 606–659. * Burgard et al. (2009) Sarah A Burgard, Jennie E Brand, and James S House. 2009. Perceived job insecurity and worker health in the United States. *Social science & medicine* 69, 5 (2009), 777–785. * Chen et al. (2024a) Le Chen, Nesreen K Ahmed, Akash Dutta, Arijit Bhattacharjee, Sixing Yu, Quazi Ishtiaque Mahmud, Waqwoya Abebe, Hung Phan, Aishwarya Sarkar, Branden Butler, et al. 2024a. The Landscape and Challenges of HPC Research and LLMs. *CoRR* (2024). * Chen et al. (2024b) Le Chen, Arijit Bhattacharjee, Nesreen Ahmed, Niranjan Hasabnis, Gal Oren, Vy Vo, and Ali Jannesari. 2024b. Ompgpt: A generative pre-trained transformer model for openmp. In *European Conference on Parallel Processing*. Springer, 121–134. * Chen et al. (2023a) Le Chen, Xianzhong Ding, Murali Emani, Tristan Vanderbruggen, Pei-Hung Lin, and Chunhua Liao. 2023a. Data race detection using large language models. In *Proceedings of the SC’23 Workshops of The International Conference on High Performance Computing, Network, Storage, and Analysis*. 215–223. * Chen et al. (2023b) Le Chen, Pei-Hung Lin, Tristan Vanderbruggen, Chunhua Liao, Murali Emani, and Bronis De Supinski. 2023b. Lm4hpc: Towards effective language model application in high-performance computing. In *International Workshop on OpenMP*. Springer, 18–33. * Chen et al. (2022) Le Chen, Quazi Ishtiaque Mahmud, and Ali Jannesari. 2022. Multi-view learning for parallelism discovery of sequential programs. In *2022 IEEE International Parallel and Distributed Processing Symposium Workshops (IPDPSW)*. IEEE, 295–303. * Ding et al. (2023) Xianzhong Ding, Le Chen, Murali Emani, Chunhua Liao, Pei-Hung Lin, Tristan Vanderbruggen, Zhen Xie, Alberto Cerpa, and Wan Du. 2023. Hpc-gpt: Integrating large language model for high-performance computing. In *Proceedings of the SC’23 Workshops of The International Conference on High Performance Computing, Network, Storage, and Analysis*. 951–960. * Iqbal (2010) Adnan Iqbal. 2010. Employee turnover: Causes, consequences and retention strategies in the Saudi organizations. *The Business Review, Cambridge* 16, 2 (2010), 275–281. * Jain et al. (2020) Praphula Kumar Jain, Madhur Jain, and Rajendra Pamula. 2020. Explaining and predicting employees’ attrition: a machine learning approach. *SN Applied Sciences* 2, 4 (2020), 757. * Latha (2013) K Lavanya Latha. 2013. A study on employee attrition and retention in manufacturing industries. *BVIMSR’s Journal of Management Research (BJMR)* 5, 1 (2013), 1–23. * Liga and Robaldo (2023) Davide Liga and Livio Robaldo. 2023. Fine-tuning GPT-3 for legal rule classification. *Computer Law & Security Review* 51 (2023), 105864. * Mohan (2024) Sai Krishnan Mohan. 2024. Management consulting in the artificial intelligence–LLM era. *Management Consulting Journal* 7, 1 (2024), 9–24. * Pallathadka et al. (2022) Harikumar Pallathadka, V Hari Leela, Sushant Patil, BH Rashmi, Vipin Jain, and Samrat Ray. 2022. Attrition in software companies: Reason and measures. *Materials Today: Proceedings* 51 (2022), 528–531. * Raza et al. (2022) Ali Raza, Kashif Munir, Mubarak Almutairi, Faizan Younas, and Mian Muhammad Sadiq Fareed. 2022. Predicting employee attrition using machine learning approaches. *Applied Sciences* 12, 13 (2022), 6424. * Singh (2023) Vasudha Singh. 2023. *Exploring the role of large language model (llm)-based chatbots for human resources*. Ph. D. Dissertation. * Team et al. (2023) Gemini Team, Rohan Anil, Sebastian Borgeaud, Yonghui Wu, Jean-Baptiste Alayrac, Jiahui Yu, Radu Soricut, Johan Schalkwyk, Andrew M Dai, Anja Hauth, et al. 2023. Gemini: a family of highly capable multimodal models. *arXiv preprint arXiv:2312.11805* (2023). * Touvron et al. (2023) Hugo Touvron, Thibaut Lavril, Gautier Izacard, Xavier Martinet, Marie-Anne Lachaux, Timothée Lacroix, Baptiste Rozière, Naman Goyal, Eric Hambro, Faisal Azhar, et al. 2023. Llama: Open and efficient foundation language models. *arXiv preprint arXiv:2302.13971* (2023). * Vaswani (2017) A Vaswani. 2017. Attention is all you need. *Advances in Neural Information Processing Systems* (2017)."
+            }
+          ],
+          "children": []
+        }
+      ]
+    }
+  ],
+  "chunks": [
+    {
+      "heading_path": [
+        "Report GitHub Issue"
+      ],
+      "text": "##### Report GitHub Issue\n\nContent selection saved. Describe the issue below:"
+    },
+    {
+      "heading_path": [
+        "Can Large Language Model Predict Employee Attrition?"
+      ],
+      "text": "# Can Large Language Model Predict Employee Attrition?"
+    },
+    {
+      "heading_path": [
+        "Can Large Language Model Predict Employee Attrition?",
+        "Abstract."
+      ],
+      "text": "###### Abstract.\n\nEmployee attrition is a critical issue faced by organizations, with significant costs associated with turnover and the loss of valuable talent. Traditional methods for predicting attrition often rely on statistical techniques that, while useful, struggle to capture the complexity of modern workforces. Recent advancements in machine learning (ML) have provided more accurate, scalable solutions, allowing organizations to analyze diverse data points and predict attrition with greater precision. However, the emergence of large language models (LLMs) has opened new possibilities in human resource management by offering the ability to interpret contextual information from employee communications and detect subtle cues related to turnover.\n\nIn this paper, we leverage the IBM HR Analytics Employee Attrition dataset to evaluate the effectiveness of a fine-tuned GPT-3.5 model in comparison to traditional machine learning classifiers, including Logistic Regression, k-Nearest Neighbors (KNN), Support Vector Machine (SVM), Decision Tree, Random Forest, AdaBoost, and XGBoost. Our study focuses on assessing the predictive power, interpretability, and real-world applicability of each model. While traditional models offer ease of use and transparency, LLMs have the potential to uncover more nuanced patterns in employee behavior. Through our analysis, we aim to provide practical insights for organizations seeking to enhance their employee retention strategies with advanced predictive tools.\n\nOur results show that the fine-tuned GPT-3.5 large language model (LLM) outperforms traditional machine learning approaches in terms of prediction accuracy, with an impressive precision of 0.91, recall of 0.94, and an F1-score of 0.92. In contrast, the best-performing traditional model, Support Vector Machine (SVM), achieved an F1-score of 0.82, while ensemble methods like Random Forest and XGBoost reached F1-scores of 0.80. These findings highlight the ability of GPT-3.5 to capture complex patterns in employee behavior and attrition risks, offering enhanced interpretability by identifying subtle linguistic cues and recurring themes. This demonstrates the potential of integrating LLMs into HR strategies to significantly improve predictive performance and decision-making in employee retention."
+    },
+    {
+      "heading_path": [
+        "Can Large Language Model Predict Employee Attrition?",
+        "Keywords:"
+      ],
+      "text": "###### Keywords:"
+    },
+    {
+      "heading_path": [
+        "Can Large Language Model Predict Employee Attrition?",
+        "1. Introduction"
+      ],
+      "text": "## 1. Introduction\n\nEmployees are invaluable assets and investments for companies of all sizes, from small businesses to large multinational corporations. For instance, the average cost of a single interview in Switzerland is CHF 400, and the median cost to hire a skilled employee can reach CHF 9,738 ([Blatter et al., 2016](https://arxiv.org/html/2411.01353v1#bib.bib5)). While recruitment processes are designed to select the most suitable candidates, they do not always guarantee successful outcomes. Employee attrition has long been a challenge for human resource managers and employers, particularly in fast-growing economies ([Iqbal, 2010](https://arxiv.org/html/2411.01353v1#bib.bib14); [Alao and Adeyemo, 2013](https://arxiv.org/html/2411.01353v1#bib.bib3)).\n\nEmployee attrition is a multifaceted issue influenced by various factors that impact organizational performance. Common causes include the absence of career growth opportunities, inadequate compensation, and poor work-life balance, all of which contribute to dissatisfaction and burnout ([Latha, 2013](https://arxiv.org/html/2411.01353v1#bib.bib16); [Alao and Adeyemo, 2013](https://arxiv.org/html/2411.01353v1#bib.bib3)). Additionally, mismanagement, a mismatch between job responsibilities and employee skills, and cultural disconnects within the organization can further exacerbate turnover ([Pallathadka et al., 2022](https://arxiv.org/html/2411.01353v1#bib.bib19)). Employees may also leave due to better job offers, lack of recognition, unresolved workplace conflicts, or perceived job insecurity ([Raza et al., 2022](https://arxiv.org/html/2411.01353v1#bib.bib20); [Burgard et al., 2009](https://arxiv.org/html/2411.01353v1#bib.bib7)). Understanding these factors is crucial for organizations aiming to improve employee retention strategies.\n\nTraditional approaches to predicting employee attrition typically involve the analysis of historical data using statistical methods to identify patterns and trends. These methods often require manual data analysis, such as reviewing exit interviews, employee surveys, and demographic information to detect common reasons for leaving. HR teams tend to focus on key indicators such as job tenure, performance reviews, and salary growth to assess the risk of turnover. However, these methods can be limited by their reliance on retrospective data and may struggle to capture the complexities of attrition dynamics in larger, more diverse workforces. They may also face challenges related to scalability and accuracy. Despite these limitations, traditional methods have served as foundational tools for understanding workforce trends and informing retention strategies before the advent of more advanced machine learning techniques.\n\nTo address these challenges, machine learning (ML) has gained traction as a more powerful method for employee attrition prediction. ML models can analyze vast amounts of data, uncover complex patterns, and make more accurate predictions than traditional approaches. By incorporating diverse data points, such as employee engagement levels, work performance, demographic characteristics, and external factors like market trends, ML models offer a more comprehensive view of attrition risks. These models—including classification algorithms like Logistic Regression, Decision Trees, Random Forests, and advanced techniques like XGBoost and neural networks—can continuously learn from new data, improving predictive performance over time.\n\nMoreover, ML-based systems can handle large-scale, real-time data, making them highly adaptable to dynamic workforce environments. These systems can also detect early warning signs of attrition, enabling organizations to intervene proactively. By leveraging these predictive capabilities, businesses can take targeted actions, such as personalizing employee development programs, adjusting compensation structures, or addressing disengagement issues. In this way, ML offers a forward-looking, data-driven solution that empowers organizations to mitigate employee turnover and maintain a competitive edge in talent retention.\n\nRecently, large language models (LLMs) have emerged as powerful tools in diverse fields, from natural language processing ([Achiam et al., 2023](https://arxiv.org/html/2411.01353v1#bib.bib2); [Team et al., 2023](https://arxiv.org/html/2411.01353v1#bib.bib22); [Touvron et al., 2023](https://arxiv.org/html/2411.01353v1#bib.bib23)) to scientific research ([Chen et al., 2023b](https://arxiv.org/html/2411.01353v1#bib.bib11); [Ding et al., 2023](https://arxiv.org/html/2411.01353v1#bib.bib13); [Chen et al., 2023a](https://arxiv.org/html/2411.01353v1#bib.bib10)), and their applications are now expanding into human resource management. LLMs enable organizations to go beyond numerical data and tap into the contextual richness present in employee communications. These models can analyze subtle linguistic patterns, shifts in tone, or recurring themes in employee communications to detect potential attrition risks. This deeper understanding of employee sentiment allows HR professionals to make more informed decisions about retention strategies. As LLMs continue to advance, their integration into employee attrition prediction models offers the potential to significantly enhance accuracy, scalability, and interpretability, thereby transforming workforce retention practices.\n\nDespite the advantages of LLMs, their effectiveness in employee attrition prediction is still under scrutiny. In this work, we use the widely recognized IBM HR Analytics Employee Attrition dataset to compare the performance of a fine-tuned GPT-3.5 model with classic machine learning models, including Logistic Regression, k-Nearest Neighbors (KNN), Support Vector Machine (SVM), Decision Tree, Random Forest, AdaBoost, and XGBoost.\n\nOur objective is to evaluate the predictive capabilities of the LLM against these traditional classifiers, with a particular focus on accuracy, interpretability, and real-world applicability. While traditional models have long been favored for attrition prediction due to their simplicity and interpretability, LLMs have the potential to uncover more complex patterns in employee behavior. This study aims to determine whether fine-tuned LLMs can outperform or complement traditional methods and provide unique insights into the drivers of employee turnover.\n\nBy evaluating the strengths and weaknesses of each model, we aim to offer practical guidance for organizations seeking to integrate advanced predictive tools into their human resource strategies. Additionally, we explore how model interpretability—crucial in HR decisions—differs across approaches, particularly in terms of transparency and decision-making between LLMs and more conventional machine learning methods.\n\nThe remainder of this paper is organized as follows. Section 2 provides an overview of existing research on employee attrition prediction, focusing on both traditional machine learning models and recent applications of large language models (LLMs). We discuss the strengths and limitations of various approaches and highlight the research gap that this study aims to address. Section 3 describes the IBM HR Analytics Employee Attrition dataset used in our analysis. We outline the key attributes of the dataset, including employee demographics, job satisfaction, and performance indicators. We also discuss the preprocessing steps, such as data cleaning, handling missing values, encoding categorical features, and normalizing the data to prepare it for model training. Section 4 details the methodology used to train and evaluate both the traditional machine learning models and the fine-tuned GPT-3.5 model. We explain the parameter tuning process, feature selection, and model training strategies. Additionally, we describe the evaluation metrics used to compare model performance, such as accuracy, precision, recall, and F1-score, as well as considerations for model interpretability. Section 5 presents the results of our experiments, comparing the performance of each model on the employee attrition prediction task. We provide a detailed analysis of the strengths and weaknesses of both traditional machine learning models and the LLM in terms of predictive accuracy, interpretability, and practical applicability in HR decision-making.\n\nThe main contributions of this paper are as follows:\n\n* • detailed steps in processing the IBM HR Analytics Employee Attrition dataset for ML and LLM training. * • the pioneering effort to fine-tune GPT model for the task of employee attrition. * • practical insights for ML approach in HR Management.\n\ndetailed steps in processing the IBM HR Analytics Employee Attrition dataset for ML and LLM training.\n\nthe pioneering effort to fine-tune GPT model for the task of employee attrition.\n\npractical insights for ML approach in HR Management."
+    },
+    {
+      "heading_path": [
+        "Can Large Language Model Predict Employee Attrition?",
+        "2. Background"
+      ],
+      "text": "## 2. Background\n\nThis section provides background information on employee attrition and large language models."
+    },
+    {
+      "heading_path": [
+        "Can Large Language Model Predict Employee Attrition?",
+        "2. Background",
+        "2.1. Employee Attrition"
+      ],
+      "text": "### 2.1. Employee Attrition\n\nEmployee attrition refers to the voluntary or involuntary departure of employees from an organization, and it is a significant concern for businesses due to its impact on operational efficiency and costs. High attrition rates can disrupt productivity, increase the financial burden of hiring and training new employees, and negatively affect overall employee morale. Attrition can be categorized into two main types: voluntary attrition, where employees leave by their own choice (e.g., for a better opportunity or dissatisfaction with the current role), and involuntary attrition, where the employer terminates the employee’s contract due to factors like poor performance or organizational restructuring.\n\nSeveral factors contribute to employee attrition. These may include personal reasons such as lack of career development opportunities, inadequate compensation, poor work-life balance, and limited recognition for accomplishments. Organizational factors, such as unsatisfactory leadership, misalignment between job responsibilities and employee skills, toxic workplace culture, and perceived job insecurity, are also major drivers of turnover ([Pallathadka et al., 2022](https://arxiv.org/html/2411.01353v1#bib.bib19)). External factors, including changes in the job market or better offers from competing firms, further exacerbate this issue ([Raza et al., 2022](https://arxiv.org/html/2411.01353v1#bib.bib20)).\n\nFor organizations, the consequences of attrition extend beyond the cost of replacing employees. The hiring process itself is expensive and time-consuming, as it involves recruitment, interviews, onboarding, and training. Additionally, the loss of experienced employees can lead to a temporary decline in organizational knowledge and productivity, especially if the departing employees hold critical positions. According to a 2016 report by the Society for Human Resource Management, the average cost of hiring a new employee exceeds $4,000, and the average annual turnover rate in the U.S. is estimated at 19% ([Blatter et al., 2016](https://arxiv.org/html/2411.01353v1#bib.bib5)). Therefore, predicting and preventing employee attrition has become a strategic priority for HR departments, prompting the development of more advanced analytical techniques to identify at-risk employees and implement targeted retention strategies."
+    },
+    {
+      "heading_path": [
+        "Can Large Language Model Predict Employee Attrition?",
+        "2. Background",
+        "2.2. Employee Attrition Prediction Approach"
+      ],
+      "text": "### 2.2. Employee Attrition Prediction Approach\n\nTraditional methods for predicting employee attrition involve manual analysis of historical data, such as exit interviews and performance reviews. However, these approaches are limited in scope, accuracy, and scalability, especially for large organizations with complex dynamics. Machine learning (ML) has emerged as a more advanced solution, offering higher accuracy and adaptability. ML algorithms can analyze large volumes of data, identifying complex, non-linear relationships between employee characteristics and turnover risks. Common ML techniques for attrition prediction include Logistic Regression, Decision Trees, Random Forests, and more advanced methods like Support Vector Machines and XGBoost. These models process various structured data points, including employee demographics, tenure, and performance evaluations, while also incorporating external factors such as market trends and economic conditions. This comprehensive approach allows organizations to build more robust predictive models. Several studies ([Raza et al., 2022](https://arxiv.org/html/2411.01353v1#bib.bib20); [Alduayj and Rajpoot, 2018](https://arxiv.org/html/2411.01353v1#bib.bib4); [Jain et al., 2020](https://arxiv.org/html/2411.01353v1#bib.bib15)) have demonstrated the efficacy of different ML approaches in predicting employee attrition."
+    },
+    {
+      "heading_path": [
+        "Can Large Language Model Predict Employee Attrition?",
+        "2. Background",
+        "2.3. Large Language Models"
+      ],
+      "text": "### 2.3. Large Language Models\n\nLarge Language Models (LLMs) have revolutionized Natural Language Processing (NLP) since the introduction of transformer-based models by Vaswani et al. ([Vaswani, 2017](https://arxiv.org/html/2411.01353v1#bib.bib24)) in 2017. These models employ self-attention mechanisms to effectively capture long-range dependencies in text, outperforming traditional recurrent neural networks. The multi-head attention architecture enables parallel processing of multiple attention patterns, addressing issues like vanishing gradients and improving scalability. LLMs, built on transformer principles, are trained on vast datasets to model complex language distributions. Their exceptional performance in NLP ([Achiam et al., 2023](https://arxiv.org/html/2411.01353v1#bib.bib2); [Chen et al., 2024a](https://arxiv.org/html/2411.01353v1#bib.bib8)) and scientific applications ([Chen et al., 2024b](https://arxiv.org/html/2411.01353v1#bib.bib9); [Chen et al., 2022](https://arxiv.org/html/2411.01353v1#bib.bib12)) has led to increased exploration of their potential in human resource management, including applications in management consulting ([Mohan, 2024](https://arxiv.org/html/2411.01353v1#bib.bib18)), HR chatbots ([Singh, 2023](https://arxiv.org/html/2411.01353v1#bib.bib21)), and employee development ([Budhwar et al., 2023](https://arxiv.org/html/2411.01353v1#bib.bib6))."
+    },
+    {
+      "heading_path": [
+        "Can Large Language Model Predict Employee Attrition?",
+        "3. Dataset Prepare"
+      ],
+      "text": "## 3. Dataset Prepare\n\nThis section introduces the dataset used in this work. We performed different analyses to present the data from different perspectives and detailed our methods to process the data for machine learning model training and testing."
+    },
+    {
+      "heading_path": [
+        "Can Large Language Model Predict Employee Attrition?",
+        "3. Dataset Prepare",
+        "3.1. Dataset Introducation"
+      ],
+      "text": "### 3.1. Dataset Introducation\n\nThe IBM HR Analytics Employee Attrition & Performance dataset is a well-structured collection of employee data aimed at identifying factors contributing to employee attrition. It contains detailed information on 1,470 employees, with 35 different attributes that offer a comprehensive overview of various aspects related to employee performance, demographics, and job satisfaction. This dataset provides a valuable foundation for HR analytics and predictive modeling, making it suitable for machine learning tasks focused on employee attrition prediction. The dataset has below basic characteristics:\n\n* • Size: The dataset consists of 1,470 rows, each representing a unique employee, and 35 columns, each capturing specific attributes related to employee demographics, job roles, and performance metrics. * • Format: The dataset is provided in CSV format, making it easily accessible and compatible with most data processing tools and machine learning libraries. * • Missing Values: The dataset contains no missing values, with all columns having 1,470 non-null entries. This ensures data integrity and eliminates the need for extensive data cleaning, allowing for a more straightforward preprocessing pipeline.\n\nSize: The dataset consists of 1,470 rows, each representing a unique employee, and 35 columns, each capturing specific attributes related to employee demographics, job roles, and performance metrics.\n\nFormat: The dataset is provided in CSV format, making it easily accessible and compatible with most data processing tools and machine learning libraries.\n\nMissing Values: The dataset contains no missing values, with all columns having 1,470 non-null entries. This ensures data integrity and eliminates the need for extensive data cleaning, allowing for a more straightforward preprocessing pipeline."
+    },
+    {
+      "heading_path": [
+        "Can Large Language Model Predict Employee Attrition?",
+        "3. Dataset Prepare",
+        "3.2. Key Features"
+      ],
+      "text": "### 3.2. Key Features\n\n| Category | Features | | --- | --- | | Demographic Information | Age, Gender, Marital Status, Education, Education Field | | Job-related Attributes | Department, Job Role, Job Level, Job Involvement, Job Satisfaction, Years at Company, Years in Current Role, Years Since Last Promotion, Years with Current Manager | | Compensation and Benefits | Daily Rate, Hourly Rate, Monthly Income, Monthly Rate, Percent Salary Hike, Stock Option Level | | Performance Metrics | Performance Rating, Training Times Last Year | | Work Environment Factors | Business Travel, Environment Satisfaction, Work-Life Balance, Overtime | | Other Relevant Information | Distance from Home, Relationship Satisfaction, Total Working Years, Number of Companies Worked | | Target Variable | Attrition (Yes/No) |\n\nThe IBM HR Analytics Employee Attrition & Performance dataset, as summarized in Table [1](https://arxiv.org/html/2411.01353v1#S3.T1 \"Table 1 ‣ 3.2. Key Features ‣ 3. Dataset Prepare ‣ Can Large Language Model Predict Employee Attrition?\"), provides a comprehensive set of features for analyzing factors contributing to employee attrition. The dataset encompasses a wide array of information, from basic demographic data (such as age, gender, and marital status) to detailed job-related attributes (including department, job role, and tenure metrics). Additionally, it contains data on compensation, benefits, performance metrics, and work environment factors. Notably, features related to employee satisfaction, such as job satisfaction, work-life balance, and relationship satisfaction, offer insights into the non-monetary aspects of employee experience. Other variables like distance from home and the number of companies previously worked for may highlight less obvious influences on attrition. With attrition as the binary target variable, this feature set enables robust analysis and predictive modeling, helping HR professionals better understand and manage employee turnover.\n\nTable [2](https://arxiv.org/html/2411.01353v1#S3.T2 \"Table 2 ‣ 3.2. Key Features ‣ 3. Dataset Prepare ‣ Can Large Language Model Predict Employee Attrition?\") presents descriptive statistics for key numerical features in the dataset, which may influence employee attrition. Each feature is described by its count, mean, standard deviation, and percentiles (minimum, 25th, 50th, 75th, and maximum values).\n\nFor example, the average employee age in the dataset is approximately 36.92 years, with a standard deviation of 9.14 years, while monthly income has a mean of $6,502.93, ranging from $1,009 to $19,999. These statistics provide a snapshot of the dataset’s distribution and will serve as the foundation for our predictive modeling of employee attrition patterns.\n\n| Feature | Count | Mean | Std | Min | 25% | 50% | 75% | Max | | --- | --- | --- | --- | --- | --- | --- | --- | --- | | Age | 1470 | 36.92 | 9.14 | 18 | 30 | 36 | 43 | 60 | | Daily Rate | 1470 | 802.49 | 403.51 | 102 | 465 | 802 | 1157 | 1499 | | Distance from Home | 1470 | 9.19 | 8.11 | 1 | 2 | 7 | 14 | 29 | | Education | 1470 | 2.91 | 1.02 | 1 | 2 | 3 | 4 | 5 | | Monthly Income | 1470 | 6502.93 | 4707.96 | 1009 | 2911 | 4919 | 8379 | 19999 | | Number of Companies Worked | 1470 | 2.69 | 2.50 | 0 | 1 | 2 | 4 | 9 | | Percent Salary Hike | 1470 | 15.21 | 3.66 | 11 | 12 | 14 | 18 | 25 | | Total Working Years | 1470 | 11.28 | 7.78 | 0 | 6 | 10 | 15 | 40 | | Training Times Last Year | 1470 | 2.80 | 1.29 | 0 | 2 | 3 | 3 | 6 | | Years at Company | 1470 | 7.01 | 6.13 | 0 | 3 | 5 | 9 | 40 | | Years in Current Role | 1470 | 4.23 | 3.62 | 0 | 2 | 3 | 7 | 18 | | Years Since Last Promotion | 1470 | 2.19 | 3.22 | 0 | 0 | 1 | 3 | 15 | | Years with Current Manager | 1470 | 4.12 | 3.57 | 0 | 2 | 3 | 7 | 17 |"
+    },
+    {
+      "heading_path": [
+        "Can Large Language Model Predict Employee Attrition?",
+        "3. Dataset Prepare",
+        "3.3. Data Cleaning and Reduction"
+      ],
+      "text": "### 3.3. Data Cleaning and Reduction\n\nTo ensure the dataset is clean and relevant for our analysis, we performed several preprocessing steps. First, the dataset, which contains a variety of employee attributes, was loaded. Some of these attributes were redundant or not useful for predicting employee attrition.\n\nWe reduced the dataset by removing the following features:\n\n* • EmployeeCount: This feature is a constant value for all entries and thus provides no useful information for predictive modeling. * • StandardHours: Similar to EmployeeCount, this column contains the same value for every employee and does not contribute to the variability needed for classification tasks. * • Over18: This feature contains only a single value (“Yes”) across all instances, which does not provide any useful distinction between employees. * • EmployeeNumber: This is simply an identifier for each employee and does not influence the outcome of attrition prediction.\n\nEmployeeCount: This feature is a constant value for all entries and thus provides no useful information for predictive modeling.\n\nStandardHours: Similar to EmployeeCount, this column contains the same value for every employee and does not contribute to the variability needed for classification tasks.\n\nOver18: This feature contains only a single value (“Yes”) across all instances, which does not provide any useful distinction between employees.\n\nEmployeeNumber: This is simply an identifier for each employee and does not influence the outcome of attrition prediction.\n\nBy removing these features, we eliminated unnecessary columns and reduced the dimensionality of the data, which can improve the model’s performance by focusing only on the relevant attributes. This step is crucial for ensuring that the model is not overfitting on irrelevant or redundant data."
+    },
+    {
+      "heading_path": [
+        "Can Large Language Model Predict Employee Attrition?",
+        "3. Dataset Prepare",
+        "3.4. Data Analysis"
+      ],
+      "text": "### 3.4. Data Analysis\n\nData Balance. Figure [1](https://arxiv.org/html/2411.01353v1#S3.F1 \"Figure 1 ‣ 3.4. Data Analysis ‣ 3. Dataset Prepare ‣ Can Large Language Model Predict Employee Attrition?\") illustrates the distribution of employee attrition within the dataset after cleaning and reduction. The majority of employees, 83.9%, have not left the company, while only 16.1% have. This substantial imbalance in the attrition classes highlights the need to address class imbalance when building predictive models.\n\nIn particular, techniques such as oversampling the minority class or applying specialized algorithms for imbalanced data may be necessary to ensure that the model does not develop a bias towards predicting the majority class. Furthermore, the imbalance suggests that employee attrition is relatively uncommon, which could indicate either successful employee retention strategies or natural tendencies within the workforce.\n\nFrequency Distribution. To better understand the distribution of the numerical features in the dataset, we generated the histogram plot to provide insights into the data distributions. A histogram visualizes the frequency distribution of a feature by dividing the data into bins. The height of each bin represents the number of observations that fall within the corresponding range of values. This helps to identify skewness and the overall spread of the data. Figure [2](https://arxiv.org/html/2411.01353v1#S3.F2 \"Figure 2 ‣ 3.4. Data Analysis ‣ 3. Dataset Prepare ‣ Can Large Language Model Predict Employee Attrition?\") listed the features that have skewness issue."
+    },
+    {
+      "heading_path": [
+        "Can Large Language Model Predict Employee Attrition?",
+        "3. Dataset Prepare",
+        "3.5. Skewed Data Handling"
+      ],
+      "text": "### 3.5. Skewed Data Handling\n\nFigure [2](https://arxiv.org/html/2411.01353v1#S3.F2 \"Figure 2 ‣ 3.4. Data Analysis ‣ 3. Dataset Prepare ‣ Can Large Language Model Predict Employee Attrition?\") illustrated features that have skewed issues. In our dataset, several numerical features exhibited right-skewed distributions, where the majority of the data points are concentrated on the lower end of the scale, with a long tail extending to the right. Right-skewed distributions are common when certain features, such as income or years of experience, have a small number of very large values that disproportionately influence the distribution.\n\nSkewed data can pose significant challenges in predictive modeling. Many machine learning algorithms, especially linear models and algorithms that assume normally distributed data, can be sensitive to skewness. Highly skewed features can result in models that are less accurate or biased toward the skewed data. By addressing skewness, we ensure that our models perform more effectively by learning from data that is better distributed, leading to more accurate predictions.\n\nTo address the issue of right-skewness, we applied a logarithmic transformation to the affected features. For each numerical feature with a skewness greater than 0.5, we performed a log transformation using the log⁡(1+x)\\log(1+x) function. This method helps reduce skewness by compressing large values and spreading out smaller ones, bringing the distribution closer to normal. After applying the transformation, the features exhibit a more symmetric distribution, improving the model’s ability to generalize and make accurate predictions.\n\nlog⁡(1+x)\\log(1+x)"
+    },
+    {
+      "heading_path": [
+        "Can Large Language Model Predict Employee Attrition?",
+        "3. Dataset Prepare",
+        "3.6. Feature Engineering"
+      ],
+      "text": "### 3.6. Feature Engineering\n\nTo enhance the predictive power of the model and simplify the dataset, feature engineering was performed by creating two new composite features: WorkExperience and OverallSatisfaction. These features encapsulate important aspects of employees’ work experience and satisfaction, reducing redundancy in the dataset while maintaining essential information for modeling.\n\nThe WorkExperience feature was derived by averaging several key experience-related variables, including TotalWorkingYears, YearsAtCompany, YearsInCurrentRole, YearsSinceLastPromotion, and YearsWithCurrManager. By consolidating these columns, a single metric representing an employee’s overall work experience was generated, simplifying the data without losing critical information.\n\nSimilarly, the OverallSatisfaction feature was created by averaging the JobSatisfaction, EnvironmentSatisfaction, RelationshipSatisfaction, and WorkLifeBalance columns. This new feature provides a comprehensive measure of an employee’s satisfaction with both their job and work environment.\n\nAfter generating these new features, the original columns used to create them were removed from the dataset. This step helped to reduce redundancy and improve the dataset’s efficiency, ensuring that the key information necessary for predictive modeling was retained in a more streamlined form."
+    },
+    {
+      "heading_path": [
+        "Can Large Language Model Predict Employee Attrition?",
+        "3. Dataset Prepare",
+        "3.7. Categorical Encoding"
+      ],
+      "text": "### 3.7. Categorical Encoding\n\nTo prepare the categorical features for modeling, we applied label encoding to all categorical variables. Label encoding converts categorical values into numerical representations, which are required by most machine learning algorithms. Specifically, we identified the categorical columns in the dataset and used the LabelEncoder class from the sklearn library to encode each column. This process ensured that categorical features such as Department and JobRole were transformed into numerical values, enabling the machine learning model to process them effectively."
+    },
+    {
+      "heading_path": [
+        "Can Large Language Model Predict Employee Attrition?",
+        "3. Dataset Prepare",
+        "3.8. Train-Test Splitting"
+      ],
+      "text": "### 3.8. Train-Test Splitting\n\nOnce the data was prepared, we split it into training and test sets to evaluate the performance of the model. Using the train\\_test\\_split function from sklearn, we partitioned the dataset, reserving 80% of the data for training and 20% for testing. The target variable, Attrition, was stratified to ensure that the class distribution in the training and test sets remained consistent.\n\nThe resulting split produced 1176 samples for training and 294 samples for testing, as shown in the following output:\n\n* • X\\_train shape: (1176, 24) * • X\\_test shape: (294, 24) * • y\\_train shape: (1176,) * • y\\_test shape: (294,)\n\nX\\_train shape: (1176, 24)\n\nX\\_test shape: (294, 24)\n\ny\\_train shape: (1176,)\n\ny\\_test shape: (294,)\n\nThis splitting ensures that the model can be trained on the larger portion of the data while being evaluated on a separate, unseen test set, providing an accurate assessment of the model’s generalization performance."
+    },
+    {
+      "heading_path": [
+        "Can Large Language Model Predict Employee Attrition?",
+        "3. Dataset Prepare",
+        "3.9. Feature Scaling"
+      ],
+      "text": "### 3.9. Feature Scaling\n\nBefore training our machine learning model, it was essential to standardize the features to ensure that they are on the same scale. Standardization transforms features so that they have a mean of zero and a standard deviation of one. This process is particularly important for models that are sensitive to the magnitude of the input features, such as logistic regression and support vector machines. By standardizing the features, we ensure that the model does not place undue emphasis on features with larger ranges or units, which could negatively impact the performance of the model.\n\nThe training data was used to compute the scaling factors (mean and standard deviation), and these factors were applied consistently to both the training and test datasets. This ensures that the model generalizes well to unseen data while maintaining consistency across datasets."
+    },
+    {
+      "heading_path": [
+        "Can Large Language Model Predict Employee Attrition?",
+        "3. Dataset Prepare",
+        "3.10. Imbalanced Data Handling"
+      ],
+      "text": "### 3.10. Imbalanced Data Handling\n\nOur dataset exhibited a significant class imbalance, with the number of non-attrition cases far outnumbering the attrition cases. Imbalanced datasets can lead to biased models that perform well on the majority class but poorly on the minority class, which in our case is employee attrition. To address this imbalance, we applied the Synthetic Minority Over-sampling Technique (SMOTE).\n\nSMOTE generates synthetic samples of the minority class by interpolating between existing samples, effectively increasing the number of minority class instances and balancing the class distribution. Before applying SMOTE, the training dataset contained 986 non-attrition samples and 190 attrition samples. After oversampling, the dataset was balanced, with 986 samples for each class.\n\nThis balancing process ensures that the model has equal exposure to both classes, improving its ability to accurately detect instances of employee attrition and reducing bias toward the majority class. As a result, the model is better equipped to generalize to real-world scenarios where both classes are important."
+    },
+    {
+      "heading_path": [
+        "Can Large Language Model Predict Employee Attrition?",
+        "4. Experiment"
+      ],
+      "text": "## 4. Experiment\n\nThis section details the experiments, covering model selection and result comparisons."
+    },
+    {
+      "heading_path": [
+        "Can Large Language Model Predict Employee Attrition?",
+        "4. Experiment",
+        "4.1. Classic Models Used for Attrition Prediction"
+      ],
+      "text": "### 4.1. Classic Models Used for Attrition Prediction\n\nTo build a robust and accurate predictive model for employee attrition, we employed a diverse set of machine learning algorithms. Each of these models offers unique strengths and approaches to classification, allowing us to compare their performance and identify the most suitable method for our dataset. The following models were used in our analysis:\n\nLogistic Regression estimates class probabilities using a logistic function on input features. This sklearn implementation uses default parameters: L2 regularization with C=1.0, ’lbfgs’ solver, and no penalty. It offers interpretable predictions by revealing feature contributions. The model is trained on X\\_train and y\\_train, then used to predict both training and test data outcomes.\n\nK-Nearest Neighbors (KNN) is a non-parametric algorithm classifying instances based on proximity to neighbors in feature space. We used 10 neighbors, uniform weights, and Minkowski distance (p=2, equivalent to Euclidean). The algorithm choice is automatic, with a leaf size of 50 for optimized tree searches. KNN works well for non-linear boundaries in smaller datasets but is sensitive to distance metrics and k values.\n\nSupport Vector Machine (SVM) finds the optimal hyperplane to separate classes in feature space. This implementation uses an RBF kernel with C=200, gamma=’scale’, and degree=5. It employs a ’one-vs-rest’ decision function, tolerance of 0.1, and no probability estimates. SVM excels in high-dimensional spaces and can handle non-linear classification through kernel functions. It’s particularly effective for datasets with clear class separation.\n\nDecision Tree Classifier creates a tree structure by splitting data based on feature value. Decision Trees are easy to interpret and visualize but can be prone to overfitting, especially with small datasets. We limited tree depth to 5 levels, preventing overfitting.\n\nRandom Forest combines multiple decision trees to improve accuracy and reduce overfitting. Our implementation uses 200 trees, each with a maximum depth of 5. It employs ’sqrt’ max\\_features, selecting the square root of total features for each split. By averaging predictions from diverse trees, Random Forest handles complex feature relationships and outperforms single decision trees.\n\nAdaBoost Classifier combines weak classifiers to create a strong one, focusing on misclassified instances. Our implementation uses 150 estimators with a learning rate of 0.01. It employs the ’SAMME’ algorithm for multiclass problems. AdaBoost iteratively adjusts instance weights, improving overall accuracy and reducing bias. It’s effective for moderately complex datasets, balancing between weak classifiers to form a robust ensemble.\n\nXGBoost (Extreme Gradient Boosting) is an advanced gradient boosting implementation. Our configuration uses binary logistic regression for classification, with a learning rate of 0.01 and 350 estimators. Tree depth is limited to 3, and ’sqrt’ max\\_features is employed. XGBoost combines regularization and optimized computation, excelling in speed and accuracy for large, imbalanced datasets. Its flexibility allows for fine-tuning across various machine learning tasks."
+    },
+    {
+      "heading_path": [
+        "Can Large Language Model Predict Employee Attrition?",
+        "4. Experiment",
+        "4.2. GPT Model for Attrition Prediction"
+      ],
+      "text": "### 4.2. GPT Model for Attrition Prediction\n\nGPT-3.5 Turbo is a large language model that leverages the transformer architecture to perform predictive tasks. While it is predominantly used in natural language processing tasks, GPT-3.5 can be fine-tuned for various prediction and classification problems, including employee attrition prediction. We followed the process described in ([Liga and Robaldo, 2023](https://arxiv.org/html/2411.01353v1#bib.bib17)) to fine-tune GPT-3.5 turbo using prompt-response pairs constructed by the training set.\n\nData prepare. We constructed a JSONL format data, in which each line is a prompt-response pair for the model to learn from.\n\n{\n    \"prompt\": \"Analyze the employee information and\n    predict employee turnover: {Employee_Info}\",\n    \"completion\": \"{Attrition_result}\"\n}\n\nGPT-3.5 Turbo Fine-tuning. We used the OpenAI library and API to fine-tune the GPT model with our data. We set the m​a​x​\\_​t​o​k​e​nmax\\\\_token to be 50 to save the cost as our predicted results are y​e​syes or n​ono.\n\nm​a​x​_​t​o​k​e​nmax\\_token\n\ny​e​syes\n\nn​ono\n\nInference. To generate predictions, we passed the test set to the fine-tuned GPT model using its fine-tuned ID."
+    },
+    {
+      "heading_path": [
+        "Can Large Language Model Predict Employee Attrition?",
+        "4. Experiment",
+        "4.3. Evaluation Metrics"
+      ],
+      "text": "### 4.3. Evaluation Metrics\n\nTo evaluate the predictive models’ performance, we used the classification metrics precision, recall, and F1-score, as defined in Equations [1](https://arxiv.org/html/2411.01353v1#S4.E1 \"In 4.3. Evaluation Metrics ‣ 4. Experiment ‣ Can Large Language Model Predict Employee Attrition?\"), [2](https://arxiv.org/html/2411.01353v1#S4.E2 \"In 4.3. Evaluation Metrics ‣ 4. Experiment ‣ Can Large Language Model Predict Employee Attrition?\"), and [3](https://arxiv.org/html/2411.01353v1#S4.E3 \"In 4.3. Evaluation Metrics ‣ 4. Experiment ‣ Can Large Language Model Predict Employee Attrition?\"):\n\n| | | | | | --- | --- | --- | --- | | (1) | | Precision=True PositivesTrue Positives+False Positives\\text{Precision}=\\frac{\\text{True Positives}}{\\text{True Positives}+\\text{False Positives}} | |\n\nPrecision=True PositivesTrue Positives+False Positives\\text{Precision}=\\frac{\\text{True Positives}}{\\text{True Positives}+\\text{False Positives}}\n\n| | | | | | --- | --- | --- | --- | | (2) | | Recall=True PositivesTrue Positives+False Negatives\\text{Recall}=\\frac{\\text{True Positives}}{\\text{True Positives}+\\text{False Negatives}} | |\n\nRecall=True PositivesTrue Positives+False Negatives\\text{Recall}=\\frac{\\text{True Positives}}{\\text{True Positives}+\\text{False Negatives}}\n\n| | | | | | --- | --- | --- | --- | | (3) | | F1-Score=2⋅Precision⋅RecallPrecision+Recall\\text{F1-Score}=2\\cdot\\frac{\\text{Precision}\\cdot\\text{Recall}}{\\text{Precision}+\\text{Recall}} | |\n\nF1-Score=2⋅Precision⋅RecallPrecision+Recall\\text{F1-Score}=2\\cdot\\frac{\\text{Precision}\\cdot\\text{Recall}}{\\text{Precision}+\\text{Recall}}\n\nThese metrics allow us to evaluate the trade-offs between precision and recall and help in determining the best performing model for employee attrition prediction."
+    },
+    {
+      "heading_path": [
+        "Can Large Language Model Predict Employee Attrition?",
+        "4. Experiment",
+        "4.4. Results"
+      ],
+      "text": "### 4.4. Results\n\nThe comparative analysis of various machine learning models for this classification task revealed intriguing insights, as listed in Table [3](https://arxiv.org/html/2411.01353v1#S4.T3 \"Table 3 ‣ 4.4. Results ‣ 4. Experiment ‣ Can Large Language Model Predict Employee Attrition?\"). The fine-tuned GPT-3.5 model emerged as the superior performer, achieving exceptional metrics with a precision of 0.91, recall of 0.94, and an F1-score of 0.92. This performance significantly outpaced traditional machine learning algorithms, underscoring the potential of large language models in classification tasks when properly fine-tuned. Among conventional models, Support Vector Machine (SVM) demonstrated the strongest performance with an F1-score of 0.82, followed closely by ensemble methods such as Random Forest and XGBoost, both achieving an F1-score of 0.80. Logistic Regression and AdaBoost showed comparable efficacy with F1-scores of 0.78 and 0.79 respectively, while K-Nearest Neighbors (KNN) exhibited the lowest performance with an F1-score of 0.71. These results highlight the robust performance of ensemble methods and the particular suitability of SVM for this dataset. The marked superiority of the fine-tuned GPT-3.5 model suggests promising avenues for leveraging advanced language models in classification tasks, potentially revolutionizing approaches to similar problems in the field.\n\n| Model | Precision | Recall | F1-score | | --- | --- | --- | --- | | Logistic Regression | 0.84 | 0.76 | 0.78 | | KNN | 0.80 | 0.66 | 0.71 | | SVM | 0.81 | 0.83 | 0.82 | | Decision Tree | 0.83 | 0.78 | 0.80 | | Random Forest | 0.82 | 0.80 | 0.80 | | AdaBoost | 0.82 | 0.77 | 0.79 | | XGBoost | 0.80 | 0.80 | 0.80 | | GPT 3.5 Fine-tuned | 0.91 | 0.94 | 0.92 |"
+    },
+    {
+      "heading_path": [
+        "Can Large Language Model Predict Employee Attrition?",
+        "5. Conclusion"
+      ],
+      "text": "## 5. Conclusion\n\nIn this study, we explored the performance of various machine learning models for the task of employee attrition prediction, comparing traditional algorithms with the fine-tuned GPT-3.5 model. Our experiments demonstrated that the fine-tuned GPT-3.5 model significantly outperformed conventional machine learning techniques, achieving the highest precision, recall, and F1-score. This result underscores the potential of large language models in classification tasks, particularly when fine-tuned for domain-specific data.\n\nAmong traditional models, Support Vector Machine (SVM) exhibited the strongest performance, followed closely by ensemble methods such as Random Forest and XGBoost. These models also showed competitive results, validating their efficacy for this type of classification problem. However, simpler models like Logistic Regression and K-Nearest Neighbors (KNN) demonstrated lower predictive power, particularly in capturing the complexity of the data.\n\nThe superior performance of GPT-3.5 highlights the growing role that advanced language models can play in solving classification tasks beyond natural language processing. As machine learning techniques evolve, integrating large language models into predictive analytics pipelines holds immense potential for enhancing decision-making processes in fields like human resource management.\n\nFuture work could further explore the impact of different feature subsets on model performance for a comprehensive understanding of the factors influencing model performance. Additionally, investigating the interpretability of these models in real-world applications will be crucial for their broader adoption in business and operational environments. Overall, this study demonstrates the advantages of leveraging LLMs in classification tasks and points to promising avenues for future research in this area."
+    },
+    {
+      "heading_path": [
+        "Can Large Language Model Predict Employee Attrition?",
+        "References"
+      ],
+      "text": "## References\n\n* Achiam et al. (2023) Josh Achiam, Steven Adler, Sandhini Agarwal, Lama Ahmad, Ilge Akkaya, Florencia Leoni Aleman, Diogo Almeida, Janko Altenschmidt, Sam Altman, Shyamal Anadkat, et al. 2023. Gpt-4 technical report. *arXiv preprint arXiv:2303.08774* (2023). * Alao and Adeyemo (2013) DABA Alao and AB Adeyemo. 2013. Analyzing employee attrition using decision tree algorithms. *Computing, Information Systems, Development Informatics and Allied Research Journal* 4, 1 (2013), 17–28. * Alduayj and Rajpoot (2018) Sarah S Alduayj and Kashif Rajpoot. 2018. Predicting employee attrition using machine learning. In *2018 international conference on innovations in information technology (iit)*. IEEE, 93–98. * Blatter et al. (2016) Marc Blatter, Samuel Muehlemann, Samuel Schenker, and Stefan C Wolter. 2016. Hiring costs for skilled workers and the supply of firm-provided training. *Oxford Economic Papers* 68, 1 (2016), 238–257. * Budhwar et al. (2023) Pawan Budhwar, Soumyadeb Chowdhury, Geoffrey Wood, Herman Aguinis, Greg J Bamber, Jose R Beltran, Paul Boselie, Fang Lee Cooke, Stephanie Decker, Angelo DeNisi, et al. 2023. Human resource management in the age of generative artificial intelligence: Perspectives and research directions on ChatGPT. *Human Resource Management Journal* 33, 3 (2023), 606–659. * Burgard et al. (2009) Sarah A Burgard, Jennie E Brand, and James S House. 2009. Perceived job insecurity and worker health in the United States. *Social science & medicine* 69, 5 (2009), 777–785. * Chen et al. (2024a) Le Chen, Nesreen K Ahmed, Akash Dutta, Arijit Bhattacharjee, Sixing Yu, Quazi Ishtiaque Mahmud, Waqwoya Abebe, Hung Phan, Aishwarya Sarkar, Branden Butler, et al. 2024a. The Landscape and Challenges of HPC Research and LLMs. *CoRR* (2024). * Chen et al. (2024b) Le Chen, Arijit Bhattacharjee, Nesreen Ahmed, Niranjan Hasabnis, Gal Oren, Vy Vo, and Ali Jannesari. 2024b. Ompgpt: A generative pre-trained transformer model for openmp. In *European Conference on Parallel Processing*. Springer, 121–134. * Chen et al. (2023a) Le Chen, Xianzhong Ding, Murali Emani, Tristan Vanderbruggen, Pei-Hung Lin, and Chunhua Liao. 2023a. Data race detection using large language models. In *Proceedings of the SC’23 Workshops of The International Conference on High Performance Computing, Network, Storage, and Analysis*. 215–223. * Chen et al. (2023b) Le Chen, Pei-Hung Lin, Tristan Vanderbruggen, Chunhua Liao, Murali Emani, and Bronis De Supinski. 2023b. Lm4hpc: Towards effective language model application in high-performance computing. In *International Workshop on OpenMP*. Springer, 18–33. * Chen et al. (2022) Le Chen, Quazi Ishtiaque Mahmud, and Ali Jannesari. 2022. Multi-view learning for parallelism discovery of sequential programs. In *2022 IEEE International Parallel and Distributed Processing Symposium Workshops (IPDPSW)*. IEEE, 295–303. * Ding et al. (2023) Xianzhong Ding, Le Chen, Murali Emani, Chunhua Liao, Pei-Hung Lin, Tristan Vanderbruggen, Zhen Xie, Alberto Cerpa, and Wan Du. 2023. Hpc-gpt: Integrating large language model for high-performance computing. In *Proceedings of the SC’23 Workshops of The International Conference on High Performance Computing, Network, Storage, and Analysis*. 951–960. * Iqbal (2010) Adnan Iqbal. 2010. Employee turnover: Causes, consequences and retention strategies in the Saudi organizations. *The Business Review, Cambridge* 16, 2 (2010), 275–281. * Jain et al. (2020) Praphula Kumar Jain, Madhur Jain, and Rajendra Pamula. 2020. Explaining and predicting employees’ attrition: a machine learning approach. *SN Applied Sciences* 2, 4 (2020), 757. * Latha (2013) K Lavanya Latha. 2013. A study on employee attrition and retention in manufacturing industries. *BVIMSR’s Journal of Management Research (BJMR)* 5, 1 (2013), 1–23. * Liga and Robaldo (2023) Davide Liga and Livio Robaldo. 2023. Fine-tuning GPT-3 for legal rule classification. *Computer Law & Security Review* 51 (2023), 105864. * Mohan (2024) Sai Krishnan Mohan. 2024. Management consulting in the artificial intelligence–LLM era. *Management Consulting Journal* 7, 1 (2024), 9–24. * Pallathadka et al. (2022) Harikumar Pallathadka, V Hari Leela, Sushant Patil, BH Rashmi, Vipin Jain, and Samrat Ray. 2022. Attrition in software companies: Reason and measures. *Materials Today: Proceedings* 51 (2022), 528–531. * Raza et al. (2022) Ali Raza, Kashif Munir, Mubarak Almutairi, Faizan Younas, and Mian Muhammad Sadiq Fareed. 2022. Predicting employee attrition using machine learning approaches. *Applied Sciences* 12, 13 (2022), 6424. * Singh (2023) Vasudha Singh. 2023. *Exploring the role of large language model (llm)-based chatbots for human resources*. Ph. D. Dissertation. * Team et al. (2023) Gemini Team, Rohan Anil, Sebastian Borgeaud, Yonghui Wu, Jean-Baptiste Alayrac, Jiahui Yu, Radu Soricut, Johan Schalkwyk, Andrew M Dai, Anja Hauth, et al. 2023. Gemini: a family of highly capable multimodal models. *arXiv preprint arXiv:2312.11805* (2023). * Touvron et al. (2023) Hugo Touvron, Thibaut Lavril, Gautier Izacard, Xavier Martinet, Marie-Anne Lachaux, Timothée Lacroix, Baptiste Rozière, Naman Goyal, Eric Hambro, Faisal Azhar, et al. 2023. Llama: Open and efficient foundation language models. *arXiv preprint arXiv:2302.13971* (2023). * Vaswani (2017) A Vaswani. 2017. Attention is all you need. *Advances in Neural Information Processing Systems* (2017)."
+    }
+  ]
+}

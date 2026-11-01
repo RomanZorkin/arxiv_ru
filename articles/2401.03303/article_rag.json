@@ -1,0 +1,739 @@
+{
+  "title": "Guiding Effort Allocation in Open-Source Software Projects Using Bus Factor Analysis",
+  "sections": [
+    {
+      "heading": "Report GitHub Issue",
+      "level": 5,
+      "content": [
+        {
+          "type": "paragraph",
+          "text": "Content selection saved. Describe the issue below:"
+        }
+      ],
+      "children": []
+    },
+    {
+      "heading": "Guiding Effort Allocation in Open-Source Software Projects Using Bus Factor Analysis",
+      "level": 1,
+      "content": [],
+      "children": [
+        {
+          "heading": "Abstract.",
+          "level": 6,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "A critical issue faced by open-source software projects is the risk of key personnel leaving the project. This risk is exacerbated in large projects that have been under development for a long time and experienced growth in their development teams. One way to quantify this risk is to measure the concentration of knowledge about the project among its developers. Formally known as the Bus Factor (BF) of a project and defined as “the number of key developers who would need to be incapacitated to make a project unable to proceed” ([1](https://arxiv.org/html/2401.03303v1#bib.bib1)). Most of the proposed algorithms for BF calculation measure a developer’s knowledge of a file based on the number of commits. In this work, we propose using other metrics like lines of code changes (LOCC) and cosine difference of lines of code (change-size-cos) to calculate the BF. We use these metrics for BF calculation for five open-source GitHub projects using the CST algorithm and the RIG algorithm, which is git-blame-based. Moreover, we calculate the BF on project sub-directories that have seen the most active development recently. Lastly, we compare the results of the two algorithms in accuracy, similarity in results, execution time, and trends in BF values over time."
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "Keywords:",
+          "level": 6,
+          "content": [],
+          "children": []
+        },
+        {
+          "heading": "1. Introduction",
+          "level": 2,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "If we look at our daily use of the Internet, we realize that we are consumed with the use of software and applications. The development and maintenance of all these software projects are based on the knowledge held by its developers. This makes the software development process the most dependent upon its developers. Given that, developers become an important asset for project organizations and open-source project teams. This also makes the rate at which developers leave a software project a critical matter and risk. To mitigate this risk, it is important that project managers or principal developers monitor and quantify the concentration of knowledge of the project among its developers ([2](https://arxiv.org/html/2401.03303v1#bib.bib2)) An interesting measurement used in this regard is known as the Bus Factor (BF), which is defined as the minimum number of key developers whose departure would make a project unable or difficult to proceed ([2](https://arxiv.org/html/2401.03303v1#bib.bib2)) A smaller bus factor value would mean that the maximum knowledge of the project is concentrated among them and the project is at a higher risk if some or all of these developers leave the project, company or go for a vacation, etc. A bus factor of one would be the worst-case scenario. Conversely, a high bus factor means a lesser risk is posed to the project in case some of the developers end up leaving."
+            },
+            {
+              "type": "paragraph",
+              "text": "When it comes to open-source software projects, the bus factor is of much more importance. Most of the people working on these projects are making contributions voluntarily. Volunteering means that the developers or contributors do not have financial benefits associated with these projects. This puts open-source software projects at a higher risk of developer turnover ([2](https://arxiv.org/html/2401.03303v1#bib.bib2)). Given the importance of bus factor measurement in open-source software development projects, algorithms have been proposed to calculate it using data gathered from version control systems such as GitHub ([1](https://arxiv.org/html/2401.03303v1#bib.bib1), [3](https://arxiv.org/html/2401.03303v1#bib.bib3), [4](https://arxiv.org/html/2401.03303v1#bib.bib4)). To the best of our knowledge, most of these algorithms are commit-based, i.e., the algorithms look at the commit data from version control repositories. Moreover, existing work mostly proposes bus factor calculation algorithms and presents tools for the same. Few studies attempt to validate the results of these algorithms. ([2](https://arxiv.org/html/2401.03303v1#bib.bib2)) is an empirical and comparative study where three Bus Factor algorithms are validated, but they only used the tools and metrics provided by the original authors."
+            },
+            {
+              "type": "paragraph",
+              "text": "Therefore, in this paper, we look at two algorithms (a) first one was proposed by Cosentino et al. ([2](https://arxiv.org/html/2401.03303v1#bib.bib2)), which calculates the bus factor of each file and aggregates it up to branch, directory, or project level; (b) second one proposed by Rigby et al. ([4](https://arxiv.org/html/2401.03303v1#bib.bib4)), which uses a git-blame-based approach to calculate the bus factor. The tool based on the first algorithm is publicly available ([1](https://arxiv.org/html/2401.03303v1#bib.bib1)); however, the authors have only provided the pseudo-code of the second. Using the convention followed in ([2](https://arxiv.org/html/2401.03303v1#bib.bib2)), we refer to the first algorithm as CST and the second one as RIG. Among the two algorithms, CST is a commit-based algorithm, and we wanted to use it with other metrics like lines of code changes (LOCC) and cosine difference of lines of code (change-size-cos). For that, we implemented it by understanding the algorithm mentioned in ([1](https://arxiv.org/html/2401.03303v1#bib.bib1)). RIG algorithm had to be implemented as its code, or any related tool is not publicly available. We implemented and tested both algorithms on five open-source projects and compared their results. We also got feedback from the principal developers of these projects to validate the results. Lastly, we used the tool provided in ([1](https://arxiv.org/html/2401.03303v1#bib.bib1)) to obtain bus factor results for the selected projects."
+            },
+            {
+              "type": "paragraph",
+              "text": "To summarize, we seek to answer the following research questions:"
+            },
+            {
+              "type": "list",
+              "text": "1. (1) How do different metrics such as lines of changed code and cosine difference affect the bus factor computation? 2. (2) How can the bus factor guide principal developers or managers to allocate effort for hiring or knowledge transfer among the existing team of developers? 3. (3) How do bus factor algorithms differ in terms of accuracy and performance?"
+            },
+            {
+              "type": "paragraph",
+              "text": "How do different metrics such as lines of changed code and cosine difference affect the bus factor computation?"
+            },
+            {
+              "type": "paragraph",
+              "text": "How can the bus factor guide principal developers or managers to allocate effort for hiring or knowledge transfer among the existing team of developers?"
+            },
+            {
+              "type": "paragraph",
+              "text": "How do bus factor algorithms differ in terms of accuracy and performance?"
+            },
+            {
+              "type": "paragraph",
+              "text": "As such, our contributions can be summarized as follows:"
+            },
+            {
+              "type": "list",
+              "text": "* • Implemented the CST algorithm (with lines of code changes and cosine difference of lines of code) and the RIG algorithm and compared their results. * • Got feedback from the principal developers of the five selected projects to validate our results. * • Calculated the BF of the selected projects using the commit-based CST algorithm tool provided in ([1](https://arxiv.org/html/2401.03303v1#bib.bib1)) to compare with our results. * • Calculated the bus factor for the selected projects for the last five years to see the trend in BF values."
+            },
+            {
+              "type": "paragraph",
+              "text": "Implemented the CST algorithm (with lines of code changes and cosine difference of lines of code) and the RIG algorithm and compared their results."
+            },
+            {
+              "type": "paragraph",
+              "text": "Got feedback from the principal developers of the five selected projects to validate our results."
+            },
+            {
+              "type": "paragraph",
+              "text": "Calculated the BF of the selected projects using the commit-based CST algorithm tool provided in ([1](https://arxiv.org/html/2401.03303v1#bib.bib1)) to compare with our results."
+            },
+            {
+              "type": "paragraph",
+              "text": "Calculated the bus factor for the selected projects for the last five years to see the trend in BF values."
+            },
+            {
+              "type": "paragraph",
+              "text": "In Section [2](https://arxiv.org/html/2401.03303v1#S2 \"2. Existing Literature ‣ Guiding Effort Allocation in Open-Source Software Projects Using Bus Factor Analysis\"), we review the existing literature for bus factor calculation. Section [3](https://arxiv.org/html/2401.03303v1#S3 \"3. Study Design ‣ Guiding Effort Allocation in Open-Source Software Projects Using Bus Factor Analysis\") explains the design and steps involved in our study. We present our results in Section [4](https://arxiv.org/html/2401.03303v1#S4 \"4. Results ‣ Guiding Effort Allocation in Open-Source Software Projects Using Bus Factor Analysis\") and conclude the paper in Section [6](https://arxiv.org/html/2401.03303v1#S6 \"6. Conclusion ‣ Guiding Effort Allocation in Open-Source Software Projects Using Bus Factor Analysis\")."
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "2. Existing Literature",
+          "level": 2,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "In this section, first, we describe the two algorithms for measuring bus factors that we will be using as part of our study in this paper. Towards the end, we describe other algorithms that are part of the existing literature but not implemented in our study."
+            }
+          ],
+          "children": [
+            {
+              "heading": "2.1. CST Algorithm",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "The CST algorithm is proposed as part of a tool paper ([1](https://arxiv.org/html/2401.03303v1#bib.bib1)) by Cosentino et al. The algorithm calculates the knowledge of developers on each file and determines the bus factor for each file based on that. Furthermore, aggregation is performed from file to directory, branch, or project level to get developer knowledge. The aggregation is done by simply adding the knowledge on each file and scaling with the number of files in the directory, branch, or project. The authors proposed four metrics to calculate a developer’s knowledge of a file. *last change takes it all* assigns 100% knowledge of a file to the last developer who modified it, and in *multiple changes equally considered*, the knowledge of a developer is calculated by dividing the number of commits made by the developer on a file by the total number of commits ever made on that file. The third metric is *non-consecutive changes*, which considers the developer’s non-consecutive commits on a file only and merges the consecutive commits into a single one. The last metric is an extension of the third metric, called the *weighted non-consecutive changes*, and assigns incremental weight to the later commits on the file."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Once the developer’s knowledge of the artifacts, i.e., file, directory, branch, or project, has been calculated, the bus factor for each of these artifacts is measured by using two sets of developers. The first set is called the primary developers who have minimum knowledge XX of the artifact. The second set is called the secondary developers who at least have some knowledge YY of the artifact, where YY is less than XX. The threshold XX for the selection of primary developers is set to 1/N1/N where NN is the total number of developers that have made changes to the artifact till date. YY is set of half of XX for the selection of secondary developers. The number of developers in the union of both these sets gives us the bus factor for the particular artifact."
+                },
+                {
+                  "type": "formula",
+                  "text": "XX"
+                },
+                {
+                  "type": "formula",
+                  "text": "YY"
+                },
+                {
+                  "type": "formula",
+                  "text": "YY"
+                },
+                {
+                  "type": "formula",
+                  "text": "XX"
+                },
+                {
+                  "type": "formula",
+                  "text": "XX"
+                },
+                {
+                  "type": "formula",
+                  "text": "1/N1/N"
+                },
+                {
+                  "type": "formula",
+                  "text": "NN"
+                },
+                {
+                  "type": "formula",
+                  "text": "YY"
+                },
+                {
+                  "type": "formula",
+                  "text": "XX"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Since, CST is a commit-based algorithm, we use the same algorithm with *LOCC* and *change-size-cos*. The details of how we collect and use this data for open-source projects on GitHub are provided in later sections."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Data git-blame data for each file in the project Result BFset (BF developers), g (Bus Factor)"
+                },
+                {
+                  "type": "formula",
+                  "text": "g←1​t​o​200g\\leftarrow 1\\hskip 5.69046ptto\\hskip 5.69046pt200"
+                },
+                {
+                  "type": "formula",
+                  "text": "i←1​t​o​1000i\\leftarrow 1\\hskip 5.69046ptto\\hskip 5.69046pt1000"
+                },
+                {
+                  "type": "formula",
+                  "text": "B​F​s​e​t←BFset\\leftarrow"
+                },
+                {
+                  "type": "formula",
+                  "text": "​a​b​a​n​d​o​n​e​d−f​i​l​e​s​()≥50%\\emph{abandoned-files()}\\geq 50\\%"
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "2.2. RIG Algorithm",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "RIG algorithm was proposed by Rigby et al. ([4](https://arxiv.org/html/2401.03303v1#bib.bib4)), in which they adapt the financial risk management measures to a developer turnover context to measure the risk posed to a project from developer turnover. Unlike the CST algorithm, RIG uses a blame-based approach to calculate code ownership of developers. The *blame* feature is implemented in version control systems such that a git-blame command assigns each line in a file to a developer who changed it last. The algorithm’s authors claim that this approach allows them to follow code ownership at a finer granularity. As per the algorithm, a line is considered abandoned if it is attributed to a developer who is no longer part of the project, and a file is considered abandoned when 90% of its files are abandoned. This high threshold makes sure that developers with trivial contributions are excluded. Algorithm [1](https://arxiv.org/html/2401.03303v1#alg1 \"Algorithm 1 ‣ 2.1. CST Algorithm ‣ 2. Existing Literature ‣ Guiding Effort Allocation in Open-Source Software Projects Using Bus Factor Analysis\") shows the pseudo-code for the RIG algorithm. The algorithm starts by varying the size of developers gg from 1 to 200 who leave the project, as shown in line 1. Line 3 shows the random sampling of developers of size gg who leave the project, and this random sampling is repeated 1,000 times for every value of gg. We limit these iterations to 10 instead of 1,000 because the algorithm takes a long time on relatively larger projects we chose. Moreover, following ([2](https://arxiv.org/html/2401.03303v1#bib.bib2)), we return the lowest value of gg that resulted in the abandoned status of more than 50% of the files, as shown from lines 5-7. The authors in the original paper ([4](https://arxiv.org/html/2401.03303v1#bib.bib4)) also calculate the likelihood of each group of developers leaving the project between lines 3-4, but we omit it since we are A noticeable characteristic of this algorithm is its non-deterministic nature, i.e., different results are produced for each execution of the algorithm because of the random sampling of the developers. Also, the algorithm may not return a valid result, as can be seen from line 10, which happens when no *BFset* results in more than 50% of abandon files."
+                },
+                {
+                  "type": "formula",
+                  "text": "gg"
+                },
+                {
+                  "type": "formula",
+                  "text": "gg"
+                },
+                {
+                  "type": "formula",
+                  "text": "gg"
+                },
+                {
+                  "type": "formula",
+                  "text": "gg"
+                },
+                {
+                  "type": "table",
+                  "text": "| Project | Release Year | Contributors | Language | Description | | --- | --- | --- | --- | --- | | PETSc([5](https://arxiv.org/html/2401.03303v1#bib.bib5)) | 1994 | 207 | C | Portable, Extensible Toolkit for Scientific Computation. | | Spack([6](https://arxiv.org/html/2401.03303v1#bib.bib6)) | 2014 | 1,164 | Python | Multi-platform package manager. | | Hypre([7](https://arxiv.org/html/2401.03303v1#bib.bib7)) | 2004 | 34 | C | Library of high performance pre-conditioners and solvers. | | Lammps([8](https://arxiv.org/html/2401.03303v1#bib.bib8)) | 2016 | 224 | C++ | Large-scale Atomic/Molecular Massively Parallel Simulator. | | NWChem([9](https://arxiv.org/html/2401.03303v1#bib.bib9)) | 1994 | 44 | Fortran | Open Source High-Performance Computational Chemistry. |"
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "2.3. Other Bus Factor Algorithms",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "Another commit-based algorithm was proposed by Avelino et al. and computes the *Degree of Authorship (DOA)* of each file to identify the key developers ([3](https://arxiv.org/html/2401.03303v1#bib.bib3)). The DOA value for a file ff is initialized when it is created by a certain developer dd. The DOA of dd increases when dd makes more commits on ff while it decreases if other developers commit to ff. Lastly, DOA values are normalized for each file with the developer with the highest DOA equal to 1. Developers with a DOA greater than 0.75 are considered the authors of that file. We have not implemented this algorithm as part of our study and chose one commit-based algorithm only i.e., the CST algorithm explained in Section [2.1](https://arxiv.org/html/2401.03303v1#S2.SS1 \"2.1. CST Algorithm ‣ 2. Existing Literature ‣ Guiding Effort Allocation in Open-Source Software Projects Using Bus Factor Analysis\")."
+                },
+                {
+                  "type": "formula",
+                  "text": "ff"
+                },
+                {
+                  "type": "formula",
+                  "text": "dd"
+                },
+                {
+                  "type": "formula",
+                  "text": "dd"
+                },
+                {
+                  "type": "formula",
+                  "text": "dd"
+                },
+                {
+                  "type": "formula",
+                  "text": "ff"
+                },
+                {
+                  "type": "formula",
+                  "text": "ff"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "The first algorithm for the automated calculation of BF from version control systems was proposed by Zazworka et al. ([10](https://arxiv.org/html/2401.03303v1#bib.bib10)) in which each developer who made changes to a file, regardless of the number of commits, is considered the author of that file. Moreover, to find the BF, they look at each combination of developers ranging from 1 to NN (total developers). The BF is the largest combination of developers that a project may lose while the remaining developers still have knowledge of at least a part of the project’s files. Since the algorithm looks at each combination, it is shown in ([11](https://arxiv.org/html/2401.03303v1#bib.bib11)) that the algorithm scales to a maximum of 30 developers only. It is also mentioned in ([2](https://arxiv.org/html/2401.03303v1#bib.bib2)) that this algorithm did not terminate on projects even after running for more than three days. Hence, we did not include this algorithm in our study since all our projects’ total number of developers exceeds 30."
+                },
+                {
+                  "type": "formula",
+                  "text": "NN"
+                }
+              ],
+              "children": []
+            }
+          ]
+        },
+        {
+          "heading": "3. Study Design",
+          "level": 2,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "In the following subsections, we will discuss in detail the database for GitHub projects that we use in this study, the bus factor algorithms that we implement, and how we validate the bus factor results. For the RIG algorithm, we executed our experimental runs in Google Colaboratory and on a server."
+            }
+          ],
+          "children": [
+            {
+              "heading": "3.1. Database of GitHub data for HPC projects and other Metrics",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "In this work, we used GitHub data from five open-source high-performance computing (HPC) software projects. Table [1](https://arxiv.org/html/2401.03303v1#S2.T1 \"Table 1 ‣ 2.2. RIG Algorithm ‣ 2. Existing Literature ‣ Guiding Effort Allocation in Open-Source Software Projects Using Bus Factor Analysis\") shows some details about these projects. The GitHub data for a number of open-source projects, including these, has been stored, organized and parsed by us in a SQL database to be used for different research projects. The database contains computations for the lines of code changes (*LOCC*) and the cosine difference of code changes (*change-size-cos*), which are used for the bus factor calculation in our study for the CST algorithm."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "As mentioned in Section [2](https://arxiv.org/html/2401.03303v1#S2 \"2. Existing Literature ‣ Guiding Effort Allocation in Open-Source Software Projects Using Bus Factor Analysis\"), AVL and CST algorithms are commit-based. However, commits are not a great metric to consider to measure code ownership. One reason is the difference in coding styles of different individuals, where some frequently commit after every small change while others prefer to commit once after completing the task. Moreover, a commit-based approach would consider a commit consisting of deletions equal to that of additions regardless of the actual contribution made ([4](https://arxiv.org/html/2401.03303v1#bib.bib4)). Also, deletion removes the authorship of a certain piece of code from a developer and, hence, decreases the developer’s knowledge."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "With *LOCC*, each file is analyzed based on the number of lines the author has contributed with a commit. However, it will also consider the addition and deletion of blank spaces or comments as meaningful contributions. For the cosine difference of the changes, textdistance Python package is used to examine differences in text. It adds all the words from the changed lines to a word bank, places the added words in a column and deleted words in a row. Then it compares the columns and rows and assigns a numeric value of how much the line was changed. Given that, a change of variable name will be considered as a very small change under the cosine metric but may be a larger change under *LOCC*. Hence, using the cosine difference between the changed lines of code only considers the contributions with actual impact on the files, giving a comprehensive understanding of a developer’s contribution."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "The authors of the RIG algorithm give a similar reasoning for not using a commit-based approach and instead mention that a blame-based approach allows them to study code ownership at a finer granularity ([4](https://arxiv.org/html/2401.03303v1#bib.bib4))."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Input cMetric, cstMetric, timeRange (opt.), directory (opt.), branch(es) (opt.) Result primaryDev, secondaryDev, busFactor"
+                },
+                {
+                  "type": "formula",
+                  "text": "D←t​o​t​a​l​D​e​v​e​l​o​p​e​r​sD\\leftarrow totalDevelopers"
+                },
+                {
+                  "type": "formula",
+                  "text": "p​r​i​m​R​a​t​i​o←1/DprimRatio\\leftarrow 1/D"
+                },
+                {
+                  "type": "formula",
+                  "text": "s​e​c​o​n​d​R​a​t​i​o←p​r​i​m​R​a​t​i​o/2secondRatio\\leftarrow primRatio/2"
+                },
+                {
+                  "type": "formula",
+                  "text": "t​o​t​a​l​P​e​r​F​i​l​e​D​ftotalPerFileDf"
+                },
+                {
+                  "type": "formula",
+                  "text": "c​s​t​M​e​t​r​i​c==m​u​l​C​h​a​n​g​e​s​E​q​u​a​lcstMetric==mulChangesEqual"
+                },
+                {
+                  "type": "formula",
+                  "text": "ff"
+                },
+                {
+                  "type": "formula",
+                  "text": "t​o​t​a​l​P​e​r​F​i​l​e​D​ftotalPerFileDf"
+                },
+                {
+                  "type": "formula",
+                  "text": "f​i​l​e​T​o​t​a​l←s​u​m​(c​M​e​t​r​i​c)fileTotal\\leftarrow sum(cMetric)"
+                },
+                {
+                  "type": "formula",
+                  "text": "ff"
+                },
+                {
+                  "type": "formula",
+                  "text": "d​e​v​T​o​t​a​l←s​u​m​(c​M​e​t​r​i​c)devTotal\\leftarrow sum(cMetric)"
+                },
+                {
+                  "type": "formula",
+                  "text": "dd"
+                },
+                {
+                  "type": "formula",
+                  "text": "ff"
+                },
+                {
+                  "type": "formula",
+                  "text": "d​e​v​K​n​o​w​l​e​d​g​e←d​e​v​T​o​t​a​lf​i​l​e​T​o​t​a​ldevKnowledge\\leftarrow\\frac{devTotal}{fileTotal}"
+                },
+                {
+                  "type": "formula",
+                  "text": "d​e​v​K​n​o​w​l​e​d​g​edevKnowledge"
+                },
+                {
+                  "type": "formula",
+                  "text": "a​g​g​r​e​g​a​t​e​d​D​faggregatedDf"
+                },
+                {
+                  "type": "formula",
+                  "text": "d​e​v​K​n​o​w​l​e​d​g​edevKnowledge"
+                },
+                {
+                  "type": "formula",
+                  "text": "a​g​g​r​e​g​a​t​e​d​D​faggregatedDf"
+                },
+                {
+                  "type": "formula",
+                  "text": "d​e​v​K​n​o​w​l​e​d​g​e≥p​r​i​m​R​a​t​i​odevKnowledge\\geq primRatio"
+                },
+                {
+                  "type": "formula",
+                  "text": "p​r​i​m​a​r​y​D​e​v=p​r​i​m​a​r​y​D​e​v+1primaryDev=primaryDev+1"
+                },
+                {
+                  "type": "formula",
+                  "text": "d​e​v​K​n​o​w​l​e​d​g​e≥s​e​c​o​n​d​R​a​t​i​odevKnowledge\\geq secondRatio"
+                },
+                {
+                  "type": "formula",
+                  "text": "s​e​c​o​n​d​a​r​y​D​e​v=s​e​c​o​n​d​a​r​y​D​e​v+1secondaryDev=secondaryDev+1"
+                },
+                {
+                  "type": "formula",
+                  "text": "b​u​s​F​a​c​t​o​r←p​r​i​m​a​r​y​D​e​vbusFactor\\leftarrow primaryDev"
+                },
+                {
+                  "type": "formula",
+                  "text": "s​e​c​o​n​d​a​r​y​D​e​vsecondaryDev"
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "3.2. Implementation of Bus Factor Algorithms",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "After reviewing the literature for the CST algorithm ([1](https://arxiv.org/html/2401.03303v1#bib.bib1)), we aimed to use this algorithm on two new metrics. Before doing that, we decided to calculate BF on our selected projects using the tools provided by the authors of the CST algorithm. Two tools are needed to calculate the BF of a project, as provided by the authors. The first is called *Gitana*11 1 https://github.com/valeriocos/Gitana, which imports all the data from a GitHub repository to an SQL database and then exports it to a JSON file ([12](https://arxiv.org/html/2401.03303v1#bib.bib12)). Second, the web-based bus factor calculating tool22 2 https://github.com/SOM-Research/busfactor takes the JSON file as input and calculates BF based on the selected CST metric and thresholds. It is worth noting that exporting data from the database using *Gitana* takes a lot longer than importing the data from GitHub. For instance, running *Gitana* for the smallest project, Hypre took more than 8 hours."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Moreover, we implemented the CST algorithm as part of the Git repository mining and analysis software (GReMCat)33 3 https://github.com/HPCL/ideas-uo. The implementation design of the complete software framework can be seen in Figure [1](https://arxiv.org/html/2401.03303v1#acmlabel1 \"Figure 1 ‣ 3.1. Database of GitHub data for HPC projects and other Metrics ‣ 3. Study Design ‣ Guiding Effort Allocation in Open-Source Software Projects Using Bus Factor Analysis\"). The CST algorithm is implemented in the patterns package and can be used from a Jupiter Notebook44 4 https://tinyurl.com/CSTnotebook by calling the visualizer object. The authors of CST do not provide a pseudo-code for their proposed algorithm in their paper ([1](https://arxiv.org/html/2401.03303v1#bib.bib1)). We implemented it based on the explanation in ([1](https://arxiv.org/html/2401.03303v1#bib.bib1)) and ([2](https://arxiv.org/html/2401.03303v1#bib.bib2)) and its pseudo-code for our implementation of *multiple changes equally considered* metric is presented in Algorithm [2](https://arxiv.org/html/2401.03303v1#alg2 \"Algorithm 2 ‣ 3.1. Database of GitHub data for HPC projects and other Metrics ‣ 3. Study Design ‣ Guiding Effort Allocation in Open-Source Software Projects Using Bus Factor Analysis\"). Instead of using the number of commits, we used the *LOCC* or *change-size-cos* values against each commit that is pre-computed in our database. The algorithm allows the user to input the branch, directory, time period, CST metric and the proposed data metrics they want to be used for the BF calculation. The time period can be *year-year*, *month-month*, a specific *year* or *month*."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "As mentioned in Section [2.2](https://arxiv.org/html/2401.03303v1#S2.SS2 \"2.2. RIG Algorithm ‣ 2. Existing Literature ‣ Guiding Effort Allocation in Open-Source Software Projects Using Bus Factor Analysis\"), the RIG algorithm is not commit-based, and due to the size and continuously changing nature of the git blame data, we do not store it in our database. In fact, we implemented RIG presented in Algorithm [1](https://arxiv.org/html/2401.03303v1#alg1 \"Algorithm 1 ‣ 2.1. CST Algorithm ‣ 2. Existing Literature ‣ Guiding Effort Allocation in Open-Source Software Projects Using Bus Factor Analysis\") outside of GReMCat, and executed it on our selected projects in Google Colaboratory and on a server. The authors of the RIG algorithm do not provide a public tool or its code but it was fairly easy to understand and implement from their explanation in ([4](https://arxiv.org/html/2401.03303v1#bib.bib4)) and also using the pseudo-code provided in ([2](https://arxiv.org/html/2401.03303v1#bib.bib2))."
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "3.3. Handling External Code and Aliases",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "GReMCat already had its implementation of removing external code and libraries from the commits data of the projects in the database based on the names of directories. We used it for the CST algorithm and applied the same methodology to the RIG algorithm. Moreover, GReMCat uses Python fuzzywuzzy package ([13](https://arxiv.org/html/2401.03303v1#bib.bib13)) for identifying multiple different names and emails associated with the same author. We used this implementation for both CST and RIG algorithms to handle aliases."
+                },
+                {
+                  "type": "table",
+                  "text": "| | | | | --- | --- | --- | | Project | Key developers | Loss tolerance | | PETSc | 7 | 4 | | Hypre | 17 | 3 | | Lammps | 4 | - | | NWChem | 4 | 2 |"
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "3.4. Validating Bus Factor Results",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "In order to validate the Bus Factor results, we reached out to the principal developers of the five projects via email and asked them three questions: (a) Can you estimate the total number of key developers in the project? If your estimate is for a specific time period, please indicate the years. (b) Who do you consider your top project contributors overall or during a specific time period (please indicate which years)? (c) How many key developers could you lose (in a worst-case scenario) and still continue successfully with your project? We received answers from four out of five projects, while some chose not to name the developers. The answers we received are reported in Table [2](https://arxiv.org/html/2401.03303v1#S3.T2 \"Table 2 ‣ 3.3. Handling External Code and Aliases ‣ 3. Study Design ‣ Guiding Effort Allocation in Open-Source Software Projects Using Bus Factor Analysis\"), where the key developers correspond to answers to (a) while loss tolerance corresponds to answers to (c)."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Additionally, we also used the tool provided by the authors of the CST algorithm to get BF results for the projects. We were able to export GitHub data to JSON files for three of the projects while getting the BF results for only two of them. The tools continued executing for larger projects like PETSc([5](https://arxiv.org/html/2401.03303v1#bib.bib5)) and Lammps([8](https://arxiv.org/html/2401.03303v1#bib.bib8)) for more than 48 hours without producing results."
+                },
+                {
+                  "type": "table",
+                  "text": "| Project | CST (cos) | CST (LOCC) | RIG | CST (commits) | | --- | --- | --- | --- | --- | | PETSc | 32 | 28 | - | - | | Hypre | 12 | 10 | 29 | 5 | | Lammps | 24 | 23 | - | - | | NWChem | 13 | 13 | - | 7 | | Spack | 211 | 172 | - | - |"
+                }
+              ],
+              "children": []
+            }
+          ]
+        },
+        {
+          "heading": "4. Results",
+          "level": 2,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "In this section, first we compare the project and directory-level BF results of the two algorithms with the feedback received from the principal developers and compare results from different CST metrics. Secondly, we look at the trend in bus factor values for the past five years. Lastly, we look into the performance of RIG algorithm by comparing its directory-level results."
+            }
+          ],
+          "children": [
+            {
+              "heading": "4.1. Comparison for Accuracy of Results",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "In this subsection, we answer the first of the research questions, which focuses on the impact of different metrics on the bus factor computation. The bus factors calculated by the CST algorithm with our proposed data metrics, the CST tool provided by the authors (commits-based), and our implementation of the RIG algorithm are reported in Table [3](https://arxiv.org/html/2401.03303v1#S3.T3 \"Table 3 ‣ 3.4. Validating Bus Factor Results ‣ 3. Study Design ‣ Guiding Effort Allocation in Open-Source Software Projects Using Bus Factor Analysis\"). The values reported are based on the *mul-changes-equal* CST metric. The tool for the CST algorithm took more than 8 hours to produce results for each of the two projects Hypre and NWChem. The calls to the SQL database containing the commits data timed out for the other three projects, given their large sizes. Moreover, the RIG algorithm only returned a bus factor for the Hypre project, which is the smallest in terms of the number of files and subsequently the git-blame data. For projects with many files and authors, the algorithm continued execution for more than 24 hours. Thus, the missing results in the Table [3](https://arxiv.org/html/2401.03303v1#S3.T3 \"Table 3 ‣ 3.4. Validating Bus Factor Results ‣ 3. Study Design ‣ Guiding Effort Allocation in Open-Source Software Projects Using Bus Factor Analysis\") highlight the limitations of the RIG algorithm and the tools of the CST algorithm given the large size of the projects."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "As mentioned in Section [3.4](https://arxiv.org/html/2401.03303v1#S3.SS4 \"3.4. Validating Bus Factor Results ‣ 3. Study Design ‣ Guiding Effort Allocation in Open-Source Software Projects Using Bus Factor Analysis\"), for the accuracy of results and validation of the bus factor values in Table [3](https://arxiv.org/html/2401.03303v1#S3.T3 \"Table 3 ‣ 3.4. Validating Bus Factor Results ‣ 3. Study Design ‣ Guiding Effort Allocation in Open-Source Software Projects Using Bus Factor Analysis\"), we got in touch with the principal developers of each of the projects and recorded their responses in Table [2](https://arxiv.org/html/2401.03303v1#S3.T2 \"Table 2 ‣ 3.3. Handling External Code and Aliases ‣ 3. Study Design ‣ Guiding Effort Allocation in Open-Source Software Projects Using Bus Factor Analysis\"). By comparing the bus factor values in Table [2](https://arxiv.org/html/2401.03303v1#S3.T2 \"Table 2 ‣ 3.3. Handling External Code and Aliases ‣ 3. Study Design ‣ Guiding Effort Allocation in Open-Source Software Projects Using Bus Factor Analysis\") and [3](https://arxiv.org/html/2401.03303v1#S3.T3 \"Table 3 ‣ 3.4. Validating Bus Factor Results ‣ 3. Study Design ‣ Guiding Effort Allocation in Open-Source Software Projects Using Bus Factor Analysis\"), it can be seen that the values given by the developers do not exactly match the values by any of the algorithms. However, the error for the Hypre project, which is calculated as follows:"
+                },
+                {
+                  "type": "table",
+                  "text": "| | | | | | --- | --- | --- | --- | | (1) | | e​r​r​o​r=|B​Fa​l​g​o​r​i​t​h​m−B​Fp​r​i​n​c​i​p​a​l​\\_​d​e​v|error=|BF\\_{algorithm}-BF\\_{principal\\\\_dev}| | |"
+                },
+                {
+                  "type": "formula",
+                  "text": "e​r​r​o​r=|B​Fa​l​g​o​r​i​t​h​m−B​Fp​r​i​n​c​i​p​a​l​_​d​e​v|error=|BF_{algorithm}-BF_{principal\\_dev}|"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "is the smallest for *change-size-cos* (e​r​r​o​r=5error=5) and LOCC (e​r​r​o​r=7error=7) based CST algorithm implemented as part of this study. E​r​r​o​r=12Error=12 for the commit-based CST ([1](https://arxiv.org/html/2401.03303v1#bib.bib1)) and the RIG algorithm ([4](https://arxiv.org/html/2401.03303v1#bib.bib4)). Lastly, we looked at the results from the commit-based CST algorithm and observed that the results were not in sync with the cut-offs mentioned in ([1](https://arxiv.org/html/2401.03303v1#bib.bib1)) for primary and secondary developers, hence, the high error value."
+                },
+                {
+                  "type": "formula",
+                  "text": "e​r​r​o​r=5error=5"
+                },
+                {
+                  "type": "formula",
+                  "text": "e​r​r​o​r=7error=7"
+                },
+                {
+                  "type": "formula",
+                  "text": "E​r​r​o​r=12Error=12"
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Along with comparing the bus factor values, we also looked at their accuracy in identifying the developers who are part of the bus factor result by each algorithm. Only the principal developers of the Lammps and NWChem project shared the names of the developers constituting the bus factor. For privacy reasons, we won’t be sharing the names in this paper. However, from our comparative study, we can state that the developers identified by the principal developers for both Lammps and NWChem are at the top of the sorted list for *change-size-cos* and LOCC-based CST algorithm. The top developer identified by the tool in ([1](https://arxiv.org/html/2401.03303v1#bib.bib1)) for NWChem is not even part of the developers named by the NWChem’s principal developer. This shows that the threshold for primary and secondary developers in ([1](https://arxiv.org/html/2401.03303v1#bib.bib1)) is not the best case and also that *change-size-cos* and LOCC-based CST algorithm is more accurate. RIG performed the worst by identifying only 5 out of 12 (*change-size-cos*) or 5 out of 10 (LOCC) developers correctly for the Hypre project. It is important to note that the five projects chosen for this study are large in terms of files, number of developers, commits, and git-blame data. This highlighted the limitation of ([12](https://arxiv.org/html/2401.03303v1#bib.bib12)), ([14](https://arxiv.org/html/2401.03303v1#bib.bib14)), and ([15](https://arxiv.org/html/2401.03303v1#bib.bib15)) when it comes to large GitHub projects, as results were not returned for the three larger projects."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "In Figure [2](https://arxiv.org/html/2401.03303v1#acmlabel2 \"Figure 2 ‣ 3.4. Validating Bus Factor Results ‣ 3. Study Design ‣ Guiding Effort Allocation in Open-Source Software Projects Using Bus Factor Analysis\"), we look into the bus factors for the most recently updated directories of PETSc and NWChem projects. We compare the bus factor values of the *change-size-cos* and LOCC-based CST algorithm with the RIG algorithm. It can be clearly seen that the results from the RIG algorithm are significantly different and higher than not only the CST algorithm but also the data provided by the principal developers of the projects. Hence, we found the RIG algorithm to be the worst performer."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Moreover, we present comparative plots for the four CST algorithm metrics explained in Section [2.1](https://arxiv.org/html/2401.03303v1#S2.SS1 \"2.1. CST Algorithm ‣ 2. Existing Literature ‣ Guiding Effort Allocation in Open-Source Software Projects Using Bus Factor Analysis\") and also the two data metrics *change-size-cos* and LOCC in Figure [3](https://arxiv.org/html/2401.03303v1#acmlabel3 \"Figure 3 ‣ 4. Results ‣ Guiding Effort Allocation in Open-Source Software Projects Using Bus Factor Analysis\") for Hypre and PETSc. It can be seen from the graphs that there is not a significant variation in the results for each combination. Given that information, we focused our study on the *mul-changes-equal* metric. However, as mentioned in ([1](https://arxiv.org/html/2401.03303v1#bib.bib1)), a CST metric can be chosen as per the requirements and processes followed by an organization for version control."
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "4.2. Trend in bus factors over time",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "In this subsection, we seek the answer to the second research question, i.e., the role of the bus factor in guiding effort allocation towards hiring and knowledge transfer. The intention is to study the applicability of the bus factor and the guidance these results provide to principal developers and managers. Intuitively, the bus factor of a project or directory will indicate the concentration of knowledge within a certain number of people. If that number is small, then principal developers or project managers can work on effort allocation for hiring new people to work on that project. Another thing that can be done is to ensure knowledge transfer to other developers within the organization. For our study, we looked at the trend in bus factor over the past five years for the selected projects. Figure [4](https://arxiv.org/html/2401.03303v1#acmlabel4 \"Figure 4 ‣ 4.1. Comparison for Accuracy of Results ‣ 4. Results ‣ Guiding Effort Allocation in Open-Source Software Projects Using Bus Factor Analysis\") shows the trend in bus factor since 2018 for PETSc and Spack. The yellow bars represent the total number of developers; the left y-axis, along with solid lines, represents the bus factor value, while the right y-axis and the dashed lines are for the percentage of developers that are part of the bus factor. For both projects, we can see that the developers with higher knowledge of the projects are decreasing in later years, reaching the minimum value in the year 2022. Knowledge of this trend can help the principal developers or managers hire new people or initiate the knowledge transfer process to other existing developers for these projects."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Sometimes, looking at the trend in bus factor for the whole project does not provide the best view of the knowledge concentration and the risk of the project in terms of employee turnover. Given that, looking at individual directories or important parts of the projects is more helpful. Figure [5](https://arxiv.org/html/2401.03303v1#acmlabel5 \"Figure 5 ‣ 4.2. Trend in bus factors over time ‣ 4. Results ‣ Guiding Effort Allocation in Open-Source Software Projects Using Bus Factor Analysis\") shows the trend in bus factor values for major directories of PETSc and Spack. With this narrowed-down view, a more informed decision can be taken for the important parts of the projects. Figure [5](https://arxiv.org/html/2401.03303v1#acmlabel5 \"Figure 5 ‣ 4.2. Trend in bus factors over time ‣ 4. Results ‣ Guiding Effort Allocation in Open-Source Software Projects Using Bus Factor Analysis\") (c) particularly shows a steep drop in the bus factor value for var/spack/ directory of the project, which cannot be picked up from the holistic view shown in Figure [4](https://arxiv.org/html/2401.03303v1#acmlabel4 \"Figure 4 ‣ 4.1. Comparison for Accuracy of Results ‣ 4. Results ‣ Guiding Effort Allocation in Open-Source Software Projects Using Bus Factor Analysis\") (b)."
+                }
+              ],
+              "children": []
+            },
+            {
+              "heading": "4.3. Performance comparison of BF Algorithms",
+              "level": 3,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "This subsection focuses on answering the research question about the accuracy of results and the performance of the bus factor algorithms. For that, we wanted to look at each algorithm to compare and contrast results. Most of this question is answered for the CST algorithm in Section [4.1](https://arxiv.org/html/2401.03303v1#S4.SS1 \"4.1. Comparison for Accuracy of Results ‣ 4. Results ‣ Guiding Effort Allocation in Open-Source Software Projects Using Bus Factor Analysis\"), where we compared the results from the CST algorithm with RIG using Figure [2](https://arxiv.org/html/2401.03303v1#acmlabel2 \"Figure 2 ‣ 3.4. Validating Bus Factor Results ‣ 3. Study Design ‣ Guiding Effort Allocation in Open-Source Software Projects Using Bus Factor Analysis\"), so here we focused on the RIG algorithm and its non-deterministic nature."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "As mentioned in Section [2.2](https://arxiv.org/html/2401.03303v1#S2.SS2 \"2.2. RIG Algorithm ‣ 2. Existing Literature ‣ Guiding Effort Allocation in Open-Source Software Projects Using Bus Factor Analysis\"), the RIG algorithm is non-deterministic, i.e., it does not produce the same results for different executions. We collected data from two runs for different directories of the five projects to see the variation in results by the RIG algorithm. In Figure [6](https://arxiv.org/html/2401.03303v1#acmlabel6 \"Figure 6 ‣ 4.3. Performance comparison of BF Algorithms ‣ 4. Results ‣ Guiding Effort Allocation in Open-Source Software Projects Using Bus Factor Analysis\"), we show results for two of the projects, PETSc and NWChem. It can be seen that none of the executions resulted in the same result for any of the directories. The difference is significant for some, including petsc/src/vec in (a) and nwchem/src/ccd in (b). We also looked at the developer names resulting from the algorithm for each execution and did not find a common pattern of similarity among results, which further confirms the random nature of the RIG algorithm."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "The non-deterministic and random nature of the RIG algorithm automatically makes the CST algorithm a better choice. This is further corroborated by the responses of the principal developers, as shown in Table [3](https://arxiv.org/html/2401.03303v1#S3.T3 \"Table 3 ‣ 3.4. Validating Bus Factor Results ‣ 3. Study Design ‣ Guiding Effort Allocation in Open-Source Software Projects Using Bus Factor Analysis\") and the lower errors for the CST algorithm. Moreover, Rigby et al. themselves claim in ([4](https://arxiv.org/html/2401.03303v1#bib.bib4)) that bus factor scenarios computed using loss percentages are unrealistic."
+                }
+              ],
+              "children": []
+            }
+          ]
+        },
+        {
+          "heading": "5. Future Work",
+          "level": 2,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "There are many future dimensions to this work. One way to extend this work is to look at the impact of different threshold values for the algorithms with the proposed data metrics. Since authors of both CST and RIG algorithm do not give reasoning behind the choice of all the chosen threshold and cutoff values, this can be an interesting study. The results can help in making a more informed choice behind these values with reasoning provided. Moreover, using a more data-driven approach for the validation of results with trained machine learning models can help in eliminating the threats to correctness of the validation process. The large amount of mined GitHub data can be used for training purposes."
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "6. Conclusion",
+          "level": 2,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "It is common for open-source projects to face the risk of key developers leaving the project. This risk is even higher with long-term and large projects. To judge the risk posed to the projects or the severity of it, the concentration of knowledge among its developers can be measured. This measurement is known as the bus factor of the project and there are several algorithms proposed for its calculation. Most of these algorithms use the commits data from version control systems. We proposed the use of two other metrics i.e. lines of code changes (LOCC) and cosine difference of lines of code (*change-size-cos*) and tested them with the CST algorithm. We also used a git-blame based RIG algorithm on our use-case of five High Performance Computing projects on GitHub. Along with complete projects, we also looked at the bus factor values of the major directories in each. We did a comparative study for the accuracy, similarity in results and trend in BF values on the two algorithms and also the metrics proposed by us. We validated our results from the principal developers of the selected projects which showed LOCC and *change-size-cos* to be more accurate than commits. Our implementation of the CST algorithm is scalable when compared to the online available tools by Cosentino at el. Lastly, we demonstrated with examples how looking at the trend in bus factor values over time can guide principal developers in effort allocation."
+            }
+          ],
+          "children": []
+        },
+        {
+          "heading": "References",
+          "level": 2,
+          "content": [
+            {
+              "type": "list",
+              "text": "* [1] Valerio Cosentino, Javier Canovas Izquierdo, and Jordi Cabot. Assessing the bus factor of git repositories. 03 2015. * [2] Mívian Ferreira, Marco Tulio Valente, and Kecia Ferreira. A comparison of three algorithms for computing truck factors. In 2017 IEEE/ACM 25th International Conference on Program Comprehension (ICPC), pages 207–217, 2017. * [3] G. Avelino, L. Passos, A. Hora, and M. Valente. A novel approach for estimating truck factors. In 2016 IEEE 24th International Conference on Program Comprehension (ICPC), pages 1–10, Los Alamitos, CA, USA, may 2016. IEEE Computer Society. * [4] Peter C. Rigby, Yue Cai Zhu, Samuel M. Donadelli, and Audris Mockus. Quantifying and mitigating turnover-induced knowledge loss: Case studies of chrome and a project at avaya. In Proceedings of the 38th International Conference on Software Engineering, ICSE ’16, page 1006–1016, New York, NY, USA, 2016. Association for Computing Machinery. * [5] Petsc project. Available online at: <https://github.com/petsc/petsc>. * [6] Spack project. Available online at: <https://github.com/spack/spack>. * [7] Hypre project. Available online at: <https://github.com/hypre-space/hypre>. * [8] Lammps project. Available online at: <https://github.com/lammps/lammps>. * [9] Nwchem project. Available online at: <https://github.com/nwchemgit/nwchem>. * [10] Nico Zazworka, Kai Stapel, Eric Knauss, Forrest Shull, Victor R. Basili, and Kurt Schneider. Are developers complying with the process: An xp study. In Proceedings of the 2010 ACM-IEEE International Symposium on Empirical Software Engineering and Measurement, ESEM ’10, New York, NY, USA, 2010. Association for Computing Machinery. * [11] Filippo Ricca, Alessandro Marchetto, and Marco Torchiano. On the difficulty of computing the truck factor. volume 6759, pages 337–351, 06 2011. * [12] Valerio Cosentino, Javier Canovas Izquierdo, and Jordi Cabot. Gitana: A software project inspector. Science of Computer Programming, 153, 12 2017. * [13] SeatGeek Inc. fuzzywuzzy: Fuzzy String Matching in Python, 2014. * [14] Valerio Cosentino, Javier Canovas Izquierdo, and Jordi Cabot. Gitana: a sql-based project activity inspector. Available online at: <https://github.com/SOM-Research/Gitana>. * [15] Valerio Cosentino. Bus factor analyzer. Available online at: <https://github.com/SOM-Research/busfactor>."
+            }
+          ],
+          "children": []
+        }
+      ]
+    }
+  ],
+  "chunks": [
+    {
+      "heading_path": [
+        "Report GitHub Issue"
+      ],
+      "text": "##### Report GitHub Issue\n\nContent selection saved. Describe the issue below:"
+    },
+    {
+      "heading_path": [
+        "Guiding Effort Allocation in Open-Source Software Projects Using Bus Factor Analysis"
+      ],
+      "text": "# Guiding Effort Allocation in Open-Source Software Projects Using Bus Factor Analysis"
+    },
+    {
+      "heading_path": [
+        "Guiding Effort Allocation in Open-Source Software Projects Using Bus Factor Analysis",
+        "Abstract."
+      ],
+      "text": "###### Abstract.\n\nA critical issue faced by open-source software projects is the risk of key personnel leaving the project. This risk is exacerbated in large projects that have been under development for a long time and experienced growth in their development teams. One way to quantify this risk is to measure the concentration of knowledge about the project among its developers. Formally known as the Bus Factor (BF) of a project and defined as “the number of key developers who would need to be incapacitated to make a project unable to proceed” ([1](https://arxiv.org/html/2401.03303v1#bib.bib1)). Most of the proposed algorithms for BF calculation measure a developer’s knowledge of a file based on the number of commits. In this work, we propose using other metrics like lines of code changes (LOCC) and cosine difference of lines of code (change-size-cos) to calculate the BF. We use these metrics for BF calculation for five open-source GitHub projects using the CST algorithm and the RIG algorithm, which is git-blame-based. Moreover, we calculate the BF on project sub-directories that have seen the most active development recently. Lastly, we compare the results of the two algorithms in accuracy, similarity in results, execution time, and trends in BF values over time."
+    },
+    {
+      "heading_path": [
+        "Guiding Effort Allocation in Open-Source Software Projects Using Bus Factor Analysis",
+        "Keywords:"
+      ],
+      "text": "###### Keywords:"
+    },
+    {
+      "heading_path": [
+        "Guiding Effort Allocation in Open-Source Software Projects Using Bus Factor Analysis",
+        "1. Introduction"
+      ],
+      "text": "## 1. Introduction\n\nIf we look at our daily use of the Internet, we realize that we are consumed with the use of software and applications. The development and maintenance of all these software projects are based on the knowledge held by its developers. This makes the software development process the most dependent upon its developers. Given that, developers become an important asset for project organizations and open-source project teams. This also makes the rate at which developers leave a software project a critical matter and risk. To mitigate this risk, it is important that project managers or principal developers monitor and quantify the concentration of knowledge of the project among its developers ([2](https://arxiv.org/html/2401.03303v1#bib.bib2)) An interesting measurement used in this regard is known as the Bus Factor (BF), which is defined as the minimum number of key developers whose departure would make a project unable or difficult to proceed ([2](https://arxiv.org/html/2401.03303v1#bib.bib2)) A smaller bus factor value would mean that the maximum knowledge of the project is concentrated among them and the project is at a higher risk if some or all of these developers leave the project, company or go for a vacation, etc. A bus factor of one would be the worst-case scenario. Conversely, a high bus factor means a lesser risk is posed to the project in case some of the developers end up leaving.\n\nWhen it comes to open-source software projects, the bus factor is of much more importance. Most of the people working on these projects are making contributions voluntarily. Volunteering means that the developers or contributors do not have financial benefits associated with these projects. This puts open-source software projects at a higher risk of developer turnover ([2](https://arxiv.org/html/2401.03303v1#bib.bib2)). Given the importance of bus factor measurement in open-source software development projects, algorithms have been proposed to calculate it using data gathered from version control systems such as GitHub ([1](https://arxiv.org/html/2401.03303v1#bib.bib1), [3](https://arxiv.org/html/2401.03303v1#bib.bib3), [4](https://arxiv.org/html/2401.03303v1#bib.bib4)). To the best of our knowledge, most of these algorithms are commit-based, i.e., the algorithms look at the commit data from version control repositories. Moreover, existing work mostly proposes bus factor calculation algorithms and presents tools for the same. Few studies attempt to validate the results of these algorithms. ([2](https://arxiv.org/html/2401.03303v1#bib.bib2)) is an empirical and comparative study where three Bus Factor algorithms are validated, but they only used the tools and metrics provided by the original authors.\n\nTherefore, in this paper, we look at two algorithms (a) first one was proposed by Cosentino et al. ([2](https://arxiv.org/html/2401.03303v1#bib.bib2)), which calculates the bus factor of each file and aggregates it up to branch, directory, or project level; (b) second one proposed by Rigby et al. ([4](https://arxiv.org/html/2401.03303v1#bib.bib4)), which uses a git-blame-based approach to calculate the bus factor. The tool based on the first algorithm is publicly available ([1](https://arxiv.org/html/2401.03303v1#bib.bib1)); however, the authors have only provided the pseudo-code of the second. Using the convention followed in ([2](https://arxiv.org/html/2401.03303v1#bib.bib2)), we refer to the first algorithm as CST and the second one as RIG. Among the two algorithms, CST is a commit-based algorithm, and we wanted to use it with other metrics like lines of code changes (LOCC) and cosine difference of lines of code (change-size-cos). For that, we implemented it by understanding the algorithm mentioned in ([1](https://arxiv.org/html/2401.03303v1#bib.bib1)). RIG algorithm had to be implemented as its code, or any related tool is not publicly available. We implemented and tested both algorithms on five open-source projects and compared their results. We also got feedback from the principal developers of these projects to validate the results. Lastly, we used the tool provided in ([1](https://arxiv.org/html/2401.03303v1#bib.bib1)) to obtain bus factor results for the selected projects.\n\nTo summarize, we seek to answer the following research questions:\n\n1. (1) How do different metrics such as lines of changed code and cosine difference affect the bus factor computation? 2. (2) How can the bus factor guide principal developers or managers to allocate effort for hiring or knowledge transfer among the existing team of developers? 3. (3) How do bus factor algorithms differ in terms of accuracy and performance?\n\nHow do different metrics such as lines of changed code and cosine difference affect the bus factor computation?\n\nHow can the bus factor guide principal developers or managers to allocate effort for hiring or knowledge transfer among the existing team of developers?\n\nHow do bus factor algorithms differ in terms of accuracy and performance?\n\nAs such, our contributions can be summarized as follows:\n\n* • Implemented the CST algorithm (with lines of code changes and cosine difference of lines of code) and the RIG algorithm and compared their results. * • Got feedback from the principal developers of the five selected projects to validate our results. * • Calculated the BF of the selected projects using the commit-based CST algorithm tool provided in ([1](https://arxiv.org/html/2401.03303v1#bib.bib1)) to compare with our results. * • Calculated the bus factor for the selected projects for the last five years to see the trend in BF values.\n\nImplemented the CST algorithm (with lines of code changes and cosine difference of lines of code) and the RIG algorithm and compared their results.\n\nGot feedback from the principal developers of the five selected projects to validate our results.\n\nCalculated the BF of the selected projects using the commit-based CST algorithm tool provided in ([1](https://arxiv.org/html/2401.03303v1#bib.bib1)) to compare with our results.\n\nCalculated the bus factor for the selected projects for the last five years to see the trend in BF values.\n\nIn Section [2](https://arxiv.org/html/2401.03303v1#S2 \"2. Existing Literature ‣ Guiding Effort Allocation in Open-Source Software Projects Using Bus Factor Analysis\"), we review the existing literature for bus factor calculation. Section [3](https://arxiv.org/html/2401.03303v1#S3 \"3. Study Design ‣ Guiding Effort Allocation in Open-Source Software Projects Using Bus Factor Analysis\") explains the design and steps involved in our study. We present our results in Section [4](https://arxiv.org/html/2401.03303v1#S4 \"4. Results ‣ Guiding Effort Allocation in Open-Source Software Projects Using Bus Factor Analysis\") and conclude the paper in Section [6](https://arxiv.org/html/2401.03303v1#S6 \"6. Conclusion ‣ Guiding Effort Allocation in Open-Source Software Projects Using Bus Factor Analysis\")."
+    },
+    {
+      "heading_path": [
+        "Guiding Effort Allocation in Open-Source Software Projects Using Bus Factor Analysis",
+        "2. Existing Literature"
+      ],
+      "text": "## 2. Existing Literature\n\nIn this section, first, we describe the two algorithms for measuring bus factors that we will be using as part of our study in this paper. Towards the end, we describe other algorithms that are part of the existing literature but not implemented in our study."
+    },
+    {
+      "heading_path": [
+        "Guiding Effort Allocation in Open-Source Software Projects Using Bus Factor Analysis",
+        "2. Existing Literature",
+        "2.1. CST Algorithm"
+      ],
+      "text": "### 2.1. CST Algorithm\n\nThe CST algorithm is proposed as part of a tool paper ([1](https://arxiv.org/html/2401.03303v1#bib.bib1)) by Cosentino et al. The algorithm calculates the knowledge of developers on each file and determines the bus factor for each file based on that. Furthermore, aggregation is performed from file to directory, branch, or project level to get developer knowledge. The aggregation is done by simply adding the knowledge on each file and scaling with the number of files in the directory, branch, or project. The authors proposed four metrics to calculate a developer’s knowledge of a file. *last change takes it all* assigns 100% knowledge of a file to the last developer who modified it, and in *multiple changes equally considered*, the knowledge of a developer is calculated by dividing the number of commits made by the developer on a file by the total number of commits ever made on that file. The third metric is *non-consecutive changes*, which considers the developer’s non-consecutive commits on a file only and merges the consecutive commits into a single one. The last metric is an extension of the third metric, called the *weighted non-consecutive changes*, and assigns incremental weight to the later commits on the file.\n\nOnce the developer’s knowledge of the artifacts, i.e., file, directory, branch, or project, has been calculated, the bus factor for each of these artifacts is measured by using two sets of developers. The first set is called the primary developers who have minimum knowledge XX of the artifact. The second set is called the secondary developers who at least have some knowledge YY of the artifact, where YY is less than XX. The threshold XX for the selection of primary developers is set to 1/N1/N where NN is the total number of developers that have made changes to the artifact till date. YY is set of half of XX for the selection of secondary developers. The number of developers in the union of both these sets gives us the bus factor for the particular artifact.\n\nXX\n\nYY\n\nYY\n\nXX\n\nXX\n\n1/N1/N\n\nNN\n\nYY\n\nXX\n\nSince, CST is a commit-based algorithm, we use the same algorithm with *LOCC* and *change-size-cos*. The details of how we collect and use this data for open-source projects on GitHub are provided in later sections.\n\nData git-blame data for each file in the project Result BFset (BF developers), g (Bus Factor)\n\ng←1​t​o​200g\\leftarrow 1\\hskip 5.69046ptto\\hskip 5.69046pt200\n\ni←1​t​o​1000i\\leftarrow 1\\hskip 5.69046ptto\\hskip 5.69046pt1000\n\nB​F​s​e​t←BFset\\leftarrow\n\n​a​b​a​n​d​o​n​e​d−f​i​l​e​s​()≥50%\\emph{abandoned-files()}\\geq 50\\%"
+    },
+    {
+      "heading_path": [
+        "Guiding Effort Allocation in Open-Source Software Projects Using Bus Factor Analysis",
+        "2. Existing Literature",
+        "2.2. RIG Algorithm"
+      ],
+      "text": "### 2.2. RIG Algorithm\n\nRIG algorithm was proposed by Rigby et al. ([4](https://arxiv.org/html/2401.03303v1#bib.bib4)), in which they adapt the financial risk management measures to a developer turnover context to measure the risk posed to a project from developer turnover. Unlike the CST algorithm, RIG uses a blame-based approach to calculate code ownership of developers. The *blame* feature is implemented in version control systems such that a git-blame command assigns each line in a file to a developer who changed it last. The algorithm’s authors claim that this approach allows them to follow code ownership at a finer granularity. As per the algorithm, a line is considered abandoned if it is attributed to a developer who is no longer part of the project, and a file is considered abandoned when 90% of its files are abandoned. This high threshold makes sure that developers with trivial contributions are excluded. Algorithm [1](https://arxiv.org/html/2401.03303v1#alg1 \"Algorithm 1 ‣ 2.1. CST Algorithm ‣ 2. Existing Literature ‣ Guiding Effort Allocation in Open-Source Software Projects Using Bus Factor Analysis\") shows the pseudo-code for the RIG algorithm. The algorithm starts by varying the size of developers gg from 1 to 200 who leave the project, as shown in line 1. Line 3 shows the random sampling of developers of size gg who leave the project, and this random sampling is repeated 1,000 times for every value of gg. We limit these iterations to 10 instead of 1,000 because the algorithm takes a long time on relatively larger projects we chose. Moreover, following ([2](https://arxiv.org/html/2401.03303v1#bib.bib2)), we return the lowest value of gg that resulted in the abandoned status of more than 50% of the files, as shown from lines 5-7. The authors in the original paper ([4](https://arxiv.org/html/2401.03303v1#bib.bib4)) also calculate the likelihood of each group of developers leaving the project between lines 3-4, but we omit it since we are A noticeable characteristic of this algorithm is its non-deterministic nature, i.e., different results are produced for each execution of the algorithm because of the random sampling of the developers. Also, the algorithm may not return a valid result, as can be seen from line 10, which happens when no *BFset* results in more than 50% of abandon files.\n\ngg\n\ngg\n\ngg\n\ngg\n\n| Project | Release Year | Contributors | Language | Description | | --- | --- | --- | --- | --- | | PETSc([5](https://arxiv.org/html/2401.03303v1#bib.bib5)) | 1994 | 207 | C | Portable, Extensible Toolkit for Scientific Computation. | | Spack([6](https://arxiv.org/html/2401.03303v1#bib.bib6)) | 2014 | 1,164 | Python | Multi-platform package manager. | | Hypre([7](https://arxiv.org/html/2401.03303v1#bib.bib7)) | 2004 | 34 | C | Library of high performance pre-conditioners and solvers. | | Lammps([8](https://arxiv.org/html/2401.03303v1#bib.bib8)) | 2016 | 224 | C++ | Large-scale Atomic/Molecular Massively Parallel Simulator. | | NWChem([9](https://arxiv.org/html/2401.03303v1#bib.bib9)) | 1994 | 44 | Fortran | Open Source High-Performance Computational Chemistry. |"
+    },
+    {
+      "heading_path": [
+        "Guiding Effort Allocation in Open-Source Software Projects Using Bus Factor Analysis",
+        "2. Existing Literature",
+        "2.3. Other Bus Factor Algorithms"
+      ],
+      "text": "### 2.3. Other Bus Factor Algorithms\n\nAnother commit-based algorithm was proposed by Avelino et al. and computes the *Degree of Authorship (DOA)* of each file to identify the key developers ([3](https://arxiv.org/html/2401.03303v1#bib.bib3)). The DOA value for a file ff is initialized when it is created by a certain developer dd. The DOA of dd increases when dd makes more commits on ff while it decreases if other developers commit to ff. Lastly, DOA values are normalized for each file with the developer with the highest DOA equal to 1. Developers with a DOA greater than 0.75 are considered the authors of that file. We have not implemented this algorithm as part of our study and chose one commit-based algorithm only i.e., the CST algorithm explained in Section [2.1](https://arxiv.org/html/2401.03303v1#S2.SS1 \"2.1. CST Algorithm ‣ 2. Existing Literature ‣ Guiding Effort Allocation in Open-Source Software Projects Using Bus Factor Analysis\").\n\nff\n\ndd\n\ndd\n\ndd\n\nff\n\nff\n\nThe first algorithm for the automated calculation of BF from version control systems was proposed by Zazworka et al. ([10](https://arxiv.org/html/2401.03303v1#bib.bib10)) in which each developer who made changes to a file, regardless of the number of commits, is considered the author of that file. Moreover, to find the BF, they look at each combination of developers ranging from 1 to NN (total developers). The BF is the largest combination of developers that a project may lose while the remaining developers still have knowledge of at least a part of the project’s files. Since the algorithm looks at each combination, it is shown in ([11](https://arxiv.org/html/2401.03303v1#bib.bib11)) that the algorithm scales to a maximum of 30 developers only. It is also mentioned in ([2](https://arxiv.org/html/2401.03303v1#bib.bib2)) that this algorithm did not terminate on projects even after running for more than three days. Hence, we did not include this algorithm in our study since all our projects’ total number of developers exceeds 30.\n\nNN"
+    },
+    {
+      "heading_path": [
+        "Guiding Effort Allocation in Open-Source Software Projects Using Bus Factor Analysis",
+        "3. Study Design"
+      ],
+      "text": "## 3. Study Design\n\nIn the following subsections, we will discuss in detail the database for GitHub projects that we use in this study, the bus factor algorithms that we implement, and how we validate the bus factor results. For the RIG algorithm, we executed our experimental runs in Google Colaboratory and on a server."
+    },
+    {
+      "heading_path": [
+        "Guiding Effort Allocation in Open-Source Software Projects Using Bus Factor Analysis",
+        "3. Study Design",
+        "3.1. Database of GitHub data for HPC projects and other Metrics"
+      ],
+      "text": "### 3.1. Database of GitHub data for HPC projects and other Metrics\n\nIn this work, we used GitHub data from five open-source high-performance computing (HPC) software projects. Table [1](https://arxiv.org/html/2401.03303v1#S2.T1 \"Table 1 ‣ 2.2. RIG Algorithm ‣ 2. Existing Literature ‣ Guiding Effort Allocation in Open-Source Software Projects Using Bus Factor Analysis\") shows some details about these projects. The GitHub data for a number of open-source projects, including these, has been stored, organized and parsed by us in a SQL database to be used for different research projects. The database contains computations for the lines of code changes (*LOCC*) and the cosine difference of code changes (*change-size-cos*), which are used for the bus factor calculation in our study for the CST algorithm.\n\nAs mentioned in Section [2](https://arxiv.org/html/2401.03303v1#S2 \"2. Existing Literature ‣ Guiding Effort Allocation in Open-Source Software Projects Using Bus Factor Analysis\"), AVL and CST algorithms are commit-based. However, commits are not a great metric to consider to measure code ownership. One reason is the difference in coding styles of different individuals, where some frequently commit after every small change while others prefer to commit once after completing the task. Moreover, a commit-based approach would consider a commit consisting of deletions equal to that of additions regardless of the actual contribution made ([4](https://arxiv.org/html/2401.03303v1#bib.bib4)). Also, deletion removes the authorship of a certain piece of code from a developer and, hence, decreases the developer’s knowledge.\n\nWith *LOCC*, each file is analyzed based on the number of lines the author has contributed with a commit. However, it will also consider the addition and deletion of blank spaces or comments as meaningful contributions. For the cosine difference of the changes, textdistance Python package is used to examine differences in text. It adds all the words from the changed lines to a word bank, places the added words in a column and deleted words in a row. Then it compares the columns and rows and assigns a numeric value of how much the line was changed. Given that, a change of variable name will be considered as a very small change under the cosine metric but may be a larger change under *LOCC*. Hence, using the cosine difference between the changed lines of code only considers the contributions with actual impact on the files, giving a comprehensive understanding of a developer’s contribution.\n\nThe authors of the RIG algorithm give a similar reasoning for not using a commit-based approach and instead mention that a blame-based approach allows them to study code ownership at a finer granularity ([4](https://arxiv.org/html/2401.03303v1#bib.bib4)).\n\nInput cMetric, cstMetric, timeRange (opt.), directory (opt.), branch(es) (opt.) Result primaryDev, secondaryDev, busFactor\n\nD←t​o​t​a​l​D​e​v​e​l​o​p​e​r​sD\\leftarrow totalDevelopers\n\np​r​i​m​R​a​t​i​o←1/DprimRatio\\leftarrow 1/D\n\ns​e​c​o​n​d​R​a​t​i​o←p​r​i​m​R​a​t​i​o/2secondRatio\\leftarrow primRatio/2\n\nt​o​t​a​l​P​e​r​F​i​l​e​D​ftotalPerFileDf\n\nc​s​t​M​e​t​r​i​c==m​u​l​C​h​a​n​g​e​s​E​q​u​a​lcstMetric==mulChangesEqual\n\nff\n\nt​o​t​a​l​P​e​r​F​i​l​e​D​ftotalPerFileDf\n\nf​i​l​e​T​o​t​a​l←s​u​m​(c​M​e​t​r​i​c)fileTotal\\leftarrow sum(cMetric)\n\nff\n\nd​e​v​T​o​t​a​l←s​u​m​(c​M​e​t​r​i​c)devTotal\\leftarrow sum(cMetric)\n\ndd\n\nff\n\nd​e​v​K​n​o​w​l​e​d​g​e←d​e​v​T​o​t​a​lf​i​l​e​T​o​t​a​ldevKnowledge\\leftarrow\\frac{devTotal}{fileTotal}\n\nd​e​v​K​n​o​w​l​e​d​g​edevKnowledge\n\na​g​g​r​e​g​a​t​e​d​D​faggregatedDf\n\nd​e​v​K​n​o​w​l​e​d​g​edevKnowledge\n\na​g​g​r​e​g​a​t​e​d​D​faggregatedDf\n\nd​e​v​K​n​o​w​l​e​d​g​e≥p​r​i​m​R​a​t​i​odevKnowledge\\geq primRatio\n\np​r​i​m​a​r​y​D​e​v=p​r​i​m​a​r​y​D​e​v+1primaryDev=primaryDev+1\n\nd​e​v​K​n​o​w​l​e​d​g​e≥s​e​c​o​n​d​R​a​t​i​odevKnowledge\\geq secondRatio\n\ns​e​c​o​n​d​a​r​y​D​e​v=s​e​c​o​n​d​a​r​y​D​e​v+1secondaryDev=secondaryDev+1\n\nb​u​s​F​a​c​t​o​r←p​r​i​m​a​r​y​D​e​vbusFactor\\leftarrow primaryDev\n\ns​e​c​o​n​d​a​r​y​D​e​vsecondaryDev"
+    },
+    {
+      "heading_path": [
+        "Guiding Effort Allocation in Open-Source Software Projects Using Bus Factor Analysis",
+        "3. Study Design",
+        "3.2. Implementation of Bus Factor Algorithms"
+      ],
+      "text": "### 3.2. Implementation of Bus Factor Algorithms\n\nAfter reviewing the literature for the CST algorithm ([1](https://arxiv.org/html/2401.03303v1#bib.bib1)), we aimed to use this algorithm on two new metrics. Before doing that, we decided to calculate BF on our selected projects using the tools provided by the authors of the CST algorithm. Two tools are needed to calculate the BF of a project, as provided by the authors. The first is called *Gitana*11 1 https://github.com/valeriocos/Gitana, which imports all the data from a GitHub repository to an SQL database and then exports it to a JSON file ([12](https://arxiv.org/html/2401.03303v1#bib.bib12)). Second, the web-based bus factor calculating tool22 2 https://github.com/SOM-Research/busfactor takes the JSON file as input and calculates BF based on the selected CST metric and thresholds. It is worth noting that exporting data from the database using *Gitana* takes a lot longer than importing the data from GitHub. For instance, running *Gitana* for the smallest project, Hypre took more than 8 hours.\n\nMoreover, we implemented the CST algorithm as part of the Git repository mining and analysis software (GReMCat)33 3 https://github.com/HPCL/ideas-uo. The implementation design of the complete software framework can be seen in Figure [1](https://arxiv.org/html/2401.03303v1#acmlabel1 \"Figure 1 ‣ 3.1. Database of GitHub data for HPC projects and other Metrics ‣ 3. Study Design ‣ Guiding Effort Allocation in Open-Source Software Projects Using Bus Factor Analysis\"). The CST algorithm is implemented in the patterns package and can be used from a Jupiter Notebook44 4 https://tinyurl.com/CSTnotebook by calling the visualizer object. The authors of CST do not provide a pseudo-code for their proposed algorithm in their paper ([1](https://arxiv.org/html/2401.03303v1#bib.bib1)). We implemented it based on the explanation in ([1](https://arxiv.org/html/2401.03303v1#bib.bib1)) and ([2](https://arxiv.org/html/2401.03303v1#bib.bib2)) and its pseudo-code for our implementation of *multiple changes equally considered* metric is presented in Algorithm [2](https://arxiv.org/html/2401.03303v1#alg2 \"Algorithm 2 ‣ 3.1. Database of GitHub data for HPC projects and other Metrics ‣ 3. Study Design ‣ Guiding Effort Allocation in Open-Source Software Projects Using Bus Factor Analysis\"). Instead of using the number of commits, we used the *LOCC* or *change-size-cos* values against each commit that is pre-computed in our database. The algorithm allows the user to input the branch, directory, time period, CST metric and the proposed data metrics they want to be used for the BF calculation. The time period can be *year-year*, *month-month*, a specific *year* or *month*.\n\nAs mentioned in Section [2.2](https://arxiv.org/html/2401.03303v1#S2.SS2 \"2.2. RIG Algorithm ‣ 2. Existing Literature ‣ Guiding Effort Allocation in Open-Source Software Projects Using Bus Factor Analysis\"), the RIG algorithm is not commit-based, and due to the size and continuously changing nature of the git blame data, we do not store it in our database. In fact, we implemented RIG presented in Algorithm [1](https://arxiv.org/html/2401.03303v1#alg1 \"Algorithm 1 ‣ 2.1. CST Algorithm ‣ 2. Existing Literature ‣ Guiding Effort Allocation in Open-Source Software Projects Using Bus Factor Analysis\") outside of GReMCat, and executed it on our selected projects in Google Colaboratory and on a server. The authors of the RIG algorithm do not provide a public tool or its code but it was fairly easy to understand and implement from their explanation in ([4](https://arxiv.org/html/2401.03303v1#bib.bib4)) and also using the pseudo-code provided in ([2](https://arxiv.org/html/2401.03303v1#bib.bib2))."
+    },
+    {
+      "heading_path": [
+        "Guiding Effort Allocation in Open-Source Software Projects Using Bus Factor Analysis",
+        "3. Study Design",
+        "3.3. Handling External Code and Aliases"
+      ],
+      "text": "### 3.3. Handling External Code and Aliases\n\nGReMCat already had its implementation of removing external code and libraries from the commits data of the projects in the database based on the names of directories. We used it for the CST algorithm and applied the same methodology to the RIG algorithm. Moreover, GReMCat uses Python fuzzywuzzy package ([13](https://arxiv.org/html/2401.03303v1#bib.bib13)) for identifying multiple different names and emails associated with the same author. We used this implementation for both CST and RIG algorithms to handle aliases.\n\n| | | | | --- | --- | --- | | Project | Key developers | Loss tolerance | | PETSc | 7 | 4 | | Hypre | 17 | 3 | | Lammps | 4 | - | | NWChem | 4 | 2 |"
+    },
+    {
+      "heading_path": [
+        "Guiding Effort Allocation in Open-Source Software Projects Using Bus Factor Analysis",
+        "3. Study Design",
+        "3.4. Validating Bus Factor Results"
+      ],
+      "text": "### 3.4. Validating Bus Factor Results\n\nIn order to validate the Bus Factor results, we reached out to the principal developers of the five projects via email and asked them three questions: (a) Can you estimate the total number of key developers in the project? If your estimate is for a specific time period, please indicate the years. (b) Who do you consider your top project contributors overall or during a specific time period (please indicate which years)? (c) How many key developers could you lose (in a worst-case scenario) and still continue successfully with your project? We received answers from four out of five projects, while some chose not to name the developers. The answers we received are reported in Table [2](https://arxiv.org/html/2401.03303v1#S3.T2 \"Table 2 ‣ 3.3. Handling External Code and Aliases ‣ 3. Study Design ‣ Guiding Effort Allocation in Open-Source Software Projects Using Bus Factor Analysis\"), where the key developers correspond to answers to (a) while loss tolerance corresponds to answers to (c).\n\nAdditionally, we also used the tool provided by the authors of the CST algorithm to get BF results for the projects. We were able to export GitHub data to JSON files for three of the projects while getting the BF results for only two of them. The tools continued executing for larger projects like PETSc([5](https://arxiv.org/html/2401.03303v1#bib.bib5)) and Lammps([8](https://arxiv.org/html/2401.03303v1#bib.bib8)) for more than 48 hours without producing results.\n\n| Project | CST (cos) | CST (LOCC) | RIG | CST (commits) | | --- | --- | --- | --- | --- | | PETSc | 32 | 28 | - | - | | Hypre | 12 | 10 | 29 | 5 | | Lammps | 24 | 23 | - | - | | NWChem | 13 | 13 | - | 7 | | Spack | 211 | 172 | - | - |"
+    },
+    {
+      "heading_path": [
+        "Guiding Effort Allocation in Open-Source Software Projects Using Bus Factor Analysis",
+        "4. Results"
+      ],
+      "text": "## 4. Results\n\nIn this section, first we compare the project and directory-level BF results of the two algorithms with the feedback received from the principal developers and compare results from different CST metrics. Secondly, we look at the trend in bus factor values for the past five years. Lastly, we look into the performance of RIG algorithm by comparing its directory-level results."
+    },
+    {
+      "heading_path": [
+        "Guiding Effort Allocation in Open-Source Software Projects Using Bus Factor Analysis",
+        "4. Results",
+        "4.1. Comparison for Accuracy of Results"
+      ],
+      "text": "### 4.1. Comparison for Accuracy of Results\n\nIn this subsection, we answer the first of the research questions, which focuses on the impact of different metrics on the bus factor computation. The bus factors calculated by the CST algorithm with our proposed data metrics, the CST tool provided by the authors (commits-based), and our implementation of the RIG algorithm are reported in Table [3](https://arxiv.org/html/2401.03303v1#S3.T3 \"Table 3 ‣ 3.4. Validating Bus Factor Results ‣ 3. Study Design ‣ Guiding Effort Allocation in Open-Source Software Projects Using Bus Factor Analysis\"). The values reported are based on the *mul-changes-equal* CST metric. The tool for the CST algorithm took more than 8 hours to produce results for each of the two projects Hypre and NWChem. The calls to the SQL database containing the commits data timed out for the other three projects, given their large sizes. Moreover, the RIG algorithm only returned a bus factor for the Hypre project, which is the smallest in terms of the number of files and subsequently the git-blame data. For projects with many files and authors, the algorithm continued execution for more than 24 hours. Thus, the missing results in the Table [3](https://arxiv.org/html/2401.03303v1#S3.T3 \"Table 3 ‣ 3.4. Validating Bus Factor Results ‣ 3. Study Design ‣ Guiding Effort Allocation in Open-Source Software Projects Using Bus Factor Analysis\") highlight the limitations of the RIG algorithm and the tools of the CST algorithm given the large size of the projects.\n\nAs mentioned in Section [3.4](https://arxiv.org/html/2401.03303v1#S3.SS4 \"3.4. Validating Bus Factor Results ‣ 3. Study Design ‣ Guiding Effort Allocation in Open-Source Software Projects Using Bus Factor Analysis\"), for the accuracy of results and validation of the bus factor values in Table [3](https://arxiv.org/html/2401.03303v1#S3.T3 \"Table 3 ‣ 3.4. Validating Bus Factor Results ‣ 3. Study Design ‣ Guiding Effort Allocation in Open-Source Software Projects Using Bus Factor Analysis\"), we got in touch with the principal developers of each of the projects and recorded their responses in Table [2](https://arxiv.org/html/2401.03303v1#S3.T2 \"Table 2 ‣ 3.3. Handling External Code and Aliases ‣ 3. Study Design ‣ Guiding Effort Allocation in Open-Source Software Projects Using Bus Factor Analysis\"). By comparing the bus factor values in Table [2](https://arxiv.org/html/2401.03303v1#S3.T2 \"Table 2 ‣ 3.3. Handling External Code and Aliases ‣ 3. Study Design ‣ Guiding Effort Allocation in Open-Source Software Projects Using Bus Factor Analysis\") and [3](https://arxiv.org/html/2401.03303v1#S3.T3 \"Table 3 ‣ 3.4. Validating Bus Factor Results ‣ 3. Study Design ‣ Guiding Effort Allocation in Open-Source Software Projects Using Bus Factor Analysis\"), it can be seen that the values given by the developers do not exactly match the values by any of the algorithms. However, the error for the Hypre project, which is calculated as follows:\n\n| | | | | | --- | --- | --- | --- | | (1) | | e​r​r​o​r=|B​Fa​l​g​o​r​i​t​h​m−B​Fp​r​i​n​c​i​p​a​l​\\_​d​e​v|error=|BF\\_{algorithm}-BF\\_{principal\\\\_dev}| | |\n\ne​r​r​o​r=|B​Fa​l​g​o​r​i​t​h​m−B​Fp​r​i​n​c​i​p​a​l​_​d​e​v|error=|BF_{algorithm}-BF_{principal\\_dev}|\n\nis the smallest for *change-size-cos* (e​r​r​o​r=5error=5) and LOCC (e​r​r​o​r=7error=7) based CST algorithm implemented as part of this study. E​r​r​o​r=12Error=12 for the commit-based CST ([1](https://arxiv.org/html/2401.03303v1#bib.bib1)) and the RIG algorithm ([4](https://arxiv.org/html/2401.03303v1#bib.bib4)). Lastly, we looked at the results from the commit-based CST algorithm and observed that the results were not in sync with the cut-offs mentioned in ([1](https://arxiv.org/html/2401.03303v1#bib.bib1)) for primary and secondary developers, hence, the high error value.\n\ne​r​r​o​r=5error=5\n\ne​r​r​o​r=7error=7\n\nE​r​r​o​r=12Error=12\n\nAlong with comparing the bus factor values, we also looked at their accuracy in identifying the developers who are part of the bus factor result by each algorithm. Only the principal developers of the Lammps and NWChem project shared the names of the developers constituting the bus factor. For privacy reasons, we won’t be sharing the names in this paper. However, from our comparative study, we can state that the developers identified by the principal developers for both Lammps and NWChem are at the top of the sorted list for *change-size-cos* and LOCC-based CST algorithm. The top developer identified by the tool in ([1](https://arxiv.org/html/2401.03303v1#bib.bib1)) for NWChem is not even part of the developers named by the NWChem’s principal developer. This shows that the threshold for primary and secondary developers in ([1](https://arxiv.org/html/2401.03303v1#bib.bib1)) is not the best case and also that *change-size-cos* and LOCC-based CST algorithm is more accurate. RIG performed the worst by identifying only 5 out of 12 (*change-size-cos*) or 5 out of 10 (LOCC) developers correctly for the Hypre project. It is important to note that the five projects chosen for this study are large in terms of files, number of developers, commits, and git-blame data. This highlighted the limitation of ([12](https://arxiv.org/html/2401.03303v1#bib.bib12)), ([14](https://arxiv.org/html/2401.03303v1#bib.bib14)), and ([15](https://arxiv.org/html/2401.03303v1#bib.bib15)) when it comes to large GitHub projects, as results were not returned for the three larger projects.\n\nIn Figure [2](https://arxiv.org/html/2401.03303v1#acmlabel2 \"Figure 2 ‣ 3.4. Validating Bus Factor Results ‣ 3. Study Design ‣ Guiding Effort Allocation in Open-Source Software Projects Using Bus Factor Analysis\"), we look into the bus factors for the most recently updated directories of PETSc and NWChem projects. We compare the bus factor values of the *change-size-cos* and LOCC-based CST algorithm with the RIG algorithm. It can be clearly seen that the results from the RIG algorithm are significantly different and higher than not only the CST algorithm but also the data provided by the principal developers of the projects. Hence, we found the RIG algorithm to be the worst performer.\n\nMoreover, we present comparative plots for the four CST algorithm metrics explained in Section [2.1](https://arxiv.org/html/2401.03303v1#S2.SS1 \"2.1. CST Algorithm ‣ 2. Existing Literature ‣ Guiding Effort Allocation in Open-Source Software Projects Using Bus Factor Analysis\") and also the two data metrics *change-size-cos* and LOCC in Figure [3](https://arxiv.org/html/2401.03303v1#acmlabel3 \"Figure 3 ‣ 4. Results ‣ Guiding Effort Allocation in Open-Source Software Projects Using Bus Factor Analysis\") for Hypre and PETSc. It can be seen from the graphs that there is not a significant variation in the results for each combination. Given that information, we focused our study on the *mul-changes-equal* metric. However, as mentioned in ([1](https://arxiv.org/html/2401.03303v1#bib.bib1)), a CST metric can be chosen as per the requirements and processes followed by an organization for version control."
+    },
+    {
+      "heading_path": [
+        "Guiding Effort Allocation in Open-Source Software Projects Using Bus Factor Analysis",
+        "4. Results",
+        "4.2. Trend in bus factors over time"
+      ],
+      "text": "### 4.2. Trend in bus factors over time\n\nIn this subsection, we seek the answer to the second research question, i.e., the role of the bus factor in guiding effort allocation towards hiring and knowledge transfer. The intention is to study the applicability of the bus factor and the guidance these results provide to principal developers and managers. Intuitively, the bus factor of a project or directory will indicate the concentration of knowledge within a certain number of people. If that number is small, then principal developers or project managers can work on effort allocation for hiring new people to work on that project. Another thing that can be done is to ensure knowledge transfer to other developers within the organization. For our study, we looked at the trend in bus factor over the past five years for the selected projects. Figure [4](https://arxiv.org/html/2401.03303v1#acmlabel4 \"Figure 4 ‣ 4.1. Comparison for Accuracy of Results ‣ 4. Results ‣ Guiding Effort Allocation in Open-Source Software Projects Using Bus Factor Analysis\") shows the trend in bus factor since 2018 for PETSc and Spack. The yellow bars represent the total number of developers; the left y-axis, along with solid lines, represents the bus factor value, while the right y-axis and the dashed lines are for the percentage of developers that are part of the bus factor. For both projects, we can see that the developers with higher knowledge of the projects are decreasing in later years, reaching the minimum value in the year 2022. Knowledge of this trend can help the principal developers or managers hire new people or initiate the knowledge transfer process to other existing developers for these projects.\n\nSometimes, looking at the trend in bus factor for the whole project does not provide the best view of the knowledge concentration and the risk of the project in terms of employee turnover. Given that, looking at individual directories or important parts of the projects is more helpful. Figure [5](https://arxiv.org/html/2401.03303v1#acmlabel5 \"Figure 5 ‣ 4.2. Trend in bus factors over time ‣ 4. Results ‣ Guiding Effort Allocation in Open-Source Software Projects Using Bus Factor Analysis\") shows the trend in bus factor values for major directories of PETSc and Spack. With this narrowed-down view, a more informed decision can be taken for the important parts of the projects. Figure [5](https://arxiv.org/html/2401.03303v1#acmlabel5 \"Figure 5 ‣ 4.2. Trend in bus factors over time ‣ 4. Results ‣ Guiding Effort Allocation in Open-Source Software Projects Using Bus Factor Analysis\") (c) particularly shows a steep drop in the bus factor value for var/spack/ directory of the project, which cannot be picked up from the holistic view shown in Figure [4](https://arxiv.org/html/2401.03303v1#acmlabel4 \"Figure 4 ‣ 4.1. Comparison for Accuracy of Results ‣ 4. Results ‣ Guiding Effort Allocation in Open-Source Software Projects Using Bus Factor Analysis\") (b)."
+    },
+    {
+      "heading_path": [
+        "Guiding Effort Allocation in Open-Source Software Projects Using Bus Factor Analysis",
+        "4. Results",
+        "4.3. Performance comparison of BF Algorithms"
+      ],
+      "text": "### 4.3. Performance comparison of BF Algorithms\n\nThis subsection focuses on answering the research question about the accuracy of results and the performance of the bus factor algorithms. For that, we wanted to look at each algorithm to compare and contrast results. Most of this question is answered for the CST algorithm in Section [4.1](https://arxiv.org/html/2401.03303v1#S4.SS1 \"4.1. Comparison for Accuracy of Results ‣ 4. Results ‣ Guiding Effort Allocation in Open-Source Software Projects Using Bus Factor Analysis\"), where we compared the results from the CST algorithm with RIG using Figure [2](https://arxiv.org/html/2401.03303v1#acmlabel2 \"Figure 2 ‣ 3.4. Validating Bus Factor Results ‣ 3. Study Design ‣ Guiding Effort Allocation in Open-Source Software Projects Using Bus Factor Analysis\"), so here we focused on the RIG algorithm and its non-deterministic nature.\n\nAs mentioned in Section [2.2](https://arxiv.org/html/2401.03303v1#S2.SS2 \"2.2. RIG Algorithm ‣ 2. Existing Literature ‣ Guiding Effort Allocation in Open-Source Software Projects Using Bus Factor Analysis\"), the RIG algorithm is non-deterministic, i.e., it does not produce the same results for different executions. We collected data from two runs for different directories of the five projects to see the variation in results by the RIG algorithm. In Figure [6](https://arxiv.org/html/2401.03303v1#acmlabel6 \"Figure 6 ‣ 4.3. Performance comparison of BF Algorithms ‣ 4. Results ‣ Guiding Effort Allocation in Open-Source Software Projects Using Bus Factor Analysis\"), we show results for two of the projects, PETSc and NWChem. It can be seen that none of the executions resulted in the same result for any of the directories. The difference is significant for some, including petsc/src/vec in (a) and nwchem/src/ccd in (b). We also looked at the developer names resulting from the algorithm for each execution and did not find a common pattern of similarity among results, which further confirms the random nature of the RIG algorithm.\n\nThe non-deterministic and random nature of the RIG algorithm automatically makes the CST algorithm a better choice. This is further corroborated by the responses of the principal developers, as shown in Table [3](https://arxiv.org/html/2401.03303v1#S3.T3 \"Table 3 ‣ 3.4. Validating Bus Factor Results ‣ 3. Study Design ‣ Guiding Effort Allocation in Open-Source Software Projects Using Bus Factor Analysis\") and the lower errors for the CST algorithm. Moreover, Rigby et al. themselves claim in ([4](https://arxiv.org/html/2401.03303v1#bib.bib4)) that bus factor scenarios computed using loss percentages are unrealistic."
+    },
+    {
+      "heading_path": [
+        "Guiding Effort Allocation in Open-Source Software Projects Using Bus Factor Analysis",
+        "5. Future Work"
+      ],
+      "text": "## 5. Future Work\n\nThere are many future dimensions to this work. One way to extend this work is to look at the impact of different threshold values for the algorithms with the proposed data metrics. Since authors of both CST and RIG algorithm do not give reasoning behind the choice of all the chosen threshold and cutoff values, this can be an interesting study. The results can help in making a more informed choice behind these values with reasoning provided. Moreover, using a more data-driven approach for the validation of results with trained machine learning models can help in eliminating the threats to correctness of the validation process. The large amount of mined GitHub data can be used for training purposes."
+    },
+    {
+      "heading_path": [
+        "Guiding Effort Allocation in Open-Source Software Projects Using Bus Factor Analysis",
+        "6. Conclusion"
+      ],
+      "text": "## 6. Conclusion\n\nIt is common for open-source projects to face the risk of key developers leaving the project. This risk is even higher with long-term and large projects. To judge the risk posed to the projects or the severity of it, the concentration of knowledge among its developers can be measured. This measurement is known as the bus factor of the project and there are several algorithms proposed for its calculation. Most of these algorithms use the commits data from version control systems. We proposed the use of two other metrics i.e. lines of code changes (LOCC) and cosine difference of lines of code (*change-size-cos*) and tested them with the CST algorithm. We also used a git-blame based RIG algorithm on our use-case of five High Performance Computing projects on GitHub. Along with complete projects, we also looked at the bus factor values of the major directories in each. We did a comparative study for the accuracy, similarity in results and trend in BF values on the two algorithms and also the metrics proposed by us. We validated our results from the principal developers of the selected projects which showed LOCC and *change-size-cos* to be more accurate than commits. Our implementation of the CST algorithm is scalable when compared to the online available tools by Cosentino at el. Lastly, we demonstrated with examples how looking at the trend in bus factor values over time can guide principal developers in effort allocation."
+    },
+    {
+      "heading_path": [
+        "Guiding Effort Allocation in Open-Source Software Projects Using Bus Factor Analysis",
+        "References"
+      ],
+      "text": "## References\n\n* [1] Valerio Cosentino, Javier Canovas Izquierdo, and Jordi Cabot. Assessing the bus factor of git repositories. 03 2015. * [2] Mívian Ferreira, Marco Tulio Valente, and Kecia Ferreira. A comparison of three algorithms for computing truck factors. In 2017 IEEE/ACM 25th International Conference on Program Comprehension (ICPC), pages 207–217, 2017. * [3] G. Avelino, L. Passos, A. Hora, and M. Valente. A novel approach for estimating truck factors. In 2016 IEEE 24th International Conference on Program Comprehension (ICPC), pages 1–10, Los Alamitos, CA, USA, may 2016. IEEE Computer Society. * [4] Peter C. Rigby, Yue Cai Zhu, Samuel M. Donadelli, and Audris Mockus. Quantifying and mitigating turnover-induced knowledge loss: Case studies of chrome and a project at avaya. In Proceedings of the 38th International Conference on Software Engineering, ICSE ’16, page 1006–1016, New York, NY, USA, 2016. Association for Computing Machinery. * [5] Petsc project. Available online at: <https://github.com/petsc/petsc>. * [6] Spack project. Available online at: <https://github.com/spack/spack>. * [7] Hypre project. Available online at: <https://github.com/hypre-space/hypre>. * [8] Lammps project. Available online at: <https://github.com/lammps/lammps>. * [9] Nwchem project. Available online at: <https://github.com/nwchemgit/nwchem>. * [10] Nico Zazworka, Kai Stapel, Eric Knauss, Forrest Shull, Victor R. Basili, and Kurt Schneider. Are developers complying with the process: An xp study. In Proceedings of the 2010 ACM-IEEE International Symposium on Empirical Software Engineering and Measurement, ESEM ’10, New York, NY, USA, 2010. Association for Computing Machinery. * [11] Filippo Ricca, Alessandro Marchetto, and Marco Torchiano. On the difficulty of computing the truck factor. volume 6759, pages 337–351, 06 2011. * [12] Valerio Cosentino, Javier Canovas Izquierdo, and Jordi Cabot. Gitana: A software project inspector. Science of Computer Programming, 153, 12 2017. * [13] SeatGeek Inc. fuzzywuzzy: Fuzzy String Matching in Python, 2014. * [14] Valerio Cosentino, Javier Canovas Izquierdo, and Jordi Cabot. Gitana: a sql-based project activity inspector. Available online at: <https://github.com/SOM-Research/Gitana>. * [15] Valerio Cosentino. Bus factor analyzer. Available online at: <https://github.com/SOM-Research/busfactor>."
+    }
+  ]
+}
